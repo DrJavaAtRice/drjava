@@ -1,4 +1,0 @@
-class BadReturnType {
-  
-  BadReturnTaiepe method() { return new BadReturnType(); }
-}

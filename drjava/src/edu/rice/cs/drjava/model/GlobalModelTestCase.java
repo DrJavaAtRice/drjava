@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2012, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2015, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -228,9 +228,11 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   protected OpenDefinitionsDocument setupDocument(final String text) throws BadLocationException {
     TestListener listener = new TestListener() {
       public void newFileCreated(OpenDefinitionsDocument doc) { newCount++; }
+      public String toString() { return "TestListener created in GlobalModelTestCase"; }
     };
 
     _model.addListener(listener);
+    System.err.println("Added " + listener);
 
     // Open a new document
     int numOpen = _model.getOpenDefinitionsDocuments().size();

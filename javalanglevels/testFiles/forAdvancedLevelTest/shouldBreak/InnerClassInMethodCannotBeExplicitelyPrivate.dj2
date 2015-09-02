@@ -1,7 +1,0 @@
-//Inner classes in methods cannot be explicitely private.
-class InnerClassInMethodCannotBeExplicitelyPrivate {
-  void myMethod() {
-    private class InnerClass {
-    }
-  }
-}

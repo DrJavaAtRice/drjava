@@ -1,5 +1,0 @@
-
-/**This should throw an error*/
-class UseThreadUhOh {
-  Thread t = new Thread();
-}

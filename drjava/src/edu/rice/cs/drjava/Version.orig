@@ -44,7 +44,7 @@ import java.text.SimpleDateFormat;
  * This file is copied to Version.java by the build process, which also
  * fills in the right values of the date and time.
  *
- * This javadoc corresponds to build drjava-@DATE@-r@REVISION@;
+ * This javadoc corresponds to build drscala-@DATE@-r@REVISION@;
  *
  * @version $Id: Version.orig 4571 2008-07-10 22:45:33Z dlsmith $
  */
@@ -97,6 +97,6 @@ public abstract class Version {
   }
 
   public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + VERSION_STRING);
+    System.out.println("Version for edu.rice.cs.drjava.DrScala: " + VERSION_STRING);
   }
 } 

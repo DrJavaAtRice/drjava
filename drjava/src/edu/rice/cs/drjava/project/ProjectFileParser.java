@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2012, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2015, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -264,16 +264,16 @@ public class ProjectFileParser extends ProjectFileParserFacade {
         return c.getRest().accept(this);
       }
   
-      public List<Integer> forBoolAtom(BoolAtom b) {
+      public List<Integer> forBoolAtom(Atom.BoolAtom b) {
         throw new PrivateProjectException("unexpected boolean found, int expected");
       }
       
-      public List<Integer> forNumberAtom(NumberAtom n) {
+      public List<Integer> forNumberAtom(Atom.NumberAtom n) {
         intList.add(Integer.valueOf(n.intValue()));
         return intList;
       }
       
-      public List<Integer> forTextAtom(TextAtom t) {
+      public List<Integer> forTextAtom(Atom.TextAtom t) {
         throw new PrivateProjectException("unexpected string found where number expected: " + t.getText());
       }
       
@@ -388,13 +388,13 @@ public class ProjectFileParser extends ProjectFileParserFacade {
       throw new PrivateProjectException("Found an empty node, expected a labeled node");
     }
     public String forCons(Cons c) { return c.getFirst().accept(this); }
-    public String forBoolAtom(BoolAtom b) {
+    public String forBoolAtom(Atom.BoolAtom b) {
       throw new PrivateProjectException("Found a boolean, expected a label");
     }
-    public String forNumberAtom(NumberAtom n) {
+    public String forNumberAtom(Atom.NumberAtom n) {
       throw new PrivateProjectException("Found a number, expected a label");
     }
-    public String forTextAtom(TextAtom t) { return t.getText(); }
+    public String forTextAtom(Atom.TextAtom t) { return t.getText(); }
   };
   
   /** Retrieves the number of a node.  The node should either be a list with its first element being a number atom, 
@@ -408,11 +408,11 @@ public class ProjectFileParser extends ProjectFileParserFacade {
       throw new PrivateProjectException("Found an empty node, expected an integer");
     }
     public Integer forCons(Cons c) { return c.getFirst().accept(this); }
-    public Integer forBoolAtom(BoolAtom b) {
+    public Integer forBoolAtom(Atom.BoolAtom b) {
       throw new PrivateProjectException("Found a boolean, expected an integer");
     }
-    public Integer forNumberAtom(NumberAtom n) { return n.intValue(); }
-    public Integer forTextAtom(TextAtom t) {
+    public Integer forNumberAtom(Atom.NumberAtom n) { return n.intValue(); }
+    public Integer forTextAtom(Atom.TextAtom t) {
       throw new PrivateProjectException("Found a string '" + t + "', expected an integer");
     }
   };

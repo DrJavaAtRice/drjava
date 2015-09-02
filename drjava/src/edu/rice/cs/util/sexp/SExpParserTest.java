@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2012, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2015, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -105,9 +105,9 @@ public class SExpParserTest extends DrScalaTestCase {
       }
       public String forEmpty(Empty e){ return _failMe("an empty list"); }
       public String forCons(Cons c){ return _failMe("an empty list"); }
-      public String forBoolAtom(BoolAtom b){ return _failMe("a boolean"); }
-      public String forNumberAtom(NumberAtom n) { return _failMe("a number"); }
-      public String forTextAtom(TextAtom t) { return t.getText(); }
+      public String forBoolAtom(Atom.BoolAtom b){ return _failMe("a boolean"); }
+      public String forNumberAtom(Atom.NumberAtom n) { return _failMe("a number"); }
+      public String forTextAtom(Atom.TextAtom t) { return t.getText(); }
     };
     
     final SExpVisitor<String> outerVisitor = new SExpVisitor<String>() {
@@ -117,9 +117,9 @@ public class SExpParserTest extends DrScalaTestCase {
       }
       public String forEmpty(Empty e){ return _failMe("an empty list"); }
       public String forCons(Cons c){ return c.getFirst().accept(innerVisitor); }
-      public String forBoolAtom(BoolAtom b){ return _failMe("a boolean"); }
-      public String forNumberAtom(NumberAtom n) { return _failMe("a number"); }
-      public String forTextAtom(TextAtom t) { return _failMe("text"); }
+      public String forBoolAtom(Atom.BoolAtom b){ return _failMe("a boolean"); }
+      public String forNumberAtom(Atom.NumberAtom n) { return _failMe("a number"); }
+      public String forTextAtom(Atom.TextAtom t) { return _failMe("text"); }
     };
     
     assertEquals("wrong text in 1st s-expression", "abcdefg",  exp1.accept(outerVisitor));

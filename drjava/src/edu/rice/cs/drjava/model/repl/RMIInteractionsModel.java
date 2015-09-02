@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2012, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2015, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -37,6 +37,7 @@
 package edu.rice.cs.drjava.model.repl;
 
 import edu.rice.cs.drjava.model.repl.newjvm.*;
+import edu.rice.cs.drjava.model.repl.newjvm.InterpreterException;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.tuple.Option;
 import edu.rice.cs.plt.tuple.Pair;
@@ -70,7 +71,7 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
   /** Interprets the given command.
     * @param toEval command to be evaluated
     */
-  protected void _interpret(String toEval) {
+  protected void _interpretCommand(String toEval) {
     debug.logStart("Interpret " + toEval);
     _jvm.interpret(toEval);
     debug.logEnd();

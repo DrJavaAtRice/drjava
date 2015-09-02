@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2012, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2015, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -80,40 +80,39 @@ public class ProjectTest extends DrScalaTestCase {
     super.tearDown();
   }
   
-//  /** Test to make sure all elements of the project are read correctly into the IR */
-//  public void testLegacyParseProject() throws IOException, MalformedProjectFileException, java.text.ParseException {
-//    String proj1 =
-//      ";; DrJava project file.  Written with build: 20040623-1933\n" +
-//      "(source ;; comment\n" +
-//      "   (file (name \"src/sexp/Atom.java\")(select 32 32)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
-//      "   (file (name \"src/sexp/BoolAtom.java\")(select 0 0)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
-//      "   (file (name \"src/sexp/Cons.java\")(select 0 0)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
-//      "   (file (name \"src/sexp/Empty.java\")(select 24 28)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
-//      "   (file (name \"src/sexp/Lexer.java\")(select 0 0)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
-//      "   (file (name \"src/sexp/NumberAtom.java\")(select 12 12)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
-//      "   (file (name \"src/sexp/SEList.java\")(select 0 0)))\n" + // doesn't have mod date
+
+//   /** Test to make sure all elements of the project are read correctly into the IR */
+//  public void xtestParseProject() throws IOException, MalformedProjectFileException, java.text.ParseException {
+//    String proj2 =
+//      ";; DrScala project file.  Written with build: 2006??\n" +
+//      "(proj-root-and-base (file (name \"src\")))\n" +
+//      "(source-files ;; comment\n" +
+//      "   (file (name \"sexp/Atom.java\")(select 32 32)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
+//      "   (file (name \"sexp/BoolAtom.java\")(select 0 0)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
+//      "   (file (name \"sexp/Cons.java\")(select 0 0)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
+//      "   (file (name \"sexp/Empty.java\")(select 24 28)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
+//      "   (file (name \"sexp/Lexer.java\")(select 0 0)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
+//      "   (file (name \"sexp/NumberAtom.java\")(select 12 12)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
+//      "   (file (name \"sexp/SEList.java\")(select 0 0)))\n" + // doesn't have mod date
 //      "(auxiliary ;; absolute file names\n" +
-//      "   (file (name " + convertToLiteral(new File(parent, "junk/sexp/Tokens.java").getCanonicalPath()) + 
-//         ")(select 32 32)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
-//      "   (file (name " + convertToLiteral(new File(parent, "jdk1.5.0/JScrollPane.java").getCanonicalPath()) + 
-//         ")(select 9086 8516)(mod-date \"16-Jul-2004 03:45:23\")))\n" +
+//      "   (file (name " + convertToLiteral(new File(parent,"junk/sexp/Tokens.java").getCanonicalPath()) +
+//          ")(select 32 32)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
+//      "   (file (name " + convertToLiteral(new File(parent,"jdk1.5.0/JScrollPane.java").getCanonicalPath()) +
+//          ")(select 9086 8516)(mod-date \"16-Jul-2004 03:45:23\")))\n" +
 //      "(collapsed ;; relative paths\n" +
 //      "   (path \"./[ Source Files ]/sexp/\")\n" +
 //      "   (path \"./[ External ]/\"))\n" +
 //      "(build-dir ;; absolute path\n" +
-//      "   (file (name " +  convertToLiteral(new File(parent,"built").getCanonicalPath()) + ")))\n" +
-//      "(work-dir ;; absolute path\n" +
-//      "   (file (name " +  convertToLiteral(new File(parent,"src").getCanonicalPath()) + ")))\n" +
-//      "(proj-root ;; absolute path\n" +
-//      "   (file (name " +  convertToLiteral(new File(parent,"src").getCanonicalPath()) + ")))\n" +
+//      "   (file (name " +  convertToLiteral(new File(parent, "built").getCanonicalPath()) + ")))\n" +
+//      "(work-dir (file (name \"src\")))\n" +
 //      "(classpaths\n" +
-//      "   (file (name " +  convertToLiteral(new File(parent,"src/edu/rice/cs/lib").getCanonicalPath()) + ")))\n" +
+//      "   (file (name " +  convertToLiteral(new File(parent, "src/edu/rice/cs/lib").getCanonicalPath()) + ")))\n" +
 //      "(main-class\n" +
-//      "   some.package.ClassName)";
+//      "   some.ClassName)";
 //    
-//    File f = new File(parent, "test1.drscala");
+//    File f = new File(parent, "test2.drscala");
 //
-//    IOUtil.writeStringToFile(f, proj1);
+//    IOUtil.writeStringToFile(f, proj2);
 ////    System.err.println("Project directory is " + parent);
 ////    System.err.println("Project file is " + f);
 ////    System.err.println("projFile exists? " + f.exists());
@@ -124,11 +123,13 @@ public class ProjectTest extends DrScalaTestCase {
 //    assertEquals("number of collapsed", 2, pfir.getCollapsedPaths().length);
 //    assertEquals("number of classpaths", 1, IterUtil.sizeOf(pfir.getClassPaths()));
 //    File base = f.getParentFile();
+//    File root = new File(base, "src");
+//    assertEquals("proj-root-and-base", root.getPath(), pfir.getProjectRoot().getPath());
 //    assertEquals("first source filename", new File(base,"src/sexp/Atom.java").getPath(), pfir.getSourceFiles()[0].getPath());
 //    assertEquals("mod-date value", 
 //                 ProjectProfile.MOD_DATE_FORMAT.parse("16-Jul-2004 03:45:23").getTime(),
 //                 pfir.getSourceFiles()[0].getSavedModDate());
-//    assertEquals("last source filename", new File(base,"src/sexp/SEList.java").getPath(), 
+//    assertEquals("last source filename", new File(root, "sexp/SEList.java").getPath(), 
 //                 pfir.getSourceFiles()[6].getPath());
 //    assertEquals("first aux filename", new File(base,"junk/sexp/Tokens.java").getPath(), 
 //                 pfir.getAuxiliaryFiles()[0].getCanonicalPath());
@@ -139,72 +140,9 @@ public class ProjectTest extends DrScalaTestCase {
 //                 pfir.getWorkingDirectory().getCanonicalPath());
 //    assertEquals("classpath name", new File(base, "src/edu/rice/cs/lib").getCanonicalPath(), 
 //                 IterUtil.first(pfir.getClassPaths()).getCanonicalPath());
-//    assertEquals("main-class name", "some.package.ClassName", 
+//    assertEquals("main-class name", "some.ClassName", 
 //                 pfir.getMainClass());
 //  }
-
-   /** Test to make sure all elements of the project are read correctly into the IR */
-  public void xtestParseProject() throws IOException, MalformedProjectFileException, java.text.ParseException {
-    String proj2 =
-      ";; DrScala project file.  Written with build: 2006??\n" +
-      "(proj-root-and-base (file (name \"src\")))\n" +
-      "(source-files ;; comment\n" +
-      "   (file (name \"sexp/Atom.java\")(select 32 32)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
-      "   (file (name \"sexp/BoolAtom.java\")(select 0 0)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
-      "   (file (name \"sexp/Cons.java\")(select 0 0)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
-      "   (file (name \"sexp/Empty.java\")(select 24 28)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
-      "   (file (name \"sexp/Lexer.java\")(select 0 0)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
-      "   (file (name \"sexp/NumberAtom.java\")(select 12 12)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
-      "   (file (name \"sexp/SEList.java\")(select 0 0)))\n" + // doesn't have mod date
-      "(auxiliary ;; absolute file names\n" +
-      "   (file (name " + convertToLiteral(new File(parent,"junk/sexp/Tokens.java").getCanonicalPath()) +
-          ")(select 32 32)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
-      "   (file (name " + convertToLiteral(new File(parent,"jdk1.5.0/JScrollPane.java").getCanonicalPath()) +
-          ")(select 9086 8516)(mod-date \"16-Jul-2004 03:45:23\")))\n" +
-      "(collapsed ;; relative paths\n" +
-      "   (path \"./[ Source Files ]/sexp/\")\n" +
-      "   (path \"./[ External ]/\"))\n" +
-      "(build-dir ;; absolute path\n" +
-      "   (file (name " +  convertToLiteral(new File(parent, "built").getCanonicalPath()) + ")))\n" +
-      "(work-dir (file (name \"src\")))\n" +
-      "(classpaths\n" +
-      "   (file (name " +  convertToLiteral(new File(parent, "src/edu/rice/cs/lib").getCanonicalPath()) + ")))\n" +
-      "(main-class\n" +
-      "   some.ClassName)";
-    
-    File f = new File(parent, "test2.drscala");
-
-    IOUtil.writeStringToFile(f, proj2);
-//    System.err.println("Project directory is " + parent);
-//    System.err.println("Project file is " + f);
-//    System.err.println("projFile exists? " + f.exists());
-    ProjectFileIR pfir = ProjectFileParserFacade.ONLY.parse(f);
-//    System.err.println("buildDir = " + pfir.getBuildDirectory().getCanonicalPath());
-    assertEquals("number of source files", 7, pfir.getSourceFiles().length);
-    assertEquals("number of aux files", 2, pfir.getAuxiliaryFiles().length);
-    assertEquals("number of collapsed", 2, pfir.getCollapsedPaths().length);
-    assertEquals("number of classpaths", 1, IterUtil.sizeOf(pfir.getClassPaths()));
-    File base = f.getParentFile();
-    File root = new File(base, "src");
-    assertEquals("proj-root-and-base", root.getPath(), pfir.getProjectRoot().getPath());
-    assertEquals("first source filename", new File(base,"src/sexp/Atom.java").getPath(), pfir.getSourceFiles()[0].getPath());
-    assertEquals("mod-date value", 
-                 ProjectProfile.MOD_DATE_FORMAT.parse("16-Jul-2004 03:45:23").getTime(),
-                 pfir.getSourceFiles()[0].getSavedModDate());
-    assertEquals("last source filename", new File(root, "sexp/SEList.java").getPath(), 
-                 pfir.getSourceFiles()[6].getPath());
-    assertEquals("first aux filename", new File(base,"junk/sexp/Tokens.java").getPath(), 
-                 pfir.getAuxiliaryFiles()[0].getCanonicalPath());
-    assertEquals("last collapsed path", "./[ External ]/", pfir.getCollapsedPaths()[1]);
-    assertEquals("build-dir name", new File(base, "built").getCanonicalPath(), 
-                 pfir.getBuildDirectory().getCanonicalPath());
-    assertEquals("work-dir name", new File(base, "src").getCanonicalPath(), 
-                 pfir.getWorkingDirectory().getCanonicalPath());
-    assertEquals("classpath name", new File(base, "src/edu/rice/cs/lib").getCanonicalPath(), 
-                 IterUtil.first(pfir.getClassPaths()).getCanonicalPath());
-    assertEquals("main-class name", "some.ClassName", 
-                 pfir.getMainClass());
-  }
   
   public void xtestParseFile() throws SExpParseException {
     SEList c = SExpParser.parse("(file (name \"file-name\") (select 1 2))").get(0);

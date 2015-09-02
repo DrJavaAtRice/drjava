@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2012, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2015, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
-import edu.rice.cs.util.sexp.QuotedTextAtom;
+import edu.rice.cs.util.sexp.Atom;
 
 /**
  * This parser is not meant to be instantiated.  It has
@@ -176,18 +176,18 @@ public class SExpParser {
     private Atom parseAtom(Tokens.SExpToken t) {
       if (t instanceof Tokens.BooleanToken) {
         if (((Tokens.BooleanToken)t).getValue())
-          return BoolAtom.TRUE;
+          return Atom.BoolAtom.TRUE;
         else 
-          return BoolAtom.FALSE;
+          return Atom.BoolAtom.FALSE;
       }
       else if (t instanceof Tokens.NumberToken) {
-        return new NumberAtom(((Tokens.NumberToken)t).getValue());
+        return new Atom.NumberAtom(((Tokens.NumberToken)t).getValue());
       }
       else if (t instanceof Tokens.QuotedTextToken) {
-        return new QuotedTextAtom(t.getText());
+        return new Atom.QuotedTextAtom(t.getText());
       }
       else {
-        return new TextAtom(t.getText());
+        return new Atom.TextAtom(t.getText());
       }
     }
     

@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2012, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2015, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -48,9 +48,9 @@ import edu.rice.cs.util.text.EditDocumentException;
 import javax.swing.text.BadLocationException;
 import edu.rice.cs.plt.tuple.Pair;
 
-
 import edu.rice.cs.drjava.model.repl.newjvm.*;
 import edu.rice.cs.drjava.model.repl.newjvm.ClassPathManager;
+import edu.rice.cs.drjava.model.repl.newjvm.InterpreterException;
 import edu.rice.cs.drjava.DrScalaTestCase;
 
 import edu.rice.cs.plt.tuple.OptionVisitor;
@@ -58,7 +58,7 @@ import edu.rice.cs.plt.reflect.ReflectUtil;
 import edu.rice.cs.plt.text.TextUtil;
 
 import edu.rice.cs.drjava.model.repl.newjvm.DrScalaInterpreter;
-import edu.rice.cs.dynamicjava.interpreter.InterpreterException;
+//import edu.rice.cs.dynamicjava.interpreter.InterpreterException;  // moved to newjvm package 
 
 import java.io.File;
 import java.io.IOException;
@@ -118,7 +118,7 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
   /** Tests that we don't get an error for public classes. */
   @SuppressWarnings("unchecked")
   public void testInterpretExtendPublic()
-    throws BadLocationException, IOException, InterruptedException, InterpreterException {
+    throws BadLocationException, IOException, InterruptedException {
     _log.log("testInterpretExtendPublic started");
     
 //    OpenDefinitionsDocument doc = setupDocument(UNARY_FUN_PUBLIC_INTERFACE_TEXT);
@@ -161,7 +161,7 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
   /** Tests that we get the correct 'cannot access its superinterface' error for non-public classes. */
   @SuppressWarnings("unchecked")
   public void testInterpretExtendNonPublicClass()
-    throws BadLocationException, IOException, InterruptedException, InterpreterException {
+    throws BadLocationException, IOException, InterruptedException {
     _log.log("testInterpretExtendNonPublic started");
     
     OpenDefinitionsDocument doc = setupDocument(UNARY_FUN_NON_PUBLIC_CLASS_TEXT);
@@ -197,8 +197,7 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
   
   /** Tests that we don't get an error for public classes. */
   @SuppressWarnings("unchecked")
-  public void testInterpretExtendPublicClass()
-    throws BadLocationException, IOException, InterruptedException, InterpreterException {
+  public void testInterpretExtendPublicClass() throws BadLocationException, IOException, InterruptedException {
     _log.log("testInterpretExtendPublic started");
     
 //    OpenDefinitionsDocument doc = setupDocument(UNARY_FUN_PUBLIC_CLASS_TEXT);
@@ -236,7 +235,7 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
   /** Test that we get the right package using getPackage(). */
   @SuppressWarnings("unchecked")
   public void testInterpretGetPackageClass()
-    throws BadLocationException, IOException, InterruptedException, InterpreterException {
+    throws BadLocationException, IOException, InterruptedException {
     _log.log("testInterpretGetPackageClass started");
     
     OpenDefinitionsDocument doc = setupDocument(CLASS_IN_PACKAGE_CLASS_TEXT);

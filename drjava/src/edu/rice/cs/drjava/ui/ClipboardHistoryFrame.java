@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2012, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2015, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -222,7 +222,7 @@ public class ClipboardHistoryFrame extends SwingFrame {
     });
     _historyList.setFont(DrScala.getConfig().getSetting(OptionConstants.FONT_MAIN));
     _historyList.setCellRenderer(new DefaultListCellRenderer()  {
-      public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+      public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
         Component c = super.getListCellRendererComponent(list,value,index,isSelected,cellHasFocus);
         c.setForeground(DrScala.getConfig().getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR));
         return c;
@@ -407,10 +407,14 @@ public class ClipboardHistoryFrame extends SwingFrame {
     }
     public String getFull() { return full; }
     public String toString() { return display; }
-//    public boolean equals(Object o) {
-//      if (o == null || getClass() != o.getClass()) return false;
-//      return full.equals(((HistoryString)o).full);
-//    }
-//    public int hashCode() { return  (full != null ? full.hashCode() : 0); }
+    
+    /* No equals/hashcode overrides because History Strings are not used as hash
+     * keys.  If they were:
+     public boolean equals(Object o) {
+       if (o == null || getClass() != o.getClass()) return false;
+       return full.equals(((HistoryString)o).full);
+     }
+     public int hashCode() { return  (full != null ? full.hashCode() : 0); }
+     */
   }
 }

@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2012, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2015, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -1525,41 +1525,6 @@ public interface OptionConstants {
   public static final BooleanOption STICKY_INTERACTIONS_DIRECTORY =
     new BooleanOption("sticky.interactions.dir", Boolean.TRUE);
  
-  /* Irrelevant in DrScala. */
-//  /** Whether to require a semicolon at the end of statements in the Interactions Pane. */
-//  public static final BooleanOption DYNAMICJAVA_REQUIRE_SEMICOLON =
-//    new BooleanOption("dynamicjava.require.semicolon", Boolean.FALSE);
-//  
-//  /** Whether to require a variable type for variable declarations in the Interactions Pane. */
-//  public static final BooleanOption DYNAMICJAVA_REQUIRE_VARIABLE_TYPE =
-//    new BooleanOption("dynamicjava.require.variable.type", Boolean.TRUE);
-  
-  /* Irrelevant in DrScala. */
-//  /** Dynamic Java access control. */
-//  public static final ArrayList<String> DYNAMICJAVA_ACCESS_CONTROL_CHOICES =
-//    DynamicJavaAccessControlChoices.evaluate();
-//  public static class DynamicJavaAccessControlChoices {
-//    public static final String DISABLED = "disabled";
-//    public static final String PRIVATE = "private only";
-//    public static final String PRIVATE_AND_PACKAGE = "private and package only";
-//    public static ArrayList<String> evaluate() {
-//      ArrayList<String> aList = new ArrayList<String>(4);
-//      aList.add(DISABLED);
-//      aList.add(PRIVATE);
-//      
-//      // NOTE: this sets the enforceAllAccess option in InteractionsPaneOptions, but since that is not fully
-//      // implemented, this description is better.
-//      aList.add(PRIVATE_AND_PACKAGE); 
-//      return aList;
-//    }
-//  }
-  
-  /* Irrelevant in DrScala. */
-//  /** File extension registration. */
-//  public static final ForcedChoiceOption DYNAMICJAVA_ACCESS_CONTROL =
-//    new ForcedChoiceOption("dynamicjava.access.control", DynamicJavaAccessControlChoices.PRIVATE_AND_PACKAGE,
-//                           DYNAMICJAVA_ACCESS_CONTROL_CHOICES);
-//  
   /** The command-line arguments to be passed to the Master JVM. */
   public static final StringOption MASTER_JVM_ARGS = new StringOption("master.jvm.args", "");
   

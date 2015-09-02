@@ -1,6 +1,6 @@
    /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2012, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2015, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -39,8 +39,8 @@ package edu.rice.cs.drjava.model.repl.newjvm;
 import java.io.StringWriter;
 import java.io.PrintWriter;
 import java.io.Serializable;
-import edu.rice.cs.dynamicjava.interpreter.InterpreterException;
-import edu.rice.cs.dynamicjava.interpreter.EvaluatorException;
+//import edu.rice.cs.dynamicjava.interpreter.InterpreterException;  // moved to this package
+//import edu.rice.cs.dynamicjava.interpreter.EvaluatorException;  // moved to this package
 
 /**
  * Super class for any type of result that can occur from a call to interpret.
@@ -71,7 +71,6 @@ public abstract class InterpretResult implements Serializable {
     public static final BusyResult INSTANCE = new BusyResult();
     public <T> T apply(Visitor<T> v) { return v.forBusy(); }
   }
-  
   
   public static InterpretResult exception(InterpreterException e) { return new ExceptionResult(e); }
   

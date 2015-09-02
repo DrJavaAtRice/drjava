@@ -1,1 +1,0 @@
-class OneLine extends Maggie { int stuff; double method(char c) { return stuff; } }

@@ -47,7 +47,6 @@
   <property name="java6-home" value="${env.JAVA6_HOME}" />
   <property name="java5-home" value="${env.JAVA5_HOME}" />
   <property name="launch4j-home" value="${env.LAUNCH4J_HOME}" />
-  <property name="clover-jar" value="${env.CLOVER_JAR}" />
   <property name="findbugs-home" value="${env.FINDBUGS_HOME}" />
   
   <property name="is-development" value="yes" /> <!-- Development or stable release -->
@@ -74,9 +73,9 @@
   <!-- Use ConcJUnit if use-concjunit is not defined and we are not running Java 7. -->
   <!-- ConcJUnit is currently incompatible with Java 7. -->
   <if>
-    <contains string="${java.version}" substring="1.7"/>
+    <contains string="${java.version}" substring="1.8"/>
     <then>
-      <echo message="ConcJUnit is currently incompatible with Java 7."/>
+      <echo message="ConcJUnit is currently incompatible with Java 7, 8."/>
       <property name="use-concjunit" value="false" />
     </then>
     <else>
@@ -99,7 +98,7 @@
     <echo message="variables may need to be defined (depending on the target invoked):" />
     <echo message="PATH: The 'javac' command is used for compilation;" />
     <echo message="      the 'java' command is used by default in testing/running; " />
-    <echo message="      the 'svn' command is used to generate version numbers and " />
+    <echo message="      the 'git' command is used to generate version numbers and " />
     <echo message="      in Subversion targets" />
     <echo message="JAVA5_HOME: Home folder of the Java 5 JRE or JDK (required for" />
     <echo message="            compiling and '-5' targets)" />
@@ -111,7 +110,6 @@
     <echo message="            '-8' targets)" />
     <echo message="LAUNCH4J_HOME: Location of the Launch4j installation (used to " />
     <echo message="               release a Windows application)" />
-    <echo message="CLOVER_JAR: Location of the Clover jar file" />
     <echo message="FINDBUGS_HOME: Location of the FindBugs installation" />
     <echo message="" />
     <echo message="For control over the version of Java used to run Ant, set JAVA_HOME." />
@@ -508,7 +506,6 @@
         <pathelement location="${junit-jar}" />
         <pathelement location="lib/buildlib/plt-ant.jar" /> <!-- required for custom formatter -->
         <pathelement location="lib/buildlib/netbeans-memory-leak-utils.jar" />
-        <pathelement location="${clover-jar}" />
         <pathelement location="classes/test" />
         <pathelement location="classes/base" />
         <pathelement location="classes/lib" />
@@ -1536,7 +1533,7 @@
               value="edu.rice.cs.plt.ant.OneLineJUnitResultFormatter" />
   </target>
   
-  <target name="resolve-version-tag" depends="resolve-svn-revision">
+  <target name="resolve-version-tag">
     <!-- Get a timestamp based on GMT, rather than local time -->
     <tstamp>
       <format property="DSTAMP" pattern="yyyyMMdd" timezone="GMT" />

@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2012, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2015, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -88,7 +88,8 @@ public class Step extends DebugAction<StepRequest> implements OptionConstants {
     }
     if (!stepInterpreter) {
       request.addClassExclusionFilter("koala.*");
-      request.addClassExclusionFilter("edu.rice.cs.dynamicjava.*");
+      /* DynamicJava is not used in DrScala */
+//      request.addClassExclusionFilter("edu.rice.cs.dynamicjava.*");
     }
     if (!stepDrJava) {
       request.addClassExclusionFilter("edu.rice.cs.drjava.*");

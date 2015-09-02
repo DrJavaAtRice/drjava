@@ -1,6 +1,0 @@
-class DoesNotImplementInterfaceMethod implements AnInterface {
-}
-
-interface AnInterface {
-  public abstract int myMethod(int i, int j);
-}

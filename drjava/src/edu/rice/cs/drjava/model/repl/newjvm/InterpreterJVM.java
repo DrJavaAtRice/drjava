@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2012, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2015, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -71,19 +71,19 @@ import edu.rice.cs.util.swing.Utilities;
 //import edu.rice.cs.dynamicjava.Options;
 
 /* Most of these imports involve debugger code that I don't think works in DrScala. */
-import edu.rice.cs.dynamicjava.interpreter.ClassContext;
-import edu.rice.cs.dynamicjava.interpreter.ClassSignatureContext;
-import edu.rice.cs.dynamicjava.interpreter.DelegatingContext;
-import edu.rice.cs.dynamicjava.interpreter.EvaluatorException;
-import edu.rice.cs.dynamicjava.interpreter.ImportContext;
-import edu.rice.cs.dynamicjava.interpreter.InterpreterException;
-import edu.rice.cs.dynamicjava.interpreter.LocalContext;
-import edu.rice.cs.dynamicjava.interpreter.RuntimeBindings;
-import edu.rice.cs.dynamicjava.interpreter.TypeContext;
-import edu.rice.cs.dynamicjava.symbol.DJClass;
-import edu.rice.cs.dynamicjava.symbol.SymbolUtil;
-import edu.rice.cs.dynamicjava.symbol.LocalVariable;
-import edu.rice.cs.dynamicjava.symbol.type.Type;
+//import edu.rice.cs.dynamicjava.interpreter.ClassContext;
+//import edu.rice.cs.dynamicjava.interpreter.ClassSignatureContext;
+//import edu.rice.cs.dynamicjava.interpreter.DelegatingContext;
+//import edu.rice.cs.dynamicjava.interpreter.EvaluatorException;  // moved to this package
+//import edu.rice.cs.dynamicjava.interpreter.ImportContext;
+//import edu.rice.cs.dynamicjava.interpreter.InterpreterException;  // moved to this package
+//import edu.rice.cs.dynamicjava.interpreter.LocalContext;
+//import edu.rice.cs.dynamicjava.interpreter.RuntimeBindings;
+//import edu.rice.cs.dynamicjava.interpreter.TypeContext;
+//import edu.rice.cs.dynamicjava.symbol.DJClass;
+//import edu.rice.cs.dynamicjava.symbol.SymbolUtil;  // no longer used
+//import edu.rice.cs.dynamicjava.symbol.LocalVariable;
+//import edu.rice.cs.dynamicjava.symbol.type.Type;
 
 // For Windows focus fix
 import javax.swing.JDialog;
@@ -247,19 +247,19 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     */
   public InterpretResult interpret(String s) { return interpret(s, _activeInterpreter.second()); }
   
-  /** Interprets the given string of source code with the given interpreter. The result is returned to
-    * MainJVM via the interpretResult method.
-    * @param s Source code to interpret.
-    * @param interpreterName Name of the interpreter to use
-    * @throws IllegalArgumentException if the named interpreter does not exist
-    */
-  public InterpretResult interpret(String s, String name) {
-    Interpreter i = getInterpreter(name);
-    if (i == null) {
-      throw new IllegalArgumentException("Interpreter '" + name + "' does not exist.");
-    }
-    return interpret(s, i);
-  }
+//  /** Interprets the given string of source code with the given interpreter. The result is returned to
+//    * MainJVM via the interpretResult method.
+//    * @param s Source code to interpret.
+//    * @param interpreterName Name of the interpreter to use
+//    * @throws IllegalArgumentException if the named interpreter does not exist
+//    */
+//  public InterpretResult interpret(String s, String name) {
+//    Interpreter i = getInterpreter(name);
+//    if (i == null) {
+//      throw new IllegalArgumentException("Interpreter '" + name + "' does not exist.");
+//    }
+//    return interpret(s, i);
+//  }
   
   private InterpretResult interpret(String input, Interpreter interpreter) {
     debug.logStart("Interpret " + input);
@@ -322,32 +322,36 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
 //    });
 //  }
   
-  /** Gets the value of the variable with the given name in the current interpreter.
-    * Invoked reflectively by the debugger.  To simplify the inter-process exchange,
-    * an array here is used as the return type rather than an {@code Option<Object>} --
-    * an empty array corresponds to "none," and a singleton array corresponds to a "some."
-    * @param var name of the variable to look up
-    * @return empty array for "none", singleton array for "some" value
-    * @see edu.rice.cs.drjava.model.debug.jpda.JPDADebugger#GET_VARIABLE_VALUE_SIG
-    * @see edu.rice.cs.drjava.model.debug.jpda.JPDADebugger#_copyVariablesFromInterpreter()
-    */
-  public Object[] getVariableValue(String var) {
-    Pair<Object,String>[] arr = getVariable(var);
-    if (arr.length == 0) return new Object[0];
-    else return new Object[] { arr[0].first() };
-  }
+//  /** Gets the value of the variable with the given name in the current interpreter.
+//    * Invoked reflectively by the debugger.  To simplify the inter-process exchange,
+//    * an array here is used as the return type rather than an {@code Option<Object>} --
+//    * an empty array corresponds to "none," and a singleton array corresponds to a "some."
+//    * @param var name of the variable to look up
+//    * @return empty array for "none", singleton array for "some" value
+//    * @see edu.rice.cs.drjava.model.debug.jpda.JPDADebugger#GET_VARIABLE_VALUE_SIG
+//    * @see edu.rice.cs.drjava.model.debug.jpda.JPDADebugger#_copyVariablesFromInterpreter()
+//    */
+//  public Object[] getVariableValue(String var) {
+//    Pair<Object,String>[] arr = getVariable(var);
+//    if (arr.length == 0) return new Object[0];
+//    else return new Object[] { arr[0].first() };
+//  }
   
   /** Gets the value and type string of the variable with the given name in the current interpreter.
     * Invoked reflectively by the debugger.  To simplify the inter-process exchange,
     * an array here is used as the return type rather than an {@code Option<Object>} --
     * an empty array corresponds to "none," and a singleton array corresponds to a "some."
     */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("all")  // New array operations must use raw types, which creates typing mismatches.
   public Pair<Object,String>[] getVariable(String var) {
     synchronized(_stateLock) {
       InterpretResult ir = interpret(var);
       return ir.apply(new InterpretResult.Visitor<Pair<Object,String>[]>() {
+        
+        @SuppressWarnings({"unchecked", "rawtypes"})
         public Pair<Object,String>[] fail() { return new Pair[0]; }
+        
+        @SuppressWarnings({"unchecked", "rawtypes"})
         public Pair<Object,String>[] value(Object val) {
           return new Pair[] { new Pair<Object,String>(val, getClassName(val.getClass())) };
         }
@@ -356,8 +360,11 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
         public Pair<Object,String>[] forCharValue(Character val) { return value(val); }
         public Pair<Object,String>[] forNumberValue(Number val) { return value(val); }
         public Pair<Object,String>[] forBooleanValue(Boolean val) { return value(val); }
+        
+        @SuppressWarnings({"unchecked", "rawtypes"})
         public Pair<Object,String>[] forObjectValue(String valString, String objTypeString) {
-          return new Pair[] { new Pair<Object,String>(valString, objTypeString) }; }
+          return new Pair[] { new Pair<Object,String>(valString, objTypeString) }; 
+        }
         public Pair<Object,String>[] forException(String message) { return fail(); }
         public Pair<Object,String>[] forEvalException(String message, StackTraceElement[] stackTrace) { return fail(); }
         public Pair<Object,String>[] forUnexpectedException(Throwable t) { return fail(); }
@@ -427,76 +434,33 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     }
   }
   
-  /* TODO: revise this to work with DrScala. Does the debugger work at all in DrScala? */
-  /** Adds a named Interpreter in the given environment to the list.  Invoked reflectively by
-    * the debugger.
-    * @param name  The unique name for the interpreter
-    * @param thisVal  The value of {@code this} (may be null, implying this is a static context)
-    * @param thisClass  The class in whose context the interpreter is to be created
-    * @param localVars  Values of local variables
-    * @param localVarNames  Names of the local variables
-    * @param localVarClasses  Classes of the local variables.  To simplify the work callers must
-    *                         do, a value with a primitive type may have a {@code null} entry here.
-    * @throws IllegalArgumentException if the name is not unique, or if the local var arrays
-    *                                  are not all of the same length
-    * @see edu.rice.cs.drjava.model.debug.jpda.JPDADebugger#ADD_INTERPRETER_SIG
-    * @see edu.rice.cs.drjava.model.debug.jpda.JPDADebugger#_dumpVariablesIntoInterpreterAndSwitch
-    */
-  public void addInterpreter(String name, Object thisVal, Class<?> thisClass, Object[] localVars,
-                             String[] localVarNames, Class<?>[] localVarClasses) {
-    synchronized(_stateLock) {
-      debug.logValues(new String[]{ "name", "thisVal", "thisClass", "localVars", "localVarNames",
-        "localVarClasses" }, name, thisVal, thisClass, localVars, localVarNames, localVarClasses);
-      if (isInterpreterName(name)) {
-        throw new IllegalArgumentException("'" + name + "' is not a unique interpreter name");
-      }
-      if (localVars.length != localVarNames.length || localVars.length != localVarClasses.length) {
-        throw new IllegalArgumentException("Local variable arrays are inconsistent");
-      }
-      
-      // TODO: handle inner classes
-      // TODO: enforce final vars?
-      Package pkg = thisClass.getPackage();
-      DJClass c = SymbolUtil.wrapClass(thisClass);
-      List<LocalVariable> vars = new LinkedList<LocalVariable>();
-      for (int i = 0; i < localVars.length; i++) {
-        if (localVarClasses[i] == null) {
-          try { localVarClasses[i] = (Class<?>) localVars[i].getClass().getField("TYPE").get(null); }
-          catch (IllegalAccessException e) { throw new IllegalArgumentException(e); }
-          catch (NoSuchFieldException e) { throw new IllegalArgumentException(e); }
-        }
-        Type varT = SymbolUtil.typeOfGeneralClass(localVarClasses[i], _interpreterOptions.typeSystem());
-        vars.add(new LocalVariable(localVarNames[i], varT, false));
-      }
-      
-      TypeContext ctx = new ImportContext(_interpreterLoader, _interpreterOptions);
-      if (pkg != null) { ctx = ctx.setPackage(pkg.getName()); }
-      ctx = new ClassSignatureContext(ctx, c, _interpreterLoader);
-      ctx = new ClassContext(ctx, c);
-      ctx = new DebugMethodContext(ctx, thisVal == null);
-      ctx = new LocalContext(ctx, vars);
-      
-      RuntimeBindings bindings = RuntimeBindings.EMPTY;
-      if (thisVal != null) { bindings = new RuntimeBindings(bindings, c, thisVal); }
-      bindings = new RuntimeBindings(bindings, vars, IterUtil.asIterable(localVars));
-      
-//      Interpreter i = new Interpreter(_interpreterOptions, ctx, bindings);
-      Interpreter i = new DrScalaInterpreter();
-//      _environments.put(name, Pair.make(ctx, bindings));
-      putInterpreter(name, i);
-    }
-  }
-  
-  /** A custom context for interpreting within the body of a defined method. */
-  private static class DebugMethodContext extends DelegatingContext {
-    private final boolean _isStatic;
-    public DebugMethodContext(TypeContext next, boolean isStatic) { super(next); _isStatic = isStatic; }
-    protected TypeContext duplicate(TypeContext next) { return new DebugMethodContext(next, _isStatic); }
-    @Override public DJClass getThis() { return _isStatic ? null : super.getThis(); }
-    @Override public DJClass getThis(String className) { return _isStatic ? null : super.getThis(className); }
-    @Override public Type getReturnType() { return null; }
-    @Override public Iterable<Type> getDeclaredThrownTypes() { return IterUtil.empty(); }
-  }
+//  /* TODO: revise this to work with DrScala. Does the debugger work at all in DrScala? */
+//  /** Adds a named Interpreter in the given environment to the list.  Invoked reflectively by
+//    * the debugger.
+//    * @param name  The unique name for the interpreter
+//    * @param thisVal  The value of {@code this} (may be null, implying this is a static context)
+//    * @param thisClass  The class in whose context the interpreter is to be created
+//    * @param localVars  Values of local variables
+//    * @param localVarNames  Names of the local variables
+//    * @param localVarClasses  Classes of the local variables.  To simplify the work callers must
+//    *                         do, a value with a primitive type may have a {@code null} entry here.
+//    * @throws IllegalArgumentException if the name is not unique, or if the local var arrays
+//    *                                  are not all of the same length
+//    * @see edu.rice.cs.drjava.model.debug.jpda.JPDADebugger#ADD_INTERPRETER_SIG
+//    * @see edu.rice.cs.drjava.model.debug.jpda.JPDADebugger#_dumpVariablesIntoInterpreterAndSwitch
+//    */
+//// <
+//  
+//  /** A custom context for interpreting within the body of a defined method. */
+//  private static class DebugMethodContext extends DelegatingContext {
+//    private final boolean _isStatic;
+//    public DebugMethodContext(TypeContext next, boolean isStatic) { super(next); _isStatic = isStatic; }
+//    protected TypeContext duplicate(TypeContext next) { return new DebugMethodContext(next, _isStatic); }
+//    @Override public DJClass getThis() { return _isStatic ? null : super.getThis(); }
+//    @Override public DJClass getThis(String className) { return _isStatic ? null : super.getThis(className); }
+//    @Override public Type getReturnType() { return null; }
+//    @Override public Iterable<Type> getDeclaredThrownTypes() { return IterUtil.empty(); }
+//  }
   
   /** Sets the current interpreter to be the one specified by the given name
     * @param name the unique name of the interpreter to set active

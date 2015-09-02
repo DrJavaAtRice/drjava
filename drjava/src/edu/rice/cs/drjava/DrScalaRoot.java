@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2012, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2015, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -55,7 +55,7 @@ import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.drjava.ui.MainFrame;
 import edu.rice.cs.drjava.ui.DrJavaErrorWindow;
 import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
-import edu.rice.cs.drjava.ui.SimpleInteractionsWindow;
+//import edu.rice.cs.drjava.ui.SimpleInteractionsWindow;
 import edu.rice.cs.drjava.ui.SplashScreen;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.platform.PlatformFactory;
@@ -82,7 +82,7 @@ public class DrScalaRoot {
   
 //  /** This field is only used in the instance of this class in the Interpreter JVM. */
   
-  private static volatile SimpleInteractionsWindow _debugConsole = null;
+//  private static volatile SimpleInteractionsWindow _debugConsole = null;
   
   private static volatile boolean anyLineNumbersSpecified = false;
   
@@ -133,7 +133,7 @@ public class DrScalaRoot {
           PlasticLookAndFeel.setTabStyle(PlasticLookAndFeel.TAB_STYLE_METAL_VALUE);
           com.jgoodies.looks.Options.setPopupDropShadowEnabled(true);
           if(! configLAFName.equals(currLAFName)) UIManager.setLookAndFeel(configLAFName);
-        } catch(NoSuchMethodException nsmex) {
+        } catch(UnsupportedOperationException nsmex) {
           JOptionPane.showMessageDialog(null, failureMessage, failureTitle, JOptionPane.ERROR_MESSAGE);
         } catch(SecurityException sex) {
           JOptionPane.showMessageDialog(null, failureMessage, failureTitle, JOptionPane.ERROR_MESSAGE);
@@ -187,8 +187,8 @@ public class DrScalaRoot {
       }));
       
 //      Utilities.showDebug("showDebugConsole flag = " + DrJava.getShowDebugConsole());
-      // Show debug console if enabled
-      if (DrScala.getShowDebugConsole()) showDrJavaDebugConsole(_mainFrame);
+      // Show debug console if enabled; disabled in DrScala
+//      if (DrScala.getShowDebugConsole()) showDrJavaDebugConsole(_mainFrame);
     }
     catch(Throwable t) {
       error.log(t);
@@ -280,26 +280,26 @@ public class DrScalaRoot {
     }
   }
   
-  /** Shows a separate interactions window with a reference to DrJava's MainFrame defined as "mainFrame".  
-    * Useful for debugging DrJava.
-    * @param mf MainFrame to define in the new window
-    */
-  public static void showDrJavaDebugConsole(MainFrame mf) {
-    if (_debugConsole == null) {
-      _debugConsole = new SimpleInteractionsWindow("DrJava Debug Console") {
-        protected void close() {
-          dispose();
-          _debugConsole = null;
-        }
-      };
-      // TODO: define appropriate context
-//      _debugConsole.defineConstant("mainFrame", mf);
-//      _debugConsole.defineConstant("model", mf.getModel());
-//      _debugConsole.defineConstant("config", DrJava.getConfig());
-      _debugConsole.setVisible(true);
-    }
-    else  _debugConsole.toFront();
-  }
+//  /** Shows a separate interactions window with a reference to DrJava's MainFrame defined as "mainFrame".  
+//    * Useful for debugging DrJava.
+//    * @param mf MainFrame to define in the new window
+//    */
+//  public static void showDrJavaDebugConsole(MainFrame mf) {
+//    if (_debugConsole == null) {
+//      _debugConsole = new SimpleInteractionsWindow("DrJava Debug Console") {
+//        protected void close() {
+//          dispose();
+//          _debugConsole = null;
+//        }
+//      };
+//      // TODO: define appropriate context
+////      _debugConsole.defineConstant("mainFrame", mf);
+////      _debugConsole.defineConstant("model", mf.getModel());
+////      _debugConsole.defineConstant("config", DrJava.getConfig());
+//      _debugConsole.setVisible(true);
+//    }
+//    else  _debugConsole.toFront();
+//  }
   
   /** Get the actual System.err stream.
     * @return System.err

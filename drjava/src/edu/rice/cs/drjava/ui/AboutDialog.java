@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2012, JavaPLT group at Rice University (javaplt@rice.edu)
+ * Copyright (c) 2001-2015, JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -88,7 +88,7 @@ public class AboutDialog extends JDialog implements ActionListener {
     getRootPane().setDefaultButton(_okButton);
     // pack();
     // setSize((int) (.8f*owner.getWidth()),(int) (.8f*owner.getHeight()));
-    setSize(550, 400);
+    setSize(800, 600);
     // suggested from zaq@nosi.com, to keep the frame on the screen!
     //System.out.println("Dialog created...");
   }
@@ -137,8 +137,9 @@ public class AboutDialog extends JDialog implements ActionListener {
     if (LICENSE != null) addTab(_tabs,"DrScala License",createTextScroller(LICENSE));
     
     addTab(_tabs,"Scala License",createTextScroller(SCALA_LICENSE));
-    addTab(_tabs,"DynamicJava License",createTextScroller(DYADE_LICENSE));
-    addTab(_tabs,"Eclipse License",createTextScroller(ECLIPSE_LICENSE));
+    /* DynanmicJava and Eclipse are is not used in DrScQava */
+//    addTab(_tabs,"DynamicJava License",createTextScroller(DYADE_LICENSE));
+//    addTab(_tabs,"Eclipse License",createTextScroller(ECLIPSE_LICENSE));
     addTab(_tabs,"System Properties",createSysPropTab());
     _propertiesTabIndex = _tabs.getTabCount()-1;
     cp.add(createBottomBar(),BorderLayout.SOUTH);
@@ -194,9 +195,9 @@ public class AboutDialog extends JDialog implements ActionListener {
         sb.append(customDrJavaJarVersionSuffix);
       }
     }
-    sb.append("\nDrJava Build Time: ");
+    sb.append("\nDrScala Build Time: ");
     sb.append(Version.getBuildTimeString());
-    sb.append("\n\nDrJava Configuration File: ");
+    sb.append("\n\nDrScala Configuration File: ");
     sb.append(DrScala.getPropertiesFile().getAbsolutePath());
     sb.append("\n\nUsed memory: about ");
     sb.append(StringOps.memSizeToString(Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory()));
@@ -214,7 +215,7 @@ public class AboutDialog extends JDialog implements ActionListener {
     // deal with logos now (calibrate size)
     final LogoList logos = new LogoList();
     logos.addLogo(createBorderedLabel(CSLOGO,new EmptyBorder(5,5,5,5)), "http://compsci.rice.edu/");
-    logos.addLogo(createBorderedLabel(SF,null), "http://sourceforge.net/projects/drjava/");
+    logos.addLogo(createBorderedLabel(SF,null), "http://github.com/DrJavaAtRice/DrScala/");
     logos.resizeLogos();
 
     // add to panel
@@ -334,7 +335,7 @@ public class AboutDialog extends JDialog implements ActionListener {
   }
 
   public static final String COPYRIGHT =
-    "Copyright (c) 2001-2012, JavaPLT group at Rice University (javaplt@rice.edu)\n" + 
+    "Copyright (c) 2001-2015, JavaPLT group at Rice University (javaplt@rice.edu)\n" + 
     "All rights reserved.\n\n" + 
     "Redistribution and use in source and binary forms, with or without " + 
     "modification, are permitted provided that the following conditions are met:\n" + 
@@ -372,15 +373,14 @@ public class AboutDialog extends JDialog implements ActionListener {
     "Permission to use, copy, modify, and distribute this software in source\n" +
     "or binary form for any purpose with or without fee is hereby granted,\n" +
     "provided that the following conditions are met:\n\n" +
-    "   1. Redistributions of source code must retain the above copyright\n" +
-    "      notice, this list of conditions and the following disclaimer.\n\n" +
-    "   2. Redistributions in binary form must reproduce the above copyright\n" +
-    "      notice, this list of conditions and the following disclaimer in the\n" +
-    "      documentation and/or other materials provided with the distribution.\n" +
-    
-    "   3. Neither the name of the EPFL nor the names of its contributors\n" +
-    "      may be used to endorse or promote products derived from this\n" +
-    "      software without specific prior written permission.\n\n\n" +
+    " * Redistributions of source code must retain the above copyright\n" +
+    "   notice, this list of conditions and the following disclaimer.\n\n" +
+    " * Redistributions in binary form must reproduce the above copyright\n" +
+    "   notice, this list of conditions and the following disclaimer in the\n" +
+    "   documentation and/or other materials provided with the distribution.\n" +
+    " * Neither the name of the EPFL nor the names of its contributors\n" +
+    "   may be used to endorse or promote products derived from this\n" +
+    "   software without specific prior written permission.\n\n\n" +
     "THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND\n" +
     "ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE\n" +
     "IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE\n" +
@@ -632,41 +632,41 @@ public class AboutDialog extends JDialog implements ActionListener {
     }
   }
 
-  public static String getLicense() {
-    if (initLicense) return LICENSE;
-
-    try {
-      InputStream is = AboutDialog.class.getResourceAsStream("/edu/rice/cs/LICENSE");
-      if (is != null) {
-        BufferedReader r = new BufferedReader(new InputStreamReader(is));
-        try {
-          
-          final StringBuilder sb = new StringBuilder();
-          for (String s = r.readLine(); s != null; s = r.readLine()) {
-            int lastSig = s.length()-1; // the last char index
-            
-            while (lastSig >= 0 && Character.isWhitespace(s.charAt(lastSig))) lastSig--;
-            if (lastSig < 0) sb.append("\n"); // empty line, so insert two newlines.
-            else {
-              sb.append(s.substring(0,lastSig+1));
-              sb.append('\n');
-            }
-          }
-          LICENSE = sb.toString();
-          LICENSE = LICENSE.trim();
-          if (LICENSE.length() == 0) LICENSE = null;
-        }
-        finally { 
-          is.close();
-          r.close();
-        }
-      }
-    }
-    catch(Exception e) { throw new UnexpectedException(e, StringOps.getStackTrace(e)); }
-
-    initLicense = true;
-    return LICENSE;
-  }
+  public static String getLicense() { return LICENSE; }
+//    if (initLicense) return LICENSE;
+//
+//    try {
+//      InputStream is = AboutDialog.class.getResourceAsStream("/edu/rice/cs/LICENSE");
+//      if (is != null) {
+//        BufferedReader r = new BufferedReader(new InputStreamReader(is));
+//        try {
+//          
+//          final StringBuilder sb = new StringBuilder();
+//          for (String s = r.readLine(); s != null; s = r.readLine()) {
+//            int lastSig = s.length()-1; // the last char index
+//            
+//            while (lastSig >= 0 && Character.isWhitespace(s.charAt(lastSig))) lastSig--;
+//            if (lastSig < 0) sb.append("\n"); // empty line, so insert two newlines.
+//            else {
+//              sb.append(s.substring(0,lastSig+1));
+//              sb.append('\n');
+//            }
+//          }
+//          LICENSE = sb.toString();
+//          LICENSE = LICENSE.trim();
+//          if (LICENSE.length() == 0) LICENSE = null;
+//        }
+//        finally { 
+//          is.close();
+//          r.close();
+//        }
+//      }
+//    }
+//    catch(Exception e) { throw new UnexpectedException(e, StringOps.getStackTrace(e)); }
+//
+//    initLicense = true;
+//    return LICENSE;
+//  }
 
   private static void wrapBorder(JComponent c, Border b) {
     c.setBorder(new CompoundBorder(b,c.getBorder()));

@@ -1,9 +1,0 @@
-class InnerClassArrayField {
- OneType.TwoType[] ottt = 
-   new OneType.TwoType[0]; 
-}
-
-class OneType {
-  class TwoType {
-  }
-}

@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2012, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2015, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -238,7 +238,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
 
         new Thread(new Runnable() { 
           public void run() { 
-            try { interpret(evalText); } 
+            try { interpretCommand(evalText); } 
             catch(Throwable t) { DrJavaErrorHandler.record(t); }
           } 
         }).start(); 
@@ -268,7 +268,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     }
 
     if (sb.length() > 0) {
-      interpret(sb.toString());
+      interpretCommand(sb.toString());
       _document.insertBeforeLastPrompt("Auto-import: " + sb.toString() + "\n", InteractionsDocument.DEBUGGER_STYLE);
     }
   }
@@ -288,12 +288,12 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   
   /** Interprets the given command.
     * @param toEval command to be evaluated. */
-  public final void interpret(String toEval) { _interpret(toEval); }
+  public final void interpretCommand(String toEval) { _interpretCommand(toEval); }
   
   /** Interprets the given command.  This should only be called from interpret, never directly.
     * @param toEval command to be evaluated
     */
-  protected abstract void _interpret(String toEval);
+  protected abstract void _interpretCommand(String toEval);
   
   /** Notifies the view that the current interaction is incomplete. */
   protected abstract void _notifyInteractionIncomplete();
@@ -867,7 +867,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
       }
     }
     if (sb.length() > 0) {
-      interpret(sb.toString());
+      interpretCommand(sb.toString());
       _document.insertBeforeLastPrompt("Default imports: " + sb.toString() + "\n", InteractionsDocument.DEBUGGER_STYLE);
     }
   }

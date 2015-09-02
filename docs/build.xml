@@ -1,4 +1,4 @@
-<!-- DrJava Documentation Build Script -->
+<!-- DrScala Documentation Build Script -->
 
 <!-- This build script is based on the template located at "trunk/misc/build-template.xml"
      in the DrJava Subversion repository.  In general, changes made to the script should be
@@ -6,7 +6,7 @@
      
 <project name="docs" default="help">
 
-  <property name="readable-project-name" value="DrJava Documentation" />
+  <property name="readable-project-name" value="DrScala Documentation" />
   <property name="svn-repository" value="https://svn.sourceforge.net/svnroot/drjava" />
 
   <property environment="env" />

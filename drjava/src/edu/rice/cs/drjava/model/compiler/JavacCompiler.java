@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2012, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2015, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -123,9 +123,9 @@ public abstract class JavacCompiler implements CompilerInterface {
     String command = 
       "try '{'\n" +
       "  java.lang.reflect.Method m = {0}.class.getMethod(\"main\", java.lang.String[].class);\n" +
-      "  if (!m.getReturnType().equals(void.class)) throw new java.lang.NoSuchMethodException();\n" +
+      "  if (!m.getReturnType().equals(void.class)) throw new java.lang.UnsupportedOperationException();\n" +
       "'}'\n" +
-      "catch (java.lang.NoSuchMethodException e) '{'\n" +
+      "catch (java.lang.UnsupportedOperationException e) '{'\n" +
       "  throw new java.lang.NoSuchMethodError(\"main\");\n" +
       "'}'\n" +
       "{0}.main(new String[]'{'{1}'}');";
@@ -175,7 +175,7 @@ public abstract class JavacCompiler implements CompilerInterface {
         m = c.getMethod("main", java.lang.String[].class);
         if (!m.getReturnType().equals(void.class)) { m = null; }
       }
-      catch (java.lang.NoSuchMethodException e) { m = null; }
+      catch (java.lang.UnsupportedOperationException e) { m = null; }
       if (m == null) {
         java.applet.Applet instance = null;
         if (args.length == 0) {
@@ -184,7 +184,7 @@ public abstract class JavacCompiler implements CompilerInterface {
             Constructor<?> ctor = c.getConstructor();
             instance = java.applet.Applet.class.cast(ctor.newInstance());
           }
-          catch(NoSuchMethodException nsme) { instance = null; }
+          catch(UnsupportedOperationException nsme) { instance = null; }
           catch(InstantiationException ie) { instance = null; }
           catch(IllegalAccessException iae) { instance = null; }
           catch(java.lang.reflect.InvocationTargetException ite) {
@@ -201,7 +201,7 @@ public abstract class JavacCompiler implements CompilerInterface {
               Constructor<?> ctor = c.getConstructor(String[].class);
               instance = java.applet.Applet.class.cast(ctor.newInstance(new Object[] { new String[0] }));
             }
-            catch(NoSuchMethodException nsme) { instance = null; }
+            catch(UnsupportedOperationException nsme) { instance = null; }
             catch(InstantiationException ie) { instance = null; }
             catch(IllegalAccessException iae) { instance = null; }
             catch(java.lang.reflect.InvocationTargetException ite) {
@@ -226,7 +226,7 @@ public abstract class JavacCompiler implements CompilerInterface {
             Constructor<?> ctor = c.getConstructor(String[].class);
             instance = java.applet.Applet.class.cast(ctor.newInstance(new Object[] { args }));
           }
-          catch(NoSuchMethodException nsme) { instance = null; }
+          catch(UnsupportedOperationException nsme) { instance = null; }
           catch(InstantiationException ie) { instance = null; }
           catch(IllegalAccessException iae) { instance = null; }
           catch(java.lang.reflect.InvocationTargetException ite) {
@@ -254,7 +254,7 @@ public abstract class JavacCompiler implements CompilerInterface {
           m = null;
         }
       }
-      catch (java.lang.NoSuchMethodException e) {
+      catch (java.lang.UnsupportedOperationException e) {
 //        System.err.println("Static Error: This class does not have a static void main method accepting String[].");
         m = null;
       }
@@ -442,7 +442,7 @@ public abstract class JavacCompiler implements CompilerInterface {
 //       "    m = c.getMethod(\"main\", java.lang.String[].class);\n" +
 //       "    if (!m.getReturnType().equals(void.class)) { m = null; }\n" +
 //       "  }\n" +
-//       "  catch (java.lang.NoSuchMethodException e) { m = null; }\n" +
+//       "  catch (java.lang.UnsupportedOperationException e) { m = null; }\n" +
 //       "  if (m==null) {\n" +
 //       "    java.applet.Applet instance = null;\n" +
 //       "    boolean fail = false;\n");
@@ -453,7 +453,7 @@ public abstract class JavacCompiler implements CompilerInterface {
 //       "      java.lang.reflect.Constructor ctor = c.getConstructor();\n" +
 //       "      instance = java.applet.Applet.class.cast(ctor.newInstance());\n" +
 //       "    }\n" +
-//       "    catch(NoSuchMethodException nsme) { instance = null; }\n" +
+//       "    catch(UnsupportedOperationException nsme) { instance = null; }\n" +
 //       "    catch(InstantiationException ie) { instance = null; }\n" +
 //       "    catch(IllegalAccessException iae) { instance = null; }\n" +
 //       "    catch(java.lang.reflect.InvocationTargetException ite) {\n" +
@@ -470,7 +470,7 @@ public abstract class JavacCompiler implements CompilerInterface {
 //       "        java.lang.reflect.Constructor ctor = c.getConstructor(String[].class);\n" +
 //       "        instance = java.applet.Applet.class.cast(ctor.newInstance(new Object[] { new String[0] }));\n" +
 //       "      }\n" +
-//       "      catch(NoSuchMethodException nsme) { instance = null; }\n" +
+//       "      catch(UnsupportedOperationException nsme) { instance = null; }\n" +
 //       "      catch(InstantiationException ie) { instance = null; }\n" +
 //       "      catch(IllegalAccessException iae) { instance = null; }\n" +
 //       "      catch(java.lang.reflect.InvocationTargetException ite) {\n" +
@@ -496,7 +496,7 @@ public abstract class JavacCompiler implements CompilerInterface {
 //       "      java.lang.reflect.Constructor ctor = c.getConstructor(String[].class);\n" +
 //       "      instance = java.applet.Applet.class.cast(ctor.newInstance(new Object[] { args }));\n" +
 //       "    }\n" +
-//       "    catch(NoSuchMethodException nsme) { instance = null; }\n" +
+//       "    catch(UnsupportedOperationException nsme) { instance = null; }\n" +
 //       "    catch(InstantiationException ie) { instance = null; }\n" +
 //       "    catch(IllegalAccessException iae) { instance = null; }\n" +
 //       "    catch(java.lang.reflect.InvocationTargetException ite) {\n" +
@@ -525,7 +525,7 @@ public abstract class JavacCompiler implements CompilerInterface {
 //       "      m = null;\n" +
 //       "    }\n" +
 //       "  }\n" +
-//       "  catch (java.lang.NoSuchMethodException e) {\n" +
+//       "  catch (java.lang.UnsupportedOperationException e) {\n" +
 //       "    System.err.println(\"Error: This class does not have a static void main method accepting String[].\");\n" +
 //       "    m = null;\n" +
 //       "  }\n" +

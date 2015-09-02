@@ -1,5 +1,0 @@
-class Watson extends AFriend {
-  String getName() {
-    return "Watson";
-  }
-}

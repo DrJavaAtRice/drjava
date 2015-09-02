@@ -39,7 +39,7 @@ public class Interpreter {
     this(opt, new ImportContext(loader, opt), RuntimeBindings.EMPTY);
   }
   
-  public Option<Object> interpret(String code) throws InterpreterException {
+  public Option<Object> interpret(String code) {
     Iterable<Node> tree = parse(code);
     debug.logValue("Parse result", tree);
     TypeContext tcResult = typeCheck(tree);
@@ -58,7 +58,7 @@ public class Interpreter {
     return evalResult.second();
   }
   
-  private Iterable<Node> parse(String code) throws InterpreterException {
+  private Iterable<Node> parse(String code) {
     try {
       return new JavaCCParser(new StringReader(code), _opt).parseStream();
     }
@@ -67,12 +67,11 @@ public class Interpreter {
     }
   }
   
-  private TypeContext typeCheck(Iterable<Node> tree) throws InterpreterException {
-    try { return new StatementChecker(_typeContext, _opt).checkList(tree); }
+  private TypeContext typeCheck(Iterable<Node> tree) {
     catch (ExecutionError e) { throw new CheckerException(e); }
   }
   
-  private Pair<RuntimeBindings, Option<Object>> evaluate(Iterable<Node> tree) throws InterpreterException {
+  private Pair<RuntimeBindings, Option<Object>> evaluate(Iterable<Node> tree) {
     try {
       StatementEvaluator.Result r = new StatementEvaluator(_bindings, _opt).evaluateSequence(tree);
       return Pair.make(r.bindings(), r.value());

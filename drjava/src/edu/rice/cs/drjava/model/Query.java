@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2012, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2015, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -72,6 +72,7 @@ public interface Query {
       PrevEnclosingBrace o = (PrevEnclosingBrace) other;
       return o._pos == _pos && o._opening == _opening;
     }
+    public int hashCode() { return hash(getClass().hashCode(), _pos, _opening); }
   }
   
   public static class NextEnclosingBrace implements Query {
@@ -96,7 +97,7 @@ public interface Query {
   
   abstract static class CharArrayAndFlag implements Query {
     private final int _pos;
-    private final char[] _chars;
+    private final char[] _chars;  // immutable
     private final boolean _flag;
     
     public CharArrayAndFlag(int pos, char[] chars, boolean flag) { 
@@ -112,8 +113,7 @@ public interface Query {
     }
     
     public int hashCode() { 
-      int[] intArray = new int[] { getClass().hashCode(), _pos, (int)_chars[0], (int)_chars[_chars.length-1], (_flag ? 1 : 0) };
-      return hash(intArray); 
+      return hash(getClass().hashCode(), _pos ^ _chars[0], _chars.length, (_flag ? 1 : 0));
     }
   }
   
@@ -123,7 +123,7 @@ public interface Query {
   
   public static class PrevCharPos implements Query {
     private final int _pos;
-    private final char[] _whitespace;
+    private final char[] _whitespace; // immutable
     
     public PrevCharPos(int pos, final char[] whitespace) { 
       _pos = pos; 
@@ -133,36 +133,37 @@ public interface Query {
     public boolean equals(Object other) {
       if (other == null || other.getClass() != getClass()) return false;
       PrevCharPos o = (PrevCharPos) other;
-      return o._pos == _pos && Arrays.equals(o._whitespace, _whitespace);
+      return o._pos == _pos && (_whitespace.length == o._whitespace.length) && Arrays.equals(o._whitespace, _whitespace);
     }
     
     public int hashCode() { 
-      return hash(getClass().hashCode(), _pos, _whitespace[0], _whitespace[_whitespace.length-1]); 
+      return hash(getClass().hashCode(), _pos, _whitespace[0], _whitespace.length); 
     }
   }
   
   public static class IndentOfStmt implements Query {
     private final int _pos;
-    private final char[] _delims;
-    private final char[] _whitespace;
+    private final char[] _delims;      // non-empty
+    private final char[] _whitespace;  // non-empty
     
     public IndentOfStmt(int pos, char[] delims, char[] whitespace) { 
       _pos = pos;
       _delims = delims;
       _whitespace = whitespace;
+      if (_delims.length == 0 || _whitespace.length == 0) 
+        throw new IllegalArgumentException("delims and whitespace must be non-empty");
     }
     
     public boolean equals(Object other) {
       if (other == null || other.getClass() != getClass()) return false;
       IndentOfStmt o = (IndentOfStmt) other;
-      return o._pos == _pos && Arrays.equals(o._delims, _delims) && Arrays.equals(o._whitespace, _whitespace);
+      return (o._pos == _pos) && (_delims.length == o._delims.length) && (_whitespace.length == o._whitespace.length)
+        && Arrays.equals(o._delims, _delims) && Arrays.equals(o._whitespace, _whitespace);
     }
     
     public int hashCode() { 
-      int[] intArray = new int[] { getClass().hashCode(), _pos ^_delims[0], _delims[_delims.length-1], _whitespace[0], 
-        _whitespace[_whitespace.length-1] };
-      return hash(intArray); 
-    }
+      return hash(getClass().hashCode(), (_pos ^ _delims[0]) ^ _whitespace[0], _delims.length, _whitespace.length); 
+    }  
   }
   
   public static class CharOnLine implements Query {

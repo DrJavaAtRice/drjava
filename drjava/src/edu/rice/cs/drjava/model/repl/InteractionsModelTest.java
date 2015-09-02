@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2012, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2015, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -698,7 +698,7 @@ public final class InteractionsModelTest extends DrScalaTestCase {
     }
     
     /** Sets toEval field and simulates successful interpretation. */
-    protected void _interpret(String toEval) {
+    protected void _interpretCommand(String toEval) {
 //      System.err.println("interpret setting toEval to " + toEval);
       this.toEval = toEval; 
       replReturnedVoid(); // imitate completed call

@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2012, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2015, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -1131,6 +1131,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   public void setPageFormat(PageFormat format) { _pageFormat = format; }
   
+  /** throws UnsupportedOperationException */
   public CompilerModel getCompilerModel() {
     throw new UnsupportedOperationException("AbstractGlobalModel does not support compilation");
   }

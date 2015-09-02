@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2012, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2015, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -112,7 +112,7 @@ public class DrScala {
   private static final ArrayList<String> _filesToOpen = new ArrayList<String>();
   private static final ArrayList<String> _jvmArgs = new ArrayList<String>();
   
-  static volatile boolean _showDebugConsole = false;
+//  static volatile boolean _showDebugConsole = false;
   
   /** true if a new instance of DrScala should be started instead of
     * connecting to an already running instance. */
@@ -229,8 +229,8 @@ public class DrScala {
 //    return false; // failure
 //  }
   
-  /** @return true if the debug console should be enabled */
-  public static boolean getShowDebugConsole() { return _showDebugConsole; }
+//  /** @return true if the debug console should be enabled */
+//  public static boolean getShowDebugConsole() { return _showDebugConsole; }
   
   /** Starts running DrScala.
     * @param args Command line argument array
@@ -270,8 +270,8 @@ public class DrScala {
         
         LinkedList<String> classArgs = new LinkedList<String>();
         
-        // Add the parameters "-debugConsole" to classArgsList if _showDebugConsole is true
-        if (_showDebugConsole) { classArgs.addFirst("-debugConsole"); }
+//        // Add the parameters "-debugConsole" to classArgsList if _showDebugConsole is true
+//        if (_showDebugConsole) { classArgs.addFirst("-debugConsole"); }
         
         if (! _propertiesFile.equals(DEFAULT_PROPERTIES_FILE)) {
           // Placed in reversed order to get "-config filename"
@@ -417,7 +417,7 @@ public class DrScala {
         _jvmArgs.add(arg); 
       }
       
-      else if (arg.equals("-debugConsole")) _showDebugConsole = true;
+//      else if (arg.equals("-debugConsole")) _showDebugConsole = true;
       
       else if (arg.equals("-new")) _forceNewInstance = true;
       

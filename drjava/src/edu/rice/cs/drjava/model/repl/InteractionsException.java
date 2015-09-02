@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2012, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2015, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -36,11 +36,9 @@
 
 package edu.rice.cs.drjava.model.repl;
 
-/**
- * Exception to signify that something went wrong during an interaction.
- *
- * @version $Id: InteractionsException.java 5594 2012-06-21 11:23:40Z rcartwright $
- */
+/** Exception to signify that something went wrong during an interaction.
+  * @version $Id: InteractionsException.java 5594 2012-06-21 11:23:40Z rcartwright $
+  */
 public class InteractionsException extends RuntimeException {
   public InteractionsException(String s) { super(s); }
 }

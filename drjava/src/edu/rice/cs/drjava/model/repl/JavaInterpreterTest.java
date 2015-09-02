@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2012, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2015, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -37,6 +37,9 @@
 package edu.rice.cs.drjava.model.repl;
 
 import edu.rice.cs.drjava.model.repl.newjvm.*;
+import edu.rice.cs.drjava.model.repl.newjvm.EvaluatorException;
+import edu.rice.cs.drjava.model.repl.newjvm.Interpreter;
+import edu.rice.cs.drjava.model.repl.newjvm.InterpreterException;
 import edu.rice.cs.drjava.DrScalaTestCase;
 
 import edu.rice.cs.plt.tuple.Pair;
@@ -44,10 +47,10 @@ import edu.rice.cs.plt.tuple.OptionVisitor;
 import edu.rice.cs.plt.reflect.ReflectUtil;
 import edu.rice.cs.plt.text.TextUtil;
 
-import edu.rice.cs.dynamicjava.Options;
-import edu.rice.cs.dynamicjava.interpreter.InterpreterException;
-import edu.rice.cs.dynamicjava.interpreter.EvaluatorException;
-import edu.rice.cs.dynamicjava.interpreter.Interpreter;
+//import edu.rice.cs.dynamicjava.Options;
+//import edu.rice.cs.dynamicjava.interpreter.InterpreterException;  // moved to newjvm as shown above
+//import edu.rice.cs.dynamicjava.interpreter.EvaluatorException;  // moved to newjvm as shown above
+//import edu.rice.cs.dynamicjava.interpreter.Interpreter;
 // TODO: we should move these three classes/interfaces out of DynamicJava so we can flush dynamicjava.jar
 import edu.rice.cs.dynamicjava.symbol.*;
 //import edu.rice.cs.dynamicjava.symbol.type.Type;
@@ -76,37 +79,33 @@ public class JavaInterpreterTest extends DrScalaTestCase {
     super.setUp();
 //    _interpreter = new DynamicJavaAdapter(new ClassPathManager());
 //    testValue = false;
-    _classPathManager = new ClassPathManager(ReflectUtil.SYSTEM_CLASS_PATH);
-    _interpreterLoader = _classPathManager.makeClassLoader(null);
-    
-    // _interpreterOptions = Options.DEFAULT;
-    _interpreterOptions = new InteractionsPaneOptions();
-    _interpreter = new Interpreter(_interpreterOptions, _interpreterLoader);
+//    _classPathManager = new ClassPathManager(ReflectUtil.SYSTEM_CLASS_PATH);
+//    _interpreterLoader = _classPathManager.makeClassLoader(null);
+//    
+//    // _interpreterOptions = Options.DEFAULT;
+//    _interpreterOptions = new InteractionsPaneOptions();
+    _interpreter = new DrScalaInterpreter();
+//    _interpreter.addCP("Default CP", System.getProperty("java.class.path");
   }
 
   /** Asserts that the results of interpreting the first of each
     * Pair is equal to the second.
     * @param cases an array of Pairs
     */
-  private void tester(Pair<String,Object>[] cases) throws InterpreterException {
+  private void tester(Pair<String,Object>[] cases) {
     for (int i = 0; i < cases.length; i++) {
-      Object out = interpret(cases[i].first());
-      assertEquals(cases[i].first() + " interpretation wrong!", cases[i].second(), out);
+      String out = interpret(cases[i].first());
+      assertEquals(cases[i].first() + " interpretation wrong!", cases[i].second().toString(), out);
     }
   }
   
-  private Object interpret(String s) throws InterpreterException {
-    return _interpreter.interpret(s).apply(new OptionVisitor<Object, Object>() {
-      public Object forNone() { return null; }
-      public Object forSome(Object obj) { return obj; }
-    });
-  }
+  private String interpret(String s) { return _interpreter.interpret(s); }
 
   /** Make sure interpreting simple constants works.
     * Note that strings and characters are quoted.
     */
   @SuppressWarnings({"unchecked", "rawtypes"})
-  public void testConstants() throws InterpreterException {
+  public void testConstants() {
     Pair<String,Object>[] cases = new Pair[] {
       Pair.make("5", new Integer(5)),
         Pair.make("1356", new Integer(1356)),
@@ -123,7 +122,7 @@ public class JavaInterpreterTest extends DrScalaTestCase {
 
   /** Test simple operations with Booleans */
   @SuppressWarnings({"unchecked", "rawtypes"})
-  public void testBooleanOps() throws InterpreterException {
+  public void testBooleanOps() {
     Pair<String,Object>[] cases = new Pair[] {
       //and
       Pair.make("true && false", Boolean.FALSE), Pair.make("true && true",
@@ -145,7 +144,7 @@ public class JavaInterpreterTest extends DrScalaTestCase {
 
   /** Tests short circuiting */
   @SuppressWarnings({"unchecked", "rawtypes"})
-  public void testShortCircuit() throws InterpreterException {
+  public void testShortCircuit() {
     Pair<String,Object>[] cases = new Pair[] {
       Pair.make("false && (3 == 1/0)", Boolean.FALSE),
       Pair.make("true || (1/0 != 43)", Boolean.TRUE)
@@ -155,7 +154,7 @@ public class JavaInterpreterTest extends DrScalaTestCase {
 
   /** Tests integer operations. */
   @SuppressWarnings({"unchecked", "rawtypes"})
-  public void testIntegerOps() throws InterpreterException {
+  public void testIntegerOps() {
     Pair<String,Object>[] cases = new Pair[] {
       // plus
       Pair.make("5+6", new Integer(5 + 6)),
@@ -206,7 +205,7 @@ public class JavaInterpreterTest extends DrScalaTestCase {
    * Test double operations.
    */
   @SuppressWarnings({"unchecked", "rawtypes"})
-  public void testDoubleOps() throws InterpreterException {
+  public void testDoubleOps() {
     Pair<String,Object>[] cases = new Pair[] {
       // less than
       Pair.make("5.6 < 6.7", Boolean.valueOf(5.6 < 6.7)),
@@ -242,7 +241,7 @@ public class JavaInterpreterTest extends DrScalaTestCase {
    * Test string operations
    */
   @SuppressWarnings({"unchecked", "rawtypes"})
-  public void testStringOps() throws InterpreterException {
+  public void testStringOps() {
     Pair<String,Object>[] cases = new Pair[] {
       // concatenation
       Pair.make("\"yeah\" + \"and\"", "yeah" + "and"),
@@ -257,7 +256,7 @@ public class JavaInterpreterTest extends DrScalaTestCase {
    * Test character operations.
    */
   @SuppressWarnings({"unchecked", "rawtypes"})
-  public void testCharacterOps()  throws InterpreterException{
+  public void testCharacterOps() {
     Pair<String,Object>[] cases = new Pair[] {
       // equals
       Pair.make("'c' == 'c'", Boolean.valueOf('c' == 'c'))
@@ -270,7 +269,7 @@ public class JavaInterpreterTest extends DrScalaTestCase {
    * a result, while the variables themselves return a quoted result.
    */
   @SuppressWarnings({"unchecked", "rawtypes"})
-  public void testSemicolon() throws InterpreterException {
+  public void testSemicolon() {
     Pair<String,Object>[] cases = new Pair[] {
       Pair.make("'c' == 'c'", Boolean.valueOf('c' == 'c')),
       Pair.make("'c' == 'c';", null),
@@ -289,7 +288,7 @@ public class JavaInterpreterTest extends DrScalaTestCase {
    * Tests that null can be used in instanceof expressions.
    */
   @SuppressWarnings({"unchecked", "rawtypes"})
-  public void testNullInstanceOf() throws InterpreterException {
+  public void testNullInstanceOf() {
     Pair<String,Object>[] cases = new Pair[] {
       Pair.make("null instanceof Object", Boolean.valueOf(null instanceof Object)),
       Pair.make("null instanceof String", Boolean.valueOf(null instanceof String))
@@ -302,7 +301,7 @@ public class JavaInterpreterTest extends DrScalaTestCase {
    * of variable redefinition (tested by testVariableRedefinition).
    */
   @SuppressWarnings("unchecked")
-  public void testVariableDefinition() throws InterpreterException {
+  public void testVariableDefinition() {
     _interpreter.interpret("int a = 5;");
     _interpreter.interpret("int b = a;");
 
@@ -313,7 +312,7 @@ public class JavaInterpreterTest extends DrScalaTestCase {
    * Tests that variables are assigned default values.
    */
   @SuppressWarnings({"unchecked", "rawtypes"})
-  public void testVariableDefaultValues() throws InterpreterException {
+  public void testVariableDefaultValues() {
     _interpreter.interpret("byte b");
     _interpreter.interpret("short s");
     _interpreter.interpret("int i");
@@ -348,7 +347,7 @@ public class JavaInterpreterTest extends DrScalaTestCase {
    * sure the evaluation doesn't return errors without actually evaluating which
    * may have side-effects.
    */
-  public void testVariableRedefinition() throws InterpreterException {
+  public void testVariableRedefinition() {
     // test error in NameVisitor
     try {
       _interpreter.interpret("String s = abc;");
@@ -400,7 +399,7 @@ public class JavaInterpreterTest extends DrScalaTestCase {
   }
 
   /** Ensure that the interpreter rejects assignments where the right type is not a subclass of the left type. */
-  public void testIncompatibleAssignment() throws InterpreterException {
+  public void testIncompatibleAssignment() {
     try {
       _interpreter.interpret("Integer i = new Object()");
       fail("incompatible assignment should have failed");
@@ -494,7 +493,7 @@ public class JavaInterpreterTest extends DrScalaTestCase {
 //  }
 
   /** Test that arrays initializers are accepted. */
-  public void testInitializeArrays() throws InterpreterException {
+  public void testInitializeArrays() {
     try {
       _interpreter.interpret("int i[] = new int[]{1,2,3};");
       _interpreter.interpret("int j[][] = new int[][]{{1}, {2,3}};");
@@ -506,7 +505,7 @@ public class JavaInterpreterTest extends DrScalaTestCase {
   }
 
   /** Test that array cloning works. */
-  public void testArrayCloning() throws InterpreterException {
+  public void testArrayCloning() {
     try { _interpreter.interpret("new int[]{0}.clone()"); }
     catch(RuntimeException e) { fail("Array cloning failed."); }
   }
@@ -524,13 +523,13 @@ public class JavaInterpreterTest extends DrScalaTestCase {
    * Tests that a call to user-defined void method returns NO_RESULT, instead of null.
    * This test does not pass, it is currently broken.
    */
-  public void testUserDefinedVoidMethod() throws InterpreterException {
+  public void testUserDefinedVoidMethod() {
      Object result = interpret("public void foo() {}; foo()");
      assertSame("Should have returned NO_RESULT.", null, result);
    }
   
   /** Test throwing null, for bug 3008828. */
-  public void testThrowNull() throws InterpreterException {
+  public void testThrowNull() {
     try {
       _interpreter.interpret("throw null");
       fail("Should have thrown an EvaluatorException with a NullPointerException as cause.");

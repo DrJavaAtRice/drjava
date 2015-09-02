@@ -8,36 +8,35 @@ import java.util.HashSet;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
-import edu.rice.cs.dynamicjava.interpreter.RuntimeBindings;
-import edu.rice.cs.dynamicjava.interpreter.TypeContext;
-import edu.rice.cs.dynamicjava.interpreter.InterpreterException;
-import edu.rice.cs.dynamicjava.Options;
+//import edu.rice.cs.dynamicjava.interpreter.RuntimeBindings;
+//import edu.rice.cs.dynamicjava.interpreter.TypeContext;
+//import edu.rice.cs.dynamicjava.interpreter.InterpreterException;  // moved to this package
+//import edu.rice.cs.dynamicjava.Options;
 import edu.rice.cs.util.UnexpectedException;
 
 import edu.rice.cs.util.swing.Utilities;
 
-/**
- * Class for providing interpretation services in the Interactions pane. Code
- * submitted for interpretation (from the Interactions pane) is submitted to
- * a "DrScalaILoop" instance, which interprets the code and returns a String result.
- * 
- * Since stderr and stdout are redirected to point to the Interactions pane and
- * the DrJava console, "print" statements called from within ILoop, in the course
- * of interpretation, are routed correctly.  As such, all content *returned* from
- * ILoop can still be conveniently differentiated from content printed to the 
- * console.
- * 
- * IO between calls from the main slave JVM thread and ILoop, which runs in its 
- * own thread, is accomplished using a bounded buffer (ArrayBlockingQueue) in each 
- * direction.  Each line of code submitted for interpretation is added to the input 
- * queue, after which the output queue is immediately polled for ILoop's return 
- * content.
- *
- * TODO: 
- *       1)  error handling (I'm basically just printing the stack traces of any 
- *       exceptions caught, but we should probably be trying to restart calls in 
- *       some places -- particularly any interrupted blocking calls on blocking queues)
- */
+/** Class for providing interpretation services in the Interactions pane. Code
+  * submitted for interpretation (from the Interactions pane) is submitted to
+  * a "DrScalaILoop" instance, which interprets the code and returns a String result.
+  * 
+  * Since stderr and stdout are redirected to point to the Interactions pane and
+  * the DrJava console, "print" statements called from within ILoop, in the course
+  * of interpretation, are routed correctly.  As such, all content *returned* from
+  * ILoop can still be conveniently differentiated from content printed to the 
+  * console.
+  * 
+  * IO between calls from the main slave JVM thread and ILoop, which runs in its 
+  * own thread, is accomplished using a bounded buffer (ArrayBlockingQueue) in each 
+  * direction.  Each line of code submitted for interpretation is added to the input 
+  * queue, after which the output queue is immediately polled for ILoop's return 
+  * content.
+  *
+  * TODO: 
+  *       1)  error handling (I'm basically just printing the stack traces of any 
+  *       exceptions caught, but we should probably be trying to restart calls in 
+  *       some places -- particularly any interrupted blocking calls on blocking queues)
+  */
 public class DrScalaInterpreter implements Interpreter {
 
   /* producer: slave JVM's main thread sends code from the interactions pane for 
@@ -52,14 +51,13 @@ public class DrScalaInterpreter implements Interpreter {
    */
   final ArrayBlockingQueue<String> outputStrings = new ArrayBlockingQueue<String>(100);
 
-  /**
-   * Used to catch scala interpreter commands.
-   *
-   * The Scala ILoop interpreter accepts colon command for a variety
-   * of functions, such as ":paste", ":run", and ":quit".  The ":quit" command
-   * can kill the interpreter, thus leaving the interactions pane unusable.
-   * This regex is used to catch those colon commands so they can be ignored.
-   */
+  /** Used to catch scala interpreter commands.
+    *
+    * The Scala ILoop interpreter accepts colon command for a variety
+    * of functions, such as ":paste", ":run", and ":quit".  The ":quit" command
+    * can kill the interpreter, thus leaving the interactions pane unusable.
+    * This regex is used to catch those colon commands so they can be ignored.
+    */
   final private Pattern scalaColonCmd = Pattern.compile("^\\s*:.*$");
 
   /* Used to record whether the interpreter has been initialized */
@@ -197,12 +195,11 @@ public class DrScalaInterpreter implements Interpreter {
     if (! Utilities.TEST_MODE) _init();
   }
 
-  /**
-   * Public interface for the interpretation; this is separated from the internal 
-   * implementation ('_interpret') because 'colon commands' are passed to that
-   * method in order to augment the REPL classpath.
-   */
-  public String interpret(String input) throws InterpreterException {
+  /** Public interface for the interpretation; this is separated from the internal 
+    * implementation ('_interpret') because 'colon commands' are passed to that
+    * method in order to augment the REPL classpath.
+    */
+  public String interpret(String input) {
     if (input.equals(":test-reset")){
       this.reset();
       return "";

@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2012, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2015, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -166,8 +166,9 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     assertTrue("class file for file1 exists", new File(dir1, "DrScalaTestFoo.class").exists());
 
     // example format of REPL result: res0: java.lang.String = DrScalaTestFoo
-    String pattern = "\\s*res[0-9]+: java\\.lang\\.String = DrScalaTestFoo\\s*";
+    String pattern = "\\s*res[0-9]+: String = DrScalaTestFoo\\s*";
     String result = interpret("new DrScalaTestFoo().getClass().getName()");
+    System.err.println("result = '" + result + "'");
     assertTrue("interactions result matches pattern", result.matches(pattern));
     
     // Add directory 1 to extra classpath and close doc1
@@ -509,12 +510,12 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     _model.resetInteractionsClassPath();
     
     // example format of REPL result: res0: java.lang.String = DrScalaTestFoo
-    String pattern = "\\s*res[0-9]+: java\\.lang\\.String = DrScalaTestFoo\\s*";
+    String pattern = "\\s*res[0-9]+: String = DrScalaTestFoo\\s*";
     result = interpret("new DrScalaTestFoo().getClass().getName()");
 
     // Now it should be on the classpath
     assertTrue("interactions result matches pattern", result.matches(pattern));
-
+    System.err.println("result = '" + result + "'");
     // Rename directory back to clean up
     tempDir = makeCanonical(new File(tempPath + "a"));
     tempDir.renameTo(makeCanonical(new File(tempPath)));

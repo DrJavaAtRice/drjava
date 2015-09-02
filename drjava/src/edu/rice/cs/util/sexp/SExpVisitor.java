@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2012, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2015, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -48,10 +48,10 @@ public interface SExpVisitor<Ret> {
   
   public Ret forCons(Cons c);
   
-  public Ret forBoolAtom(BoolAtom b);
+  public Ret forBoolAtom(Atom.BoolAtom b);
   
-  public Ret forNumberAtom(NumberAtom n);
+  public Ret forNumberAtom(Atom.NumberAtom n);
   
-  public Ret forTextAtom(TextAtom t);
+  public Ret forTextAtom(Atom.TextAtom t);
   
 }

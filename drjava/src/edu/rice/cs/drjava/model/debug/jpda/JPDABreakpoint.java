@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2012, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2015, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -57,7 +57,8 @@ import com.sun.jdi.request.*;
   */
 public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> implements Breakpoint {
   
-  private volatile Position _position;
+  /* Mutable fields; updated as corresponding breakpoint moves. */
+  private volatile Position _position;  
   private volatile Position _startPos;
   private volatile Position _endPos;
   
@@ -215,17 +216,19 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
     return start1 - start2;
   }
   
+  /* WARNING: overriding hashCode to "agree" with equals is disastrous because Breakpoint offsets change!  Hashcode must
+   * be inconsisent with equals to produce an invariant value.  Hence, you must use IdentityHashMap instead of HashMap
+   * or Hashtable. 
+   */
+  public int hashCode() { 
+    throw new UnsupportedOperationException("JPDA Breakpoint is mutable; hashing on object contents is perilous.");
+  }
+  
   /** Returns the line number this DebugAction occurs on */
   public int getLineNumber() {
     update();
     return _lineNumber;
   }
-  
-  /* WARNING: overriding hashCode to "agree" with equals is disastrous because Breakpoint offsets change!  Hashcode must
-   * be inconsisent with equals to produce an invariant value.  Hence, you must use IdentityHashMap instead of HashMap
-   * or Hashtable. 
-   */
-//  public int hashCode() { return ObjectUtil.hash(_doc, getStartOffset(), getEndOffset()); }
   
   /** Enable/disable the breakpoint. */
   public void setEnabled(boolean isEnabled) {

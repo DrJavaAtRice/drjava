@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2012, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2015, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -229,7 +229,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private volatile JMenu _editMenu;
   private volatile JMenu _toolsMenu;
   private volatile JMenu _projectMenu;
-  private volatile JMenu _languageLevelMenu;
   private volatile JMenu _helpMenu;
   
   private volatile JMenu _debugMenu;
@@ -2126,10 +2125,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public void actionPerformed(ActionEvent ae) { _model.resetConsole(); }
   };
   
-  /** Shows the DebugConsole. */
-  private final Action _showDebugConsoleAction = new AbstractAction("Show DrJava Debug Console") {
-    public void actionPerformed(ActionEvent e) { DrScalaRoot.showDrJavaDebugConsole(MainFrame.this); }
-  };
+//  /** Shows the DebugConsole. */
+//  private final Action _showDebugConsoleAction = new AbstractAction("Show DrJava Debug Console") {
+//    public void actionPerformed(ActionEvent e) { DrScalaRoot.showDrJavaDebugConsole(MainFrame.this); }
+//  };
   
   /** Resets the Interactions pane. */
   private final Action _resetInteractionsAction = new AbstractAction("Reset Interactions") {
@@ -3262,13 +3261,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _projectMenu = _setUpProjectMenu(mask, true);
       _debugMenu = null;
       if (_showDebugger) _debugMenu = _setUpDebugMenu(mask, true);
-//      _languageLevelMenu = _setUpLanguageLevelMenu(mask, true);
       _helpMenu = _setUpHelpMenu(mask, true);
       
       // initialize menu bar and actions
       _setUpActions();
+      /* Omit _debugMenu until debugging actions are implemented correctly */
       _setUpMenuBar(_menuBar,
-                    _fileMenu, _editMenu, _toolsMenu, _projectMenu, _debugMenu, /* _languageLevelMenu, */ _helpMenu);
+                    _fileMenu, _editMenu, _toolsMenu, _projectMenu, /* _debugMenu, */ _helpMenu);
       setJMenuBar(_menuBar);
       
       //    _setUpDocumentSelector();
@@ -5949,7 +5948,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       case JFileChooser.APPROVE_OPTION:
         File chosen = fc.getSelectedFile();
         if (chosen != null) {
-          //append the appropriate language level extension if not written by user
+          //append the appropriate language extension if not written by user
           if (addSourceFileExtension) {
             if (chosen.getName().indexOf(".") == -1) {
               // no file extension
@@ -6257,8 +6256,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _setUpAction(_saveConsoleCopyAction, "Save Copy of Console...",
                  "SaveAs", "Save copy of console contents to a file");
     _setUpAction(_clearConsoleAction, "Clear Console", "Clear all text in the Console Pane");
-    _setUpAction(_showDebugConsoleAction, "Show DrJava Debug Console", "<html>Show a console for debugging DrJava<br>" +
-                 "(with \"mainFrame\", \"model\", and \"config\" variables defined)</html>");
+//    _setUpAction(_showDebugConsoleAction, "Show DrJava Debug Console", "<html>Show a console for debugging DrJava<br>" +
+//                 "(with \"mainFrame\", \"model\", and \"config\" variables defined)</html>");
     
     if (_model.getDebugger().isAvailable()) {
       _setUpAction(_toggleDebuggerAction, "Debug Mode", "Enable or disable DrJava's debugger");
@@ -6340,24 +6339,24 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     int mask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
     _setUpMenuBar(menuBar,
                   _setUpFileMenu(mask, false), _setUpEditMenu(mask, false), _setUpToolsMenu(mask, false),
-                  _setUpProjectMenu(mask, false), _showDebugger?_setUpDebugMenu(mask, false):null,
-                  /* _setUpLanguageLevelMenu(mask, false), */ _setUpHelpMenu(mask, false));
+                  _setUpProjectMenu(mask, false), /* _showDebugger ? _setUpDebugMenu(mask, false) : null, */
+                  _setUpHelpMenu(mask, false));
   }
 
+  /* Defining a method that takes an argument for each menu is very rigid! */
   void _setUpMenuBar(JMenuBar menuBar,
                      JMenu fileMenu,
                      JMenu editMenu,
                      JMenu toolsMenu,
                      JMenu projectMenu,
-                     JMenu debugMenu,
-                    /* JMenu languageLevelMenu, */
+                  /*   JMenu debugMenu, */   
                      JMenu helpMenu) {
     menuBar.add(fileMenu);
     menuBar.add(editMenu);
     menuBar.add(toolsMenu);
     menuBar.add(projectMenu);
-    if (_showDebugger && (debugMenu!=null)) menuBar.add(debugMenu);
-//    menuBar.add(languageLevelMenu);
+    /* Omit until debugger is specified and implemented correctly. */
+//    if (_showDebugger && (debugMenu!=null)) menuBar.add(debugMenu);
     menuBar.add(helpMenu);
     // Plastic-specific style hints
     if(Utilities.isPlasticLaf()) {
@@ -6424,7 +6423,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     PlatformFactory.ONLY.setMnemonic(fileMenu,KeyEvent.VK_F);
     // New, open
     _addMenuItem(fileMenu, _newAction, KEY_NEW_FILE, updateKeyboardManager);
-    _addMenuItem(fileMenu, _newClassAction, KEY_NEW_CLASS_FILE, updateKeyboardManager);
+    /* Omit until new Scala class is suppported. */
+//    _addMenuItem(fileMenu, _newClassAction, KEY_NEW_CLASS_FILE, updateKeyboardManager);
 
     _addMenuItem(fileMenu, _newJUnitTestAction, KEY_NEW_TEST, updateKeyboardManager);
     _addMenuItem(fileMenu, _openAction, KEY_OPEN_FILE, updateKeyboardManager);
@@ -6593,7 +6593,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     // Run
     final int runActionIndex = toolsMenu.getItemCount();
     _addMenuItem(toolsMenu, _runAction, KEY_RUN, updateKeyboardManager);
-    _addMenuItem(toolsMenu, _runAppletAction, KEY_RUN_APPLET, updateKeyboardManager);
+    /* Omit this menu item until Scala applets are supported. */
+//    _addMenuItem(toolsMenu, _runAppletAction, KEY_RUN_APPLET, updateKeyboardManager);
     _addMenuItem(toolsMenu, _resetInteractionsAction, KEY_RESET_INTERACTIONS, updateKeyboardManager);
     toolsMenu.addSeparator();
     
@@ -6603,8 +6604,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _addMenuItem(scaladocMenu, _scaladocCurrentAction, KEY_SCALADOC_CURRENT, updateKeyboardManager);
     scaladocMenu.addSeparator();
     _addMenuItem(scaladocMenu, _openScaladocAction, KEY_OPEN_SCALADOC, updateKeyboardManager);
-    _addMenuItem(scaladocMenu, _openScaladocUnderCursorAction, KEY_OPEN_SCALADOC_UNDER_CURSOR, updateKeyboardManager);    
-    toolsMenu.add(scaladocMenu);
+    _addMenuItem(scaladocMenu, _openScaladocUnderCursorAction, KEY_OPEN_SCALADOC_UNDER_CURSOR, updateKeyboardManager);
+    /* Omit scaladoc menu until the actions are implemented correctly. */
+//    toolsMenu.add(scaladocMenu);
     
     final JMenu historyMenu = new JMenu("History");
     _addMenuItem(historyMenu, _executeHistoryAction, KEY_EXECUTE_HISTORY, updateKeyboardManager);
@@ -6624,9 +6626,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _addMenuItem(interMenu, _saveConsoleCopyAction, KEY_SAVE_CONSOLE_COPY, updateKeyboardManager);
     _addMenuItem(interMenu, _printConsoleAction, KEY_PRINT_CONSOLE, updateKeyboardManager);
     _addMenuItem(interMenu, _closeSystemInAction, KEY_CLOSE_SYSTEM_IN, updateKeyboardManager);
-    if (DrScala.getConfig().getSetting(SHOW_DEBUG_CONSOLE).booleanValue()) {
-      toolsMenu.add(_showDebugConsoleAction);
-    }
+    /* Disabled in DrScala. */
+//    if (DrScala.getConfig().getSetting(SHOW_DEBUG_CONSOLE).booleanValue()) {
+//      toolsMenu.add(_showDebugConsoleAction);
+//    }
     toolsMenu.add(interMenu);
     
     final JMenu extMenu = new JMenu("External Processes");
@@ -6693,7 +6696,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     final JMenu advancedMenu = new JMenu("Advanced");
     _addMenuItem(advancedMenu, _generateCustomDrJavaJarAction, KEY_GENERATE_CUSTOM_DRSCALA, updateKeyboardManager);
     _addMenuItem(advancedMenu, _newDrJavaInstanceAction, KEY_NEW_DRSCALA_INSTANCE, updateKeyboardManager);
-    toolsMenu.add(advancedMenu);
+    /* Omit Advanced menu until some utility is demonstrated. */
+//    toolsMenu.add(advancedMenu);
 
     toolsMenu.addSeparator();    
     
@@ -6776,7 +6780,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     tempDebuggerEnabledMenuItem.setSelected(false);
     _setMenuShortcut(tempDebuggerEnabledMenuItem, _toggleDebuggerAction, KEY_DEBUG_MODE_TOGGLE, updateKeyboardManager);
     debugMenu.add(tempDebuggerEnabledMenuItem);
-    if (_debuggerEnabledMenuItem==null) {
+    if (_debuggerEnabledMenuItem == null) {
       // assign the first time
       _debuggerEnabledMenuItem = tempDebuggerEnabledMenuItem;
     }
@@ -6897,11 +6901,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     JMenu helpMenu = new JMenu("Help");
     PlatformFactory.ONLY.setMnemonic(helpMenu,KeyEvent.VK_H);
     _addMenuItem(helpMenu, _helpAction, KEY_HELP, updateKeyboardManager);
-    _addMenuItem(helpMenu, _quickStartAction, KEY_QUICKSTART, updateKeyboardManager);
+//    _addMenuItem(helpMenu, _quickStartAction, KEY_QUICKSTART, updateKeyboardManager);
     helpMenu.addSeparator();
     _addMenuItem(helpMenu, _aboutAction, KEY_ABOUT, updateKeyboardManager);
 //    _addMenuItem(helpMenu, _drjavaSurveyAction, KEY_DRSCALA_SURVEY, updateKeyboardManager);
-    _addMenuItem(helpMenu, _checkNewVersionAction, KEY_CHECK_NEW_VERSION, updateKeyboardManager);
+//    _addMenuItem(helpMenu, _checkNewVersionAction, KEY_CHECK_NEW_VERSION, updateKeyboardManager);
     _addMenuItem(helpMenu, _errorsAction, KEY_DRSCALA_ERRORS, updateKeyboardManager);
     helpMenu.addSeparator();
     _addMenuItem(helpMenu, _forceQuitAction, KEY_FORCE_QUIT, updateKeyboardManager);
@@ -7016,7 +7020,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     _toolBar.add(_runButton = _createToolbarButton(_runAction));
     _toolBar.add(_junitButton = _createToolbarButton(_junitAllAction));
-    _toolBar.add(_createToolbarButton(_scaladocAllAction));
+    /* Omit until action is correctly implemented. */
+//    _toolBar.add(_createToolbarButton(_scaladocAllAction));
     
     // DrScala Errors
     _toolBar.addSeparator();
@@ -7593,9 +7598,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
               m.add(Utilities.createDelegateAction("Print File Preview...", _printDefDocPreviewAction));
               m.add(Utilities.createDelegateAction("Compile File", _compileAction));
               m.add(Utilities.createDelegateAction("Test File", _junitAction));
-              m.add(Utilities.createDelegateAction("Preview Scaladoc for File", _scaladocCurrentAction));
+              /* Omit until the action in correctly implemented. */
+//              m.add(Utilities.createDelegateAction("Preview Scaladoc for File", _scaladocCurrentAction));
               m.add(Utilities.createDelegateAction("Run File", _runAction));
-              m.add(Utilities.createDelegateAction("Run File as Applet", _runAppletAction));
+              /* Omit until the action is sensibly defined and correctly implemented. */
+//              m.add(Utilities.createDelegateAction("Run File as Applet", _runAppletAction));
             }
             else if (docSelectedCount>1) {
               m.add(Utilities.createDelegateAction("Save All Files ("+docSelectedCount+")", _saveAction));
