@@ -1710,14 +1710,15 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     int createJarFlags = getCreateJarFlags();
     if (createJarFlags != 0) builder.setCreateJarFlags (createJarFlags);
     
+    /* Debugger is deactivated in DrScala */
     // add breakpoints and watches
-    ArrayList<DebugBreakpointData> l = new ArrayList<DebugBreakpointData>();  
-    for (OpenDefinitionsDocument odd: _breakpointManager.getDocuments()) {
-      for(Breakpoint bp: _breakpointManager.getRegions(odd)) { l.add(bp); }
-    }
-    builder.setBreakpoints(l);
-    try { builder.setWatches(getDebugger().getWatches()); }
-    catch(DebugException de) { /* ignore, just don't store watches */ }
+//    ArrayList<DebugBreakpointData> l = new ArrayList<DebugBreakpointData>();  
+//    for (OpenDefinitionsDocument odd: _breakpointManager.getDocuments()) {
+//      for(Breakpoint bp: _breakpointManager.getRegions(odd)) { l.add(bp); }
+//    }
+//    builder.setBreakpoints(l);
+//    try { builder.setWatches(getDebugger().getWatches()); }
+//    catch(DebugException de) { /* ignore, just don't store watches */ }
     
     // add bookmarks
     builder.setBookmarks(_bookmarkManager.getFileRegions());
@@ -1938,31 +1939,33 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       public File[] getFiles() { return filesToOpen; }
     });
     
-    /* Files are opened synchronously by the preceding notification.  If this process is made asynchronous, we need to 
-     * wait here (using the projectLoaded CompletionMonitor above (commented out). */
-    // set breakpoints
-    for (DebugBreakpointData dbd: ir.getBreakpoints()) {
-      try {
-        File f = dbd.getFile();
-        if (! modifiedFiles.contains(f)) {
-          int lnr = dbd.getLineNumber();
-          OpenDefinitionsDocument odd = getDocumentForFile(f);
-          getDebugger().toggleBreakpoint(odd, odd._getOffset(lnr), dbd.isEnabled());
-        }
-      }
-      catch(DebugException de) { /* ignore, just don't add breakpoint */ }
-    }
+    /* Debugger is deactivated in DrScala */
+//    /* Files are opened synchronously by the preceding notification.  If this process is made asynchronous, we need to 
+//     * wait here (using the projectLoaded CompletionMonitor above (commented out). */
+//    // set breakpoints
+//    for (DebugBreakpointData dbd: ir.getBreakpoints()) {
+//      try {
+//        File f = dbd.getFile();
+//        if (! modifiedFiles.contains(f)) {
+//          int lnr = dbd.getLineNumber();
+//          OpenDefinitionsDocument odd = getDocumentForFile(f);
+//          getDebugger().toggleBreakpoint(odd, odd._getOffset(lnr), dbd.isEnabled());
+//        }
+//      }
+//      catch(DebugException de) { /* ignore, just don't add breakpoint */ }
+//    }
     
     //Set active document from project file
     if (active != null) setActiveDocument(getDocumentForFile(active));
     
-    // set watches
-    try { getDebugger().removeAllWatches(); }
-    catch(DebugException de) { /* ignore, just don't remove old watches */ }
-    for (DebugWatchData dwd: ir.getWatches()) {
-      try { getDebugger().addWatch( dwd.getName()); }
-      catch(DebugException de) { /* ignore, just don't add watch */ }
-    }
+    /* Debugger is deactivated in DrScala */
+//    // set watches
+//    try { getDebugger().removeAllWatches(); }
+//    catch(DebugException de) { /* ignore, just don't remove old watches */ }
+//    for (DebugWatchData dwd: ir.getWatches()) {
+//      try { getDebugger().addWatch( dwd.getName()); }
+//      catch(DebugException de) { /* ignore, just don't add watch */ }
+//    }
     
     // set bookmarks
     for (FileRegion bm: ir.getBookmarks()) {
@@ -2528,10 +2531,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** Prints to the DrScala console as an echo of System.in.  This method can safely be run outside the event thread. */
   public void systemInEcho(final String s) { _docAppend(_consoleDoc, s, ConsoleDocument.SYSTEM_IN_STYLE); }
   
-  /** throws UnsupportedOperationException */
-  public void printDebugMessage(String s) {
-    throw new UnsupportedOperationException("AbstractGlobalModel does not support debugging");
-  }
+  /* Debugger deactivated in DrScala */ 
+//  /** throws UnsupportedOperationException */
+//  public void printDebugMessage(String s) {
+//    throw new UnsupportedOperationException("AbstractGlobalModel does not support debugging");
+//  }
   
   /** throws new UnsupportedOperationException */
   public Iterable<File> getInteractionsClassPath() {
@@ -2630,8 +2634,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       File f = _getSourceFileFromPath(fileName, s);
       if (f != null) return f;
     }
-    Vector<File> sourcepath = DrScala.getConfig().getSetting(OptionConstants.DEBUG_SOURCEPATH);
-    return findFileInPaths(fileName, sourcepath);
+    
+    /* Debugger deactivated in DrScala */ 
+//    Vector<File> sourcepath = DrScala.getConfig().getSetting(OptionConstants.DEBUG_SOURCEPATH);
+//    return findFileInPaths(fileName, sourcepath);
+    return FileOps.NULL_FILE;
   }
   
   /** Searches for a file with the given name on the provided paths. Returns NULL_FILE if the file is not found.

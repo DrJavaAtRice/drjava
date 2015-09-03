@@ -360,9 +360,10 @@ public class DummyGlobalModel implements GlobalModel {
     throw new UnsupportedOperationException("Tried to call getHistory on a Dummy");
   }
   
-  public void printDebugMessage(String s) {
-    throw new UnsupportedOperationException("Tried to call printDebugMessage on a Dummy");
-  }
+  /* Debugger deactivated in DrScala */
+//  public void printDebugMessage(String s) {
+//    throw new UnsupportedOperationException("Tried to call printDebugMessage on a Dummy");
+//  }
   
   public int getDebugPort() throws IOException {
     throw new UnsupportedOperationException("Tried to call getDebugPort on a Dummy");

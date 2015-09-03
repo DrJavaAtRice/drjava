@@ -34,22 +34,24 @@
  * 
  * END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model.debug.jpda;
+/* Debugger deactivated in DrScala */ 
 
-import edu.rice.cs.drjava.model.debug.DebugTestCase;
-
-/** A DebugTestCase whose debugger is a {@code JPDADebugger}.
- *  @version $Id: JPDADebugTestCase.java 5594 2012-06-21 11:23:40Z rcartwright $
- */
-public abstract class JPDADebugTestCase extends DebugTestCase {
-
-  protected volatile JPDADebugger _debugger;
-
-    /* Generates ClassCastException.  JPDADebugger is being loaded by two different class loaders. */
-///  public void setUp() throws Exception {
-//    super.setUp();
-//    // This cast will fail if the debugger has an unexpected type
-//    _debugger = (JPDADebugger) super._debugger;
-//  }
-
-}
+//package edu.rice.cs.drjava.model.debug.jpda;
+//
+//import edu.rice.cs.drjava.model.debug.DebugTestCase;
+//
+///** A DebugTestCase whose debugger is a {@code JPDADebugger}.
+// *  @version $Id: JPDADebugTestCase.java 5594 2012-06-21 11:23:40Z rcartwright $
+// */
+//public abstract class JPDADebugTestCase extends DebugTestCase {
+//
+//  protected volatile JPDADebugger _debugger;
+//
+//    /* Generates ClassCastException.  JPDADebugger is being loaded by two different class loaders. */
+/////  public void setUp() throws Exception {
+////    super.setUp();
+////    // This cast will fail if the debugger has an unexpected type
+////    _debugger = (JPDADebugger) super._debugger;
+////  }
+//
+//}

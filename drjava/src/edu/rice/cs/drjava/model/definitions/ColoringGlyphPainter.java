@@ -69,6 +69,8 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
   public static Color INTERACTIONS_SYSTEM_OUT_COLOR = DrScala.getConfig().getSetting(SYSTEM_OUT_COLOR);
   //Renamed as to avoid confusion with the one in option constants
   public static Color ERROR_COLOR = DrScala.getConfig().getSetting(INTERACTIONS_ERROR_COLOR);
+  
+  /* Used in non-debug code */
   public static Color DEBUGGER_COLOR = DrScala.getConfig().getSetting(DEBUG_MESSAGE_COLOR);
   
   private boolean _listenersAttached;
@@ -349,6 +351,9 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
     DrScala.getConfig().addOptionListener( OptionConstants.SYSTEM_IN_COLOR, col);
     DrScala.getConfig().addOptionListener( OptionConstants.SYSTEM_OUT_COLOR, col);
     DrScala.getConfig().addOptionListener( OptionConstants.INTERACTIONS_ERROR_COLOR, col);
+    
+
+    /* Used in non-debug code */
     DrScala.getConfig().addOptionListener( OptionConstants.DEBUG_MESSAGE_COLOR, col);
     
     // The listeners that were added in the above lines need to be removed from
@@ -371,6 +376,8 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
           DrScala.getConfig().removeOptionListener( OptionConstants.SYSTEM_IN_COLOR, col);
           DrScala.getConfig().removeOptionListener( OptionConstants.SYSTEM_OUT_COLOR, col);
           DrScala.getConfig().removeOptionListener( OptionConstants.INTERACTIONS_ERROR_COLOR, col);
+          
+          /* Used in non-debug code. */
           DrScala.getConfig().removeOptionListener( OptionConstants.DEBUG_MESSAGE_COLOR, col); 
         }
       });
@@ -393,8 +400,10 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
     INTERACTIONS_SYSTEM_IN_COLOR = DrScala.getConfig().getSetting(SYSTEM_IN_COLOR);
     INTERACTIONS_SYSTEM_OUT_COLOR = DrScala.getConfig().getSetting(SYSTEM_OUT_COLOR);
     ERROR_COLOR = DrScala.getConfig().getSetting(INTERACTIONS_ERROR_COLOR);
-    DEBUGGER_COLOR = DrScala.getConfig().getSetting(DEBUG_MESSAGE_COLOR);
     
+    /* Used in non-debug code */
+    DEBUGGER_COLOR = DrScala.getConfig().getSetting(DEBUG_MESSAGE_COLOR);
+
     EventQueue.invokeLater(_lambdaRepaint);
   }
   

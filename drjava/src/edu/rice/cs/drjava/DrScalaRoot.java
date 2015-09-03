@@ -71,9 +71,11 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 /** Main class for DrJava.
   * @version $Id: DrScalaRoot.java 5668 2012-08-15 04:58:30Z rcartwright $
   */
-public class DrScalaRoot {  
-  /** Class to probe to see if the debugger is available */
-  public static final String TEST_DEBUGGER_CLASS = "com.sun.jdi.Bootstrap";
+public class DrScalaRoot { 
+  
+  /* Debugger deactivated in DrScala */
+//  /** Class to probe to see if the debugger is available */
+//  public static final String TEST_DEBUGGER_CLASS = "com.sun.jdi.Bootstrap";
   
   public static final String PLASTIC_THEMES_PACKAGE = "com.jgoodies.looks.plastic.theme";
   

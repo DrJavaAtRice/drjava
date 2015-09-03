@@ -401,7 +401,7 @@ public class InteractionsController extends AbstractConsoleController {
       }
     });
     
-    // Debug
+    // Debug (used in non-debug code!)
     _debugStyle.addAttributes(_defaultStyle);
     _debugStyle.addAttribute(StyleConstants.Foreground, 
                              DrScala.getConfig().getSetting(OptionConstants.DEBUG_MESSAGE_COLOR));

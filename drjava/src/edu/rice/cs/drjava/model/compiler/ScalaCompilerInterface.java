@@ -38,7 +38,7 @@ package edu.rice.cs.drjava.model.compiler;
 
 import java.io.File;
 
-/* This interfaced has been DEPRECATED. The output dir in flat file mode is the common source root.  A set of files
+/* This interface has been DEPRECATED. The output dir in flat file mode is the common source root.  A set of files
  * without a common root cannot be compiled in flat file mode. */
 
 /** An interface extending CompilerInterface; the new methods getOutputDir and setOutputDir are required to support

@@ -98,7 +98,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 /** Handles the bulk of DrJava's program logic. The UI components interface with the GlobalModel through its public
   * methods, and the GlobalModel responds via the GlobalModelListener interface. This removes the dependency on the 
   * UI for the logical flow of the program's features.  With the current implementation, we can finally test the compile
-  * functionality of DrJava, along with many other things. <p>
+  * command of DrJava, along with many other things. <p>
   * @version $Id: DefaultGlobalModel.java 5727 2012-09-30 03:58:32Z rcartwright $
   */
 public class DefaultGlobalModel extends AbstractGlobalModel {
@@ -456,7 +456,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     forceReset |= !wd.equals(workDir);
     // update the setting
     DrScala.getConfig().setSetting(LAST_INTERACTIONS_DIRECTORY, wd);
-    getDebugger().setAutomaticTraceEnabled(false);
+//    getDebugger().setAutomaticTraceEnabled(false);
     _interactionsModel.resetInterpreter(wd, forceReset);
     debug.logEnd();
   }
@@ -519,11 +519,12 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     return _interactionsModel.getDocument().getHistoryAsString();
   }
   
-  /** Called when the debugger wants to print a message.  Inserts a newline. */
-  public void printDebugMessage(String s) {
-    _interactionsModel.getDocument().
-      insertBeforeLastPrompt(s + "\n", InteractionsDocument.DEBUGGER_STYLE);
-  }
+    /* Debugger deactivated in DrScala */ 
+//  /** Called when the debugger wants to print a message.  Inserts a newline. */
+//  public void printDebugMessage(String s) {
+//    _interactionsModel.getDocument().
+//      insertBeforeLastPrompt(s + "\n", InteractionsDocument.DEBUGGER_STYLE);
+//  }
   
   /** Returns the current class path in use by the Interpreter JVM. */
   public Iterable<File> getInteractionsClassPath() {
@@ -628,26 +629,26 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
            * as soon as possible. */
           
           _interactionsModel.removeListener(_runMain);  // listener cannot run
-          
-          // Run debugger restart in an invokeLater so that the InteractionsModel EventNotifier
-          // reader-writer lock isn't held anymore.
-          javax.swing.SwingUtilities.invokeLater(new Runnable() {   
-            public void run() {
-              // Restart debugger if it was previously enabled and is now off
-              if (wasDebuggerEnabled && (! getDebugger().isReady())) {
-//            System.err.println("Trying to start debugger");
-                try { getDebugger().startUp(); } catch(DebugException de) { /* ignore, continue without debugger */ }
-              }
-              // Load the proper text into the interactions document
-              iDoc.clearCurrentInput();
-              iDoc.append(java.text.MessageFormat.format(command, className), null);
-              
-              // Finally, execute the new interaction and record that event
-              new Thread("Running document") {
-                public void run() { _interactionsModel.interpretCurrentInteraction(); }
-              }.start();
-            }
-          });
+          /* Debugger de-activated in DrScala */
+//          // Run debugger restart in an invokeLater so that the InteractionsModel EventNotifier
+//          // reader-writer lock isn't held anymore.
+//          javax.swing.SwingUtilities.invokeLater(new Runnable() {   
+//            public void run() {
+//              // Restart debugger if it was previously enabled and is now off
+//              if (wasDebuggerEnabled && (! getDebugger().isReady())) {
+////            System.err.println("Trying to start debugger");
+//                try { getDebugger().startUp(); } catch(DebugException de) { /* ignore, continue without debugger */ }
+//              }
+//              // Load the proper text into the interactions document
+//              iDoc.clearCurrentInput();
+//              iDoc.append(java.text.MessageFormat.format(command, className), null);
+//              
+//              // Finally, execute the new interaction and record that event
+//              new Thread("Running document") {
+//                public void run() { _interactionsModel.interpretCurrentInteraction(); }
+//              }.start();
+//            }
+//          });
         }
       };
       
@@ -868,6 +869,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     if (projectExtras != null)  for (File cpE : projectExtras) { _interactionsModel.addProjectClassPath(cpE); }
     
     Vector<File> cp = DrScala.getConfig().getSetting(EXTRA_CLASSPATH);
+    System.err.println("Extra class path used in resetInteraction is: '" + cp + "'");
     if (cp != null) {
       for (File f : cp) { _interactionsModel.addExtraClassPath(f); }
     }

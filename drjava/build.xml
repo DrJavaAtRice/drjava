@@ -375,7 +375,7 @@
 
   <target name="test-8" depends="compile, resolve-java7-exec, resolve-java8-tools" unless="skip-test"
           description="Run all tests under Java 8 (after compiling); use -Dtest-spec=... to filter">
-    <echo message="ConcJUnit is currently incompatible with Java 7."/>
+    <echo message="ConcJUnit is currently incompatible with Java 8."/>
     <antcall target="iterate-tests">
       <param name="test-jvm" value="${java8-exec}" />
       <param name="test-tools" value="${java8-tools}" />

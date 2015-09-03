@@ -248,10 +248,9 @@ public final class IOUtil {
     catch (SecurityException e) { return false; }
   }
   
-  /**
-   * Make a best attempt at invoking {@link File#deleteOnExit()}.  Any resulting 
-   * {@link SecurityException} will be ignored.
-   */
+  /** Make a best attempt at invoking {@link File#deleteOnExit()}.  Any resulting 
+    * {@link SecurityException} will be ignored.
+    */
   public static void attemptDeleteOnExit(File f) {
     try { f.deleteOnExit(); }
     catch (SecurityException e) { /* ignore */ }
@@ -735,14 +734,13 @@ public final class IOUtil {
     finally { input.close(); }
   }
   
-  /**
-   * Copies the contents of one file into another.
-   * @param source the file to be copied
-   * @param dest the file to be copied to
-   * @throws  IOException  If one of the files does not exist or cannot be opened, or if an error 
-   *                       occurs during reading or writing
-   * @throws  SecurityException  If read or write access, respectively, to the file is denied
-   */
+  /** Copies the contents of one file into another.
+    * @param source the file to be copied
+    * @param dest the file to be copied to
+    * @throws  IOException  If one of the files does not exist or cannot be opened, or if an error 
+    *                       occurs during reading or writing
+    * @throws  SecurityException  If read or write access, respectively, to the file is denied
+    */
   public static void copyFile(File source, File dest) throws IOException {
     FileInputStream in = new FileInputStream(source);
     try {
@@ -753,15 +751,14 @@ public final class IOUtil {
     finally { in.close(); }
   }
 
-  /**
-   * Copies the contents of one file into another, using the given array as an intermediate buffer.
-   * @param source  The file to be copied
-   * @param dest  The file to be copied to
-   * @param buffer  A buffer to use in copying
-   * @throws  IOException  If one of the files does not exist or cannot be opened, or if an error 
-   *                       occurs during reading or writing
-   * @throws  SecurityException  If read or write access, respectively, to the file is denied
-   */
+  /** Copies the contents of one file into another, using the given array as an intermediate buffer.
+    * @param source  The file to be copied
+    * @param dest  The file to be copied to
+    * @param buffer  A buffer to use in copying
+    * @throws  IOException  If one of the files does not exist or cannot be opened, or if an error 
+    *                       occurs during reading or writing
+    * @throws  SecurityException  If read or write access, respectively, to the file is denied
+    */
   public static void copyFile(File source, File dest, byte[] buffer) throws IOException {
     FileInputStream in = new FileInputStream(source);
     try {
@@ -772,100 +769,92 @@ public final class IOUtil {
     finally { in.close(); }
   }
 
-  /**
-   * Writes text to the file, overwriting whatever was there.
-   * @param file  File to write to
-   * @param text  Text to write
-   * @throws  IOException  If the file does not exist or cannot be opened, or if an error occurs during writing
-   * @throws  SecurityException  If write access to the file is denied
-   */
+  /** Writes text to the file, overwriting whatever was there.
+    * @param file  File to write to
+    * @param text  Text to write
+    * @throws  IOException  If the file does not exist or cannot be opened, or if an error occurs during writing
+    * @throws  SecurityException  If write access to the file is denied
+    */
   public static void writeStringToFile(File file, String text) throws IOException {
     writeStringToFile(file, text, false);
   }
   
-  /**
-   * Writes text to the file, overwriting whatever was there.  Ignores any exceptions that occur.
-   * @param file  File to write to
-   * @param text  Text to write
-   * @return  {@code true} iff the operation succeeded without an exception.
-   */
+  /** Writes text to the file, overwriting whatever was there.  Ignores any exceptions that occur.
+    * @param file  File to write to
+    * @param text  Text to write
+    * @return  {@code true} iff the operation succeeded without an exception.
+    */
   public static boolean attemptWriteStringToFile(File file, String text) {
     try { writeStringToFile(file, text); return true; }
     catch (IOException e) { return false; }
     catch (SecurityException e) { return false; }
   }
   
-  /**
-   * Writes text to the file.
-   * @param file  File to write to
-   * @param text  Text to write
-   * @param append  {@code true} iff the file should be opened in "append" mode (rather than
-   *                "overwrite" mode)
-   * @throws  IOException  If the file does not exist or cannot be opened, or if an error occurs during writing
-   * @throws  SecurityException  If write access to the file is denied
-   */
+  /** Writes text to the file.
+    * @param file  File to write to
+    * @param text  Text to write
+    * @param append  {@code true} iff the file should be opened in "append" mode (rather than
+    *                "overwrite" mode)
+    * @throws  IOException  If the file does not exist or cannot be opened, or if an error occurs during writing
+    * @throws  SecurityException  If write access to the file is denied
+    */
   public static void writeStringToFile(File file, String text, boolean append) throws IOException {
     FileWriter writer = new FileWriter(file, append);
     try { writer.write(text); }
     finally { writer.close(); }
   }
   
-  /**
-   * Writes text to the file, ignoring any exceptions that occur.
-   * @param file  File to write to
-   * @param text  Text to write
-   * @param append  {@code true} iff the file should be opened in "append" mode (rather than
-   *                "overwrite" mode)
-   * @return  {@code true} iff the operation succeeded without an exception.
-   */
+  /** Writes text to the file, ignoring any exceptions that occur.
+    * @param file  File to write to
+    * @param text  Text to write
+    * @param append  {@code true} iff the file should be opened in "append" mode (rather than
+    *                "overwrite" mode)
+    * @return  {@code true} iff the operation succeeded without an exception.
+    */
   public static boolean attemptWriteStringToFile(File file, String text, boolean append) {
     try { writeStringToFile(file, text, append); return true; }
     catch (IOException e) { return false; }
     catch (SecurityException e) { return false; }
   }
   
-  /**
-   * Create a temporary file in the system temp directory (via {@link File#createTempFile(String, String)}) and 
-   * immediately mark it for deletion
-   * @throws IOException  If an exception occurs in {@link File#createTempFile(String, String)}
-   * @throws SecurityException  If write or delete access to the system temp directory is denied
-   */
+  /** Create a temporary file in the system temp directory (via {@link File#createTempFile(String, String)}) and 
+    * immediately mark it for deletion
+    * @throws IOException  If an exception occurs in {@link File#createTempFile(String, String)}
+    * @throws SecurityException  If write or delete access to the system temp directory is denied
+    */
   public static File createAndMarkTempFile(String prefix, String suffix) throws IOException {
     return createAndMarkTempFile(prefix, suffix, null);
   }
   
-  /**
-   * Create a temporary file in the specified directory (via {@link File#createTempFile(String, String, File)}) and 
-   * immediately mark it for deletion
-   * @throws IOException  If an exception occurs in {@link File#createTempFile(String, String, File)}
-   * @throws SecurityException  If write or delete access to {@code location} is denied
-   */
+  /** Create a temporary file in the specified directory (via {@link File#createTempFile(String, String, File)}) and 
+    * immediately mark it for deletion
+    * @throws IOException  If an exception occurs in {@link File#createTempFile(String, String, File)}
+    * @throws SecurityException  If write or delete access to {@code location} is denied
+    */
   public static File createAndMarkTempFile(String prefix, String suffix, File location) throws IOException {
     File result = File.createTempFile(prefix, suffix, location);
     attemptDeleteOnExit(result);
     return result;
   }
   
-  /**
-   * Create a temporary directory (named by {@link File#createTempFile}) and immediately mark it for 
-   * deletion.  (Deletion will only actually occur if the directory is empty on exit, or if all files 
-   * created in the directory are also marked for deletion.)
-   * @throws IOException  If an exception occurs in {@link File#createTempFile}, or if the attempt to
-   *                      create the directory is unsuccessful
-   * @throws SecurityException  If write access to the system temp directory is denied
-   */
+  /** Create a temporary directory (named by {@link File#createTempFile}) and immediately mark it for 
+    * deletion.  (Deletion will only actually occur if the directory is empty on exit, or if all files 
+    * created in the directory are also marked for deletion.)
+    * @throws IOException  If an exception occurs in {@link File#createTempFile}, or if the attempt to
+    *                      create the directory is unsuccessful
+    * @throws SecurityException  If write access to the system temp directory is denied
+    */
   public static File createAndMarkTempDirectory(String prefix, String suffix) throws IOException {
     return createAndMarkTempDirectory(prefix, suffix, null);
   }
   
-  /**
-   * Create a temporary directory (named by {@link File#createTempFile}) and immediately mark it for 
-   * deletion.  (Deletion will only actually occur if the directory is empty on exit, or if all files 
-   * created in the directory are also marked for deletion.)
-   * @throws IOException  If an exception occurs in {@link File#createTempFile}, or if the attempt to
-   *                      create the directory is unsuccessful
-   * @throws SecurityException  If write access to {@code location} is denied
-   */
+  /** Create a temporary directory (named by {@link File#createTempFile}) and immediately mark it for 
+    * deletion.  (Deletion will only actually occur if the directory is empty on exit, or if all files 
+    * created in the directory are also marked for deletion.)
+    * @throws IOException  If an exception occurs in {@link File#createTempFile}, or if the attempt to
+    *                      create the directory is unsuccessful
+    * @throws SecurityException  If write access to {@code location} is denied
+    */
   public static File createAndMarkTempDirectory(String prefix, String suffix, File location) throws IOException {
     File result = File.createTempFile(prefix, suffix, location);
     boolean success = result.delete();

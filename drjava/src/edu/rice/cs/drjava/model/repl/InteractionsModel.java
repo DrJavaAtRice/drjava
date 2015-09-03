@@ -208,32 +208,35 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
 //        if (toEval.startsWith("java ")) toEval = _transformJavaCommand(toEval);
 //        else if (toEval.startsWith("applet ")) toEval = _transformAppletCommand(toEval);
         toEval = transformCommands(toEval);
-        if (DrScala.getConfig().getSetting(OptionConstants.DEBUG_AUTO_IMPORT).booleanValue() &&
-            toEval.startsWith("import ")) {
-          // add the class or package after the import to the set of auto-imports
-          // NOTE: this only processes import statements until the first non-import statement or comment is reached
-          // Example: import java.io.File; import java.io.IOException // imports both File and IOException
-          // Example: import java.io.File; /* comment */ import java.io.IOException // imports only File
-          // Example: import java.io.File; File f; import java.io.IOException // imports only File
-          String line = toEval;
-          do {
-            line = line.substring("import ".length());
-            String substr = line;
-            int endPos = 0;
-            while((endPos<substr.length()) &&
-                  ((Character.isJavaIdentifierPart(substr.charAt(endPos))) ||
-                   (substr.charAt(endPos) == '.') ||
-                   (substr.charAt(endPos) == '*'))) ++endPos;
-            substr = substr.substring(0,endPos);
-            _autoImportSet.add(substr);
-            
-            // remove substr from line
-            line = line.substring(substr.length()).trim();
-            if (!line.startsWith(";")) break;
-            line = line.substring(1).trim();
-          } while(line.startsWith("import "));
-        }
+        
+        /* Debugger deactivated in DrScala */
+//        if (DrScala.getConfig().getSetting(OptionConstants.DEBUG_AUTO_IMPORT).booleanValue() &&
+//            toEval.startsWith("import ")) {
+//          // add the class or package after the import to the set of auto-imports
+//          // NOTE: this only processes import statements until the first non-import statement or comment is reached
+//          // Example: import java.io.File; import java.io.IOException // imports both File and IOException
+//          // Example: import java.io.File; /* comment */ import java.io.IOException // imports only File
+//          // Example: import java.io.File; File f; import java.io.IOException // imports only File
+//          String line = toEval;
+//          do {
+//            line = line.substring("import ".length());
+//            String substr = line;
+//            int endPos = 0;
+//            while((endPos<substr.length()) &&
+//                  ((Character.isJavaIdentifierPart(substr.charAt(endPos))) ||
+//                   (substr.charAt(endPos) == '.') ||
+//                   (substr.charAt(endPos) == '*'))) ++endPos;
+//            substr = substr.substring(0,endPos);
+//            _autoImportSet.add(substr);
+//            
+//            // remove substr from line
+//            line = line.substring(substr.length()).trim();
+//            if (!line.startsWith(";")) break;
+//            line = line.substring(1).trim();
+//          } while(line.startsWith("import "));
+//        }
 //          System.err.println("Preparing to interpret '" + toEval  + "'");
+        
         final String evalText = toEval;
 
         new Thread(new Runnable() { 
@@ -258,14 +261,15 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
         sb.append(s.trim());
         sb.append("; ");
       }
-    }    
-    if (DrScala.getConfig().getSetting(OptionConstants.DEBUG_AUTO_IMPORT).booleanValue()) {
-      for(String s: _autoImportSet) {
-        sb.append("import ");
-        sb.append(s);
-        sb.append("; ");
-      }
-    }
+    } 
+    /* Debugger deactivated in DrScala */
+//    if (DrScala.getConfig().getSetting(OptionConstants.DEBUG_AUTO_IMPORT).booleanValue()) {
+//      for(String s: _autoImportSet) {
+//        sb.append("import ");
+//        sb.append(s);
+//        sb.append("; ");
+//      }
+//    }
 
     if (sb.length() > 0) {
       interpretCommand(sb.toString());

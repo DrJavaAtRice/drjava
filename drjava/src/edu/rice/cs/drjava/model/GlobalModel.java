@@ -377,13 +377,14 @@ public interface GlobalModel extends ILoadDocuments {
   
   //------------------------------- Debugger -------------------------------//
   
-  /** Called when the debugger wants to print a message. */
-  public void printDebugMessage(String s);
-  
-  /** Returns an available port number to use for debugging the interactions JVM.
-    * @throws IOException if unable to get a valid port number.
-    */
-  public int getDebugPort() throws IOException;
+  /* Debugger deactivated in DrScala */
+//  /** Called when the debugger wants to print a message. */
+//  public void printDebugMessage(String s);
+//  
+//  /** Returns an available port number to use for debugging the interactions JVM.
+//    * @throws IOException if unable to get a valid port number.
+//    */
+//  public int getDebugPort() throws IOException;
   
   //--------------------------------- Misc ---------------------------------//
   

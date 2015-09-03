@@ -75,6 +75,8 @@ public class ColoringView extends PlainView implements OptionConstants {
   public static Color INTERACTIONS_SYSTEM_OUT_COLOR = DrScala.getConfig().getSetting(SYSTEM_OUT_COLOR);
   //Renamed as to avoid confusion with the one in option constants
   public static Color ERROR_COLOR = DrScala.getConfig().getSetting(INTERACTIONS_ERROR_COLOR);
+  
+  /* Used in non-debug code */
   public static Color DEBUGGER_COLOR = DrScala.getConfig().getSetting(DEBUG_MESSAGE_COLOR);
   
   /** Constructs a new coloring view.
@@ -104,6 +106,8 @@ public class ColoringView extends PlainView implements OptionConstants {
       DrScala.getConfig().addOptionListener( OptionConstants.SYSTEM_IN_COLOR, col);
       DrScala.getConfig().addOptionListener( OptionConstants.SYSTEM_OUT_COLOR, col);
       DrScala.getConfig().addOptionListener( OptionConstants.INTERACTIONS_ERROR_COLOR, col);
+      
+      /* Used in non-debug code */
       DrScala.getConfig().addOptionListener( OptionConstants.DEBUG_MESSAGE_COLOR, col);
       
     }
@@ -124,6 +128,8 @@ public class ColoringView extends PlainView implements OptionConstants {
           DrScala.getConfig().removeOptionListener( OptionConstants.SYSTEM_IN_COLOR, col);
           DrScala.getConfig().removeOptionListener( OptionConstants.SYSTEM_OUT_COLOR, col);
           DrScala.getConfig().removeOptionListener( OptionConstants.INTERACTIONS_ERROR_COLOR, col);
+          
+          /*Used in non-debug code */
           DrScala.getConfig().removeOptionListener( OptionConstants.DEBUG_MESSAGE_COLOR, col); 
         }
       });
@@ -259,6 +265,8 @@ public class ColoringView extends PlainView implements OptionConstants {
     INTERACTIONS_SYSTEM_IN_COLOR = DrScala.getConfig().getSetting(SYSTEM_IN_COLOR);
     INTERACTIONS_SYSTEM_OUT_COLOR = DrScala.getConfig().getSetting(SYSTEM_OUT_COLOR);
     ERROR_COLOR = DrScala.getConfig().getSetting(INTERACTIONS_ERROR_COLOR);
+    
+    /* Used in non-debug code */
     DEBUGGER_COLOR = DrScala.getConfig().getSetting(DEBUG_MESSAGE_COLOR);
     
     // Avoid the ColoringView that does not have a container.

@@ -135,6 +135,8 @@ public interface OptionConstants {
   public static final ColorOption SYSTEM_IN_COLOR = new ColorOption("system.in.color", Color.magenta.darker().darker());
   public static final ColorOption INTERACTIONS_ERROR_COLOR =
     new ColorOption("interactions.error.color", Color.red.darker());
+  
+  /* Used in non-debug code. */
   public static final ColorOption DEBUG_MESSAGE_COLOR = new ColorOption("debug.message.color", Color.blue.darker());
   
   /** Color for background of definitions pane. */
@@ -188,13 +190,15 @@ public interface OptionConstants {
       FIND_RESULTS_COLOR8
   };
   
-  /** Color for highlighting breakpoints. */
-  public static final ColorOption DEBUG_BREAKPOINT_COLOR = new ColorOption("debug.breakpoint.color", Color.red);
-  
-  /** Color for highlighting disabled breakpoints. */
-  public static final ColorOption DEBUG_BREAKPOINT_DISABLED_COLOR = 
-    new ColorOption("debug.breakpoint.disabled.color", new Color(128,0,0));
-  
+  /* Debugger deactivated in DrScala */  
+//  /** Color for highlighting breakpoints. */
+//  public static final ColorOption DEBUG_BREAKPOINT_COLOR = new ColorOption("debug.breakpoint.color", Color.red);
+//  
+//  /** Color for highlighting disabled breakpoints. */
+//  public static final ColorOption DEBUG_BREAKPOINT_DISABLED_COLOR = 
+//    new ColorOption("debug.breakpoint.disabled.color", new Color(128,0,0));
+//  
+  /* Used by non-debug code? */
   /** Color for highlighting thread locations. */
   public static final ColorOption DEBUG_THREAD_COLOR = new ColorOption("debug.thread.color", new Color(100,255,255));
   
@@ -1006,65 +1010,67 @@ public interface OptionConstants {
                                 new KeyStrokeOption("",null), 
                                 to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_K, MASK)));
   
-  /** The key binding for toggling debug mode. */
-  public static final VectorOption<KeyStroke> KEY_DEBUG_MODE_TOGGLE =
-    new VectorOption<KeyStroke>("key.debug.mode.toggle", 
-                                new KeyStrokeOption("",null), 
-                                to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_D, MASK | SHIFT_MASK)));
+  /* Debugger deactivated in DrScala */
   
-//  /** The key binding for suspending the debugger. */
-//  public static final VectorOption<KeyStroke> KEY_DEBUG_SUSPEND =
-//    new VectorOption<KeyStroke>("key.debug.suspend", 
+//  /** The key binding for toggling debug mode. */
+//  public static final VectorOption<KeyStroke> KEY_DEBUG_MODE_TOGGLE =
+//    new VectorOption<KeyStroke>("key.debug.mode.toggle", 
 //                                new KeyStrokeOption("",null), 
-//                                to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0)));
-  
-  /** The key binding for resuming the debugger. */
-  public static final VectorOption<KeyStroke> KEY_DEBUG_RESUME =
-    new VectorOption<KeyStroke>("key.debug.resume", 
-                                new KeyStrokeOption("",null), 
-                                to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_F7, 0)));
-  
-  /** The key binding for automatically tracing through each line of a program*/
-  public static final VectorOption<KeyStroke> KEY_DEBUG_AUTOMATIC_TRACE = 
-    new VectorOption<KeyStroke>("key.debug.automatic.trace", 
-                                new KeyStrokeOption("",null), 
-                                to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_F9, 0)));
-  
-  /** The key binding for stepping into in the debugger */
-  public static final VectorOption<KeyStroke> KEY_DEBUG_STEP_INTO =
-    new VectorOption<KeyStroke>("key.debug.step.into", 
-                                new KeyStrokeOption("",null), 
-                                to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_F12, 0)));
-  
-  /** The key binding for stepping over in the debugger. */
-  public static final VectorOption<KeyStroke> KEY_DEBUG_STEP_OVER =
-    new VectorOption<KeyStroke>("key.debug.step.over", 
-                                new KeyStrokeOption("",null), 
-                                to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_F11, 0)));
-  
-  /** The key binding for stepping out in the debugger. */
-  public static final VectorOption<KeyStroke> KEY_DEBUG_STEP_OUT =
-    new VectorOption<KeyStroke>("key.debug.step.out", 
-                                new KeyStrokeOption("",null), 
-                                to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_F12, SHIFT_MASK)));
-  
-  /** The key binding for toggling a breakpoint. */
-  public static final VectorOption<KeyStroke> KEY_DEBUG_BREAKPOINT_TOGGLE =
-    new VectorOption<KeyStroke>("key.debug.breakpoint.toggle",
-                                new KeyStrokeOption("",null), 
-                                to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_B, MASK)));
-  
-  /** The key binding for displaying the breakpoints panel. */
-  public static final VectorOption<KeyStroke> KEY_DEBUG_BREAKPOINT_PANEL =
-    new VectorOption<KeyStroke>("key.debug.breakpoint.panel", 
-                                new KeyStrokeOption("",null), 
-                                to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_B, MASK | SHIFT_MASK)));
-  
-  /** The key binding for clearing all breakpoints. */
-  public static final VectorOption<KeyStroke> KEY_DEBUG_CLEAR_ALL_BREAKPOINTS =
-    new VectorOption<KeyStroke>("key.debug.clear.all.breakpoints", 
-                                new KeyStrokeOption("",null), 
-                                to.vector());
+//                                to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_D, MASK | SHIFT_MASK)));
+//  
+////  /** The key binding for suspending the debugger. */
+////  public static final VectorOption<KeyStroke> KEY_DEBUG_SUSPEND =
+////    new VectorOption<KeyStroke>("key.debug.suspend", 
+////                                new KeyStrokeOption("",null), 
+////                                to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0)));
+//  
+//  /** The key binding for resuming the debugger. */
+//  public static final VectorOption<KeyStroke> KEY_DEBUG_RESUME =
+//    new VectorOption<KeyStroke>("key.debug.resume", 
+//                                new KeyStrokeOption("",null), 
+//                                to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_F7, 0)));
+//  
+//  /** The key binding for automatically tracing through each line of a program*/
+//  public static final VectorOption<KeyStroke> KEY_DEBUG_AUTOMATIC_TRACE = 
+//    new VectorOption<KeyStroke>("key.debug.automatic.trace", 
+//                                new KeyStrokeOption("",null), 
+//                                to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_F9, 0)));
+//  
+//  /** The key binding for stepping into in the debugger */
+//  public static final VectorOption<KeyStroke> KEY_DEBUG_STEP_INTO =
+//    new VectorOption<KeyStroke>("key.debug.step.into", 
+//                                new KeyStrokeOption("",null), 
+//                                to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_F12, 0)));
+//  
+//  /** The key binding for stepping over in the debugger. */
+//  public static final VectorOption<KeyStroke> KEY_DEBUG_STEP_OVER =
+//    new VectorOption<KeyStroke>("key.debug.step.over", 
+//                                new KeyStrokeOption("",null), 
+//                                to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_F11, 0)));
+//  
+//  /** The key binding for stepping out in the debugger. */
+//  public static final VectorOption<KeyStroke> KEY_DEBUG_STEP_OUT =
+//    new VectorOption<KeyStroke>("key.debug.step.out", 
+//                                new KeyStrokeOption("",null), 
+//                                to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_F12, SHIFT_MASK)));
+//  
+//  /** The key binding for toggling a breakpoint. */
+//  public static final VectorOption<KeyStroke> KEY_DEBUG_BREAKPOINT_TOGGLE =
+//    new VectorOption<KeyStroke>("key.debug.breakpoint.toggle",
+//                                new KeyStrokeOption("",null), 
+//                                to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_B, MASK)));
+//  
+//  /** The key binding for displaying the breakpoints panel. */
+//  public static final VectorOption<KeyStroke> KEY_DEBUG_BREAKPOINT_PANEL =
+//    new VectorOption<KeyStroke>("key.debug.breakpoint.panel", 
+//                                new KeyStrokeOption("",null), 
+//                                to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_B, MASK | SHIFT_MASK)));
+//  
+//  /** The key binding for clearing all breakpoints. */
+//  public static final VectorOption<KeyStroke> KEY_DEBUG_CLEAR_ALL_BREAKPOINTS =
+//    new VectorOption<KeyStroke>("key.debug.clear.all.breakpoints", 
+//                                new KeyStrokeOption("",null), 
+//                                to.vector());
   
   /** The key binding for toggling a bookmark. */
   public static final VectorOption<KeyStroke> KEY_BOOKMARKS_TOGGLE =
@@ -1120,10 +1126,11 @@ public interface OptionConstants {
   public static final VectorOption<KeyStroke> KEY_DETACH_TABBEDPANES = 
     new VectorOption<KeyStroke>("key.detach.tabbedpanes", new KeyStrokeOption("",null), to.vector());
   
-  /** The key binding to detach/re-attach the debugger panel. */
-  public static final VectorOption<KeyStroke> KEY_DETACH_DEBUGGER = 
-    new VectorOption<KeyStroke>("key.detach.debugger", new KeyStrokeOption("",null), to.vector());
-  
+  /* Debugger deactivated in DrScala */
+//  /** The key binding to detach/re-attach the debugger panel. */
+//  public static final VectorOption<KeyStroke> KEY_DETACH_DEBUGGER = 
+//    new VectorOption<KeyStroke>("key.detach.debugger", new KeyStrokeOption("",null), to.vector());
+ 
   /** The key binging to close stream input in the ineractions panel. Ctrl-D on all systems.
     * In the console on DOS/Windows, this was typically Ctrl-Z, but Ctrl-Z is now the
     * default for Undo, even on Windows. */
@@ -1168,34 +1175,36 @@ public interface OptionConstants {
   public static final BooleanOption FIND_NO_TEST_CASES =
     new BooleanOption("find.replace.no.test.cases", Boolean.FALSE);
   
+  /* Debugger deactivated in DrScala */
+  
   /* ---------- Debugger Options ---------- */
   
-  /** A classpath-structured vector of all paths to look for source files on while stepping in the debugger. */
-  public static final VectorOption<File> DEBUG_SOURCEPATH =
-    new ClassPathOption().evaluate("debug.sourcepath");
-  
-  /** Whether stepping should step through Java's source files. */
-  public static final BooleanOption DEBUG_STEP_JAVA = new BooleanOption("debug.step.java", Boolean.FALSE);
-  
-  /** Whether stepping should step through Dynamic Java's source files. */
-  public static final BooleanOption DEBUG_STEP_INTERPRETER =
-    new BooleanOption("debug.step.interpreter", Boolean.FALSE);
-  
-  /** Whether stepping should step through DrJava's source files. */
-  public static final BooleanOption DEBUG_STEP_DRSCALA =
-    new BooleanOption("debug.step.drjava", Boolean.FALSE);
-  
-  /** Which packages to exclude when stepping. */
-  public static final VectorOption<String> DEBUG_STEP_EXCLUDE =
-    new VectorOption<String>("debug.step.exclude", new StringOption("",null), new Vector<String>());
-  
-  /** Whether we want to automatically import packages after breakpoints or steps. */
-  public static final BooleanOption DEBUG_AUTO_IMPORT =
-    new BooleanOption("debug.auto.import", Boolean.TRUE);
-  
-  /** Whether we want to allow expressions and method calls in watches. */
-  public static final BooleanOption DEBUG_EXPRESSIONS_AND_METHODS_IN_WATCHES =
-    new BooleanOption("debug.expressions.and.methods.in.watches", Boolean.FALSE);
+//  /** A classpath-structured vector of all paths to look for source files on while stepping in the debugger. */
+//  public static final VectorOption<File> DEBUG_SOURCEPATH =
+//    new ClassPathOption().evaluate("debug.sourcepath");
+//  
+//  /** Whether stepping should step through Java's source files. */
+//  public static final BooleanOption DEBUG_STEP_JAVA = new BooleanOption("debug.step.java", Boolean.FALSE);
+//  
+//  /** Whether stepping should step through Dynamic Java's source files. */
+//  public static final BooleanOption DEBUG_STEP_INTERPRETER =
+//    new BooleanOption("debug.step.interpreter", Boolean.FALSE);
+//  
+//  /** Whether stepping should step through DrJava's source files. */
+//  public static final BooleanOption DEBUG_STEP_DRSCALA =
+//    new BooleanOption("debug.step.drjava", Boolean.FALSE);
+//  
+//  /** Which packages to exclude when stepping. */
+//  public static final VectorOption<String> DEBUG_STEP_EXCLUDE =
+//    new VectorOption<String>("debug.step.exclude", new StringOption("",null), new Vector<String>());
+//  
+//  /** Whether we want to automatically import packages after breakpoints or steps. */
+//  public static final BooleanOption DEBUG_AUTO_IMPORT =
+//    new BooleanOption("debug.auto.import", Boolean.TRUE);
+//  
+//  /** Whether we want to allow expressions and method calls in watches. */
+//  public static final BooleanOption DEBUG_EXPRESSIONS_AND_METHODS_IN_WATCHES =
+//    new BooleanOption("debug.expressions.and.methods.in.watches", Boolean.FALSE);
   
   
   /* ---------- Scaladoc Options ---------- */
@@ -1315,17 +1324,19 @@ public interface OptionConstants {
   public static final BooleanOption ALWAYS_COMPILE_BEFORE_SCALADOC =
     new BooleanOption("compile.before.scaladoc", Boolean.FALSE);
   
-  /** Whether to prompt to save before compiling. */
-  public static final BooleanOption ALWAYS_SAVE_BEFORE_DEBUG =
-    new BooleanOption("save.before.debug", Boolean.FALSE);
-  
-  /** Whether to warn if a document has been modified before allowing the user to set a breakpoint in it. */
-  public static final BooleanOption WARN_BREAKPOINT_OUT_OF_SYNC =
-    new BooleanOption("warn.breakpoint.out.of.sync", Boolean.TRUE);
-  
-  /** Whether to warn that the user is debugging a file that is out of sync with its class file. */
-  public static final BooleanOption WARN_DEBUG_MODIFIED_FILE =
-    new BooleanOption("warn.debug.modified.file", Boolean.TRUE);
+    
+  /* Debugger deactivated in DrScala */
+//  /** Whether to prompt to save before compiling. */
+//  public static final BooleanOption ALWAYS_SAVE_BEFORE_DEBUG =
+//    new BooleanOption("save.before.debug", Boolean.FALSE);
+//
+//  /** Whether to warn if a document has been modified before allowing the user to set a breakpoint in it. */
+//  public static final BooleanOption WARN_BREAKPOINT_OUT_OF_SYNC =
+//    new BooleanOption("warn.breakpoint.out.of.sync", Boolean.TRUE);
+//  
+//  /** Whether to warn that the user is debugging a file that is out of sync with its class file. */
+//  public static final BooleanOption WARN_DEBUG_MODIFIED_FILE =
+//    new BooleanOption("warn.debug.modified.file", Boolean.TRUE);
   
   /** Whether to warn that a restart is necessary before the look and feel will change. */
   public static final BooleanOption WARN_CHANGE_LAF = new BooleanOption("warn.change.laf", Boolean.TRUE);
@@ -1435,10 +1446,11 @@ public interface OptionConstants {
     */
   public static final class COMPILER_PREFERENCE_CONTROL {
     public static final String NO_PREFERENCE = "No Preference";
-    public static final String SCALA = "Scala version 2.9";
+    public static final String SCALA = "Scala version 2.12";
     public static ArrayList<String> _list = new ArrayList<String>();
     
     public static void setList(ArrayList<String> list) { _list = list; }
+    
     public static ForcedChoiceOption evaluate() {
       if (! _list.contains(NO_PREFERENCE)) _list.add(NO_PREFERENCE);
       
@@ -1468,8 +1480,10 @@ public interface OptionConstants {
   public static final VectorOption<File> RECENT_PROJECTS =
     new VectorOption<File>("recent.projects", new FileOption("", null), new Vector<File>());
   
-  /** Whether to enabled the Show Debug Console menu item in the Tools menu. */
-  public static final BooleanOption SHOW_DEBUG_CONSOLE = new BooleanOption("show.debug.console", Boolean.FALSE);
+    
+  /* Debugger deactivated in DrScala */
+//  /** Whether to enabled the Show Debug Console menu item in the Tools menu. */
+//  public static final BooleanOption SHOW_DEBUG_CONSOLE = new BooleanOption("show.debug.console", Boolean.FALSE);
   
   /** Height of MainFrame at startUp.  Can be overridden if out of bounds. */
   public static final NonNegativeIntegerOption WINDOW_HEIGHT =
@@ -1505,11 +1519,13 @@ public interface OptionConstants {
   public static final NonNegativeIntegerOption TABS_HEIGHT =
     new NonNegativeIntegerOption("tabs.height", Integer.valueOf(120));
   
-  /** Height of debugger panel at startUp.  Must be less than WINDOW_HEIGHT + TABS_HEIGHT.  Can be overridden if out of
-    * bounds.
-    */
-  public static final NonNegativeIntegerOption DEBUG_PANEL_HEIGHT =
-    new NonNegativeIntegerOption("debug.panel.height", Integer.valueOf(0));
+    
+  /* Debugger deactivated in DrScala */
+//  /** Height of debugger panel at startUp.  Must be less than WINDOW_HEIGHT + TABS_HEIGHT.  Can be overridden if out of
+//    * bounds.
+//    */
+//  public static final NonNegativeIntegerOption DEBUG_PANEL_HEIGHT =
+//    new NonNegativeIntegerOption("debug.panel.height", Integer.valueOf(0));
   
   /** The directory in use by the file choosers upon the previous quit. */
   public static final FileOption LAST_DIRECTORY = new FileOption("last.dir", FileOps.NULL_FILE);
@@ -1637,16 +1653,18 @@ public interface OptionConstants {
   public static final BooleanOption DETACH_TABBEDPANES =
     new BooleanOption("tabbedpanes.detach", Boolean.FALSE);
   
-  /** The last state of the "Debugger" frame. */
-  public static final StringOption DIALOG_DEBUGFRAME_STATE = new StringOption("debugger.state", "default");
-  
-  /** Whether to save and restore window size and position at startUp/shutdown. */
-  public static final BooleanOption DIALOG_DEBUGFRAME_STORE_POSITION =
-    new BooleanOption("debugger.store.position", Boolean.TRUE);
-  
-  /** Whether the debugger is detached from the MainFrame. */
-  public static final BooleanOption DETACH_DEBUGGER =
-    new BooleanOption("debugger.detach", Boolean.FALSE);
+    
+  /* Debugger deactivated in DrScala */
+//  /** The last state of the "Debugger" frame. */
+//  public static final StringOption DIALOG_DEBUGFRAME_STATE = new StringOption("debugger.state", "default");
+//  
+//  /** Whether to save and restore window size and position at startUp/shutdown. */
+//  public static final BooleanOption DIALOG_DEBUGFRAME_STORE_POSITION =
+//    new BooleanOption("debugger.store.position", Boolean.TRUE);
+//  
+//  /** Whether the debugger is detached from the MainFrame. */
+//  public static final BooleanOption DETACH_DEBUGGER =
+//    new BooleanOption("debugger.detach", Boolean.FALSE);
   
   /** The last state of the "Create Jar from Project" dialog. */
   public static final StringOption DIALOG_JAROPTIONS_STATE = new StringOption("dialog.jaroptions.state", "default");

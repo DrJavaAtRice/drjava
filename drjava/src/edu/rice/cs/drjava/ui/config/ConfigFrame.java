@@ -444,8 +444,9 @@ public class ConfigFrame extends SwingFrame {
     PanelTreeNode interactionsNode = _createPanel("Interactions Pane");
     _setupInteractionsPanel(interactionsNode.getPanel());
     
-    PanelTreeNode debugNode = _createPanel("Debugger");
-    _setupDebugPanel(debugNode.getPanel());
+    /* Debugger deactivated in DrScala */
+//    PanelTreeNode debugNode = _createPanel("Debugger");
+//    _setupDebugPanel(debugNode.getPanel());
 
     PanelTreeNode junitNode = _createPanel("JUnit");
     _setupJUnitPanel(junitNode.getPanel());
@@ -640,17 +641,24 @@ public class ConfigFrame extends SwingFrame {
     for (int i = 0; i < FIND_RESULTS_COLORS.length; ++i) {
       addOptionComponent(panel, newColorOptionComponent(FIND_RESULTS_COLORS[i], true));
     }
-    addOptionComponent(panel, 
-                       newColorOptionComponent(DEBUG_BREAKPOINT_COLOR, true));
-    addOptionComponent(panel, 
-                       newColorOptionComponent(DEBUG_BREAKPOINT_DISABLED_COLOR, true));
+    /* Debugger deactivated in DrScala */
+//    addOptionComponent(panel, 
+//                       newColorOptionComponent(DEBUG_BREAKPOINT_COLOR, true));
+//    addOptionComponent(panel, 
+//                       newColorOptionComponent(DEBUG_BREAKPOINT_DISABLED_COLOR, true));
+    
+    /* Used by non-debug code? */
     addOptionComponent(panel, 
                        newColorOptionComponent(DEBUG_THREAD_COLOR, true));
+    
     addOptionComponent(panel, newColorOptionComponent(SYSTEM_OUT_COLOR));
     addOptionComponent(panel, newColorOptionComponent(SYSTEM_ERR_COLOR));
     addOptionComponent(panel, newColorOptionComponent(SYSTEM_IN_COLOR));
     addOptionComponent(panel, newColorOptionComponent(INTERACTIONS_ERROR_COLOR, false, true));
+    
+    /* used in non-debug code */
     addOptionComponent(panel, newColorOptionComponent(DEBUG_MESSAGE_COLOR, false, true));
+    
     addOptionComponent(panel, 
                        newColorOptionComponent(DRSCALA_ERRORS_BUTTON_COLOR, true));
     addOptionComponent(panel, 
@@ -760,17 +768,19 @@ public class ConfigFrame extends SwingFrame {
                          .setEntireColumn(true));
 
     addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
-    addOptionComponent(panel, 
-                       newBooleanOptionComponent(DIALOG_DEBUGFRAME_STORE_POSITION,false)
-                         .setEntireColumn(true));
-    addOptionComponent(panel, new ButtonComponent(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        _mainFrame.resetDebugFrame();
-      }
-    }, "Reset \"Debugger\" Window Position", this, "This resets the window position to its default values."));
-
-    addOptionComponent(panel, newBooleanOptionComponent(DETACH_DEBUGGER, false)
-                         .setEntireColumn(true));
+      
+    /* Debugger deactivated in DrScala */   
+//    addOptionComponent(panel, 
+//                       newBooleanOptionComponent(DIALOG_DEBUGFRAME_STORE_POSITION,false)
+//                         .setEntireColumn(true));   
+//    addOptionComponent(panel, new ButtonComponent(new ActionListener() {
+//      public void actionPerformed(ActionEvent e) {
+//        _mainFrame.resetDebugFrame();
+//      }
+//    }, "Reset \"Debugger\" Window Position", this, "This resets the window position to its default values."));
+//
+//    addOptionComponent(panel, newBooleanOptionComponent(DETACH_DEBUGGER, false)
+//                         .setEntireColumn(true));
 
     panel.displayComponents();
   }
@@ -816,42 +826,43 @@ public class ConfigFrame extends SwingFrame {
     panel.displayComponents();
   }
 
-  /** Add all of the components for the Debugger panel of the preferences window. */
-  private void _setupDebugPanel(ConfigPanel panel) {
-    if (!_mainFrame.getModel().getDebugger().isAvailable()) {
-      // Explain how to use debugger
-      String howto =
-        "\nThe debugger is not currently available. To use the debugger,\n" +
-        "you can enter the location of the tools.jar file in the\n" +
-        "\"Resource Locations\" pane, in case DrJava does not automatically find it.\n" +
-        "See the user documentation for more details.\n";
-      LabelComponent label = new LabelComponent(howto, this);
-      label.setEntireColumn(true);
-      addOptionComponent(panel, label);
-    }
-
-    VectorFileOptionComponent sourcePath =
-      newVectorFileOptionComponent(DEBUG_SOURCEPATH, true);
-    // Source path can only include directories
-    sourcePath.getFileChooser().setFileFilter(new DirectoryFilter("Source Directories"));
-    addOptionComponent(panel, sourcePath);
-    addOptionComponent(panel, 
-                       newBooleanOptionComponent(DEBUG_STEP_JAVA));
-    addOptionComponent(panel, newBooleanOptionComponent(DEBUG_STEP_INTERPRETER));
-    addOptionComponent(panel, newBooleanOptionComponent(DEBUG_STEP_DRSCALA));
-    addOptionComponent(panel, 
-                       new LabelComponent("<html>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
-                                          "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
-                                          "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</html>", 
-                                          this, true));
-    addOptionComponent(panel, 
-                       newVectorStringOptionComponent(DEBUG_STEP_EXCLUDE, false));
-    addOptionComponent(panel, newBooleanOptionComponent(DEBUG_AUTO_IMPORT));
-    
-    addOptionComponent(panel, newIntegerOptionComponent(AUTO_STEP_RATE));                                                            
-    addOptionComponent(panel, newBooleanOptionComponent(DEBUG_EXPRESSIONS_AND_METHODS_IN_WATCHES));
-    panel.displayComponents();
-  }
+  /* Debugger deactivated in DrScala */
+//  /** Add all of the components for the Debugger panel of the preferences window. */
+//  private void _setupDebugPanel(ConfigPanel panel) {
+//    if (!_mainFrame.getModel().getDebugger().isAvailable()) {
+//      // Explain how to use debugger
+//      String howto =
+//        "\nThe debugger is not currently available. To use the debugger,\n" +
+//        "you can enter the location of the tools.jar file in the\n" +
+//        "\"Resource Locations\" pane, in case DrJava does not automatically find it.\n" +
+//        "See the user documentation for more details.\n";
+//      LabelComponent label = new LabelComponent(howto, this);
+//      label.setEntireColumn(true);
+//      addOptionComponent(panel, label);
+//    }
+//
+//    VectorFileOptionComponent sourcePath =
+//      newVectorFileOptionComponent(DEBUG_SOURCEPATH, true);
+//    // Source path can only include directories
+//    sourcePath.getFileChooser().setFileFilter(new DirectoryFilter("Source Directories"));
+//    addOptionComponent(panel, sourcePath);
+//    addOptionComponent(panel, 
+//                       newBooleanOptionComponent(DEBUG_STEP_JAVA));
+//    addOptionComponent(panel, newBooleanOptionComponent(DEBUG_STEP_INTERPRETER));
+//    addOptionComponent(panel, newBooleanOptionComponent(DEBUG_STEP_DRSCALA));
+//    addOptionComponent(panel, 
+//                       new LabelComponent("<html>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
+//                                          "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
+//                                          "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</html>", 
+//                                          this, true));
+//    addOptionComponent(panel, 
+//                       newVectorStringOptionComponent(DEBUG_STEP_EXCLUDE, false));
+//    addOptionComponent(panel, newBooleanOptionComponent(DEBUG_AUTO_IMPORT));
+//    
+//    addOptionComponent(panel, newIntegerOptionComponent(AUTO_STEP_RATE));                                                            
+//    addOptionComponent(panel, newBooleanOptionComponent(DEBUG_EXPRESSIONS_AND_METHODS_IN_WATCHES));
+//    panel.displayComponents();
+//  }
 
   /** Add all of the components for the Scaladoc panel of the preferences window. */
   private void _setupScaladocPanel(ConfigPanel panel) {
@@ -964,12 +975,15 @@ public class ConfigFrame extends SwingFrame {
 //                       newBooleanOptionComponent(ALWAYS_SAVE_BEFORE_DEBUG));
     
     // Warnings
-    addOptionComponent(panel, 
-                       newBooleanOptionComponent(WARN_BREAKPOINT_OUT_OF_SYNC,false)
-                         .setEntireColumn(true));
-    addOptionComponent(panel, 
-                       newBooleanOptionComponent(WARN_DEBUG_MODIFIED_FILE,false)
-                         .setEntireColumn(true));
+    
+    /* Debugger deactivated in DrScala */
+//    addOptionComponent(panel, 
+//                       newBooleanOptionComponent(WARN_BREAKPOINT_OUT_OF_SYNC,false)
+//                         .setEntireColumn(true));
+//    addOptionComponent(panel, 
+//                       newBooleanOptionComponent(WARN_DEBUG_MODIFIED_FILE,false)
+//                         .setEntireColumn(true));
+    
     addOptionComponent(panel, 
                        newBooleanOptionComponent(WARN_CHANGE_LAF,false)
                          .setEntireColumn(true));

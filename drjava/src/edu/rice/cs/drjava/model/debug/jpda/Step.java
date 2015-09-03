@@ -34,75 +34,77 @@
  * 
  * END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model.debug.jpda;
+  /* Debugger deactivated in DrScala */
 
-import edu.rice.cs.drjava.DrScala;
-import edu.rice.cs.drjava.config.OptionConstants;
-import edu.rice.cs.drjava.model.debug.DebugException;
-
-import java.util.StringTokenizer;
-
-import com.sun.jdi.*;
-import com.sun.jdi.request.*;
-
-/** The breakpoint object which has references to its OpenDefinitionsDocument and its StepRequest */
-public class Step extends DebugAction<StepRequest> implements OptionConstants {
-  private final ThreadReference _thread;
-  private final int _size;
-  private final int _depth;
-
-  // Java class patterns for which we may not want events
-  private final String[] _javaExcludes = {"java.*", "javax.*", "sun.*", "com.sun.*", "com.apple.eawt.*", "com.apple.eio.*" };
-
-  /** @throws IllegalStateException if the document does not have a file */
-  public Step(JPDADebugger manager, int size, int depth)
-    throws DebugException, IllegalStateException {
-     super (manager);
-    _suspendPolicy = EventRequest.SUSPEND_EVENT_THREAD;
-    _thread = _manager.getCurrentThread();
-    _size = size;
-    _depth = depth;
-    _countFilter = 1; //only step once.
-    _initializeRequests();
-  }
-
-  //public boolean createRequest(ReferenceType rt) throws DebugException {
-  //  return false;
-  //}
-
-  /** Creates an appropriate EventRequest from the EventRequestManager and
-   * stores it in the _request field.
-   * @throws DebugException if the request could not be created.
-   */
-  protected void _createRequests() throws DebugException {
-    boolean stepJava = DrScala.getConfig().getSetting(DEBUG_STEP_JAVA).booleanValue();
-    boolean stepInterpreter = DrScala.getConfig().getSetting(DEBUG_STEP_INTERPRETER).booleanValue();
-    boolean stepDrJava = DrScala.getConfig().getSetting(DEBUG_STEP_DRSCALA).booleanValue();
-
-    StepRequest request = _manager.getEventRequestManager().
-      createStepRequest(_thread, _size, _depth);
-    if (!stepJava) {
-      for (int i = 0; i < _javaExcludes.length; i++) {
-        request.addClassExclusionFilter(_javaExcludes[i]);
-      }
-    }
-    if (!stepInterpreter) {
-      request.addClassExclusionFilter("koala.*");
-      /* DynamicJava is not used in DrScala */
-//      request.addClassExclusionFilter("edu.rice.cs.dynamicjava.*");
-    }
-    if (!stepDrJava) {
-      request.addClassExclusionFilter("edu.rice.cs.drjava.*");
-      request.addClassExclusionFilter("edu.rice.cs.util.*");
-      request.addClassExclusionFilter("edu.rice.cs.plt.*");
-    }
-    for(String s: DrScala.getConfig().getSetting(DEBUG_STEP_EXCLUDE)) {
-      request.addClassExclusionFilter(s.trim());
-    }
-
-    // Add this request (the only one) to the list
-    _requests.add(request);
-  }
-
-  public String toString() { return "Step[thread: " + _thread +  "]"; }
-}
+//package edu.rice.cs.drjava.model.debug.jpda;
+//
+//import edu.rice.cs.drjava.DrScala;
+//import edu.rice.cs.drjava.config.OptionConstants;
+//import edu.rice.cs.drjava.model.debug.DebugException;
+//
+//import java.util.StringTokenizer;
+//
+//import com.sun.jdi.*;
+//import com.sun.jdi.request.*;
+//
+///** The breakpoint object which has references to its OpenDefinitionsDocument and its StepRequest */
+//public class Step extends DebugAction<StepRequest> implements OptionConstants {
+//  private final ThreadReference _thread;
+//  private final int _size;
+//  private final int _depth;
+//
+//  // Java class patterns for which we may not want events
+//  private final String[] _javaExcludes = {"java.*", "javax.*", "sun.*", "com.sun.*", "com.apple.eawt.*", "com.apple.eio.*" };
+//
+//  /** @throws IllegalStateException if the document does not have a file */
+//  public Step(JPDADebugger manager, int size, int depth)
+//    throws DebugException, IllegalStateException {
+//     super (manager);
+//    _suspendPolicy = EventRequest.SUSPEND_EVENT_THREAD;
+//    _thread = _manager.getCurrentThread();
+//    _size = size;
+//    _depth = depth;
+//    _countFilter = 1; //only step once.
+//    _initializeRequests();
+//  }
+//
+//  //public boolean createRequest(ReferenceType rt) throws DebugException {
+//  //  return false;
+//  //}
+//
+//  /** Creates an appropriate EventRequest from the EventRequestManager and
+//   * stores it in the _request field.
+//   * @throws DebugException if the request could not be created.
+//   */
+//  protected void _createRequests() throws DebugException {
+//    boolean stepJava = DrScala.getConfig().getSetting(DEBUG_STEP_JAVA).booleanValue();
+//    boolean stepInterpreter = DrScala.getConfig().getSetting(DEBUG_STEP_INTERPRETER).booleanValue();
+//    boolean stepDrJava = DrScala.getConfig().getSetting(DEBUG_STEP_DRSCALA).booleanValue();
+//
+//    StepRequest request = _manager.getEventRequestManager().
+//      createStepRequest(_thread, _size, _depth);
+//    if (!stepJava) {
+//      for (int i = 0; i < _javaExcludes.length; i++) {
+//        request.addClassExclusionFilter(_javaExcludes[i]);
+//      }
+//    }
+//    if (!stepInterpreter) {
+//      request.addClassExclusionFilter("koala.*");
+//      /* DynamicJava is not used in DrScala */
+////      request.addClassExclusionFilter("edu.rice.cs.dynamicjava.*");
+//    }
+//    if (!stepDrJava) {
+//      request.addClassExclusionFilter("edu.rice.cs.drjava.*");
+//      request.addClassExclusionFilter("edu.rice.cs.util.*");
+//      request.addClassExclusionFilter("edu.rice.cs.plt.*");
+//    }
+//    for(String s: DrScala.getConfig().getSetting(DEBUG_STEP_EXCLUDE)) {
+//      request.addClassExclusionFilter(s.trim());
+//    }
+//
+//    // Add this request (the only one) to the list
+//    _requests.add(request);
+//  }
+//
+//  public String toString() { return "Step[thread: " + _thread +  "]"; }
+//}

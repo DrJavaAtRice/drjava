@@ -157,9 +157,8 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     
     // Compile Foo
     OpenDefinitionsDocument doc1 = setupDocument(FOO_TEXT);
-    File dir1 = makeCanonical(new File(_tempDir, "dir1"));
-    dir1.mkdir();
-    File file1 = makeCanonical(new File(dir1, "TestFile1.scala"));
+    File dir1 = tempDirectory("dir1");
+    File file1 = tempFile("TestFile1", dir1);
 //    System.err.println("Original class Path is: " + _model.getInteractionsClassPath());
     doCompile(doc1, file1);
 //    System.err.println("After loading " + file1 + ", class Path is now: " + _model.getInteractionsClassPath());
@@ -181,20 +180,19 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     
     // Compile Baz which extends Foo in another directory.
     OpenDefinitionsDocument doc2 = setupDocument(BAZ_TEXT);
-    File dir2 = makeCanonical(new File(_tempDir, "dir2"));
-    dir2.mkdir();
-    File file2 = makeCanonical(new File(dir2, "TestFile2.scala"));
+    File dir2 = tempDirectory("dir2");
+    File file2 = tempFile("TestFile2", dir2);
     doCompile(doc2, file2);
     
     // Ensure that Baz can use the Foo class from extra classpath
-    assertEquals("interactions result", "z: java.lang.String = DrScalaTestBaz$", 
+    assertEquals("interactions result", "z: String = DrScalaTestBaz$", 
                  interpret("val z = DrScalaTestBaz.getClass().getName()"));
     
     // Ensure that static fields can be seen
     assertEquals("result of singleton field", "y: Int = 3", interpret("val y = DrScalaTestBaz.x"));
     
     // Also ensure that Foo can be used directly
-    assertEquals("interactions result", "x: java.lang.String = DrScalaTestFoo", 
+    assertEquals("interactions result", "x: String = DrScalaTestFoo", 
                  interpret("val x = new DrScalaTestFoo().getClass().getName()"));
     
     _log.log("testInteractionsCanSeeCompletedClasses completed");
@@ -493,6 +491,8 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     String tempPath = f.getParent();
     File tempDir = makeCanonical(new File(tempPath));
     tempDir.renameTo(makeCanonical(new File(tempPath + "a")));
+    tempDir.deleteOnExit();
+    System.err.println("Renamed directory = '" + tempDir + "'");
     
     String result = interpret("new DrScalaTestFoo().getClass().getName()");
     
@@ -501,18 +501,32 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     assertFalse("interactions should have an error, not the correct answer", "\"DrScalaTestFoo\"".equals(result));
 //    System.err.println("Result1 is: " + result);
     
+    System.err.println("Classpath before extension = '" + _model.getInteractionsClassPath() + "'");
+    
     // Add new directory to classpath through Config
     Vector<File> cp = new Vector<File>();
-    cp.add(makeCanonical(new File(tempPath + "a")));
+    
+    File renamedDir = makeCanonical(new File(tempPath + "a"));
+    renamedDir.deleteOnExit();
+    /* renamedDir is NOT the same as tempDir which was NOT mutated by renameTo method */
+//    assertEquals("File.renameTo modifies its receiver", tempDir, renamedDir);
+    cp.add(renamedDir);
+    System.err.println("Extra Classpath = '" + cp + "'");
     DrScala.getConfig().setSetting(EXTRA_CLASSPATH, cp);
     
     Utilities.clearEventQueue();
     _model.resetInteractionsClassPath();
     
-    // example format of REPL result: res0: java.lang.String = DrScalaTestFoo
+    Iterable<File> newCp = _model.getInteractionsClassPath();
+    System.err.println("New class path is:\n" + IterUtil.multilineToString(newCp));
+    System.err.println("Classpath after extension = '" + _model.getInteractionsClassPath() + "'");
+    Utilities.show("Pause to inspect class path including " + cp);
+    
+    // example format of REPL result: res0: String = DrScalaTestFoo
     String pattern = "\\s*res[0-9]+: String = DrScalaTestFoo\\s*";
     result = interpret("new DrScalaTestFoo().getClass().getName()");
-
+    System.err.println("result = '" + result + "'; pattern = '" + pattern + "'");
+    
     // Now it should be on the classpath
     assertTrue("interactions result matches pattern", result.matches(pattern));
     System.err.println("result = '" + result + "'");

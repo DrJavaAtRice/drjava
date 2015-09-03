@@ -59,7 +59,9 @@ import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelState;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.DrScala;
-import edu.rice.cs.drjava.model.debug.Breakpoint;
+
+/* Debugger deactivated in DrScala */
+//import edu.rice.cs.drjava.model.debug.Breakpoint;
 
 import static edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelStates.*;
 
@@ -142,14 +144,16 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     * Keep in mind that, while the array is volatile, the elements inside of it are not! */
   static volatile int[] FIND_RESULTS_PAINTERS_USAGE = new int[FIND_RESULTS_COLORS.length];
 
-  /** Highlight painter for breakpoints. */
-  static volatile ReverseHighlighter.DrJavaHighlightPainter BREAKPOINT_PAINTER =
-    new ReverseHighlighter.DrJavaHighlightPainter(DrScala.getConfig().getSetting(DEBUG_BREAKPOINT_COLOR));
+  /* Debugger deactivated in DrScala */
+//  /** Highlight painter for breakpoints. */
+//  static volatile ReverseHighlighter.DrJavaHighlightPainter BREAKPOINT_PAINTER =
+//    new ReverseHighlighter.DrJavaHighlightPainter(DrScala.getConfig().getSetting(DEBUG_BREAKPOINT_COLOR));
+//
+//  /** Highlight painter for disabled breakpoints. */
+//  static volatile ReverseHighlighter.DrJavaHighlightPainter DISABLED_BREAKPOINT_PAINTER =
+//    new ReverseHighlighter.DrJavaHighlightPainter(DrScala.getConfig().getSetting(DEBUG_BREAKPOINT_DISABLED_COLOR));
 
-  /** Highlight painter for disabled breakpoints. */
-  static volatile ReverseHighlighter.DrJavaHighlightPainter DISABLED_BREAKPOINT_PAINTER =
-    new ReverseHighlighter.DrJavaHighlightPainter(DrScala.getConfig().getSetting(DEBUG_BREAKPOINT_DISABLED_COLOR));
-
+  /* Used in non-debug code. */
   /** Highlight painter for thread's current location. */
   static volatile ReverseHighlighter.DrJavaHighlightPainter THREAD_PAINTER =
     new ReverseHighlighter.DrJavaHighlightPainter(DrScala.getConfig().getSetting(DEBUG_THREAD_COLOR));
@@ -279,22 +283,24 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     }
   }
 
-  /** The OptionListener for DEBUG_BREAKPOINT_COLOR. */
-  private class BreakpointColorOptionListener implements OptionListener<Color> {
-    public void optionChanged(OptionEvent<Color> oce) {
-      BREAKPOINT_PAINTER = new ReverseHighlighter.DrJavaHighlightPainter(oce.value);
-      _mainFrame.refreshBreakpointHighlightPainter();
-    }
-  }
+  /* Debugger deactivated in DrScala */
+//  /** The OptionListener for DEBUG_BREAKPOINT_COLOR. */
+//  private class BreakpointColorOptionListener implements OptionListener<Color> {
+//    public void optionChanged(OptionEvent<Color> oce) {
+//      BREAKPOINT_PAINTER = new ReverseHighlighter.DrJavaHighlightPainter(oce.value);
+//      _mainFrame.refreshBreakpointHighlightPainter();
+//    }
+//  }
+//
+//  /** The OptionListener for DEBUG_BREAKPOINT_DISABLED_COLOR. */
+//  private class DisabledBreakpointColorOptionListener implements OptionListener<Color> {
+//    public void optionChanged(OptionEvent<Color> oce) {
+//      DISABLED_BREAKPOINT_PAINTER =  new ReverseHighlighter.DrJavaHighlightPainter(oce.value);
+//      _mainFrame.refreshBreakpointHighlightPainter();
+//    }
+//  }
 
-  /** The OptionListener for DEBUG_BREAKPOINT_DISABLED_COLOR. */
-  private class DisabledBreakpointColorOptionListener implements OptionListener<Color> {
-    public void optionChanged(OptionEvent<Color> oce) {
-      DISABLED_BREAKPOINT_PAINTER =  new ReverseHighlighter.DrJavaHighlightPainter(oce.value);
-      _mainFrame.refreshBreakpointHighlightPainter();
-    }
-  }
-
+  /* Used by non-debugger code? */
   /** The OptionListener for DEBUG_THREAD_COLOR. */
   private static class ThreadColorOptionListener implements OptionListener<Color> {
     public void optionChanged(OptionEvent<Color> oce) {
@@ -583,22 +589,24 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       DrScala.getConfig().addOptionListener(OptionConstants.FIND_RESULTS_COLORS[i], cListener);
     }
     
-    {
-      final OptionListener<Color> bcListener = new BreakpointColorOptionListener();
-      final Pair<Option<Color>, OptionListener<Color>> bcPair = 
-        new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.DEBUG_BREAKPOINT_COLOR, bcListener);
-      _colorOptionListeners.add(bcPair);
-      DrScala.getConfig().addOptionListener(OptionConstants.DEBUG_BREAKPOINT_COLOR, bcListener);
-    }
-    
-    {
-      final OptionListener<Color> dbcListener = new DisabledBreakpointColorOptionListener();
-      final Pair<Option<Color>, OptionListener<Color>> dbcPair = 
-        new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.DEBUG_BREAKPOINT_DISABLED_COLOR, dbcListener);
-      _colorOptionListeners.add(dbcPair);
-      DrScala.getConfig().addOptionListener( OptionConstants.DEBUG_BREAKPOINT_DISABLED_COLOR, dbcListener);
-    }
-    
+    /* Debugger deactivated in DrScala */
+//    {
+//      final OptionListener<Color> bcListener = new BreakpointColorOptionListener();
+//      final Pair<Option<Color>, OptionListener<Color>> bcPair = 
+//        new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.DEBUG_BREAKPOINT_COLOR, bcListener);
+//      _colorOptionListeners.add(bcPair);
+//      DrScala.getConfig().addOptionListener(OptionConstants.DEBUG_BREAKPOINT_COLOR, bcListener);
+//    }
+//    
+//    {
+//      final OptionListener<Color> dbcListener = new DisabledBreakpointColorOptionListener();
+//      final Pair<Option<Color>, OptionListener<Color>> dbcPair = 
+//        new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.DEBUG_BREAKPOINT_DISABLED_COLOR, dbcListener);
+//      _colorOptionListeners.add(dbcPair);
+//      DrScala.getConfig().addOptionListener( OptionConstants.DEBUG_BREAKPOINT_DISABLED_COLOR, dbcListener);
+//    }
+
+    /* Used by non-debug code? */
     {
       final OptionListener<Color> tcListener = new ThreadColorOptionListener();
       final Pair<Option<Color>, OptionListener<Color>> tcPair = 
@@ -892,20 +900,21 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     });
     _popMenu.add(toggleBookmarkItem);
       
-    if (_mainFrame.getModel().getDebugger().isAvailable()) {
-      _popMenu.addSeparator();
-
-      // Breakpoint
-      JMenuItem breakpointItem = new JMenuItem("Toggle Breakpoint");
-      breakpointItem.addActionListener( new AbstractAction() {
-        public void actionPerformed( ActionEvent ae ) {
-          // Make sure that the breakpoint is set on the *clicked* line, if within a selection block.
-          setCaretPosition(viewToModel(_popupMenuMA.getLastMouseClick().getPoint()));
-          _mainFrame.debuggerToggleBreakpoint();
-        }
-      });
-      _popMenu.add(breakpointItem);
-    }
+    /* Debugger deactivated in DrScala */
+//    if (_mainFrame.getModel().getDebugger().isAvailable()) {
+//      _popMenu.addSeparator();
+//
+//      // Breakpoint
+//      JMenuItem breakpointItem = new JMenuItem("Toggle Breakpoint");
+//      breakpointItem.addActionListener( new AbstractAction() {
+//        public void actionPerformed( ActionEvent ae ) {
+//          // Make sure that the breakpoint is set on the *clicked* line, if within a selection block.
+//          setCaretPosition(viewToModel(_popupMenuMA.getLastMouseClick().getPoint()));
+//          _mainFrame.debuggerToggleBreakpoint();
+//        }
+//      });
+//      _popMenu.add(breakpointItem);
+//    }
   }
 
   /* The private MouseAdapter for responding to various clicks concerning the popup menu */
@@ -1024,9 +1033,10 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     _hasWarnedAboutModified = hasWarned;
   }
 
-  public void addBreakpointHighlight( Breakpoint bp ) { }
-
-  public void removeBreakpointHighlight( Breakpoint bp) { }
+  /* Debugger deactivated in DrScala */
+//  public void addBreakpointHighlight( Breakpoint bp ) { }
+//
+//  public void removeBreakpointHighlight( Breakpoint bp) { }
 
   /** This instance of the scroll pane is here in order to allow for the definitions pane to save the
    *  horizontal and vertical scroll

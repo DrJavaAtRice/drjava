@@ -66,6 +66,8 @@ public class InteractionsDocument extends ConsoleDocument {
   public static final String ERROR_STYLE = "error";
   
   /** Style for debugger messages */
+  
+  /* Used in non-debug code */
   public static final String DEBUGGER_STYLE = "debugger";
   
   public static final String OBJECT_RETURN_STYLE = "object.return.style";

@@ -144,17 +144,24 @@ public class ConfigDescriptions {
       add(FIND_RESULTS_COLORS[i], "Find Results Color " + (i + 1),
           "A color for highlighting find results in the Definitions Pane.");
     }
-    add(DEBUG_BREAKPOINT_COLOR, "Debugger Breakpoint Color", "The color for breakpoints in the Definitions Pane.");
-    add(DEBUG_BREAKPOINT_DISABLED_COLOR, "Disabled Debugger Breakpoint Color",
-        "The color for disabled breakpoints in the Definitions Pane.");
+    /* Debugger deactivated in DrScala */
+//    add(DEBUG_BREAKPOINT_COLOR, "Debugger Breakpoint Color", "The color for breakpoints in the Definitions Pane.");
+//    add(DEBUG_BREAKPOINT_DISABLED_COLOR, "Disabled Debugger Breakpoint Color",
+//        "The color for disabled breakpoints in the Definitions Pane.");
+    
+    /* Used by non-debug code? */
     add(DEBUG_THREAD_COLOR, "Debugger Location Color",
         "The color for the location of the current suspended thread in the Definitions Pane.");
+    
     add(SYSTEM_OUT_COLOR, "System.out Color", "The color for System.out in the Interactions and Console Panes.");
     add(SYSTEM_ERR_COLOR, "System.err Color", "The color for System.err in the Interactions and Console Panes.");
     add(SYSTEM_IN_COLOR, "System.in Color", "The color for System.in in the Interactions Pane.");
     add(INTERACTIONS_ERROR_COLOR, "Interactions Error Color",
         "The color for interactions errors in the Interactions Pane.");
-    add(DEBUG_MESSAGE_COLOR, "Debug Message Color", "The color for debugger messages in the Interactions Pane.");
+    
+    /* Used in non-debug code! */
+    add(DEBUG_MESSAGE_COLOR, "Debug Message Color", "The color for debugger and auto-import messages in the Interactions Pane.");
+    
     add(DRSCALA_ERRORS_BUTTON_COLOR, "DrScala Errors Button Background Color",
         "The background color of the \"Errors\" button used to show internal DrJava errors.");
     add(RIGHT_MARGIN_COLOR, "Right Margin Color", "The color of the right margin line, if displayed.");
@@ -181,35 +188,38 @@ public class ConfigDescriptions {
     add(DIALOG_TABBEDPANES_STORE_POSITION, "Save \"Tabbed Panes\" Window Position",
         "Whether to save and restore the position of the \"Tabbed Panes\" window."); 
     add(DETACH_TABBEDPANES, "Detach Tabbed Panes",
-        "Whether to detach the tabbed panes and display them in a separate window.");                         
-    add(DIALOG_DEBUGFRAME_STORE_POSITION, "Save \"Debugger\" Window Position",
-        "Whether to save and restore the position of the \"Debugger\" window.");
-    add(DETACH_DEBUGGER, "Detach Debugger",
-        "Whether to detach the debugger and display it in a separate window.");
+        "Whether to detach the tabbed panes and display them in a separate window.");
     
-    /** Adds all of the components for the Key Bindings panel of the preferences window. */
-    add(DEBUG_SOURCEPATH, "Sourcepath", "<html>Any directories in which to search for source<br>" +
-        "files when stepping in the Debugger.</html>");
-    add(DEBUG_STEP_JAVA, "Step Into Java Classes", 
-        "<html>Whether the Debugger should step into Java library classes,<br>" +
-        "including java.*, javax.*, sun.*, com.sun.*, com.apple.eawt.*, and com.apple.eio.*</html>");
-    add(DEBUG_STEP_INTERPRETER, "Step Into Interpreter Classes",
-        "<html>Whether the Debugger should step into the classes<br>" +
-        "used by the Interactions Pane (DynamicJava).</html>");
-    add(DEBUG_STEP_DRSCALA, "Step Into DrScala Classes", "Whether the Debugger should step into DrJava's own class files.");
-    add(DEBUG_STEP_EXCLUDE, "Classes/Packages To Exclude",
-        "<html>Any classes that the debuggger should not step into.<br>" +
-        "Should be a list of fully-qualified class names.<br>" +
-        "To exclude a package, add <code>packagename.*</code> to the list.</html>");
-    add(DEBUG_AUTO_IMPORT, "Auto-Import after Breakpoint/Step",
-        "<html>Whether the Debugger should automatically import packages<br>" +
-        "and classes again after a breakpoint or step.</html>");
-    add(AUTO_STEP_RATE, "Auto-Step Rate in ms",
-        "<html>A defined rate in ms at which the debugger automatically steps into/over each line of code.<br>" +
-        "Value entered must be an integer value. </html>");                                                            
-    add(DEBUG_EXPRESSIONS_AND_METHODS_IN_WATCHES, "Allow Expressions and Method Calls in Watches",
-        "<html>Whether the Debugger should allow expressions and method<br>" +
-        "calls in watches. These may have side effects and can cause<br>" + "delays during the debug process.</html>");
+    /* Debugger deactivated in DrScala */
+//    add(DIALOG_DEBUGFRAME_STORE_POSITION, "Save \"Debugger\" Window Position",
+//        "Whether to save and restore the position of the \"Debugger\" window.");
+//    add(DETACH_DEBUGGER, "Detach Debugger",
+//        "Whether to detach the debugger and display it in a separate window.");
+//    
+//    /** Adds all of the components for the Key Bindings panel of the preferences window. */
+//    add(DEBUG_SOURCEPATH, "Sourcepath", "<html>Any directories in which to search for source<br>" +
+//        "files when stepping in the Debugger.</html>");
+//    add(DEBUG_STEP_JAVA, "Step Into Java Classes", 
+//        "<html>Whether the Debugger should step into Java library classes,<br>" +
+//        "including java.*, javax.*, sun.*, com.sun.*, com.apple.eawt.*, and com.apple.eio.*</html>");
+//    add(DEBUG_STEP_INTERPRETER, "Step Into Interpreter Classes",
+//        "<html>Whether the Debugger should step into the classes<br>" +
+//        "used by the Interactions Pane (DynamicJava).</html>");
+//    add(DEBUG_STEP_DRSCALA, "Step Into DrScala Classes", "Whether the Debugger should step into DrJava's own class files.");
+//    add(DEBUG_STEP_EXCLUDE, "Classes/Packages To Exclude",
+//        "<html>Any classes that the debuggger should not step into.<br>" +
+//        "Should be a list of fully-qualified class names.<br>" +
+//        "To exclude a package, add <code>packagename.*</code> to the list.</html>");
+//    add(DEBUG_AUTO_IMPORT, "Auto-Import after Breakpoint/Step",
+//        "<html>Whether the Debugger should automatically import packages<br>" +
+//        "and classes again after a breakpoint or step.</html>");
+//    add(AUTO_STEP_RATE, "Auto-Step Rate in ms",
+//        "<html>A defined rate in ms at which the debugger automatically steps into/over each line of code.<br>" +
+//        "Value entered must be an integer value. </html>");                                                            
+//    add(DEBUG_EXPRESSIONS_AND_METHODS_IN_WATCHES, "Allow Expressions and Method Calls in Watches",
+//        "<html>Whether the Debugger should allow expressions and method<br>" +
+//        "calls in watches. These may have side effects and can cause<br>" + "delays during the debug process.</html>");
+    
     add(SCALADOC_API_REF_VERSION, "Java Version for \"Open Java API Scaladoc\"",
         "Version of the Java API documentation to be used.");
     add(SCALADOC_ACCESS_STATUS, "Access Level", "<html>Fields and methods with access modifiers at this level<br>" +
@@ -286,12 +296,15 @@ public class ConfigDescriptions {
 //                                                  "debugging or explicitly asks the user each time.</html>");
     
     // Warnings
-    add(WARN_BREAKPOINT_OUT_OF_SYNC, "Warn on Breakpoint if Out of Sync", 
-        "<html>Whether DrScala should warn the user if the class file<br>" +
-        "is out of sync before setting a breakpoint in that file.</html>");
-    add(WARN_DEBUG_MODIFIED_FILE, "Warn if Debugging Modified File", 
-        "<html>Whether DrScala should warn the user if the file being<br>" +
-        "debugged has been modified since its last save.</html>");
+    
+    /* Debugger deactivated in DrScala */
+//    add(WARN_BREAKPOINT_OUT_OF_SYNC, "Warn on Breakpoint if Out of Sync", 
+//        "<html>Whether DrScala should warn the user if the class file<br>" +
+//        "is out of sync before setting a breakpoint in that file.</html>");
+//    add(WARN_DEBUG_MODIFIED_FILE, "Warn if Debugging Modified File", 
+//        "<html>Whether DrScala should warn the user if the file being<br>" +
+//        "debugged has been modified since its last save.</html>");
+    
     add(WARN_CHANGE_LAF, "Warn to Restart to Change Look and Feel",
         "<html>Whether DrScala should warn the user that look and feel<br>" +
         "changes will not be applied until DrScala is restarted.</html>.");

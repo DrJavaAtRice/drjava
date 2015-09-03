@@ -200,7 +200,7 @@ public class DrScalaInterpreter implements Interpreter {
     * method in order to augment the REPL classpath.
     */
   public String interpret(String input) {
-    if (input.equals(":test-reset")){
+    if (input.equals(":_$$$$$__$$$$$$_-reset")){
       this.reset();
       return "";
     }

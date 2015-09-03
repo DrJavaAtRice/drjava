@@ -118,7 +118,10 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
   protected void _resetInterpreter(File wd, boolean force) {
     setToDefaultInterpreter();
     _jvm.setWorkingDirectory(wd);
-    _jvm.restartInterpreterJVM(force);
+    /* Try to reset the interpreter using the internal scala interpreter reset command.  If this fails restart the
+     * slave JVM. */
+    boolean success = _jvm.interpret(":_$$$$$__$$$$$$_-reset");
+    if (! success) _jvm.restartInterpreterJVM(force);
   }
   
   /** Adds a named interpreter to the list.

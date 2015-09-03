@@ -399,7 +399,8 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     _varCommandLineCmdStyle = new SimpleAttributeSet();
     StyleConstants.setBackground(_varCommandLineCmdStyle, DrScala.getConfig().getSetting(DEFINITIONS_MATCH_COLOR));
     _varErrorCommandLineCmdStyle = new SimpleAttributeSet();
-    StyleConstants.setBackground(_varErrorCommandLineCmdStyle, DrScala.getConfig().getSetting(DEBUG_BREAKPOINT_COLOR));
+    /* Debugger deactivated in DrScala */
+//    StyleConstants.setBackground(_varErrorCommandLineCmdStyle, DrScala.getConfig().getSetting(DEBUG_BREAKPOINT_COLOR));
     _varCommandLineCmdStyle = new SimpleAttributeSet();
     StyleConstants.setBackground(_varCommandLineCmdStyle, DrScala.getConfig().getSetting(DEFINITIONS_MATCH_COLOR));
     

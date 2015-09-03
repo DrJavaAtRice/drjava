@@ -75,7 +75,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
  */
 public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   
-  public static final Log _log  = new Log("GlobalModel.txt", false);
+  public static final Log _log  = new Log("GlobalModel.txt", true);
 
   protected volatile DefaultGlobalModel _model;
   protected volatile InteractionsController _interactionsController;
@@ -191,11 +191,30 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     return File.createTempFile("DrScala-test" + i, ".scala", _tempDir).getCanonicalFile();
   }
 
+  /** Create a new NAMED (last segment of qualified class name) temporary file in _tempDir. */
+  protected File tempFile(String name) throws IOException {
+    File f = File.createTempFile(name, ".scala", _tempDir).getCanonicalFile();
+//    System.err.println("temp file created with name " + f);
+    return f;
+  }
+  
+   /** Create a new NAMED (last segment of qualified class name) temporary file in specified location. */
+  protected File tempFile(String name, File location) throws IOException {
+    File f = File.createTempFile(name, ".scala", location).getCanonicalFile();
+//    System.err.println("temp file created with name " + f);
+    return f;
+  }
+  
   /** Create a new temporary directory in _tempDir. */
   protected File tempDirectory() throws IOException {
     return IOUtil.createAndMarkTempDirectory("DrScala-test", "", _tempDir);
   }
 
+  /** Create a new NAMED temporary directory in _tempDir. */
+  protected File tempDirectory(String name) throws IOException {
+    return IOUtil.createAndMarkTempDirectory(name, "", _tempDir);
+  }
+  
   protected File createFile(String name) { return new File(_tempDir, name); }
 
   /** Given a .java file and a class file name, returns the corresponding .class file. */
@@ -975,7 +994,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   }
   
   public static class InteractionListener extends TestListener {
-    private static final int WAIT_TIMEOUT = 20000; // time to wait for _interactionDone or _resetDone 
+    private static final int WAIT_TIMEOUT = 100000; // time to wait for _interactionDone or _resetDone 
     private volatile CompletionMonitor _interactionDone;
     private volatile CompletionMonitor _resetDone;
     
