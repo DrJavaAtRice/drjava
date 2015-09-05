@@ -94,9 +94,17 @@ import edu.rice.cs.plt.concurrent.CompletionMonitor;
 import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.UnexpectedException;
 
-import static edu.rice.cs.plt.debug.DebugUtil.debug;
+
+/* Debugger deactivated in DrScala */
+//import static edu.rice.cs.plt.debug.DebugUtil.debug;
+
 /* TODO: clean up mixed references to _adapter and _doc which point to almost the same thing (an 
- * InteractionsDJDocument versus an InteractionsDocument. */
+ * InteractionsDJDocument versus an InteractionsDocument.
+ * 
+ * Be careful! There is a crucial difference between the two.  One is a subclass of the swing document hierarchy 
+ * (Document,  AbstractDocument, etc. and the other is NOT.  This code is shared with the Eclipse plugin which is NOT
+ * based on swing!
+ */
 
 /** This class installs listeners and actions between an InteractionsDocument (the model) and an InteractionsPane 
   * (the view).  We may want to refactor this class into a different package. <p>

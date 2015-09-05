@@ -259,7 +259,6 @@ public class InteractionsDocument extends ConsoleDocument {
     return false;
   }
   
-  
   /** Reverse searches the history for interactions that started with the current interaction. */
   public void reverseSearchInteractionsInHistory() {
     if (hasHistoryPrevious()) reverseHistorySearch(getCurrentInteraction());

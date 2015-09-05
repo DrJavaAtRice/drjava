@@ -45,8 +45,11 @@ import java.util.Map;
 
 import edu.rice.cs.util.AbsRelFile;
 import edu.rice.cs.drjava.model.compiler.CompilerModel;
-import edu.rice.cs.drjava.model.debug.Debugger;
-import edu.rice.cs.drjava.model.debug.Breakpoint;
+
+/* Debugger deactivated in DrScala */
+//import edu.rice.cs.drjava.model.debug.Debugger;
+//import edu.rice.cs.drjava.model.debug.Breakpoint;
+
 import edu.rice.cs.drjava.model.definitions.DefinitionsEditorKit;
 import edu.rice.cs.drjava.model.junit.JUnitModel;
 import edu.rice.cs.drjava.model.repl.DefaultInteractionsModel;
@@ -106,16 +109,18 @@ public interface GlobalModel extends ILoadDocuments {
   /** Gets the ScaladocModel, which provides all methods relating to Scaladoc. */
   public ScaladocModel getScaladocModel();
   
-  /** Gets the Debugger, which interfaces with the integrated debugger. */
-  public Debugger getDebugger();
-  
+  /* Debugger deactivated in DrScala */
+//  /** Gets the Debugger, which interfaces with the integrated debugger. */
+//  public Debugger getDebugger();
+//  
   /** Gets the DocumentNavigator, which controls the document view. */
   public IDocumentNavigator<OpenDefinitionsDocument> getDocumentNavigator();
   
   public void setDocumentNavigator(IDocumentNavigator<OpenDefinitionsDocument> newnav);
-  
-  /** @return manager for breakpoint regions. */
-  public RegionManager<Breakpoint> getBreakpointManager();
+
+  /* Debugger deactivated in DrScala */  
+//  /** @return manager for breakpoint regions. */
+//  public RegionManager<Breakpoint> getBreakpointManager();
   
   /** @return manager for bookmark regions. */
   public RegionManager<MovingDocumentRegion> getBookmarkManager();

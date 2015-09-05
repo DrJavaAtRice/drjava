@@ -48,8 +48,7 @@ import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 
 public class JarCreationTest extends DrScalaTestCase {
-  /** Tests the creation of manifest files through the ManifestWriter class
-   */
+  /** Tests the creation of manifest files through the ManifestWriter class */
   public void testCreateManifest() {
     ManifestWriter mw = new ManifestWriter();
     Manifest manifest = mw.getManifest();
@@ -57,15 +56,15 @@ public class JarCreationTest extends DrScalaTestCase {
     assertEquals("should have version attribute", "1.0", manifest.getMainAttributes().get(Attributes.Name.MANIFEST_VERSION));
     assertEquals("should only have manifest attribute", 1, manifest.getMainAttributes().size());
 
-    mw.setMainClass("edu.rice.cs.drjava.DrJava");
+    mw.setMainClass("edu.rice.cs.drjava.DrScala");
     manifest = mw.getManifest();
     assertTrue("should have version attribute", manifest.getMainAttributes().containsKey(Attributes.Name.MANIFEST_VERSION));
     assertEquals("should have version attribute", "1.0", manifest.getMainAttributes().get(Attributes.Name.MANIFEST_VERSION));
     assertTrue("should have main class attribute", manifest.getMainAttributes().containsKey(Attributes.Name.MAIN_CLASS));
-    assertEquals("should have main class attribute", "edu.rice.cs.drjava.DrJava", manifest.getMainAttributes().get(Attributes.Name.MAIN_CLASS));
+    assertEquals("should have main class attribute", "edu.rice.cs.drjava.DrScala", manifest.getMainAttributes().get(Attributes.Name.MAIN_CLASS));
     assertEquals("should only have manifest attribute", 2, manifest.getMainAttributes().size());
 
-
+    /* Eventually all of this code will be eliminated. */
     mw = new ManifestWriter();
     mw.addClassPath("koala.dynamicjava");
     manifest = mw.getManifest();
@@ -83,14 +82,14 @@ public class JarCreationTest extends DrScalaTestCase {
     assertEquals("should have correct classpath", "koala.dynamicjava edu.rice.cs.util", manifest.getMainAttributes().get(Attributes.Name.CLASS_PATH));
     assertEquals("have version and classpath", 2, manifest.getMainAttributes().size());
 
-    mw.setMainClass("edu.rice.cs.drjava.DrJava");
+    mw.setMainClass("edu.rice.cs.drjava.DrScala");
     manifest = mw.getManifest();
     assertTrue("should have version attribute", manifest.getMainAttributes().containsKey(Attributes.Name.MANIFEST_VERSION));
     assertEquals("should have version attribute", "1.0", manifest.getMainAttributes().get(Attributes.Name.MANIFEST_VERSION));
     assertTrue("should have classpath attribute", manifest.getMainAttributes().containsKey(Attributes.Name.CLASS_PATH));
     assertEquals("should have correct classpath", "koala.dynamicjava edu.rice.cs.util", manifest.getMainAttributes().get(Attributes.Name.CLASS_PATH));
     assertTrue("should have main class attribute", manifest.getMainAttributes().containsKey(Attributes.Name.MAIN_CLASS));
-    assertEquals("should have main class attribute", "edu.rice.cs.drjava.DrJava", manifest.getMainAttributes().get(Attributes.Name.MAIN_CLASS));
+    assertEquals("should have main class attribute", "edu.rice.cs.drjava.DrScala", manifest.getMainAttributes().get(Attributes.Name.MAIN_CLASS));
     assertEquals("have version and classpath", 3, manifest.getMainAttributes().size());
   }
 

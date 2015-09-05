@@ -45,7 +45,10 @@ import java.awt.*;
 
 import edu.rice.cs.drjava.ui.avail.*;
 import edu.rice.cs.drjava.model.SingleDisplayModel;
-import edu.rice.cs.drjava.model.debug.*;
+
+/* Debugger deactivated in DrScala */
+//import edu.rice.cs.drjava.model.debug.*;
+
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.util.swing.Utilities;

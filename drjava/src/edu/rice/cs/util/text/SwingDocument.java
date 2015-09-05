@@ -49,12 +49,15 @@ import edu.rice.cs.util.swing.Utilities;
 
 import java.util.HashMap;
 
-/** A swing implementation of the toolkit-independent EditDocumentInterface.  This document should use the 
-  * readers/writers locking protocol established in its superclasses but it does not.  Under unfavorable
-  * schedules, methods like append will generate run-time errors because the document can change between the
-  * determination of its length and the insertion of the appended text.  An operation in the document is safe 
+/** A swing implementation of the toolkit-independent EditDocumentInterface.  This document formerly used an 
+  * extension of the readers/writers locking protocol established in its superclasses.  Now all methods that
+  * modify the document must be performed in the event thread, which is the norm for Swing components.
+  * If such methods are executed in other threads their execution may be non-atomic--interleavaing with other
+  * operations that mutate the document.  As a result, such methods (like append) can generate run-time errors 
+  * or garbled results because document changes performed by other threads (including the event thread!) 
+  * can occur at any point during the execution of the method.  As a result, mutating operations in are safe 
   * only if the proper lock is held before it is called OR all update and operations involving multiple reads
-  * are performed in the event thread.
+  * only when all mutating operations are performed in the event thread.
   * 
   * TODO: create a separate DummySwingDocument class for testing and make SwingDocument abstract.
   * @version $Id: SwingDocument.java 5594 2012-06-21 11:23:40Z rcartwright $

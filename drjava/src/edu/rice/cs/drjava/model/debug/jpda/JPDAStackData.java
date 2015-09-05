@@ -34,35 +34,37 @@
  * 
  * END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model.debug.jpda;
+  /* Debugger deactivated in DrScala */
 
-import com.sun.jdi.StackFrame;
-import edu.rice.cs.drjava.model.debug.DebugStackData;
-
-/** Class for keeping track of a stack frame in the debugger.
-  * @version $Id: JPDAStackData.java 5594 2012-06-21 11:23:40Z rcartwright $
-  */
-public class JPDAStackData extends DebugStackData {
-  /** Object for keeping track of a stack frame.
-    * @param frame JPDA's reference to the stack frame
-    */
-  public JPDAStackData(StackFrame frame) {
-    super(methodName(frame), frame.location().lineNumber());
-  }
-  
-  /** Object for keeping track of a stack frame.
-    * @param method method name as "myPackage.MyClass.myMethod"
-    * @param lineNum line number
-    */
-  public JPDAStackData(String method, int lineNum) {
-    super(method, lineNum);
-  }
-  
-  /** Translate the type and method information from a JDI StackFrame to a "myPackage.MyClass.myMethod" method name string.
-    * @param frame JDI stack frame
-    * @return "myPackage.MyClass.myMethod" method name string
-    */
-  public static String methodName(StackFrame frame) {
-    return frame.location().declaringType().name() + "." + frame.location().method().name();
-  }
-}
+//package edu.rice.cs.drjava.model.debug.jpda;
+//
+//import com.sun.jdi.StackFrame;
+//import edu.rice.cs.drjava.model.debug.DebugStackData;
+//
+///** Class for keeping track of a stack frame in the debugger.
+//  * @version $Id: JPDAStackData.java 5594 2012-06-21 11:23:40Z rcartwright $
+//  */
+//public class JPDAStackData extends DebugStackData {
+//  /** Object for keeping track of a stack frame.
+//    * @param frame JPDA's reference to the stack frame
+//    */
+//  public JPDAStackData(StackFrame frame) {
+//    super(methodName(frame), frame.location().lineNumber());
+//  }
+//  
+//  /** Object for keeping track of a stack frame.
+//    * @param method method name as "myPackage.MyClass.myMethod"
+//    * @param lineNum line number
+//    */
+//  public JPDAStackData(String method, int lineNum) {
+//    super(method, lineNum);
+//  }
+//  
+//  /** Translate the type and method information from a JDI StackFrame to a "myPackage.MyClass.myMethod" method name string.
+//    * @param frame JDI stack frame
+//    * @return "myPackage.MyClass.myMethod" method name string
+//    */
+//  public static String methodName(StackFrame frame) {
+//    return frame.location().declaringType().name() + "." + frame.location().method().name();
+//  }
+//}

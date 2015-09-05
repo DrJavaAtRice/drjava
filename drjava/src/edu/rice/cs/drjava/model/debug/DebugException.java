@@ -34,16 +34,17 @@
  * 
  * END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model.debug;
-
-/**
- * Thrown when something goes wrong in the integrated debugger.
- * 
- * @version $Id: DebugException.java 5594 2012-06-21 11:23:40Z rcartwright $
- */
-public class DebugException extends Exception {
-  public DebugException() { super(); }
-  public DebugException(String desc) { super(desc); }
-  public DebugException(Throwable cause) { super(cause); }
-  public DebugException(String desc, Throwable cause) { super(desc, cause); }
-}
+/* Debugger deactivated in DrScala */
+//package edu.rice.cs.drjava.model.debug;
+//
+///**
+// * Thrown when something goes wrong in the integrated debugger.
+// * 
+// * @version $Id: DebugException.java 5594 2012-06-21 11:23:40Z rcartwright $
+// */
+//public class DebugException extends Exception {
+//  public DebugException() { super(); }
+//  public DebugException(String desc) { super(desc); }
+//  public DebugException(Throwable cause) { super(cause); }
+//  public DebugException(String desc, Throwable cause) { super(desc, cause); }
+//}

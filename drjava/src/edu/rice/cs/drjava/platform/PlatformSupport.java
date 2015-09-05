@@ -114,26 +114,26 @@ public interface PlatformSupport {
   public void setMnemonicAt(javax.swing.JTabbedPane obj, int tabIndex, int mnemonic);
   
   /** @return true if file extensions can be registered and unregistered. */
-  public boolean canRegisterFileExtensions();
+  public boolean canRegisterFileExtension();
   
   /** Register .drjava and .djapp file extensions.
     * @return true if registering succeeded */
-  public boolean registerDrJavaFileExtensions();
+  public boolean registerDrScalaFileExtension();
 
   /** Unregister .drjava and .djapp file extensions.
     * @return true if unregistering succeeded */
-  public boolean unregisterDrJavaFileExtensions();
+  public boolean unregisterDrScalaFileExtension();
   
   /** @return true if .drjava and .djapp file extensions are registered. */
-  public boolean areDrJavaFileExtensionsRegistered();
+  public boolean areDrScalaFileExtensionRegistered();
   
   /** Register .java file extension.
     * @return true if registering succeeded */
-  public boolean registerJavaFileExtension();
+  public boolean registerScalaFileExtension();
   
   /** Unregister .java file extension.
     * @return true if unregistering succeeded */
-  public boolean unregisterJavaFileExtension();
+  public boolean unregisterScalaFileExtension();
   
   /** @return true if .java file extension is registered. */
   public boolean isJavaFileExtensionRegistered();

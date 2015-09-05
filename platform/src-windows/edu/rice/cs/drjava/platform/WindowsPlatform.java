@@ -10,7 +10,7 @@
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the names of DrJava, the JavaPLT group, Rice University, nor the
+ *    * Neither the names of DrJava, DrScala, the JavaPLT group, Rice University, nor the
  *      names of its contributors may be used to endorse or promote products
  *      derived from this software without specific prior written permission.
  * 
@@ -102,58 +102,54 @@ class WindowsPlatform extends DefaultPlatform {
   public boolean canRegisterFileExtensions() {
     // only works in .exe version for now
     try {
-      return getDrJavaFile().getName().endsWith(".exe");
+      return getDrScalaFile().getName().endsWith(".exe");
     }
     catch(IOException ioe) { return false; }
   }
   
-  private static final String DRJAVA_PROJECT_PROGID = "DrJava.Project";
-  private static final String DRJAVA_EXTPROCESS_PROGID = "DrJava.ExtProcess";
-  private static final String DRJAVA_JAVA_PROGID = "DrJava.Java";
+  private static final String DRSCALA_PROJECT_PROGID = "DrScala.Project";
+  private static final String DRSCALA_JAVA_PROGID = "DrScala.Scala";
   
-  /** Register .drjava and .djapp file extensions.
+  /** Register .drscala file extension.
     * @return true if registering succeeded */
-  public boolean registerDrJavaFileExtensions() {
-    boolean retval = registerFileExtension(OptionConstants.PROJECT_FILE_EXTENSION, DRJAVA_PROJECT_PROGID, "DrJava project file", "text", "text/plain");
-    retval &= registerFileExtension(OptionConstants.EXTPROCESS_FILE_EXTENSION, DRJAVA_EXTPROCESS_PROGID, "DrJava addon file", "program", "multipart/mixed");
+  public boolean registerDrScalaFileExtensions() {
+    boolean retval = registerFileExtension(OptionConstants.PROJECT_FILE_EXTENSION, DRSCALA_PROJECT_PROGID, "DrScala project file", "text", "text/plain");
     return retval;
   }
 
-  /** Unregister .drjava and .djapp file extensions.
+  /** Unregister .drscala file extension.
     * @return true if unregistering succeeded */
-  public boolean unregisterDrJavaFileExtensions() {
-    boolean retval = unregisterFileExtension(OptionConstants.PROJECT_FILE_EXTENSION, DRJAVA_PROJECT_PROGID);
-    retval &= unregisterFileExtension(OptionConstants.EXTPROCESS_FILE_EXTENSION, DRJAVA_EXTPROCESS_PROGID);
+  public boolean unregisterDrScalaFileExtensions() {
+    boolean retval = unregisterFileExtension(OptionConstants.PROJECT_FILE_EXTENSION, DRSCALA_PROJECT_PROGID);
     return retval;
   }
   
-  /** @return true if .drjava and .djapp file extensions are registered. */
-  public boolean areDrJavaFileExtensionsRegistered() {
+  /** @return true if .drjava file extension are registered. */
+  public boolean isDrScalaFileExtensionRegistered() {
     return
-      isFileExtensionRegistered(OptionConstants.PROJECT_FILE_EXTENSION, DRJAVA_PROJECT_PROGID) && 
-      isFileExtensionRegistered(OptionConstants.EXTPROCESS_FILE_EXTENSION, DRJAVA_EXTPROCESS_PROGID);
+      isFileExtensionRegistered(OptionConstants.PROJECT_FILE_EXTENSION, DRSCALA_PROJECT_PROGID);
   }
   
   /** Register .java file extension.
     * @return true if registering succeeded */
   public boolean registerJavaFileExtension() {
-    return registerFileExtension(".java", DRJAVA_JAVA_PROGID, "Java source file", "text", "text/plain");
+    return registerFileExtension(".scala", DRSCALA_JAVA_PROGID, "Java source file", "text", "text/plain");
   }
   
   /** Unregister .java file extension.
     * @return true if unregistering succeeded */
   public boolean unregisterJavaFileExtension() {
-    return unregisterFileExtension(".java", DRJAVA_JAVA_PROGID);
+    return unregisterFileExtension(".scala", DRSCALA_JAVA_PROGID);
   }
   
   /** @return true if .java file extension is registered. */
   public boolean isJavaFileExtensionRegistered() {
-    return isFileExtensionRegistered(".java", DRJAVA_JAVA_PROGID);
+    return isFileExtensionRegistered(".scala", DRSCALA_JAVA_PROGID);
   }
      
   /** Return true if a file extension is registered.
     * @param extension extension, like ".drjava"
-    * @param progid program ID, like "DrJava.Project"
+    * @param progid program ID, like "DrScala.Project"
     * @return true if a file extension is registered */
   private boolean isFileExtensionRegistered(String extension, String progid) {
     try {
@@ -178,8 +174,8 @@ class WindowsPlatform extends DefaultPlatform {
   
   /** Register a file extension.
     * @param extension extension, like ".drjava"
-    * @param progid program ID, like "DrJava.Project"
-    * @param fileDesc file description, like "DrJava project file"
+    * @param progid program ID, like "DrScala.Project"
+    * @param fileDesc file description, like "DrScala project file"
     * @return true if registering succeeded */
   private boolean registerFileExtension(String extension, String progid, String fileDesc, String perceived, String mime) {
     try {
@@ -219,7 +215,7 @@ class WindowsPlatform extends DefaultPlatform {
       
       WindowsRegistry.setKey(WindowsRegistry.HKEY_CLASSES_ROOT, progid, "", fileDesc);
       
-      WindowsRegistry.setKey(WindowsRegistry.HKEY_CLASSES_ROOT, progid+"\\shell\\open", "FriendlyAppName", "DrJava");
+      WindowsRegistry.setKey(WindowsRegistry.HKEY_CLASSES_ROOT, progid+"\\shell\\open", "FriendlyAppName", "DrScala");
       WindowsRegistry.setKey(WindowsRegistry.HKEY_CLASSES_ROOT, progid+"\\shell\\open\\command", "",
                              cmdLine+" \"%1\" %*");
       return true;
@@ -234,7 +230,7 @@ class WindowsPlatform extends DefaultPlatform {
 
   /** Unregister a file extension.
     * @param extension extension, like ".drjava"
-    * @param progid program ID, like "DrJava.Project"
+    * @param progid program ID, like "DrScala.Project"
     * @return true if unregistering succeeded */
   public boolean unregisterFileExtension(String extension, String progid) {
     boolean otherProgidsLeft = false; // true if other programs are still registered and the file type shouldn't be deleted
@@ -279,10 +275,10 @@ class WindowsPlatform extends DefaultPlatform {
       
       // also need to delete from
       // HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.ext\Application
-      File drjavaFile = null;
+      File drScalaFile = null;
       String ourCmdLine = null;
       try {
-        drjavaFile = getDrJavaFile();
+        drScalaFile = getDrScalaFile();
         ourCmdLine = getCommandLine()+" \"%1\" %*";
       }
       catch(IOException ioe) { return false; }
@@ -296,7 +292,7 @@ class WindowsPlatform extends DefaultPlatform {
         try {
           String s = WindowsRegistry.queryValue(handle, "Application");
           // LOG.log("Application = "+s);
-          if ((s!=null) && (s.equals(drjavaFile.getName()))) {
+          if ((s!=null) && (s.equals(drScalaFile.getName()))) {
             // LOG.log("[3]");
             WindowsRegistry.deleteValue(handle, progid);
             // LOG.log("[4]");
@@ -498,8 +494,8 @@ class WindowsPlatform extends DefaultPlatform {
     }
   }
 
-  private File getDrJavaFile() throws IOException {
-    // detect current DrJava file (.jar or .exe)
+  private File getDrScalaFile() throws IOException {
+    // detect current DrScala file (.jar or .exe)
     String[] cps = System.getProperty("java.class.path").split("\\;", -1);
     File found = null;
     for(String cp: cps) {
@@ -507,8 +503,8 @@ class WindowsPlatform extends DefaultPlatform {
         File f = new File(cp);
         if (!f.exists()) { continue; }
         if (f.isDirectory()) {
-          // this is a directory, maybe DrJava is contained here as individual files
-          File cf = new File(f, edu.rice.cs.drjava.DrJava.class.getName().replace('.', File.separatorChar)+".class");
+          // this is a directory, maybe DrScala is contained here as individual files
+          File cf = new File(f, edu.rice.cs.drjava.DrScala.class.getName().replace('.', File.separatorChar)+".class");
           if (cf.exists() && cf.isFile()) {
             found = f;
             break;
@@ -519,8 +515,8 @@ class WindowsPlatform extends DefaultPlatform {
           java.util.jar.JarFile jf = new java.util.jar.JarFile(f);
           // if it's not a jar file, an exception will already have been thrown
           // so we know it is a jar file
-          // now let's check if it contains DrJava
-          if (jf.getJarEntry(edu.rice.cs.drjava.DrJava.class.getName().replace('.', '/')+".class")!=null) {
+          // now let's check if it contains DrScala
+          if (jf.getJarEntry(edu.rice.cs.drjava.DrScala.class.getName().replace('.', '/')+".class")!=null) {
             found = f;
             break;
           }
@@ -528,15 +524,15 @@ class WindowsPlatform extends DefaultPlatform {
       }
       catch(IOException e) { /* ignore, we'll continue with the next classpath item */ }
     }
-    if (found==null) throw new IOException("DrJava file not found");
+    if (found==null) throw new IOException("DrScala file not found");
     return found;
   }
   
   private String getCommandLine() throws WindowsRegistry.RegistryException, IOException {
-    final File drjavaFile = getDrJavaFile();
+    final File drScalaFile = getDrScalaFile();
     
-    String cmdLine = drjavaFile.getAbsolutePath();
-    if (!drjavaFile.getAbsolutePath().endsWith(".exe")) {
+    String cmdLine = drScalaFile.getAbsolutePath();
+    if (!drScalaFile.getAbsolutePath().endsWith(".exe")) {
       // jar file, we need to start it with Java
       // look up .jar
       String jarProgid = WindowsRegistry.getKey(WindowsRegistry.HKEY_CLASSES_ROOT, ".jar", "");
@@ -546,7 +542,7 @@ class WindowsPlatform extends DefaultPlatform {
       tok.whitespaceRange(' ',' ');
       tok.addQuotes("\"","\"");
       String jarCommand = tok.getNextToken();
-      cmdLine = jarCommand + " -jar "+drjavaFile.getAbsolutePath();
+      cmdLine = jarCommand + " -jar "+drScalaFile.getAbsolutePath();
     }
     return cmdLine;
   }

@@ -932,9 +932,9 @@ public class ConfigFrame extends SwingFrame {
     addOptionComponent(panel, newBooleanOptionComponent(QUIT_PROMPT, false)
                          .setEntireColumn(true));
 
-    // Interactions
-    addOptionComponent(panel, newBooleanOptionComponent(INTERACTIONS_RESET_PROMPT, false)
-                         .setEntireColumn(true));
+//    // Interactions
+//    addOptionComponent(panel, newBooleanOptionComponent(INTERACTIONS_RESET_PROMPT, false)
+//                         .setEntireColumn(true));
     
     addOptionComponent(panel, 
                        newBooleanOptionComponent(INTERACTIONS_EXIT_PROMPT,false)
@@ -1079,56 +1079,56 @@ public class ConfigFrame extends SwingFrame {
 
   /** Adds all of the components for the file types panel of the preferences window. */
   private void _setupFileTypesPanel(ConfigPanel panel) {
-    if (PlatformFactory.ONLY.canRegisterFileExtensions()) {
-      addOptionComponent(panel, new LabelComponent("<html>Assign DrJava project files and DrJava extensions<br>"+
-                                                   "(with the extensions .drjava and .djapp) to DrJava.<br>"+
-                                                   "When double-clicking on a .drjava file, DrJava will open it.</html>", this, true));
+    if (PlatformFactory.ONLY.canRegisterFileExtension()) {
+      addOptionComponent(panel, new LabelComponent("<html>Assign DrScala project file extension<br>"+
+                                                   "(with the extensions .drscala) to DrScala.<br>"+
+                                                   "When double-clicking on a .drscala file, DrScala will open it.</html>", this, true));
       
       panel.addComponent(new ButtonComponent(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          if (PlatformFactory.ONLY.registerDrJavaFileExtensions()) {
+          if (PlatformFactory.ONLY.registerDrScalaFileExtension()) {
             JOptionPane.showMessageDialog(ConfigFrame.this,
-                                          "Successfully set .drjava and .djapp file associations.",
+                                          "Successfully set .drscala file association.",
                                           "Success",
                                           JOptionPane.INFORMATION_MESSAGE); 
           }
           else {
             JOptionPane.showMessageDialog(ConfigFrame.this,
-                                          "Could not set .drjava and .djapp file associations.",
+                                          "Could not set .drjava file association.",
                                           "File Types Error",
                                           JOptionPane.ERROR_MESSAGE); 
           }
         }
-      }, "Associate .drjava and .djapp Files with DrJava", this, "This associates .drjava and .djapp files with DrJava."));
+      }, "Associate .drjava Files with DrJava", this, "This associates .drscala files with DrJava."));
 
       addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
       
       panel.addComponent(new ButtonComponent(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          if (PlatformFactory.ONLY.unregisterDrJavaFileExtensions()) {
+          if (PlatformFactory.ONLY.unregisterDrScalaFileExtension()) {
             JOptionPane.showMessageDialog(ConfigFrame.this,
-                                          "Successfully removed .drjava and .djapp file associations.",
+                                          "Successfully removed .drscala file association.",
                                           "Success",
                                           JOptionPane.INFORMATION_MESSAGE); 
           }
           else {
             JOptionPane.showMessageDialog(ConfigFrame.this,
-                                          "Could not remove .drjava and .djapp file associations.",
+                                          "Could not remove .drscala file association.",
                                           "File Types Error",
                                           JOptionPane.ERROR_MESSAGE); 
           }
         }
-      }, "Remove .drjava and .djapp File Associations", this, "This removes the association of .drjava and .djapp files with DrJava."));
+      }, "Remove .drscala", this, "This removes the association of .drscala files with DrScala."));
       
       addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
       addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
       addOptionComponent(panel, new LabelComponent("<html>Assign Java source files with the<br>"+
-                                                   "extension .java to DrJava. When double-clicking<br>"+
-                                                   "on a .java file, DrJava will open it.</html>", this, true));
+                                                   "extension .scala to DrScala. When double-clicking<br>"+
+                                                   "on a .scala file, DrScala will open it.</html>", this, true));
 
       panel.addComponent(new ButtonComponent(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          if (PlatformFactory.ONLY.registerJavaFileExtension()) {
+          if (PlatformFactory.ONLY.registerScalaFileExtension()) {
             JOptionPane.showMessageDialog(ConfigFrame.this,
                                           "Successfully set .java file association.",
                                           "Success",
@@ -1147,7 +1147,7 @@ public class ConfigFrame extends SwingFrame {
 
       panel.addComponent(new ButtonComponent(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          if (PlatformFactory.ONLY.unregisterJavaFileExtension()) {
+          if (PlatformFactory.ONLY.unregisterScalaFileExtension()) {
             JOptionPane.showMessageDialog(ConfigFrame.this,
                                           "Successfully removed .java file association.",
                                           "Success",

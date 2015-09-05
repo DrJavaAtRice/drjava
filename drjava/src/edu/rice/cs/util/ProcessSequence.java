@@ -186,8 +186,8 @@ public class ProcessSequence extends Process {
     }
     connectProcess(_processes[_index]);
     _deathThread.start();
-//    _debugOutput.println("\n\nProcessSequence started\n\n");
-//    _debugOutput.flush();
+    _debugOutput.println("\n\nProcessSequence started\n\n");
+    _debugOutput.flush();
   }
   
   /**

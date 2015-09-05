@@ -48,7 +48,10 @@ import javax.swing.event.DocumentListener;
 import javax.swing.event.UndoableEditListener;
 import javax.swing.text.*;
 
-import edu.rice.cs.drjava.model.debug.Breakpoint;
+
+/* Debugger deactivated in DrScala */
+//import edu.rice.cs.drjava.model.debug.Breakpoint;
+
 import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.drjava.model.FinalizationListener;
@@ -142,9 +145,11 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   public void print() throws PrinterException, BadLocationException, FileMovedException {
     throw new UnsupportedOperationException("Dummy method");
   }
-  public void removeFromDebugger() { throw new UnsupportedOperationException("Dummy method"); }
-
-  public RegionManager<Breakpoint> getBreakpointManager() { throw new UnsupportedOperationException("Dummy method"); }
+  
+  /* Debugger deactivated in DrScala */
+//  public void removeFromDebugger() { throw new UnsupportedOperationException("Dummy method"); }
+//
+//  public RegionManager<Breakpoint> getBreakpointManager() { throw new UnsupportedOperationException("Dummy method"); }
 
   public RegionManager<MovingDocumentRegion> getBookmarkManager() { throw new UnsupportedOperationException("Dummy method"); }
 

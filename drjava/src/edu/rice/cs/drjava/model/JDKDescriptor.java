@@ -92,16 +92,17 @@ public abstract class JDKDescriptor {
     return getAdapterForCompiler(); // ignore the version
   }
   
-  /** Return the class name of the debugger adapter.
-    * @return class name of debugger, or null if no debugger */
-  public abstract String getAdapterForDebugger();
-
-  /** Return the class name of the debugger adapter.
-    * @param guessedVersion the guessed version of the compiler
-    * @return class name of debugger, or null if no debugger */
-  public String getAdapterForDebugger(JavaVersion.FullVersion guessedVersion) {
-    return getAdapterForDebugger(); // ignore version
-  }
+  /* Debugger deactivated in DrScala */
+//  /** Return the class name of the debugger adapter.
+//    * @return class name of debugger, or null if no debugger */
+//  public abstract String getAdapterForDebugger();
+//
+//  /** Return the class name of the debugger adapter.
+//    * @param guessedVersion the guessed version of the compiler
+//    * @return class name of debugger, or null if no debugger */
+//  public String getAdapterForDebugger(JavaVersion.FullVersion guessedVersion) {
+//    return getAdapterForDebugger(); // ignore version
+//  }
   
   /** Return true if the file (jar file or directory) contains the compiler.
     * @return true if the file contains the compiler */
@@ -177,10 +178,12 @@ public abstract class JDKDescriptor {
     public String getAdapterForCompiler(JavaVersion.FullVersion guessedVersion) {
       return JDKToolsLibrary.adapterForCompiler(guessedVersion);
     }
-    public String getAdapterForDebugger() { return ""; }
-    public String getAdapterForDebugger(JavaVersion.FullVersion guessedVersion) {
-      return JDKToolsLibrary.adapterForDebugger(guessedVersion);
-    }
+    
+    /* Debugger deactivated in DrScala */
+//    public String getAdapterForDebugger() { return ""; }
+//    public String getAdapterForDebugger(JavaVersion.FullVersion guessedVersion) {
+//      return JDKToolsLibrary.adapterForDebugger(guessedVersion);
+//    }
     public boolean containsCompiler(File f) { return true; }
     public JavaVersion getMinimumMajorVersion() { return JavaVersion.JAVA_1_1; }
     public Iterable<File> getAdditionalCompilerFiles(File compiler) throws FileNotFoundException {

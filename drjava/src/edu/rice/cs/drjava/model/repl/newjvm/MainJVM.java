@@ -47,11 +47,14 @@ import java.util.concurrent.TimeoutException;
 
 import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.config.OptionConstants;
-import edu.rice.cs.drjava.model.repl.*;
-import edu.rice.cs.drjava.model.repl.newjvm.Interpreter;
 import edu.rice.cs.drjava.model.junit.JUnitError;
 import edu.rice.cs.drjava.model.junit.JUnitModelCallback;
-import edu.rice.cs.drjava.model.debug.DebugModelCallback;
+import edu.rice.cs.drjava.model.repl.*;
+import edu.rice.cs.drjava.model.repl.newjvm.Interpreter;
+
+/* Debugger deactivated in DrScala */
+//import edu.rice.cs.drjava.model.debug.DebugModelCallback;
+
 import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
 
@@ -116,9 +119,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   /** Listens to JUnit-related events. */
   private volatile JUnitModelCallback _junitModel;
   
-  /** Listens to debug-related events */
-  private volatile DebugModelCallback _debugModel;
-  
+  /* Debugger deactivated in DrScala */  
+//  /** Listens to debug-related events */
+//  private volatile DebugModelCallback _debugModel;
   
   /* JVM execution options */
   
@@ -140,7 +143,11 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     _workingDir = wd;
     _interactionsModel = new DummyInteractionsModel();
     _junitModel = new DummyJUnitModel();
-    _debugModel = new DummyDebugModel();
+    
+    
+    /* Debugger deactivated in DrScala */
+//    _debugModel = new DummyDebugModel();
+    
     _state = new StateMonitor<State>(new FreshState());
     _startupClassPath = ReflectUtil.SYSTEM_CLASS_PATH;
   }
@@ -316,10 +323,12 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   /** Provides an object to listen to test-related events.*/
   public void setJUnitModel(JUnitModelCallback model) { _junitModel = model; }
   
-  /** Provides an object to listen to debug-related events.
-    * @param model the debug model
-    */
-  public void setDebugModel(DebugModelCallback model) { _debugModel = model; }
+  
+  /* Debugger deactivated in DrScala */
+//  /** Provides an object to listen to debug-related events.
+//    * @param model the debug model
+//    */
+//  public void setDebugModel(DebugModelCallback model) { _debugModel = model; }
   
   /** Sets whether the remote JVM will run "assert" statements after the next restart. */
   public void setAllowAssertions(boolean allow) { _allowAssertions = allow; }
@@ -673,13 +682,17 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     // ------------------------------------------------------
     
     if (_allowAssertions) { jvmArgs.add("-ea"); }
-    int debugPort = _getDebugPort();
-    if (debugPort > -1) {
-      jvmArgs.add("-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=" + debugPort);
-      jvmArgs.add("-Xdebug");
-      jvmArgs.add("-Xnoagent");
-      jvmArgs.add("-Djava.compiler=NONE");
-    }
+    
+    
+/* Debugger deactivated in DrScala */
+//    int debugPort = _getDebugPort();
+//    if (debugPort > -1) {
+//      jvmArgs.add("-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=" + debugPort);
+//      jvmArgs.add("-Xdebug");
+//      jvmArgs.add("-Xnoagent");
+//      jvmArgs.add("-Djava.compiler=NONE");
+//    }
+    
     String slaveMemory = DrScala.getConfig().getSetting(SLAVE_JVM_XMX);
     if (!"".equals(slaveMemory) && !heapSizeChoices.get(0).equals(slaveMemory)) {
       jvmArgs.add("-Xmx" + slaveMemory + "M");
@@ -756,15 +769,17 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     invokeSlave(jvmb);
   }
   
-  /** Returns the debug port to use, as specified by the model. Returns -1 if no usable port could be found. */
-  private int _getDebugPort() {
-    int port = -1;
-    try {  port = _interactionsModel.getDebugPort(); }
-    catch (IOException ioe) {
-      /* Can't find port; don't use debugger */
-    }
-    return port;
-  }
+  
+  /* Debugger deactivated in DrScala */
+//  /** Returns the debug port to use, as specified by the model. Returns -1 if no usable port could be found. */
+//  private int _getDebugPort() {
+//    int port = -1;
+//    try {  port = _interactionsModel.getDebugPort(); }
+//    catch (IOException ioe) {
+//      /* Can't find port; don't use debugger */
+//    }
+//    return port;
+//  }
   
   /** Lets the model know if any exceptions occur while communicating with the Interpreter JVM. */
   private void _handleRemoteException(RemoteException e) {
@@ -1049,7 +1064,10 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   
   /** InteractionsModel which does not react to events. */
   public static class DummyInteractionsModel implements InteractionsModelCallback {
-    public int getDebugPort() throws IOException { return -1; }
+    
+/* Debugger deactivated in DrScala */
+//    public int getDebugPort() throws IOException { return -1; }
+    
     public void replSystemOutPrint(String s) { }
     public void replSystemErrPrint(String s) { }
     public String getConsoleInput() {
@@ -1089,9 +1107,11 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     public void junitJVMReady() { }
   }
   
-  /** DebugModelCallback which does not react to events. */
-  public static class DummyDebugModel implements DebugModelCallback {
-    public void notifyDebugInterpreterAssignment(String name) {
-    }
-  }
+/* Debugger deactivated in DrScala */
+  
+//  /** DebugModelCallback which does not react to events. */
+//  public static class DummyDebugModel implements DebugModelCallback {
+//    public void notifyDebugInterpreterAssignment(String name) {
+//    }
+//  }
 }

@@ -3660,18 +3660,18 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       
       // check file associations if desired by user
       boolean alreadyShowedDialog = false;
-      if (PlatformFactory.ONLY.canRegisterFileExtensions()) {
+      if (PlatformFactory.ONLY.canRegisterFileExtension()) {
         // only try to register file extensions if this platform supports it
         if (DrScala.getConfig().getSetting(OptionConstants.FILE_EXT_REGISTRATION)
               .equals(OptionConstants.FILE_EXT_REGISTRATION_CHOICES.get(2))) { // Always
           // always set file associations
-          PlatformFactory.ONLY.registerDrJavaFileExtensions();
-          PlatformFactory.ONLY.registerJavaFileExtension();
+          PlatformFactory.ONLY.registerDrScalaFileExtension();
+          PlatformFactory.ONLY.registerScalaFileExtension();
         }
         else if (DrScala.getConfig().getSetting(OptionConstants.FILE_EXT_REGISTRATION)
                    .equals(OptionConstants.FileExtRegistrationChoices.ASK_ME) && // Ask me
                  ! Utilities.TEST_MODE &&
-                 ((!PlatformFactory.ONLY.areDrJavaFileExtensionsRegistered()) ||
+                 ((!PlatformFactory.ONLY.areDrScalaFileExtensionRegistered()) ||
                   (!PlatformFactory.ONLY.isJavaFileExtensionRegistered()))) {
           alreadyShowedDialog = true;
           EventQueue.invokeLater(new Runnable() {
@@ -3688,8 +3688,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
               rc = JOptionPane.showOptionDialog(MainFrame.this, text, "Set File Associations?", JOptionPane.YES_NO_OPTION,
                                                 JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
               if ((rc == 0) || (rc==2)) { // Yes or Always
-                PlatformFactory.ONLY.registerDrJavaFileExtensions();
-                PlatformFactory.ONLY.registerJavaFileExtension();
+                PlatformFactory.ONLY.registerDrScalaFileExtension();
+                PlatformFactory.ONLY.registerScalaFileExtension();
               }
               if (rc==2) { // Always
                 DrScala.getConfig().setSetting(OptionConstants.FILE_EXT_REGISTRATION,

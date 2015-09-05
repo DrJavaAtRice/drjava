@@ -191,8 +191,8 @@ public class ProcessChain extends Process {
                                  new ProcessChainThreadGroup(this));
     _redirectors.add(r);
     r.start();
-//    _debugOutput.println("\n\nProcessChain started\n\n");
-//    _debugOutput.flush();
+    _debugOutput.println("\n\nProcessChain started\n\n");
+    _debugOutput.flush();
   }
   
 //  /**

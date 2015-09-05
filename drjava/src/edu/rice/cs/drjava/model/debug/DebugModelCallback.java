@@ -34,17 +34,19 @@
  * 
  * END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model.debug;
+/* Debugger deactivated in DrScala */
 
-/** Callback interface which allows a Debugger to respond to events fired 
-  * in a remote jvm.
-  * @version $Id: DebugModelCallback.java 5594 2012-06-21 11:23:40Z rcartwright $
-  */
-public interface DebugModelCallback {
+//package edu.rice.cs.drjava.model.debug;
+//
+///** Callback interface which allows a Debugger to respond to events fired 
+//  * in a remote jvm.
+//  * @version $Id: DebugModelCallback.java 5594 2012-06-21 11:23:40Z rcartwright $
+//  */
+//public interface DebugModelCallback {
 //  /** Notifies the debugger that an assignment has been made in the given debug interpreter.
 //    * Does not notify on declarations.
 //    * Not currently used.
 //    * @param name the name of the interpreter
 //    */
 //  public void notifyDebugInterpreterAssignment(String name);
-}
+//}

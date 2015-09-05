@@ -46,7 +46,10 @@ import javax.swing.text.Position;
 
 import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.util.docnavigation.*;
-import edu.rice.cs.drjava.model.debug.Breakpoint;
+
+/* Debugger deactivated in DrScala */
+//import edu.rice.cs.drjava.model.debug.Breakpoint;
+
 import edu.rice.cs.drjava.model.Finalizable;
 import edu.rice.cs.drjava.model.definitions.*;
 
@@ -328,9 +331,10 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
   
   /** Called when this document is reset so it can notify the cache. */
   public void documentReset();
-    
-  /** @return the breakpoint region manager. */
-  public RegionManager<Breakpoint> getBreakpointManager();
+
+  /* Debugger deactivated in DrScala */    
+//  /** @return the breakpoint region manager. */
+//  public RegionManager<Breakpoint> getBreakpointManager();
     
   /** @return the bookmark region manager. */
   public RegionManager<MovingDocumentRegion> getBookmarkManager();
@@ -348,9 +352,10 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
   
   /** Remove the browser regions for this document from the browser history manager. */
   public void clearBrowserRegions();
-
-  /** Called when this document is being closed, removing related state from the debug manager. */
-  public void removeFromDebugger();
+  
+  /* Debugger deactivated in DrScala */
+//  /** Called when this document is being closed, removing related state from the debug manager. */
+//  public void removeFromDebugger();
   
   /** Sets the document as modified. */
   public void updateModifiedSinceSave();

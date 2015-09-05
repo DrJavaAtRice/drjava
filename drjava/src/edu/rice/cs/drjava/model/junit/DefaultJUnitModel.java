@@ -416,9 +416,13 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
                 public void visit(int version, int access, String name, String sig, String sup, String[] inters) {
                   className.set(name.replace('/', '.'));
                 }
-                public void visitSource(String source, String debug) {
-                  sourceName.set(source);
-                }
+                
+                
+                /* Debugger deactivated in DrScala. No longer used */
+//                public void visitSource(String source /*, String debug */) {
+//                  sourceName.set(source);
+//                }
+                
                 public void visitOuterClass(String owner, String name, String desc) { }
                 public AnnotationVisitor visitAnnotation(String desc, boolean visible) { return null; }
                 public void visitAttribute(Attribute attr) { }

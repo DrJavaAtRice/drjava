@@ -69,8 +69,11 @@ import edu.rice.cs.plt.reflect.JavaVersion.FullVersion;
 
 import edu.rice.cs.drjava.model.compiler.CompilerInterface;
 import edu.rice.cs.drjava.model.compiler.NoCompilerAvailable;
-import edu.rice.cs.drjava.model.debug.Debugger;
-import edu.rice.cs.drjava.model.debug.NoDebuggerAvailable;
+
+/* Debugger deactivated in DrScala */
+//import edu.rice.cs.drjava.model.debug.Debugger;
+//import edu.rice.cs.drjava.model.debug.NoDebuggerAvailable;
+
 import edu.rice.cs.drjava.model.javadoc.ScaladocModel;
 import edu.rice.cs.drjava.model.javadoc.DefaultScaladocModel;
 import edu.rice.cs.drjava.model.javadoc.NoScaladocAvailable;
@@ -121,9 +124,9 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
   private final List<File> _bootClassPath; // may be null (i.e. compiler's internal behavior)
   
   private JarJDKToolsLibrary(File location, FullVersion version, JDKDescriptor jdkDescriptor,
-                             CompilerInterface compiler, Debugger debugger,
+                             CompilerInterface compiler, /* Debugger debugger, */
                              ScaladocModel scaladoc, List<File> bootClassPath) {
-    super(version, jdkDescriptor, compiler, debugger, scaladoc);
+    super(version, jdkDescriptor, compiler, /* debugger, */ scaladoc);
     _location = location;
     _bootClassPath = bootClassPath;
   }
@@ -149,7 +152,9 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     assert desc != null;
     
     CompilerInterface compiler = NoCompilerAvailable.ONLY;
-    Debugger debugger = NoDebuggerAvailable.ONLY;
+    /* Debugger deactivated in DrScala */
+//    Debugger debugger = NoDebuggerAvailable.ONLY;
+    
     ScaladocModel scaladoc = new NoScaladocAvailable(model);
     
     FullVersion version = desc.guessVersion(f);
@@ -226,25 +231,26 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         catch (LinkageError e) { /* can't load */ }
       }
       
-      String debuggerAdapter = desc.getAdapterForDebugger(version);
-      String debuggerPackage = "edu.rice.cs.drjava.model.debug.jpda";
-      if (debuggerAdapter != null) {
-        try {
-          JDKToolsLibrary.msg("                 loading debugger: "+debuggerAdapter);
-          Class<?>[] sig = { GlobalModel.class };
-          // can't use loadLibraryAdapter because we need to preempt the whole package
-          ClassLoader debugLoader = new PreemptingClassLoader(new PathClassLoader(loader, path), debuggerPackage);
-          Debugger attempt = (Debugger) ReflectUtil.loadObject(debugLoader, debuggerAdapter, sig, model);        
-          JDKToolsLibrary.msg("                 debugger=" + attempt.getClass().getName());
-          if (attempt.isAvailable()) { debugger = attempt; }
-        }
-        catch (ReflectException e) {
-          JDKToolsLibrary.msg("                 no debugger, ReflectException " + e); /* can't load */
-        }
-        catch (LinkageError e) {
-          JDKToolsLibrary.msg("                 no debugger, LinkageError " + e);  /* can't load */
-        }
-      }
+      /* Debugger deactivated in DrScala */
+//      String debuggerAdapter = desc.getAdapterForDebugger(version);
+//      String debuggerPackage = "edu.rice.cs.drjava.model.debug.jpda";
+//      if (debuggerAdapter != null) {
+//        try {
+//          JDKToolsLibrary.msg("                 loading debugger: "+debuggerAdapter);
+//          Class<?>[] sig = { GlobalModel.class };
+//          // can't use loadLibraryAdapter because we need to preempt the whole package
+//          ClassLoader debugLoader = new PreemptingClassLoader(new PathClassLoader(loader, path), debuggerPackage);
+//          Debugger attempt = (Debugger) ReflectUtil.loadObject(debugLoader, debuggerAdapter, sig, model);        
+//          JDKToolsLibrary.msg("                 debugger=" + attempt.getClass().getName());
+//          if (attempt.isAvailable()) { debugger = attempt; }
+//        }
+//        catch (ReflectException e) {
+//          JDKToolsLibrary.msg("                 no debugger, ReflectException " + e); /* can't load */
+//        }
+//        catch (LinkageError e) {
+//          JDKToolsLibrary.msg("                 no debugger, LinkageError " + e);  /* can't load */
+//        }
+//      }
       
       try {
         new PathClassLoader(loader, path).loadClass("scala.tools.nsc.ScalaDoc");
@@ -258,7 +264,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         
     }
     
-    return new JarJDKToolsLibrary(f, version, desc, compiler, debugger, scaladoc, bootClassPath);
+    return new JarJDKToolsLibrary(f, version, desc, compiler, /* debugger, */ scaladoc, bootClassPath);
   }
   
   public static FullVersion guessVersion(File f, JDKDescriptor desc) {
@@ -536,7 +542,8 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         }
         else {
           JDKToolsLibrary.msg("This library is not valid: compiler=" + lib.compiler().isAvailable() +
-                              " debugger=" + lib.debugger().isAvailable() + " scaladoc=" + lib.scaladoc().isAvailable());
+                             /* " debugger=" + lib.debugger().isAvailable() + */ 
+                              " scaladoc=" + lib.scaladoc().isAvailable());
         }
       }
       _log.log("Valid Results: \n***** results = " + results + "\n***** compound results = " + compoundResults);
@@ -716,7 +723,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
   /** Search for JDK descriptors.
     * Note: This does not work properly if not all classes are in a jar or in the same directory.
     * For example, when doing an "ant run", the classes are spread across classes/base and classes/lib,
-    * with the edu.rice.cs.drjava.DrJava class in classes/base but the descriptors in classes/lib. */
+    * with the edu.rice.cs.drjava.DrScala class in classes/base but the descriptors in classes/lib. */
   private static Iterable<JDKDescriptor> searchForJDKDescriptors() {
     JDKToolsLibrary.msg("---- Searching for JDKDescriptors in executable ----");
     long t0 = System.currentTimeMillis();

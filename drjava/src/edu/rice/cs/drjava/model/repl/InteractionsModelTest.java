@@ -425,27 +425,29 @@ public final class InteractionsModelTest extends DrScalaTestCase {
   // TO DO: test that the correct history is returned (careful of last newline)
   
   
-  /** Tests that a debug port can be generated. */
-  public void testDebugPort() throws IOException {
-     _log.log("testDebugPort started");
-    int port = _model.getDebugPort();
-    assertTrue("generated debug port", port != -1);
-    
-    // Resetting after startUp should change the port
-    _model.setWaitingForFirstInterpreter(false);
-    _model.interpreterResetting();
-    int newPort = _model.getDebugPort();
-    assertTrue("debug port should change", newPort != port);
-    
-    // Set port
-    _model.setDebugPort(5);
-    assertEquals("manually set debug port", 5, _model.getDebugPort());
-    
-    // Port should stay -1 after setting it
-    _model.setDebugPort(-1);
-    assertEquals("debug port should be -1", -1, _model.getDebugPort());
-    _log.log("testDebugPort ended");
-  }
+/* Debugger deactivated in DrScala */
+  
+//  /** Tests that a debug port can be generated. */
+//  public void testDebugPort() throws IOException {
+//     _log.log("testDebugPort started");
+//    int port = _model.getDebugPort();
+//    assertTrue("generated debug port", port != -1);
+//    
+//    // Resetting after startUp should change the port
+//    _model.setWaitingForFirstInterpreter(false);
+//    _model.interpreterResetting();
+//    int newPort = _model.getDebugPort();
+//    assertTrue("debug port should change", newPort != port);
+//    
+//    // Set port
+//    _model.setDebugPort(5);
+//    assertEquals("manually set debug port", 5, _model.getDebugPort());
+//    
+//    // Port should stay -1 after setting it
+//    _model.setDebugPort(-1);
+//    assertEquals("debug port should be -1", -1, _model.getDebugPort());
+//    _log.log("testDebugPort ended");
+//  }
   
   /** Tests that an interactions history can be loaded in as a script. */
   public void testScriptLoading() throws Exception {

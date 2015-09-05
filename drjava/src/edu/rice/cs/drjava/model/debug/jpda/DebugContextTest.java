@@ -36,8 +36,8 @@
 
 /* Debugger deactivated in DrScala */
 
-package edu.rice.cs.drjava.model.debug.jpda;
-
+//package edu.rice.cs.drjava.model.debug.jpda;
+//
 //import java.io.*;
 //import java.util.ArrayList;
 //import java.util.Vector;
@@ -51,15 +51,12 @@ package edu.rice.cs.drjava.model.debug.jpda;
 //
 //import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
-/** More tests over the JPDA debugger.
- *  @version $Id: DebugContextTest.java 5594 2012-06-21 11:23:40Z rcartwright $
- */
-public final class DebugContextTest /* extends JPDADebugTestCase */ {
-   
-  public void testStub() { /* here just to prevent a "no tests found" error */ }
-  
-  
-//  inherits _log from GlobalModelTestCase 
+///** More tests over the JPDA debugger.
+// *  @version $Id: DebugContextTest.java 5594 2012-06-21 11:23:40Z rcartwright $
+// */
+//public final class DebugContextTest /* extends JPDADebugTestCase */ {
+//  
+////  inherits _log from GlobalModelTestCase 
 //  public static Log _log = new Log("Debug.txt", false);
   
   /* Debugger deactivated in DrScala */
@@ -773,4 +770,4 @@ public final class DebugContextTest /* extends JPDADebugTestCase */ {
 //    _debugger.removeListener(debugListener);
 //    debug.logEnd();
 //  }
-}
+//}

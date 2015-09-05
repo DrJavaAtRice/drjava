@@ -57,8 +57,11 @@ import edu.rice.cs.drjava.Version;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.FileRegion;
-import edu.rice.cs.drjava.model.debug.DebugBreakpointData;
-import edu.rice.cs.drjava.model.debug.DebugWatchData;
+
+/* Debugger deactivated in DrScala */
+//import edu.rice.cs.drjava.model.debug.DebugBreakpointData;
+//import edu.rice.cs.drjava.model.debug.DebugWatchData;
+
 import edu.rice.cs.util.XMLConfig;
 
 import edu.rice.cs.plt.text.TextUtil;
@@ -103,8 +106,11 @@ public class ProjectProfile implements ProjectFileIR {
   private HashMap<OptionParser<?>,String> _storedPreferences = new HashMap<OptionParser<?>,String>();
   
   private List<FileRegion> _bookmarks = new ArrayList<FileRegion>();
-  private List<DebugBreakpointData> _breakpoints = new ArrayList<DebugBreakpointData>();
-  private List<DebugWatchData> _watches = new ArrayList<DebugWatchData>();
+  
+  
+  /* Debugger deactivated in DrScala */
+//  private List<DebugBreakpointData> _breakpoints = new ArrayList<DebugBreakpointData>();
+//  private List<DebugWatchData> _watches = new ArrayList<DebugWatchData>();
   
   private String _version = "unknown";
   
@@ -196,11 +202,11 @@ public class ProjectProfile implements ProjectFileIR {
   /** @return an array of the bookmarks in this project. */
   public FileRegion[] getBookmarks() { return _bookmarks.toArray(new FileRegion[_bookmarks.size()]); }
   
-  /** @return an array of the breakpoints in this project. */
-  public DebugBreakpointData[] getBreakpoints() { return _breakpoints.toArray(new DebugBreakpointData[_breakpoints.size()]); }
-  
-  /** @return an array of the watches in this project. */
-  public DebugWatchData[] getWatches() { return _watches.toArray(new DebugWatchData[_watches.size()]); }
+//  /** @return an array of the breakpoints in this project. */
+//  public DebugBreakpointData[] getBreakpoints() { return _breakpoints.toArray(new DebugBreakpointData[_breakpoints.size()]); }
+//  
+//  /** @return an array of the watches in this project. */
+//  public DebugWatchData[] getWatches() { return _watches.toArray(new DebugWatchData[_watches.size()]); }
   
   public boolean getAutoRefreshStatus() { return _autoRefreshStatus; }
 
@@ -271,8 +277,11 @@ public class ProjectProfile implements ProjectFileIR {
   public void setCreateJarFlags(int createJarFlags) { _createJarFlags = createJarFlags; }
   
   public void setBookmarks(List<? extends FileRegion> bms) { _bookmarks = new ArrayList<FileRegion>(bms); }
-  public void setBreakpoints(List<? extends DebugBreakpointData> bps) { _breakpoints = new ArrayList<DebugBreakpointData>(bps); }
-  public void setWatches(List<? extends DebugWatchData> ws) { _watches = new ArrayList<DebugWatchData>(ws); }
+  
+  
+  /* Debugger deactivated in DrScala */
+//  public void setBreakpoints(List<? extends DebugBreakpointData> bps) { _breakpoints = new ArrayList<DebugBreakpointData>(bps); }
+//  public void setWatches(List<? extends DebugWatchData> ws) { _watches = new ArrayList<DebugWatchData>(ws); }
   
   public void setAutoRefreshStatus(boolean status) { _autoRefreshStatus = status;}
 
@@ -443,24 +452,28 @@ public class ProjectProfile implements ProjectFileIR {
         xc.set(".absolute", String.valueOf(cp.keepAbsolute()), f, true);
       }
     }
-    xc.createNode("drjava/project/breakpoints");
-    if (!_breakpoints.isEmpty()) {
-      for(DebugBreakpointData bp: _breakpoints) {
-        Node f = xc.createNode("drjava/project/breakpoints/breakpoint", null, false);
-        path = FileOps.stringMakeRelativeTo(bp.getFile(), _projectRoot);
-        path = replace(path, File.separator, "/");
-        xc.set(".file", path, f, true);
-        xc.set(".line", String.valueOf(bp.getLineNumber()), f, true);
-        xc.set(".enabled", String.valueOf(bp.isEnabled()), f, true);
-      }
-    }
-    xc.createNode("drjava/project/watches");
-    if (!_watches.isEmpty()) {
-      for(DebugWatchData w: _watches) {
-        Node f = xc.createNode("drjava/project/watches/watch", null, false);
-        xc.set(".name", w.getName(), f, true);
-      }
-    }
+    
+    
+    /* Debugger deactivated in DrScala */
+//    xc.createNode("drjava/project/breakpoints");
+//    if (!_breakpoints.isEmpty()) {
+//      for(DebugBreakpointData bp: _breakpoints) {
+//        Node f = xc.createNode("drjava/project/breakpoints/breakpoint", null, false);
+//        path = FileOps.stringMakeRelativeTo(bp.getFile(), _projectRoot);
+//        path = replace(path, File.separator, "/");
+//        xc.set(".file", path, f, true);
+//        xc.set(".line", String.valueOf(bp.getLineNumber()), f, true);
+//        xc.set(".enabled", String.valueOf(bp.isEnabled()), f, true);
+//      }
+//    }
+//    xc.createNode("drjava/project/watches");
+//    if (!_watches.isEmpty()) {
+//      for(DebugWatchData w: _watches) {
+//        Node f = xc.createNode("drjava/project/watches/watch", null, false);
+//        xc.set(".name", w.getName(), f, true);
+//      }
+//    }
+    
     xc.createNode("drjava/project/bookmarks");
     if (!_bookmarks.isEmpty()) {
       for (FileRegion bm: _bookmarks) {
@@ -615,21 +628,21 @@ public class ProjectProfile implements ProjectFileIR {
     }
     else fw.write("\n;; no create jar flags");
 
-    // write breakpoints
-    if (!_breakpoints.isEmpty()) {
-      fw.write("\n(breakpoints");
-      for(DebugBreakpointData bp: _breakpoints) { fw.write("\n" + encodeBreakpointRelative(bp, "  ")); }
-      fw.write(")"); // close the breakpoints expression
-    }
-    else fw.write("\n;; no breakpoints");
-
-    // write watches
-    if (!_watches.isEmpty()) {
-      fw.write("\n(watches");
-      for(DebugWatchData w: _watches) { fw.write("\n" + encodeWatch(w, "  ")); }
-      fw.write(")"); // close the watches expression
-    }
-    else fw.write("\n;; no watches");
+//    // write breakpoints
+//    if (!_breakpoints.isEmpty()) {
+//      fw.write("\n(breakpoints");
+//      for(DebugBreakpointData bp: _breakpoints) { fw.write("\n" + encodeBreakpointRelative(bp, "  ")); }
+//      fw.write(")"); // close the breakpoints expression
+//    }
+//    else fw.write("\n;; no breakpoints");
+//
+//    // write watches
+//    if (!_watches.isEmpty()) {
+//      fw.write("\n(watches");
+//      for(DebugWatchData w: _watches) { fw.write("\n" + encodeWatch(w, "  ")); }
+//      fw.write(")"); // close the watches expression
+//    }
+//    else fw.write("\n;; no watches");
 
     // write bookmarks
     if (!_bookmarks.isEmpty()) {
@@ -737,40 +750,41 @@ public class ProjectProfile implements ProjectFileIR {
   private String encodeDocFileAbsolute(DocFile df, String prefix) throws IOException {
     return encodeDocFile(df, prefix, false);
   }
-  
-  /** This encodes a breakpoint relative to _projectRoot.
-   *  @param bp the breakpoint to encode
-   *  @param prefix the indent level to place the s-expression at
-   *  @return the s-expression syntax to describe the given breakpoint.
-   */
-  private String encodeBreakpointRelative(DebugBreakpointData bp, String prefix) throws IOException {
-    String ret = "";
-    String path = FileOps.stringMakeRelativeTo(bp.getFile(), _projectRoot);
-    
-    path = replace(path,File.separator,"/");
-    ret += prefix + "(breakpoint (name " + convertToLiteral(path) + ")";
-    
-    int lineNumber = bp.getLineNumber();
-    ret += "\n" + prefix + "      ";
-    ret += "(line " + lineNumber + ")";
-    if (bp.isEnabled()) ret += "(enabled)";
-    ret += ")"; // close the breakpoint expression
-    
-    return ret;
-  }
- 
-  /** This encodes a watch.
-   *  @param w the watch to encode
-   *  @param prefix the indent level to place the s-expression at
-   *  @return the s-expression syntax to describe the given watch.
-   */
-  private String encodeWatch(DebugWatchData w, String prefix) throws IOException {
-    String ret = "";
 
-    ret += prefix + "(watch " + convertToLiteral(w.getName()) + ")";
-    
-    return ret;
-  }
+  /* Debugger deactivated in DrScala */  
+//  /** This encodes a breakpoint relative to _projectRoot.
+//   *  @param bp the breakpoint to encode
+//   *  @param prefix the indent level to place the s-expression at
+//   *  @return the s-expression syntax to describe the given breakpoint.
+//   */
+//  private String encodeBreakpointRelative(DebugBreakpointData bp, String prefix) throws IOException {
+//    String ret = "";
+//    String path = FileOps.stringMakeRelativeTo(bp.getFile(), _projectRoot);
+//    
+//    path = replace(path,File.separator,"/");
+//    ret += prefix + "(breakpoint (name " + convertToLiteral(path) + ")";
+//    
+//    int lineNumber = bp.getLineNumber();
+//    ret += "\n" + prefix + "      ";
+//    ret += "(line " + lineNumber + ")";
+//    if (bp.isEnabled()) ret += "(enabled)";
+//    ret += ")"; // close the breakpoint expression
+//    
+//    return ret;
+//  }
+// 
+//  /** This encodes a watch.
+//   *  @param w the watch to encode
+//   *  @param prefix the indent level to place the s-expression at
+//   *  @return the s-expression syntax to describe the given watch.
+//   */
+//  private String encodeWatch(DebugWatchData w, String prefix) throws IOException {
+//    String ret = "";
+//
+//    ret += prefix + "(watch " + convertToLiteral(w.getName()) + ")";
+//    
+//    return ret;
+//  }
 
   /** This encodes a bookmark relative to _projectRoot.
    *  @param bm the bookmark to encode

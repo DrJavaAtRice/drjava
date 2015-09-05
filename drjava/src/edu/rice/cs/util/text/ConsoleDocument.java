@@ -52,9 +52,13 @@ import edu.rice.cs.util.text.DocumentEditCondition;
 import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.util.FileOps;
 
-/** A GUI-toolkit agnostic interface to a console document.  This class assumes that the embedded document supports 
-  * readers/writers locking and uses that locking protocol to ensure the integrity of the data added in this class
-  * WHY is prompt considered part of a console document rather than an interactions document?
+/** A GUI-toolkit agnostic interface to a console document.  This class assumes that the embedded document relies
+  * on confining the use of all operations that mutate the document in a designated thread, typically the event 
+  * (handling) thread.  In DrJava, all actual documents are swing documents which obey this convention.  Note
+  * that the embedded _document also implements ConsoleDocumentInterface.  Hence, a ConsoleDocument extends an
+  * embedded document that already implemens ConsoleDocumentInterface.
+  * 
+  * Open question: why is prompt considered part of a console document rather than an interactions document?
   * @version $Id: ConsoleDocument.java 5594 2012-06-21 11:23:40Z rcartwright $ */
 public class ConsoleDocument implements ConsoleDocumentInterface {
   
@@ -253,11 +257,15 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     * @throws EditDocumentException if the offset is illegal
     */
   public void append(String str, String style) throws EditDocumentException {
-/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
-    int offs = _document.getLength();
-    _addToStyleLists(offs, str, style);
-    _document.insertText(offs, str, style);
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    _document.append(str, style);
+//    int offs = _document.getLength();
+//    _addToStyleLists(offs, str, style);
+//    _document.insertText(offs, str, style);
   }
+  
+//  /** Clears the document. */
+//  public void clear() { _document.clear(); }
   
   /** Inserts a string into the document at the given offset and  style, regardless of the edit condition.
     * @param offs Offset into the document

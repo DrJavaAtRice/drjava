@@ -246,9 +246,9 @@ public class ConfigDescriptions {
     
     add(QUIT_PROMPT, "Prompt Before Quit", "Whether DrScala should prompt the user before quitting.");
     
-    // Interactions
-    add(INTERACTIONS_RESET_PROMPT, "Prompt Before Resetting Interactions Pane",
-        "<html>Whether DrScala should prompt the user before<br>" + "manually resetting the interactions pane.</html>");
+//    // Interactions
+//    add(INTERACTIONS_RESET_PROMPT, "Prompt Before Resetting Interactions Pane",
+//        "<html>Whether DrScala should prompt the user before<br>" + "manually resetting the interactions pane.</html>");
     
     
     add(INTERACTIONS_EXIT_PROMPT, "Prompt if Interactions Pane Exits Unexpectedly",

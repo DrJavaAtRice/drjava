@@ -34,42 +34,43 @@
  * 
  * END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model.debug;
-
-/**
- * Class for keeping track of the currently running threads.
- * @version $Id: DebugThreadData.java 5594 2012-06-21 11:23:40Z rcartwright $
- */
-public abstract class DebugThreadData {
-  private final String _name;
-  private final String _status;
-  private final long _uniqueID;
-  
-  public DebugThreadData(String name, String status, long uniqueID) {
-    _name = name;
-    _status = status;
-    _uniqueID = uniqueID;
-  }
-  
-  /** Returns the name of this thread.
-   */
-  public String getName() {
-    return _name;
-  }
-  
-  /** Returns the status of this thread (at the time of this object's construction)
-   */
-  public String getStatus() {
-    return _status;
-  }
-  
-  public long getUniqueID() {
-    return _uniqueID;
-  }
-  
-  /** Tells whether or not the thread is suspended.
-   * @return true iff the thread is suspended
-   */
-  public abstract boolean isSuspended();
-  
-}
+/* Debugger deactivated in DrScala */
+//package edu.rice.cs.drjava.model.debug;
+//
+///**
+// * Class for keeping track of the currently running threads.
+// * @version $Id: DebugThreadData.java 5594 2012-06-21 11:23:40Z rcartwright $
+// */
+//public abstract class DebugThreadData {
+//  private final String _name;
+//  private final String _status;
+//  private final long _uniqueID;
+//  
+//  public DebugThreadData(String name, String status, long uniqueID) {
+//    _name = name;
+//    _status = status;
+//    _uniqueID = uniqueID;
+//  }
+//  
+//  /** Returns the name of this thread.
+//   */
+//  public String getName() {
+//    return _name;
+//  }
+//  
+//  /** Returns the status of this thread (at the time of this object's construction)
+//   */
+//  public String getStatus() {
+//    return _status;
+//  }
+//  
+//  public long getUniqueID() {
+//    return _uniqueID;
+//  }
+//  
+//  /** Tells whether or not the thread is suspended.
+//   * @return true iff the thread is suspended
+//   */
+//  public abstract boolean isSuspended();
+//  
+//}

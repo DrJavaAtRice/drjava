@@ -55,13 +55,16 @@ import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.drjava.model.compiler.DummyCompilerListener;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
-import edu.rice.cs.drjava.model.debug.Breakpoint;
-import edu.rice.cs.drjava.model.debug.Debugger;
-import edu.rice.cs.drjava.model.debug.DebugException;
-import edu.rice.cs.drjava.model.debug.NoDebuggerAvailable;
-import edu.rice.cs.drjava.model.debug.DebugListener;
-import edu.rice.cs.drjava.model.debug.DebugWatchData;
-import edu.rice.cs.drjava.model.debug.DebugThreadData;
+
+/* Debugger deactivated in DrScala */
+//import edu.rice.cs.drjava.model.debug.Breakpoint;
+//import edu.rice.cs.drjava.model.debug.Debugger;
+//import edu.rice.cs.drjava.model.debug.DebugException;
+//import edu.rice.cs.drjava.model.debug.NoDebuggerAvailable;
+//import edu.rice.cs.drjava.model.debug.DebugListener;
+//import edu.rice.cs.drjava.model.debug.DebugWatchData;
+//import edu.rice.cs.drjava.model.debug.DebugThreadData;
+
 import edu.rice.cs.drjava.model.javadoc.ScaladocModel;
 import edu.rice.cs.drjava.model.javadoc.NoScaladocAvailable;
 import edu.rice.cs.drjava.model.repl.DefaultInteractionsModel;
@@ -184,15 +187,17 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   
   /* Debugger Fields */
   
-  /** Interface to the integrated debugger.  If unavailable, set NoDebuggerAvailable.ONLY. */
-  private volatile Debugger _debugger;
+  /* Debugger deactivated in DrScala */
+//  /** Interface to the integrated debugger.  If unavailable, set NoDebuggerAvailable.ONLY. */
+//  private volatile Debugger _debugger;
   
   /* CONSTRUCTORS */
   /** Constructs a new GlobalModel. Creates a new MainJVM and starts its Interpreter JVM. */
   public DefaultGlobalModel() {
     Iterable<? extends JDKToolsLibrary> tools = findLibraries();
     List<CompilerInterface> compilers = new LinkedList<CompilerInterface>();
-    _debugger = null;
+    /* Debugger deactivated in DrScala */
+//    _debugger = null;
     _scaladocModel = null;
     for (JDKToolsLibrary t : tools) {
       // check for support of JAVA_6; Scala 2.12.0_M2+ requires Java 8. */
@@ -200,11 +205,12 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
 //        Utilities.show("For compiler " + t.compiler() + " isAvailable() = " + t.compiler().isAvailable());
         compilers.add(t.compiler());
       }
-      if (_debugger == null && t.debugger().isAvailable()) { _debugger = t.debugger(); }
+      /* Debugger deactivated in DrScala */
+//      if (_debugger == null && t.debugger().isAvailable()) { _debugger = t.debugger(); }
       if (_scaladocModel == null && t.scaladoc().isAvailable()) { _scaladocModel = t.scaladoc(); }
 //      else if (_scaladocModel == null) Utilities.show("No compiler found for JDKToolsLibrary" + t);
     }
-    if (_debugger == null) { _debugger = NoDebuggerAvailable.ONLY; }
+//    if (_debugger == null) { _debugger = NoDebuggerAvailable.ONLY; }
     if (_scaladocModel == null) { _scaladocModel = new NoScaladocAvailable(this); }
 //    Utilities.show("_scaladocModel = " + _scaladocModel);
     
@@ -220,7 +226,8 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     _jvm.setInteractionsModel(_interactionsModel);
     _jvm.setJUnitModel(_junitModel);
     
-    _setupDebugger();
+    /* Debugger deactivated in DrScala */
+//    _setupDebugger();
     
     // Chain notifiers so that all events also go to GlobalModelListeners.
     _interactionsModel.addListener(_notifier);
@@ -537,13 +544,15 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     */
   void setResetAfterCompile(boolean shouldReset) { _resetAfterCompile = shouldReset; }
   
-  /** Gets the Debugger used by DrJava. */
-  public Debugger getDebugger() { return _debugger; }
+  /* Debugger deactivated in DrScala */
   
-  /** Returns an available port number to use for debugging the interactions JVM.
-    * @throws IOException if unable to get a valid port number.
-    */
-  public int getDebugPort() throws IOException { return _interactionsModel.getDebugPort(); }
+//  /** Gets the Debugger used by DrJava. */
+//  public Debugger getDebugger() { return _debugger; }
+//  
+//  /** Returns an available port number to use for debugging the interactions JVM.
+//    * @throws IOException if unable to get a valid port number.
+//    */
+//  public int getDebugPort() throws IOException { return _interactionsModel.getDebugPort(); }
   
   // ---------- ConcreteOpenDefDoc inner class ----------
   
@@ -618,7 +627,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
         return;
       }
       
-      final boolean wasDebuggerEnabled = getDebugger().isReady();
+//      final boolean wasDebuggerEnabled = getDebugger().isReady();
       
       _runMain = new DummyInteractionsListener() {
         public void interpreterReady(File wd) {
@@ -730,8 +739,8 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       _scaladocModel.scaladocDocument(this, saver);
     }
     
-    /** Called to indicate the document is being closed, so to remove all related state from the debug manager. */
-    public void removeFromDebugger() { getBreakpointManager().removeRegions(this); }
+//    /** Called to indicate the document is being closed, so to remove all related state from the debug manager. */
+//    public void removeFromDebugger() { getBreakpointManager().removeRegions(this); }
     
     // This creation context is useful for debugging memory leaks in DefinitionsPaneMemoryLeakTest.
     // It should be commented out for normal compilation.
@@ -771,53 +780,53 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     }
   }
   
-  private void _setupDebugger() {
-    _jvm.setDebugModel(_debugger.callback());
-    
-    // add listener to set the project file to "changed" when a breakpoint or watch is added, removed, or changed
-    getBreakpointManager().addListener(new RegionManagerListener<Breakpoint>() {
-      public void regionAdded(final Breakpoint bp) { setProjectChanged(true); }
-      public void regionChanged(final Breakpoint bp) { setProjectChanged(true); }
-      public void regionRemoved(final Breakpoint bp) { 
-        try { getDebugger().removeBreakpoint(bp); } 
-        catch(DebugException de) {
-          /* just ignore it */
-          // TODO: should try to pop up dialog to give the user the option of restarting the debugger (mgricken)
-//          int result = JOptionPane.showConfirmDialog(null, "Could not remove breakpoint.", "Restart debugger?", JOptionPane.YES_NO_OPTION);
-//          if (result==JOptionPane.YES_OPTION) {
-//            getDebugger().shutdown();
-//            getDebugger().startUp();
-//          }
-        }
-        setProjectChanged(true);
-      }
-    });
-    getBookmarkManager().addListener(new RegionManagerListener<MovingDocumentRegion>() {
-      public void regionAdded(MovingDocumentRegion r) { setProjectChanged(true); }
-      public void regionChanged(MovingDocumentRegion r) { setProjectChanged(true); }
-      public void regionRemoved(MovingDocumentRegion r) { setProjectChanged(true); }
-    });
-    
-    _debugger.addListener(new DebugListener() {
-      public void watchSet(final DebugWatchData w) { setProjectChanged(true); }
-      public void watchRemoved(final DebugWatchData w) { setProjectChanged(true); }    
-      
-      public void regionAdded(final Breakpoint bp) { }
-      public void regionChanged(final Breakpoint bp) { }
-      public void regionRemoved(final Breakpoint bp) { }
-      public void debuggerStarted() { }
-      public void debuggerShutdown() { }
-      public void threadLocationUpdated(OpenDefinitionsDocument doc, int lineNumber, boolean shouldHighlight) { }
-      public void breakpointReached(final Breakpoint bp) { }
-      public void stepRequested() { }
-      public void currThreadSuspended() { }
-      public void currThreadResumed() { }
-      public void threadStarted() { }
-      public void currThreadDied() { }
-      public void nonCurrThreadDied() {  }
-      public void currThreadSet(DebugThreadData thread) { }
-    });
-  }
+//  private void _setupDebugger() {
+//    _jvm.setDebugModel(_debugger.callback());
+//    
+//    // add listener to set the project file to "changed" when a breakpoint or watch is added, removed, or changed
+//    getBreakpointManager().addListener(new RegionManagerListener<Breakpoint>() {
+//      public void regionAdded(final Breakpoint bp) { setProjectChanged(true); }
+//      public void regionChanged(final Breakpoint bp) { setProjectChanged(true); }
+//      public void regionRemoved(final Breakpoint bp) { 
+//        try { getDebugger().removeBreakpoint(bp); } 
+//        catch(DebugException de) {
+//          /* just ignore it */
+//          // TODO: should try to pop up dialog to give the user the option of restarting the debugger (mgricken)
+////          int result = JOptionPane.showConfirmDialog(null, "Could not remove breakpoint.", "Restart debugger?", JOptionPane.YES_NO_OPTION);
+////          if (result==JOptionPane.YES_OPTION) {
+////            getDebugger().shutdown();
+////            getDebugger().startUp();
+////          }
+//        }
+//        setProjectChanged(true);
+//      }
+//    });
+//    getBookmarkManager().addListener(new RegionManagerListener<MovingDocumentRegion>() {
+//      public void regionAdded(MovingDocumentRegion r) { setProjectChanged(true); }
+//      public void regionChanged(MovingDocumentRegion r) { setProjectChanged(true); }
+//      public void regionRemoved(MovingDocumentRegion r) { setProjectChanged(true); }
+//    });
+//    
+//    _debugger.addListener(new DebugListener() {
+//      public void watchSet(final DebugWatchData w) { setProjectChanged(true); }
+//      public void watchRemoved(final DebugWatchData w) { setProjectChanged(true); }    
+//      
+//      public void regionAdded(final Breakpoint bp) { }
+//      public void regionChanged(final Breakpoint bp) { }
+//      public void regionRemoved(final Breakpoint bp) { }
+//      public void debuggerStarted() { }
+//      public void debuggerShutdown() { }
+//      public void threadLocationUpdated(OpenDefinitionsDocument doc, int lineNumber, boolean shouldHighlight) { }
+//      public void breakpointReached(final Breakpoint bp) { }
+//      public void stepRequested() { }
+//      public void currThreadSuspended() { }
+//      public void currThreadResumed() { }
+//      public void threadStarted() { }
+//      public void currThreadDied() { }
+//      public void nonCurrThreadDied() {  }
+//      public void currThreadSet(DebugThreadData thread) { }
+//    });
+//  }
   
   /** Get the class path to be used in all class-related operations.
     * TODO: Ensure that this is used wherever appropriate.

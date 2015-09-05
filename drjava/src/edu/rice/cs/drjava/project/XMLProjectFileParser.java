@@ -49,8 +49,12 @@ import edu.rice.cs.util.AbsRelFile;
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.drjava.model.DummyDocumentRegion;
 import edu.rice.cs.drjava.model.FileRegion;
-import edu.rice.cs.drjava.model.debug.DebugWatchData;
-import edu.rice.cs.drjava.model.debug.DebugBreakpointData;
+
+
+/* Debugger deactivated in DrScala */
+//import edu.rice.cs.drjava.model.debug.DebugWatchData;
+//import edu.rice.cs.drjava.model.debug.DebugBreakpointData;
+
 import edu.rice.cs.util.XMLConfig;
 import edu.rice.cs.drjava.project.MalformedProjectFileException;
 import edu.rice.cs.util.StringOps;
@@ -190,12 +194,13 @@ public class XMLProjectFileParser extends ProjectFileParserFacade {
       
         // read class paths
         pfir.setClassPaths(readFiles("classpath", _srcFileBase));
-      
-        // read breakpoints
-        pfir.setBreakpoints(readBreakpoints());
-      
-        // read watches
-        pfir.setWatches(readWatches());
+
+        /* Debugger deactivated in DrScala */      
+//        // read breakpoints
+//        pfir.setBreakpoints(readBreakpoints());
+//      
+//        // read watches
+//        pfir.setWatches(readWatches());
 
         // read bookmarks
         pfir.setBookmarks(readBookmarks());
@@ -317,47 +322,48 @@ public class XMLProjectFileParser extends ProjectFileParserFacade {
     }
     return pList;
   }
-  
-  protected List<DebugBreakpointData> readBreakpoints() {
-    List<DebugBreakpointData> bpList = new ArrayList<DebugBreakpointData>();
-    List<Node> defs = _xc.getNodes("breakpoints/breakpoint");
-    for(Node n: defs) {
-      // now all path names are relative to node n...
-      String name = _xc.get(".file", n);
-      final int lnr = _xc.getInt(".line", n);
-      final boolean enabled = _xc.getBool(".enabled", n);
-      DebugBreakpointData dbd;
-      if ((_srcFileBase == null) || (new File(name).isAbsolute())) {
-        final File f = new File(name);
-        dbd = new DebugBreakpointData() {
-          public File getFile() { return f; }
-          public int getLineNumber() { return lnr; }
-          public boolean isEnabled() { return enabled; }
-        };
-      }
-      else {
-        final File f = new File(_srcFileBase, name);
-        dbd = new DebugBreakpointData() {
-          public File getFile() { return f; }
-          public int getLineNumber() { return lnr; }
-          public boolean isEnabled() { return enabled; }
-        };
-      }
-      bpList.add(dbd);
-    }
-    return bpList;
-  }
-
-  protected List<DebugWatchData> readWatches() {
-    List<DebugWatchData> wList = new ArrayList<DebugWatchData>();
-    List<Node> defs = _xc.getNodes("watches/watch");
-    for(Node n: defs) {
-      // now all path names are relative to node n...
-      wList.add(new DebugWatchData(_xc.get(".name", n)));
-    }
-    return wList;
-  }
-    
+ 
+  /* Debugger deactivated in DrScala */ 
+//  protected List<DebugBreakpointData> readBreakpoints() {
+//    List<DebugBreakpointData> bpList = new ArrayList<DebugBreakpointData>();
+//    List<Node> defs = _xc.getNodes("breakpoints/breakpoint");
+//    for(Node n: defs) {
+//      // now all path names are relative to node n...
+//      String name = _xc.get(".file", n);
+//      final int lnr = _xc.getInt(".line", n);
+//      final boolean enabled = _xc.getBool(".enabled", n);
+//      DebugBreakpointData dbd;
+//      if ((_srcFileBase == null) || (new File(name).isAbsolute())) {
+//        final File f = new File(name);
+//        dbd = new DebugBreakpointData() {
+//          public File getFile() { return f; }
+//          public int getLineNumber() { return lnr; }
+//          public boolean isEnabled() { return enabled; }
+//        };
+//      }
+//      else {
+//        final File f = new File(_srcFileBase, name);
+//        dbd = new DebugBreakpointData() {
+//          public File getFile() { return f; }
+//          public int getLineNumber() { return lnr; }
+//          public boolean isEnabled() { return enabled; }
+//        };
+//      }
+//      bpList.add(dbd);
+//    }
+//    return bpList;
+//  }
+//
+//  protected List<DebugWatchData> readWatches() {
+//    List<DebugWatchData> wList = new ArrayList<DebugWatchData>();
+//    List<Node> defs = _xc.getNodes("watches/watch");
+//    for(Node n: defs) {
+//      // now all path names are relative to node n...
+//      wList.add(new DebugWatchData(_xc.get(".name", n)));
+//    }
+//    return wList;
+//  }
+   
   protected List<FileRegion> readBookmarks() {
     List<FileRegion> rList = new ArrayList<FileRegion>();
     List<Node> defs = _xc.getNodes("bookmarks/bookmark");

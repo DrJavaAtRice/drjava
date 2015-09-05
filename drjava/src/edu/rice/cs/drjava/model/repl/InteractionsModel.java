@@ -100,11 +100,13 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   /** Number of milliseconds to wait after each println, to prevent the JVM from being flooded with print calls. */
   private final int _writeDelay;
   
-  /** Port used by the debugger to connect to the Interactions JVM. Uniquely created in getDebugPort(). */
-  private volatile int _debugPort;
   
-  /** Whether the debug port has already been set.  If not, calling getDebugPort will generate an available port. */
-  private volatile boolean _debugPortSet;
+  /* Debugger deactivated in DrScala */
+//  /** Port used by the debugger to connect to the Interactions JVM. Uniquely created in getDebugPort(). */
+//  private volatile int _debugPort;
+//  
+//  /** Whether the debug port has already been set.  If not, calling getDebugPort will generate an available port. */
+//  private volatile boolean _debugPortSet;
   
   /** The String added to history when the interaction is complete or an error is thrown */
   private volatile String _toAddToHistory = "";
@@ -151,8 +153,12 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     _waitingForFirstInterpreter = true;
     _workingDirectory = wd;
     _writerLock = new Object();
-    _debugPort = -1;
-    _debugPortSet = false;
+    
+    
+    /* Debugger deactivated in DrScala */
+//    _debugPort = -1;
+//    _debugPortSet = false;
+    
     _inputListener = NoInputListener.ONLY;
     Utilities.invokeLater(new Runnable() {
       public void run() { _document.setBanner(generateBanner(wd));}
@@ -315,10 +321,14 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   public final void resetInterpreter(File wd, boolean force) {
     _workingDirectory = wd;
     _autoImportSet.clear(); // clear list when interpreter is reset
+    _notifyInterpreterResetting();
+    _document.reset(generateBanner(wd));  // clears the embedded InteractionsDocument and re-initializes it
     _resetInterpreter(wd, force);
+    _notifyInterpreterReady(wd);
   }
   
-  /** Resets the interpreter.  This should only be called from resetInterpreter, never directly. */
+  /** Resets the interpreter and resets the embedded Interactions document.  This should only be called from 
+    * resetInterpreter, never directly. */
   protected abstract void _resetInterpreter(File wd, boolean force);
   
   /** Returns the working directory for the current interpreter. */
@@ -485,40 +495,42 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     return interactions;
   }
   
-  /** Returns the port number to use for debugging the interactions JVM. Generates an available port if one has 
-    * not been set manually.
-    * @throws IOException if unable to get a valid port number.
-    */
-  public int getDebugPort() throws IOException {
-    if (!_debugPortSet) _createNewDebugPort();
-    return _debugPort;
-  }
   
-  /** Generates an available port for use with the debugger.
-    * @throws IOException if unable to get a valid port number.
-    */
-  protected void _createNewDebugPort() throws IOException {
-//    Utilities.showDebug("InteractionsModel: _createNewDebugPort() called");
-    try {
-      ServerSocket socket = new ServerSocket(0);
-      _debugPort = socket.getLocalPort();
-      socket.close();
-    }
-    catch (java.net.SocketException se) {
-      // something wrong with sockets, can't use for debugger
-      _debugPort = -1;
-    }
-    _debugPortSet = true;
-    System.setProperty("drjava.debug.port", String.valueOf(_debugPort));
-  }
-  
-  /** Sets the port number to use for debugging the interactions JVM.
-    * @param port Port to use to debug the interactions JVM
-    */
-  public void setDebugPort(int port) {
-    _debugPort = port;
-    _debugPortSet = true;
-  }
+  /* Debugger deactivated in DrScala */
+//  /** Returns the port number to use for debugging the interactions JVM. Generates an available port if one has 
+//    * not been set manually.
+//    * @throws IOException if unable to get a valid port number.
+//    */
+//  public int getDebugPort() throws IOException {
+//    if (!_debugPortSet) _createNewDebugPort();
+//    return _debugPort;
+//  }
+//  
+//  /** Generates an available port for use with the debugger.
+//    * @throws IOException if unable to get a valid port number.
+//    */
+//  protected void _createNewDebugPort() throws IOException {
+////    Utilities.showDebug("InteractionsModel: _createNewDebugPort() called");
+//    try {
+//      ServerSocket socket = new ServerSocket(0);
+//      _debugPort = socket.getLocalPort();
+//      socket.close();
+//    }
+//    catch (java.net.SocketException se) {
+//      // something wrong with sockets, can't use for debugger
+//      _debugPort = -1;
+//    }
+//    _debugPortSet = true;
+//    System.setProperty("drjava.debug.port", String.valueOf(_debugPort));
+//  }
+//  
+//  /** Sets the port number to use for debugging the interactions JVM.
+//    * @param port Port to use to debug the interactions JVM
+//    */
+//  public void setDebugPort(int port) {
+//    _debugPort = port;
+//    _debugPortSet = true;
+//  }
     
   private static final int DELAY_INTERVAL = 10;
   private volatile int delayCount = DELAY_INTERVAL;
@@ -757,11 +769,13 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
         }
       });
       
-      // Change to a new debug port to avoid conflicts
-      try { _createNewDebugPort(); }
-      catch (IOException ioe) {
-        // Oh well, leave it at the previous port
-      }
+      
+      /* Debugger deactivated in DrScala */   
+//      // Change to a new debug port to avoid conflicts
+//      try { _createNewDebugPort(); }
+//      catch (IOException ioe) {
+//        // Oh well, leave it at the previous port
+//      }
       _notifyInterpreterResetting();
 //      Utilities.showDebug("InteractionsModel: interpreterResetting notification complete");
     }
@@ -799,12 +813,14 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   
   public String getBanner() { return _banner; }
   
-  public String getStartUpBanner() { return getBanner(_workingDirectory); }
+  public String getStartUpBanner() { return generateBanner(_workingDirectory); }
   
-  public static String getBanner(File wd) { return BANNER_PREFIX + "  Working directory is " + wd + '\n'; }
-  
-  /* The method repackages getBanner as an instance method.  (Why?) */
-  private String generateBanner(File wd) { return getBanner(wd); }
+  /* The method repackages generates the banner corresponding to wd, binds _banner to this value, and returns it. 
+   * It is package private so that RMIInteractionsModel inherits it. */
+  String generateBanner(File wd) { 
+    _banner = BANNER_PREFIX + "  Working directory is " + wd + '\n';
+    return _banner;
+  }
   
 //  /** Initializes the caret in a new or reset InteractionsModel. */
 //  private void _caretInit() { advanceCaret(_document.getLength()); }

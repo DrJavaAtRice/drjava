@@ -54,8 +54,11 @@ import edu.rice.cs.util.text.AbstractDocumentInterface;
 import edu.rice.cs.util.text.ConsoleDocument;
 
 import edu.rice.cs.drjava.model.definitions.DefinitionsEditorKit;
-import edu.rice.cs.drjava.model.debug.Breakpoint;
-import edu.rice.cs.drjava.model.debug.Debugger;
+
+/* Debugger deactivated in DrScala */
+//import edu.rice.cs.drjava.model.debug.Breakpoint;
+//import edu.rice.cs.drjava.model.debug.Debugger;
+
 import edu.rice.cs.drjava.model.javadoc.ScaladocModel;
 import edu.rice.cs.drjava.model.repl.DefaultInteractionsModel;
 import edu.rice.cs.drjava.model.repl.InteractionsDocument;
@@ -103,13 +106,14 @@ public class DummyGlobalModel implements GlobalModel {
     throw new UnsupportedOperationException("Tried to call getScaladocModel on a Dummy");
   }
   
-  public Debugger getDebugger() {
-    throw new UnsupportedOperationException("Tried to call getDebugger on a Dummy");
-  }
-  
-  public RegionManager<Breakpoint> getBreakpointManager() {
-    throw new UnsupportedOperationException("Tried to call getBreakpointManager on a Dummy");
-  }
+  /* Debugger deactivated in DrScala */
+//  public Debugger getDebugger() {
+//    throw new UnsupportedOperationException("Tried to call getDebugger on a Dummy");
+//  }
+//  
+//  public RegionManager<Breakpoint> getBreakpointManager() {
+//    throw new UnsupportedOperationException("Tried to call getBreakpointManager on a Dummy");
+//  }
   
   public RegionManager<MovingDocumentRegion> getBookmarkManager() {
     throw new UnsupportedOperationException("Tried to call getBookmarkManager on a Dummy");
@@ -364,10 +368,10 @@ public class DummyGlobalModel implements GlobalModel {
 //  public void printDebugMessage(String s) {
 //    throw new UnsupportedOperationException("Tried to call printDebugMessage on a Dummy");
 //  }
-  
-  public int getDebugPort() throws IOException {
-    throw new UnsupportedOperationException("Tried to call getDebugPort on a Dummy");
-  }
+//  
+//  public int getDebugPort() throws IOException {
+//    throw new UnsupportedOperationException("Tried to call getDebugPort on a Dummy");
+//  }
   
   public Iterable<File> getClassPath() {
     throw new UnsupportedOperationException("Tried to call getClassPath on a Dummy");

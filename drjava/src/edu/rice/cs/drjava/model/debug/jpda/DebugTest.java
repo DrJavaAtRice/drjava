@@ -34,10 +34,10 @@
  * 
  * END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model.debug.jpda;
-
   /* Debugger deactivated in DrScala */
 
+//package edu.rice.cs.drjava.model.debug.jpda;
+//
 //import java.io.*;
 //
 //import edu.rice.cs.drjava.config.*;
@@ -52,10 +52,7 @@ package edu.rice.cs.drjava.model.debug.jpda;
   * TODO: Why are these tests commented out?!
   * @version $Id: DebugTest.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
-public final class DebugTest /* extends JPDADebugTestCase implements OptionConstants */ {
-  
-  public void testStub() { /* here just to prevent a "no tests found" error */ }
-  
+//public final class DebugTest /* extends JPDADebugTestCase implements OptionConstants */ {
 //  
 //  /** Tests startUp and shutdown, ensuring that all appropriate fields are initialized.  Ensures multiple startups
 //    * and shutdowns work, even after a reset, which changes the debug port.
@@ -795,5 +792,5 @@ public final class DebugTest /* extends JPDADebugTestCase implements OptionConst
 //                 "",
 //                 DrJavaFileUtils.getPackageDir(class2));
 //  }
-}
+//}
 

@@ -93,12 +93,15 @@ import edu.rice.cs.drjava.model.cache.DCacheAdapter;
 import edu.rice.cs.drjava.model.cache.DDReconstructor;
 import edu.rice.cs.drjava.model.cache.DocumentCache ;
 import edu.rice.cs.drjava.model.compiler.CompilerModel;
-import edu.rice.cs.drjava.model.debug.Breakpoint;
-import edu.rice.cs.drjava.model.debug.DebugBreakpointData;
-import edu.rice.cs.drjava.model.debug.DebugException ;
-import edu.rice.cs.drjava.model.debug.DebugWatchData;
-import edu.rice.cs.drjava.model.debug.Debugger;
-import edu.rice.cs.drjava.model.debug.NoDebuggerAvailable;
+
+/* Debugger deactivated in DrScala */
+//import edu.rice.cs.drjava.model.debug.Breakpoint;
+//import edu.rice.cs.drjava.model.debug.DebugBreakpointData;
+//import edu.rice.cs.drjava.model.debug.DebugException ;
+//import edu.rice.cs.drjava.model.debug.DebugWatchData;
+//import edu.rice.cs.drjava.model.debug.Debugger;
+//import edu.rice.cs.drjava.model.debug.NoDebuggerAvailable;
+
 import edu.rice.cs.drjava.model.javadoc.ScaladocModel;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 import edu.rice.cs.drjava.model.definitions.CompoundUndoManager;
@@ -227,11 +230,13 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** Notifier list for the global model. */
   public GlobalEventNotifier getNotifier() { return _notifier; }
   
-  /** Manager for breakpoint regions. */
-  protected final ConcreteRegionManager<Breakpoint> _breakpointManager;
   
-  /** @return manager for breakpoint regions. */
-  public RegionManager<Breakpoint> getBreakpointManager() { return _breakpointManager; }
+  /* Debugger deactivated in DrScala */
+//  /** Manager for breakpoint regions. */
+//  protected final ConcreteRegionManager<Breakpoint> _breakpointManager;
+//  
+//  /** @return manager for breakpoint regions. */
+//  public RegionManager<Breakpoint> getBreakpointManager() { return _breakpointManager; }
   
   /** Manager for bookmark regions. */
   protected final ConcreteRegionManager<MovingDocumentRegion> _bookmarkManager;
@@ -289,7 +294,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     _findResultsManagers = new LinkedList<RegionManager<MovingDocumentRegion>>();
     _browserHistoryManager = new BrowserHistoryManager();
     
-    _breakpointManager = new ConcreteRegionManager<Breakpoint>();
+
+    /* Debugger deactivated in DrScala */
+//    _breakpointManager = new ConcreteRegionManager<Breakpoint>();
+    
     /* The following method was included in an anonymous class definition of _breakpointManager, but it
      was inacessible because no such method exists in the visible interface of ConcreteRegionManager. */
     
@@ -1845,7 +1853,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     // clear browser, breakpoint, and bookmark histories
     
     if (! _browserHistoryManager.getRegions().isEmpty()) _browserHistoryManager.clearBrowserRegions();
-    if (! _breakpointManager.getDocuments().isEmpty()) _breakpointManager.clearRegions();
+     
+    /* Debugger deactivated in DrScala */
+//    if (! _breakpointManager.getDocuments().isEmpty()) _breakpointManager.clearRegions();
+    
     if (! _bookmarkManager.getDocuments().isEmpty()) _bookmarkManager.clearRegions();
     
     final String projfilepath = projectRoot.getCanonicalPath();
@@ -2115,7 +2126,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
     
     // remove regions for this file
-    _breakpointManager.removeRegions(doc);
+    
+    /* Debugger deactivated in DrScala */
+//    _breakpointManager.removeRegions(doc);
     _bookmarkManager.removeRegions(doc);
     
     // The following copy operation is dictated by the silly "no comodification" constraint on Collection iterators
@@ -2588,16 +2601,17 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 //    return doc.getDisplayFullPath();
 //  }
   
-  /** throws UnsupportedOperationException */
-  public Debugger getDebugger() {
-    // throw new UnsupportedOperationException("AbstractGlobalModel does not support debugging");
-    return NoDebuggerAvailable.ONLY;
-  }
-  
-  /** throws UnsupportedOperationException */
-  public int getDebugPort() throws IOException {
-    throw new UnsupportedOperationException("AbstractGlobalModel does not support debugging");
-  }
+  /* Debugger deactivated in DrScala */
+//  /** throws UnsupportedOperationException */
+//  public Debugger getDebugger() {
+//    // throw new UnsupportedOperationException("AbstractGlobalModel does not support debugging");
+//    return NoDebuggerAvailable.ONLY;
+//  }
+//  
+//  /** throws UnsupportedOperationException */
+//  public int getDebugPort() throws IOException {
+//    throw new UnsupportedOperationException("AbstractGlobalModel does not support debugging");
+//  }
   
   /** Checks if any open definitions documents have been modified since last being saved.
     * @return whether any documents have been modified
@@ -3295,8 +3309,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
             resetModification();
             if (! oldFile.equals(file)) {
               /* remove regions for this document */
-              removeFromDebugger();
-              _breakpointManager.removeRegions(this);
+              
+              /* Debugger deactivated in DrScala */
+//              removeFromDebugger();
+//              _breakpointManager.removeRegions(this);
+              
               _bookmarkManager.removeRegions(this);
               for (RegionManager<MovingDocumentRegion> rm: getFindResultsManagers()) rm.removeRegions(this);
               clearBrowserRegions();
@@ -3568,7 +3585,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     /** Degenerate version of close; does not remove breakpoints in this document */
     public void close() {
-      removeFromDebugger();
+//      removeFromDebugger();
       _cacheAdapter.close();
     }
     
@@ -3580,8 +3597,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       if (doc.isUntitled()) throw new UnexpectedException("Cannot revert an Untitled file!");
       
       //need to remove old, possibly invalid breakpoints
-      removeFromDebugger();
-      _breakpointManager.removeRegions(this);
+      
+      /* Debugger deactivated in DrScala */
+//      removeFromDebugger();
+//      _breakpointManager.removeRegions(this);
+      
       _bookmarkManager.removeRegions(this);
       for (RegionManager<MovingDocumentRegion> rm: getFindResultsManagers()) rm.removeRegions(this);
       doc.clearBrowserRegions();
@@ -3670,9 +3690,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       * @return the relative distance forwards to the offset after the matching brace.
       */
     public int balanceForward() { return getDocument().balanceForward(); }
-    
-    /** @return the breakpoint region manager. */
-    public RegionManager<Breakpoint> getBreakpointManager() { return _breakpointManager; }
+      
+    /* Debugger deactivated in DrScala */
+//    /** @return the breakpoint region manager. */
+//    public RegionManager<Breakpoint> getBreakpointManager() { return _breakpointManager; }
     
     /** @return the bookmark region manager. */
     public RegionManager<MovingDocumentRegion> getBookmarkManager() { return _bookmarkManager; }
@@ -3684,8 +3705,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       _browserRegions.clear();
     }
     
-    /** throws UnsupportedOperationException */
-    public void removeFromDebugger() { /* do nothing because it is called in methods in this class */ }
+    /* Debugger deactivated in DrScala */   
+//    /** throws UnsupportedOperationException */
+//    public void removeFromDebugger() { /* do nothing because it is called in methods in this class */ }
     
     public String toString() { return getFileName(); }
     

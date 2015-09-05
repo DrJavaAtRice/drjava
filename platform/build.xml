@@ -1,7 +1,7 @@
 <!-- DrScala Platform-Specific Classes Build Script -->
 
 <!-- This build script is based on the template located at "trunk/misc/build-template.xml"
-     in the DrJava Subversion repository.  In general, changes made to the script should be
+     in the DrJava git repository.  In general, changes made to the script should be
      reflected in the template as well. -->
      
 <!-- To add an additional platform type, the following should be done:
@@ -37,7 +37,7 @@
   
   <!-- *** Environment properties that are not needed may be removed *** -->
   <property environment="env" />
-  <property name="drjava-jar" value="${env.DRJAVA_JAR}" />
+  <property name="drscala-jar" value="${env.DRSCALA_JAR}" />
   <property name="java6-home" value="${env.JAVA6_HOME}" />
   <property name="java7-home" value="${env.JAVA7_HOME}" />
   <property name="java8-home" value="${env.JAVA8_HOME}" />
@@ -91,7 +91,7 @@
     <echo message="      the 'java' command is used by default in testing/running; " />
     <echo message="      the 'svn' command is used to generate version numbers and " />
     <echo message="      in Subversion targets" />
-    <echo message="DRJAVA_JAR: Location of the drjava.jar file (most classes here " />
+    <echo message="DRSCALA_JAR: Location of the drscala.jar file (most classes here " />
     <echo message="            implement interfaces defined there)." />
     <echo message="JAVA6_HOME: Home folder of the Java 6 JDK" />
     <echo message="JAVA7_HOME: Home folder of the Java 7 JDK" />
@@ -155,7 +155,7 @@
        
   <!-- In general, we prefer using the Java 5 language and APIs for compilation.  Where
        that is not possible, later versions are used.  Note that if there are dependencies on
-       later APIs, the DrJava application is responsible for ensuring that those classes are 
+       later APIs, the DrScala application is responsible for ensuring that those classes are 
        only loaded when the necessary APIs are available. -->
        
   <target name="compile-jdk6" depends="resolve-java6-runtime, resolve-java6-tools" 
@@ -196,7 +196,7 @@
       <param name="runtime-jar" value="${java8-runtime}" />
       <param name="extra-classpath" 
              value="${scala-home}/lib/scala-compiler.jar:${scala-home}/lib/scala-library.jar:${scala-home}/lib/scala-reflect.jar:${basedir}/../drjava/drscala.jar" />  
-   <!-- Note that the following depends on scala.jar in lib directory of this branch's drjava tree -->
+   <!-- Note that the following depends on scala.jar in lib directory of this branch's drscala tree -->
    <!-- Replaced  <param name="extra-classpath" value="" /> -->
     </antcall>
 
@@ -225,7 +225,7 @@
   
   <!-- Requires that the properties 'platform-tag', 'source-version', 'runtime-jar', and
        'extra-classpath' be set -->
-  <target name="do-compile" depends="assert-drjava-jar-exists">
+  <target name="do-compile" depends="assert-drscala-jar-exists">
   
     <echo message="Compiling src-${platform-tag} directory to classes/base-${platform-tag} and classes/test-${platform-tag}" />
     <echo message="with command 'javac'" />
@@ -250,7 +250,7 @@
         <fileset refid="libs" />
         <pathelement location="lib/buildlib/junit.jar" />
         <pathelement location="classes/base-${platform-tag}" />
-        <pathelement location="${drjava-jar}" />
+        <pathelement location="${drscala-jar}" />
       </classpath>
       <compilerarg value="-Xlint" />
       <!-- Ignore serial warnings, because they occur for every Throwable definition (among others) -->
@@ -456,7 +456,7 @@
   </target>
   
   <!-- Requires that the properties 'platform-tag' and 'extra-classpath' be set -->
-  <target name="do-test" depends="assert-drjava-jar-exists, resolve-jvm-args">
+  <target name="do-test" depends="assert-drscala-jar-exists, resolve-jvm-args">
     <echo message="Running all ${platform-tag} tests matching '${test-filter-string}' with command '${test-jvm}'" />
     <junit haltonfailure="${test-halt}" failureproperty="test-failed"
            fork="yes" forkmode="perTest" maxmemory="512M" jvm="${test-jvm}" dir="${basedir}">
@@ -467,7 +467,7 @@
         <pathelement location="classes/test-${platform-tag}" />
         <pathelement location="classes/base-${platform-tag}" />
         <pathelement location="classes/lib" />
-        <pathelement location="${drjava-jar}" />
+        <pathelement location="${drscala-jar}" />
       </classpath>
       <assertions>
         <enable />
@@ -721,7 +721,7 @@
   <patternset id="exclude-binaries">
     <exclude name="**/*.jar" />
     <exclude name="**/*.class" />
-    <exclude name="**/DrJava" />
+    <exclude name="**/DrScala" />
     <exclude name="**/*.png" />
     <exclude name="**/*.icns" />
     <exclude name="**/*.gif" />
@@ -1006,9 +1006,9 @@
     <fail message="Can't find ${ant.project.name}.jar" unless="jar-exists" />
   </target>
   
-  <target name="assert-drjava-jar-exists">
-    <available property="drjava-jar-exists" file="${drjava-jar}" />
-    <fail message="${drjava-jar} does not exist" unless="drjava-jar-exists" />
+  <target name="assert-drscala-jar-exists">
+    <available property="drscala-jar-exists" file="${drscala-jar}" />
+    <fail message="${drscala-jar} does not exist" unless="drscala-jar-exists" />
   </target>
   
   <target name="resolve-development-value">

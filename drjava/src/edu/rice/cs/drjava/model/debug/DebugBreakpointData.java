@@ -34,18 +34,20 @@
  * 
  * END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model.debug;
 
-import java.io.File;
-
-/** Interface for breakpoint data. */
-public interface DebugBreakpointData {
-  /** @return the file the breakpoint is in. */
-  public File getFile();
-
-  /** @return line number of the breakpoint. */
-  public int getLineNumber();
-  
-  /** @return true if breakpoint is enabled. */
-  public boolean isEnabled();
-}
+/* Debugger deactivated in DrScala */
+//package edu.rice.cs.drjava.model.debug;
+//
+//import java.io.File;
+//
+///** Interface for breakpoint data. */
+//public interface DebugBreakpointData {
+//  /** @return the file the breakpoint is in. */
+//  public File getFile();
+//
+//  /** @return line number of the breakpoint. */
+//  public int getLineNumber();
+//  
+//  /** @return true if breakpoint is enabled. */
+//  public boolean isEnabled();
+//}

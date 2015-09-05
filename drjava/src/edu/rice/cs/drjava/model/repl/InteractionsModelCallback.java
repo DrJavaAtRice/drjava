@@ -46,10 +46,12 @@ import java.util.List;
   */
 public interface InteractionsModelCallback {
   
-  /** Returns an available port number to use for debugging a remote interpreter.
-    * @throws IOException if unable to get a valid port number.
-    */
-  public int getDebugPort() throws IOException;
+  
+  /* Debugger deactivated in DrScala */
+//  /** Returns an available port number to use for debugging a remote interpreter.
+//    * @throws IOException if unable to get a valid port number.
+//    */
+//  public int getDebugPort() throws IOException;
   
   /** Called when the repl prints to System.out.
     * @param s String to print

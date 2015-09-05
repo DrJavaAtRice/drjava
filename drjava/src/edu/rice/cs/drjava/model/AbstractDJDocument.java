@@ -2677,10 +2677,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   /** Returns the byte image (as written to a file) of this document. */
   public byte[] getBytes() { return getText().getBytes(); }
   
-  public void clear() {
-    try { remove(0, getLength()); }
-    catch(BadLocationException e) { throw new UnexpectedException(e); }
-  }
+//  public void clear() { ... } // Inherited from SwingDocument
   
   /** @return true if pos is the position of one of the chars in an occurrence of "//" or "/*" in text. */
   private static boolean isCommentOpen(String text, int pos) {

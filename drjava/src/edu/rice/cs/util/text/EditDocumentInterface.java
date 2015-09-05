@@ -107,6 +107,9 @@ public interface EditDocumentInterface /* extends ReadersWritersLocking, Seriali
     */
   public void append(String str, String style);
   
+//  /** Clears the document. */
+//  public void clear();
+  
   /** Gets the String identifying the default style for this document if one exists; null otherwise. */
   public String getDefaultStyle();
   

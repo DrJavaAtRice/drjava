@@ -39,7 +39,10 @@ package edu.rice.cs.drjava.ui;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.drjava.model.DrJavaFileUtils;
 import edu.rice.cs.drjava.project.MalformedProjectFileException;
-import edu.rice.cs.drjava.model.debug.DebugException;
+
+/* Debugger deactivated in DrScala */
+//import edu.rice.cs.drjava.model.debug.DebugException;
+
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.StringOps;
 
@@ -140,9 +143,11 @@ public class MainFrameStatics {
               "Please check that your classpath includes all relevant paths.\n\n");
   }
   
-  public static void showDebugError(Component parent, DebugException de) {
-    showError(parent, de, "Debug Error", "A Debugger error occurred in the last operation.\n\n");
-  }
+  
+  /* Debugger deactivated in DrScala */
+//  public static void showDebugError(Component parent, DebugException de) {
+//    showError(parent, de, "Debug Error", "A Debugger error occurred in the last operation.\n\n");
+//  }
   
   public static void showJUnitInterrupted(Component parent, UnexpectedException e) {
     showWarning(parent, e.getCause(), "JUnit Testing Interrupted", 

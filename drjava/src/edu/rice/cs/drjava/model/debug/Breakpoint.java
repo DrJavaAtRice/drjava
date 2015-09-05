@@ -34,17 +34,20 @@
  * 
  * END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model.debug;
 
-import edu.rice.cs.drjava.model.OrderedDocumentRegion;
+/* Debugger deactivated in DrScala */
 
-public interface Breakpoint extends DebugBreakpointData, OrderedDocumentRegion {
-  
-  public String getClassName();
-
-  /** Enable/disable the breakpoint. */
-  public void setEnabled(boolean isEnabled);
-
-  /** Update positions and line nubmers from the position that moves with the document. */
-  public void update();
-}
+//package edu.rice.cs.drjava.model.debug;
+//
+//import edu.rice.cs.drjava.model.OrderedDocumentRegion;
+//
+//public interface Breakpoint extends DebugBreakpointData, OrderedDocumentRegion {
+//  
+//  public String getClassName();
+//
+//  /** Enable/disable the breakpoint. */
+//  public void setEnabled(boolean isEnabled);
+//
+//  /** Update positions and line nubmers from the position that moves with the document. */
+//  public void update();
+//}

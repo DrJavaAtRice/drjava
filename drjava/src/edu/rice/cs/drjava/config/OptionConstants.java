@@ -1300,9 +1300,9 @@ public interface OptionConstants {
   /** Whether to prompt before quitting DrJava. */
   public static final BooleanOption QUIT_PROMPT = new BooleanOption("quit.prompt", Boolean.TRUE);
   
-  /** Whether to prompt before resetting the interactions pane. */
-  public static final BooleanOption INTERACTIONS_RESET_PROMPT =
-    new BooleanOption("interactions.reset.prompt", Boolean.TRUE);
+//  /** Whether to prompt before resetting the interactions pane. */
+//  public static final BooleanOption INTERACTIONS_RESET_PROMPT =
+//    new BooleanOption("interactions.reset.prompt", Boolean.TRUE);
   
   /** Whether to prompt to save before compiling. */
   public static final BooleanOption ALWAYS_SAVE_BEFORE_COMPILE =

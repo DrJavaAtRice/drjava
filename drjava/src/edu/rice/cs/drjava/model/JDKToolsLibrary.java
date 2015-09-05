@@ -51,8 +51,11 @@ import edu.rice.cs.plt.object.ObjectUtil;
 import edu.rice.cs.drjava.model.compiler.CompilerInterface;
 import edu.rice.cs.drjava.model.compiler.NoCompilerAvailable;
 import edu.rice.cs.drjava.model.compiler.ScalaCompiler;
-import edu.rice.cs.drjava.model.debug.Debugger;
-import edu.rice.cs.drjava.model.debug.NoDebuggerAvailable;
+
+/* Debugger deactivated in DrScala */
+//import edu.rice.cs.drjava.model.debug.Debugger;
+//import edu.rice.cs.drjava.model.debug.NoDebuggerAvailable;
+
 import edu.rice.cs.drjava.model.javadoc.ScaladocModel;
 import edu.rice.cs.drjava.model.javadoc.NoScaladocAvailable;
 import edu.rice.cs.drjava.model.javadoc.DefaultScaladocModel;
@@ -74,16 +77,16 @@ public class JDKToolsLibrary {
   
   private final FullVersion _version;
   private final CompilerInterface _compiler;
-  private final Debugger _debugger;
+//  private final Debugger _debugger;
   private final ScaladocModel _scaladoc;
   private final JDKDescriptor _jdkDescriptor; // JDKDescriptor.NONE if none
   
   protected JDKToolsLibrary(FullVersion version, JDKDescriptor jdkDescriptor, CompilerInterface compiler, 
-                            Debugger debugger, ScaladocModel scaladoc) {
+                            /* Debugger debugger, */ ScaladocModel scaladoc) {
     assert jdkDescriptor != null;
     _version = version;
     _compiler = compiler;
-    _debugger = debugger;
+//    _debugger = debugger;
     _scaladoc = scaladoc;
     _jdkDescriptor = jdkDescriptor;
   }
@@ -93,15 +96,16 @@ public class JDKToolsLibrary {
   public JDKDescriptor jdkDescriptor() { return _jdkDescriptor; }
   
   public CompilerInterface compiler() { return _compiler; }
-  
-  public Debugger debugger() { return _debugger; }
+
+  /* Debugger deactivated in DrScala */
+//  public Debugger debugger() { return _debugger; }
   
   public ScaladocModel scaladoc() { return _scaladoc; }
   
   public boolean isValid() {
     boolean result =
       _compiler instanceof ScalaCompiler ||  /* This is an ugly hack.  TODO: refactor compiler adapters framework */
-      _compiler.isAvailable() || _debugger.isAvailable() || _scaladoc.isAvailable();
+      _compiler.isAvailable() /* || _debugger.isAvailable() */ || _scaladoc.isAvailable();
     _log.log("Invoking isValid() for " + _compiler.getClass() + " returned " + result);
     return result;
   }
@@ -125,14 +129,15 @@ public class JDKToolsLibrary {
     }
   }
   
-  public static String adapterForDebugger(JavaVersion.FullVersion version) {
-    switch (version.majorVersion()) {
-      case JAVA_7:
-      case JAVA_6:
-      case JAVA_5: return "edu.rice.cs.drjava.model.debug.jpda.JPDADebugger";
-      default: return null;
-    }
-  }
+  /* Debugger deactivated in DrScala */
+//  public static String adapterForDebugger(JavaVersion.FullVersion version) {
+//    switch (version.majorVersion()) {
+//      case JAVA_7:
+//      case JAVA_6:
+//      case JAVA_5: return "edu.rice.cs.drjava.model.debug.jpda.JPDADebugger";
+//      default: return null;
+//    }
+//  }
 
   /** Only called in making compilers from runtime */
   protected static CompilerInterface getCompilerInterface(String className, FullVersion version) {
@@ -142,7 +147,7 @@ public class JDKToolsLibrary {
       List<File> bootClassPath = null;
       String bootProp = System.getProperty("sun.boot.class.path");
       if (bootProp != null) { bootClassPath = CollectUtil.makeList(IOUtil.parsePath(bootProp)); }
-//      File toolsJar = edu.rice.cs.drjava.DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.JAVAC_LOCATION);
+//      File toolsJar = edu.rice.cs.drjava.DrScala.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.JAVAC_LOCATION);
       try {
         Class<?>[] sig = { FullVersion.class, String.class, List.class };
         Object[] args = { version, "the runtime class path", bootClassPath };
@@ -167,18 +172,19 @@ public class JDKToolsLibrary {
     CompilerInterface compiler = getCompilerInterface(compilerAdapter, version);
     msg("                 compiler=" + compiler.getClass().getName());
     
-    Debugger debugger = NoDebuggerAvailable.ONLY;
-    String debuggerAdapter = adapterForDebugger(version);
-    if (debuggerAdapter != null) {
-      try {
-        msg("                 loading debugger: " + debuggerAdapter);
-        Debugger attempt = (Debugger) ReflectUtil.loadObject(debuggerAdapter, new Class<?>[]{GlobalModel.class}, model);
-        msg("                 debugger=" + attempt.getClass().getName());
-        if (attempt.isAvailable()) { debugger = attempt; }
-      }
-      catch (ReflectException e) { msg("                 no debugger, ReflectException " + e); /* can't load */ }
-      catch (LinkageError e) { msg("                 no debugger, LinkageError " + e);  /* can't load */ }
-    }
+    /* Debugger deactivated in DrScala */   
+//    Debugger debugger = NoDebuggerAvailable.ONLY;
+//    String debuggerAdapter = adapterForDebugger(version);
+//    if (debuggerAdapter != null) {
+//      try {
+//        msg("                 loading debugger: " + debuggerAdapter);
+//        Debugger attempt = (Debugger) ReflectUtil.loadObject(debuggerAdapter, new Class<?>[]{GlobalModel.class}, model);
+//        msg("                 debugger=" + attempt.getClass().getName());
+//        if (attempt.isAvailable()) { debugger = attempt; }
+//      }
+//      catch (ReflectException e) { msg("                 no debugger, ReflectException " + e); /* can't load */ }
+//      catch (LinkageError e) { msg("                 no debugger, LinkageError " + e);  /* can't load */ }
+//    }
     
     ScaladocModel scaladoc = new NoScaladocAvailable(model);
     try {
@@ -194,7 +200,7 @@ public class JDKToolsLibrary {
     if (compiler != NoCompilerAvailable.ONLY) {
       // if we have found a compiler, add it
       msg("                 compiler found");
-      list.add(new JDKToolsLibrary(version, JDKDescriptor.NONE, compiler, debugger, scaladoc));
+      list.add(new JDKToolsLibrary(version, JDKDescriptor.NONE, compiler, /* debugger, */ scaladoc));
     }
       
     msg("                 compilers found: " + list.size());
@@ -202,7 +208,7 @@ public class JDKToolsLibrary {
     if (list.size() == 0) {
       // no compiler found, i.e. compiler == NoCompilerAvailable.ONLY
       msg("                 no compilers found, adding NoCompilerAvailable library");
-      list.add(new JDKToolsLibrary(version, JDKDescriptor.NONE, NoCompilerAvailable.ONLY, debugger, scaladoc));
+      list.add(new JDKToolsLibrary(version, JDKDescriptor.NONE, NoCompilerAvailable.ONLY, /* debugger, */ scaladoc));
     }
     
     return list;

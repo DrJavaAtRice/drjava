@@ -49,8 +49,10 @@ import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.sexp.*;
 import edu.rice.cs.drjava.model.FileRegion;
 import edu.rice.cs.drjava.model.DummyDocumentRegion;
-import edu.rice.cs.drjava.model.debug.DebugWatchData;
-import edu.rice.cs.drjava.model.debug.DebugBreakpointData;
+
+/* Debugger deactivated in DrScala */
+//import edu.rice.cs.drjava.model.debug.DebugWatchData;
+//import edu.rice.cs.drjava.model.debug.DebugBreakpointData;
 
 /** This parser uses the s-expression parser defined in the util pacakge.  The SExp tree given by the parser is 
  *  interpreted into a ProjectFileIR that is given to the user.  This class must also deal with different
@@ -72,8 +74,10 @@ public class ProjectFileParser extends ProjectFileParserFacade {
   
   private volatile String _parent;
   private volatile String _srcFileBase;
+ 
+  /* Debugger deactivated in DrScala */ 
+//  volatile BreakpointListVisitor breakpointListVisitor = new BreakpointListVisitor();
   
-  volatile BreakpointListVisitor breakpointListVisitor = new BreakpointListVisitor();
   volatile BookmarkListVisitor bookmarkListVisitor = new BookmarkListVisitor();
   
 //  private ProjectFileParser() { _xmlProjectFile = false; }
@@ -190,14 +194,17 @@ public class ProjectFileParser extends ProjectFileParserFacade {
       Integer i = exp.getRest().accept(NumberVisitor.ONLY);
       pfir.setCreateJarFlags(i);
     }
-    else if (name.compareToIgnoreCase("breakpoints") == 0) {
-       List<DebugBreakpointData> bpList = exp.getRest().accept(breakpointListVisitor);
-       pfir.setBreakpoints(bpList);
-    }
-    else if (name.compareToIgnoreCase("watches") == 0) {
-      List<DebugWatchData> sList = exp.getRest().accept(WatchListVisitor.ONLY);
-      pfir.setWatches(sList);
-    }
+    
+    /* Debugger deactivated in DrScala */
+//    else if (name.compareToIgnoreCase("breakpoints") == 0) {
+//       List<DebugBreakpointData> bpList = exp.getRest().accept(breakpointListVisitor);
+//       pfir.setBreakpoints(bpList);
+//    }
+//    else if (name.compareToIgnoreCase("watches") == 0) {
+//      List<DebugWatchData> sList = exp.getRest().accept(WatchListVisitor.ONLY);
+//      pfir.setWatches(sList);
+//    }
+    
     else if (name.compareToIgnoreCase("bookmarks") == 0) {
        List<FileRegion> bmList = exp.getRest().accept(bookmarkListVisitor);
        pfir.setBookmarks(bmList);
@@ -417,97 +424,101 @@ public class ProjectFileParser extends ProjectFileParserFacade {
     }
   };
 
-  /** Parses out a list of watch names into a list of watches. */
-  private static class WatchListVisitor implements SEListVisitor<List<DebugWatchData>> {
-    public static final WatchListVisitor ONLY = new WatchListVisitor();
-    private WatchListVisitor() { }
-    
-    public List<DebugWatchData> forEmpty(Empty e) { return new ArrayList<DebugWatchData>(); }
-    public List<DebugWatchData> forCons(Cons c) {
-      List<DebugWatchData> list = c.getRest().accept(this);
-      SExp first = c.getFirst();
-      String name = first.accept(NameVisitor.ONLY); 
-      if (name.compareToIgnoreCase("watch") == 0) {
-        String tmp = ProjectFileParser.ONLY.parseStringNode(c.getFirst());
-        list.add(0,new DebugWatchData(tmp)); // add to the end
-      }
-      return list;
-    }
-  };
+  
+  /* Debugger deactivated in DrScala */
+//  /** Parses out a list of watch names into a list of watches. */
+//  private static class WatchListVisitor implements SEListVisitor<List<DebugWatchData>> {
+//    public static final WatchListVisitor ONLY = new WatchListVisitor();
+//    private WatchListVisitor() { }
+//    
+//    public List<DebugWatchData> forEmpty(Empty e) { return new ArrayList<DebugWatchData>(); }
+//    public List<DebugWatchData> forCons(Cons c) {
+//      List<DebugWatchData> list = c.getRest().accept(this);
+//      SExp first = c.getFirst();
+//      String name = first.accept(NameVisitor.ONLY); 
+//      if (name.compareToIgnoreCase("watch") == 0) {
+//        String tmp = ProjectFileParser.ONLY.parseStringNode(c.getFirst());
+//        list.add(0,new DebugWatchData(tmp)); // add to the end
+//      }
+//      return list;
+//    }
+//  };
   
   // === breakpoints ===
   
-  /** Parses out a list of breakpoint nodes. */
-  private class BreakpointListVisitor implements SEListVisitor<List<DebugBreakpointData>> {
-    public List<DebugBreakpointData> forEmpty(Empty e) { return new ArrayList<DebugBreakpointData>(); }
-    public List<DebugBreakpointData> forCons(Cons c) {
-      List<DebugBreakpointData> list = c.getRest().accept(this);
-      DebugBreakpointData tmp = ProjectFileParser.ONLY.parseBreakpoint(c.getFirst(), _srcFileBase);
-      list.add(0, tmp); // add to the end
-      return list;
-    }
-  };
-    
-  /** Parses out the labeled node (a non-empty list) into a breakpoint. The node must have the "breakpoint" label on it.
-   *  @param s the non-empty list expression
-   *  @return the breakpoint described by this s-expression
-   */
-  DebugBreakpointData parseBreakpoint(SExp s, String pathRoot) {
-    String name = s.accept(NameVisitor.ONLY);
-    if (name.compareToIgnoreCase("breakpoint") != 0)
-      throw new PrivateProjectException("Expected a breakpoint tag, found: " + name);
-    if (! (s instanceof Cons))
-      throw new PrivateProjectException("Expected a labeled node, found a label: " + name);
-    SEList c = ((Cons)s).getRest(); // get parameter list
-    
-    BreakpointPropertyVisitor v = new BreakpointPropertyVisitor(pathRoot);
-    return c.accept(v);
-  }
-  
-  
-  /** Traverses the list of expressions found after "breakpoint" tag and returns the Breakpoint described by those properties. */
-  private static class BreakpointPropertyVisitor implements SEListVisitor<DebugBreakpointData> {
-    private String fname = null;
-//    private Integer offset = null;  // Not used.
-    private Integer lineNumber = null;
-    private boolean isEnabled = false;
-    
-    private String pathRoot;
-    public BreakpointPropertyVisitor(String pr) { pathRoot = pr; }
-    
-    public DebugBreakpointData forCons(Cons c) {
-      String name = c.getFirst().accept(NameVisitor.ONLY); 
-      if (name.compareToIgnoreCase("name") == 0) { fname = ProjectFileParser.ONLY.parseFileName(c.getFirst()); }
-      // The offset field is not used.
-//      else if (name.compareToIgnoreCase("offset") == 0) { offset = ProjectFileParser.ONLY.parseInt(c.getFirst()); } 
-      else if (name.compareToIgnoreCase("line") == 0) { lineNumber = ProjectFileParser.ONLY.parseInt(c.getFirst()); }
-      else if (name.compareToIgnoreCase("enabled") == 0) { isEnabled = true; }
-        
-      return c.getRest().accept(this);
-    }
-    
-    public DebugBreakpointData forEmpty(Empty c) {
-      if ((fname == null) || (lineNumber == null)) {
-        throw new PrivateProjectException("Breakpoint information incomplete, need name and line tags");
-      }
-      if (pathRoot == null || new File(fname).isAbsolute()) {
-        final File f = new File(fname);
-        return new DebugBreakpointData() {
-          public File getFile() { return f; }
-          public int getLineNumber() { return lineNumber; }
-          public boolean isEnabled() { return isEnabled; }
-        };
-      }
-      else {
-        final File f = new File(pathRoot, fname);
-        return new DebugBreakpointData() {
-          public File getFile() { return f; }
-          public int getLineNumber() { return lineNumber; }
-          public boolean isEnabled() { return isEnabled; }
-        };
-      }
-    }
-  }
+
+  /* Debugger deactivated in DrScala */
+//  /** Parses out a list of breakpoint nodes. */
+//  private class BreakpointListVisitor implements SEListVisitor<List<DebugBreakpointData>> {
+//    public List<DebugBreakpointData> forEmpty(Empty e) { return new ArrayList<DebugBreakpointData>(); }
+//    public List<DebugBreakpointData> forCons(Cons c) {
+//      List<DebugBreakpointData> list = c.getRest().accept(this);
+//      DebugBreakpointData tmp = ProjectFileParser.ONLY.parseBreakpoint(c.getFirst(), _srcFileBase);
+//      list.add(0, tmp); // add to the end
+//      return list;
+//    }
+//  };
+//    
+//  /** Parses out the labeled node (a non-empty list) into a breakpoint. The node must have the "breakpoint" label on it.
+//   *  @param s the non-empty list expression
+//   *  @return the breakpoint described by this s-expression
+//   */
+//  DebugBreakpointData parseBreakpoint(SExp s, String pathRoot) {
+//    String name = s.accept(NameVisitor.ONLY);
+//    if (name.compareToIgnoreCase("breakpoint") != 0)
+//      throw new PrivateProjectException("Expected a breakpoint tag, found: " + name);
+//    if (! (s instanceof Cons))
+//      throw new PrivateProjectException("Expected a labeled node, found a label: " + name);
+//    SEList c = ((Cons)s).getRest(); // get parameter list
+//    
+//    BreakpointPropertyVisitor v = new BreakpointPropertyVisitor(pathRoot);
+//    return c.accept(v);
+//  }
+//  
+//  
+//  /** Traverses the list of expressions found after "breakpoint" tag and returns the Breakpoint described by those properties. */
+//  private static class BreakpointPropertyVisitor implements SEListVisitor<DebugBreakpointData> {
+//    private String fname = null;
+////    private Integer offset = null;  // Not used.
+//    private Integer lineNumber = null;
+//    private boolean isEnabled = false;
+//    
+//    private String pathRoot;
+//    public BreakpointPropertyVisitor(String pr) { pathRoot = pr; }
+//    
+//    public DebugBreakpointData forCons(Cons c) {
+//      String name = c.getFirst().accept(NameVisitor.ONLY); 
+//      if (name.compareToIgnoreCase("name") == 0) { fname = ProjectFileParser.ONLY.parseFileName(c.getFirst()); }
+//      // The offset field is not used.
+////      else if (name.compareToIgnoreCase("offset") == 0) { offset = ProjectFileParser.ONLY.parseInt(c.getFirst()); } 
+//      else if (name.compareToIgnoreCase("line") == 0) { lineNumber = ProjectFileParser.ONLY.parseInt(c.getFirst()); }
+//      else if (name.compareToIgnoreCase("enabled") == 0) { isEnabled = true; }
+//        
+//      return c.getRest().accept(this);
+//    }
+//    
+//    public DebugBreakpointData forEmpty(Empty c) {
+//      if ((fname == null) || (lineNumber == null)) {
+//        throw new PrivateProjectException("Breakpoint information incomplete, need name and line tags");
+//      }
+//      if (pathRoot == null || new File(fname).isAbsolute()) {
+//        final File f = new File(fname);
+//        return new DebugBreakpointData() {
+//          public File getFile() { return f; }
+//          public int getLineNumber() { return lineNumber; }
+//          public boolean isEnabled() { return isEnabled; }
+//        };
+//      }
+//      else {
+//        final File f = new File(pathRoot, fname);
+//        return new DebugBreakpointData() {
+//          public File getFile() { return f; }
+//          public int getLineNumber() { return lineNumber; }
+//          public boolean isEnabled() { return isEnabled; }
+//        };
+//      }
+//    }
+//  }
   
   // === bookmarks ===
   

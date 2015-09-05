@@ -41,6 +41,7 @@ import edu.rice.cs.drjava.model.repl.newjvm.InterpreterException;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.tuple.Option;
 import edu.rice.cs.plt.tuple.Pair;
+import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.ConsoleDocumentInterface;
 
 import java.io.File;
@@ -114,14 +115,21 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
     */
   public void addExtraClassPath(File f) { _jvm.addExtraClassPath(f); }
   
-  /** Resets the Java interpreter. */
-  protected void _resetInterpreter(File wd, boolean force) {
+  /** Resets the Java interpreter. If DrScala is in a normal state (implying that _jvm.interpret(...) below will 
+    * succeed, the embedded Interactions document has already been cleared. */
+  protected void _resetInterpreter(final File wd, final boolean force) {
     setToDefaultInterpreter();
     _jvm.setWorkingDirectory(wd);
     /* Try to reset the interpreter using the internal scala interpreter reset command.  If this fails restart the
      * slave JVM. */
-    boolean success = _jvm.interpret(":_$$$$$__$$$$$$_-reset");
-    if (! success) _jvm.restartInterpreterJVM(force);
+    Utilities.invokeLater(new Runnable() {
+      public void run() {
+        _document.insertBeforeLastPrompt(" Resetting Interactions ...\n", InteractionsDocument.ERROR_STYLE);
+        boolean success = _jvm.interpret(":_$$$$$__$$$$$$_-reset");
+        if (success) _document.reset(generateBanner(wd));
+        else _jvm.restartInterpreterJVM(force);
+      }
+    });
   }
   
   /** Adds a named interpreter to the list.

@@ -42,8 +42,12 @@ import java.util.Map;
 
 import edu.rice.cs.drjava.config.OptionParser;
 import edu.rice.cs.drjava.model.FileRegion;
-import edu.rice.cs.drjava.model.debug.DebugBreakpointData;
-import edu.rice.cs.drjava.model.debug.DebugWatchData;
+
+
+/* Debugger deactivated in DrScala */
+//import edu.rice.cs.drjava.model.debug.DebugBreakpointData;
+//import edu.rice.cs.drjava.model.debug.DebugWatchData;
+
 import edu.rice.cs.util.AbsRelFile;
 
 public interface ProjectFileIR {
@@ -96,11 +100,13 @@ public interface ProjectFileIR {
   /** @return the array of bookmarks. */
   public FileRegion[] getBookmarks();
   
-  /** @return the array of breakpoints. */
-  public DebugBreakpointData[] getBreakpoints();
   
-  /** @return the array of watches. */
-  public DebugWatchData[] getWatches();
+  /* Debugger deactivated in DrScala */
+//  /** @return the array of breakpoints. */
+//  public DebugBreakpointData[] getBreakpoints();
+//  
+//  /** @return the array of watches. */
+//  public DebugWatchData[] getWatches();
   
   public boolean getAutoRefreshStatus();
   
@@ -119,8 +125,11 @@ public interface ProjectFileIR {
   public void setCreateJarFile(File createJarFile);
   public void setCreateJarFlags(int createJarFlags);
   public void setBookmarks(List<? extends FileRegion> bms);
-  public void setBreakpoints(List<? extends DebugBreakpointData> bps);
-  public void setWatches(List<? extends DebugWatchData> ws);
+  
+/* Debugger deactivated in DrScala */
+//  public void setBreakpoints(List<? extends DebugBreakpointData> bps);
+//  public void setWatches(List<? extends DebugWatchData> ws);
+  
   public void setAutoRefreshStatus(boolean b);
   public void setPreferencesStoredInProject(Map<OptionParser<?>,String> sp);
   

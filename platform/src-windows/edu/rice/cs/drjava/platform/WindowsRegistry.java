@@ -650,38 +650,4 @@ public class WindowsRegistry {
               (hive==HKEY_CURRENT_USER?"HKEY_CURRENT_USER":
                  (hive==HKEY_LOCAL_MACHINE?"HKEY_LOCAL_MACHINE":"0x"+Integer.toHexString(hive))));
   }
-//  
-//  public static void main(String args[]) {
-//    try {
-//      System.out.println(Preferences.userRoot().getClass());
-//      
-//      System.out.println("Proxy Server = "+getKey(HKEY_CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings","ProxyServer"));
-//      System.out.println("Internet Explorer Version = "+getKey(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Internet Explorer","Version"));
-//      System.out.println(".java Perceived Type = "+getKey(HKEY_CLASSES_ROOT, ".java","PerceivedType"));
-//      
-//      try {
-//        System.out.println(".drjava = "+getKey(HKEY_CLASSES_ROOT, ".drjava",""));
-//      }
-//      catch(RegistryException re) { System.err.println(re); }
-//
-//      setKey(HKEY_CLASSES_ROOT, ".drjava", "", "DrJavaProject");
-//      setKey(HKEY_CLASSES_ROOT, "DrJavaProject", "", "DrJava project file");
-//      setKey(HKEY_CLASSES_ROOT, "DrJavaProject\\shell\\open\\command", "",
-//             "\"C:\\Program Files\\Java\\jre6\\bin\\javaw.exe\" -jar \"C:\\Documents and Settings\\Administrator\\Desktop\\drjava.jar\" \"%1\" %*");
-//
-//      System.out.println(".drjava = "+getKey(HKEY_CLASSES_ROOT, ".drjava",""));
-//      System.out.println(toString(HKEY_CLASSES_ROOT, "Drive"));
-//      
-////      deleteKey(HKEY_CLASSES_ROOT, ".drjava");
-////      deleteKey(HKEY_CLASSES_ROOT, "DrJavaProject\\shell\\open\\command");
-////      deleteKey(HKEY_CLASSES_ROOT, "DrJavaProject\\shell\\open");
-////      deleteKey(HKEY_CLASSES_ROOT, "DrJavaProject\\shell");
-////      deleteKey(HKEY_CLASSES_ROOT, "DrJavaProject");
-//      delKey(HKEY_CLASSES_ROOT, ".drjava");
-//      delKey(HKEY_CLASSES_ROOT, "DrJavaProject");
-//    }
-//    catch(RegistryException re) {
-//      re.printStackTrace();
-//    }
-//  }
 }

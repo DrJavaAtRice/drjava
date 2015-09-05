@@ -34,30 +34,32 @@
  * 
  * END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model.debug;
+/* Debugger deactivated in DrScala */
 
-/**
- * Class for keeping track of a stack frame in the debugger.
- * @version $Id: DebugStackData.java 5594 2012-06-21 11:23:40Z rcartwright $
- */
-public class DebugStackData {
-  private final String _method;
-  private final int _line;
-  
-  /** Object for keeping track of a stack frame.
-   * @param method name of the method
-   * @param line line number in the file
-   */
-  public DebugStackData(String method, int line) {
-    _method = method;
-    _line = line;
-  }
-  
-  /** Returns the name of the method at this frame of the stack.
-   */
-  public String getMethod() { return _method; }
-  
-  /** Returns the line number of this frame of the stack.
-   */
-  public int getLine() { return _line; }
-}
+//package edu.rice.cs.drjava.model.debug;
+//
+///**
+// * Class for keeping track of a stack frame in the debugger.
+// * @version $Id: DebugStackData.java 5594 2012-06-21 11:23:40Z rcartwright $
+// */
+//public class DebugStackData {
+//  private final String _method;
+//  private final int _line;
+//  
+//  /** Object for keeping track of a stack frame.
+//   * @param method name of the method
+//   * @param line line number in the file
+//   */
+//  public DebugStackData(String method, int line) {
+//    _method = method;
+//    _line = line;
+//  }
+//  
+//  /** Returns the name of the method at this frame of the stack.
+//   */
+//  public String getMethod() { return _method; }
+//  
+//  /** Returns the line number of this frame of the stack.
+//   */
+//  public int getLine() { return _line; }
+//}

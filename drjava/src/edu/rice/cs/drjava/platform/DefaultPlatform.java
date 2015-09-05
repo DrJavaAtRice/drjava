@@ -215,26 +215,26 @@ class DefaultPlatform implements PlatformSupport {
   }
   
   /** @return true if file extensions can be registered and unregistered. */
-  public boolean canRegisterFileExtensions() { return false; }
+  public boolean canRegisterFileExtension() { return false; }
   
   /** Register .drscala and .dsapp file extensions.
     * @return true if registering succeeded */
-  public boolean registerDrJavaFileExtensions() { return false; }
+  public boolean registerDrScalaFileExtension() { return false; }
 
   /** Unregister .drscala and .dsapp file extensions.
     * @return true if unregistering succeeded */
-  public boolean unregisterDrJavaFileExtensions() { return false; }
+  public boolean unregisterDrScalaFileExtension() { return false; }
   
   /** @return true if .drscala and .dsapp file extensions are registered. */
-  public boolean areDrJavaFileExtensionsRegistered() { return false; }
+  public boolean areDrScalaFileExtensionRegistered() { return false; }
   
   /** Register .java file extension.
     * @return true if registering succeeded */
-  public boolean registerJavaFileExtension() { return false; }
+  public boolean registerScalaFileExtension() { return false; }
   
   /** Unregister .java file extension.
     * @return true if unregistering succeeded */
-  public boolean unregisterJavaFileExtension() { return false; }
+  public boolean unregisterScalaFileExtension() { return false; }
   
   /** @return true if .java file extension is registered. */
   public boolean isJavaFileExtensionRegistered() { return false; }
