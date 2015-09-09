@@ -416,7 +416,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     });
 
     // We choose not to preserve backwards searching between sessions
-    //_machine.setSearchBackwards(DrJava.getConfig().getSetting(OptionConstants.FIND_SEARCH_BACKWARDS));
+    //_machine.setSearchBackwards(DrScala.getConfig().getSetting(OptionConstants.FIND_SEARCH_BACKWARDS));
     
     
     /******** Initialize the panels containing the checkboxes ********/

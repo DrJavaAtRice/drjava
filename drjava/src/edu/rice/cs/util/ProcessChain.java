@@ -40,7 +40,7 @@ import java.io.*;
 import java.util.Set;
 import java.util.HashSet;
 
-import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
+import edu.rice.cs.drjava.ui.DrScalaErrorHandler;
 import edu.rice.cs.util.JoinInputStream;
 
 /**
@@ -371,7 +371,7 @@ public class ProcessChain extends Process {
                           e.toString() + "\n\n");
       }
       else {
-        DrJavaErrorHandler.record(e);
+        DrScalaErrorHandler.record(e);
       }
     }
   }

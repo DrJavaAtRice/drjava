@@ -98,7 +98,7 @@ import edu.rice.cs.util.swing.Utilities;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
-/** Handles the bulk of DrJava's program logic. The UI components interface with the GlobalModel through its public
+/** Handles the bulk of DrScala's program logic. The UI components interface with the GlobalModel through its public
   * methods, and the GlobalModel responds via the GlobalModelListener interface. This removes the dependency on the 
   * UI for the logical flow of the program's features.  With the current implementation, we can finally test the compile
   * command of DrJava, along with many other things. <p>
@@ -448,10 +448,9 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   public void resetInteractions(File wd) { resetInteractions(wd, false); }
   
   /** Clears and resets the slave JVM with working directory wd. Also clears the console if the option is 
-    * indicated (on by default).  The reset operation is suppressed if the existing slave JVM has not been
-    * used, {@code wd} matches its working directory, and forceReset is false.  {@code wd} may be {@code null}
-    * if a valid directory cannot be determined.  In that case, the former working directory is used.  This
-    * method may run outside the event thread.
+    * indicated (on by default).  The reset operation is suppressed if {@code wd} matches its working directory (or
+    * wd is null), and forceReset is false.  {@code wd} may be {@code null} if a valid directory cannot be determined.
+    * In that case, the former working directory is used.  This method may run outside the event thread.
     */
   public void resetInteractions(File wd, boolean forceReset) {
     assert _interactionsModel._pane != null;
@@ -857,7 +856,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     if (globalExtras != null) { result = IterUtil.compose(result, globalExtras); }
     
     /* We must add JUnit to the class path.  We do so by including the current JVM's class path.
-     * This is not ideal, because all other classes on the current class path (including all of DrJava's
+     * This is not ideal, because all other classes on the current class path (including all of DrScala's
      * internal classes) are also included.  But we're probably stuck doing something like this if we
      * want to continue bundling JUnit with DrJava.
      */

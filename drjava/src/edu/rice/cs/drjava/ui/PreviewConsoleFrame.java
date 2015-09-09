@@ -42,7 +42,7 @@ import edu.rice.cs.drjava.model.*;
 
 import edu.rice.cs.util.text.EditDocumentInterface;
 
-/** DrJava's print preview window for a console document (interactions or console)
+/** DrScala's print preview window for a console document (interactions or console)
   * @version $Id: PreviewConsoleFrame.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class PreviewConsoleFrame extends PreviewFrame {

@@ -39,7 +39,7 @@ package edu.rice.cs.drjava.model.repl;
 import java.io.*;
 import java.awt.print.*;
 
-import edu.rice.cs.drjava.model.print.DrJavaBook;
+import edu.rice.cs.drjava.model.print.DrScalaBook;
 
 import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.util.UnexpectedException;
@@ -99,7 +99,7 @@ public class InteractionsDocument extends ConsoleDocument {
     this(document, new History(maxHistorySize));
   }
   
-  /** Creates and resets the interactions document on DrJava startUp.  Uses the given history.  
+  /** Creates and resets the interactions document on DrScala startUp.  Uses the given history.  
     * @param document EditDocumentInterface to use for the model
     * @param history History of commands
     */
@@ -315,9 +315,9 @@ public class InteractionsDocument extends ConsoleDocument {
   
   public String getDefaultStyle() { return InteractionsDocument.DEFAULT_STYLE; }
   
-  /** This method tells the document to prepare all the DrJavaBook and PagePrinter objects. */
+  /** This method tells the document to prepare all the DrScalaBook and PagePrinter objects. */
   public void preparePrintJob() {
-    _book = new DrJavaBook(getDocText(0, getLength()), "Interactions", new PageFormat());
+    _book = new DrScalaBook(getDocText(0, getLength()), "Interactions", new PageFormat());
   }
   
   /* Only used for testing. */

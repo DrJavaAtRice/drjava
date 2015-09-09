@@ -66,16 +66,16 @@ public abstract class AbstractDJPane extends JTextPane
 
   
   /** Paren/brace/bracket matching highlight color. */
-  static ReverseHighlighter.DrJavaHighlightPainter MATCH_PAINTER;
+  static ReverseHighlighter.DrScalaHighlightPainter MATCH_PAINTER;
 
   static {
     Color highColor = DrScala.getConfig().getSetting(DEFINITIONS_MATCH_COLOR);
-    MATCH_PAINTER = new ReverseHighlighter.DrJavaHighlightPainter(highColor);
+    MATCH_PAINTER = new ReverseHighlighter.DrScalaHighlightPainter(highColor);
   }
   
   /** Highlight painter for selected errors in the defs doc. */
-  static ReverseHighlighter.DrJavaHighlightPainter ERROR_PAINTER =
-    new ReverseHighlighter.DrJavaHighlightPainter(DrScala.getConfig().getSetting(COMPILER_ERROR_COLOR));
+  static ReverseHighlighter.DrScalaHighlightPainter ERROR_PAINTER =
+    new ReverseHighlighter.DrScalaHighlightPainter(DrScala.getConfig().getSetting(COMPILER_ERROR_COLOR));
   
   private static final int ALT_CTRL_META_MASK = Event.ALT_MASK | Event.CTRL_MASK | Event.META_MASK;
   
@@ -103,7 +103,7 @@ public abstract class AbstractDJPane extends JTextPane
         else updateStatusField();  // update main frame status fields; a no-op for InteractionsPanes
         
       }
-      catch(BadLocationException e) { DrJavaErrorHandler.record(e); }
+      catch(BadLocationException e) { DrScalaErrorHandler.record(e); }
     }
   };
   

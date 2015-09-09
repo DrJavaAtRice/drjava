@@ -37,7 +37,7 @@
 package edu.rice.cs.drjava;
 
 /** Main controller class for DrJava.  This class sets up all of the appropriate cross-references between components at 
-  * runtime.  Almost all of the functionality of DrJava is hidden in components with extremely high-level interfaces.
+  * runtime.  Almost all of the functionality of DrScala is hidden in components with extremely high-level interfaces.
   * This class ensures that each component is registered with all other components that need to call its methods.  In 
   * essence, this class manages component associations.  Any details more low-level than who talks to who should be
   * handled by components through their interfaces.

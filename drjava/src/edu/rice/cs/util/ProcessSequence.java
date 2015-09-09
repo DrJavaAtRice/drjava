@@ -38,7 +38,7 @@ package edu.rice.cs.util;
 
 import java.io.*;
 
-import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
+import edu.rice.cs.drjava.ui.DrScalaErrorHandler;
 
 /**
  * This class represents a sequence of processes. The inputs and outputs of the processes
@@ -346,7 +346,7 @@ public class ProcessSequence extends Process {
                           e.toString() + "\n\n");
       }
       else {
-        DrJavaErrorHandler.record(e);
+        DrScalaErrorHandler.record(e);
       }
     }
   }

@@ -37,7 +37,7 @@
   <property name="benchmark-count" value="5" />
   <property name="benchmark-skip" value="1" />
 
-  <property name="drjava.test.config" value="testFiles/drjava.basic.config" />
+  <property name="drscala.test.config" value="testFiles/drscala.basic.config" />
   
   <property environment="env" />
   <property name="java8-home" value="${env.JAVA8_HOME}" />
@@ -73,9 +73,9 @@
   <!-- Use ConcJUnit if use-concjunit is not defined and we are not running Java 7. -->
   <!-- ConcJUnit is currently incompatible with Java 7. -->
   <if>
-    <contains string="${java.version}" substring="1.8"/>
+    <contains string="${java.version}" substring="1.7"/>
     <then>
-      <echo message="ConcJUnit is currently incompatible with Java 7, 8."/>
+      <echo message="ConcJUnit is currently incompatible with Java 7"/>
       <property name="use-concjunit" value="false" />
     </then>
     <else>
@@ -162,8 +162,8 @@
     <echo message="                 (default: 5)" />
     <echo message="benchmark-skip: Number of 'PREV' updates to perform between benchmark" />
     <echo message="                runs (default: 1)" />
-    <echo message="drjava.test.config: Location of the DrScala configuration file to use" />
-    <echo message="                    in tests (default: testFiles/drjava.basic.config)" />
+    <echo message="drscala.test.config: Location of the DrScala configuration file to use" />
+    <echo message="                    in tests (default: testFiles/drscala.basic.config)" />
     <echo message="use-concjunit: Set to true to test ConcJUnit instead of JUnit." />
   </target>
   
@@ -375,11 +375,10 @@
 
   <target name="test-8" depends="compile, resolve-java7-exec, resolve-java8-tools" unless="skip-test"
           description="Run all tests under Java 8 (after compiling); use -Dtest-spec=... to filter">
-    <echo message="ConcJUnit is currently incompatible with Java 8."/>
     <antcall target="iterate-tests">
       <param name="test-jvm" value="${java8-exec}" />
       <param name="test-tools" value="${java8-tools}" />
-      <param name="test-force-disable-concjunit" value="true" />
+      <param name="test-force-disable-concjunit" value="false" />
     </antcall>
   </target>
 
@@ -515,7 +514,7 @@
       </assertions>
       <syspropertyset>
         <propertyref prefix="plt." />
-        <propertyref prefix="drjava." />
+        <propertyref prefix="drscala." />
         <!-- Add any properties that should be passed on -->
       </syspropertyset>
       <jvmarg line="${jvm-args} ${concjunit-bootclasspath}" />
@@ -570,7 +569,7 @@
       </assertions>
       <syspropertyset>
         <propertyref prefix="plt." />
-        <propertyref prefix="drjava." />
+        <propertyref prefix="drscala." />
         <!-- Add any properties that should be passed on -->
       </syspropertyset>
       <jvmarg line="${jvm-args}" />
@@ -612,7 +611,7 @@
       </assertions>
       <syspropertyset>
         <propertyref prefix="plt." />
-        <propertyref prefix="drjava." />
+        <propertyref prefix="drscala." />
         <!-- Add any properties that should be passed on -->
       </syspropertyset>
       <jvmarg line="${jvm-args}" />
@@ -1173,7 +1172,7 @@
   </target>
 
   <!-- This generates a file md5.properties that contains
-       MD5 checksums for all files contained in the drjava.jar file -->
+       MD5 checksums for all files contained in the drscala.jar file -->
   <target name="generate-md5-properties" depends="compile, resolve-version-tag">
     <delete file="${basedir}/${md5-temp-name}"/>
 

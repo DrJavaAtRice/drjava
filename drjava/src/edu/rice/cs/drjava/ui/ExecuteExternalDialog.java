@@ -732,7 +732,7 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
                 }
                 boolean found = false;
                 for(String category: props.getCategories()) {
-                  DrJavaProperty p = props.getProperty(category, key);
+                  DrScalaProperty p = props.getProperty(category, key);
                   if (p != null) {
                     found = true;
                     doc.setCharacterAttributes(pos,pos+next.length(),variable,true);
@@ -1003,7 +1003,7 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
             EventQueue.invokeLater(new Runnable() { public void run() { ExecuteExternalDialog.this.toFront(); } });
             _mainFrame.installModalWindowAdapter(ExecuteExternalDialog.this, LambdaUtil.NO_OP, CANCEL);
 
-            edu.rice.cs.plt.tuple.Pair<String,DrJavaProperty> selected = _insertVarDialog.getSelected();
+            edu.rice.cs.plt.tuple.Pair<String,DrScalaProperty> selected = _insertVarDialog.getSelected();
             if (selected != null) {
               String text = _lastCommandFocus.getText();
               Caret caret = _lastCommandFocus.getCaret();

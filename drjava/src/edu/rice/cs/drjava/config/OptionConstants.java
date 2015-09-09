@@ -58,7 +58,7 @@ import edu.rice.cs.util.FileOps;
 import static java.awt.Event.*;
 
 
-/** Defines the commonly used Option constants in DrJava config and project profiles.
+/** Defines the commonly used Option constants in DrScala config and project profiles.
   * @version $Id: OptionConstants.java 5707 2012-08-26 05:57:03Z rcartwright $
   */
 public interface OptionConstants {
@@ -80,10 +80,10 @@ public interface OptionConstants {
   /* The default rate at which the debugger steps into or over every line of code*/
   public static final NonNegativeIntegerOption AUTO_STEP_RATE = new NonNegativeIntegerOption("auto.step.rate", 1000);
   
-  /** The extension for an external DrJava app */
+  /** The extension for an external DrScala app */
   public static final String EXTPROCESS_FILE_EXTENSION = ".djapp";
   
-  /** The extension for a DrJava project file */
+  /** The extension for a DrScala project file */
   public static final String PROJECT_FILE_EXTENSION = ".drscala"; 
       
   /* Constants for language extensions */
@@ -203,7 +203,7 @@ public interface OptionConstants {
   public static final ColorOption DEBUG_THREAD_COLOR = new ColorOption("debug.thread.color", new Color(100,255,255));
   
   /** Color for the background of the "DrScala Errors" button. */
-  public static final ColorOption DRSCALA_ERRORS_BUTTON_COLOR = new ColorOption("drjava.errors.button.color", Color.red);
+  public static final ColorOption DRSCALA_ERRORS_BUTTON_COLOR = new ColorOption("drscala.errors.button.color", Color.red);
 
   /** Color for the line at the right margin. */
   public static final ColorOption RIGHT_MARGIN_COLOR = new ColorOption("right.margin.color", new Color(204,204,204));
@@ -1102,7 +1102,7 @@ public interface OptionConstants {
   public static final VectorOption<KeyStroke> KEY_CHECK_NEW_VERSION = 
     new VectorOption<KeyStroke>("key.check.new.version", new KeyStrokeOption("",null), to.vector());
   
-  /** The key binding for the DrJava survey dialog */
+  /** The key binding for the DrScala survey dialog */
   public static final VectorOption<KeyStroke> KEY_DRSCALA_SURVEY = 
     new VectorOption<KeyStroke>("key.drjava.survey", new KeyStrokeOption("",null), to.vector());
   
@@ -1143,11 +1143,11 @@ public interface OptionConstants {
   public static final KeyStrokeOption KEY_FOR_UNIT_TESTS_ONLY = 
     new KeyStrokeOption("key.for.unit.tests.only", KeyStroke.getKeyStroke(KeyEvent.VK_N, CTRL_MASK|SHIFT_MASK|MASK));
 
-  /** The key binding for the GenerateCustomDrJavaJarFrame. */
+  /** The key binding for the GenerateCustomDrScalaJarFrame. */
   public static final VectorOption<KeyStroke> KEY_GENERATE_CUSTOM_DRSCALA = 
     new VectorOption<KeyStroke>("key.generate.custom.drjava", new KeyStrokeOption("",null), to.vector());
   
-  /** The key binding for starting a new, blank DrJava instance. */
+  /** The key binding for starting a new, blank DrScala instance. */
   public static final VectorOption<KeyStroke> KEY_NEW_DRSCALA_INSTANCE= 
     new VectorOption<KeyStroke>("key.new.drjava.instance", new KeyStrokeOption("",null),
                                 to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_F1, CTRL_MASK|SHIFT_MASK)));
@@ -1402,7 +1402,7 @@ public interface OptionConstants {
   /** Whether remote control using sockets is enabled. */
   public static final BooleanOption REMOTE_CONTROL_ENABLED = new BooleanOption("remote.control.enabled", Boolean.TRUE);
   
-  /** The port where DrJava will listen for remote control requests. */
+  /** The port where DrScala will listen for remote control requests. */
   public static final IntegerOption REMOTE_CONTROL_PORT = new IntegerOption("remote.control.port", Integer.valueOf(4444));
   
   /** Whether to warn if Compiz is being used */
@@ -1691,11 +1691,11 @@ public interface OptionConstants {
   public static final BooleanOption FIND_REPLACE_FOCUS_IN_DEFPANE =
     new BooleanOption("find.replace.focus.in.defpane", Boolean.FALSE);
   
-  /** Whether to show a notification popup when the first DrJava error occurs. */
+  /** Whether to show a notification popup when the first DrScala error occurs. */
   public static final BooleanOption DIALOG_DRSCALA_ERROR_POPUP_ENABLED =
     new BooleanOption("dialog.drjava.error.popup.enabled", Boolean.TRUE);
   
-  /** Whether to ask the user if DrJava may send system information to the DrJava developers. */
+  /** Whether to ask the user if DrScala may send system information to the DrScala developers. */
   public static final BooleanOption DIALOG_DRSCALA_SURVEY_ENABLED =
     new BooleanOption("dialog.drjava.survey.enabled", Boolean.TRUE);
   
@@ -1705,7 +1705,7 @@ public interface OptionConstants {
   
   /** Whether to use Runtime.halt to quit DrScala (see bugs 1550220 and 1478796). */
   public static final BooleanOption DRSCALA_USE_FORCE_QUIT =
-    new BooleanOption("drjava.use.force.quit", Boolean.FALSE);
+    new BooleanOption("drscala.use.force.quit", Boolean.FALSE);
   
   /** Whether to display the "Auto Import" dialog when an undefined class
     * is encountered in the Interactions Pane. */
@@ -1771,7 +1771,7 @@ public interface OptionConstants {
     }
   }
   
-  /** The kind of version DrJava should be looking for. */
+  /** The kind of version DrScala should be looking for. */
   public static final ForcedChoiceOption NEW_VERSION_NOTIFICATION =
     new ForcedChoiceOption("new.version.notification", VersionNotificationChoices.BETA, NEW_VERSION_NOTIFICATION_CHOICES);
 
@@ -1785,15 +1785,15 @@ public interface OptionConstants {
   public static final NonNegativeIntegerOption NEW_VERSION_NOTIFICATION_DAYS =
     new NonNegativeIntegerOption("new.version.notification.days", 7);  
   
-  /** The number of days that have to pass before we ask and allow the user to participate in the DrJava survey again. */
+  /** The number of days that have to pass before we ask and allow the user to participate in the DrScala survey again. */
   public static final NonNegativeIntegerOption DRSCALA_SURVEY_DAYS =
-    new NonNegativeIntegerOption("drjava.survey.days", 91); // every three month  
+    new NonNegativeIntegerOption("drscala.survey.days", 91); // every three month  
   
-  /** The last time we asked the user to participate in the DrJava survey. */
-  public static final LongOption LAST_DRSCALA_SURVEY = new LongOption("drjava.survey.notification.last", (long)0);  
+  /** The last time we asked the user to participate in the DrScala survey. */
+  public static final LongOption LAST_DRSCALA_SURVEY = new LongOption("drscala.survey.notification.last", (long)0);  
   
-  /** The request URL that the user generated the last time the DrJava survey was taken. */
-  public static final StringOption LAST_DRSCALA_SURVEY_RESULT = new StringOption("drjava.survey.result.last", "");
+  /** The request URL that the user generated the last time the DrScala survey was taken. */
+  public static final StringOption LAST_DRSCALA_SURVEY_RESULT = new StringOption("drscala.survey.result.last", "");
   
   /** Delete class files for language-level classes. */
   public static final ArrayList<String> DELETE_LL_CLASS_FILES_CHOICES =

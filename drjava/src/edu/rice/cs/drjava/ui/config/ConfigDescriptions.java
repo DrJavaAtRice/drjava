@@ -266,7 +266,7 @@ public class ConfigDescriptions {
     // Prompt to change the language level extensions (.dj0/.dj1->.dj, .dj2->.java)
     add(PROMPT_RENAME_LL_FILES, "Prompt to Rename Old Language Level Files When Saving",
         "<html>Whether DrScala should prompt the user to rename old language level files.<br>" +
-        "DrJava/DrScala suggests to rename .dj0 and .dj1 files to .dj, and .dj2 files to .java.</html>");
+        "DrScala/DrScala suggests to rename .dj0 and .dj1 files to .dj, and .dj2 files to .java.</html>");
     
     // Save before X
     add(ALWAYS_SAVE_BEFORE_COMPILE, "Automatically Save Before Compiling",
@@ -326,7 +326,7 @@ public class ConfigDescriptions {
         "Users cannot use such files in the Interactions Pane<br>" + "because of a bug in Java.</html>");
     add(DIALOG_DRSCALA_ERROR_POPUP_ENABLED, "Show a notification window when the first DrScala error occurs",
         "<html>Whether to show a notification window when the first DrScala error occurs.<br>" +
-        "If this is disabled, only the \"DrJava Error\" button will appear.</html>");
+        "If this is disabled, only the \"DrScala Error\" button will appear.</html>");
     add(WARN_IF_COMPIZ, "Warn If Compiz Detected",
         "<html>Whether DrScala should warn the user if Compiz is running.<br>"+
         "Compiz and Java Swing are incompatible and can lead to crashes.</html>");
@@ -446,7 +446,7 @@ public class ConfigDescriptions {
     add(JUNIT_LOCATION_ENABLED, "Use external JUnit",
         "<html>If this is enabled, DrScala will use the JUnit configured<br>" +
         "below under 'JUnit/ConcJUnit Location'. If it is disabled,<br>" +
-        "DrJava will use the JUnit that is built-in.</html>");
+        "DrScala will use the JUnit that is built-in.</html>");
     add(JUNIT_LOCATION, "JUnit/ConcJUnit Location", "<html>Optional location of the JUnit or ConcJUnit jar file.<br>" +
         "(Changes will not be applied until the Interactions Pane<br>" + "is reset.)</html>");
     add(CONCJUNIT_CHECKS_ENABLED, "Enabled ConcJUnit Checks",

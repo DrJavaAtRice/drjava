@@ -46,7 +46,7 @@ import java.util.*;
   */
 public final class PropertyMaps implements Cloneable {
   /** Map of property sets. */
-  protected Map<String,Map<String,DrJavaProperty>> _props = new TreeMap<String,Map<String,DrJavaProperty>>();
+  protected Map<String,Map<String,DrScalaProperty>> _props = new TreeMap<String,Map<String,DrScalaProperty>>();
   
   /** Template instance. */
   public static final PropertyMaps TEMPLATE = new PropertyMaps();
@@ -65,7 +65,7 @@ public final class PropertyMaps implements Cloneable {
   
   /** Create the basic property maps.
     * One is named "Java" and contains the Java system properties.
-    * A second one is named "Config" and contains the DrJava configuration items. */
+    * A second one is named "Config" and contains the DrScala configuration items. */
   public PropertyMaps() { }
 
   /** Return the property requested, or null if not found.
@@ -73,8 +73,8 @@ public final class PropertyMaps implements Cloneable {
     * @param name name of the property
     * @return property, or null if not found
     * @throws IllegalArgumentException if category is not known. */
-  public DrJavaProperty getProperty(String category, String name) {
-    Map<String,DrJavaProperty> m = _props.get(category);
+  public DrScalaProperty getProperty(String category, String name) {
+    Map<String,DrScalaProperty> m = _props.get(category);
     if (m == null) { throw new IllegalArgumentException("DrScalaProperty category unknown."); }
     return m.get(name);
   }
@@ -82,9 +82,9 @@ public final class PropertyMaps implements Cloneable {
   /** Search through all categories and return the property requested, or null if not found.
     * @param key key of the property
     * @return property, or null if not found */
-  public DrJavaProperty getProperty(String key) {
+  public DrScalaProperty getProperty(String key) {
     for(String category: _props.keySet()) {
-      DrJavaProperty p = getProperty(category, key);
+      DrScalaProperty p = getProperty(category, key);
       if (p != null) { return p; }
     }
     return null;
@@ -92,16 +92,16 @@ public final class PropertyMaps implements Cloneable {
   
   /** Remove the specified property.
     * @param p property to remove */
-  public void removeProperty(DrJavaProperty p) {
+  public void removeProperty(DrScalaProperty p) {
     for(String category: _props.keySet()) {
       _props.get(category).remove(p);
     }
   }
   
   /** Add a property. */
-  public DrJavaProperty setProperty(String category, DrJavaProperty p) {
-    Map<String,DrJavaProperty> m = _props.get(category);
-    if (m == null) { m = new HashMap<String,DrJavaProperty>(); _props.put(category,m); }
+  public DrScalaProperty setProperty(String category, DrScalaProperty p) {
+    Map<String,DrScalaProperty> m = _props.get(category);
+    if (m == null) { m = new HashMap<String,DrScalaProperty>(); _props.put(category,m); }
     m.put(p.getName(), p);
     return p;
   }
@@ -116,20 +116,20 @@ public final class PropertyMaps implements Cloneable {
 
   /** Return the properties in a category.
     * @throws IllegalArgumentException if category is not known. */
-  public Map<String, DrJavaProperty> getProperties(String category) {
-    Map<String,DrJavaProperty> m = _props.get(category);
+  public Map<String, DrScalaProperty> getProperties(String category) {
+    Map<String,DrScalaProperty> m = _props.get(category);
     if (m == null) { throw new IllegalArgumentException("DrScalaProperty category unknown."); }
     return m;
   }
   
   /** A lambda to use the getLazy() method, which does not force an update and might be stale. */
-  public static final Lambda2<DrJavaProperty,PropertyMaps,String> GET_LAZY = new Lambda2<DrJavaProperty,PropertyMaps,String>() {
-    public String value(DrJavaProperty p, PropertyMaps pm) { return p.getLazy(pm); /* might be stale */ }
+  public static final Lambda2<DrScalaProperty,PropertyMaps,String> GET_LAZY = new Lambda2<DrScalaProperty,PropertyMaps,String>() {
+    public String value(DrScalaProperty p, PropertyMaps pm) { return p.getLazy(pm); /* might be stale */ }
   };
   
   /** A lambda to use the getCurrent() method, which forces an update. */
-  public static final Lambda2<DrJavaProperty,PropertyMaps,String> GET_CURRENT = new Lambda2<DrJavaProperty,PropertyMaps,String>() {
-    public String value(DrJavaProperty p, PropertyMaps pm) { return p.getCurrent(pm); }
+  public static final Lambda2<DrScalaProperty,PropertyMaps,String> GET_CURRENT = new Lambda2<DrScalaProperty,PropertyMaps,String>() {
+    public String value(DrScalaProperty p, PropertyMaps pm) { return p.getCurrent(pm); }
   };
   
   protected HashMap<String,Stack<VariableProperty>> _variables = new HashMap<String,Stack<VariableProperty>>();

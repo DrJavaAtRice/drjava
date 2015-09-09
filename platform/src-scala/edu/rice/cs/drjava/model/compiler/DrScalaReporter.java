@@ -61,7 +61,7 @@ import edu.rice.cs.util.Log;
   * (ii) an overridden print method that adds each scalac error message to the table. 
   * The table djErrors is created by the caller.
   */
-public class DrJavaReporter extends ConsoleReporter {
+public class DrScalaReporter extends ConsoleReporter {
   
   public static final Log _log = new Log("GlobalModel.txt", false);
   
@@ -75,7 +75,7 @@ public class DrJavaReporter extends ConsoleReporter {
 //    }
 //  };
 
-  public DrJavaReporter(final LinkedList<DJError> errors) { 
+  public DrScalaReporter(final LinkedList<DJError> errors) { 
     super(new Settings(new AbstractFunction1<String, BoxedUnit>() {
       public BoxedUnit apply(String msg) { 
 //        error(new FakePos("scalac"), msg + "\n  scalac -help  gives more information");

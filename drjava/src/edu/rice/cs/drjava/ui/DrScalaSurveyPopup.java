@@ -53,11 +53,11 @@ import edu.rice.cs.util.swing.BorderlessScrollPane;
 import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.plt.lambda.LambdaUtil;
 
-/** Asks whether DrJava may contact the DrJava developers and send information about
+/** Asks whether an installed DrScala system may contact the DrScala developers and send information about
   * the operating system and the Java version used.
-  * @version $Id: DrJavaSurveyPopup.java 5594 2012-06-21 11:23:40Z rcartwright $
+  * @version $Id: DrScalaSurveyPopup.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
-public class DrJavaSurveyPopup extends JDialog {
+public class DrScalaSurveyPopup extends JDialog {
   /** the keys of the system properties that we want to send */
   public static final String[] DRSCALA_SURVEY_KEYS = new String[] {"os.name","os.version","java.version","java.vendor"};
   
@@ -69,14 +69,14 @@ public class DrJavaSurveyPopup extends JDialog {
   private MainFrame _mainFrame;
   /** the version information pane */
   private JOptionPane _questionPanel;
-  /** the table with the information that DrJava will send */
+  /** the table with the information that DrScala will send */
   private JTable _propertiesTable;
   /** don't ask user again */
   private JCheckBox _neverAskAgain;
   
-  /** Creates a window to display whether a new version of DrJava is available. */
-  public DrJavaSurveyPopup(MainFrame parent) {
-    super(parent, "Send System Information to DrJava Developers");
+  /** Creates a window to display whether a new version of DrScala is available. */
+  public DrScalaSurveyPopup(MainFrame parent) {
+    super(parent, "Send System Information to DrScala Developers");
     setResizable(false);
     setSize(550,350);
     _mainFrame = parent;
@@ -96,7 +96,7 @@ public class DrJavaSurveyPopup extends JDialog {
     buttonPanel.add(_yesButton);
     buttonPanel.add(_noButton);
 
-    _questionPanel = new JOptionPane("May DrJava anonymously send the information\nbelow to the DrJava developers?",
+    _questionPanel = new JOptionPane("May DrScala anonymously send the information\nbelow to the DrScala developers?",
                                      JOptionPane.QUESTION_MESSAGE,JOptionPane.DEFAULT_OPTION,null,
                                      new Object[0]);
     int size = DRSCALA_SURVEY_KEYS.length + 2;
@@ -142,8 +142,8 @@ public class DrJavaSurveyPopup extends JDialog {
   };
 
   protected void noAction() {
-    // set the date we asked even if the user pressed no
-    // so the user won't be bothered the next time he starts DrJava
+    // set the date we asked even if the user pressed "no"
+    // so the user won't be bothered the next time he starts DrScala
     // next popup will occur in DRSCALA_SURVEY_DAYS (91) days.
     DrScala.getConfig().setSetting(OptionConstants.LAST_DRSCALA_SURVEY, new Date().getTime());
     DrScala.getConfig().setSetting(OptionConstants.LAST_DRSCALA_SURVEY_RESULT, getSurveyURL());
@@ -153,7 +153,7 @@ public class DrJavaSurveyPopup extends JDialog {
 
   public static final edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("survey.txt",false);
 
-  /** Return the URL that would be used to answer the DrJava survey. */
+  /** Return the URL that would be used to answer the DrScala survey. */
   public static String getSurveyURL() {
     final String DRSCALA_SURVEY_PAGE = "http://www.drjava.org/submit-usage.php?";
     StringBuilder sb = new StringBuilder();

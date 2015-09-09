@@ -41,7 +41,7 @@ import javax.swing.filechooser.FileFilter;
 import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.DrScalaRoot;
 import edu.rice.cs.drjava.config.OptionConstants;
-import edu.rice.cs.drjava.model.DrJavaFileUtils;
+import edu.rice.cs.drjava.model.DrScalaFileUtils;
 
 /** A file filter for all source files. Java language levels support has been disabled.
  *  @version $Id: SmartSourceFilter.java 5594 2012-06-21 11:23:40Z rcartwright $

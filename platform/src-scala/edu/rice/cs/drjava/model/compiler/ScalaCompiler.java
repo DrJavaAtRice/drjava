@@ -48,7 +48,7 @@ import java.util.Set;
 
 import javax.swing.filechooser.FileFilter;
 
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.DJError;
 import edu.rice.cs.drjava.model.JDKDescriptor;
@@ -262,15 +262,20 @@ public class ScalaCompiler extends Javac160FilteringCompiler implements /* Scala
     
 //    Utilities.show("compile command for Scala called");
     
-    ConsoleReporter reporter = new DrJavaReporter(errors);
+    ConsoleReporter reporter = new DrScalaReporter(errors);
 
     // Create a Settings object that captures the Java class path as the Scala class path!
     Settings settings = reporter.settings();
     
 //    settings.processArgumentString("-usejavacp");
     settings.processArgumentString("-deprecation");
-    _log.log("Passing argument string '" + "-d " + '"' + destination.getPath() + '"' + "to the scala compiler (Global)");
-    settings.processArgumentString("-d " + '"' + destination.getPath() + '"');
+    String dest = (destination == null) ? null : destination.getPath();
+//    Utilities.show("dest = '" + dest + "'");
+    if (dest != null) {
+      _log.log("Passing argument string '" + "-d " + '"' + dest + '"' + "to the scala compiler (Global)");
+      settings.processArgumentString("-d " + '"' + dest + '"');
+    }
+    else settings.processArgumentString("-d " + '"' + '"');
     // additionalBootClassPathForInteractions consists of the jar files required to run scalac
     String cp = additionalBootClassPathForInteractions().toString() + dJPathToPath(classPath);
     settings.processArgumentString("-cp " + '"' + cp + '"');  // cp quoted because unescaped blanks may appear in Windows file names

@@ -36,8 +36,6 @@
 
 package edu.rice.cs.drjava.model.repl;
 
-import edu.rice.cs.dynamicjava.Options;
-
 /** Interpreter options that can be changed.
   * @version $Id: InteractionsPaneOptions.java 5594 2012-06-21 11:23:40Z rcartwright $
   */

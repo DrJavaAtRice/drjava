@@ -141,7 +141,7 @@ public interface ProjectFileIR {
   public String getDrScalaVersion();
   
   /**
-   * Sets the version of DrJava that built this project.
+   * Sets the version of DrScala that built this project.
    * 
    * @param version - the version string, should be called with "unknown" if the version could not be determined.
    */

@@ -500,7 +500,6 @@ public class DummyGlobalModel implements GlobalModel {
     throw new UnsupportedOperationException("Tried to call getCreateJarFlags on a Dummy");
   }
   
-  
   public boolean inProject(File f) {
     throw new UnsupportedOperationException("Tried to call inProject on a Dummy");
   }

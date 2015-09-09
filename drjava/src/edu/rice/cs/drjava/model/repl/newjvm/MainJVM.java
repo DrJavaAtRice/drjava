@@ -56,12 +56,16 @@ import edu.rice.cs.drjava.model.repl.newjvm.Interpreter;
 //import edu.rice.cs.drjava.model.debug.DebugModelCallback;
 
 import edu.rice.cs.drjava.platform.PlatformFactory;
-import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
+import edu.rice.cs.drjava.ui.DrScalaErrorHandler;
 
 import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.text.ConsoleDocument;
+import edu.rice.cs.util.newjvm.*;
+import edu.rice.cs.util.classloader.ClassFileError;
+
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.reflect.ReflectUtil;
@@ -71,9 +75,6 @@ import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.concurrent.JVMBuilder;
 import edu.rice.cs.plt.concurrent.StateMonitor;
 import edu.rice.cs.plt.concurrent.CompletionMonitor;
-  
-import edu.rice.cs.util.newjvm.*;
-import edu.rice.cs.util.classloader.ClassFileError;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 import static edu.rice.cs.drjava.config.OptionConstants.*;
@@ -169,7 +170,10 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     * is running.  If a currently-running JVM is already "fresh", it is still stopped and restarted when
     * {@code force} is true.
     */
-  public void restartInterpreterJVM(boolean force) { _state.value().restart(force); /* waitUntilReady(); */ }
+  public void restartInterpreterJVM(boolean force) { 
+    _state.value().restart(force); /* waitUntilReady(); */
+    _interactionsModel._notifyInterpreterReady(_workingDir);
+  }
     
   /**
    * Stop the interpreter JVM, do not restart it, and terminate the RMI server associated with this object.
@@ -318,11 +322,10 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    */
   
   /** Provides an object to listen to interactions-related events. */
-  public void setInteractionsModel(InteractionsModelCallback model) { _interactionsModel = model; }
+  public void setInteractionsModel(InteractionsModel model) { _interactionsModel = model; }
   
   /** Provides an object to listen to test-related events.*/
-  public void setJUnitModel(JUnitModelCallback model) { _junitModel = model; }
-  
+  public void setJUnitModel(JUnitModelCallback model) { _junitModel = model; } 
   
   /* Debugger deactivated in DrScala */
 //  /** Provides an object to listen to debug-related events.
@@ -791,7 +794,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
       if ((e.getCause() instanceof SocketException) &&
           (e.getCause().getMessage().equals("Connection reset"))) return;
     }
-    DrJavaErrorHandler.record(e);
+    DrScalaErrorHandler.record(e);
   }
   
   /*
@@ -1079,6 +1082,39 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     public void changeInputListener(InputListener from, InputListener to) {
       throw new IllegalStateException("Cannot change the input listener of dummy interactions model!");
     }
+//    public ConsoleDocument getConsoleDocument() {
+//      throw new IllegalStateException("Cannot get console document of dummy interactions model!");
+//    }
+//    
+    public void _notifyInterpreterReady(File f) {
+      throw new IllegalStateException("Cannot notifyInterpreterReady from dummy interactions model!");
+    }
+//    protected void _notifyInterpreterResetFailed(Throwable t) {
+//      throw new IllegalStateException("Cannot execute _notifyInterpreterResetFailed from dummy interactions model!");
+//    }
+//    protected void _notifyInterpreterResetting(Throwable t) {
+//      throw new IllegalStateException("Cannot execute _notifyInterpreterResetFailed from dummy interactions model!");
+//    }  
+//    protected void _notifyInterpreterResetting() {
+//      throw new IllegalStateException("Cannot execute _notifyInterpreterResetting from dummy interactions model!");
+//    }
+//    protected void _notifyInterpreterExited(int status) {
+//      throw new IllegalStateException("Cannot execute _notifyInterpreterExited from dummy interactions model!");
+//    }
+//    protected void _notifyInteractionEnded() {
+//      throw new IllegalStateException("Cannot execute _notifyInteractionEnded from dummy interactions model!");
+//    }
+//    protected void _notifySyntaxErrorOccurred(final int offset, final int length) {
+//      throw new IllegalStateException("Cannot execute _notifySyntaxErrorOccurred from dummy interactions model!");
+//    }
+//        
+//    protected void _interpreterWontStart(Exception e) {
+//      throw new IllegalStateException("Cannot execute _interpreterWontStart from dummy interactions model!");
+//    }
+//    protected void _interpreterResetFailed(Throwable t) {
+//      throw new IllegalStateException("Cannot execute _interpreterResetFailed from dummy interactions model!");
+//    }
+  
     public void replReturnedVoid() { }
     public void replReturnedResult(String result, String style) { }
     public void replThrewException(String message, StackTraceElement[] stackTrace) { }

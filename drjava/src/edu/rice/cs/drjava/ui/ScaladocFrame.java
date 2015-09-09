@@ -48,7 +48,7 @@ import java.io.IOException;
 import edu.rice.cs.util.UnexpectedException;
 
 /**
- * DrJava's Scaladoc viewing frame
+ * DrScala's Scaladoc viewing frame
  * @version $Id: ScaladocFrame.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class ScaladocFrame extends HTMLFrame {

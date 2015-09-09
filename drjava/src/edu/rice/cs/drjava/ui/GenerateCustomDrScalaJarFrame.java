@@ -60,7 +60,7 @@ import edu.rice.cs.plt.io.IOUtil;
 import javax.swing.filechooser.FileFilter;
 
 /** A frame for generating a custom drjava.jar. */
-public class GenerateCustomDrJavaJarFrame extends SwingFrame {
+public class GenerateCustomDrScalaJarFrame extends SwingFrame {
 
   private static final int FRAME_WIDTH = 503;
   private static final int FRAME_HEIGHT = 500;
@@ -76,7 +76,7 @@ public class GenerateCustomDrJavaJarFrame extends SwingFrame {
   private final JButton _closeButton;
   private JPanel _mainPanel;
   
-  /** The file with the current DrJava executable. */
+  /** The file with the current DrScala executable. */
   private final File _drjavaFile = FileOps.getDrScalaFile();
 
   /** File selector for the jar output file. */
@@ -86,7 +86,7 @@ public class GenerateCustomDrJavaJarFrame extends SwingFrame {
   private VectorFileOptionComponent _sourcesList;
   
   /** Constructs a frame to generate a custom drjava.jar. */
-  public GenerateCustomDrJavaJarFrame(MainFrame mf) {
+  public GenerateCustomDrScalaJarFrame(MainFrame mf) {
     super("Generate Custom drjava.jar File");
 
     _mainFrame = mf;
@@ -173,10 +173,10 @@ public class GenerateCustomDrJavaJarFrame extends SwingFrame {
     _jarFileSelector = new FileSelectorComponent(this, fileChooser, 20, 12f, false) {
       /** Opens the file chooser to select a file, putting the result in the file field. */
       protected void _chooseFile() {
-        _mainFrame.removeModalWindowAdapter(GenerateCustomDrJavaJarFrame.this);
+        _mainFrame.removeModalWindowAdapter(GenerateCustomDrScalaJarFrame.this);
         super._chooseFile();
         validateTextField();
-        _mainFrame.installModalWindowAdapter(GenerateCustomDrJavaJarFrame.this, LambdaUtil.NO_OP, CLOSE);
+        _mainFrame.installModalWindowAdapter(GenerateCustomDrScalaJarFrame.this, LambdaUtil.NO_OP, CLOSE);
       }
       public boolean validateTextField() {
         String newValue = _fileField.getText().trim();
@@ -210,7 +210,7 @@ public class GenerateCustomDrJavaJarFrame extends SwingFrame {
   public void generate() {
     final File jarOut = _jarFileSelector.getFileFromField();
     if ((jarOut == null) || (jarOut.equals(FileOps.NULL_FILE))) {
-      JOptionPane.showMessageDialog(GenerateCustomDrJavaJarFrame.this,
+      JOptionPane.showMessageDialog(GenerateCustomDrScalaJarFrame.this,
                                     "You must specify an output file",
                                     "Error: No File Specified",
                                     JOptionPane.ERROR_MESSAGE);
@@ -218,15 +218,15 @@ public class GenerateCustomDrJavaJarFrame extends SwingFrame {
     }
     else if (jarOut.exists()) {
       if (jarOut.equals(_drjavaFile)) {
-        JOptionPane.showMessageDialog(GenerateCustomDrJavaJarFrame.this,
-                                      "You cannot specify this DrJava executable as output file.\n"+
+        JOptionPane.showMessageDialog(GenerateCustomDrScalaJarFrame.this,
+                                      "You cannot specify this DrScala executable as output file.\n"+
                                       "Please choose a different file.",
                                       "Error: Cannot Overwrite",
                                       JOptionPane.ERROR_MESSAGE);
         return;
       }
 
-      if (JOptionPane.showConfirmDialog(GenerateCustomDrJavaJarFrame.this,
+      if (JOptionPane.showConfirmDialog(GenerateCustomDrScalaJarFrame.this,
                                         "Are you sure you want to overwrite the file '" + jarOut.getPath() + "'?",
                                         "Overwrite file?",
                                         JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION) {
@@ -260,7 +260,7 @@ public class GenerateCustomDrJavaJarFrame extends SwingFrame {
                       catch(IOException ioe) { /* ignore, this failed anyway */ }
                       setContentPane(prevContentPane);
                       validate();
-                      new DrJavaScrollableDialog(GenerateCustomDrJavaJarFrame.this,
+                      new DrScalaScrollableDialog(GenerateCustomDrScalaJarFrame.this,
                                                  "Generation Failed",
                                                  "Custom drjava.jar file generation failed.",
                                                  sb.toString(),
@@ -279,7 +279,7 @@ public class GenerateCustomDrJavaJarFrame extends SwingFrame {
                         zos.close();
                         setContentPane(prevContentPane);
                         validate();
-                        JOptionPane.showMessageDialog(GenerateCustomDrJavaJarFrame.this,
+                        JOptionPane.showMessageDialog(GenerateCustomDrScalaJarFrame.this,
                                                       "Custom drjava.jar file generated successfully.",
                                                       "Generation Successful",
                                                       JOptionPane.INFORMATION_MESSAGE);
@@ -291,7 +291,7 @@ public class GenerateCustomDrJavaJarFrame extends SwingFrame {
                 catch(IOException ioe) {
                   setContentPane(prevContentPane);
                   validate();
-                  new DrJavaScrollableDialog(GenerateCustomDrJavaJarFrame.this,
+                  new DrScalaScrollableDialog(GenerateCustomDrScalaJarFrame.this,
                                              "Generation Failed",
                                              "Custom drjava.jar file generation failed.",
                                              sb.toString(),
@@ -324,7 +324,7 @@ public class GenerateCustomDrJavaJarFrame extends SwingFrame {
     */
   public boolean askGenerateAnyway(String text) {
     final boolean[] result = new boolean[] { false };
-    new DrJavaScrollableDialog(this,
+    new DrScalaScrollableDialog(this,
                                "Additional Files Conflict",
                                "The files you want to add create conflicts. As a result,\n"+
                                "the generated file may not work.",
@@ -538,14 +538,14 @@ public class GenerateCustomDrJavaJarFrame extends SwingFrame {
         final StringBuilder sb = new StringBuilder();
         checkConflictFree(sb, null, "Checking for conflicts ...", new Runnable() {
           public void run() {
-            JOptionPane.showMessageDialog(GenerateCustomDrJavaJarFrame.this,
+            JOptionPane.showMessageDialog(GenerateCustomDrScalaJarFrame.this,
                                           "There were no conflicts.",
                                           "Additional Files",
                                           JOptionPane.INFORMATION_MESSAGE);
           }
         }, new Runnable() {
           public void run() {
-            new DrJavaScrollableDialog(GenerateCustomDrJavaJarFrame.this,
+            new DrScalaScrollableDialog(GenerateCustomDrScalaJarFrame.this,
                                        "Additional Files Conflict",
                                        "The files you want to add create conflicts. As a result,\n"+
                                        "the generated file may not work.",
@@ -576,23 +576,23 @@ public class GenerateCustomDrJavaJarFrame extends SwingFrame {
     
     JTextArea helpText = new JTextArea();
     helpText.setEditable(false);
-    helpText.setText("This dialog lets you generate a custom drjava.jar file based on "+
-                     "the currently running version of DrJava, and you can include "+
+    helpText.setText("This dialog lets you generate a custom drscala.jar file based on "+
+                     "the currently running version of DrScala, and you can include "+
                      "additional jar files, zip files or directories. These additional "+
                      "files are added to the drjava.jar and are immediately available "+
-                     "in the generated DrJava application without having to set up "+
+                     "in the generated DScala application without having to set up "+
                      "extra classpaths.\n"+
                      "\n"+
                      "If a file is contained in more than one source, the file " +
                      "contained in the first source will be included; conflicting " +
                      "files from sources further down the list will be skipped. " +
-                     "Files belonging to DrJava always take precedence.\n" +
-                     "Note: This implies that DrJava's manifest file will be used.\n" +
+                     "Files belonging to DrScala always take precedence.\n" +
+                     "Note: This implies that DrScala's manifest file will be used.\n" +
                      "\n"+
-                     "Please note that the added files may produce a copy of DrJava "+
+                     "Please note that the added files may produce a copy of DrScala "+
                      "does not work as intended, and that it will be more difficult "+
                      "for us to help you with these problems. YOU ARE USING THE "+
-                     "CUSTOM DRSCALA.JAR FILE AT YOUR OWN RISK.");
+                     "CUSTOM drscala.jar FILE AT YOUR OWN RISK.");
     helpText.setLineWrap(true);
     helpText.setWrapStyleWord(true);
     
@@ -632,7 +632,7 @@ public class GenerateCustomDrJavaJarFrame extends SwingFrame {
                             "file. If a file is contained in more than one source,<br>" +
                             "the file contained in the first source will be included;<br>" +
                             "conflicting files from sources further down the list<br>" +
-                            "will be skipped. Files belonging to DrJava always<br>" +
+                            "will be skipped. Files belonging to DrScala always<br>" +
                             "take precedence.</html>");
     gridbag.setConstraints(jarLabel, c);
     panel.add(jarLabel);
@@ -655,9 +655,9 @@ public class GenerateCustomDrJavaJarFrame extends SwingFrame {
         final Action a = super._getAddAction();
         return new AbstractAction("Add") {
           public void actionPerformed(ActionEvent ae) {
-            _mainFrame.removeModalWindowAdapter(GenerateCustomDrJavaJarFrame.this);
+            _mainFrame.removeModalWindowAdapter(GenerateCustomDrScalaJarFrame.this);
             a.actionPerformed(ae);
-            _mainFrame.installModalWindowAdapter(GenerateCustomDrJavaJarFrame.this, LambdaUtil.NO_OP, CLOSE);
+            _mainFrame.installModalWindowAdapter(GenerateCustomDrScalaJarFrame.this, LambdaUtil.NO_OP, CLOSE);
           }
         };
       }
@@ -695,7 +695,7 @@ public class GenerateCustomDrJavaJarFrame extends SwingFrame {
   public void addOptionsPropertiesFile(ZipOutputStream zos) throws IOException {
     Properties optionsProperties = new Properties();
     ResourceBundle bundle = ResourceBundle .getBundle(edu.rice.cs.drjava.DrScala.RESOURCE_BUNDLE_NAME);
-    String customDrJavaJarVersionSuffix = "";
+    String customDrScalaJarVersionSuffix = "";
 
     Enumeration<String> keyEn = bundle.getKeys();    
     while(keyEn.hasMoreElements()) {
@@ -703,7 +703,7 @@ public class GenerateCustomDrJavaJarFrame extends SwingFrame {
       String value = bundle.getString(key);
       if (key.equals(OptionConstants.CUSTOM_DRSCALA_JAR_VERSION_SUFFIX.getName())) {
         // store value and skip
-        customDrJavaJarVersionSuffix = value;
+        customDrScalaJarVersionSuffix = value;
       }
       else if (key.equals(OptionConstants.NEW_VERSION_NOTIFICATION.getName())) {
         // skip
@@ -717,7 +717,7 @@ public class GenerateCustomDrJavaJarFrame extends SwingFrame {
     }
     
     // update customDrJavaJarVersionSuffix
-    StringBuilder sb = new StringBuilder(customDrJavaJarVersionSuffix);
+    StringBuilder sb = new StringBuilder(customDrScalaJarVersionSuffix);
     for(File f: _sourcesList.getValue()) {
       if (sb.length()>0) { sb.append(", "); }
       sb.append(f.getName());

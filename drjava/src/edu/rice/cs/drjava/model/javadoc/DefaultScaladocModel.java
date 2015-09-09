@@ -61,7 +61,7 @@ import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.config.Configuration;
 import edu.rice.cs.drjava.config.OptionConstants;
-import edu.rice.cs.drjava.model.DrJavaFileUtils;
+import edu.rice.cs.drjava.model.DrScalaFileUtils;
 import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
 import edu.rice.cs.drjava.model.compiler.CompilerListener;
 import edu.rice.cs.drjava.model.compiler.DummyCompilerListener;
@@ -200,7 +200,7 @@ public class DefaultScaladocModel implements ScaladocModel {
     _notifier.scaladocStarted();  // fire first so _scaladocAllWorker can fire scaladocEnded
     // Start a new thread to do the work.
     final File destDirF = destDir;
-    new Thread("DrJava Scaladoc Thread") {
+    new Thread("DrScala Scaladoc Thread") {
       public void run() { _scaladocAllWorker(destDirF, saver); }
     }.start();
   }
@@ -337,11 +337,11 @@ public class DefaultScaladocModel implements ScaladocModel {
     
   private void _rawScaladocDocument(final File file) throws IOException {
     // Generate to a temporary directory
-    final File destDir = IOUtil.createAndMarkTempDirectory("DrJava-scaladoc", "");
+    final File destDir = IOUtil.createAndMarkTempDirectory("DrScala-scaladoc", "");
     
     _notifier.scaladocStarted();  // fire first so _scaladocDocumntWorker can fire scaladocEnded
     // Start a new thread to do the work.
-    new Thread("DrJava Scaladoc Thread") {
+    new Thread("DrScala Scaladoc Thread") {
       public void run() {
         Iterable<String> extraArgs = IterUtil.make("-noindex", "-notree", "-nohelp", "-nonavbar");
         _runScaladoc(IterUtil.make(file.getPath()), destDir, extraArgs, false);
@@ -390,7 +390,7 @@ public class DefaultScaladocModel implements ScaladocModel {
    * @param files  List of files to generate
    * @param destDir  Directory where the results are being saved
    * @param extraArgs  List of additional arguments to use with scaladoc (besides those gathered from config settings)
-   * @param allDocs  Whether this is running on all documents. If Scaladoc is not run on all documents, the target directory will be deleted when DrJava exits
+   * @param allDocs  Whether this is running on all documents. If Scaladoc is not run on all documents, the target directory will be deleted when DrScala exits
    */
   private void _runScaladoc(Iterable<String> files, final File destDir, Iterable<String> extraArgs, final boolean allDocs) {    
     Iterable<String> args = IterUtil.empty();

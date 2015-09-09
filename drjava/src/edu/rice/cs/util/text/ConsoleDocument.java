@@ -41,7 +41,7 @@ import java.awt.EventQueue;
 import java.awt.print.*;
 import java.awt.EventQueue;
 
-import edu.rice.cs.drjava.model.print.DrJavaBook;
+import edu.rice.cs.drjava.model.print.DrScalaBook;
 
 import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.util.UnexpectedException;
@@ -95,7 +95,7 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
   protected volatile String _continuationString;
   
   /** The book object used for printing that represents several pages */
-  protected volatile DrJavaBook _book;
+  protected volatile DrScalaBook _book;
   
   /** Creates a new ConsoleDocument with the given embedded ConsoleDocumentInterface (a SwingDocument in native DrJava).
     * @param doc the embedded ConsoleDocumentInterface object
@@ -347,9 +347,9 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     */
   public Pageable getPageable() throws IllegalStateException { return _book; }
   
-  /** This method tells the document to prepare all the DrJavaBook and PagePrinter objects. */
+  /** This method tells the document to prepare all the DrScalaBook and PagePrinter objects. */
   public void preparePrintJob() {
-    _book = new DrJavaBook(getDocText(0, getLength()), "Console", new PageFormat());
+    _book = new DrScalaBook(getDocText(0, getLength()), "Console", new PageFormat());
   }
   
   /** Prints the given document by bringing up a "Print" window. */

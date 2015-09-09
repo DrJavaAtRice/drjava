@@ -58,9 +58,9 @@ import edu.rice.cs.drjava.config.FileConfiguration;
  *  This window is not automatically updated when new errors occur. In the case of errors, we want to
  *  minimize the effects on the GUI. If we want to see an updated dialog, we can click on the "DrScala Errors"
  *  button again.
- *  @version $Id: DrJavaErrorWindow.java 5727 2012-09-30 03:58:32Z rcartwright $
+ *  @version $Id: DrScalaErrorWindow.java 5727 2012-09-30 03:58:32Z rcartwright $
  */
-public class DrJavaErrorWindow extends JDialog {
+public class DrScalaErrorWindow extends JDialog {
   /** Sourceforge add bug URL */
   public static final String SF_ADD_BUG_URL = "http://sourceforge.net/tracker/?func=add&group_id=44253&atid=438935/";  
 
@@ -107,14 +107,14 @@ public class DrJavaErrorWindow extends JDialog {
   public static JFrame getFrame() { return _parentFrame; }
   
   /** The singleton instance of this dialog. */
-  private static volatile DrJavaErrorWindow _singletonInstance;
+  private static volatile DrScalaErrorWindow _singletonInstance;
   
   /** Returns the singleton instance. Recreates it if necessary. */
-  public static DrJavaErrorWindow singleton() {
+  public static DrScalaErrorWindow singleton() {
     if (_parentChanged) {
-      synchronized(DrJavaErrorWindow.class) {
+      synchronized(DrScalaErrorWindow.class) {
         if (_parentChanged) {
-          _singletonInstance = new DrJavaErrorWindow();
+          _singletonInstance = new DrScalaErrorWindow();
           _parentChanged = false;
         }
       }
@@ -123,7 +123,7 @@ public class DrJavaErrorWindow extends JDialog {
   }
   
   /** Creates a window to graphically display the errors that have occurred in the code of DrScala. */
-  private DrJavaErrorWindow() {
+  private DrScalaErrorWindow() {
     super(_parentFrame, "DrScala Errors");
 
     this.setSize(600,400);
@@ -168,18 +168,18 @@ public class DrJavaErrorWindow extends JDialog {
 
   protected WindowAdapter _windowListener = new WindowAdapter() {
     public void windowDeactivated(WindowEvent we) {
-      DrJavaErrorWindow.this.toFront();
+      DrScalaErrorWindow.this.toFront();
     }
     public void windowClosing(WindowEvent we) {
-      DrJavaErrorWindow.this.dispose();
-      if (DrJavaErrorHandler.getButton() == null) { System.exit(1); }
+      DrScalaErrorWindow.this.dispose();
+      if (DrScalaErrorHandler.getButton() == null) { System.exit(1); }
     }
   };
   
   /** Lambda that calls _cancel. */
   protected final Runnable1<WindowEvent> CANCEL = new Runnable1<WindowEvent>() {
     public void run(WindowEvent e) {
-      if (DrJavaErrorHandler.getButton() == null) { System.exit(1); }
+      if (DrScalaErrorHandler.getButton() == null) { System.exit(1); }
     }
   };
 
@@ -207,9 +207,9 @@ public class DrJavaErrorWindow extends JDialog {
   
   /** Initialize the dialog. */
   private void init() {
-    _errorCount = DrJavaErrorHandler.getErrorCount();
+    _errorCount = DrScalaErrorHandler.getErrorCount();
     if (_errorCount > 0) {
-      _error = DrJavaErrorHandler.getError(0);
+      _error = DrScalaErrorHandler.getError(0);
       _errorIndex = 0;
     }
     else {
@@ -228,7 +228,7 @@ public class DrJavaErrorWindow extends JDialog {
     getContentPane().remove(_errorInfo);
     if (_error != null) {
       final StringBuilder b = new StringBuilder();
-      if (_error instanceof DrJavaErrorHandler.LoggedCondition) {
+      if (_error instanceof DrScalaErrorHandler.LoggedCondition) {
         b.append("Logged condition: ");
         b.append(_error.getMessage());
         b.append('\n');
@@ -250,7 +250,7 @@ public class DrJavaErrorWindow extends JDialog {
       }
       
       b.append("\n\n");
-      b.append(getSystemAndDrJavaInfo());
+      b.append(getSystemAndDrScalaInfo());
 
       _stackTrace.setText(b.toString());
       _stackTrace.setCaretPosition(0);
@@ -299,17 +299,17 @@ public class DrJavaErrorWindow extends JDialog {
   /** Return a string with the system properties, the DrScala configuration file contents, and
     * information about memory. The data is anonymized.
     * @return information string */
-  public static String getSystemAndDrJavaInfo() {
+  public static String getSystemAndDrScalaInfo() {
     final StringBuilder b = new StringBuilder();
     b.append("System Properties:\n");
     b.append("DrScala Version ");
     b.append(edu.rice.cs.drjava.Version.getVersionString());
     FileConfiguration config = DrScala.getConfig();
     if (config!=null) {
-      String customDrJavaJarVersionSuffix = config.getSetting(OptionConstants.CUSTOM_DRSCALA_JAR_VERSION_SUFFIX);
-      if (customDrJavaJarVersionSuffix.length()>0)  {
+      String customDrScalaJarVersionSuffix = config.getSetting(OptionConstants.CUSTOM_DRSCALA_JAR_VERSION_SUFFIX);
+      if (customDrScalaJarVersionSuffix.length()>0)  {
         b.append(" with ");
-        b.append(customDrJavaJarVersionSuffix);
+        b.append(customDrScalaJarVersionSuffix);
       }
     }
     b.append('\n');
@@ -377,8 +377,8 @@ public class DrJavaErrorWindow extends JDialog {
   /* Close the window. */
   private final Action _okAction = new AbstractAction("OK") {
     public void actionPerformed(ActionEvent e) {
-      DrJavaErrorWindow.this.dispose();
-      if (DrJavaErrorHandler.getButton() == null) { System.exit(1); }
+      DrScalaErrorWindow.this.dispose();
+      if (DrScalaErrorHandler.getButton() == null) { System.exit(1); }
     }
   };
   
@@ -387,7 +387,7 @@ public class DrJavaErrorWindow extends JDialog {
     public void actionPerformed(ActionEvent e) {
       if (_errorIndex > 0) {
         --_errorIndex;
-        _error = DrJavaErrorHandler.getError(_errorIndex);
+        _error = DrScalaErrorHandler.getError(_errorIndex);
         if (_errorIndex == 0) { setEnabled(false); }
         if (_errorCount>1) { _nextAction.setEnabled(true); }
         updateErrorInfo();
@@ -410,7 +410,7 @@ public class DrJavaErrorWindow extends JDialog {
     public void actionPerformed(ActionEvent e) {
       if (_errorIndex < _errorCount-1) {
         ++_errorIndex;
-        _error = DrJavaErrorHandler.getError(_errorIndex);
+        _error = DrScalaErrorHandler.getError(_errorIndex);
         if (_errorIndex == _errorCount-1) { setEnabled(false); }
         if (_errorCount>1) { _prevAction.setEnabled(true); }
         updateErrorInfo();
@@ -421,7 +421,7 @@ public class DrJavaErrorWindow extends JDialog {
   /** Dismiss all errors and close the window. */
   private Action _dismissAction = new AbstractAction("Dismiss") {
     public void actionPerformed(ActionEvent e) {
-      DrJavaErrorHandler.clearErrors();
+      DrScalaErrorHandler.clearErrors();
       _errorCount = 0;
       _error = null;
       _errorIndex = -1;
@@ -430,7 +430,7 @@ public class DrJavaErrorWindow extends JDialog {
       _nextAction.setEnabled(false);
       _copyAction.setEnabled(false);
       updateErrorInfo();
-      JButton errorsButton = DrJavaErrorHandler.getButton();
+      JButton errorsButton = DrScalaErrorHandler.getButton();
       if (errorsButton != null) { errorsButton.setVisible(false); }
       _okAction.actionPerformed(e);
     }

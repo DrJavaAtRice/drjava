@@ -53,8 +53,8 @@ import edu.rice.cs.util.OutputStreamRedirector;
 import edu.rice.cs.util.swing.Utilities;
 
 import edu.rice.cs.drjava.ui.MainFrame;
-import edu.rice.cs.drjava.ui.DrJavaErrorWindow;
-import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
+import edu.rice.cs.drjava.ui.DrScalaErrorWindow;
+import edu.rice.cs.drjava.ui.DrScalaErrorHandler;
 //import edu.rice.cs.drjava.ui.SimpleInteractionsWindow;
 import edu.rice.cs.drjava.ui.SplashScreen;
 import edu.rice.cs.drjava.model.*;
@@ -88,7 +88,7 @@ public class DrScalaRoot {
   
   private static volatile boolean anyLineNumbersSpecified = false;
   
-  /** Main frame of this DrJava instance. */
+  /** Main frame of this DrScala instance. */
   private static volatile MainFrame _mainFrame = null;
   
   /* Config objects can't be public static final, since we have to delay construction until we know the 
@@ -101,7 +101,7 @@ public class DrScalaRoot {
     PlatformFactory.ONLY.beforeUISetup();
     
 //    Utilities.show("DrScalaRoot started with args = " + Arrays.toString(args));
-    // let DrJava class handle command line arguments
+    // let DrScala class handle command line arguments
     if (! DrScala.handleCommandLineArgs(args)) { System.exit(0); }
     
     DrScala.warnIfLinuxWithCompiz();
@@ -122,7 +122,7 @@ public class DrScalaRoot {
       String configLAFName = DrScala.getConfig().getSetting(LOOK_AND_FEEL);
       String currLAFName = UIManager.getLookAndFeel().getClass().getName();
       String failureMessage =
-        "DrJava could not load the configured theme for the Plastic Look and Feel.\n" +
+        "DrScala could not load the configured theme for the Plastic Look and Feel.\n" +
         "If you've manually edited your configuration file, try \n" +
         "removing the key \"plastic.theme\" and restarting DrJava.\n" +
         "In the meantime, the system default Look and Feel will be used.\n";
@@ -159,9 +159,9 @@ public class DrScalaRoot {
       _mainFrame = new MainFrame();
 //      Utilities.showDebug("MainFrame created");
       
-      // Make sure all uncaught exceptions are shown in an DrJavaErrorHandler
-      DrJavaErrorWindow.setFrame(_mainFrame);
-      Thread.setDefaultUncaughtExceptionHandler(DrJavaErrorHandler.INSTANCE);
+      // Make sure all uncaught exceptions are shown in an DrScalaErrorHandler
+      DrScalaErrorWindow.setFrame(_mainFrame);
+      Thread.setDefaultUncaughtExceptionHandler(DrScalaErrorHandler.INSTANCE);
       
       /* We use EventQueue.invokeLater rather than Utilities.invokeLater to ensure all files have been loaded and
        * added to the file view before the MainFrame is set visible.  When this was not done, we occasionally encountered
@@ -173,17 +173,17 @@ public class DrScalaRoot {
           
           // now open the files specified on the command line. must be done here
           // after _mainFrame.start() to address bug
-          // [ drjava-Bugs-2831253 ] Starting DrJava with Project as Parameter
+          // [ drjava-Bugs-2831253 ] Starting DrScala with Project as Parameter
           _openCommandLineFiles(_mainFrame, filesToOpen, numFiles, true);
         } 
       });
       
-      // redirect stdout to DrJava's console
+      // redirect stdout to DrScala's console
       System.setOut(new PrintStream(new OutputStreamRedirector() {
         public void print(String s) { _mainFrame.getModel().systemOutPrint(s); }
       }));
       
-      // redirect stderr to DrJava's console
+      // redirect stderr to DrScala's console
       System.setErr(new PrintStream(new OutputStreamRedirector() {
         public void print(String s) { _mainFrame.getModel().systemErrPrint(s); }
       }));
@@ -194,11 +194,11 @@ public class DrScalaRoot {
     }
     catch(Throwable t) {
       error.log(t);
-      // Show any errors to the real System.err and in an DrJavaErrorHandler
+      // Show any errors to the real System.err and in an DrScalaErrorHandler
       _consoleErr.println(t.getClass().getName() + ": " + t.getMessage());
       t.printStackTrace(_consoleErr);
       System.out.println("error thrown");
-      DrJavaErrorHandler.record(t);
+      DrScalaErrorHandler.record(t);
     }
   }
   
@@ -220,7 +220,7 @@ public class DrScalaRoot {
   }
   
   private static void _openCommandLineFiles(final MainFrame mf, String[] filesToOpen, int len, boolean jump) {
-    // Assertion commented out because it doesn't hold at startup.  See DrJava bug 2321815.
+    // Assertion commented out because it doesn't hold at startup.  See Drjava bug 2321815.
     /* assert EventQueue.isDispatchThread(); */
 //    Utilities.showDebug("Files to open: " + Arrays.toString(filesToOpen));
     anyLineNumbersSpecified = false;
@@ -282,13 +282,13 @@ public class DrScalaRoot {
     }
   }
   
-//  /** Shows a separate interactions window with a reference to DrJava's MainFrame defined as "mainFrame".  
+//  /** Shows a separate interactions window with a reference to DrScala's MainFrame defined as "mainFrame".  
 //    * Useful for debugging DrJava.
 //    * @param mf MainFrame to define in the new window
 //    */
 //  public static void showDrJavaDebugConsole(MainFrame mf) {
 //    if (_debugConsole == null) {
-//      _debugConsole = new SimpleInteractionsWindow("DrJava Debug Console") {
+//      _debugConsole = new SimpleInteractionsWindow("DrScala Debug Console") {
 //        protected void close() {
 //          dispose();
 //          _debugConsole = null;

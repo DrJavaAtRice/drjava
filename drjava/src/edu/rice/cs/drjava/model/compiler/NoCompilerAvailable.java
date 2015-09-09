@@ -42,7 +42,7 @@ import java.util.Arrays;
 import java.util.Set;
 import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.model.DJError;
-import edu.rice.cs.drjava.model.DrJavaFileUtils;
+import edu.rice.cs.drjava.model.DrScalaFileUtils;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.plt.reflect.JavaVersion;
 
@@ -95,12 +95,12 @@ public class NoCompilerAvailable implements CompilerInterface {
   
   /** Return the set of source file extensions that this compiler supports.
     * @return the set of source file extensions that this compiler supports. */
-  public Set<String> getSourceFileExtensions() { return DrJavaFileUtils.getSourceFileExtensions(); }
+  public Set<String> getSourceFileExtensions() { return DrScalaFileUtils.getSourceFileExtensions(); }
   
   /** Return the suggested file extension that will be appended to a file without extension.
     * @return the suggested file extension */
   public String getSuggestedFileExtension() {
-    return DrJavaFileUtils.getSuggestedFileExtension();
+    return DrScalaFileUtils.getSuggestedFileExtension();
   }
 
   /** Return a file filter that can be used to open files this compiler supports.

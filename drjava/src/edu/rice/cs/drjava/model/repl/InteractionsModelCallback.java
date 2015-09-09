@@ -135,14 +135,16 @@ public interface InteractionsModelCallback {
   /** Called when the interpreter starts to reset. */
   public void interpreterResetting();
   
-  /**
-   * Called to assert that a fresh Java interpreter is ready for use either after a start or a restart.
-   * Is sometimes preceded by a call to {@code interpreterResetting()}, but not when the interpreter is
-   * first starting or is already fresh.
-   */
+  /** Called to assert that a fresh Java interpreter is ready for use either after a start or a restart.
+    * Is sometimes preceded by a call to {@code interpreterResetting()}, but not when the interpreter is
+    * first starting or is already fresh.
+    */
   public void interpreterReady(File wd);
   
-  /** A compiler can instruct DrJava to include additional elements for the boot
+  /** Called to signal that the interpreter is now read (after a reset). */  // TODO: consolidate with preceding method
+  public void _notifyInterpreterReady(File wd);
+  
+  /** A compiler can instruct DrScala to include additional elements for the boot
     * class path of the Interactions JVM. */
   public List<File> getCompilerBootClassPath();
   

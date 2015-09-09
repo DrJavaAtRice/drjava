@@ -63,10 +63,10 @@ import java.net.*;
   */
 public final class RemoteControlServer {
   /** Prefix of a legitimate query by a client. */
-  public static final String QUERY_PREFIX = "DrJava Remote Control?";
+  public static final String QUERY_PREFIX = "DrScala Remote Control?";
   
   /** Prefix of a legitimate response by this server. */
-  public static final String RESPONSE_PREFIX = "DrJava Remote Control ";
+  public static final String RESPONSE_PREFIX = "DrScala Remote Control ";
   
   /** Prefix of a legitimate response by this server, including the user name. */
   public static final String RESPONSE_PREFIX_WITH_USER = RESPONSE_PREFIX+System.getProperty("user.name") + "!";

@@ -259,7 +259,7 @@ public class FileOpsTest extends DrScalaTestCase {
   /** Tests that non-empty directories can be deleted on exit. */
   public void testDeleteDirectoryOnExit() throws IOException, InterruptedException {
     
-    File tempDir = FileOps.createTempDirectory("DrJavaTestTempDir");
+    File tempDir = FileOps.createTempDirectory("DrScalaTestTempDir");
     assertTrue("tempDir exists", tempDir.exists());
     File dir1 = new File(tempDir, "dir1");
     dir1.mkdir();
@@ -375,7 +375,7 @@ public class FileOpsTest extends DrScalaTestCase {
   
   /** Tests getFilesInDir. */
   public void testGetFiles() throws IOException {
-    File dir1 = FileOps.createTempDirectory("DrJavaTestTempDir");
+    File dir1 = FileOps.createTempDirectory("DrScalaTestTempDir");
     assertTrue("dir1 exists", dir1.exists());
     File file1a = File.createTempFile("DrScalaTest-", ".temp", dir1).getCanonicalFile();
     assertTrue("file1a exists", file1a.exists());
@@ -418,7 +418,7 @@ public class FileOpsTest extends DrScalaTestCase {
   /** Tests for getShortFile. This test creates a file and writes to it using a long file name, then
     * checks if the short file name is the same (canonical) file and that it contains teh same data. */
   public void testGetShortFile() throws IOException {
-    File dir1 = FileOps.createTempDirectory("DrJavaTestTempDir");
+    File dir1 = FileOps.createTempDirectory("DrScalaTestTempDir");
     File dir2 = new File(dir1, "Documents and Settings" + File.separator + "User Name" + File.separator + "My Documents");
     assertTrue("Couldn't create temp directory", dir2.mkdirs());
     

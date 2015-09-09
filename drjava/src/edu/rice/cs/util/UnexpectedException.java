@@ -36,7 +36,7 @@
 
 package edu.rice.cs.util;
 
-/** An exception which DrJava throws on an unexpected error.
+/** An exception which DrScala throws on an unexpected error.
   * Many times, we have to catch BadLocationExceptions in
   * code that accesses DefinitionDocument, even if we know for a
   * fact that a BadLocationException cannot occur.  In that case,

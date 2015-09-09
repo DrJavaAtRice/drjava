@@ -41,7 +41,7 @@ import java.awt.print.*;
 import edu.rice.cs.drjava.model.*;
 
 /**
- * DrJava's print preview window for a definitions document
+ * DrScala's print preview window for a definitions document
  * @version $Id: PreviewDefDocFrame.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class PreviewDefDocFrame extends PreviewFrame {

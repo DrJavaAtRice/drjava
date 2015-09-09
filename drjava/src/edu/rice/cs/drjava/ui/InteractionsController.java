@@ -102,7 +102,7 @@ import edu.rice.cs.util.UnexpectedException;
  * InteractionsDJDocument versus an InteractionsDocument.
  * 
  * Be careful! There is a crucial difference between the two.  One is a subclass of the swing document hierarchy 
- * (Document,  AbstractDocument, etc. and the other is NOT.  This code is shared with the Eclipse plugin which is NOT
+ * (Document,  AbstractDocument, etc.) and the other is NOT.  This code is shared with the Eclipse plugin which is NOT
  * based on swing!
  */
 
@@ -127,7 +127,7 @@ public class InteractionsController extends AbstractConsoleController {
   public static final String INPUT_BOX_STYLE = "input.box.style";
   
   /** The symbol used in the document for the input box. */
-  public static final String INPUT_BOX_SYMBOL = "[DrJava Input Box]";
+  public static final String INPUT_BOX_SYMBOL = "[DrScala Input Box]";
   
   /** InteractionsModel to handle interpretation. */
   private volatile InteractionsModel _model;
@@ -138,7 +138,7 @@ public class InteractionsController extends AbstractConsoleController {
   /** Style to use for error messages. */
   private volatile SimpleAttributeSet _errStyle;
   
-  /** Style to use for debug messages. */
+  /** Style to use for debug messages.  Some non-debugging code uses this style. */
   private final SimpleAttributeSet _debugStyle;
   
   /** Lambda used to input text into the embedded System.in input box. */
@@ -509,7 +509,7 @@ public class InteractionsController extends AbstractConsoleController {
 //      _prepareToInterpret(text);  // Writes a newLine!
 //    }
 //    try { _model.interpretCommand(toEval); }
-//    catch (Throwable t) { DrJavaErrorHandler.record(t); }
+//    catch (Throwable t) { DrScalaErrorHandler.record(t); }
 //  };
 //  
 //  /** Performs pre-interpretation preparation of the interactions document and notifies the view.  Must run in the

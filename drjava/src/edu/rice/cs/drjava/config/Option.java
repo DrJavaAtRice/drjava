@@ -43,7 +43,7 @@ import java.util.Vector;
 // TODO: Change the usage of these classes to Collections style.
 // TODO: Do these need to be synchronized?
 
-/** An instance of this class represents a configurable option in DrJava that has static type T.  Classes can extend
+/** An instance of this class represents a configurable option in DrScala that has static type T.  Classes can extend
   * this class and the rest of the Configuration typing framework will work for it.  Named subclasses aren't even 
   * necessary -- but may be convenient in order to re-use code.  For example, to make an anonymous class that handles
   * options of static type Integer, with the name "indent.level", you could use the following code:

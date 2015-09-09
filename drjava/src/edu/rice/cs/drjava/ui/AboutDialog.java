@@ -189,10 +189,10 @@ public class AboutDialog extends JDialog implements ActionListener {
     sb.append(Version.getVersionString());
     FileConfiguration config = DrScala.getConfig();
     if (config!=null) {
-      String customDrJavaJarVersionSuffix = config.getSetting(OptionConstants.CUSTOM_DRSCALA_JAR_VERSION_SUFFIX);
-      if (customDrJavaJarVersionSuffix.length()>0)  {
+      String customDrScalaJarVersionSuffix = config.getSetting(OptionConstants.CUSTOM_DRSCALA_JAR_VERSION_SUFFIX);
+      if (customDrScalaJarVersionSuffix.length()>0)  {
         sb.append(" with ");
-        sb.append(customDrJavaJarVersionSuffix);
+        sb.append(customDrScalaJarVersionSuffix);
       }
     }
     sb.append("\nDrScala Build Time: ");
@@ -309,7 +309,7 @@ public class AboutDialog extends JDialog implements ActionListener {
     _copyButton = new JButton(new AbstractAction("Copy System Properties") {
       public void actionPerformed(ActionEvent e) {
         Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
-        StringSelection contents = new StringSelection(DrJavaErrorWindow.getSystemAndDrJavaInfo());
+        StringSelection contents = new StringSelection(DrScalaErrorWindow.getSystemAndDrScalaInfo());
         cb.setContents(contents, null);
       }
     });

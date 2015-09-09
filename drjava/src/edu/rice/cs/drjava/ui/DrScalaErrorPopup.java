@@ -10,7 +10,7 @@
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the names of DrJava, DrScala, the JavaPLT group, Rice University, nor the
+ *    * Neither the names of DrScala, DrScala, the JavaPLT group, Rice University, nor the
  *      names of its contributors may be used to endorse or promote products
  *      derived from this software without specific prior written permission.
  * 
@@ -47,9 +47,9 @@ import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.util.swing.Utilities;
 
 /** Displays a popup window for the first uncaught exception or logged conditions.
- *  @version $Id: DrJavaErrorPopup.java 5594 2012-06-21 11:23:40Z rcartwright $
+ *  @version $Id: DrScalaErrorPopup.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
-public class DrJavaErrorPopup extends JDialog {
+public class DrScalaErrorPopup extends JDialog {
   /** information about the error */
   private JComponent _errorInfo;
   /** contains the stack trace */
@@ -67,8 +67,8 @@ public class DrJavaErrorPopup extends JDialog {
 //  /** the parent frame */
 //  private JFrame _parentFrame = new JFrame();
   
-  /** Creates a window to graphically display the current error that has occurred in the code of DrJava. */
-  public DrJavaErrorPopup(JFrame parent, Throwable error) {
+  /** Creates a window to graphically display the current error that has occurred in the code of DrScala. */
+  public DrScalaErrorPopup(JFrame parent, Throwable error) {
     super(parent, "DrScala Error");
     
 //    _parentFrame = parent;
@@ -96,7 +96,7 @@ public class DrJavaErrorPopup extends JDialog {
     _bottomPanel.add(_keepDisplaying, BorderLayout.WEST);
     _bottomPanel.add(_buttonPanel, BorderLayout.EAST);
 
-    if (_error instanceof DrJavaErrorHandler.LoggedCondition) { msg[1] = "Logged condition: " + _error.getMessage(); }
+    if (_error instanceof DrScalaErrorHandler.LoggedCondition) { msg[1] = "Logged condition: " + _error.getMessage(); }
     else { msg[1] = _error.toString(); }
     _errorInfo = new JOptionPane(msg,JOptionPane.ERROR_MESSAGE,
                                  JOptionPane.DEFAULT_OPTION,null,
@@ -113,8 +113,8 @@ public class DrJavaErrorPopup extends JDialog {
   /* Close the window. */
   private Action _okAction = new AbstractAction("OK") {
     public void actionPerformed(ActionEvent e) {
-      DrJavaErrorPopup.this.dispose();
-      if (DrJavaErrorHandler.getButton() == null) { System.exit(1); }
+      DrScalaErrorPopup.this.dispose();
+      if (DrScalaErrorHandler.getButton() == null) { System.exit(1); }
     }
   };
 
@@ -122,9 +122,9 @@ public class DrJavaErrorPopup extends JDialog {
   private Action _moreAction = new AbstractAction("More Information") {
     public void actionPerformed(ActionEvent e) {
       if (! Utilities.TEST_MODE) {
-        DrJavaErrorPopup.this.dispose();
-        Utilities.setPopupLoc(DrJavaErrorWindow.singleton(), DrJavaErrorWindow.getFrame());
-        DrJavaErrorWindow.singleton().setVisible(true);
+        DrScalaErrorPopup.this.dispose();
+        Utilities.setPopupLoc(DrScalaErrorWindow.singleton(), DrScalaErrorWindow.getFrame());
+        DrScalaErrorWindow.singleton().setVisible(true);
       }
     }
   };
@@ -132,7 +132,7 @@ public class DrJavaErrorPopup extends JDialog {
   /** Contains the canned message for the user
    */
   private final String[] msg = {
-    "An error occurred in DrJava:",
+    "An error occurred in DrScala:",
     "",
-    "You may wish to save all your work and restart DrJava."};
+    "You may wish to save all your work and restart DrScala."};
 }

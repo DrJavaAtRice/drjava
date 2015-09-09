@@ -46,7 +46,7 @@ import edu.rice.cs.util.StringOps;
 /** Class representing file lists that are not evaluated until necessary.
   * @version $Id: FileListProperty.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
-public abstract class FileListProperty extends DrJavaProperty {
+public abstract class FileListProperty extends DrScalaProperty {
   /** Separating string. */
   protected String _sep;
   /** Relative directory. */
@@ -62,7 +62,7 @@ public abstract class FileListProperty extends DrJavaProperty {
   /** Mark the value as stale. */
   public void invalidate() {
     // nothing to do, but tell those who are listening
-    invalidateOthers(new HashSet<DrJavaProperty>());
+    invalidateOthers(new HashSet<DrScalaProperty>());
   }
   
   /** Return true if the value is current. */

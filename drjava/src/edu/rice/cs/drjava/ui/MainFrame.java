@@ -150,7 +150,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   // ------ Field Declarations -------
   
-  /** The model which controls all logic in DrJava. */
+  /** The model which controls all logic in DrScala. */
   private volatile AbstractGlobalModel _model;
   
   /** The main model listener attached by the main frame to the global model */
@@ -359,7 +359,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     * @return the suggested file extension */
   private String getSuggestedFileExtension() {
     CompilerModel cm = _model.getCompilerModel();
-    if (cm == null) return DrJavaFileUtils.getSuggestedFileExtension();
+    if (cm == null) return DrScalaFileUtils.getSuggestedFileExtension();
     else return cm.getActiveCompiler().getSuggestedFileExtension();
   }
   
@@ -2026,7 +2026,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
   };
 
-  /** Saves a copy of DrJava's output console to a file. */
+  /** Saves a copy of DrScala's output console to a file. */
   private final Action _saveConsoleCopyAction = new AbstractAction("Save Copy of Console...") {
     public void actionPerformed(ActionEvent ae) {
       updateStatusField("Saving Copy of Console");
@@ -2136,7 +2136,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
   }
   
-  /** Clears DrJava's output console. */
+  /** Clears DrScala's output console. */
   private final Action _clearConsoleAction = new AbstractAction("Clear Console") {
     public void actionPerformed(ActionEvent ae) { _model.resetConsole(); }
   };
@@ -2200,7 +2200,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         return !("".equals(arg.toString().trim())) && alreadySeen.add(arg);
       }
     }));
-    new DrJavaScrollableDialog(this, "Interactions Classpath", "Current Interpreter Classpath", cp).show();
+    new DrScalaScrollableDialog(this, "Interactions Classpath", "Current Interpreter Classpath", cp).show();
   }
   
   /** Action that shows what help documentation is available.  Only executes in the event thread. */
@@ -2232,33 +2232,33 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
   };
   
-//  /** Asks whether DrJava may contact the DrJava developers and send system information. */
+//  /** Asks whether DrScala may contact the DrScala developers and send system information. */
 //  private final Action _drjavaSurveyAction = new AbstractAction("Send System Information") {
 //    public void actionPerformed(ActionEvent ae) {
-//      DrJavaSurveyPopup popup = new DrJavaSurveyPopup(MainFrame.this);
+//      DrScalaSurveyPopup popup = new DrScalaSurveyPopup(MainFrame.this);
 //      popup.setVisible(true);
 //    }
 //  };
   
-  /** Action that pops up the DrJava errors dialog.  Only runs in the event thread. */
+  /** Action that pops up the DrScala errors dialog.  Only runs in the event thread. */
   private final Action _errorsAction = new AbstractAction("DrScala Errors") {
     public void actionPerformed(ActionEvent ae) {
-      setPopupLoc(DrJavaErrorWindow.singleton());
-      DrJavaErrorWindow.singleton().setVisible(true);
+      setPopupLoc(DrScalaErrorWindow.singleton());
+      DrScalaErrorWindow.singleton().setVisible(true);
     }
   };
   
   /** Action that pops up the dialog to generate a custom drjava.jar file. 
     * Only runs in the event thread. */
-  private final Action _generateCustomDrJavaJarAction = new AbstractAction("Generate Custom drjava.jar...") {
+  private final Action _generateCustomDrScalaJarAction = new AbstractAction("Generate Custom drjava.jar...") {
     public void actionPerformed(ActionEvent ae) {
-      GenerateCustomDrJavaJarFrame popup = new GenerateCustomDrJavaJarFrame(MainFrame.this);
+      GenerateCustomDrScalaJarFrame popup = new GenerateCustomDrScalaJarFrame(MainFrame.this);
       popup.setVisible(true);
     }
   };
 
   /** Action that starts a new, blank, unconnected DrScala instance. */
-  private final Action _newDrJavaInstanceAction = new AbstractAction("New DrScala Instance...") {
+  private final Action _newDrScalaInstanceAction = new AbstractAction("New DrScala Instance...") {
     public void actionPerformed(ActionEvent ae) {
       try {
         Process p = JVMBuilder.DEFAULT.classPath(FileOps.getDrScalaFile()).
@@ -3164,10 +3164,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
 //        updateStatusField();
 //      }
 //    };
-//    DrJava.getConfig().addOptionListener(LIGHTWEIGHT_PARSING_ENABLED, parsingEnabledListener);
+//    DrScala.getConfig().addOptionListener(LIGHTWEIGHT_PARSING_ENABLED, parsingEnabledListener);
 //    parsingEnabledListener.
 //      optionChanged(new OptionEvent<Boolean>(LIGHTWEIGHT_PARSING_ENABLED, 
-//                                             DrJava.getConfig().
+//                                             DrScala.getConfig().
 //                                               getSetting(LIGHTWEIGHT_PARSING_ENABLED).booleanValue()));
 //    
 //    Utilities.show("Global Model started");
@@ -3480,8 +3480,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       });
       
       /* The scala compiler and library are embedded in the drscala.jar file.  We do not have to worry
-       * about selecting another compiler.  All associated Java compilers should version 1.8 as well,
-       * so much of the infrastructure inherited from DrJava is overkill.
+       * about selecting another compiler.  All associated Java compilers should be version 8 (1.8) as well,
+       * so much of the infrastructure inherited from DrScala is overkill.
        */
       
 //      // The OptionListener for SCALADOC_API_REF_VERSION.
@@ -3621,7 +3621,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         }
       });
       
-//      if (DrJava.getConfig().getSetting(OptionConstants.REMOTE_CONTROL_ENABLED)) {
+//      if (DrScala.getConfig().getSetting(OptionConstants.REMOTE_CONTROL_ENABLED)) {
 //        // start remote control server if no server is running
 //        try {
 //          if (! RemoteControlClient.isServerRunning()) {
@@ -3648,15 +3648,15 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
 //                                                 options,
 //                                                 options[1]);
 //            if (n==JOptionPane.YES_OPTION) {
-//              DrJava.getConfig().setSetting(OptionConstants.REMOTE_CONTROL_ENABLED, false);
+//              DrScala.getConfig().setSetting(OptionConstants.REMOTE_CONTROL_ENABLED, false);
 //            }
 //          }
 //        }
 //      }
       
-      setUpDrJavaProperties();  
+      setUpDrScalaProperties();  
       
-      DrJavaErrorHandler.setButton(_errorsButton);
+      DrScalaErrorHandler.setButton(_errorsButton);
       
       // check file associations if desired by user
       boolean alreadyShowedDialog = false;
@@ -3730,14 +3730,14 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
 //        // ask if the user wants to submit the survey
 //        // but only if we haven't just asked if the user wants to download a new version
 //        // two dialogs on program start is too much clutter
-//        if (DrJava.getConfig().getSetting(DIALOG_DRSCALA_SURVEY_ENABLED) && 
+//        if (DrScala.getConfig().getSetting(DIALOG_DRSCALA_SURVEY_ENABLED) && 
 //            ! edu.rice.cs.util.swing.Utilities.TEST_MODE) {
-//          if (DrJavaSurveyPopup.maySubmitSurvey()) {
+//          if (DrScalaSurveyPopup.maySubmitSurvey()) {
 //            // either enough days have passed, or the configuration has changed
 //            alreadyShowedDialog = true;
 //            EventQueue.invokeLater(new Runnable() {
 //              public void run() {
-//                DrJavaSurveyPopup popup = new DrJavaSurveyPopup(MainFrame.this);
+//                DrScalaSurveyPopup popup = new DrScalaSurveyPopup(MainFrame.this);
 //                popup.setVisible(true);
 //              }
 //            });
@@ -3760,16 +3760,16 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     super.setVisible(b); 
   }
   
-  /** This method sets up all the DrJava properties that can be used as variables
+  /** This method sets up all the DrScala properties that can be used as variables
     * in external process command lines. */
-  public void setUpDrJavaProperties() {
+  public void setUpDrScalaProperties() {
     final String DEF_DIR = "${drjava.working.dir}";
     
-    DrJavaPropertySetup.setup(); 
+    DrScalaPropertySetup.setup(); 
     
     // Files
-    PropertyMaps.TEMPLATE.setProperty("DrJava", 
-                                      new FileProperty("drjava.current.file", 
+    PropertyMaps.TEMPLATE.setProperty("DrScala", 
+                                      new FileProperty("drscala.current.file", 
                                                        new Thunk<File>() {
                                                          public File value() { return _model.getActiveDocument().getRawFile(); } }, 
                                                        "Returns the current document in DrScala.\n"+
@@ -3779,15 +3779,15 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                                        "\tdquote=\"<true to enclose file in double quotes>\"") {
                                                          public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
                                                        });
-    PropertyMaps.TEMPLATE.setProperty("DrJava", 
-                                      new DrJavaProperty("drjava.current.line", 
+    PropertyMaps.TEMPLATE.setProperty("DrScala", 
+                                      new DrScalaProperty("drscala.current.line", 
                                                          "Returns the current line in the Definitions Pane.") {
       public void update(PropertyMaps pm) { _value = String.valueOf(_posListener.lastLine()); }
       public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
       public boolean isCurrent() { return false; }
     });
     PropertyMaps.TEMPLATE.
-      setProperty("DrJava", new DrJavaProperty("drjava.current.col",
+      setProperty("DrScala", new DrScalaProperty("drscala.current.col",
                                                "Returns the current column in the Definitions Pane.") {
       public void update(PropertyMaps pm) {
 //        int line = _currentDefPane.getCurrentLine();
@@ -3799,11 +3799,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       public boolean isCurrent() { return false; }
     });
     PropertyMaps.TEMPLATE.
-      setProperty("DrJava", 
-                  new FileProperty("drjava.working.dir", new Thunk<File>() {
+      setProperty("DrScala", 
+                  new FileProperty("drscala.working.dir", new Thunk<File>() {
       public File value() { return _model.getInteractionsModel().getWorkingDirectory(); }
     },
-                                   "Returns the current working directory of DrJava.\n"+
+                                   "Returns the current working directory of DrScala.\n"+
                                    "Optional attributes:\n"+
                                    "\trel=\"<dir to which output should be relative\"\n"+
                                    "\tsquote=\"<true to enclose file in single quotes>\"\n"+
@@ -3811,11 +3811,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                      public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
                                    });
     PropertyMaps.TEMPLATE.
-      setProperty("DrJava", 
-                  new FileProperty("drjava.master.working.dir", new Thunk<File>() {
+      setProperty("DrScala", 
+                  new FileProperty("drscala.master.working.dir", new Thunk<File>() {
       public File value() { return _model.getMasterWorkingDirectory(); }
     },
-                                   "Returns the working directory of the DrJava master JVM.\n"+
+                                   "Returns the working directory of the DrScala master JVM.\n"+
                                    "Optional attributes:\n"+
                                    "\trel=\"<dir to which output should be relative\"\n"+
                                    "\tsquote=\"<true to enclose file in single quotes>\"\n"+
@@ -3825,9 +3825,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     // Files
     PropertyMaps.TEMPLATE.
-      setProperty("DrJava", 
-                  new FileListProperty("drjava.all.files", File.pathSeparator, DEF_DIR,
-                                       "Returns a list of all files open in DrJava.\n"+
+      setProperty("DrScala", 
+                  new FileListProperty("drscala.all.files", File.pathSeparator, DEF_DIR,
+                                       "Returns a list of all files open in DrScala.\n"+
                                        "Optional attributes:\n"+
                                        "\trel=\"<dir to which output should be relative\"\n"+
                                        "\tsep=\"<separator between files>\"\n"+
@@ -3844,9 +3844,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       public boolean isCurrent() { return false; }
     });
     PropertyMaps.TEMPLATE.
-      setProperty("DrJava", 
-                  new FileListProperty("drjava.project.files", File.pathSeparator, DEF_DIR,
-                                       "Returns a list of all files open in DrJava that belong " +
+      setProperty("DrScala", 
+                  new FileListProperty("drscala.project.files", File.pathSeparator, DEF_DIR,
+                                       "Returns a list of all files open in DrScala that belong " +
                                        "to a project and are underneath the project root.\n" +
                                        "Optional attributes:\n" +
                                        "\trel=\"<dir to which output should be relative\"\n" +
@@ -3862,11 +3862,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       }
       public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
       public boolean isCurrent() { return false; }
-    }).listenToInvalidatesOf(PropertyMaps.TEMPLATE.getProperty("DrJava", "drjava.all.files"));
+    }).listenToInvalidatesOf(PropertyMaps.TEMPLATE.getProperty("DrScala", "drscala.all.files"));
     PropertyMaps.TEMPLATE.
-      setProperty("DrJava", 
-                  new FileListProperty("drjava.included.files", File.pathSeparator, DEF_DIR,
-                                       "Returns a list of all files open in DrJava that are " +
+      setProperty("DrScala", 
+                  new FileListProperty("drscala.included.files", File.pathSeparator, DEF_DIR,
+                                       "Returns a list of all files open in DrScala that are " +
                                        "not underneath the project root but are included in " +
                                        "the project.\n" +
                                        "Optional attributes:\n" +
@@ -3883,11 +3883,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       }
       public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
       public boolean isCurrent() { return false; }
-    }).listenToInvalidatesOf(PropertyMaps.TEMPLATE.getProperty("DrJava", "drjava.all.files"));
+    }).listenToInvalidatesOf(PropertyMaps.TEMPLATE.getProperty("DrScala", "drscala.all.files"));
     PropertyMaps.TEMPLATE.
-      setProperty("DrJava", 
-                  new FileListProperty("drjava.external.files", File.pathSeparator, DEF_DIR,
-                                       "Returns a list of all files open in DrJava that are "+
+      setProperty("DrScala", 
+                  new FileListProperty("drscala.external.files", File.pathSeparator, DEF_DIR,
+                                       "Returns a list of all files open in DrScala that are "+
                                        "not underneath the project root and are not included in "+
                                        "the project.\n"+
                                        "Optional attributes:\n"+
@@ -3904,11 +3904,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       }
       public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
       public boolean isCurrent() { return false; }
-    }).listenToInvalidatesOf(PropertyMaps.TEMPLATE.getProperty("DrJava", "drjava.all.files"));    
+    }).listenToInvalidatesOf(PropertyMaps.TEMPLATE.getProperty("DrScala", "drscala.all.files"));    
     
     PropertyMaps.TEMPLATE.
       setProperty("Misc", 
-                  new DrJavaProperty("input", "(User Input...)",
+                  new DrScalaProperty("input", "(User Input...)",
                                      "Get an input string from the user.\n"+
                                      "Optional attributes:\n"+
                                      "\tprompt=\"<prompt to display>\"\n"+
@@ -3941,7 +3941,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     // Project
     PropertyMaps.TEMPLATE.
       setProperty("Project", 
-                  new DrJavaProperty("project.mode",
+                  new DrScalaProperty("project.mode",
                                      "Evaluates to true if a project is loaded.") {
       public void update(PropertyMaps pm) {
         Boolean b = _model.isProjectActive();
@@ -3959,7 +3959,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     });
     PropertyMaps.TEMPLATE.
       setProperty("Project", 
-                  new DrJavaProperty("project.changed",
+                  new DrScalaProperty("project.changed",
                                      "Evaluates to true if the project has been "+
                                      "changed since the last save.") {  //TODO: factor out repeated code!
       public void update(PropertyMaps pm) {
@@ -3983,7 +3983,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                    new Thunk<File>() {
       public File value() { return _model.getProjectFile(); }
     },
-                                   "Returns the current project file in DrJava.\n"+
+                                   "Returns the current project file in DrScala.\n"+
                                    "Optional attributes:\n"+
                                    "\trel=\"<dir to which the output should be relative\"\n"+
                                    "\tsquote=\"<true to enclose file in single quotes>\"\n"+
@@ -3997,7 +3997,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                    new Thunk<File>() {
       public File value() { return new File(_model.getMainClass()); }
     },
-                                   "Returns the current project file in DrJava.\n"+
+                                   "Returns the current project file in DrScala.\n"+
                                    "Optional attributes:\n"+
                                    "\trel=\"<dir to which the output should be relative\"\n"+
                                    "\tsquote=\"<true to enclose file in single quotes>\"\n"+
@@ -4010,7 +4010,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                    new Thunk<File>() {
       public File value() { return _model.getProjectRoot(); }
     },
-                                   "Returns the current project root in DrJava.\n"+
+                                   "Returns the current project root in DrScala.\n"+
                                    "Optional attributes:\n"+
                                    "\trel=\"<dir to which the output should be relative\"\n"+
                                    "\tsquote=\"<true to enclose file in single quotes>\"\n"+
@@ -4023,7 +4023,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                    new Thunk<File>() {
       public File value() { return _model.getBuildDirectory(); }
     },
-                                   "Returns the current build directory in DrJava.\n"+
+                                   "Returns the current build directory in DrScala.\n"+
                                    "Optional attributes:\n"+
                                    "\trel=\"<dir to which the output should be relative\"\n"+
                                    "\tsquote=\"<true to enclose file in single quotes>\"\n"+
@@ -4051,7 +4051,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     PropertyMaps.TEMPLATE.setProperty("Project", classFilesProperty);
     PropertyMaps.TEMPLATE.
       setProperty("Project", 
-                  new DrJavaProperty("project.auto.refresh",
+                  new DrScalaProperty("project.auto.refresh",
                                      "Evaluates to true if project auto-refresh is enabled.") {
       public void update(PropertyMaps pm) {
         Boolean b = _model.getAutoRefreshStatus();
@@ -4070,7 +4070,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     PropertyMaps.TEMPLATE.
       setProperty("Project", 
                   new FileListProperty("project.excluded.files", File.pathSeparator, DEF_DIR,
-                                       "Returns a list of files that are excluded from DrJava's "+
+                                       "Returns a list of files that are excluded from DrScala's "+
                                        "project auto-refresh.\n"+
                                        "Optional attributes:\n"+
                                        "\trel=\"<dir to which output should be relative\"\n"+
@@ -4105,29 +4105,29 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     });
     
     // Actions
-    PropertyMaps.TEMPLATE.setProperty("Action", new DrJavaActionProperty("action.save.all", "(Save All...)",
+    PropertyMaps.TEMPLATE.setProperty("Action", new DrScalaActionProperty("action.save.all", "(Save All...)",
                                                                          "Execute a \"Save All\" action.") {
       public void update(PropertyMaps pm) { _saveAll(); }
       public boolean isCurrent() { return false; }
     });
     PropertyMaps.TEMPLATE.
-      setProperty("Action", new DrJavaActionProperty("action.compile.all", "(Compile All...)",
+      setProperty("Action", new DrScalaActionProperty("action.compile.all", "(Compile All...)",
                                                      "Execute a \"Compile All\" action.") {
       public void update(PropertyMaps pm) { _compileAll(); }
       public boolean isCurrent() { return false; }
     });
     PropertyMaps.TEMPLATE.
       setProperty("Action", 
-                  new DrJavaActionProperty("action.clean", "(Clean Build Directory...)",
+                  new DrScalaActionProperty("action.clean", "(Clean Build Directory...)",
                                            "Execute a \"Clean Build Directory\" action.") {
       public void update(PropertyMaps pm) {
         // could not use _clean(), since ProjectFileGroupingState.cleanBuildDirectory()
-        // is implemented as an asynchronous task, and DrJava would not wait for its completion
+        // is implemented as an asynchronous task, and DrScala would not wait for its completion
         IOUtil.deleteRecursively(_model.getBuildDirectory());
       }
       public boolean isCurrent() { return false; }
     });
-    PropertyMaps.TEMPLATE.setProperty("Action", new DrJavaActionProperty("action.open.file", "(Open File...)",
+    PropertyMaps.TEMPLATE.setProperty("Action", new DrScalaActionProperty("action.open.file", "(Open File...)",
                                                                          "Execute an \"Open File\" action.\n"+
                                                                          "Required attributes:\n"+
                                                                          "\tfile=\"<file to open>\"\n"+
@@ -4167,7 +4167,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     });
     PropertyMaps.TEMPLATE.
       setProperty("Action", 
-                  new DrJavaActionProperty("action.auto.refresh", "(Auto-Refresh...)",
+                  new DrScalaActionProperty("action.auto.refresh", "(Auto-Refresh...)",
                                            "Execute an \"Auto-Refresh Project\" action.") {
       public void update(PropertyMaps pm) {
         _model.autoRefreshProject();
@@ -4311,7 +4311,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
 //      MainFrameStatics.showError(MainFrame.this, err, "Debugger Error",
 //                               "Unable to find the JPDA package for the debugger.\n" +
 //                               "Please make sure either tools.jar or jpda.jar is\n" +
-//                               "in your classpath when you start DrJava.");
+//                               "in your classpath when you start DrScala.");
 //      _setDebugMenuItemsEnabled(false);
 //    }
 //  }
@@ -4377,7 +4377,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     String text = "Editing " + path;
     
 // Lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
-//    if (DrJava.getConfig().getSetting(LIGHTWEIGHT_PARSING_ENABLED).booleanValue()) {
+//    if (DrScala.getConfig().getSetting(LIGHTWEIGHT_PARSING_ENABLED).booleanValue()) {
 //      String temp = _model.getParsingControl().getEnclosingClassName(doc);
 //      if ((temp != null) && (temp.length() > 0)) { text = text + " - " + temp; }
     
@@ -4527,9 +4527,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         catch(IOException e) { /* do nothing */ }
       }
     }
-    PropertyMaps.TEMPLATE.getProperty("DrJava","drjava.project.files").invalidate();
-    PropertyMaps.TEMPLATE.getProperty("DrJava","drjava.included.files").invalidate();
-    PropertyMaps.TEMPLATE.getProperty("DrJava","drjava.external.files").invalidate();
+    PropertyMaps.TEMPLATE.getProperty("DrScala","drscala.project.files").invalidate();
+    PropertyMaps.TEMPLATE.getProperty("DrScala","drscala.included.files").invalidate();
+    PropertyMaps.TEMPLATE.getProperty("DrScala","drscala.external.files").invalidate();
   }
   
   /* Converts the selected files to auxiliary files.  Access is ackage protected rather than private to support access
@@ -4689,7 +4689,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
   }
   
-  /** Closes project when DrJava is not in the process of quitting.
+  /** Closes project when DrScala is not in the process of quitting.
     * @return true if the project is closed, false if cancelled.
     */
   boolean closeProject() {
@@ -4701,7 +4701,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Saves the project file; closes all open project files; and calls _model.closeProject(quitting) to 
     * clean up the state of the global model.  It also restores the list view navigator.
-    * @param quitting whether the project is being closed as part of quitting DrJava
+    * @param quitting whether the project is being closed as part of quitting DrScala
     * @return true if the project is closed, false if cancelled
     */
   boolean _closeProject(boolean quitting) {
@@ -5223,7 +5223,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
 //                                          + "\nDo you want to change the project file's extension to \""
 //                                          + PROJECT_FILE_EXTENSION+ "\"?",
 //                                        "Change to \"" + PROJECT_FILE_EXTENSION + "\"",
-//                                        "Keep \"" + DrJavaFileUtils.getExtension(fileName) + "\"",
+//                                        "Keep \"" + DrScalaFileUtils.getExtension(fileName) + "\"",
 //                                        PROJECT_FILE_EXTENSION);
 //        _model.setProjectFile(file);
 //        _currentProjFile = file;
@@ -5327,7 +5327,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
     _executeExternalDialog.setVisible(false);
     // tried passing false here. seemed to help with bug
-    // [ 1478796 ] DrJava Does Not Shut Down With Project Open
+    // [ 1478796 ] DrScala Does Not Shut Down With Project Open
     // on HP tc1100 and Toshiba Portege tablet PCs, but did not help in all cases
     if (! _closeProject(true)) return; /* if user pressed cancel, do not quit */
     
@@ -5634,7 +5634,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       catch (ClassNameNotFoundException e) {
         // Display a warning message if a class name can't be found.
         String msg =
-          "DrJava could not find the top level class name in the\n" +
+          "DrScala could not find the top level class name in the\n" +
           "current document, so it could not run the class.  Please\n" +
           "make sure that the class is properly defined first.";
         
@@ -5663,7 +5663,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     catch (ClassNameNotFoundException e) {
       // Display a warning message if a class name can't be found.
       String msg =
-        "DrJava could not find the top level class name in the\n" +
+        "DrScala could not find the top level class name in the\n" +
         "current document, so it could not run the class.  Please\n" +
         "make sure that the class is properly defined first.";
       
@@ -5682,7 +5682,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     catch (ClassNameNotFoundException e) {
       // Display a warning message if a class name can't be found.
       String msg =
-        "DrJava could not find the top level class name in the\n" +
+        "DrScala could not find the top level class name in the\n" +
         "current document, so it could not run the class.  Please\n" +
         "make sure that the class is properly defined first.";
       
@@ -5729,7 +5729,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
   }
   
-  /** Tests the documents in the project source tree. Assumes that DrJava is in project mode. */
+  /** Tests the documents in the project source tree. Assumes that DrScala is in project mode. */
   private void _junitProject() {
     updateStatusField("Running JUnit Tests in Project");
     hourglassOn();  // turned off in junitStarted/nonTestCase/_junitInterrupted
@@ -6023,7 +6023,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
             if (chosen.getName().indexOf(".") == -1) {
               // no file extension
               String previousName = (previous!=null)?previous.getName():"";
-              if (!DrJavaFileUtils.isSourceFile(previousName)) {
+              if (!DrScalaFileUtils.isSourceFile(previousName)) {
                 // previous file name doesn't have a file extension either
                 File newFile = new File(chosen.getAbsolutePath() + getSuggestedFileExtension());
                 return newFile;
@@ -6287,7 +6287,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _setUpAction(_gotoClosingBraceAction, "Go to Closing Brace", 
                  "Go th the closing brace of the block enclosing the cursor");
     
-    _setUpAction(_editPreferencesAction, "Preferences", "Edit configurable settings in DrJava");
+    _setUpAction(_editPreferencesAction, "Preferences", "Edit configurable settings in DrScala");
     
     _setUpAction(_junitAction, "Test Current", "Run JUnit over the current document");
     _setUpAction(_junitAllAction, "Test", "Run JUnit over all open JUnit tests");
@@ -6297,9 +6297,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
     else {
       _setUpAction(_scaladocAllAction, "Scaladoc",
-                   "Note: DrJava cannot run Scaladoc because no JDK was found. Please install a JDK.");
+                   "Note: DrScala cannot run Scaladoc because no JDK was found. Please install a JDK.");
       _setUpAction(_scaladocCurrentAction, "Preview Scaladoc Current",
-                   "Note: DrJava cannot run Scaladoc because no JDK was found.  Please install a JDK.");
+                   "Note: DrScala cannot run Scaladoc because no JDK was found.  Please install a JDK.");
     }
     _setUpAction(_runAction, "Run", "Run the main method of the current document");
     _setUpAction(_runAppletAction, "Run", "Run the current document as applet");
@@ -6327,12 +6327,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _setUpAction(_saveConsoleCopyAction, "Save Copy of Console...",
                  "SaveAs", "Save copy of console contents to a file");
     _setUpAction(_clearConsoleAction, "Clear Console", "Clear all text in the Console Pane");
-//    _setUpAction(_showDebugConsoleAction, "Show DrJava Debug Console", "<html>Show a console for debugging DrJava<br>" +
+//    _setUpAction(_showDebugConsoleAction, "Show DrScala Debug Console", "<html>Show a console for debugging DrScala<br>" +
 //                 "(with \"mainFrame\", \"model\", and \"config\" variables defined)</html>");
     
     /* Debugger is deactivated in DrScala */
 //    if (_model.getDebugger().isAvailable()) {
-//      _setUpAction(_toggleDebuggerAction, "Debug Mode", "Enable or disable DrJava's debugger");
+//      _setUpAction(_toggleDebuggerAction, "Debug Mode", "Enable or disable DrScala's debugger");
 //      _setUpAction(_toggleBreakpointAction, "Toggle Breakpoint", "Set or clear a breakpoint on the current line");
 //      _setUpAction(_clearAllBreakpointsAction, "Clear Breakpoints", "Clear all breakpoints in all classes");
 //      _setUpAction(_resumeDebugAction, "Resume", "Resume the current suspended thread");
@@ -6349,10 +6349,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _setUpAction(_checkNewVersionAction, "Check for New Version", "Find", "Check for New Version");
     _checkNewVersionAction.setEnabled(DrScala.getConfig().getSetting(OptionConstants.NEW_VERSION_ALLOWED));
 //    _setUpAction(_drjavaSurveyAction, "Send System Information", "About", 
-//                 "Send anonymous system information to DrJava developers");
+//                 "Send anonymous system information to DrScala developers");
     _setUpAction(_errorsAction, "DrScala Errors", "drjavaerror", "Show a window with internal DrScala errors");
     _setUpAction(_forceQuitAction, "Force Quit", "Stop", "Force DrScala to quit without cleaning up");
-    _setUpAction(_generateCustomDrJavaJarAction, "Generate Custom drscala.jar...",
+    _setUpAction(_generateCustomDrScalaJarAction, "Generate Custom drscala.jar...",
                  "<html>Generate a custom drjava.jar file that includes additional files,<br>"+
                  "e.g. libraries or resources.</html>");
   }
@@ -6766,8 +6766,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       optionChanged(new OptionEvent<Integer>(OptionConstants.EXTERNAL_SAVED_COUNT,
                                              DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT)));
     final JMenu advancedMenu = new JMenu("Advanced");
-    _addMenuItem(advancedMenu, _generateCustomDrJavaJarAction, KEY_GENERATE_CUSTOM_DRSCALA, updateKeyboardManager);
-    _addMenuItem(advancedMenu, _newDrJavaInstanceAction, KEY_NEW_DRSCALA_INSTANCE, updateKeyboardManager);
+    _addMenuItem(advancedMenu, _generateCustomDrScalaJarAction, KEY_GENERATE_CUSTOM_DRSCALA, updateKeyboardManager);
+    _addMenuItem(advancedMenu, _newDrScalaInstanceAction, KEY_NEW_DRSCALA_INSTANCE, updateKeyboardManager);
     /* Omit Advanced menu until some utility is demonstrated. */
 //    toolsMenu.add(advancedMenu);
 
@@ -7526,7 +7526,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           _model.getInteractionsModel().performDefaultImports();
         }
         catch(Throwable t) {
-          DrJavaErrorHandler.record(t);
+          DrScalaErrorHandler.record(t);
         }
       }
     });
@@ -8070,7 +8070,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     // overall size. Then we can set _docSplitPane's divider. Ahh, Swing.
     // Also, according to the Swing docs, we need to set these dividers AFTER
     // we have shown the window. How annoying.
-//    int tabHeight = DrJava.getConfig().getSetting(TABS_HEIGHT).intValue();
+//    int tabHeight = DrScala.getConfig().getSetting(TABS_HEIGHT).intValue();
     
     // 2*getHeight()/3
     _mainSplit.setDividerLocation(_mainSplit.getHeight() - 132);
@@ -8353,7 +8353,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
 //  /** Revalidate the line numers, i.e. also redraw the ones not currently visible. */
 //  public void revalidateLineNums() {
-//    if (DrJava.getConfig().getSetting(LINEENUM_ENABLED).booleanValue()) {
+//    if (DrScala.getConfig().getSetting(LINEENUM_ENABLED).booleanValue()) {
 //      JScrollPane sp = _defScrollPanes.get(_model.getActiveDocument());
 //      if (sp != null) {
 //        LineEnumRule ler = (LineEnumRule)sp.getRowHeader().getView();
@@ -8481,10 +8481,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     if (moveSelection) _currentDefPane.moveCaretPosition(newEnd);
   }
   
-  /** Blocks access to DrJava while the hourglass cursor is on. */
+  /** Blocks access to DrScala while the hourglass cursor is on. */
   private static class GlassPane extends JComponent {
     
-    /** Creates a new GlassPane over the DrJava window. */
+    /** Creates a new GlassPane over the DrScala window. */
     public GlassPane() {
       addKeyListener(new KeyAdapter() { });
       addMouseListener(new MouseAdapter() { });
@@ -8780,7 +8780,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
     
     String res = (String)JOptionPane.showInputDialog(MainFrame.this,
-                                                     "DrJava ran out of memory. You may try to enter a larger\n" +
+                                                     "DrScala ran out of memory. You may try to enter a larger\n" +
                                                      "maximum heap size for the main JVM. The maximum heap size is\n" +
                                                      "currently " + value + ".\n" +
                                                      "A restart is required after changing this setting.",
@@ -8839,7 +8839,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     public void newFileCreated(final OpenDefinitionsDocument doc) {
       _createDefScrollPane(doc);
-      PropertyMaps.TEMPLATE.getProperty("DrJava", "drjava.all.files").invalidate();
+      PropertyMaps.TEMPLATE.getProperty("DrScala", "drscala.all.files").invalidate();
     }
     
     private volatile int _fnfCount = 0;
@@ -8847,7 +8847,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     private boolean resetFNFCount() { return _fnfCount == 0; }
     
     private boolean someFilesNotFound() {
-      PropertyMaps.TEMPLATE.getProperty("DrJava", "drjava.all.files").invalidate();
+      PropertyMaps.TEMPLATE.getProperty("DrScala", "drscala.all.files").invalidate();
       return _fnfCount > 0;
     }
     
@@ -8880,7 +8880,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         
         setPopupLoc(dialog);
         dialog.showDialog();
-        PropertyMaps.TEMPLATE.getProperty("DrJava", "drjava.all.files").invalidate();
+        PropertyMaps.TEMPLATE.getProperty("DrScala", "drscala.all.files").invalidate();
       }
     }
     
@@ -8943,7 +8943,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _revertAction.setEnabled(true);
       updateStatusField();
       _currentDefPane.requestFocusInWindow();
-      PropertyMaps.TEMPLATE.getProperty("DrJava", "drjava.all.files").invalidate();
+      PropertyMaps.TEMPLATE.getProperty("DrScala", "drscala.all.files").invalidate();
       try {
         File f = doc.getFile();
         if (! _model.inProject(f)) _recentFileManager.updateOpenFiles(f);
@@ -8961,7 +8961,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     public void fileOpened(final OpenDefinitionsDocument doc) { 
       _fileOpened(doc);
-      PropertyMaps.TEMPLATE.getProperty("DrJava", "drjava.all.files").invalidate(); 
+      PropertyMaps.TEMPLATE.getProperty("DrScala", "drscala.all.files").invalidate(); 
     }
     
     private void _fileOpened(final OpenDefinitionsDocument doc) {
@@ -8969,7 +8969,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         File f = doc.getFile();
         if (! _model.inProject(f)) {
           _recentFileManager.updateOpenFiles(f);
-          PropertyMaps.TEMPLATE.getProperty("DrJava", "drjava.all.files").invalidate();
+          PropertyMaps.TEMPLATE.getProperty("DrScala", "drscala.all.files").invalidate();
         }
       }
       catch (FileMovedException fme) {
@@ -8991,7 +8991,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         ((DefinitionsPane)jsp.getViewport().getView()).close();
         _defScrollPanes.remove(doc);
       }
-      PropertyMaps.TEMPLATE.getProperty("DrJava", "drjava.all.files").invalidate();
+      PropertyMaps.TEMPLATE.getProperty("DrScala", "drscala.all.files").invalidate();
     }
     
     public void fileReverted(OpenDefinitionsDocument doc) {
@@ -9068,7 +9068,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           _lastFocusOwner = _currentDefPane;
 //            System.err.println("Requesting focus on new active document");
           _currentDefPane.requestFocusInWindow(); 
-          PropertyMaps.TEMPLATE.getProperty("DrJava","drjava.current.file").invalidate();
+          PropertyMaps.TEMPLATE.getProperty("DrScala","drscala.current.file").invalidate();
         } 
       });
     }
@@ -9578,7 +9578,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       final String message = 
         "The class file for class " + e.getClassName() + " in source file " + e.getCanonicalPath() + 
         " cannot be loaded.\n "
-        + "When DrJava tries to load it, the following error is generated:\n" +  e.getError();
+        + "When DrScala tries to load it, the following error is generated:\n" +  e.getError();
       
       JOptionPane.showMessageDialog(MainFrame.this, message,
                                     "Testing works only on valid class files",
@@ -9862,7 +9862,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     Object[] options = {"Yes","No"};
     if (d == null) return false;
     boolean dMod = d.isModifiedSinceSave();
-    String msg = "This file is already open in DrJava" + (dMod ? " and has been modified" : "") + 
+    String msg = "This file is already open in DrScala" + (dMod ? " and has been modified" : "") + 
       ".  Do you wish to overwrite it?";
     int choice = JOptionPane.showOptionDialog(MainFrame.this, msg, "File Open Warning", JOptionPane.YES_NO_OPTION,
                                               JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
@@ -10111,7 +10111,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         List<File> filteredFileList = new ArrayList<File>();
         while (iterator.hasNext()) {
           File file = iterator.next();
-          if (file.isFile() && (DrJavaFileUtils.isSourceFile(file) || file.getName().endsWith(".txt"))) {
+          if (file.isFile() && (DrScalaFileUtils.isSourceFile(file) || file.getName().endsWith(".txt"))) {
             filteredFileList.add(file);
           }
 //          else if (file.isFile() && file.getName().endsWith(OptionConstants.EXTPROCESS_FILE_EXTENSION)) {
@@ -10239,8 +10239,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
 //  public void resetAutoImportDialogPosition() {
 //    _initAutoImportDialog();
 //    _autoImportDialog.setFrameState("default");
-//    if (DrJava.getConfig().getSetting(DIALOG_AUTOIMPORT_STORE_POSITION).booleanValue()) {
-//      DrJava.getConfig().setSetting(DIALOG_AUTOIMPORT_STATE, "default");
+//    if (DrScala.getConfig().getSetting(DIALOG_AUTOIMPORT_STORE_POSITION).booleanValue()) {
+//      DrScala.getConfig().setSetting(DIALOG_AUTOIMPORT_STATE, "default");
 //    }
 //  }
   
@@ -10366,7 +10366,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                     String full = rel.replace(File.separatorChar, '.');
                     
                     // TODO: What about Habanero Java extension?
-                    for (String ext: DrJavaFileUtils.getSourceFileExtensions()) {
+                    for (String ext: DrScalaFileUtils.getSourceFileExtensions()) {
                       if (full.endsWith(ext)) {
                         full = full.substring(0, full.lastIndexOf(ext));
                         break;
@@ -10536,8 +10536,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         public void toFront(WindowEvent we) {
           Window opposite = we.getOppositeWindow();
           if (opposite == null) {
-            // Probably a native application window, not DrJava.
-            // When the user switches back to DrJava, the user may select
+            // Probably a native application window, not DrScala.
+            // When the user switches back to DrScala, the user may select
             // a different window to be on top, but we want w to be on top
             // install a listener on MainFrame, the detached panes window, and the
             // detached debugger that puts w back on top if one of those windows

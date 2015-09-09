@@ -39,6 +39,8 @@ package edu.rice.cs.drjava.model.definitions;
 import java.io.IOException;
 import java.io.StringReader;
 
+import edu.rice.cs.util.swing.Utilities;
+
 /** The simple lexer class for extracting package names from Java and Scala files.  Only the first package name is
   * returned.  This name may be divided across CONSECUTIVE, cumulative package statements as is legal in Scala. */
 public class PackageLexer extends java.io.StreamTokenizer {
@@ -48,8 +50,11 @@ public class PackageLexer extends java.io.StreamTokenizer {
    *   ...
    */
   
+  String _text;  // Used in debugging code
+  
   public PackageLexer(String text) {
     super(new StringReader(text));  // pass a Reader wrapping the text to the StreamTokenizer constructor
+    _text = text;
     
     // Cancel the default single character comment status of '/'
     ordinaryChar('/');
@@ -86,8 +91,13 @@ public class PackageLexer extends java.io.StreamTokenizer {
         prefix = ".";  // This is horrible imperative hack; in tail recursive form it is an extra argument
         token = nextToken();
       }
-      return name.toString();
+      String result = name.toString();
+//      Utilities.show("Given\n" + _text + "\nPackageLexer.getPackageName() returned '" + result + "'");
+      return result;
     }
-    catch(IOException e) { return ""; }
+    catch(IOException e) { 
+//      Utilities.show("Given\n" + _text + "\nPackageLexer.getPackageName() returned ''");
+      return ""; 
+    }
   }
 }

@@ -58,13 +58,13 @@ import static edu.rice.cs.util.XMLConfig.XMLConfigException;
 /** Class setting up the variables for external processes.
   *  @version $Id: DrJavaPropertySetup.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
-public class DrJavaPropertySetup implements OptionConstants {
+public class DrScalaPropertySetup implements OptionConstants {
   public static void setup() {
     final String DEF_DIR = "${drjava.working.dir}";
     
     // fake "Config" properties
     String msg1 = 
-      "This property contains all the JVM arguments passed to DrJava's master JVM, i.e. the JVM the user is editing " +
+      "This property contains all the JVM arguments passed to DrScala's master JVM, i.e. the JVM the user is editing " +
       "programs in. The arguments from the \"JVM Args for Main JVM\" and the special -X arguments from " +
       "\"Maximum  Heap Size for Main JVM\" are combined.";
     
@@ -91,7 +91,7 @@ public class DrJavaPropertySetup implements OptionConstants {
       listenToInvalidatesOf(PropertyMaps.TEMPLATE.getProperty("Config", "config.master.jvm.xmx"));
     
     String msg2 =  
-      "This property contains all the JVM arguments passed to DrJava's master JVM, i.e. the JVM the user is editing " +
+      "This property contains all the JVM arguments passed to DrScala's master JVM, i.e. the JVM the user is editing " +
       "programs in. The arguments from the \"JVM Args for Slave JVM\" and the special -X arguments from " +
       "\"Maximum Heap Size for Main JVM\" are combined.";
     
@@ -125,7 +125,7 @@ public class DrJavaPropertySetup implements OptionConstants {
       "\tkeep=\"<true if the file should not be erased>\"\n" +
       "\tcontent=\"<text to go into the file>\"";
     
-    DrJavaProperty prop3 = new DrJavaProperty("tmpfile", msg3) {
+    DrScalaProperty prop3 = new DrScalaProperty("tmpfile", msg3) {
       java.util.Random _r = new java.util.Random();
       public void update(PropertyMaps pm) {
         try {
@@ -185,7 +185,7 @@ public class DrJavaPropertySetup implements OptionConstants {
       "\tsquote=\"<true to enclose file in single quotes>\"\n" +
       "\tdquote=\"<true to enclose file in double quotes>\"";
 
-    DrJavaProperty prop4 = new RecursiveFileListProperty("file.find", File.pathSeparator, DEF_DIR, DEF_DIR, msg4);
+    DrScalaProperty prop4 = new RecursiveFileListProperty("file.find", File.pathSeparator, DEF_DIR, DEF_DIR, msg4);
     
     PropertyMaps.TEMPLATE.setProperty("File", prop4);
     
@@ -199,7 +199,7 @@ public class DrJavaPropertySetup implements OptionConstants {
       "files are specified, then a list of values, each " +
       "separated by ${path.separator}, is returned.";
     
-    DrJavaProperty prop5 = new DrJavaProperty("file.isdir", msg5) {
+    DrScalaProperty prop5 = new DrScalaProperty("file.isdir", msg5) {
       public void update(PropertyMaps pm) {
         String s = _attributes.get("file");
         if (s == null) {
@@ -239,7 +239,7 @@ public class DrJavaPropertySetup implements OptionConstants {
       "files are specified, then a list of values, each " +
       "separated by ${path.separator}, is returned.";
     
-    DrJavaProperty prop6 = new DrJavaProperty("file.isfile", msg6) {
+    DrScalaProperty prop6 = new DrScalaProperty("file.isfile", msg6) {
       public void update(PropertyMaps pm) {
         String s = _attributes.get("file");
         if (s == null) {
@@ -279,7 +279,7 @@ public class DrJavaPropertySetup implements OptionConstants {
       "files are specified, then a list of values, each " +
       "separated by ${path.separator}, is returned.";
     
-    DrJavaProperty prop7 = new DrJavaProperty("file.exists", msg7) {
+    DrScalaProperty prop7 = new DrScalaProperty("file.exists", msg7) {
       public void update(PropertyMaps pm) {
         String s = _attributes.get("file");
         if (s == null) {
@@ -318,7 +318,7 @@ public class DrJavaPropertySetup implements OptionConstants {
       " on this machine. If multiple files are specified, then a list of values, each " +
       "separated by ${path.separator}, is returned.";
     
-    DrJavaProperty prop8 = new DrJavaProperty("file.parent", msg8) {
+    DrScalaProperty prop8 = new DrScalaProperty("file.parent", msg8) {
       public void update(PropertyMaps pm) {
         String s = _attributes.get("file");
         if (s == null) {
@@ -361,7 +361,7 @@ public class DrJavaPropertySetup implements OptionConstants {
       " on this machine. If multiple files are specified, then a list " +
       "of values, each separated by ${path.separator}, is returned.";
     
-    PropertyMaps.TEMPLATE.setProperty("File", new DrJavaProperty("file.abs", msg9) {
+    PropertyMaps.TEMPLATE.setProperty("File", new DrScalaProperty("file.abs", msg9) {
       public void update(PropertyMaps pm) {
         String s = _attributes.get("base");
         if (s == null) {
@@ -408,7 +408,7 @@ public class DrJavaPropertySetup implements OptionConstants {
       " on this machine. If multiple files are specified, then a list " +
       "of values, each separated by ${path.separator}, is returned.";
     
-    PropertyMaps.TEMPLATE.setProperty("File", new DrJavaProperty("file.rel", msg10) {
+    PropertyMaps.TEMPLATE.setProperty("File", new DrScalaProperty("file.rel", msg10) {
       public void update(PropertyMaps pm) {
         String s = _attributes.get("base");
         if (s == null) {
@@ -476,10 +476,10 @@ public class DrJavaPropertySetup implements OptionConstants {
       "Required attributes:\n" +
       "\tfile=\"<directory to create>\"\n" +
       "Multiple files can be specified for the file attribute, each separated by ${path.separator}, which is " +
-      File.pathSeparator + " on this machine. If multiple files are specified, then DrJava " +
+      File.pathSeparator + " on this machine. If multiple files are specified, then DrScala " +
       "will attempt to make all those directories.";
       
-    PropertyMaps.TEMPLATE.setProperty("File", new DrJavaProperty("file.mkdir", msg11) {
+    PropertyMaps.TEMPLATE.setProperty("File", new DrScalaProperty("file.mkdir", msg11) {
       public void update(PropertyMaps pm) {
         String s = _attributes.get("file");
         if (s == null) {
@@ -511,10 +511,10 @@ public class DrJavaPropertySetup implements OptionConstants {
       "\trec=\"<true for recursive removal>\"\n" +
       "(if not specified, false is used and removal is not recursive)\n" +
       "Multiple files can be specified for the file attribute, each separated by ${path.separator}, which is " +
-      File.pathSeparator + " on this machine. If multiple files are specified, then DrJava " +
+      File.pathSeparator + " on this machine. If multiple files are specified, then DrScala " +
       "will attempt to remove all those files.";
     
-    PropertyMaps.TEMPLATE.setProperty("File", new DrJavaProperty("file.rm", msg12) {
+    PropertyMaps.TEMPLATE.setProperty("File", new DrScalaProperty("file.rm", msg12) {
       public void update(PropertyMaps pm) {
         String s = _attributes.get("rec");
         boolean rec = new Boolean(s).booleanValue();
@@ -558,7 +558,7 @@ public class DrJavaPropertySetup implements OptionConstants {
       "Required attributes:\n" +
       "\tfile=\"<file or directory to move>\"\tnew=\"<new location>\"";
     
-    PropertyMaps.TEMPLATE.setProperty("File", new DrJavaProperty("file.mv", msg13) {
+    PropertyMaps.TEMPLATE.setProperty("File", new DrScalaProperty("file.mv", msg13) {
       public void update(PropertyMaps pm) {
         String s = _attributes.get("file");
         if (s == null) {
@@ -608,7 +608,7 @@ public class DrJavaPropertySetup implements OptionConstants {
       "unless other format is specified by the fmt attribute.\n" + "Optional attributes:\n" + 
       "\tfmt=\"full\" or \"long\" or \"medium\" or \"short\"";
     
-    PropertyMaps.TEMPLATE.setProperty("DrScala", new DrJavaProperty("drjava.current.time.millis", msg14) {
+    PropertyMaps.TEMPLATE.setProperty("DrScala", new DrScalaProperty("drscala.current.time.millis", msg14) {
       public void update(PropertyMaps pm) {
         long millis = System.currentTimeMillis();
         String f = _attributes.get("fmt").toLowerCase();
@@ -642,7 +642,7 @@ public class DrJavaPropertySetup implements OptionConstants {
       "Required attributes:\n" +
       "\tcmd=\"<command to evaluate>\"";
       
-    PropertyMaps.TEMPLATE.setProperty("Misc", new DrJavaProperty("ignore", msg15) {
+    PropertyMaps.TEMPLATE.setProperty("Misc", new DrScalaProperty("ignore", msg15) {
       public void update(PropertyMaps pm) {
         String s = _attributes.get("cmd");
         if (s == null) {
@@ -666,7 +666,7 @@ public class DrJavaPropertySetup implements OptionConstants {
       "\tthen=\"<evaluated if true>\"\n" +
       "\telse=\"<evaluated if false>\"";
     
-    PropertyMaps.TEMPLATE.setProperty("Misc", new DrJavaProperty("if", msg16) {
+    PropertyMaps.TEMPLATE.setProperty("Misc", new DrScalaProperty("if", msg16) {
       public void update(PropertyMaps pm) {
         if (_attributes.get("cond") == null) {
           _value = "(if Error...)";
@@ -1080,7 +1080,7 @@ public class DrJavaPropertySetup implements OptionConstants {
       "\tmulti=\"<true if multiple values are allowed>\"\n" +
       "\tsep=\"<separator between results>\"";
 
-    PropertyMaps.TEMPLATE.setProperty("Misc", new DrJavaProperty("xml.in", "(XML Input...)",msg35) {
+    PropertyMaps.TEMPLATE.setProperty("Misc", new DrScalaProperty("xml.in", "(XML Input...)",msg35) {
       public String toString() {
         return "(XML Input...)";
       }
@@ -1146,7 +1146,7 @@ public class DrJavaPropertySetup implements OptionConstants {
       "\tcontent=\"<value to write into the XML>\"\n" +
       "\tappend=\"<true to append, false to overwrite existing>\"";
       
-    PropertyMaps.TEMPLATE.setProperty("Misc", new DrJavaProperty("xml.out.action", "(XML Output...)", msg36) {
+    PropertyMaps.TEMPLATE.setProperty("Misc", new DrScalaProperty("xml.out.action", "(XML Output...)", msg36) {
       public String toString() {
         return "(XML Output...)";
       }
@@ -1195,7 +1195,7 @@ public class DrJavaPropertySetup implements OptionConstants {
       "\tval=\"<value of the variable>\"\n" +
       "\tcmd=\"<command to evaluate>\"";
     
-    PropertyMaps.TEMPLATE.setProperty("Misc", new DrJavaProperty("var", msg37) {
+    PropertyMaps.TEMPLATE.setProperty("Misc", new DrScalaProperty("var", msg37) {
       public void update(PropertyMaps pm) {
         String name = _attributes.get("name");
         String val = _attributes.get("val");
@@ -1249,7 +1249,7 @@ public class DrJavaPropertySetup implements OptionConstants {
       "\tname=\"<name of the variable>\"\n" +
       "\tval=\"<value of the variable>\"";
     
-    PropertyMaps.TEMPLATE.setProperty("Misc", new DrJavaProperty("var.set", msg38) {
+    PropertyMaps.TEMPLATE.setProperty("Misc", new DrScalaProperty("var.set", msg38) {
       public void update(PropertyMaps pm) {
         String name = _attributes.get("name");
         String val = _attributes.get("val");
@@ -1296,7 +1296,7 @@ public class DrJavaPropertySetup implements OptionConstants {
       "\teach=\"<number of elements to process as one piece>\"\n" +
       "(if not defined, 1 is used)";
     
-    PropertyMaps.TEMPLATE.setProperty("Misc", new DrJavaProperty("for", msg39) {
+    PropertyMaps.TEMPLATE.setProperty("Misc", new DrScalaProperty("for", msg39) {
       public void update(PropertyMaps pm) {
         String list = _attributes.get("list");
         String var = _attributes.get("var");
@@ -1404,7 +1404,7 @@ public class DrJavaPropertySetup implements OptionConstants {
         File f = new File(cp);
         if (!f.exists()) { continue; }
         if (f.isDirectory()) {
-          // this is a directory, maybe DrJava is contained here as individual files
+          // this is a directory, maybe DrScala is contained here as individual files
           File cf = new File(f, edu.rice.cs.drjava.DrScala.class.getName().replace('.', File.separatorChar) + ".class");
           if (cf.exists() && cf.isFile()) {
             found = f;
@@ -1429,7 +1429,7 @@ public class DrJavaPropertySetup implements OptionConstants {
     final File drjavaFile = found;
     
     String msg42 = 
-      "Returns the executable file of DrJava that is currently running.\n" +
+      "Returns the executable file of DrScala that is currently running.\n" +
       "Optional attributes:\n" +
       "\trel=\"<dir to which the output should be relative\"\n" +
       "\tsquote=\"<true to enclose file in single quotes>\"\n" +
@@ -1439,7 +1439,7 @@ public class DrJavaPropertySetup implements OptionConstants {
       public File value() { return drjavaFile; }
     };
     
-    FileProperty prop42 = new FileProperty("drjava.file", thunk42, msg42) {
+    FileProperty prop42 = new FileProperty("drscala.file", thunk42, msg42) {
       public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
     };
     
@@ -1463,7 +1463,7 @@ public class DrJavaPropertySetup implements OptionConstants {
     
     PropertyMaps.TEMPLATE.setProperty("Misc", prop43);
     
-    PropertyMaps.TEMPLATE.setProperty("Misc", new DrJavaProperty("echo",
+    PropertyMaps.TEMPLATE.setProperty("Misc", new DrScalaProperty("echo",
                                                                  "Echo text to the console.\n" +
                                                                  "Required attributes:\n" +
                                                                  "\ttext=\"<text to echo>\"") {

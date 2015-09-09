@@ -168,20 +168,13 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   /** In the event thread, notifies listeners that the interpreter has changed.
     * @param inProgress Whether the new interpreter is currently in progress.
     */
-  protected void _notifyInterpreterChanged(final boolean inProgress) {
+  public void _notifyInterpreterChanged(final boolean inProgress) {
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.interpreterChanged(inProgress); } });
   }
   
   /** In the event thread, notifies listeners that the interpreter is resetting. */
   protected void _notifyInterpreterResetting() { 
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.interpreterResetting(); } });
-  }
-  
-  /** In the event thread, notifies listeners that the interpreter is ready. Sometimes called from outside the event
-    * thread. */
-  public void _notifyInterpreterReady(final File wd) {  
-//    System.out.println("Asynchronously notifying interpreterReady event listeners");  // DEBUG
-    Utilities.invokeLater(new Runnable() { public void run() { _notifier.interpreterReady(wd); } });
   }
   
   /** In the event thread, notifies listeners that the interpreter has exited unexpectedly.
@@ -219,7 +212,7 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
 //   return (LLSTM.replaceStackTrace(stackTrace,files));
 //  }  
   
-  /** A compiler can instruct DrJava to include additional elements for the boot
+  /** A compiler can instruct DrScala to include additional elements for the boot
     * class path of the Interactions JVM. */
   public List<File> getCompilerBootClassPath() {
     return _model.getCompilerModel().getActiveCompiler().additionalBootClassPathForInteractions();

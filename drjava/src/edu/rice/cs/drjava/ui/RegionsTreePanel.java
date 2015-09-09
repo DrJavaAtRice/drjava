@@ -831,7 +831,7 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
 //    }
       _changeState.updateButtons();
     }
-    catch(Exception e) { DrJavaErrorHandler.record(e); throw new UnexpectedException(e); }
+    catch(Exception e) { DrScalaErrorHandler.record(e); throw new UnexpectedException(e); }
   }
 
   private void insertNewRegionNode(R r, DefaultMutableTreeNode docNode, int pos) {

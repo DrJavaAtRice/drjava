@@ -98,7 +98,7 @@ public class AutoCompletePopup {
   final protected Set<AutoCompletePopupEntry> _apiEntries;
   
   /** Constructor for an auto-complete popup that uses the MainFrame for information.
-    * @param mf main frame of DrJava */
+    * @param mf main frame of DrScala */
   public AutoCompletePopup(MainFrame mf) { this(mf, null); }
 
   /** Constructor for an auto-complete popup that uses the MainFrame for information.

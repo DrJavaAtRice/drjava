@@ -36,7 +36,7 @@
 
 package edu.rice.cs.util.text;
 
-// This interface is no longer used because documents in DrJava should only be accessed in the event thread.
+// This interface is no longer used because documents in DrScala should only be accessed in the event thread.
 /** Interface with readers/writers locking operations. Can't use names from swing AbstractDocument class because
  *  write locking operations are protected not public.*/
 @Deprecated

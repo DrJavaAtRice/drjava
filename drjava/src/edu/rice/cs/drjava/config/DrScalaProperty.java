@@ -46,7 +46,7 @@ import edu.rice.cs.plt.lambda.Lambda;
 /** Class representing values that can be inserted as variables in external processes.
  *  @version $Id: DrJavaProperty.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
-public abstract class DrJavaProperty implements Cloneable {
+public abstract class DrScalaProperty implements Cloneable {
   /** Whether the invalidation listening mechanism has been deactivated due to an error. */
   public volatile boolean DEACTIVATED_DUE_TO_ERROR = false;
   
@@ -62,20 +62,20 @@ public abstract class DrJavaProperty implements Cloneable {
   protected HashMap<String,String> _attributes = new HashMap<String,String>();
   /** Set of other properties that are listening to this property, i.e.
     * when this property is invalidated, the other properties are too. */
-  protected Set<DrJavaProperty> _listening = new HashSet<DrJavaProperty>();
+  protected Set<DrScalaProperty> _listening = new HashSet<DrScalaProperty>();
   
   /** Create a property. */
-  public DrJavaProperty(String name, String help) {
-    if (name == null) { throw new IllegalArgumentException("DrJavaProperty name is null"); }
+  public DrScalaProperty(String name, String help) {
+    if (name == null) { throw new IllegalArgumentException("DrScalaProperty name is null"); }
     _name = name;
     if (help != null) { _help = help; } 
     resetAttributes();
   }
 
   /** Create a property. */
-  public DrJavaProperty(String name, String value, String help) {
+  public DrScalaProperty(String name, String value, String help) {
     this(name, help);
-    if (value == null) { throw new IllegalArgumentException("DrJavaProperty value is null"); }
+    if (value == null) { throw new IllegalArgumentException("DrJhavaProperty value is null"); }
     if (help != null) { _help = help; } 
     _value = value;
     _isCurrent = true;
@@ -89,7 +89,7 @@ public abstract class DrJavaProperty implements Cloneable {
   public String getCurrent(PropertyMaps pm) {
     if (!isCurrent()) {
       update(pm);
-      if (_value == null) { throw new IllegalArgumentException("DrJavaProperty value is null"); }
+      if (_value == null) { throw new IllegalArgumentException("DrScalaProperty value is null"); }
       _isCurrent = true;
     }
     return _value;
@@ -98,7 +98,7 @@ public abstract class DrJavaProperty implements Cloneable {
   /** Return the value of the property lazily. The value may be stale.
     * @param pm PropertyMaps used for substitution when replacing variables */
   public String getLazy(PropertyMaps pm) {
-    if (_value == null) { throw new IllegalArgumentException("DrJavaProperty value is null"); }
+    if (_value == null) { throw new IllegalArgumentException("DrScalaProperty value is null"); }
     return _value;
   }
   
@@ -155,20 +155,20 @@ public abstract class DrJavaProperty implements Cloneable {
   /** Mark the value as stale and invalidate other properties that are listening. */
   public void invalidate() {
     _invalidate();
-    invalidateOthers(new HashSet<DrJavaProperty>());
+    invalidateOthers(new HashSet<DrScalaProperty>());
   }
   
   /** Just invalidate. */
   protected void _invalidate() { _isCurrent = false; }
   
-  public DrJavaProperty listenToInvalidatesOf(DrJavaProperty other) {
+  public DrScalaProperty listenToInvalidatesOf(DrScalaProperty other) {
     if (other == this) {
       DEACTIVATED_DUE_TO_ERROR = true;
       RuntimeException e = 
         new IllegalArgumentException("Property cannot listen for invalidation of itself. " + 
                                      "Variables for external processes will not function correctly anymore. " + 
-                                     "This is a SERIOUS programming error. Please notify the DrJava team.");
-      edu.rice.cs.drjava.ui.DrJavaErrorHandler.record(e);
+                                     "This is a SERIOUS programming error. Please notify the DrScala team.");
+      edu.rice.cs.drjava.ui.DrScalaErrorHandler.record(e);
       throw e;
     }
     other._listening.add(this);
@@ -179,7 +179,7 @@ public abstract class DrJavaProperty implements Cloneable {
   public boolean equals(Object other) {
     if (other == null || other.getClass() != this.getClass()) return false;
 
-    DrJavaProperty o = (DrJavaProperty) other;
+    DrScalaProperty o = (DrScalaProperty) other;
     return _name.equals(o._name);
 
   }
@@ -189,10 +189,10 @@ public abstract class DrJavaProperty implements Cloneable {
   
   /** Invalidate those properties that are listening to this property.
     * @param alreadyVisited set of properties already visited, to avoid cycles. */
-  protected void invalidateOthers(Set<DrJavaProperty> alreadyVisited) {
+  protected void invalidateOthers(Set<DrScalaProperty> alreadyVisited) {
     if (DEACTIVATED_DUE_TO_ERROR) { return; }          
     if (alreadyVisited.contains(this)) {
-      Iterator<DrJavaProperty> it = alreadyVisited.iterator();
+      Iterator<DrScalaProperty> it = alreadyVisited.iterator();
       StringBuilder sb = new StringBuilder("Invalidating ");
       sb.append(getName());
       sb.append(" after already having invalidated ");
@@ -203,16 +203,16 @@ public abstract class DrJavaProperty implements Cloneable {
         sb.append(it.next().getName());
       }
       sb.append(". Variables for external processes will not function correctly anymore. " + 
-                "This is a SERIOUS programming error. Please notify the DrJava team.");
+                "This is a SERIOUS programming error. Please notify the DrScala team.");
       DEACTIVATED_DUE_TO_ERROR = true;
       RuntimeException e = new InfiniteLoopException(sb.toString());
-      edu.rice.cs.drjava.ui.DrJavaErrorHandler.record(e);
+      edu.rice.cs.drjava.ui.DrScalaErrorHandler.record(e);
       throw e;
     }
     alreadyVisited.add(this);
-    Iterator<DrJavaProperty> it = _listening.iterator();
+    Iterator<DrScalaProperty> it = _listening.iterator();
     while(it.hasNext()) {
-      DrJavaProperty prop = it.next();
+      DrScalaProperty prop = it.next();
       prop._invalidate();
       prop.invalidateOthers(alreadyVisited);
     }

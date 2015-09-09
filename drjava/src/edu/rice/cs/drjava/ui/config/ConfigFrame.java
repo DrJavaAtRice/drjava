@@ -1322,7 +1322,7 @@ public class ConfigFrame extends SwingFrame {
           super.setFileField(file);
         }
         else if (file.exists()) { // invalid JUnit/ConcJUnit file, but exists
-          new edu.rice.cs.drjava.ui.DrJavaScrollableDialog(_parent, "Invalid JUnit/ConcJUnit File", "Stack trace:",
+          new edu.rice.cs.drjava.ui.DrScalaScrollableDialog(_parent, "Invalid JUnit/ConcJUnit File", "Stack trace:",
                                                            edu.rice.cs.util.StringOps.getStackTrace(), 600, 400, false).show();
           JOptionPane.showMessageDialog(_parent, "The file '"+ file.getName() + "'\nis not a valid JUnit/ConcJUnit file.",
                                         "Invalid JUnit/ConcJUnit File", JOptionPane.ERROR_MESSAGE);
@@ -1352,7 +1352,7 @@ public class ConfigFrame extends SwingFrame {
             return true;
           }
           else {
-            new edu.rice.cs.drjava.ui.DrJavaScrollableDialog(_parent, "Invalid JUnit/ConcJUnit File", "newFile is NULL_FILE? "+(FileOps.NULL_FILE.equals(newFile)),
+            new edu.rice.cs.drjava.ui.DrScalaScrollableDialog(_parent, "Invalid JUnit/ConcJUnit File", "newFile is NULL_FILE? "+(FileOps.NULL_FILE.equals(newFile)),
                                                              edu.rice.cs.util.StringOps.getStackTrace(), 600, 400, false).show();
             JOptionPane.showMessageDialog(_parent, "The file '"+ newFile.getName() + "'\nis not a valid JUnit/ConcJUnit file.",
                                           "Invalid JUnit/ConcJUnit File", JOptionPane.ERROR_MESSAGE);

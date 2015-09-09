@@ -124,10 +124,10 @@ public class ReverseHighlighter extends DefaultHighlighter {
     
     int insertPos = _highlights.size();
 
-    if (p instanceof DrJavaHighlightPainter) {
+    if (p instanceof DrScalaHighlightPainter) {
       while (insertPos > 0) {
         HighlightInfo hli = _highlights.get( insertPos-1 );
-        if (hli.getPainter() instanceof DrJavaHighlightPainter)
+        if (hli.getPainter() instanceof DrScalaHighlightPainter)
           --insertPos;
         else break;
       }
@@ -586,11 +586,11 @@ public class ReverseHighlighter extends DefaultHighlighter {
   
   
   /** This class is a wrapper for the DefaultHighlightPainter that allows us to tell whether a highlight was
-    * requested by DrJava or by Swing (as in selected text).
+    * requested by DrScala or by Swing (as in selected text).
     */
-  public static class DrJavaHighlightPainter extends DefaultHighlightPainter {
+  public static class DrScalaHighlightPainter extends DefaultHighlightPainter {
     
-    public DrJavaHighlightPainter(Color c) { super(c); }
+    public DrScalaHighlightPainter(Color c) { super(c); }
   }
   
   

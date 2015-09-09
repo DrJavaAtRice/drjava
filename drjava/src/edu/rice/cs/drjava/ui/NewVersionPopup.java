@@ -392,13 +392,13 @@ public class NewVersionPopup extends JDialog {
                 LOG.log("Exception in shutdown hook: "+e);
                 tempClassFile.delete();
                 JOptionPane.showMessageDialog(null, 
-                                              "A new version of DrJava was downloaded. However,\n"+
+                                              "A new version of DrScala was downloaded. However,\n"+
                                               "it could not be started automatically.\n\n"+
                                               "The new copy is now installed at:\n"+
                                               finalDestFile.getAbsolutePath()+"\n\n"+
                                               "The old copy is still installed at:\n"+
                                               targetFile.getAbsolutePath()+"\n\n"+
-                                              "Please start DrJava manually.",
+                                              "Please start DrScala manually.",
                                               "Error Updating DrJava", JOptionPane.ERROR_MESSAGE);
                 // NOTE: it would be nice if this error message would keep the application alive until the user closes it
               }
@@ -411,8 +411,8 @@ public class NewVersionPopup extends JDialog {
           Runtime.getRuntime().removeShutdownHook(restart);
           tempClassFile.delete();
           JOptionPane.showMessageDialog(_mainFrame, 
-                                        "A new version of DrJava was downloaded. However, you chose\n"+
-                                        "not to restart DrJava, so the old version was not automatically\n"+
+                                        "A new version of DrScala was downloaded. However, you chose\n"+
+                                        "not to restart DrScala, so the old version was not automatically\n"+
                                         "replaced.\n\n"+
                                         "The new copy is now installed at:\n"+
                                         finalDestFile.getAbsolutePath()+"\n\n"+
@@ -541,7 +541,7 @@ public class NewVersionPopup extends JDialog {
         else {
           if (availableRef != null) { availableRef.set(false); }
           return new String[] {
-            "No new version of DrJava has been found.", "You are using the newest version that matches your criterion."};
+            "No new version of DrScala has been found.", "You are using the newest version that matches your criterion."};
         }
       default:
         _updateButton.setEnabled(false);

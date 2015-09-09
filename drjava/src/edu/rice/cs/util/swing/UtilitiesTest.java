@@ -45,7 +45,7 @@ import java.awt.datatransfer.*;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.StringOps;
 
-import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
+import edu.rice.cs.drjava.ui.DrScalaErrorHandler;
 
 import junit.framework.*;
 

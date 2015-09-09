@@ -34,68 +34,25 @@
  * 
  * END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model.print;
+package edu.rice.cs.drjava.config;
 
-import edu.rice.cs.drjava.DrScalaTestCase;
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.awt.print.PageFormat;
-import java.awt.print.Printable;
-
-/**
- * Test functions of DrJavaBook
+/** Class representing actions that are executed as side effect of command line
+  * evaluation for variables in external processes.
  *
+ *  @version $Id: DrJavaActionProperty.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
-public final class DrJavaBookTest extends DrScalaTestCase {
-  /** The DrJavaBook instance we will be testing. */
-  private DrJavaBook book = null;
+public abstract class DrScalaActionProperty extends DrScalaProperty {  
+  /** Create a property. */
+  public DrScalaActionProperty(String name, String help) { super(name,help); }
+
+  /** Create a property. */
+  public DrScalaActionProperty(String name, String value, String help) { super(name, value, help); }
   
-  /** Standard constructor.
-    * @param name name of this DrJavaBook test
-    */
-  public DrJavaBookTest(String name) { super(name); }
-  
-  /** Creates a test suite for JUnit to run.
-    * @return a test suite based on the methods in this class
-    */
-  public static Test suite() { return  new TestSuite(DrJavaBookTest.class); }
-  
-  public void setUp() throws Exception {
-    super.setUp();
-    book = new DrJavaBook("import java.io.*;", "simple_file.java", new PageFormat());
+  /** Return the value of the property. If it is not current, update first.
+    * @param pm PropertyMaps used for substitution when replacing variables */
+  public String getCurrent(PropertyMaps pm) {
+    invalidate();
+    _value = "";
+    return super.getCurrent(pm);
   }
-  
-  public void tearDown() throws Exception {
-    book = null;
-    super.tearDown();
-  }
-  
-  public void testGetNumberOfPages() {
-    assertEquals("testGetNumberOfPages:", Integer.valueOf(1), Integer.valueOf(book.getNumberOfPages()));
-  }
-  
-  public void testGetPageFormat() {
-    assertEquals("testGetPageFormat:", PageFormat.PORTRAIT, book.getPageFormat(0).getOrientation());
-  }
-  
-  public void testGetPrintable() { 
-    Graphics g = (new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB)).getGraphics();
-    Printable p = book.getPrintable(0);
-    try { 
-      assertEquals("testGetPrintable:", Integer.valueOf(Printable.PAGE_EXISTS), 
-                   Integer.valueOf(p.print(g, new PageFormat(), 0)));
-    }
-    catch(Exception e) { fail("testGetPrintable: Unexpected exception!\n" + e); }
-    
-    try {
-      p = book.getPrintable(99);
-      fail("previous operation should throw an IndexOutOfBoundsException");
-    }
-    catch(IndexOutOfBoundsException e) {
-      /* test succeeded */
-    }
-  }
-}
+} 

@@ -46,15 +46,15 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.Log;
 
-/** Test case class for all DrJava test cases. DrJava test cases should extend this class, potentially override setUp()
+/** Test case class for all DrScala test cases. DrScala test cases should extend this class, potentially override setUp()
   * and tearDown(), but make sure to invoke super.setUp() and super.tearDown() appropriately. That ensures that the 
   * system is correctly initialized for every test.
   */
 public class DrScalaTestCase extends TestCase {
-  /** Create a new DrJava test case. */
+  /** Create a new DrScala test case. */
   public DrScalaTestCase() { super(); }
   
-  /** Create a new DrJava test case.
+  /** Create a new DrScala test case.
     * @param name name of the test case
     */
   public DrScalaTestCase(String name) { super(name); }
@@ -67,11 +67,11 @@ public class DrScalaTestCase extends TestCase {
   protected void setUp() throws Exception {
     super.setUp();  // declared to throw Exception, forcing throws clause on preceding line
     Utilities.TEST_MODE = true;
-    final String newName = System.getProperty("drjava.test.config");
+    final String newName = System.getProperty("drscala.test.config");
     assert newName != null;
 //    _log.log("newName = " + newName);
 //    if (newName != null) {
-//      Utilities.show("Setting '" + newName + "' as DrJava configuration file");
+//      Utilities.show("Setting '" + newName + "' as DrScala configuration file");
     Utilities.invokeAndWait(new Runnable() {
       public void run() {
         DrScala.setPropertiesFile(newName);  // spawns change updates which should run in event thread

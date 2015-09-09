@@ -79,7 +79,7 @@
 //  protected void _createRequests() throws DebugException {
 //    boolean stepJava = DrScala.getConfig().getSetting(DEBUG_STEP_JAVA).booleanValue();
 //    boolean stepInterpreter = DrScala.getConfig().getSetting(DEBUG_STEP_INTERPRETER).booleanValue();
-//    boolean stepDrJava = DrScala.getConfig().getSetting(DEBUG_STEP_DRSCALA).booleanValue();
+//    boolean stepDrScala = DrScala.getConfig().getSetting(DEBUG_STEP_DRSCALA).booleanValue();
 //
 //    StepRequest request = _manager.getEventRequestManager().
 //      createStepRequest(_thread, _size, _depth);

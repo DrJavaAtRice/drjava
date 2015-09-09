@@ -108,7 +108,7 @@ public final class ProjectMenuTest extends DrScalaTestCase {
 //    System.err.println("test1.java and test1.java created");
           
           _projFileText =
-            ";; DrJava project file.  Written with build: 20040623-1933\n" +
+            ";; DrScala project file.  Written with build: 20040623-1933\n" +
             "(source ;; comment\n" +
             "   (file (name \"src/test1.scala\")(select 32 32))" +
             "   (file (name \"src/test2.scala\")(select 32 32)))";

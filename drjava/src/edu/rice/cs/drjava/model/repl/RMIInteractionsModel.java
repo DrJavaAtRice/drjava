@@ -126,7 +126,10 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
       public void run() {
         _document.insertBeforeLastPrompt(" Resetting Interactions ...\n", InteractionsDocument.ERROR_STYLE);
         boolean success = _jvm.interpret(":_$$$$$__$$$$$$_-reset");
-        if (success) _document.reset(generateBanner(wd));
+        if (success) {
+          _document.reset(generateBanner(wd));
+          _notifyInterpreterReady(wd);
+        }  
         else _jvm.restartInterpreterJVM(force);
       }
     });
@@ -188,6 +191,13 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
     *        an interactionEnded event will be fired)
     */
   protected abstract void _notifyInterpreterChanged(boolean inProgress);
+  
+   /** In the event thread, notifies listeners that the interpreter is ready. Sometimes called from outside the event
+    * thread. */
+  public void _notifyInterpreterReady(final File wd) {   /* TODO  rename this method */
+//    System.out.println("Asynchronously notifying interpreterReady event listeners");  // DEBUG
+    Utilities.invokeLater(new Runnable() { public void run() { _notifier.interpreterReady(wd); } });
+  }
 
   /** Sets whether or not the interpreter should enforce access to all members. */
   public void setEnforceAllAccess(boolean enforce) { _jvm.setEnforceAllAccess(enforce); }

@@ -353,7 +353,7 @@
 //    _debugger.addListener(debugListener);
 //    
 //    // Start up
-//    OpenDefinitionsDocument doc = _startupDebugger("DrJavaDebugClass.java",
+//    OpenDefinitionsDocument doc = _startupDebugger("DrScalaDebugClass.java",
 //                                                   DEBUG_CLASS);
 //    
 //    // Add breakpoint before class is loaded
@@ -441,7 +441,7 @@
 //    _debugger.addListener(debugListener);
 //    
 //    // Start up
-//    OpenDefinitionsDocument doc = _startupDebugger("DrJavaDebugClass.java",
+//    OpenDefinitionsDocument doc = _startupDebugger("DrScalaDebugClass.java",
 //                                                   DEBUG_CLASS);
 //    
 //    // Add breakpoint in DrJavaDebugClass before class is loaded
@@ -501,7 +501,7 @@
 //    _debugger.addListener(debugListener);
 //    
 //    // Start up
-//    OpenDefinitionsDocument doc = _startupDebugger("DrJavaDebugClass.java",
+//    OpenDefinitionsDocument doc = _startupDebugger("DrScalaDebugClass.java",
 //                                                   DEBUG_CLASS);
 //    
 //    // Add a breakpoint
@@ -621,7 +621,7 @@
 //    _debugger.addListener(debugListener);
 //    
 //    // Start up
-//    OpenDefinitionsDocument doc = _startupDebugger("DrJavaDebugClass.java",
+//    OpenDefinitionsDocument doc = _startupDebugger("DrScalaDebugClass.java",
 //                                                   DEBUG_CLASS);
 //    
 //    // Set breakpoint
@@ -694,7 +694,7 @@
 //    // Create the file in an "a" sub-directory
 //    File aDir = new File(_tempDir, "a");
 //    aDir.mkdir();
-//    File file = new File(aDir, "DrJavaDebugClassWithPackage.java");
+//    File file = new File(aDir, "DrScalaDebugClassWithPackage.java");
 //    
 //    // Start up
 //    OpenDefinitionsDocument doc = _startupDebugger(file, DEBUG_CLASS_WITH_PACKAGE);

@@ -40,7 +40,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
-/** A splash screen window to be displayed as DrJava is first starting up.
+/** A splash screen window to be displayed as DrScala is first starting up.
   * @version $Id: SplashScreen.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class SplashScreen extends JWindow {

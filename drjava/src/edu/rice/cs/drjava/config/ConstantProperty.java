@@ -45,7 +45,7 @@ public class ConstantProperty extends EagerProperty {
   /** Create a constant property. */
   public ConstantProperty(String name, String value, String help) {
     super(name, help);
-    if (value == null) { throw new IllegalArgumentException("DrJavaProperty value is null"); }
+    if (value == null) { throw new IllegalArgumentException("DrScalaProperty value is null"); }
     _value = value;
     _isCurrent = true;
     resetAttributes();
@@ -68,6 +68,6 @@ public class ConstantProperty extends EagerProperty {
   /** Mark the value as stale. */
   public void invalidate() {
     // nothing to do, but tell those who are listening
-    invalidateOthers(new HashSet<DrJavaProperty>());
+    invalidateOthers(new HashSet<DrScalaProperty>());
   }
 } 

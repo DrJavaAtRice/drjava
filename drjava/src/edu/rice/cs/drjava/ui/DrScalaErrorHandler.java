@@ -52,13 +52,13 @@ import edu.rice.cs.util.Log;
  *  This does not automatically update the "DrScala Errors" window when new errors occur. In the case of errors,
  *  we want to minimize the effects on the GUI. If we want to see an updated dialog, we can click on the
  *  "DrScalaErrors" button again.
- *  @version $Id: DrJavaErrorHandler.java 5594 2012-06-21 11:23:40Z rcartwright $
+ *  @version $Id: DrScalaErrorHandler.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
-public class DrJavaErrorHandler implements Thread.UncaughtExceptionHandler {
+public class DrScalaErrorHandler implements Thread.UncaughtExceptionHandler {
   
-  public static final DrJavaErrorHandler INSTANCE = new DrJavaErrorHandler();
+  public static final DrScalaErrorHandler INSTANCE = new DrScalaErrorHandler();
   
-  private DrJavaErrorHandler() { }
+  private DrScalaErrorHandler() { }
   
   /** Handles an uncaught exception. This gets called automatically by AWT. */
   public void uncaughtException(Thread t, Throwable thrown) {
@@ -84,7 +84,7 @@ public class DrJavaErrorHandler implements Thread.UncaughtExceptionHandler {
   public static Throwable getError(int index) {
     
     if (index >= 0 && index < _errors.size()) return _errors.get(index);
-    else return new UnexpectedException("Error in DrJavaErrorHandler");
+    else return new UnexpectedException("Error in DrScalaErrorHandler");
   }
   
   /** Clears the list of errors. */
@@ -96,9 +96,9 @@ public class DrJavaErrorHandler implements Thread.UncaughtExceptionHandler {
       public void run() {
         try { // put the entire handler in a try-block so we don't have an exception in here call the exception handler again (infinite loop)
           if (thrown instanceof OutOfMemoryError) {
-            // if this is an OutOfMemoryError inside DrJava, try to suggest to increase Main JVM's max heap
+            // if this is an OutOfMemoryError inside DrScala, try to suggest to increase Main JVM's max heap
             Runtime.getRuntime().gc();
-            JFrame f = DrJavaErrorWindow.getFrame();
+            JFrame f = DrScalaErrorWindow.getFrame();
             if (f instanceof MainFrame) {
               MainFrame mf = (MainFrame)f;
               mf.askToIncreaseMasterMaxHeap();
@@ -106,7 +106,7 @@ public class DrJavaErrorHandler implements Thread.UncaughtExceptionHandler {
           }
           else if (thrown.toString().startsWith("com.sun.jdi.VMOutOfMemoryException")) {
             // if this is an VMOutOfMemoryException, suggest to increase Interaction JVM's max heap
-            JFrame f = DrJavaErrorWindow.getFrame();
+            JFrame f = DrScalaErrorWindow.getFrame();
             if (f instanceof MainFrame) {
               MainFrame mf = (MainFrame)f;
               mf.askToIncreaseSlaveMaxHeap();
@@ -122,7 +122,7 @@ public class DrJavaErrorHandler implements Thread.UncaughtExceptionHandler {
           }
           if (_errors.size() == 1 && ! Utilities.TEST_MODE &&
               DrScala.getConfig().getSetting(OptionConstants.DIALOG_DRSCALA_ERROR_POPUP_ENABLED).booleanValue()) {
-            DrJavaErrorPopup popup = new DrJavaErrorPopup(DrJavaErrorWindow.getFrame(), thrown);
+            DrScalaErrorPopup popup = new DrScalaErrorPopup(DrScalaErrorWindow.getFrame(), thrown);
             Utilities.setPopupLoc(popup, popup.getOwner());
             popup.setVisible(true);
           }

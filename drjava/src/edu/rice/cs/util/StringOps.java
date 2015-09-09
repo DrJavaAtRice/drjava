@@ -804,7 +804,7 @@ public abstract class StringOps {
    * @param getter lambda from a DrJavaProperty to String
    * @return string with variables replaced by values
    */
-  public static String replaceVariables(String str, final PropertyMaps props, final Lambda2<DrJavaProperty,PropertyMaps,String> getter) {
+  public static String replaceVariables(String str, final PropertyMaps props, final Lambda2<DrScalaProperty,PropertyMaps,String> getter) {
     BalancingStreamTokenizer tok = new BalancingStreamTokenizer(new StringReader(str), '$');
     tok.wordRange(0,255);
     tok.addQuotes("${", "}");
@@ -839,7 +839,7 @@ public abstract class StringOps {
           }
           // LOG.log("\tKey      = '" + key + "'");
           // LOG.log("\tAttrList = '" + attrList + "'");
-          DrJavaProperty p = props.getProperty(key);
+          DrScalaProperty p = props.getProperty(key);
           if (p != null) {
             // found property name
             p.resetAttributes();

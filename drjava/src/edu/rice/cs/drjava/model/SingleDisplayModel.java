@@ -39,35 +39,32 @@ package edu.rice.cs.drjava.model;
 import java.io.File;
 import java.util.List;
 
-/**
- * A GlobalModel that enforces invariants associated with having
- * one active document at a time.
- *
- * Invariants:
- * <OL>
- * <LI>{@link #getOpenDefinitionsDocuments} will always return an array of
- *     at least size 1.
- * </LI>
- * <LI>(follows from previous) If there is ever no document in the model,
- *     a new one will be created.
- * </LI>
- * <LI>There is always exactly one active document, which can be get/set
- *     via {@link #getActiveDocument} and {@link #setActiveDocument}.
- * </LI>
- * </OL>
- *
- * Other functions added by this class:
- * <OL>
- * <LI>When calling {@link #openFile}, if there is currently only one open
- *     document, and it is untitled and unchanged, it will be closed after the
- *     new document is opened. This means that, in one atomic transaction, the
- *     model goes from having one totally empty document open to having one
- *     document (the requested one) open.
- * </LI>
- * </OL>
- *
- * @version $Id: SingleDisplayModel.java 5594 2012-06-21 11:23:40Z rcartwright $
- */
+/** A GlobalModel that enforces invariants associated with having Aone active document at a time. 
+  * Invariants:
+  * <OL>
+  * <LI>{@link #getOpenDefinitionsDocuments} will always return an array of
+  *     at least size 1.
+  * </LI>
+  * <LI>(follows from previous) If there is ever no document in the model,
+  *     a new one will be created.
+  * </LI>
+  * <LI>There is always exactly one active document, which can be get/set
+  *     via {@link #getActiveDocument} and {@link #setActiveDocument}.
+  * </LI>
+  * </OL>
+  *
+  * Other functions added by this class:
+  * <OL>
+  * <LI>When calling {@link #openFile}, if there is currently only one open
+  *     document, and it is untitled and unchanged, it will be closed after the
+  *     new document is opened. This means that, in one atomic transaction, the
+  *     model goes from having one totally empty document open to having one
+  *     document (the requested one) open.
+  * </LI>
+  * </OL>
+  *
+  * @version $Id: SingleDisplayModel.java 5594 2012-06-21 11:23:40Z rcartwright $
+  */
 public interface SingleDisplayModel extends GlobalModel {
   /** @return the currently active document. */
   public OpenDefinitionsDocument getActiveDocument();

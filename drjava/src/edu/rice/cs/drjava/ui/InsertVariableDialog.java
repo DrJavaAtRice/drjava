@@ -38,7 +38,7 @@ package edu.rice.cs.drjava.ui;
 
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.PropertyMaps;
-import edu.rice.cs.drjava.config.DrJavaProperty;
+import edu.rice.cs.drjava.config.DrScalaProperty;
 import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.plt.lambda.LambdaUtil;
 import edu.rice.cs.plt.concurrent.CompletionMonitor;
@@ -87,7 +87,7 @@ public class InsertVariableDialog extends SwingFrame implements OptionConstants 
   private MainFrame _mainFrame;
   
   /** Selected entry, or null if canceled. */
-  private Pair<String,DrJavaProperty> _selected = null;
+  private Pair<String,DrScalaProperty> _selected = null;
   
   /** Completion monitor to tell the calling dialog that we're done. */
   private CompletionMonitor _cm;
@@ -141,11 +141,11 @@ public class InsertVariableDialog extends SwingFrame implements OptionConstants 
       public void stateChanged(ChangeEvent e) {
         if (_tabbedPane.getSelectedIndex() < 0) { return; }
         String category = _tabbedPane.getTitleAt(_tabbedPane.getSelectedIndex());
-        Map<String, DrJavaProperty> properties = PropertyMaps.TEMPLATE.getProperties(category);
+        Map<String, DrScalaProperty> properties = PropertyMaps.TEMPLATE.getProperties(category);
         int row = _varTable.get(category).getSelectedRow();
         if (row < 0) { return; }
         String key = _varTableModel.get(category).getValueAt(row,0).toString();
-        DrJavaProperty value = properties.get(key);
+        DrScalaProperty value = properties.get(key);
         _varValueField.setText(value.toString());
         _helpPane.setText(value.getHelp());
         _helpPane.setCaretPosition(0);
@@ -199,7 +199,7 @@ public class InsertVariableDialog extends SwingFrame implements OptionConstants 
   /** Create a scroll pane for the specified category with the properties provided in the map.
     * @param category category name
     * @param props map from property names to actual properties in this category */
-  protected JScrollPane createPane(final String category, final Map<String, DrJavaProperty> props) {
+  protected JScrollPane createPane(final String category, final Map<String, DrScalaProperty> props) {
     _varTableModel.put(category,new DefaultTableModel(0,1) {
       public String getColumnName(int column) {
         switch(column) {
@@ -231,7 +231,7 @@ public class InsertVariableDialog extends SwingFrame implements OptionConstants 
         int row = _varTable.get(category).getSelectedRow();
         if (row < 0) { return; }
         String key = _varTableModel.get(category).getValueAt(row,0).toString();
-        DrJavaProperty value = PropertyMaps.TEMPLATE.getProperty(category,key);
+        DrScalaProperty value = PropertyMaps.TEMPLATE.getProperty(category,key);
         _selected = Pair.make(key, value);
         _varValueField.setText(value.getLazy(PropertyMaps.TEMPLATE));
         _helpPane.setText(value.getHelp());
@@ -241,7 +241,7 @@ public class InsertVariableDialog extends SwingFrame implements OptionConstants 
     _varTable.get(category).setSelectionModel(lsm);
     
     TreeSet<String> sorted = new TreeSet<String>();
-    for(DrJavaProperty p: PropertyMaps.TEMPLATE.getProperties(category).values()) {
+    for(DrScalaProperty p: PropertyMaps.TEMPLATE.getProperties(category).values()) {
       sorted.add(p.getName());
     }
     
@@ -271,7 +271,7 @@ public class InsertVariableDialog extends SwingFrame implements OptionConstants 
   
   /** Update the properties in all the panes. */
   protected void updatePanes() {
-    Pair<String,DrJavaProperty> sel = getSelected();
+    Pair<String,DrScalaProperty> sel = getSelected();
     String selCategory = null;
     if (sel != null) {
       selCategory = _tabbedPane.getTitleAt(_tabbedPane.getSelectedIndex());
@@ -309,12 +309,12 @@ public class InsertVariableDialog extends SwingFrame implements OptionConstants 
     if (sel == null) {
       _tabbedPane.setSelectedIndex(0);
       String category = _tabbedPane.getTitleAt(_tabbedPane.getSelectedIndex());
-      Map<String, DrJavaProperty> properties = PropertyMaps.TEMPLATE.getProperties(category);
+      Map<String, DrScalaProperty> properties = PropertyMaps.TEMPLATE.getProperties(category);
       _varTable.get(category).getSelectionModel().setSelectionInterval(0,0);
       int row = _varTable.get(category).getSelectedRow();
       if (row >= 0) {
         String key = _varTableModel.get(category).getValueAt(row,0).toString();
-        DrJavaProperty value = properties.get(key);
+        DrScalaProperty value = properties.get(key);
         _varValueField.setText(value.toString());
         _helpPane.setText(value.getHelp());
         _helpPane.setCaretPosition(0);
@@ -324,7 +324,7 @@ public class InsertVariableDialog extends SwingFrame implements OptionConstants 
   }
 
   /** Return a pair consisting of the name of the property and the property itself. */
-  public Pair<String,DrJavaProperty> getSelected() { return _selected; }
+  public Pair<String,DrScalaProperty> getSelected() { return _selected; }
   
   /** Runnable1 that calls _cancel. */
   protected final Runnable1<WindowEvent> CANCEL = new Runnable1<WindowEvent>() {

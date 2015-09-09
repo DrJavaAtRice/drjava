@@ -45,7 +45,7 @@ import java.io.*;
 /** Property that evaluates to a file and that can be inserted as variables in external processes.
   * @version $Id: FileProperty.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
-public class FileProperty extends DrJavaProperty {
+public class FileProperty extends DrScalaProperty {
   protected Thunk<File> _getFile;
   /** Create an eager file property. */
   public FileProperty(String name, Thunk<File> getFile, String help) {
@@ -72,7 +72,7 @@ public class FileProperty extends DrJavaProperty {
   /** Mark the value as stale. */
   public void invalidate() {
     // nothing to do, but tell those who are listening
-    invalidateOthers(new HashSet<DrJavaProperty>());
+    invalidateOthers(new HashSet<DrScalaProperty>());
   }
   
   /** Update the value of the property.

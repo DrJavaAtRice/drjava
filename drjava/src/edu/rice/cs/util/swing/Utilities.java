@@ -102,7 +102,7 @@ public class Utilities {
     */
   public static void show(final String msg) { 
     Utilities.invokeAndWait(new Runnable() { public void run() {
-      new edu.rice.cs.drjava.ui.DrJavaScrollableDialog(null,
+      new edu.rice.cs.drjava.ui.DrScalaScrollableDialog(null,
                                                        "Debug Message",
                                                        "Debug Message from Utilities.show():",
                                                        msg,
@@ -121,7 +121,7 @@ public class Utilities {
     if (TEST_MODE) System.out.println(title + ": " + msg); else {
       //Utilities.invokeAndWait(new Runnable() { public void run() { JOptionPane.showMessageDialog(null, msg); } } );
       Utilities.invokeAndWait(new Runnable() { public void run() {
-        new edu.rice.cs.drjava.ui.DrJavaScrollableDialog(null,
+        new edu.rice.cs.drjava.ui.DrScalaScrollableDialog(null,
                                                          title,
                                                          "Message:",
                                                          msg,
@@ -132,7 +132,7 @@ public class Utilities {
   
   public static void showStackTrace(final Throwable t) {
     Utilities.invokeAndWait(new Runnable() { public void run() { 
-      new edu.rice.cs.drjava.ui.DrJavaScrollableDialog(null,
+      new edu.rice.cs.drjava.ui.DrScalaScrollableDialog(null,
                                                        "Stack Trace",
                                                        "Stack Trace:",
                                                        StringOps.getStackTrace(t),
@@ -181,7 +181,7 @@ public class Utilities {
   /** Determines the location of the popup using a simple, uniform protocol.  If the popup has an owner, the popup is 
     * centered over the owner.  If the popup has no owner(owner == null), the popup is centered over the first monitor.
     * In either case, the popup is moved and scaled if any part of it is not on the screen.  This method should be 
-    * called for all popups to maintain uniformity in the DrJava UI.
+    * called for all popups to maintain uniformity in the DrScala UI.
     * @param popup the popup window
     * @param owner the parent component for the popup
     */

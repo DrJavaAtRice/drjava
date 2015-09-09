@@ -59,9 +59,9 @@ public final class ConfigFileTest extends DrScalaTestCase {
   /** Constructor. */
   public ConfigFileTest(String name) { super(name); }
   
-  /** Creates a custom properties file, tells DrJava to use it, and checks that it is being used. */
+  /** Creates a custom properties file, tells DrScala to use it, and checks that it is being used. */
   public void testCustomConfigFile() throws IOException {
-    final File propsFile = IOUtil.createAndMarkTempFile("DrJavaProps", ".txt");
+    final File propsFile = IOUtil.createAndMarkTempFile("DrScalaProps", ".txt");
     IOUtil.writeStringToFile(propsFile, CUSTOM_PROPS);
     Utilities.invokeAndWait(new Runnable() { 
       public void run() { 

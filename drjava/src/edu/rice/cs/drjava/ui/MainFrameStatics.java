@@ -37,7 +37,7 @@
 package edu.rice.cs.drjava.ui;
 
 import edu.rice.cs.util.swing.Utilities;
-import edu.rice.cs.drjava.model.DrJavaFileUtils;
+import edu.rice.cs.drjava.model.DrScalaFileUtils;
 import edu.rice.cs.drjava.project.MalformedProjectFileException;
 
 /* Debugger deactivated in DrScala */
@@ -55,7 +55,7 @@ import java.net.URL;
 
 import static edu.rice.cs.plt.object.ObjectUtil.hash;
 
-/** Utilities for DrJava's main window. */
+/** Utilities for DrScala's main window. */
 public class MainFrameStatics {
   
   /** Propose to the user to change the extension of the file.
@@ -81,7 +81,7 @@ public class MainFrameStatics {
     }
     if (rc == 0) {
       try {
-        String fileName = DrJavaFileUtils.removeExtension(input.getCanonicalPath()) + newExt;
+        String fileName = DrScalaFileUtils.removeExtension(input.getCanonicalPath()) + newExt;
         File file = new File(fileName);
         return file;
       }
@@ -109,7 +109,7 @@ public class MainFrameStatics {
   }
   
   public static void showProjectFileParseError(Component parent, MalformedProjectFileException mpfe) {
-    showError(parent, "Invalid Project File", "DrJava could not read the given project file.");
+    showError(parent, "Invalid Project File", "DrScala could not read the given project file.");
   }
   
   public static void showFileNotFoundError(Component parent, FileNotFoundException fnf) {

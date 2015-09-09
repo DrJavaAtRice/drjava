@@ -149,7 +149,7 @@ public abstract class AbstractMasterJVM implements MasterRemote {
     transition(State.FRESH, State.STARTING);
 
     // update jvmBuilder with any special properties
-    Map<String, String> props = ConcurrentUtil.getPropertiesAsMap("plt.", "drjava.", "edu.rice.cs.");
+    Map<String, String> props = ConcurrentUtil.getPropertiesAsMap("plt.", "drscala.", "edu.rice.cs.");
     if (!props.containsKey("plt.log.working.dir") && // Set plt.log.working.dir, in case the working dir changes
         (props.containsKey("plt.debug.log") || props.containsKey("plt.error.log") || 
             props.containsKey("plt.log.factory"))) {

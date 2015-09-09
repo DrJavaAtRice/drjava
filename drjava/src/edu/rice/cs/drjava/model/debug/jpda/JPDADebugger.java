@@ -164,12 +164,12 @@
 //    };
 //  }
 //  
-//  /** Logs any unexpected behavior that occurs (but which should not cause DrJava to abort).
+//  /** Logs any unexpected behavior that occurs (but which should not cause DrScala to abort).
 //    * @param message message to print to the log
 //    */
 //  private void _log(String message) { _log.log(message); }
 //  
-//  /** Logs any unexpected behavior that occurs (but which should not cause DrJava to abort).
+//  /** Logs any unexpected behavior that occurs (but which should not cause DrScala to abort).
 //    * @param message message to print to the log
 //    * @param t Exception or Error being logged
 //    */
@@ -715,7 +715,7 @@
 //  /** Returns a Vector of DebugStackData for the current suspended thread.
 //   * @throws DebugException if the current thread is running or there
 //   * are no suspended threads
-//   * TO DO: Config option for hiding DrJava subset of stack trace
+//   * TO DO: Config option for hiding DrScala subset of stack trace
 //   */
 //  public ArrayList<DebugStackData> getCurrentStackFrameData() throws DebugException {
 //    assert EventQueue.isDispatchThread();
@@ -1220,7 +1220,7 @@
 //    _log.log(this + "is Stepping " + thread.toString());
 //    
 //    // Copy the variables back into the thread from the appropriate interpreter.
-//    // We do this before stepping since DrJava will hang if you try to copy back
+//    // We do this before stepping since DrScala will hang if you try to copy back
 //    // variables after creating the step request.
 //    _runningThread = thread;
 //    _copyVariablesFromInterpreter();

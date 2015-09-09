@@ -49,7 +49,7 @@ import edu.rice.cs.drjava.config.ResourceBundleConfiguration;
 import edu.rice.cs.drjava.config.FileConfiguration;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.platform.PlatformFactory;
-import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
+import edu.rice.cs.drjava.ui.DrScalaErrorHandler;
 import edu.rice.cs.plt.concurrent.DelayedInterrupter;
 import edu.rice.cs.plt.concurrent.JVMBuilder;
 import edu.rice.cs.plt.reflect.JavaVersion;
@@ -57,15 +57,13 @@ import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.FileOps;
-import edu.rice.cs.drjava.model.DrJavaFileUtils;
+import edu.rice.cs.drjava.model.DrScalaFileUtils;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
-/** Startup class for DrScala consisting entirely of static members.  The main method reads the .drjava file (creating 
-  * one if none exists) to get the critical information required to start the main JVM for DrScala: 
-  * (i) the location of tools.jar in the Java JDK installed on this machine (so DrScala can invoke the javac compiler
-  *     stored in tools.jar)
-  * (ii) the argument string for invoking the main JVM (notably -X options used to determine maximum heap size, etc.)
+/** Startup class for DrScala consisting entirely of static members.  The main method reads the .drscala file (creating 
+  * one if none exists) to get the critical information required to start the main JVM for DrScala, namely the argument
+  * string for invoking the main JVM (notably -X options used to determine maximum heap size, etc.)
   * 
   * Here is a summary of the launch mechanism of DrScala:
   * 
@@ -74,20 +72,20 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
   * 2. DrScala.handleCommandLineArgs scans the command line arguments.
   * 2.1. This involves determining if the -new parameter forces a new instance.
   * 
-  * 3. DrScala.configureAndLoadDrJavaRoot determines if remote control should be used:
+  * 3. DrScala.configureAndLoadDrScalaRoot determines if remote control should be used:
   * 3.1. If -new doesn't force a new instance
   * 3.2. and REMOTE_CONTROL_ENABLED
   * 3.3. and files have been specified on the command line
   * 3.4. and the remote control server can be contacted
   * 3.5. then DrScala will open the files in an existing instance and quit
   * 
-  * 4. DrScala.configureAndLoadDrJavaRoot determines if a restart is necessary:
+  * 4. DrScala.configureAndLoadDrScalaRoot determines if a restart is necessary:
   * 4.1. If MASTER_JVM_XMX is set
   * 4.2. or MASTER_JVM_ARGS is set
   * 4.3. then DrScala will attempt to restart itself with the specified JVM arguments
   * 4.4. Files that have arrived via Mac OS X's handleOpenFile event up to this point
   *      are included in the main arguments for the restarted DrScala.
-  * 4.5. If that fails, DrScala will ask if the user wants to delete the settings in the .drjava file
+  * 4.5. If that fails, DrScala will ask if the user wants to delete the settings in the .drscala file
   * 4.5.1. If the user says "yes", DrScala will attempt another restart. If that fails, DrScala gives up.
   * 4.5.2. If the user says "no", DrScala gives up.
   * 4.6. If additional files arrive via the handleOpenFile event, DrScala will
@@ -112,6 +110,7 @@ public class DrScala {
   private static final ArrayList<String> _filesToOpen = new ArrayList<String>();
   private static final ArrayList<String> _jvmArgs = new ArrayList<String>();
   
+  /* Debugging is deactivated in DrScala */
 //  static volatile boolean _showDebugConsole = false;
   
   /** true if a new instance of DrScala should be started instead of
@@ -126,7 +125,7 @@ public class DrScala {
   
   /** true if the restarted DrScala will use remote control, and we can try to
     * pass along files to open that arrived too late. */
-  static volatile boolean _restartedDrJavaUsesRemoteControl = true;
+  static volatile boolean _restartedDrScalaUsesRemoteControl = true;
   
   /** Time in millisecond before restarting DrScala to change the heap size, etc. is deemed a success. */
   private static final int WAIT_BEFORE_DECLARING_SUCCESS = 5000;
@@ -159,9 +158,7 @@ public class DrScala {
   
   /** Returns the configuration object with all customized and default values. */
   public static synchronized FileConfiguration getConfig() {
-    if (_config == null) {
-      _config = _initConfig();  // read specified .djrava file into _config
-    }
+    if (_config == null) _config = _initConfig();  // read specified .drscala file into _config
     return _config;
   }
   
@@ -199,7 +196,7 @@ public class DrScala {
 //    */
 //  public static synchronized boolean openWithRemoteControl(ArrayList<String> files, int numAttempts) {
 //    if (! DrScala.getConfig().getSetting(OptionConstants.REMOTE_CONTROL_ENABLED) ||
-//        ! _restartedDrJavaUsesRemoteControl ||
+//        ! _restartedDrScalaUsesRemoteControl ||
 //        files.size() == 0) return false;
 //    
 //    ArrayList<String> fs = new ArrayList<String>(files);
@@ -241,12 +238,12 @@ public class DrScala {
       // Platform-specific UI setup.
       PlatformFactory.ONLY.beforeUISetup();
       
-//    Utilities.showDebug("Calling configureAndLoadDrJavaRoot with args = " + args);
-      configureAndLoadDrJavaRoot(args); 
+//    Utilities.showDebug("Calling configureAndLoadDrScalaRoot with args = " + args);
+      configureAndLoadDrScalaRoot(args); 
     }
   }
   
-  public static void configureAndLoadDrJavaRoot(String[] args) {
+  public static void configureAndLoadDrScalaRoot(String[] args) {
     try {
 //      // if there were files passed on the command line,
 //      // try to open them in an existing instance
@@ -289,10 +286,10 @@ public class DrScala {
 //          if (DrScala.getConfig().getSetting(OptionConstants.REMOTE_CONTROL_ENABLED)) {
 //            // at this time, OUR remote control server hasn't been started yet
 //            // if one is running, then we won't be able to contact the restarted DrScala
-//           _restartedDrJavaUsesRemoteControl = !RemoteControlClient.isServerRunning();
+//           _restartedDrScalaUsesRemoteControl = !RemoteControlClient.isServerRunning();
 //          } else {
             // no remote control
-            _restartedDrJavaUsesRemoteControl = false;
+            _restartedDrScalaUsesRemoteControl = false;
 //          }
           
           // Run a new copy of DrScala and exit
@@ -336,7 +333,7 @@ public class DrScala {
               else {
                 // 1st time that spawning has failed, offer to reset configuration
                 int result = JOptionPane.showConfirmDialog(null,
-                                                           "DrScala was unable to start. Your configuration file (.drjava)\n" + 
+                                                           "DrScala was unable to start. Your configuration file (.drscala)\n" + 
                                                            "might be corrupt. Do you want to reset your configuration?",
                                                            "Could Not Start DrScala",
                                                            JOptionPane.YES_NO_OPTION);
@@ -382,10 +379,10 @@ public class DrScala {
       }
     }
     catch(Throwable t) {
-      // Show any errors to the System.err and in an DrJavaErrorHandler
+      // Show any errors to the System.err and in an DrScalaErrorHandler
       System.out.println(t.getClass().getName() + ": " + t.getMessage());
       t.printStackTrace(System.err);System.out.println("error thrown");
-      DrJavaErrorHandler.record(t);
+      DrScalaErrorHandler.record(t);
     }
   }
   
@@ -496,7 +493,7 @@ public class DrScala {
     * accidentally used.
     */
   static void setPropertiesFile(String fileName) {
-    if (!DrJavaFileUtils.isSourceFile(fileName))  _propertiesFile = new File(fileName);
+    if (!DrScalaFileUtils.isSourceFile(fileName))  _propertiesFile = new File(fileName);
   }
   
   /** Initializes the configuration object with the current notion of the properties file.
@@ -534,7 +531,7 @@ public class DrScala {
                                     "Could Not Save Changes",
                                     JOptionPane.ERROR_MESSAGE);
       // log this error
-      DrJavaErrorHandler.record(new UnexpectedException(e, "Could not save the location of tools.jar in \n" +
+      DrScalaErrorHandler.record(new UnexpectedException(e, "Could not save the location of tools.jar in \n" +
                                                         "the '.drjava' file in your home directory. \n" +
                                                         "Another process may be using the file.\n\n"));
     }

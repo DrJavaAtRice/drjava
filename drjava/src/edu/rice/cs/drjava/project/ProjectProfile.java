@@ -302,7 +302,7 @@ public class ProjectProfile implements ProjectFileIR {
   
   public void write(OutputStream os) throws IOException {    
     XMLConfig xc = new XMLConfig();
-    xc.set("drjava.version", edu.rice.cs.drjava.Version.getVersionString());
+    xc.set("drscala.version", edu.rice.cs.drjava.Version.getVersionString());
     String path = FileOps.stringMakeRelativeTo(_projectRoot, _projectFile);
     path = replace(path, File.separator, "/");
     xc.set("drjava/project.root", path);

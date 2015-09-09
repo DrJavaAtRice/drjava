@@ -114,7 +114,7 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.HighlightStatus;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelControl;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelState;
 import edu.rice.cs.drjava.model.junit.JUnitModel;
-import edu.rice.cs.drjava.model.print.DrJavaBook;
+import edu.rice.cs.drjava.model.print.DrScalaBook;
 import edu.rice.cs.drjava.model.repl.DefaultInteractionsModel ;
 import edu.rice.cs.drjava.model.repl.InteractionsDJDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsDocument;
@@ -125,7 +125,7 @@ import edu.rice.cs.drjava.project.MalformedProjectFileException;
 import edu.rice.cs.drjava.project.ProjectFileIR;
 import edu.rice.cs.drjava.project.ProjectFileParserFacade;
 import edu.rice.cs.drjava.project.ProjectProfile;
-import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
+import edu.rice.cs.drjava.ui.DrScalaErrorHandler;
 
 import edu.rice.cs.plt.reflect.ReflectUtil;
 import edu.rice.cs.plt.tuple.Pair;
@@ -992,8 +992,16 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   protected FileGroupingState makeFlatFileGroupingState() { return new FlatFileGroupingState(); }
   
   class FlatFileGroupingState implements FileGroupingState {
+    
     public File getBuildDirectory() { return FileOps.NULL_FILE; }
-    public File getProjectRoot() { return getWorkingDirectory(); }
+    
+    public File getProjectRoot() { 
+      File sourceRoot = null;
+      try { sourceRoot = getActiveDocument().getSourceRoot(); }
+      catch(InvalidPackageException e) { sourceRoot = getWorkingDirectory(); }
+      return sourceRoot;
+    }
+      
     public File getWorkingDirectory() {
       // if a fixed working directory has been set in the Preferences, use it
       File prefWorkDir = DrScala.getConfig().getSetting(FIXED_INTERACTIONS_DIRECTORY);
@@ -1340,7 +1348,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     OpenDefinitionsDocument oldDoc = _activeDocument;
     OpenDefinitionsDocument openedDoc = openFileHelper(com);
     if (closeUntitled) closeFileHelper(oldDoc);
-//    Utilities.showDebug("DrJava has opened" + openedDoc + " and is setting it active");
+//    Utilities.showDebug("DrScala has opened" + openedDoc + " and is setting it active");
 //    addToBrowserHistory();
     setActiveDocument(openedDoc);
     setProjectChanged(true);
@@ -1523,7 +1531,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   public File[] getNewFilesInProject() {
     
     ArrayList<File> files = new ArrayList<File>();
-    File projRoot = _state.getProjectRoot();
+    File projRoot = getProjectRoot();
     if(projRoot == null)
       return null;
     File[] allFiles;
@@ -1638,6 +1646,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
 //    List<File> exCp = new LinkedList<File>();  // not used
     
+    /* Process titled documents that are currently open with respect to the root of this project. */
     for (OpenDefinitionsDocument doc: getOpenDefinitionsDocuments()) {
       
       File f = doc.getFile();
@@ -1662,7 +1671,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     _loadProject(builder);
   }
   
-  /** Writes the project profile augmented by usage info to specified file.  Assumes DrJava is in project mode.
+  /** Writes the project profile augmented by usage info to specified file.  Assumes DrScala is in project mode.
     * @param file where to save the project
     * @param info
     */
@@ -1750,7 +1759,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     return builder;
   }
   
-  /** Writes the project profile augmented by usage info to specified file.  Assumes DrJava is in project mode.
+  /** Writes the project profile augmented by usage info to specified file.  Assumes DrScala is in project mode.
     * @param file where to save the project
     */
   public void saveProject(File file, HashMap<OpenDefinitionsDocument, DocumentInfoGetter> info) throws IOException {
@@ -1782,7 +1791,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
                                                       builder.getPreferencesStoredInProject()));
   }
   
-  /** Writes the project profile in the old project format.  Assumes DrJava is in project mode.
+  /** Writes the project profile in the old project format.  Assumes DrScala is in project mode.
     * @param file where to save the project
     */
   public void exportOldProject(File file, HashMap<OpenDefinitionsDocument,DocumentInfoGetter> info) throws IOException {
@@ -1819,7 +1828,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     * @param projectFile The project file to parse
     */
   public void openProject(File projectFile) throws IOException, MalformedProjectFileException {
-    _loadProject(ProjectFileParserFacade.ONLY.parse(projectFile));
+    _loadProject(XMLProjectFileParser.ONLY.parse(projectFile));
   }
   
   /** Loads the specified project into the document navigator and opens all of the files (if not already open).
@@ -1992,7 +2001,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
             int lineEnd = odd._getLineEndPos(end);
             _bookmarkManager.addRegion(new MovingDocumentRegion(odd, start, end, lineStart, lineEnd)); 
           }
-          catch(Exception e) { DrJavaErrorHandler.record(e); }  // should never happen
+          catch(Exception e) { DrScalaErrorHandler.record(e); }  // should never happen
         }
         // should remove stale bookmark
       }
@@ -2184,7 +2193,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 //    _log.log("quit(" + force + ") called");
     try {
       if (! force && ! closeAllFilesOnQuit()) {
-        refreshActiveDocument();  // Ensure that DrJava is in a consistent state.
+        refreshActiveDocument();  // Ensure that DrScala is in a consistent state.
         return;
       }
       /* [ 1478796 ] DrJava Does Not Shut Down With Project Open. On HP tc1100 and Toshiba Portege tablet PCs, there
@@ -2201,21 +2210,21 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     catch(Throwable t) { shutdown(true); /* force exit anyway */ }
   }
   
-  /* Terminates DrJava via System.exit with Runtime.halt as a backup if the former gets hung up. */
+  /* Terminates DrScala via System.exit with Runtime.halt as a backup if the former gets hung up. */
   private void shutdown(boolean force) {
     if (force) Runtime.getRuntime().halt(0);
     
     dispose();  // kills interpreter and cleans up RMI hooks in the slave JVM
     
     if (DrScala.getConfig().getSetting(OptionConstants.DRSCALA_USE_FORCE_QUIT)) {
-      Runtime.getRuntime().halt(0);  // force DrJava to exit
+      Runtime.getRuntime().halt(0);  // force DrScala to exit
     }
     
     Thread monitor = new Thread(new Runnable() { 
       public void run() {
         try { Thread.sleep(2000); }
         catch(InterruptedException e) { /* proceed */ }
-        Runtime.getRuntime().halt(0);  // force DrJava to exit if it still alive
+        Runtime.getRuntime().halt(0);  // force DrScala to exit if it still alive
       }
     });
     monitor.setDaemon(true);
@@ -2777,7 +2786,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     private volatile int _initSelStart;
     private volatile int _initSelEnd;
     
-    private volatile DrJavaBook _book;
+    private volatile DrScalaBook _book;
     
     /** Standard constructor for a document read from a file.  Initializes this ODD's DD.  Assumes that f exists.
       * @param f file describing DefinitionsDocument to manage; should be in canonical form
@@ -2970,7 +2979,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public File getSourceRoot() throws InvalidPackageException { 
       if (isUntitled())
         throw new InvalidPackageException(-1, "Can not get source root for unsaved file. Please save.");
-      
       try {
         String[] packages = _packageName.split("\\.");
         if (packages.length == 1 && packages[0].equals("")) {
@@ -2991,6 +2999,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
           // which is usually not a valid identifier (like "" or "C:")
           throw new InvalidPackageException(-1, "File is in a directory tree with a null root");
         }
+//        Utilities.show("Returning sourceRoot = '" + dir + "'");
         return dir;
       }
       catch (FileMovedException fme) {
@@ -3046,6 +3055,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       try { return ! isUntitled() && IOUtil.isMember(getFile(), projRoot); }
       catch(FileMovedException e) { return false; }
     }
+    
+    /** Delegates to _state. */
+    public File getProjectRoot() { return _state.getProjectRoot(); }
     
     /** A file is in the project if it is explicitly listed as part of the project. */
     public boolean inProject() { return ! isUntitled() && _state.inProject(_file); }
@@ -3360,13 +3372,13 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       }
     }
     
-    /** This method tells the document to prepare all the DrJavaBook and PagePrinter objects. */
+    /** This method tells the document to prepare all the DrScalaBook and PagePrinter objects. */
     public void preparePrintJob() throws BadLocationException, FileMovedException {
       String fileName = "(Untitled)";
       File sourceFile = getFile();  // single read of _file
       if (! AbstractGlobalModel.isUntitled(sourceFile)) fileName = sourceFile.getAbsolutePath();
       
-      _book = new DrJavaBook(getDocument().getText(), fileName, _pageFormat);
+      _book = new DrScalaBook(getDocument().getText(), fileName, _pageFormat);
     }
     
     /** Prints the given document by bringing up a "Print" window. */

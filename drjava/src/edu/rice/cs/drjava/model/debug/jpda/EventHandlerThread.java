@@ -75,18 +75,18 @@
 //    * @param vm JPDA reference to the VirtualMachine generating the events
 //    */
 //  EventHandlerThread(JPDADebugger debugger, VirtualMachine vm) {
-//    super("DrJava Debug Event Handler");
+//    super("DrScala Debug Event Handler");
 //    _debugger = debugger;
 //    _vm = vm;
 //    _connected = true;
 //  }
 //  
-//  /** Logs any unexpected behavior that occurs (but which should not cause DrJava to abort).
+//  /** Logs any unexpected behavior that occurs (but which should not cause DrScala to abort).
 //    * @param message message to print to the log
 //    */
 //  private void _log(String message) { _log.log(message); }
 //  
-//  /** Logs any unexpected behavior that occurs (but which should not cause DrJava to abort).
+//  /** Logs any unexpected behavior that occurs (but which should not cause DrScala to abort).
 //    * @param message message to print to the log
 //    * @param t Exception or Error being logged
 //    */

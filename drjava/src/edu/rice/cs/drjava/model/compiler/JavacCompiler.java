@@ -45,7 +45,7 @@ import java.io.File;
 import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.DJError;
-import edu.rice.cs.drjava.model.DrJavaFileUtils;
+import edu.rice.cs.drjava.model.DrScalaFileUtils;
 import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.plt.reflect.JavaVersion;
 
@@ -95,7 +95,7 @@ public abstract class JavacCompiler implements CompilerInterface {
   
   public String toString() { return getName(); }
   
-  /** A compiler can instruct DrJava to include additional elements for the boot
+  /** A compiler can instruct DrScala to include additional elements for the boot
     * class path of the Interactions JVM. This isn't necessary for the Java compilers, though. */
   public List<File> additionalBootClassPathForInteractions() { return Arrays.<File>asList(); }
 
@@ -292,9 +292,9 @@ public abstract class JavacCompiler implements CompilerInterface {
   // b) an applet
   // c) a class with a static main method
   //
-  // If a), then DrJava inserts "code=MyClass" as argument 0.
-  // If b), then DrJava performs the same as "applet MyClass" (see above).
-  // If c), then DrJava executes MyClass.main (traditional java behavior).
+  // If a), then DrScala inserts "code=MyClass" as argument 0.
+  // If b), then DrScala performs the same as "applet MyClass" (see above).
+  // If c), then DrScala executes MyClass.main (traditional java behavior).
   public String transformRunCommand(String s) {    
     if (s.endsWith(";"))  s = _deleteSemiColon(s);
     List<String> args = ArgumentTokenizer.tokenize(s, true);
@@ -351,7 +351,7 @@ public abstract class JavacCompiler implements CompilerInterface {
   
   /** Return the set of source file extensions that this compiler supports.
     * @return the set of source file extensions that this compiler supports. */
-  public Set<String> getSourceFileExtensions() { return DrJavaFileUtils.getSourceFileExtensions(); }
+  public Set<String> getSourceFileExtensions() { return DrScalaFileUtils.getSourceFileExtensions(); }
   
   /** Return the suggested file extension that will be appended to a file without extension.
     * @return the suggested file extension */
@@ -395,9 +395,9 @@ public abstract class JavacCompiler implements CompilerInterface {
 //  // b) an applet
 //  // c) a class with a static main method
 //  //
-//  // If a), then DrJava inserts "code=MyClass" as argument 0.
-//  // If b), then DrJava performs the same as "applet MyClass" (see above).
-//  // If c), then DrJava executes MyClass.main (traditional java behavior).
+//  // If a), then DrScala inserts "code=MyClass" as argument 0.
+//  // If b), then DrScala performs the same as "applet MyClass" (see above).
+//  // If c), then DrScala executes MyClass.main (traditional java behavior).
 //  public static String transformRunCommand(String s) {
 //    if (s.endsWith(";"))  s = _deleteSemiColon(s);
 //    List<String> tokens = ArgumentTokenizer.tokenize(s, true);

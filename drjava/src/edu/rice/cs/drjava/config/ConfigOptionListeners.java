@@ -50,7 +50,7 @@ public class ConfigOptionListeners implements OptionConstants {
     protected JFrame _parent;
     public DisplayAllCompilerVersionsListener(JFrame parent) { _parent = parent; }
     public void optionChanged(OptionEvent<Boolean> oe) {
-      JOptionPane.showMessageDialog(_parent, "You will have to restart DrJava before the change takes effect.");
+      JOptionPane.showMessageDialog(_parent, "You will have to restart DrScala before the change takes effect.");
     }
   }
   
@@ -229,7 +229,7 @@ public class ConfigOptionListeners implements OptionConstants {
           JOptionPane.
             showMessageDialog(parent,
                               "The \"Maximum Heap Memory for Interactions JVM\" setting is too big: \"" + size + "\"\n" + 
-                              "DrJava has reset the heap size to the default. You should choose something smaller.",
+                              "DrScala has reset the heap size to the default. You should choose something smaller.",
                               "Maximum Heap Size Too Big",
                               JOptionPane.ERROR_MESSAGE);
           // clean up
@@ -267,7 +267,7 @@ public class ConfigOptionListeners implements OptionConstants {
         int result = JOptionPane.
           showConfirmDialog(_parent,
                             "Specifying Main JVM Args is an advanced option. Invalid arguments may cause\n" +
-                            "DrJava to fail on start up.  You may need to edit or delete your .drjava preferences file\n" +
+                            "DrScala to fail on start up.  You may need to edit or delete your .drjava preferences file\n" +
                             "to recover.\n Are you sure you want to set this option?\n" +
                             "(You will have to restart Drjava before changes take effect.)",
                             "Confirm Main JVM Arguments", JOptionPane.YES_NO_OPTION);
@@ -366,7 +366,7 @@ public class ConfigOptionListeners implements OptionConstants {
         });
         DrScala.getConfig().setSetting(MASTER_JVM_ARGS, newValue);
         if (result == 0) DrScala.getConfig().setSetting(MASTER_JVM_XMX, newSetting);   // copy
-        else JOptionPane.showMessageDialog(parent, "You will have to restart DrJava before the change takes effect.");
+        else JOptionPane.showMessageDialog(parent, "You will have to restart DrScala before the change takes effect.");
       }
     }
   }
@@ -377,7 +377,7 @@ public class ConfigOptionListeners implements OptionConstants {
     public void optionChanged(OptionEvent<String> oe) {
       DrScala.getConfig().removeOptionListener(MASTER_JVM_XMX, this);
       sanitizeMasterJVMXMX(_parent, oe.value);
-      JOptionPane.showMessageDialog(_parent, "You will have to restart DrJava before the change takes effect.");
+      JOptionPane.showMessageDialog(_parent, "You will have to restart DrScala before the change takes effect.");
       DrScala.getConfig().addOptionListener(MASTER_JVM_XMX, this);
     }
   }
@@ -416,7 +416,7 @@ public class ConfigOptionListeners implements OptionConstants {
           JOptionPane.
             showMessageDialog(parent,
                               "The \"Maximum Heap Memory for Main JVM\" setting is too big: \"" + size + "\"\n" + 
-                              "DrJava has reset the heap size to the default. You should choose something smaller.",
+                              "DrScala has reset the heap size to the default. You should choose something smaller.",
                               "Maximum Heap Size Too Big",
                               JOptionPane.ERROR_MESSAGE);
           // clean up
@@ -442,9 +442,9 @@ public class ConfigOptionListeners implements OptionConstants {
   /** Class that gets executed to check if the selected heap size is possible. */
   public static class MemoryCheckDummy {
     public static void main(String[] args) {
-      final StringBuilder sb = new StringBuilder("DrJava Version : ");
+      final StringBuilder sb = new StringBuilder("DrScala Version : ");
       sb.append(edu.rice.cs.drjava.Version.getVersionString());
-      sb.append("\nDrJava Build Time: ");
+      sb.append("\nDrScala Build Time: ");
       sb.append(edu.rice.cs.drjava.Version.getBuildTimeString());
       sb.append("\n\nUsed memory: about ");
       sb.append(StringOps.memSizeToString(Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory()));

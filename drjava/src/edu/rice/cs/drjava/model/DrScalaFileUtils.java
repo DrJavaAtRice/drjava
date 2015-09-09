@@ -49,7 +49,7 @@ import static edu.rice.cs.drjava.config.OptionConstants.*;
 /** Some common methods for determining Java source files, language level files, etc.
   * @version $Id: DrJavaFileUtils.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
-public class DrJavaFileUtils  {
+public class DrScalaFileUtils  {
   /** Return the set of source file extensions that this compiler supports.
     * @return the set of source file extensions that this compiler supports. */
   public static Set<String> getSourceFileExtensions() {

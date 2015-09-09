@@ -41,7 +41,7 @@ import junit.framework.*;
 
 import edu.rice.cs.util.UnexpectedException;
 
-/** DrJava's own testrunner. It updates the document in the JUnit pane as error and failure events are fired.  These methods run in
+/** DrScala's own testrunner. It updates the document in the JUnit pane as error and failure events are fired.  These methods run in
   * an auxiliary thread.
  *  @version $Id: JUnitTestRunner.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
@@ -50,7 +50,7 @@ public class JUnitTestRunner extends BaseTestRunner {
   /** Receives updates on the test suite's progress. */
   private volatile JUnitModelCallback _jmc;
 
-  /** Class loader that uses DrJava's classpath. */
+  /** Class loader that uses DrScala's classpath. */
   private volatile ClassLoader _loader;
 
   /** The JUnit TestResult being accumulated. */

@@ -44,7 +44,7 @@ import edu.rice.cs.drjava.config.OptionConstants;
  * Client class to remote control an already running instance of DrJava.  NOT USED IN DRSCALA
  */
 public class RemoteControlClient {
-  /** true if a DrJava remote control server is running.
+  /** true if a DrScala remote control server is running.
    */
   protected static Boolean _serverRunning = null;
   
@@ -54,7 +54,7 @@ public class RemoteControlClient {
 //  /** Time in ms until the client decides the server is not running. */
 //  public static final int REMOTE_CONTROL_TIMEOUT = 250;
 //  
-//  /** Return true if a DrJava remote control server is running.
+//  /** Return true if a DrScala remote control server is running.
 //    * @return true if running
 //    */
 //  public static synchronized boolean isServerRunning() {
@@ -70,7 +70,7 @@ public class RemoteControlClient {
 //    */
 //  public static String getServerUser() { return _serverUser; }
 //  
-//  /** Tell the existing DrJava instance to open a file.
+//  /** Tell the existing DrScala instance to open a file.
 //   * @param f file, or null to just test if a server is running.
 //   * @return true if file could be opened
 //   */

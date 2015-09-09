@@ -82,7 +82,6 @@ public class DocFile extends AbsRelFile {
   
   /* Relying on equals and hashCode methods inherited from File. */
   
-  
   public DocFile getAbsoluteFile() {
     if (isAbsolute()) return this;
     else

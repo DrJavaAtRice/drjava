@@ -52,7 +52,8 @@ import edu.rice.cs.plt.text.TextUtil;
 //import edu.rice.cs.dynamicjava.interpreter.EvaluatorException;  // moved to newjvm as shown above
 //import edu.rice.cs.dynamicjava.interpreter.Interpreter;
 // TODO: we should move these three classes/interfaces out of DynamicJava so we can flush dynamicjava.jar
-import edu.rice.cs.dynamicjava.symbol.*;
+
+//import edu.rice.cs.dynamicjava.symbol.*;
 //import edu.rice.cs.dynamicjava.symbol.type.Type;
 
 /** Tests the functionality of the repl interpreter.

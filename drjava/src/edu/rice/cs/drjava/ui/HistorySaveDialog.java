@@ -45,7 +45,7 @@ import java.awt.event.*;
   * user to edit or save it to a file.
   * $Id: HistorySaveDialog.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
-public class HistorySaveDialog extends DrJavaScrollableDialog /* implements Serializable */ {
+public class HistorySaveDialog extends DrScalaScrollableDialog /* implements Serializable */ {
   
   /** Reference to the history text being edited. */
   private String _history;

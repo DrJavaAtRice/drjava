@@ -49,7 +49,7 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.HighlightManager;
 import edu.rice.cs.util.swing.BorderlessScrollPane;
 import edu.rice.cs.util.text.SwingDocument;
-import edu.rice.cs.drjava.model.print.DrJavaBook;
+import edu.rice.cs.drjava.model.print.DrScalaBook;
   
 import edu.rice.cs.util.swing.RightClickMouseAdapter;
 
@@ -109,8 +109,8 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
   protected volatile RightClickMouseAdapter _popupMenuListener = null;
   
   /** Highlight painter for selected list items. */
-  static volatile ReverseHighlighter.DrJavaHighlightPainter _listHighlightPainter =
-    new ReverseHighlighter.DrJavaHighlightPainter(DrScala.getConfig().getSetting(COMPILER_ERROR_COLOR));
+  static volatile ReverseHighlighter.DrScalaHighlightPainter _listHighlightPainter =
+    new ReverseHighlighter.DrScalaHighlightPainter(DrScala.getConfig().getSetting(COMPILER_ERROR_COLOR));
   
   protected static final SimpleAttributeSet _getBoldAttributes() {
     SimpleAttributeSet s = new SimpleAttributeSet();
@@ -859,7 +859,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     private class CompilerErrorColorOptionListener implements OptionListener<Color> {
       
       public void optionChanged(OptionEvent<Color> oce) {
-        _listHighlightPainter = new ReverseHighlighter.DrJavaHighlightPainter(oce.value);
+        _listHighlightPainter = new ReverseHighlighter.DrScalaHighlightPainter(oce.value);
         if (_listHighlightTag != null) {
           _listHighlightTag.refresh(_listHighlightPainter);
         }
@@ -891,12 +891,12 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
   }
   
   public class ErrorDocument extends SwingDocument {
-    protected volatile DrJavaBook _book;
+    protected volatile DrScalaBook _book;
     protected final String _title;
     public ErrorDocument(String t) { _title = t; }
     public Pageable getPageable() throws IllegalStateException { return _book; }
     public void preparePrintJob() {
-      _book = new DrJavaBook(getDocText(0, getLength()), _title, new PageFormat());
+      _book = new DrScalaBook(getDocText(0, getLength()), _title, new PageFormat());
     }
     public void print() {
       preparePrintJob();

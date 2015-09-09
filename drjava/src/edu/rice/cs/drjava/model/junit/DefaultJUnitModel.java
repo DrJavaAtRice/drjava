@@ -61,13 +61,13 @@ import edu.rice.cs.drjava.config.BooleanOption;
 import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.FileMovedException;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
-import edu.rice.cs.drjava.model.DrJavaFileUtils;
+import edu.rice.cs.drjava.model.DrScalaFileUtils;
 import edu.rice.cs.drjava.model.repl.newjvm.MainJVM;
 import edu.rice.cs.drjava.model.compiler.CompilerModel;
 import edu.rice.cs.drjava.model.compiler.CompilerListener;
 import edu.rice.cs.drjava.model.compiler.DummyCompilerListener;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
-import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
+import edu.rice.cs.drjava.ui.DrScalaErrorHandler;
 import edu.rice.cs.drjava.config.OptionConstants;
 
 import edu.rice.cs.plt.io.IOUtil;
@@ -87,15 +87,13 @@ import org.objectweb.asm.*;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 import static edu.rice.cs.drjava.config.OptionConstants.*;
 
-//import edu.rice.cs.drjava.model.compiler.LanguageLevelStackTraceMapper;
-
 /** Manages unit testing via JUnit.
   * @version $Id: DefaultJUnitModel.java 5722 2012-09-29 19:37:22Z wdforson $
   */
 public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   
   /** log for use in debugging */
-  private static Log _log = new Log("GlobalModel.txt", false);
+  private static Log _log = new Log("GlobalModel.txt", true);
   
   /** Manages listeners to this model. */
   private final JUnitEventNotifier _notifier = new JUnitEventNotifier();
@@ -226,7 +224,9 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   
   /** Runs JUnit on the current document.  Forces the user to compile all open documents before proceeding. */
   public void junit(OpenDefinitionsDocument doc) throws ClassNotFoundException, IOException {
+    
     debug.logStart("junit(doc)");
+    
 //    new ScrollableDialog(null, "junit(" + doc + ") called in DefaultJunitModel", "", "").show();
     File testFile;
     try { 
@@ -260,6 +260,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
 
     _log.log("Retrieved JUnit error model.  outOfSync = " +  _model.getOutOfSyncDocuments(lod));
     final List<OpenDefinitionsDocument> outOfSync = _model.getOutOfSyncDocuments(lod);
+//    Utilities.show("Out of sync documents = " + outOfSync);
     _log.log("outOfSync = " + outOfSync);    
     if ((outOfSync.size() > 0) || _model.hasModifiedDocuments(lod)) {
       /* hasOutOfSyncDocuments(lod) can return false when some documents have not been successfully compiled; the 
@@ -407,7 +408,6 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
             _log.log("Found test class: " + name);
             
             // Add this class and the corrresponding source file to classNames and files, respectively.
-            // Finding the source file is non-trivial because it may be a language-levels file (NOT, disabled in DrScala)
             
             try {
               final Box<String> className = new SimpleBox<String>();
@@ -416,12 +416,9 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
                 public void visit(int version, int access, String name, String sig, String sup, String[] inters) {
                   className.set(name.replace('/', '.'));
                 }
-                
-                
-                /* Debugger deactivated in DrScala. No longer used */
-//                public void visitSource(String source /*, String debug */) {
-//                  sourceName.set(source);
-//                }
+                public void visitSource(String source /*, String debug */) {
+                  sourceName.set(source);
+                }
                 
                 public void visitOuterClass(String owner, String name, String desc) { }
                 public AnnotationVisitor visitAnnotation(String desc, boolean visible) { return null; }
@@ -435,28 +432,27 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
               File rootDir = classDirsAndRoots.get(dir);
               
               /** The canonical pathname for the file (including the file name) */
-              String javaSourceFileName = getCanonicalPath(rootDir) + File.separator + sourceName.value();
-              _log.log("Full java source fileName = " + javaSourceFileName);
+              String sourceFileName = getCanonicalPath(rootDir) + File.separator + sourceName.value();
+              _log.log("Full source fileName = " + sourceFileName);
               
-              /* The index in fileName of the dot preceding the extension ".java" or ".scala" */
-              int indexOfExtDot = javaSourceFileName.lastIndexOf('.');
-              _log.log("indexOfExtDot = " + indexOfExtDot);
-              if (indexOfExtDot == -1) continue;  // RMI stub class files return source file names without extensions
-              
-              // Language level processing is disabled in DrScala
-              /* Determine if this java source file was generated from a .java or a .scala file. */
-              String strippedName = javaSourceFileName.substring(0, indexOfExtDot);
-              _log.log("Stripped name = " + strippedName);
-              
-              String sourceFileName;
-              
-              if (openDocFiles.contains(javaSourceFileName)) sourceFileName = javaSourceFileName;
-              else if (openDocFiles.contains(strippedName + OptionConstants.SCALA_FILE_EXTENSION))
-                sourceFileName = strippedName + OptionConstants.SCALA_FILE_EXTENSION;
-              else if (openDocFiles.contains(strippedName + OptionConstants.JAVA_FILE_EXTENSION))
-                sourceFileName = strippedName + OptionConstants.JAVA_FILE_EXTENSION;
-
-              else continue; // no matching source file is open
+//              /* The index in fileName of the dot preceding the extension ".java" or ".scala" */
+//              int indexOfExtDot = sourceFileName.lastIndexOf('.');
+//              _log.log("indexOfExtDot = " + indexOfExtDot);
+//              if (indexOfExtDot == -1) continue;  // RMI stub class files return source file names without extensions
+//              
+//              /* Determine if this source file is a .java or a .scala file. */
+//              String strippedName = sourceFileName.substring(0, indexOfExtDot);
+//              _log.log("Stripped name = " + strippedName);
+//              
+//              String name = null;
+//              
+//              if (openDocFiles.contains(sourceFileName)) name = sourceFileName;
+//              else if (openDocFiles.contains(strippedName + OptionConstants.SCALA_FILE_EXTENSION))
+//                name = strippedName + OptionConstants.SCALA_FILE_EXTENSION;
+//              else if (openDocFiles.contains(strippedName + OptionConstants.JAVA_FILE_EXTENSION))
+//                name = strippedName + OptionConstants.JAVA_FILE_EXTENSION;
+//
+//              else continue; // no matching source file is open
               
               _log.log("File found in openDocFiles = "  + openDocFiles.contains(sourceFileName));
               File sourceFile = new File(sourceFileName);
@@ -494,6 +490,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
           // synchronized over _compilerModel to ensure that compilation and junit testing are mutually exclusive.
           /** Set up junit test suite on slave JVM; get TestCase classes forming that suite */
           List<String> tests = _jvm.findTestClasses(classNames, files).unwrap(null);
+//          Utilities.show("found tests " + tests);
           _log.log("tests = " + tests);
           if (tests == null || tests.isEmpty()) {
             nonTestCase(allTests, false);
@@ -617,7 +614,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
 //      for(JUnitError e: errors) {
 //        try {
 //          e.setStackTrace(_compilerModel.getLLSTM().replaceStackTrace(e.stackTrace(),files));
-//        } catch(Exception ex) { DrJavaErrorHandler.record(ex); }
+//        } catch(Exception ex) { DrScalaErrorHandler.record(ex); }
 //        File f = e.file();
 //        if ((f != null) && (DrJavaFileUtils.isLLFile(f))) {
 //          String dn = DrJavaFileUtils.getJavaForLLFile(f.getName());

@@ -484,7 +484,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   /** Tests that the save button does not set itself as enabled immediately after opening a file. */
   public void testSaveButtonEnabled() throws IOException {
     String user = System.getProperty("user.name");
-    _tempDir = IOUtil.createAndMarkTempDirectory("DrJava-test-" + user, "");
+    _tempDir = IOUtil.createAndMarkTempDirectory("DrScala-test-" + user, "");
     File forceOpenClass1_file = new File(_tempDir, "ForceOpenClass1.scala");
     String forceOpenClass1_string =
       "class ForceOpenClass1 {\n" +
@@ -535,7 +535,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     final GlobalModel _model = _frame.getModel();
     
     String user = System.getProperty("user.name");
-    _tempDir = IOUtil.createAndMarkTempDirectory("DrJava-test-" + user, "");
+    _tempDir = IOUtil.createAndMarkTempDirectory("DrScala-test-" + user, "");
     
     File forceOpenClass1_file = new File(_tempDir, "ForceOpenClass1.scala");
     String forceOpenClass1_string =
@@ -656,7 +656,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
       * username and create the temporary directory. Only sticky part is deciding where to put it, in FileOps maybe?
       */
     String user = System.getProperty("user.name");
-    _tempDir = IOUtil.createAndMarkTempDirectory("DrJava-test-" + user, "");
+    _tempDir = IOUtil.createAndMarkTempDirectory("DrScala-test-" + user, "");
     File forceOpenClass1_file = new File(_tempDir, "ForceOpenClass1.scala");
     String forceOpenClass1_string =
       "class ForceOpenClass1 {\n" +
@@ -774,7 +774,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   public void testGotoFileUnderCursor() throws IOException {
 //    Utilities.show("Running testGotoFileUnderCursor");
     String user = System.getProperty("user.name");
-    _tempDir = IOUtil.createAndMarkTempDirectory("DrJava-test-" + user, "");
+    _tempDir = IOUtil.createAndMarkTempDirectory("DrScala-test-" + user, "");
     
     final File goto1_file = new File(_tempDir, "GotoFileUnderCursor1.scala");
     final String goto1_string = "GotoFileUnderCursorTest";
@@ -902,7 +902,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   public void testGotoFileUnderCursorShowDialog() throws IOException {
 //    Utilities.show("Running testGotoFileUnderCursorShowDialog()");
     String user = System.getProperty("user.name");
-    _tempDir = IOUtil.createAndMarkTempDirectory("DrJava-test-" + user, "");
+    _tempDir = IOUtil.createAndMarkTempDirectory("DrScala-test-" + user, "");
     
     final File goto1_file = new File(_tempDir, "GotoFileUnderCursor3.scala");
     final String goto1_string = "GotoFileUnderCursor";

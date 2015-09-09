@@ -69,7 +69,7 @@ public final class RecentFileManagerTest extends DrScalaTestCase {
     _menu = new JMenu();
     _rfm = new RecentFileManager(0, _menu, null, OptionConstants.RECENT_FILES);
     String user = System.getProperty("user.name");
-    _tempDir = IOUtil.createAndMarkTempDirectory("DrJava-test-" + user, "");
+    _tempDir = IOUtil.createAndMarkTempDirectory("DrScala-test-" + user, "");
   }
   
   public void tearDown() throws Exception {

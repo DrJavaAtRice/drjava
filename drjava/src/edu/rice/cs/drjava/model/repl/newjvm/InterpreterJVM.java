@@ -94,7 +94,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.error;
 /** This is the main class for the interpreter JVM.  All public methods except those involving remote calls (callbacks) 
   * use synchronizazion on _stateLock (unless synchronization has no effect).  The class is not ready for remote
   * calls until handleStart has been executed.  This class is loaded in the Interpreter JVM, not the Main JVM. 
-  * (Do not use DrJava's config framework here.)
+  * (Do not use DrScala's config framework here.)
   * <p>
   * Note that this class is specific to the Scala interpreter. It must be refactored to accommodate other interpreters.
   * @version $Id: InterpreterJVM.java 5723 2012-09-29 19:38:35Z wdforson $
@@ -125,7 +125,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   /** Responsible for running JUnit tests in this JVM. */
   private final JUnitTestManager _junitTestManager;
   
-  /** Remote reference to the MainJVM class in DrJava's primary JVM.  Assigned ONLY once. */
+  /** Remote reference to the MainJVM class in DrScala's primary JVM.  Assigned ONLY once. */
   private volatile MainJVMRemoteI _mainJVM;
   
   private volatile boolean scalaInterpreterStarted = false;
@@ -199,7 +199,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     else 
       _defaultInterpreter.start();
 
-    /* On Windows, any frame or dialog opened from Interactions pane will appear *behind* DrJava's frame, unless a 
+    /* On Windows, any frame or dialog opened from Interactions pane will appear *behind* DrScala's frame, unless a 
      * previous frame or dialog is shown here.  Not sure what the difference is, but this hack seems to work.  (I'd
      * be happy to find a better solution, though.)  Only necessary on Windows, since frames and dialogs on other 
      * platforms appear correctly in front of DrJava. */

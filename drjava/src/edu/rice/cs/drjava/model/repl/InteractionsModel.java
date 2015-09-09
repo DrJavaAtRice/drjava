@@ -45,7 +45,7 @@ import java.util.HashSet;
 import javax.swing.text.BadLocationException;
 import java.awt.EventQueue;
 
-import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
+import edu.rice.cs.drjava.ui.DrScalaErrorHandler;
 import edu.rice.cs.drjava.ui.InteractionsPane;
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.OperationCanceledException;
@@ -62,7 +62,7 @@ import edu.rice.cs.drjava.config.OptionConstants;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
-/** A Swing specific model for the DrJava InteractionsPane.  It glues together an InteractionsDocument, an 
+/** A Swing specific model for the DrScala InteractionsPane.  It glues together an InteractionsDocument, an 
   * InteractionsPane and a JavaInterpreter.  This abstract class provides common functionality for all such models.
   * The methods in this class generally can be executed only in the event thread once the model has been constructed.
   * @version $Id: InteractionsModel.java 5727 2012-09-30 03:58:32Z rcartwright $
@@ -248,7 +248,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
         new Thread(new Runnable() { 
           public void run() { 
             try { interpretCommand(evalText); } 
-            catch(Throwable t) { DrJavaErrorHandler.record(t); }
+            catch(Throwable t) { DrScalaErrorHandler.record(t); }
           } 
         }).start(); 
       }
@@ -324,7 +324,6 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     _notifyInterpreterResetting();
     _document.reset(generateBanner(wd));  // clears the embedded InteractionsDocument and re-initializes it
     _resetInterpreter(wd, force);
-    _notifyInterpreterReady(wd);
   }
   
   /** Resets the interpreter and resets the embedded Interactions document.  This should only be called from 
@@ -521,7 +520,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
 //      _debugPort = -1;
 //    }
 //    _debugPortSet = true;
-//    System.setProperty("drjava.debug.port", String.valueOf(_debugPort));
+//    System.setProperty("drscala.debug.port", String.valueOf(_debugPort));
 //  }
 //  
 //  /** Sets the port number to use for debugging the interactions JVM.
@@ -865,7 +864,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
           
           performDefaultImports();
           
-          _notifyInterpreterReady(wd);
+//          _notifyInterpreterReady(wd);
         }
       });
     }

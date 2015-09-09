@@ -68,7 +68,7 @@
 //    _debugger.addListener(debugListener);
 //
 //    // Start up
-//    final OpenDefinitionsDocument doc = _startupDebugger("DrJavaDebugClass.java", DEBUG_CLASS);
+//    final OpenDefinitionsDocument doc = _startupDebugger("DrScalaDebugClass.java", DEBUG_CLASS);
 //    final Vector<File> path = new Vector<File>();
 //    path.add(_tempDir);  // directory where doc's file is saved
 //
@@ -145,7 +145,7 @@
 //    _debugger.addListener(debugListener);
 //
 //    // Start up
-//    OpenDefinitionsDocument doc = _startupDebugger("DrJavaDebugClass.java", DEBUG_CLASS);
+//    OpenDefinitionsDocument doc = _startupDebugger("DrScalaDebugClass.java", DEBUG_CLASS);
 //
 //    // Add a breakpoint
 //    _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("Baz Line 1"),true);
@@ -245,7 +245,7 @@
 //    _debugger.addListener(debugListener);
 //
 //    // Start up
-//    OpenDefinitionsDocument doc = _startupDebugger("DrJavaDebugClass.java", DEBUG_CLASS);
+//    OpenDefinitionsDocument doc = _startupDebugger("DrScalaDebugClass.java", DEBUG_CLASS);
 //
 //    // Add a breakpoint
 //    _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("Foo Line 1"),true);
@@ -346,7 +346,7 @@
 //    _debugger.addListener(debugListener);
 //
 //    // Start up
-//    OpenDefinitionsDocument doc = _startupDebugger("DrJavaDebugStaticField.java", CLASS_WITH_STATIC_FIELD);
+//    OpenDefinitionsDocument doc = _startupDebugger("DrScalaDebugStaticField.java", CLASS_WITH_STATIC_FIELD);
 //
 //    // Set a breakpoint
 //    _debugger.toggleBreakpoint(doc,CLASS_WITH_STATIC_FIELD.indexOf("System.out.println"),true);
@@ -372,8 +372,8 @@
 //    debugListener.assertCurrThreadSuspendedCount(2);  //fires
 //    debugListener.assertCurrThreadResumedCount(0);
 //    debugListener.assertCurrThreadDiedCount(0);
-//    assertEquals("x has correct value at start", "0", interpret("DrJavaDebugStaticField.x"));
-//    assertEquals("assigning x succeeds", "5", interpret("DrJavaDebugStaticField.x = 5"));
+//    assertEquals("x has correct value at start", "0", interpret("DrScalaDebugStaticField.x"));
+//    assertEquals("assigning x succeeds", "5", interpret("DrScalaDebugStaticField.x = 5"));
 //    assertEquals("assignment reflected in this", "5", interpret("this.x"));
 //
 //    // Step over once
@@ -389,7 +389,7 @@
 //    debugListener.assertBreakpointReachedCount(2);
 //    debugListener.assertCurrThreadDiedCount(0);
 //    assertInteractionsContains("x == 5");
-//    assertEquals("x retains correct value after step", "5", interpret("DrJavaDebugStaticField.x"));
+//    assertEquals("x retains correct value after step", "5", interpret("DrScalaDebugStaticField.x"));
 //    assertEquals("this has correct value for x after step", "5", interpret("this.x"));
 //
 //    // Step over again
@@ -405,7 +405,7 @@
 //    debugListener.assertCurrThreadSuspendedCount(4);  // fires
 //    debugListener.assertBreakpointReachedCount(2);
 //    debugListener.assertCurrThreadDiedCount(0);
-//    assertEquals("x has correct value after increment", "6", interpret("DrJavaDebugStaticField.x"));
+//    assertEquals("x has correct value after increment", "6", interpret("DrScalaDebugStaticField.x"));
 //    assertEquals("this has correct value for x after increment", "6", interpret("this.x"));
 //
 //    synchronized(_notifierLock) {
@@ -415,7 +415,7 @@
 //    }
 //    interpret("");
 //    assertInteractionsContains("The current thread has changed.");
-//    assertEquals("x has correct value in other thread", "6", interpret("DrJavaDebugStaticField.x"));
+//    assertEquals("x has correct value in other thread", "6", interpret("DrScalaDebugStaticField.x"));
 //    assertEquals("this has correct value for x in other thread", "6", interpret("this.x"));
 //
 //    // Shut down
@@ -759,7 +759,7 @@
 //    _debugger.addListener(debugListener);
 //
 //    // Start up
-//    _startupDebugger("DrJavaThreadDeathTest.java", THREAD_DEATH_CLASS);
+//    _startupDebugger("DrScalaThreadDeathTest.java", THREAD_DEATH_CLASS);
 //
 //    // Before bugs 697825 and 779111 were fixed, this line would just
 //    //  hang, since dead threads remained suspended indefinitely.

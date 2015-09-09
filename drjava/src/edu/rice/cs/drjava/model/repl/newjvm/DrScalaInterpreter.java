@@ -21,7 +21,7 @@ import edu.rice.cs.util.swing.Utilities;
   * a "DrScalaILoop" instance, which interprets the code and returns a String result.
   * 
   * Since stderr and stdout are redirected to point to the Interactions pane and
-  * the DrJava console, "print" statements called from within ILoop, in the course
+  * the DrScala console, "print" statements called from within ILoop, in the course
   * of interpretation, are routed correctly.  As such, all content *returned* from
   * ILoop can still be conveniently differentiated from content printed to the 
   * console.

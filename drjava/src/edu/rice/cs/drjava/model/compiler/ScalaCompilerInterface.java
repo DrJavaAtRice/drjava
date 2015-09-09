@@ -38,8 +38,9 @@ package edu.rice.cs.drjava.model.compiler;
 
 import java.io.File;
 
-/* This interface has been DEPRECATED. The output dir in flat file mode is the common source root.  A set of files
- * without a common root cannot be compiled in flat file mode. */
+/* This interface has been DEPRECATED. The output dir in flat file mode is determined by getProjectRoot (even in 
+ * flat file mode).  We always pass an explicit build directory to scalac.  Multiple source roots may or may not
+ * be supported. */
 
 /** An interface extending CompilerInterface; the new methods getOutputDir and setOutputDir are required to support
   * Scala compilation in flat file mode.  This interface is defined here so that we can successfully cast to it in 

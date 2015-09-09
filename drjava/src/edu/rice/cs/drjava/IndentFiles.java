@@ -99,7 +99,7 @@ public class IndentFiles {
     //System.out.println("Using Headless AWT: " + isHeadless());
     Indenter indenter = new Indenter(indentInc);
     
-    if (! silent) System.out.println("DrJava - Indenting files:");
+    if (! silent) System.out.println("DrScala - Indenting files:");
     for (int i = 0; i < fileNames.size(); i++) {
       String fname = fileNames.get(i);
       File file = new File(fname);

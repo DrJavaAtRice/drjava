@@ -40,7 +40,7 @@ import edu.rice.cs.drjava.DrScala;
 
 import java.util.Vector;
 
-/** Class representing values from the DrJava configuration file that can be inserted as variables in external processes.
+/** Class representing values from the DrScala configuration file that can be inserted as variables in external processes.
   * @version $Id: ConfigProperty.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class ConfigProperty extends EagerProperty {

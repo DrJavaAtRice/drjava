@@ -63,7 +63,7 @@ public class ProjectFileParserFacade {
       // does not start with a ';', can't be an old S-expression format project file
       // try new XML format parser
       fr.close();
-      return fixup(XMLProjectFileParser.ONLY.parse(projFile));
+      return XMLProjectFileParser.ONLY.parse(projFile);
     }
     read = fr.read();
     if (read == -1) {
@@ -74,62 +74,8 @@ public class ProjectFileParserFacade {
 //       does not start with ";;", can't be an old S-expression format project file
     // try new XML format parser
     fr.close();
-    return fixup(XMLProjectFileParser.ONLY.parse(projFile));
+    return XMLProjectFileParser.ONLY.parse(projFile);
   }
   
   private static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("ParserFacadeFixup.txt", false);
-  
-  /** Here we check versions, and see if we need to apply a fixup to account for specify main-class as a classname instead of as a file.   
-    * All DrJava revisions before 4782 need to be fixed up.  We also fixup all projects that have "unknown" versions.
-    * @param pfir - the ProjectProfile to fixup, if needed.
-    */
-  protected ProjectFileIR fixup(ProjectFileIR pfir){
-    boolean doFixup = false;
-    
-    String version = pfir.getDrScalaVersion();
-    
-    if (version.equals("unknown"))
-      doFixup = true;
-    
-    if (!doFixup){
-      int i = version.indexOf("-r");
-      
-      if(i == -1){
-        doFixup = true;
-      }else{
-        try{
-          if(Integer.parseInt(version.substring(i+2).trim()) < 4782)
-            doFixup = true;
-        }catch(NumberFormatException e){
-          doFixup = true;
-        }
-      }
-    }
-    
-    LOG.log("DoFixup? " + doFixup);
-    
-    if(!doFixup || pfir.getMainClass() == null) return pfir;
-    
-    String mainClass = pfir.getMainClass();
-    
-    LOG.log("\tmainClass = \"" + mainClass + "\"");
-    
-    String qualifiedName = mainClass;
-    
-    //Strip off any leading slashes
-    if(qualifiedName.startsWith("" + File.separatorChar))
-      qualifiedName = qualifiedName.substring(1);
-    
-    //Remove the .java extension if it exists
-    if(qualifiedName.toLowerCase().endsWith(OptionConstants.JAVA_FILE_EXTENSION))
-      qualifiedName = qualifiedName.substring(0, qualifiedName.length() -
-                                              OptionConstants.JAVA_FILE_EXTENSION.length());
-    
-    LOG.log("\tsetMainClass = \"" + qualifiedName + "\"");
-    
-    //Replace path seperators with java standard '.' package seperators.
-    pfir.setMainClass(qualifiedName.replace(File.separatorChar, '.'));
-    
-    return pfir;
-  }
 }

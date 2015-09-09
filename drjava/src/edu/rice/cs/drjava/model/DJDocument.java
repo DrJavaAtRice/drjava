@@ -47,7 +47,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.ProgressMonitor;
 
 /** Interface shared by the Definitions Document, Open Definitions Document, and Interactions Document. Characteristic
-  * of native DrJava Documents (as opposed to DrJava plugin documents).
+  * of native DrScala Documents (as opposed to DrScala plugin documents).
   */
 public interface DJDocument extends SwingDocumentInterface {
   

@@ -263,7 +263,7 @@ public class ConcJUnitUtils {
         final JProgressBar pb = processingDialog.getProgressBar();
         processingDialog.setVisible(true);
         try {
-          final File tmpDir = FileOps.createTempDirectory("DrJavaGenerateRTConcJUnitJar");
+          final File tmpDir = FileOps.createTempDirectory("DrScalaGenerateRTConcJUnitJar");
           
           SwingWorker worker = new SwingWorker() {
             volatile Boolean _success = null;

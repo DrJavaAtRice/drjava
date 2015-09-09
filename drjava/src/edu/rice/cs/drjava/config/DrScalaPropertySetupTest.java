@@ -49,7 +49,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
  * Tests for the variables and language constructs that can be used in external processes.
  * @author Mathias Ricken
  */
-public class DrJavaPropertySetupTest extends MultiThreadedTestCase {
+public class DrScalaPropertySetupTest extends MultiThreadedTestCase {
   public final String PS = File.pathSeparator; // path separator
   public final String FS = File.separator; // path separator
   public final String TMPDIR = System.getProperty("java.io.tmpdir")+
@@ -57,14 +57,14 @@ public class DrJavaPropertySetupTest extends MultiThreadedTestCase {
   public static final java.util.Random _r = new java.util.Random();
   public void setUp() throws Exception {
     super.setUp();
-    DrJavaPropertySetup.setup();
+    DrScalaPropertySetup.setup();
   }
   public void tearDown() throws Exception {
     super.tearDown();
   }
   public void testArithmetic() throws CloneNotSupportedException {
     PropertyMaps pm = PropertyMaps.TEMPLATE.clone();
-    DrJavaProperty p;
+    DrScalaProperty p;
     
     // add
     p = pm.getProperty("Misc","add");
@@ -386,7 +386,7 @@ public class DrJavaPropertySetupTest extends MultiThreadedTestCase {
   }
   public void testString() throws CloneNotSupportedException {
     PropertyMaps pm = PropertyMaps.TEMPLATE.clone();
-    DrJavaProperty p;
+    DrScalaProperty p;
     
     // strlen
     p = pm.getProperty("Misc","strlen");
@@ -436,7 +436,7 @@ public class DrJavaPropertySetupTest extends MultiThreadedTestCase {
   
   public void testList() throws CloneNotSupportedException {
     PropertyMaps pm = PropertyMaps.TEMPLATE.clone();
-    DrJavaProperty p;
+    DrScalaProperty p;
     
     // count
     p = pm.getProperty("Misc","count");
@@ -700,7 +700,7 @@ public class DrJavaPropertySetupTest extends MultiThreadedTestCase {
   
   public void testFakeConfigProperties() throws CloneNotSupportedException {
     PropertyMaps pm = PropertyMaps.TEMPLATE.clone();
-    DrJavaProperty p;
+    DrScalaProperty p;
     
     // config.master.jvm.args.combined
     p = pm.getProperty("Config","config.master.jvm.args.combined");
@@ -753,7 +753,7 @@ public class DrJavaPropertySetupTest extends MultiThreadedTestCase {
   
   public void testFile() throws CloneNotSupportedException, IOException {
     PropertyMaps pm = PropertyMaps.TEMPLATE.clone();
-    DrJavaProperty p;
+    DrScalaProperty p;
     
     // tmpfile
     p = pm.getProperty("Misc","tmpfile");
@@ -941,10 +941,10 @@ public class DrJavaPropertySetupTest extends MultiThreadedTestCase {
   
   public void testMisc() throws CloneNotSupportedException {
     PropertyMaps pm = PropertyMaps.TEMPLATE.clone();
-    @SuppressWarnings("unused") DrJavaProperty p;
+    @SuppressWarnings("unused") DrScalaProperty p;
 
     // drjava.current.time.millis
-    p = pm.getProperty("DrScala","drjava.current.time.millis");
+    p = pm.getProperty("DrScala","drscala.current.time.millis");
     
     // ignore
     p = pm.getProperty("Misc","ignore");
@@ -957,7 +957,7 @@ public class DrJavaPropertySetupTest extends MultiThreadedTestCase {
     
     // drjava.file
     // during testing, this is the classes/base directory
-    p = pm.getProperty("Misc","drjava.file");
+    p = pm.getProperty("Misc","drscala.file");
     
     // echo
     p = pm.getProperty("Misc","echo");
@@ -965,7 +965,7 @@ public class DrJavaPropertySetupTest extends MultiThreadedTestCase {
   
   public void testControlFlow() throws CloneNotSupportedException {
     PropertyMaps pm = PropertyMaps.TEMPLATE.clone();
-    DrJavaProperty p;
+    DrScalaProperty p;
 
     // if
     p = pm.getProperty("Misc","if");
@@ -982,7 +982,7 @@ public class DrJavaPropertySetupTest extends MultiThreadedTestCase {
   
   public void testXML() throws CloneNotSupportedException {
     PropertyMaps pm = PropertyMaps.TEMPLATE.clone();
-    DrJavaProperty p;
+    DrScalaProperty p;
 
     // xml.in
     p = pm.getProperty("Misc","xml.in");

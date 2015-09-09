@@ -61,7 +61,7 @@ public final class HistoryTest extends DrScalaTestCase implements OptionConstant
     super.setUp();
     DrScala.getConfig().resetToDefaults();
     String user = System.getProperty("user.name");
-    _tempDir = IOUtil.createAndMarkTempDirectory("DrJava-test-" + user, "");
+    _tempDir = IOUtil.createAndMarkTempDirectory("DrScala-test-" + user, "");
     _history = new History();
   }
 

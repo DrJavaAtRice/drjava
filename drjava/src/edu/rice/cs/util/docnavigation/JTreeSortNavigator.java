@@ -808,7 +808,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
   public Object getModelLock() { return _model; }
   
   // This visitor is executed in getCurrent(). The case methods for files and strings return
-  // null, which caused DrJava to revert to the previous selection in requestSelectionUpdate().
+  // null, which caused DrScala to revert to the previous selection in requestSelectionUpdate().
   // That code has now been commented out; this note is only for documentation purposes.
   private final NodeDataVisitor<ItemT, ItemT> _leafVisitor = new NodeDataVisitor<ItemT, ItemT>() {
     public ItemT fileCase(File f, Object... p){ return null; }

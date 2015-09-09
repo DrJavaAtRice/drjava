@@ -466,7 +466,7 @@ public class ReducedModelComment extends AbstractReducedModel {
    * ReducedModelControl keeps the _cursor fields of the enclosed ReducedModelBrace and ReducedModelCommentsupport in
    * sync, but does not support the notion of a dual iterator as an abstraction.  Hence, if a transient iterator is 
    * created for ReducedModelBrace, there is no corresponding iterator for ReducedModelComment.  The "walker" is used
-   * as a weak substitute. So the code in DrJava limps by using transient iterators over the reduced brace model and 
+   * as a weak substitute. So the code in DrScala limps by using transient iterators over the reduced brace model and 
    * a separate SHARED reduced comment "walker" (iterator) with a truly horrible interface.  
    * -- Corky */
   
