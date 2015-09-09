@@ -305,14 +305,14 @@ public class ProjectProfile implements ProjectFileIR {
     xc.set("drscala.version", edu.rice.cs.drjava.Version.getVersionString());
     String path = FileOps.stringMakeRelativeTo(_projectRoot, _projectFile);
     path = replace(path, File.separator, "/");
-    xc.set("drjava/project.root", path);
+    xc.set("drscala/project.root", path);
     path = FileOps.stringMakeRelativeTo(_workDir, _projectFile);
     path = replace(path, File.separator, "/");
-    xc.set("drjava/project.work", path);
+    xc.set("drscala/project.work", path);
     
     if(_manifest != null) {
       String cleanManifest = TextUtil.xmlEscape(_manifest);
-      xc.set("drjava/project.manifest", cleanManifest);
+      xc.set("drscala/project.manifest", cleanManifest);
       
       LOG.log("dirty manifest: " + _manifest);
       LOG.log("clean manifest: " + cleanManifest);
@@ -321,25 +321,25 @@ public class ProjectProfile implements ProjectFileIR {
     if (_buildDir != null && _buildDir.getPath() != "") {
       path = FileOps.stringMakeRelativeTo(_buildDir, _projectFile);
       path = replace(path, File.separator, "/");
-      xc.set("drjava/project.build", path);
+      xc.set("drscala/project.build", path);
     }
     if (_mainClass != null && _mainClass != "") {
       /*path = FileOps.stringMakeRelativeTo(_mainClass, _projectFile);
       path = replace(path, File.separator, "/");*/
-      xc.set("drjava/project.main", _mainClass);      
+      xc.set("drscala/project.main", _mainClass);      
     }
-    xc.set("drjava/project.autorefresh", String.valueOf(_autoRefreshStatus));
+    xc.set("drscala/project.autorefresh", String.valueOf(_autoRefreshStatus));
     
     if (_createJarFile != null) {
       path = FileOps.stringMakeRelativeTo(_createJarFile, _createJarFile);
       path = replace(path, File.separator, "/");
-      xc.set("drjava/project/createjar.file", path);
+      xc.set("drscala/project/createjar.file", path);
     }
     if (_createJarFlags != 0) {
-      xc.set("drjava/project/createjar.flags", String.valueOf(_createJarFlags));
+      xc.set("drscala/project/createjar.flags", String.valueOf(_createJarFlags));
     }
     
-    xc.createNode("drjava/project/source");
+    xc.createNode("drscala/project/source");
     DocFile active = null;
     if (!_sourceFiles.isEmpty()) {
       for(DocFile df: _sourceFiles) {
@@ -357,7 +357,7 @@ public class ProjectProfile implements ProjectFileIR {
         Pair<Integer,Integer> pScr = df.getScroll();
         String s = MOD_DATE_FORMAT.format(new Date(df.lastModified()));
 
-        Node f = xc.createNode("drjava/project/source/file", null, false);      
+        Node f = xc.createNode("drscala/project/source/file", null, false);      
         xc.set(".name", path, f, true);
         xc.set(".timestamp", s, f, true);
         String pkg = df.getPackage();
@@ -369,7 +369,7 @@ public class ProjectProfile implements ProjectFileIR {
         if (df==active) xc.set(".active", "true", f, true);
       }
     }
-    xc.createNode("drjava/project/included");
+    xc.createNode("drscala/project/included");
     if (!_auxiliaryFiles.isEmpty()) {
       if (active == null) {
         for(DocFile df: _auxiliaryFiles) {
@@ -388,7 +388,7 @@ public class ProjectProfile implements ProjectFileIR {
         Pair<Integer,Integer> pScr = df.getScroll();
         String s = MOD_DATE_FORMAT.format(new Date(df.lastModified()));
 
-        Node f = xc.createNode("drjava/project/included/file", null, false);      
+        Node f = xc.createNode("drscala/project/included/file", null, false);      
         xc.set(".name", path, f, true);
         xc.set(".timestamp", s, f, true);
         String pkg = df.getPackage();
@@ -402,7 +402,7 @@ public class ProjectProfile implements ProjectFileIR {
       }
     }
     
-    xc.createNode("drjava/project/excluded");
+    xc.createNode("drscala/project/excluded");
     if (!_excludedFiles.isEmpty()) {
       if (active == null) {
         for(DocFile df: _excludedFiles) {
@@ -421,7 +421,7 @@ public class ProjectProfile implements ProjectFileIR {
         Pair<Integer,Integer> pScr = df.getScroll();
         String s = MOD_DATE_FORMAT.format(new Date(df.lastModified()));
 
-        Node f = xc.createNode("drjava/project/excluded/file", null, false);      
+        Node f = xc.createNode("drscala/project/excluded/file", null, false);      
         xc.set(".name", path, f, true);
         xc.set(".timestamp", s, f, true);
         String pkg = df.getPackage();
@@ -435,19 +435,19 @@ public class ProjectProfile implements ProjectFileIR {
       }
     }
     
-    xc.createNode("drjava/project/collapsed");
+    xc.createNode("drscala/project/collapsed");
     if (!_collapsedPaths.isEmpty()) {
       for(String s: _collapsedPaths) {
-        Node f = xc.createNode("drjava/project/collapsed/path", null, false);
+        Node f = xc.createNode("drscala/project/collapsed/path", null, false);
         xc.set(".name", s, f, true);
       }
     }
-    xc.createNode("drjava/project/classpath");
+    xc.createNode("drscala/project/classpath");
     if (!_classPathFiles.isEmpty()) {
       for(AbsRelFile cp: _classPathFiles) {
         path = cp.keepAbsolute()?cp.getAbsolutePath():FileOps.stringMakeRelativeTo(cp, _projectRoot);
         path = replace(path, File.separator, "/");
-        Node f = xc.createNode("drjava/project/classpath/file", null, false);
+        Node f = xc.createNode("drscala/project/classpath/file", null, false);
         xc.set(".name", path, f, true);
         xc.set(".absolute", String.valueOf(cp.keepAbsolute()), f, true);
       }
@@ -455,10 +455,10 @@ public class ProjectProfile implements ProjectFileIR {
     
     
     /* Debugger deactivated in DrScala */
-//    xc.createNode("drjava/project/breakpoints");
+//    xc.createNode("drscala/project/breakpoints");
 //    if (!_breakpoints.isEmpty()) {
 //      for(DebugBreakpointData bp: _breakpoints) {
-//        Node f = xc.createNode("drjava/project/breakpoints/breakpoint", null, false);
+//        Node f = xc.createNode("drscala/project/breakpoints/breakpoint", null, false);
 //        path = FileOps.stringMakeRelativeTo(bp.getFile(), _projectRoot);
 //        path = replace(path, File.separator, "/");
 //        xc.set(".file", path, f, true);
@@ -466,18 +466,18 @@ public class ProjectProfile implements ProjectFileIR {
 //        xc.set(".enabled", String.valueOf(bp.isEnabled()), f, true);
 //      }
 //    }
-//    xc.createNode("drjava/project/watches");
+//    xc.createNode("drscala/project/watches");
 //    if (!_watches.isEmpty()) {
 //      for(DebugWatchData w: _watches) {
-//        Node f = xc.createNode("drjava/project/watches/watch", null, false);
+//        Node f = xc.createNode("drscala/project/watches/watch", null, false);
 //        xc.set(".name", w.getName(), f, true);
 //      }
 //    }
     
-    xc.createNode("drjava/project/bookmarks");
+    xc.createNode("drscala/project/bookmarks");
     if (!_bookmarks.isEmpty()) {
       for (FileRegion bm: _bookmarks) {
-        Node n = xc.createNode("drjava/project/bookmarks/bookmark", null, false);
+        Node n = xc.createNode("drscala/project/bookmarks/bookmark", null, false);
         File file = bm.getFile();
         path = FileOps.stringMakeRelativeTo(file, _projectRoot);
         path = replace(path, File.separator, "/");
@@ -486,10 +486,10 @@ public class ProjectProfile implements ProjectFileIR {
         xc.set(".to", String.valueOf(bm.getEndOffset()), n, true);
       }
     }
-    xc.createNode("drjava/project/preferences");
+    xc.createNode("drscala/project/preferences");
     if (!_storedPreferences.isEmpty()) {
       for(Map.Entry<OptionParser<?>,String> e: _storedPreferences.entrySet()) {
-        Node n = xc.createNode("drjava/project/preferences/preference", null, false);
+        Node n = xc.createNode("drscala/project/preferences/preference", null, false);
         xc.set(".name", TextUtil.xmlEscape(e.getKey().getName()), n, true);
         xc.set(".value", TextUtil.xmlEscape(e.getValue()), n, true);
       }

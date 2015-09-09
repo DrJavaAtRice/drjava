@@ -5084,22 +5084,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
     catch (IOException ioe) { MainFrameStatics.showIOError(MainFrame.this, ioe); }
     finally { hourglassOff(); }
-  }
-  
-  /* Not relevant to DrScala */  
-//  void _saveAllOld() {
-//    hourglassOn();
-//    File file = _currentProjFile;
-//    try {
-//      if (_model.isProjectActive()) {
-//        if (file.getName().indexOf(".") == -1) file = new File (file.getAbsolutePath() + OLD_PROJECT_FILE_EXTENSION);
-//        _model.exportOldProject(file, gatherProjectDocInfo());
-//      }
-//      _model.saveAllFiles(_saveSelector);
-//    }
-//    catch (IOException ioe) { MainFrameStatics.showIOError(MainFrame.this, ioe); }
-//    finally { hourglassOff(); }
-//  }
+  } 
   
   // Called by the ProjectPropertiesFrame
   void saveProject() { _saveProject(); }
@@ -5140,9 +5125,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       }
       try {
         // by getting the canonical file, we make sure that we get an IOException if the filename is illegal
-        if (projectFile == null ||
-            projectFile.getParentFile() == null ||
-            (projectFile.getCanonicalFile().exists() && ! MainFrameStatics.verifyOverwrite(MainFrame.this, projectFile))) { return; }        
+        if (projectFile == null || projectFile.getParentFile() == null || (projectFile.getCanonicalFile().exists() && 
+            ! MainFrameStatics.verifyOverwrite(MainFrame.this, projectFile))) {
+          return; 
+        }        
         _model.createNewProject(projectFile); // sets model to a new FileGroupingState for project file pf
 //      ProjectPropertiesFrame ppf = new ProjectPropertiesFrame(MainFrame.this, file);
 //      ppf.saveSettings();  // Saves new project profile in global model
@@ -5944,9 +5930,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     catch (IOException ioe) { throw new UnexpectedException(ioe); }
   }
   
-  void _showProjectFileParseError(MalformedProjectFileException mpfe) {
-    showProjectFileParseError(this, mpfe);
-  }
+  /* Not used */
+//  void _showProjectFileParseError(MalformedProjectFileException mpfe) {
+//    showProjectFileParseError(this, mpfe);
+//  }
   
   void _showFileNotFoundError(FileNotFoundException fnf) {
     showFileNotFoundError(this, fnf);

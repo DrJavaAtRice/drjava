@@ -125,6 +125,7 @@ import edu.rice.cs.drjava.project.MalformedProjectFileException;
 import edu.rice.cs.drjava.project.ProjectFileIR;
 import edu.rice.cs.drjava.project.ProjectFileParserFacade;
 import edu.rice.cs.drjava.project.ProjectProfile;
+import edu.rice.cs.drjava.project.XMLProjectFileParser;
 import edu.rice.cs.drjava.ui.DrScalaErrorHandler;
 
 import edu.rice.cs.plt.reflect.ReflectUtil;
@@ -549,9 +550,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     setProjectChanged(true);
   }
   
-//  /** Queries the use for the build directory. */
-//  File askForBuildDirectory(MainFrame frame) { return frame.askForBuildDirectory(); }
-  
   /** Gets autorfresh status of the project */
   public boolean getAutoRefreshStatus() { return _state.getAutoRefreshStatus(); }
   
@@ -590,14 +588,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   public void cleanBuildDirectory()  { _state.cleanBuildDirectory(); }
   
   public List<File> getClassFiles() { return _state.getClassFiles(); }
-  
-  // No longer used
-//  /** Helper method used in subsequent anonymous inner class */
-//  protected static String getPackageName(String classname) {
-//    int index = classname.lastIndexOf(".");
-//    if (index != -1) return classname.substring(0, index);
-//    else return "";
-//  }
   
   class ProjectFileGroupingState implements FileGroupingState {
     
@@ -787,23 +777,14 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
     
     public void setBuildDirectory(File f) { _buildDir = f; }
-    
     public void setWorkingDirectory(File f) { _workDir = f; }
-    
     public String getMainClass() { return _mainClass; }
-    
     public void setMainClass(String f) { _mainClass = f; }
-    
     public void setCreateJarFile(File f) { _createJarFile = f; }
-    
     public File getCreateJarFile() { return _createJarFile; }
-    
     public void setCreateJarFlags(int f) { _createJarFlags = f; }
-    
     public int getCreateJarFlags() { return _createJarFlags; }
-    
     public boolean isProjectChanged() { return _isProjectChanged; }
-    
     public void setProjectChanged(boolean changed) { _isProjectChanged = changed; }
     
     public boolean isAuxiliaryFile(File f) {
@@ -1462,7 +1443,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
   }
   
-  
   //----------------------- End ILoadDocuments Methods -----------------------//
   
   /** Opens all files in the specified folder dir and places them in the appropriate places in the document navigator.
@@ -1546,19 +1526,16 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         files.add(f);
       }
     }
-    
     return files.toArray(new File[files.size()]);
   }
   
-  /** Searches the source folder (recursively) for new files and opens them.
-    */
+  /** Searches the source folder (recursively) for new files and opens them. */
   public void openNewFilesInProject() {
     File[] newFiles = getNewFilesInProject();
     if (newFiles == null) return;
     try { _openFiles(newFiles); }
     catch(Exception e) { }
   }
-  
   
   /** Saves all open files, prompting for names if necessary.
     * When prompting (i.e., untitled document), set that document as active.
@@ -1776,38 +1753,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     // write to disk
     builder.write();
     
-//    synchronized(_auxiliaryFiles) {
-//      _auxiliaryFiles = new LinkedList<File>();
-//      for (File f: builder.getAuxiliaryFiles()) { _auxiliaryFiles.add(f); }
-//    }
-    
     setFileGroupingState(makeProjectFileGroupingState(builder.getProjectRoot(), builder.getMainClass(), 
                                                       builder.getBuildDirectory(), builder.getWorkingDirectory(), file,
                                                       builder.getSourceFiles(), builder.getAuxiliaryFiles(), 
-                                                      builder.getExcludedFiles(),
-                                                      builder.getClassPaths(), builder.getCreateJarFile(), 
-                                                      builder.getCreateJarFlags(), builder.getAutoRefreshStatus(),
-                                                      builder.getCustomManifest(),
-                                                      builder.getPreferencesStoredInProject()));
-  }
-  
-  /** Writes the project profile in the old project format.  Assumes DrScala is in project mode.
-    * @param file where to save the project
-    */
-  public void exportOldProject(File file, HashMap<OpenDefinitionsDocument,DocumentInfoGetter> info) throws IOException {
-    ProjectProfile builder = _makeProjectProfile(file, info);
-    
-    // write to disk
-    builder.writeOld();
-    
-//    synchronized(_auxiliaryFiles) {
-//      _auxiliaryFiles = new LinkedList<File>();
-//      for (File f: builder.getAuxiliaryFiles()) { _auxiliaryFiles.add(f); }
-//    }
-    
-    setFileGroupingState(makeProjectFileGroupingState(builder.getProjectRoot(), builder.getMainClass (), 
-                                                      builder.getBuildDirectory(), builder.getWorkingDirectory(), file,
-                                                      builder.getSourceFiles(), builder.getAuxiliaryFiles(),
                                                       builder.getExcludedFiles(),
                                                       builder.getClassPaths(), builder.getCreateJarFile(), 
                                                       builder.getCreateJarFlags(), builder.getAutoRefreshStatus(),
@@ -1824,7 +1772,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   /** Parses the given project file and loads it into the document navigator and resets interactions pane. Assumes
     * preceding project, if any, has already been closed.
-    *
     * @param projectFile The project file to parse
     */
   public void openProject(File projectFile) throws IOException, MalformedProjectFileException {
