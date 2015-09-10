@@ -317,7 +317,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     */
   public abstract Pair<String,String> getVariableToString(String var);
   
-  /** Resets the Java interpreter with working directory wd. */
+  /** Resets the Java interpreter with working directory wd. Only runs in event thread. */
   public final void resetInterpreter(File wd, boolean force) {
     _workingDirectory = wd;
     _autoImportSet.clear(); // clear list when interpreter is reset
@@ -671,24 +671,33 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
       _interactionIsOver();
     }
   }
-
-  /**
-   * Default behavior set to return what it's given. 
-   * Used to replace line number and file name in a throwable when the error
-   * occurs in a Language Level file.
-   * Overriden in DefaultInteractionModel when a GlobalModel is available
-   * to make a LanguageLevelStackTraceMapper.
-   * @param sT the stackTrace to replace line number and file name
-   * @return the same stackTrace.
-   */
-  public StackTraceElement[] replaceLLException(StackTraceElement[] sT) {
-    return sT;
-    
-  }
+  
+  /* Due to delays and blocking by running code in the event handling thread, does not have any effect. */
+  
+//  /** Displays the fact that repl is being reset requiring a restart of the Scala interpreter. The Scala interpreter
+//    * cannot be reset because it is busy. The code that performs this restart is located in MainJVM. ONLY runs in the
+//    * Event Handling Thread! 
+//    */
+//  public void replIsResetting() {
+//    _document.insertBeforeLastPrompt(" Restarting the Scala interpreter, which is a SLOW process ...\n", 
+//                                     InteractionsDocument.ERROR_STYLE);
+//  }
+  
+//  /** Default behavior set to return what it's given.  Used to replace line number and file name in a throwable when
+//    * the error
+//    * occurs in a Language Level file.
+//    * Overriden in DefaultInteractionModel when a GlobalModel is available
+//    * to make a LanguageLevelStackTraceMapper.
+//    * @param sT the stackTrace to replace line number and file name
+//    * @return the same stackTrace.
+//    */
+//  public StackTraceElement[] replaceLLException(StackTraceElement[] sT) {
+//    return sT;
+//  }
   
   /** Signifies that the most recent interpretation was ended due to an exception being thrown. */
   public void replThrewException(String message, StackTraceElement[] stackTrace) {
-    stackTrace = replaceLLException(stackTrace);
+//    stackTrace = replaceLLException(stackTrace);
     StringBuilder sb = new StringBuilder(message);
     for(StackTraceElement ste: stackTrace) {
       sb.append("\n\tat ");

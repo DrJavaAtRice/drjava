@@ -234,7 +234,7 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
     * returns false if the point is not in the list.  Only runs in event thread.
     */
   public boolean setColoring(int point, Graphics g) {
-    synchronized(_stylesList) {
+//    synchronized(_stylesList) {
       for(Pair<Pair<Integer,Integer>,String> p :  _stylesList) {
         Pair<Integer,Integer> loc = p.first();
         if (loc.first() <= point && loc.second() >= point) {
@@ -289,14 +289,14 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
         }
       }
       return false;
-    }
+//    }
   }
   
   /** Attempts to set the font on the graphics context based upon the styles held in the styles list. Only runs in
     * event thread. 
     */
   public void setBoldFonts(int point, Graphics g) {
-    synchronized(_stylesList) {
+//    synchronized(_stylesList) {
       for(Pair<Pair<Integer,Integer>,String> p :  _stylesList) {
         Pair<Integer,Integer> loc = p.first();
         if (loc.first() <= point && loc.second() >= point) {
@@ -308,7 +308,7 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
           return;
         }
       }
-    }
+//    }
   }
   
   /** Called when the Interactions pane is reset.  Only runs in event thread. */

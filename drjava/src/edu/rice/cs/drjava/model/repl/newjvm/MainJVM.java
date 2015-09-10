@@ -76,6 +76,8 @@ import edu.rice.cs.plt.concurrent.JVMBuilder;
 import edu.rice.cs.plt.concurrent.StateMonitor;
 import edu.rice.cs.plt.concurrent.CompletionMonitor;
 
+import edu.rice.cs.util.swing.Utilities;
+
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 import static edu.rice.cs.drjava.config.OptionConstants.*;
 
@@ -174,11 +176,10 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     _state.value().restart(force); /* waitUntilReady(); */
     _interactionsModel._notifyInterpreterReady(_workingDir);
   }
-    
-  /**
-   * Stop the interpreter JVM, do not restart it, and terminate the RMI server associated with this object.
-   * May be useful when a number of different MainJVM objects are created (such as when running tests).
-   */
+  
+  /** Stop the interpreter JVM, do not restart it, and terminate the RMI server associated with this object.
+    * May be useful when a number of different MainJVM objects are created (such as when running tests).
+    */
   public void dispose() { _state.value().dispose(); }
   
   
@@ -213,8 +214,6 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     _state.value().startFailed(e);
   }
     
-  
-
   /*
    * === MainJVMRemoteI methods ===
    */
@@ -1060,8 +1059,21 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     }
     
     public Void forBusy() {
-      _interactionsModel.replReturnedVoid();
-      throw new UnexpectedException("MainJVM.interpret() called when InterpreterJVM was busy!");
+      /* Full reset of the interpreter is necessary. Force the restarting of the interpreter. */
+      
+      /* Stop the interpreter which means methods that delegate to the interpreter JVM will fail until the slave
+       * JVM is restarted. */
+//      _interactionsModel.replIsResetting();
+//      Utilities.show("Stopping interpreter");
+
+      stopInterpreterJVM();
+      
+      /* Display message in interactions pane that the interpreter is being restarted. When the interpreter is
+       * restarted, this display is not included int the new InteractionsDocument. */
+      
+//      Utilities.show("Restarting interpreter");
+      restartInterpreterJVM(true);
+      return null;
     }
   }
   
@@ -1117,6 +1129,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   
     public void replReturnedVoid() { }
     public void replReturnedResult(String result, String style) { }
+//    public void replIsResetting() { }
     public void replThrewException(String message, StackTraceElement[] stackTrace) { }
     public void replThrewException(String message) { }
     public void replReturnedSyntaxError(String errorMessage, String interaction, int startRow, int startCol, int endRow,

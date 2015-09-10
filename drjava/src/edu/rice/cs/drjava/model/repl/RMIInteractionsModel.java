@@ -116,23 +116,28 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
   public void addExtraClassPath(File f) { _jvm.addExtraClassPath(f); }
   
   /** Resets the Java interpreter. If DrScala is in a normal state (implying that _jvm.interpret(...) below will 
-    * succeed, the embedded Interactions document has already been cleared. */
+    * succeed, the embedded Interactions document has already been cleared.  Only runs in the event thread. */
   protected void _resetInterpreter(final File wd, final boolean force) {
-    setToDefaultInterpreter();
+    setToDefaultInterpreter();  // TODO: tear out interpreter selection; DrScala only has one interpreter
     _jvm.setWorkingDirectory(wd);
     /* Try to reset the interpreter using the internal scala interpreter reset command.  If this fails restart the
      * slave JVM. */
-    Utilities.invokeLater(new Runnable() {
-      public void run() {
-        _document.insertBeforeLastPrompt(" Resetting Interactions ...\n", InteractionsDocument.ERROR_STYLE);
-        boolean success = _jvm.interpret(":_$$$$$__$$$$$$_-reset");
-        if (success) {
-          _document.reset(generateBanner(wd));
-          _notifyInterpreterReady(wd);
-        }  
-        else _jvm.restartInterpreterJVM(force);
-      }
-    });
+    /* Already running in the event handling thread, so this invokeLater is unnecessary. */
+//    Utilities.invokeLater(new Runnable() {
+//      public void run() {
+//        Utilities.show("Executing Reset Runnable");
+    /* The following has no effect. */
+//    _document.insertBeforeLastPrompt(" Resetting Interactions ... which can be SLOW\n", InteractionsDocument.ERROR_STYLE);
+    boolean success = _jvm.interpret(":_$$$$$__$$$$$$_-reset");
+    /* NOTE: interpret only returns false when the interpreter is stopped. It throws an exception if the interpreter
+     * is busy, triggering handler code (the uncaughtException method) in DrScalaErrorHandler. */
+    if (success) {
+      _document.reset(generateBanner(wd)); /* Avoids displaying two prompt symbols.  Fix this hack? */
+    }  
+    else _jvm.restartInterpreterJVM(force);
+    _document.clearColoring();
+//      }
+//    });
   }
   
   /** Adds a named interpreter to the list.
@@ -196,7 +201,12 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
     * thread. */
   public void _notifyInterpreterReady(final File wd) {   /* TODO  rename this method */
 //    System.out.println("Asynchronously notifying interpreterReady event listeners");  // DEBUG
-    Utilities.invokeLater(new Runnable() { public void run() { _notifier.interpreterReady(wd); } });
+    Utilities.invokeLater(new Runnable() { 
+      public void run() { 
+        _notifier.interpreterReady(wd); 
+        _document.clearColoring();
+      } 
+    });
   }
 
   /** Sets whether or not the interpreter should enforce access to all members. */

@@ -123,10 +123,14 @@ public interface InteractionsModelCallback {
     */
   public void replCalledSystemExit(int status);
   
+//  /** Signifies that repl is being reset requiring a restart of the Scala interpreter. */
+//  public void replIsResetting();
+    
   /** This method is called by the Main JVM if the Interpreter JVM cannot be exited (likely because of its 
     * having a security manager)
     * @param th The Throwable thrown by System.exit
     */
+  
   public void interpreterResetFailed(Throwable th);
   
   /** Called when the slave JVM fails to startup */

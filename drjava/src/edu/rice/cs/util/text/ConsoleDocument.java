@@ -273,7 +273,7 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     * @param style Name of the style to use.  Must have been added using addStyle.
     * @throws EditDocumentException if the offset is illegal
     */
-  public void forceInsertText(int offs, String str, String style) throws EditDocumentException {      
+  public void forceInsertText(int offs, String str, String style) {      
     _addToStyleLists(offs, str, style);
 //    System.err.println("Inserting text '" + str + "' at position " + offs);
     _document.forceInsertText(offs, str, style);
@@ -284,6 +284,12 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     if (_document instanceof SwingDocument)
       ((SwingDocument)_document).addColoring(offs, offs + str.length(), style);
   }
+  
+  /** In an InteractionsDJDocument, this method clears the styles list for this document.  This may
+    * or may not be an issue in other concrete document classes extending this one. Only runs in the
+    * event thread.
+    */
+  public void clearColoring() { }
   
   /** Removes a portion of the document, if the edit condition (including promptPos) allows it.
     * @param offs Offset to start deleting from

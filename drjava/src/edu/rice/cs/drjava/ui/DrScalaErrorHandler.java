@@ -62,8 +62,11 @@ public class DrScalaErrorHandler implements Thread.UncaughtExceptionHandler {
   
   /** Handles an uncaught exception. This gets called automatically by AWT. */
   public void uncaughtException(Thread t, Throwable thrown) {
+//    if (thrown instanceof 
     record(thrown);
+//    Utilities.show("UncaughtExceptionHandler invoked");
   }
+  
   
   /** the list of errors */
   private static volatile ArrayList<Throwable> _errors = new ArrayList<Throwable>();
