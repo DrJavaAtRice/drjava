@@ -877,7 +877,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     if (projectExtras != null)  for (File cpE : projectExtras) { _interactionsModel.addProjectClassPath(cpE); }
     
     Vector<File> cp = DrScala.getConfig().getSetting(EXTRA_CLASSPATH);
-    System.err.println("Extra class path used in resetInteraction is: '" + cp + "'");
+//    System.err.println("Extra class path used in resetInteraction is: '" + cp + "'");  // shows in console
     if (cp != null) {
       for (File f : cp) { _interactionsModel.addExtraClassPath(f); }
     }
