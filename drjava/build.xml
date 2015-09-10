@@ -1536,7 +1536,7 @@
     <!-- Get a timestamp based on GMT, rather than local time -->
     <tstamp>
       <format property="DSTAMP" pattern="yyyyMMdd" timezone="GMT" />
-      <format property="TSTAMP" pattern="HHmm" timezone="GMT" />
+      <format property="TSTAMP" pattern="HH:mm:ss" timezone="GMT" />
       <format property="TODAY" pattern="MMMM dd yyyy" timezone="GMT" />
     </tstamp>
     <property name="version-tag"

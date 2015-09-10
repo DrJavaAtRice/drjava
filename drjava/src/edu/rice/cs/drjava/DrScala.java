@@ -423,13 +423,6 @@ public class DrScala {
         deleteAfterRestart.delete();
       }
       
-      else if (arg.equals("-jll")) {
-        String[] argsForJLL = new String[args.length-argIndex];
-        System.arraycopy(args, argIndex, argsForJLL, 0, argsForJLL.length);
-        edu.rice.cs.javalanglevels.LanguageLevelConverter.main(argsForJLL);
-        System.exit(0);
-      }
-      
       else if (arg.equals("-help") || arg.equals("-?")) {
         displayUsage();
         return false;

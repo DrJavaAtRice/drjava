@@ -54,7 +54,7 @@ public abstract class Version {
    * This string will be automatically expanded upon "ant commit".
    * Do not edit it by hand!
    */
-  private static final String VERSION_STRING = "drjava-@DATE@-r@REVISION@";
+  private static final String VERSION_STRING = "drscala-@DATE@-@TIME@";
 
   /**
    * This string will be automatically expanded upon "ant commit".

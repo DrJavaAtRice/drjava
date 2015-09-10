@@ -57,12 +57,10 @@ import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.collect.CollectUtil;
+import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
-import edu.rice.cs.javalanglevels.*;
-import edu.rice.cs.javalanglevels.parser.*;
-import edu.rice.cs.javalanglevels.tree.*;
 import edu.rice.cs.util.swing.DirectoryChooser;
 import edu.rice.cs.util.swing.ScrollableListDialog;
 
@@ -322,25 +320,6 @@ public class DefaultCompilerModel implements CompilerModel {
         public void run() { _notifier.compileEnded(_model.getWorkingDirectory(), excludedFiles); }
       });
     }
-  }
-  
-  /** Converts errors thrown by the language level visitors to CompilerErrors. */
-  private LinkedList<DJError> _visitorErrors2CompilerErrors(LinkedList<Pair<String, JExpressionIF>> visitorErrors) {
-    final LinkedList<DJError> errors = new LinkedList<DJError>();
-    Iterator<Pair<String, JExpressionIF>> iter = visitorErrors.iterator();
-    while (iter.hasNext()) {
-      Pair<String, JExpressionIF> pair = iter.next();
-      String message = pair.getFirst();      
-//      System.out.println("Got error message: " + message);
-      JExpressionIF jexpr = pair.getSecond();
-      
-      SourceInfo si;
-      if (jexpr == null) si = SourceInfo.NO_INFO;
-      else si = pair.getSecond().getSourceInfo();
-      
-      errors.addLast(new DJError(si.getFile(), si.getStartLine()-1, si.getStartColumn()-1, message, false));
-    }
-    return errors;
   }
   
   /** Compile the given files and update the model with any errors that result.  Does not notify listeners.  

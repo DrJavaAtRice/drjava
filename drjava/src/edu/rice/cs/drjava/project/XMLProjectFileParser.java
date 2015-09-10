@@ -106,7 +106,7 @@ public class XMLProjectFileParser extends ProjectFileParserFacade {
       XMLConfig xcParent = new XMLConfig(projFile);
       
       // create a sub-configuration so we don't have to prefix everything with "drjava/project/"
-      _xc = new XMLConfig(xcParent, xcParent.getNodes("drjava/project").get(0));
+      _xc = new XMLConfig(xcParent, xcParent.getNodes("drscala/project").get(0));
       LOG.log(_xc.toString());
       String s;
       

@@ -50,7 +50,7 @@ public class ProjectFileParserFacade {
 //  protected boolean _xmlProjectFile;
   
   /** @param projFile the file to parse
-    *  @return the project file IR
+    * @return the project file IR
     */
   public ProjectFileIR parse(File projFile) throws IOException, FileNotFoundException, MalformedProjectFileException {
     FileReader fr = new FileReader(projFile);
