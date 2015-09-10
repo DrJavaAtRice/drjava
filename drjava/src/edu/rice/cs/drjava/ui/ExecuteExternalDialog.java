@@ -973,10 +973,10 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     XMLConfig xc = new XMLConfig();
 //    System.out.println("saveToFile(" + index + ", " + f + ")");
 //    System.out.println("\t" + names.get(index));
-    xc.set("drjava/extprocess/name", names.get(index));
-    xc.set("drjava/extprocess/cmdline", cmdlines.get(index));
-    xc.set("drjava/extprocess/workdir", workdirs.get(index));
-    xc.set("drjava/extprocess/enlcosingfile", enclosingFiles.get(index));
+    xc.set("drscala/extprocess/name", names.get(index));
+    xc.set("drscala/extprocess/cmdline", cmdlines.get(index));
+    xc.set("drscala/extprocess/workdir", workdirs.get(index));
+    xc.set("drscala/extprocess/enlcosingfile", enclosingFiles.get(index));
     xc.save(f);
   }
   

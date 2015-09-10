@@ -831,7 +831,7 @@ public class JarOptionsDialog extends SwingFrame {
             //But would rather not change it in the general case; just in case.
             String prefix = _model.getBuildDirectory().getName();
             if(prefix.length() < 3)
-              prefix = "drjava_tempSourceJar";
+              prefix = "drscala_tempSourceJar";
             
             File sourceJarFile = File.createTempFile(prefix, ".jar");
             

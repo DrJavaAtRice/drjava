@@ -6337,7 +6337,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _checkNewVersionAction.setEnabled(DrScala.getConfig().getSetting(OptionConstants.NEW_VERSION_ALLOWED));
 //    _setUpAction(_drjavaSurveyAction, "Send System Information", "About", 
 //                 "Send anonymous system information to DrScala developers");
-    _setUpAction(_errorsAction, "DrScala Errors", "drjavaerror", "Show a window with internal DrScala errors");
+    _setUpAction(_errorsAction, "DrScala Errors", "drscalaerror", "Show a window with internal DrScala errors");
     _setUpAction(_forceQuitAction, "Force Quit", "Stop", "Force DrScala to quit without cleaning up");
     _setUpAction(_generateCustomDrScalaJarAction, "Generate Custom drscala.jar...",
                  "<html>Generate a custom drjava.jar file that includes additional files,<br>"+
@@ -10130,9 +10130,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   public static void openExtProcessFile(File file) {
     try {
       XMLConfig xc = new XMLConfig(file);
-      String name = xc.get("drjava/extprocess/name");
-      ExecuteExternalDialog.addToMenu(name, xc.get("drjava/extprocess/cmdline"),
-                                      xc.get("drjava/extprocess/workdir"), "");
+      String name = xc.get("drscala/extprocess/name");
+      ExecuteExternalDialog.addToMenu(name, xc.get("drscala/extprocess/cmdline"),
+                                      xc.get("drscala/extprocess/workdir"), "");
       JOptionPane.showMessageDialog(null, "The installation was successful for:\n"+name,
                                     "Installation Successful", JOptionPane.INFORMATION_MESSAGE);
       // We override the drjava/extprocess/enclosingfile and set it to the empty string ""
