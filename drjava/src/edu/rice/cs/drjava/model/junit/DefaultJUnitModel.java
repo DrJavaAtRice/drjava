@@ -93,7 +93,7 @@ import static edu.rice.cs.drjava.config.OptionConstants.*;
 public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   
   /** log for use in debugging */
-  private static Log _log = new Log("GlobalModel.txt", true);
+  private static Log _log = new Log("GlobalModel.txt", false);
   
   /** Manages listeners to this model. */
   private final JUnitEventNotifier _notifier = new JUnitEventNotifier();
