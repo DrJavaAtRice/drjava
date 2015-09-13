@@ -520,7 +520,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     Iterable<File> newCp = _model.getInteractionsClassPath();
     System.err.println("New class path is:\n" + IterUtil.multilineToString(newCp));
     System.err.println("Classpath after extension = '" + _model.getInteractionsClassPath() + "'");
-    Utilities.show("Pause to inspect class path including " + cp);
+//    Utilities.show("Pause to inspect class path including " + cp);
     
     // example format of REPL result: res0: String = DrScalaTestFoo
     String pattern = "\\s*res[0-9]+: String = DrScalaTestFoo\\s*";

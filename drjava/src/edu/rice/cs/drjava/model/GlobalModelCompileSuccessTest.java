@@ -58,8 +58,8 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
     aDir.mkdir();
     bDir.mkdir();
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
-    final File file = new File(aDir, "DrScalaTestFoo.scala");
-    saveFile(doc, new FileSelector(file));
+    final File file1 = new File(aDir, "DrScalaTestFoo.scala");
+    saveFile(doc, new FileSelector(file1));
     OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
     final File file2 = new File(bDir, "DrScalaTestBar.scala");
     saveFile(doc2, new FileSelector(file2));
@@ -70,17 +70,18 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
     
     Utilities.clearEventQueue();
     
-    if (_model.getCompilerModel().getNumErrors() == 0) {
-      fail("compile succeeded despite multiple source roots");
-    }
-    assertCompileErrorsPresent(_name(), true);
+    // Compile should succeed with multiple source roots
+    assertEquals("compile succeeded despite multiple source roots", 0, _model.getCompilerModel().getNumErrors());
+    assertCompileErrorsPresent(_name(), false);
     listener.checkCompileOccurred();
 
-    // Make sure .class files do not exist for the two files
-    File compiled = classForScala(file, "DrScalaTestFoo");
-    assertTrue(_name() + "Foo Class file doesn't exist after compile", ! compiled.exists());
-    File compiled2 = classForScala(file2, "DrSclaTestBar");
-    assertTrue(_name() + "Bar Class file doesn't exist after compile", ! compiled2.exists());
+    // Make sure .class files exist for the first file in expected place
+    File compiled = classForScala(file2, "DrScalaTestBar");
+    System.err.println("Class file for DrScalaTestBar = " + compiled);
+    assertTrue(_name() + "Bar Class file exists after compile", compiled.exists());
+    // Scalac does not respond to null destination by placing each class file in corresponding source file's folder
+//    File compiled2 = classForScala(file2, "DrSclaTestFoo");
+//    assertTrue(_name() + "Foo Class file doesn't exist after compile", ! compiled2.exists());
     _model.removeListener(listener);
   }
   

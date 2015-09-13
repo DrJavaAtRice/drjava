@@ -151,14 +151,15 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     
     assertCompileErrorsPresent(_name(), true);
 //    System.err.println(cm.getCompilerErrorModel());
-    assertEquals("Should have 1 compiler error", 1, cm.getNumErrors());
+    assertEquals("Should have 2 compiler errors", 2, cm.getNumErrors());
     listener.checkCompileOccurred();
     
     // Make sure .class does not exist for both files
     File compiled1 = classForScala(file1, "DrScalaTestFoo");
     assertEquals(_name() + "Class file exists after failing compile (1)", false, compiled1.exists());
-    File compiled2 = classForScala(file2, "DrScalaTestBar");
-    assertEquals(_name() + "Class file exists after failing compile (2)", false, compiled2.exists());
+    /* Scalac does not respond toa null destination by placing all class files in corresponding source location. */
+//    File compiled2 = classForScala(file2, "DrScalaTestBar");
+//    assertEquals(_name() + "Class file exists after failing compile (2)", false, compiled2.exists());
     _model.removeListener(listener);
     
 //    System.err.println("testCompileAllFailsDifferentSourceRoots completed");

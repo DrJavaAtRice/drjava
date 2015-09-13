@@ -301,13 +301,15 @@ public class DefaultCompilerModel implements CompilerModel {
         
         
 //        File buildDir = _model.isProjectActive() ? _model.getBuildDirectory() : sourceRoot;
-        if (buildDir == null || buildDir == FileOps.NULL_FILE)   // flat file mode or unset build directory in a project 
+        if (buildDir == null || buildDir == FileOps.NULL_FILE) {  // flat file mode or unset build directory in a project 
           buildDir = _model.getProjectRoot();
-        
+          _model.setBuildDirectory(buildDir);
+          
 //        Utilities.show("buildDir is: " + buildDir);
-        
-        System.err.println("Calling _compileFiles(" + filesToCompile + ", " + buildDir + ")");
-        _compileFiles(filesToCompile, buildDir);
+          
+          System.err.println("Calling _compileFiles(" + filesToCompile + ", " + buildDir + ")");
+          _compileFiles(filesToCompile, buildDir);
+        }
       }
       catch (Throwable t) {
         DJError err = new DJError(t.toString(), false);

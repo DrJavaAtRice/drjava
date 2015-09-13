@@ -994,7 +994,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   }
   
   public static class InteractionListener extends TestListener {
-    private static final int WAIT_TIMEOUT = 100000; // time to wait for _interactionDone or _resetDone 
+    private static final int WAIT_TIMEOUT = 300000; // time to wait for _interactionDone or _resetDone 
     private volatile CompletionMonitor _interactionDone;
     private volatile CompletionMonitor _resetDone;
     

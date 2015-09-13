@@ -46,12 +46,14 @@ import java.io.FilenameFilter;
 import java.io.FileFilter;
 import java.io.InputStream;
 import java.io.FileOutputStream;
-import edu.rice.cs.plt.io.IOUtil;
+;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.model.DJError;
-import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.plt.reflect.JavaVersion;
+import edu.rice.cs.plt.io.IOUtil;
+import edu.rice.cs.util.ArgumentTokenizer;
+import edu.rice.cs.util.Log;
 
 /** An abstract parent for all javac-based compiler interfaces that may need to filter .exe files from the
   * classpath, i.e. javac from JDKs 1.6.0_04 or newer.
@@ -61,7 +63,9 @@ public abstract class Javac160FilteringCompiler extends JavacCompiler {
   protected final boolean _filterExe;
   protected final File _tempJUnit;
   protected static final String PREFIX = "drscala-junit";
-  protected static final String SUFFIX = ".jar";  
+  protected static final String SUFFIX = ".jar";
+  
+  protected static final Log _log = new Log("jdk8.txt",true);
   
   protected Javac160FilteringCompiler(JavaVersion.FullVersion version,
                                       String location,
@@ -69,23 +73,23 @@ public abstract class Javac160FilteringCompiler extends JavacCompiler {
     super(version, location, defaultBootClassPath);
 
     _filterExe = version.compareTo(JavaVersion.parseFullVersion("1.6.0_04")) >= 0;
+    _log.log("filterExe = " + _filterExe);
     File tempJUnit = null;
     if (_filterExe) {
       // if we need to filter out exe files from the classpath, we also need to
       // extract junit.jar and create a temporary file
       try {
-        // edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("jdk160.txt",true);
-        // LOG.log("Filtering exe files from classpath.");
+        // _log.log("Filtering exe files from classpath.");
         InputStream is = Javac160FilteringCompiler.class.getResourceAsStream("/junit.jar");
         if (is!=null) {
-          // LOG.log("\tjunit.jar found");
+          // _log.log("\tjunit.jar found");
           tempJUnit = edu.rice.cs.plt.io.IOUtil.createAndMarkTempFile(PREFIX,SUFFIX);
           FileOutputStream fos = new FileOutputStream(tempJUnit);
           int size = edu.rice.cs.plt.io.IOUtil.copyInputStream(is,fos);
-          // LOG.log("\t"+size+" bytes written to "+tempJUnit.getAbsolutePath());
+          // _log.log("\t"+size+" bytes written to "+tempJUnit.getAbsolutePath());
         }
         else {
-          // LOG.log("\tjunit.jar not found");
+          // _log.log("\tjunit.jar not found");
           if (tempJUnit!=null) {
             tempJUnit.delete();
             tempJUnit = null;

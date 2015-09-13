@@ -73,14 +73,15 @@ import scala.tools.nsc.reporters.ConsoleReporter;
 
 /** An implementation of JavacCompiler that supports compiling with the Scala 2.11.x compiler based on Java 1.7.0.
   * Must be compiled using javac 1.7.0 and with Scala compiler jar on the boot classpath.  The class 
-  * Javac160FilteringCompiler filters .exe files out of the class path because the JVM does not recognize such files
+  * Javac160FilteringCompiler filters .exe filters out of the class path because the JVM does not recognize such files
   * on its classpath after early builds of Java 6.
   *
   *  @version $Id$
   */
 public class ScalaCompiler extends Javac160FilteringCompiler implements /* Scala */ CompilerInterface {
   
-  public static final Log _log = new Log("GlobalModel.txt", false);
+//  _log is also defined in a superclass
+  public static final Log _log = new Log("jdk8.txt", true);
   
   private File _outputDir = null;
     
@@ -170,7 +171,7 @@ public class ScalaCompiler extends Javac160FilteringCompiler implements /* Scala
     * @return true if the specified file is a source file for this compiler. */
   public boolean isSourceFileForThisCompiler(File f) {
     // by default, use DrJavaFileUtils.isSourceFile
-//    _log.log("ScalaCompiler.isSourceFile(" + f + ") called");
+    _log.log("ScalaCompiler.isSourceFile(" + f + ") called");
     String fileName = f.getName();
     return fileName.endsWith(SCALA_FILE_EXTENSION) || fileName.endsWith(OptionConstants.JAVA_FILE_EXTENSION);
   }
@@ -254,8 +255,12 @@ public class ScalaCompiler extends Javac160FilteringCompiler implements /* Scala
 //                    this, files, classPath, sourcePath, destination, bootClassPath, sourceVersion, showWarnings);
 //    java.util.List<File> filteredClassPath = getFilteredClassPath(classPath);
     
+    _log.log("In " + this + ", compile(" + files + ", " + classPath + ", " + sourcePath + ", " + destination + ", " +
+             bootClassPath + ", " + sourceVersion + ", " + showWarnings + ") called");
+    
+    
     /* Must create a Reporter object for the Scalac compiler.  In Scala Setting appears to be the rough equivalent of
-     * compilatoin context.  We are using the default Setting.  Scalac does not take a list of JavaFileObjects. */
+     * compilation context.  We are using the default Setting.  Scalac does not take a list of JavaFileObjects. */
     
     /** DrJava error table, which is passed to our compilation reporter and embedded in it. */
     LinkedList<DJError> errors = new LinkedList<DJError>();
@@ -270,20 +275,26 @@ public class ScalaCompiler extends Javac160FilteringCompiler implements /* Scala
 //    settings.processArgumentString("-usejavacp");
     settings.processArgumentString("-deprecation");
     String dest = (destination == null) ? null : destination.getPath();
-//    Utilities.show("dest = '" + dest + "'");
+    System.err.println("In ScalaCompiler, dest = '" + dest + "'");
     if (dest != null) {
       _log.log("Passing argument string '" + "-d " + '"' + dest + '"' + "to the scala compiler (Global)");
+//      Utilities.show("Passing argument string '" + "-d " + '"' + dest + '"' + "to the scala compiler (Global)");
       settings.processArgumentString("-d " + '"' + dest + '"');
     }
-    else settings.processArgumentString("-d " + '"' + '"');
+    else {
+//      settings.processArgumentString("-d " + '"' + '"');
+//      Utilities.show("No destination argument string passed");
+      _log.log("No destination argument string passed");
+    }
+
     // additionalBootClassPathForInteractions consists of the jar files required to run scalac
     String cp = additionalBootClassPathForInteractions().toString() + dJPathToPath(classPath);
     settings.processArgumentString("-cp " + '"' + cp + '"');  // cp quoted because unescaped blanks may appear in Windows file names
-//    Utilities.show("Location of Scala distribution is: " + _location + "\nScala compiler class path set to '" + cp + "'");
+    _log.log("Scala compiler class path set to '" + cp + "'");
    
     Global compiler = new Global(settings, reporter);
  
-//    Utilities.show("Scala compiler object constructed");
+    _log.log("Scala compiler object constructed");
     /* Create a run of the Scala compiler. */
     Global.Run run = compiler.new Run();
     
@@ -292,12 +303,16 @@ public class ScalaCompiler extends Javac160FilteringCompiler implements /* Scala
     scala.collection.immutable.List fileObjects =   
       scala.collection.immutable.Nil$.MODULE$;  // the empty list in Scala
     for (File f : files) fileObjects = fileObjects.$colon$colon(new PlainFile(Path.jfile2path(f)));
-    try { run.compileFiles(fileObjects); }  // fileObjects has raw type List
+    try { 
+      _log.log("Compiling " + fileObjects);
+      run.compileFiles(fileObjects); 
+    }  // fileObjects has raw type List
     catch(Throwable t) {  // compiler threw an exception/error (typically out of memory error)
       errors.addFirst(new DJError("Compile exception: " + t, false));
+      _log.log("Compilation generated exception: " + t);
 //      error.log(t);
     }
-    
+    _log.log("End compile()");
 //    debug.logEnd("compile()");
     return errors;
   }
