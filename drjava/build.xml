@@ -72,7 +72,7 @@
   <taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml">
       <classpath path="lib/jacocoant.jar"/>
   </taskdef>
-  <property name="coverage-report-dir" value="coverage report"/>
+  <property name="coverage-report-dir" value="coverage_report"/>
   <property name="coverage-exec" value="jacoco.exec"/>
 
 <!--  <extendclasspath path="lib/buildlib/junit.jar" /> -->

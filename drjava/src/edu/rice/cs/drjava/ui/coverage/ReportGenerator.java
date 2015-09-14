@@ -9,7 +9,7 @@
  *    Brock Janiczak - initial API and implementation
  *    
  *******************************************************************************/
-package edu.rice.cs.drjava.ui;
+package edu.rice.cs.drjava.ui.coverage;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -89,12 +89,13 @@ public class ReportGenerator {
         }
     }
 
-    private InputStream getTargetClass(final String name) {
+    /** Public getters and setters */
+    public InputStream getTargetClass(final String name) {
         final String resource = '/' + name.replace('.', '/') + ".class";
         return getClass().getResourceAsStream(resource);
     }
  
-    private InputStream getTargetClass(final File file) throws Exception {
+    public InputStream getTargetClass(final File file) throws Exception {
         return new FileInputStream(file.getCanonicalPath().replace(".java",
             ".class"));
     }
@@ -138,90 +139,88 @@ public class ReportGenerator {
         return "";
     }
 
-   /**
-    * Create a new generator based for the given file.
-    * 
-    */
-   public ReportGenerator(final SingleDisplayModel _model, 
-       /* final GlobalModel _model, */ 
-       final List<OpenDefinitionsDocument> docs, 
-       final File destDirectory) throws Exception  {
+    /**
+     * Create a new generator based for the given file.
+     * 
+     */
+    public ReportGenerator(final GlobalModel _model, 
+        final List<OpenDefinitionsDocument> docs, 
+        final File destDirectory) throws Exception  {
 
-       File src = docs.get(0).getFile().getParentFile(); 
-       String packageName = docs.get(0).getPackageName();
-       if (!packageName.equals("")) {
-           // If there's package, go up until the root dir  
-           int numUp = packageName.split("\\.").length;
-           for (int i = 0; i< numUp ; i++) {
-               src = src.getParentFile();
-           }
-       }
-       this.sourceDirectory = src;
-       this.title = src.getName();
+        File src = docs.get(0).getFile().getParentFile(); 
+        String packageName = docs.get(0).getPackageName();
+        if (!packageName.equals("")) {
+            // If there's package, go up until the root dir  
+            int numUp = packageName.split("\\.").length;
+            for (int i = 0; i< numUp ; i++) {
+                src = src.getParentFile();
+            }
+        }
+        this.sourceDirectory = src;
+        this.title = src.getName();
 
-       List<File> targets = new ArrayList<File>();
-       for (File dir:CollectUtil.makeList(_model.getClassPath())) {
-           if (!dir.isDirectory() || dir.getName().equals("lib") || 
-               dir.getName().equals("base") || dir.getName().equals("test")) {
-               continue;
-           }
-           targets.addAll(rec_init_target(dir));
-       }
-       this.targets = targets;
+        List<File> targets = new ArrayList<File>();
+        for (File dir:CollectUtil.makeList(_model.getClassPath())) {
+            if (!dir.isDirectory() || dir.getName().equals("lib") || 
+                dir.getName().equals("base") || dir.getName().equals("test")) {
+                continue;
+            }
+            targets.addAll(rec_init_target(dir));
+        }
+        this.targets = targets;
 
-       ArrayList<String> targetNames = new ArrayList<String>();
-       for (File f: targets) {
-           targetNames.add(getTargetClassName(f));
-       }
+        ArrayList<String> targetNames = new ArrayList<String>();
+        for (File f: targets) {
+            targetNames.add(getTargetClassName(f));
+        }
 
-       this.targetNames = targetNames;
-       this.reportDirectory = destDirectory;
-       this.mainClassFileName = getTargetClassName(docs.get(0).getFile());
-   }
+        this.targetNames = targetNames;
+        this.reportDirectory = destDirectory;
+        this.mainClassFileName = getTargetClassName(docs.get(0).getFile());
+    }
 
+    /**
+     * Create a new generator based for the given project.
+     */
+    public ReportGenerator(final GlobalModel _model, 
+        File sourceDirectory, String mainClassPath, File destDirectory) 
+        throws Exception  {
 
-   /**
-    * Create a new generator based for the given project.
-    */
-   public ReportGenerator(final SingleDisplayModel _model, 
-       File sourceDirectory, String mainClassPath, File destDirectory) 
-       throws Exception  {
+        this.sourceDirectory = sourceDirectory;
+        this.reportDirectory = destDirectory; 
+        this.title = sourceDirectory.getName();  
+        this.mainClassFileName = mainClassPath;
 
-       this.sourceDirectory = sourceDirectory;
-       this.reportDirectory = destDirectory; 
-       this.title = sourceDirectory.getName();  
-       this.mainClassFileName = mainClassPath;
+        this.targets = rec_init_src(sourceDirectory);
+        ArrayList<String> targetNames = new ArrayList<String>();
+        for (File f: targets) {
+            targetNames.add(getTargetClassName(f));
+        }
 
-       this.targets = rec_init_src(sourceDirectory);
-       ArrayList<String> targetNames = new ArrayList<String>();
-       for (File f: targets) {
-           targetNames.add(getTargetClassName(f));
-       }
+        this.targetNames = targetNames;
+    }
 
-       this.targetNames = targetNames;
-   }
+    public List<File> rec_init_src(File sourceDirectory) {
 
-   public List<File> rec_init_src(File sourceDirectory) {
+        ArrayList<File> files = new ArrayList<File>();
+        for (File f: sourceDirectory.listFiles()) {
+            if (f.isFile()) {
+                int i = f.getPath().lastIndexOf('.');
+                if (i > 0) {
+                    String extension = f.getPath().substring(i+1);
+                    if (extension.equals("java")) {
+                        files.add(f);
+                    }
+                }
+            } else if (f.isDirectory()) {
+                files.addAll(rec_init_src(f));
+            }
+        }
 
-       ArrayList<File> files = new ArrayList<File>();
-       for (File f: sourceDirectory.listFiles()) {
-           if (f.isFile()) {
-               int i = f.getPath().lastIndexOf('.');
-               if (i > 0) {
-                   String extension = f.getPath().substring(i+1);
-                   if (extension.equals("java")) {
-                       files.add(f);
-                   }
-               }
-           } else if (f.isDirectory()) {
-               files.addAll(rec_init_src(f));
-           }
-       }
+        return files;
+    }
 
-       return files;
-   }
-
-   public List<File> rec_init_target(File sourceDirectory){
+    public List<File> rec_init_target(File sourceDirectory){
        ArrayList<File> files = new ArrayList<File>();
        for (File f: sourceDirectory.listFiles()) {                
            if (f.isFile()) {
@@ -237,9 +236,8 @@ public class ReportGenerator {
            }
        }
 
-       return files;
-   }
-
+        return files;
+    }
 
     /**
      * Create the report.
@@ -336,7 +334,11 @@ public class ReportGenerator {
         visitor.visitEnd();
     }
  
- 
+    /** Public getters and setters */
+    public File getSourceDirectory() {
+        return this.sourceDirectory;
+    }
+
     public ArrayList<String> getLineColorsForClass(String className) {
          
         ArrayList<String> lineColors = new ArrayList<String>();
