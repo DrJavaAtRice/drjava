@@ -47,6 +47,7 @@ public interface JUnitModel {
   
   
   /** set the forceTestSuffix flag that forces class names in projects to end in "Test */
+  public void setCoverage(boolean c);
   public void setForceTestSuffix(boolean b);
   
   //-------------------------- Listener Management --------------------------//

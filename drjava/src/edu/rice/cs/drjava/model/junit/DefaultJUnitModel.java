@@ -36,6 +36,8 @@
 
 package edu.rice.cs.drjava.model.junit;
 
+import edu.rice.cs.drjava.ui.coverage.ReportGenerator;
+
 import java.awt.EventQueue;
 import java.io.File;
 import java.io.IOException;
@@ -43,6 +45,30 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.FileReader;
 import java.rmi.RemoteException;
+
+// For JaCoCo:
+import java.io.Writer;
+import java.io.BufferedWriter;
+import java.io.OutputStreamWriter;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import org.jacoco.core.analysis.Analyzer;
+import org.jacoco.core.analysis.CoverageBuilder;
+import org.jacoco.core.analysis.IBundleCoverage;
+import org.jacoco.core.tools.ExecFileLoader;
+import org.jacoco.core.analysis.IClassCoverage;
+import org.jacoco.core.analysis.ICounter;
+import org.jacoco.core.data.ExecutionDataStore;
+import org.jacoco.core.data.SessionInfoStore;
+import org.jacoco.core.instr.Instrumenter;
+import org.jacoco.core.runtime.IRuntime;
+import org.jacoco.core.runtime.LoggerRuntime;
+import org.jacoco.core.runtime.RuntimeData;
+import org.jacoco.report.DirectorySourceFileLocator;
+import org.jacoco.report.FileMultiReportOutput;
+import org.jacoco.report.IReportVisitor;
+import org.jacoco.report.html.HTMLFormatter;
 
 import java.util.List;
 import java.util.LinkedList;
@@ -92,6 +118,8 @@ import edu.rice.cs.drjava.model.compiler.LanguageLevelStackTraceMapper;
   */
 public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   
+  private boolean coverage = false;
+
   /** log for use in debugging */
   private static Log _log = new Log("DefaultJUnitModel.txt", false);
   
@@ -141,6 +169,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   
   //-------------------------- Field Setters --------------------------------//
   
+  public void setCoverage(boolean c) { coverage = c; }
   public void setForceTestSuffix(boolean b) { _forceTestSuffix = b; }
   
   //------------------------ Simple Predicates ------------------------------//
@@ -312,7 +341,8 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     */
   private void _rawJUnitOpenDefDocs(List<OpenDefinitionsDocument> lod, final boolean allTests) {
     File buildDir = _model.getBuildDirectory();
-//    Utilities.show("Running JUnit tests. Build directory is " + buildDir);
+
+    //Utilities.show("Running JUnit tests. Build directory is " + buildDir);
     
     /** Open java source files */
     HashSet<String> openDocFiles = new HashSet<String>();
@@ -328,7 +358,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     for (OpenDefinitionsDocument doc: lod) /* for all nonEmpty documents in lod */ {
       if (doc.isSourceFile())  { // excludes Untitled documents and open non-source files
         try {
-//          System.err.println("Processing " + doc);
+          //System.err.println("Processing " + doc);
           File sourceRoot = doc.getSourceRoot(); // may throw an InvalidPackageException
           
           // doc has valid package name; add it to list of open java source doc files
@@ -348,21 +378,21 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
           
           if (! classDirsAndRoots.containsKey(classFileDir)) {
             classDirsAndRoots.put(classFileDir, sourceDir);
-//          System.err.println("Adding " + classFileDir + " with source root " + sourceRoot + 
-//          " to list of class directories");
+            //System.err.println("Adding " + classFileDir + " with source root " + sourceRoot + 
+            //" to list of class directories");
           }
         }
         catch (InvalidPackageException e) { /* Skip the file, since it doesn't have a valid package */ }
       }
     }
 
-//    System.err.println("classDirs = " + classDirsAndRoots.keySet());
+    //System.err.println("classDirs = " + classDirsAndRoots.keySet());
     
     /** set of dirs potentially containing test classes */
     Set<File> classDirs = classDirsAndRoots.keySet();
     
-//    System.err.println("openDocFiles = " + openDocFiles);
-    
+    //System.err.println("openDocFiles = " + openDocFiles);
+
     /* Names of test classes. */
     final ArrayList<String> classNames = new ArrayList<String>();
     
@@ -374,32 +404,31 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     
     try {
       for (File dir: classDirs) { // foreach class file directory
-//        System.err.println("Examining directory " + dir);
+        //System.err.println("Examining directory " + dir);
         
         File[] listing = dir.listFiles();
         
-//        System.err.println("Directory contains the files: " + Arrays.asList(listing));
+        //System.err.println("Directory contains the files: " + Arrays.asList(listing));
         
         if (listing != null) { // listFiles may return null if there's an IO error
           for (File entry : listing) { /* for each class file in the build directory */        
             
-//            System.err.println("Examining file " + entry);
+            //System.err.println("Examining file " + entry);
             
             /* ignore non-class files */
             String name = entry.getName();
             if (! name.endsWith(".class")) continue;
             
             /* Ignore class names that do not end in "Test" if FORCE_TEST_SUFFIX option is set */
+            String noExtName = "";
             if (_forceTestSuffix) {
-              String noExtName = name.substring(0, name.length() - 6);  // remove ".class" from name
+              noExtName = name.substring(0, name.length() - 6);  // remove ".class" from name
               int indexOfLastDot = noExtName.lastIndexOf('.');
               String simpleClassName = noExtName.substring(indexOfLastDot + 1);
-//            System.err.println("Simple class name is " + simpleClassName);  
+              //System.err.println("Simple class name is " + simpleClassName);  
               if (/*isProject &&*/ ! simpleClassName.endsWith("Test")) continue;
             }
-            
-//            System.err.println("Found test class: " + noExtName);
-            
+                       
             /* ignore entries that do not correspond to files?  Can this happen? */
             if (! entry.isFile()) continue;
             
@@ -429,17 +458,18 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
               
               /** The canonical pathname for the file (including the file name) */
               String javaSourceFileName = getCanonicalPath(rootDir) + File.separator + sourceName.value();
-//              System.err.println("Full java source fileName = " + javaSourceFileName);
+ 
+              //System.err.println("Full java source fileName = " + javaSourceFileName);
               
               /* The index in fileName of the dot preceding the extension ".java", ".dj", ".dj0*, ".dj1", or ".dj2" */
               int indexOfExtDot = javaSourceFileName.lastIndexOf('.');
-//              System.err.println("indexOfExtDot = " + indexOfExtDot);
+              //System.err.println("indexOfExtDot = " + indexOfExtDot);
               if (indexOfExtDot == -1) continue;  // RMI stub class files return source file names without extensions
-//              System.err.println("File found in openDocFiles = "  + openDocFiles.contains(sourceFileName));
+              //System.err.println("File found in openDocFiles = "  + openDocFiles.contains(sourceFileName));
               
               /* Determine if this java source file was generated from a language levels file. */
               String strippedName = javaSourceFileName.substring(0, indexOfExtDot);
-//              System.err.println("Stripped name = " + strippedName);
+              //System.err.println("Stripped name = " + strippedName);
               
               String sourceFileName;
               
@@ -466,10 +496,80 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
       }
     }
     catch(Exception e) {
-//      new ScrollableDialog(null, "UnexceptedExceptionThrown", e.toString(), "").show();
+      //new ScrollableDialog(null, "UnexceptedExceptionThrown", e.toString(), "").show();
       throw new UnexpectedException(e); // triggers _junitInterrupted which runs hourglassOff
     }
     
+    // JaCoCo: Create instrumented versions of class files.
+    ReportGenerator rg = null;
+    RuntimeData myData = null;
+    ArrayList<File> myInstrumentedFiles = null;
+    IRuntime myRuntime = null;
+
+    if (coverage) {
+        // Prepare to generate a JaCoCo report
+        try {
+            rg = new ReportGenerator(_model, 
+                _model.getDocumentNavigator().getSelectedDocuments(), 
+                new File("/tmp/JaCoCo"));
+        } catch (Exception e) {
+            throw new UnexpectedException(e);
+        }
+
+        myData = new RuntimeData();
+        myInstrumentedFiles = new ArrayList<File>();
+        myRuntime = new LoggerRuntime();
+
+        // The Instrumenter creates a modified version of our test target class
+        // that contains additional probes for execution data recording:
+        ArrayList<byte[]> instrumenteds = new ArrayList<byte[]>();
+        for (int i = 0 ; i< files.size() ; i++) {
+
+            // Instrument the i-th file
+            try {
+                final Instrumenter instr = new Instrumenter(myRuntime);
+                final byte[] instrumented = instr.instrument(rg.getTargetClass(
+                    files.get(i)), classNames.get(i));
+                String[] pathParts = files.get(i).getAbsolutePath().split("/");
+
+                // Write this instrumented class to a file in /tmp/
+                FileOutputStream fos = new FileOutputStream("/tmp/" + 
+                    pathParts[pathParts.length - 1].substring(0, 
+                    pathParts[pathParts.length - 1].length() - 4) + "class");
+                fos.write(instrumented);
+                fos.close();
+
+                // Keep track of all of the instrumented files
+                myInstrumentedFiles.add(new File("/tmp/" + 
+                    pathParts[pathParts.length - 1]));
+                instrumenteds.add(instrumented);
+
+            } catch (Exception e) {
+                StringWriter stackTrace = new StringWriter();
+                e.printStackTrace(new PrintWriter(stackTrace));
+                Utilities.show("INSTRUMENTATION EXCEPTION: " + stackTrace.toString());
+                continue;
+            }
+        }
+
+        // Now we're ready to run our instrumented class and need to startup the
+        // runtime first:
+        try {
+            myRuntime.startup(myData);
+        } catch (Exception e) {
+            throw new UnexpectedException(e);
+        }
+
+        _jvm.setWorkingDirectory(new File("/tmp"));
+        Utilities.show("Set working directory.");
+        _jvm.restartInterpreterJVM(true);
+        Utilities.show("Restarted interpreter.");
+    } 
+
+    final RuntimeData data = myData;
+    final ArrayList<File> instrumentedFiles = myInstrumentedFiles;
+    final IRuntime runtime = myRuntime;
+
     /** Run the junit test suite that has already been set up on the slave JVM */
     _testInProgress = true;
     // System.err.println("Spawning test thread");
@@ -484,12 +584,16 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
         // _debugger.getPendingRequestManager().classPrepared(e); (which presumably
         // deals with preparing the class) on the event thread using invokeLater.
         // This, however, doesn't get executed because the event thread is still blocking --> deadlock.
-        
         synchronized(_compilerModel.getCompilerLock()) {
           // synchronized over _compilerModel to ensure that compilation and junit testing are mutually exclusive.
           /** Set up junit test suite on slave JVM; get TestCase classes forming that suite */
-          List<String> tests = _jvm.findTestClasses(classNames, files).unwrap(null);
-//          System.err.println("tests = " + tests);
+          List<String> tests;
+          if (coverage) {
+            tests = _jvm.findTestClasses(classNames, instrumentedFiles).unwrap(null);
+          } else {
+            tests = _jvm.findTestClasses(classNames, files).unwrap(null);
+          }
+
           if (tests == null || tests.isEmpty()) {
             nonTestCase(allTests, false);
             return;
@@ -497,20 +601,65 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
         }
         
         try {
-          // Utilities.show("Starting JUnit");
-          
           _notifyJUnitStarted(); 
-          boolean testsPresent = _jvm.runTestSuite();  // The false return value could be changed to an exception.
-          if (! testsPresent) throw new RemoteException("No unit test classes were passed to the slave JVM");
+          // The false return value could be changed to an exception.
+          boolean testsPresent = _jvm.runTestSuite();  
+          if (! testsPresent) {
+              throw new RemoteException("No unit test classes were passed to the slave JVM");
+          }
         }
-        catch(RemoteException e) { // Unit testing aborted; cleanup; hourglassOff already called in junitStarted
+        catch (RemoteException e) { 
+          // Unit testing aborted; cleanup; hourglassOff already called in junitStarted
           _notifyJUnitEnded();  // balances junitStarted()
           _testInProgress = false;
         }
       }
+
     }).start();
-  }
-  
+    
+    // At the end of test execution we collect execution data and shutdown
+    // the runtime:
+    //highlight(rg, true);
+    if (coverage) {
+      Utilities.show("Collecting session info...");
+      final ExecutionDataStore executionData = new ExecutionDataStore();
+      final SessionInfoStore sessionInfos = new SessionInfoStore();
+      myData.collect(executionData, sessionInfos, false);
+      runtime.shutdown();
+
+      // Together with the original class definition we can calculate coverage
+      // information:
+      final CoverageBuilder coverageBuilder = new CoverageBuilder();
+      final Analyzer analyzer = new Analyzer(executionData, coverageBuilder);
+
+      try {
+          for (int i = 0; i< classNames.size(); i++) {
+              Utilities.show("className = " + classNames.get(i));
+              analyzer.analyzeClass(rg.getTargetClass(files.get(i)), 
+                  classNames.get(i));
+          }
+
+          //printCoverage(coverageBuilder);
+
+          // Run the structure analyzer on a single class folder to build up
+          // the coverage model. The process would be similar if your classes
+          // were in a jar file. Typically you would create a bundle for each
+          // class folder and each jar you want in your report. If you have
+          // more than one bundle you will need to add a grouping node to your
+          // report
+          Utilities.show("rg.getSourceDirectory().getName() = " + rg.getSourceDirectory().getName());
+          final IBundleCoverage bundleCoverage = coverageBuilder.getBundle(
+              rg.getSourceDirectory().getName());
+          rg.createReport(bundleCoverage, executionData, sessionInfos);
+      } catch (Exception e) {
+          StringWriter stackTrace = new StringWriter();
+          e.printStackTrace(new PrintWriter(stackTrace));
+          Utilities.show("ANALYSIS EXCEPTION: " + stackTrace.toString());
+      }
+
+    }
+ }
+   
 //-------------------------------- Helpers --------------------------------//
   
   /** Helper method to notify JUnitModel listeners that JUnit test suite execution has started. */
