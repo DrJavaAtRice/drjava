@@ -114,7 +114,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   }
   
   JButton _but;
-  /** Tests that the returned JButton of <code>createManualToolbarButton</code>:
+  /** Tests that the returned JButton of <code>createManualToolBarButton</code>:
     * 1. Is disabled upon return.
     * 2. Inherits the tooltip of the Action parameter <code>a</code>.
     */
@@ -122,7 +122,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     final Action a = new AbstractAction("Test Action") { public void actionPerformed(ActionEvent ae) { } };
     
     a.putValue(Action.LONG_DESCRIPTION, "test tooltip");
-    Utilities.invokeAndWait(new Runnable() { public void run() { _but = _frame._createManualToolbarButton(a); } });
+    Utilities.invokeAndWait(new Runnable() { public void run() { _but = _frame._createManualToolBarButton(a); } });
     
     assertTrue("Returned JButton is enabled.", ! _but.isEnabled());
     assertEquals("Tooltip text not set.", "test tooltip", _but.getToolTipText());
