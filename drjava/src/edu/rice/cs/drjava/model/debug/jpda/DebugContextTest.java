@@ -217,7 +217,7 @@
 //    _model.addListener(interpretListener);
 //    synchronized(_notifierLock) {
 ////      _log.log("-------- resuming --------");
-//      _setPendingNotifies(3);  // interactionEnded, interpreterChanged, currThreadDied (since it's the last thread)
+//      _setPendingNotifies(3);  // interactionEnded, interpreterReplaced, currThreadDied (since it's the last thread)
 //      _asyncResume();
 //      while (_pendingNotifies > 0) _notifierLock.wait();
 //    }
@@ -304,7 +304,7 @@
 //    InterpretListener interpretListener = new InterpretListener();
 //    _model.addListener(interpretListener);
 //    synchronized(_notifierLock) {
-//      _setPendingNotifies(3);  // interactionEnded, interpreterChanged, currThreadDied (since it's the last thread)
+//      _setPendingNotifies(3);  // interactionEnded, interpreterReplaced, currThreadDied (since it's the last thread)
 //      _asyncResume();
 //      while (_pendingNotifies > 0) _notifierLock.wait();
 //    }

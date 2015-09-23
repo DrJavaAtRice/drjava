@@ -140,11 +140,11 @@ public class InteractionsEventNotifier extends EventNotifier<InteractionsListene
     * @param inProgress Whether the new interpreter is currently in progress with an interaction (ie. whether an 
     * interactionEnded event will be fired)
     */
-  public void interpreterChanged(boolean inProgress) {
+  public void interpreterReplaced(boolean inProgress) {
     _lock.startRead();
     try {
       int size = _listeners.size();
-      for (int i = 0; i < size; i++)  _listeners.get(i).interpreterChanged(inProgress);
+      for (int i = 0; i < size; i++)  _listeners.get(i).interpreterReplaced(inProgress);
     }
     finally { _lock.endRead(); }
   }
@@ -158,5 +158,4 @@ public class InteractionsEventNotifier extends EventNotifier<InteractionsListene
     }
     finally { _lock.endRead(); }
   }
-  
 }

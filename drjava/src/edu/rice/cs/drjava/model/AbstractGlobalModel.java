@@ -556,21 +556,28 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** Sets autofresh status of the project */
   public void setAutoRefreshStatus(boolean status) { _state.setAutoRefreshStatus(status); }
   
-  /** @return the working directory for the Master JVM (editor and GUI). */
+  /** @return the defrault working directory for the Master JVM (editor and GUI). If _activeDirectory is non-null,
+    * it is probably a better choice for a guessed working directory.  */
   public File getMasterWorkingDirectory() {
-    File file;
-    try {
-      // restore the path from the configuration
-      file = FileOps.getValidDirectory(DrScala.getConfig().getSetting(LAST_DIRECTORY));
-    }
-    catch (RuntimeException e) {
-      // something went wrong, clear the setting and use "user.home"
-      DrScala.getConfig().setSetting(LAST_DIRECTORY, FileOps.NULL_FILE);
-      file = FileOps.getValidDirectory(new File(System.getProperty("user.home", ".")));
-    }
-    // update the setting and return it
-    DrScala.getConfig().setSetting(LAST_DIRECTORY, file);
-    return file;
+    /* On startup, LAST_DIRECTORY is random!  It may be left over from unit testing (including 
+     * a failing unit test) and no longer exist!  It should NEVER be used in a fresh start of DrJava!
+     */
+    return FileOps.getValidDirectory(new File(System.getProperty("user.home", ".")));
+      
+//    File file;
+//    try {
+//      // restore the path from the configuration
+//      file = FileOps.getValidDirectory(DrScala.getConfig().getSetting(LAST_DIRECTORY));
+//    }
+//    catch (RuntimeException e) {
+//      // something went wrong, clear the setting and use "user.home"
+//      DrScala.getConfig().setSetting(LAST_DIRECTORY, FileOps.NULL_FILE);
+//      file = ;
+//    }
+//    // update the setting and return it
+//    DrScala.getConfig().setSetting(LAST_DIRECTORY, file);
+//    return file;
+//  }
   }
   
   /** @return the working directory for the Slave (Interactions) JVM */
@@ -711,14 +718,14 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
           // containing the project file
           File parentDir = _projectFile.getParentFile();
           if (parentDir != null) {
-            return parentDir.getCanonicalFile(); // default is project root
+            return parentDir.getCanonicalFile(); // default is directory containing project file
           } // or if all else fails, user.dir
           else return new File(System.getProperty("user.dir"));
         }
         return _workDir.getCanonicalFile();
       }
       catch(IOException e) { /* fall through */ }
-      return _workDir.getAbsoluteFile();
+      return _workDir.getAbsoluteFile();  // Explain how getAbsoluteFile differs from getCanonicalFile
     }
     
     /** Sets project file to specifed value; used in "Save Project As ..." command in MainFrame. */
@@ -1015,18 +1022,19 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       Iterable<File> roots = getSourceRootSet();
       if (! IterUtil.isEmpty(roots)) { return IterUtil.first(roots); }
       else {
-        // use the last directory saved to the configuration
-        if (DrScala.getConfig().getSetting(STICKY_INTERACTIONS_DIRECTORY)) {
-          try {
-            // restore the path from the configuration
-            file = FileOps.getValidDirectory(DrScala.getConfig().getSetting(LAST_INTERACTIONS_DIRECTORY));
-          }
-          catch (RuntimeException e) { file = FileOps.NULL_FILE; }
-        }
-        if (file == FileOps.NULL_FILE) {
-          // something went wrong, clear the setting and use "user.home"
-          file = FileOps.getValidDirectory(new File(System.getProperty("user.home", ".")));
-        }
+        file = getMasterWorkingDirectory();
+//        // use the last directory saved to the configuration
+//        if (DrScala.getConfig().getSetting(STICKY_INTERACTIONS_DIRECTORY)) {
+//          try {
+//            // restore the path from the configuration
+//            file = FileOps.getValidDirectory(DrScala.getConfig().getSetting(LAST_INTERACTIONS_DIRECTORY));
+//          }
+//          catch (RuntimeException e) { file = FileOps.NULL_FILE; }
+//        }
+//        if (file == FileOps.NULL_FILE) {
+//          // something went wrong, clear the setting and use "user.home"
+//          file = FileOps.getValidDirectory(new File(System.getProperty("user.home", ".")));
+//        }
         // update the setting and return it
         DrScala.getConfig().setSetting(LAST_INTERACTIONS_DIRECTORY, file);
         return file;
@@ -1450,7 +1458,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     */
   public void openFolder(File dir, boolean rec, String ext)
     throws IOException, OperationCanceledException, AlreadyOpenException {
-    debug.logStart();
+//    debug.logStart();
     
     final File[] sfiles =  getFilesInFolder(dir, rec, ext); 
     if (sfiles == null) return;
@@ -1458,7 +1466,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     if (sfiles.length > 0 && _state.inProjectPath(dir)) setProjectChanged(true);
     
-    debug.logEnd();
+//    debug.logEnd();
   }
   
   /** @return the file extension for the "Open Folder..." command for the currently selected compiler. */
@@ -2383,9 +2391,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   /** A degenerate operation since this has no slave JVM and no interactions model. */
   public void resetInteractions(File wd) { /* do nothing */ }
-  
-  /** A degenerate operation since this has no slave JVM and no interactions model. */
-  public void resetInteractions(File wd, boolean forceReset) { /* do nothing */ }
   
   /** Resets the console. Fires consoleReset() event. */
   public void resetConsole() {
@@ -4239,7 +4244,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   /** Creates a new document if there are currently no documents open. */
   private void _ensureNotEmpty() {
-    if (getDocumentCount() == 0) newFile(getMasterWorkingDirectory());
+    if (getDocumentCount() == 0) {
+      File wd = _activeDirectory == null ? getMasterWorkingDirectory() : _activeDirectory;
+      newFile(wd);
+    }
   }
   
   /** Makes sure that none of the documents in the list are active.

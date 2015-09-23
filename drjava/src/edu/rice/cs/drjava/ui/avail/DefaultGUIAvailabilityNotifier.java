@@ -38,17 +38,20 @@ package edu.rice.cs.drjava.ui.avail;
 
 import edu.rice.cs.drjava.model.EventNotifier;
 
-/**
- * Convenience methods for starting and finishing tasks that use multiple
- * components.
+/** Convenience methods for starting and finishing tasks that use multiple components.
  *
- * <i>No</i> methods on this class should be synchronized using traditional
- * Java synchronization!
+ * <i>No</i> methods on this class should be synchronized using traditional Java synchronization!
  * <p>
  *
  * @version $Id: DefaultGUIAvailabilityNotifier.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class DefaultGUIAvailabilityNotifier extends GUIAvailabilityNotifier {
+  
+  public static final DefaultGUIAvailabilityNotifier ONLY = new DefaultGUIAvailabilityNotifier();
+  
+  /* Default constructor restricted to private access. */
+  private DefaultGUIAvailabilityNotifier() { }
+  
   /** Set the availability of tasks needed for JUnit, i.e. JUNIT and COMPILER.
     * The availabilities can be nested.
     * 

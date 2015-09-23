@@ -50,6 +50,7 @@ import java.io.File;
 public final class InteractionsDJDocumentTest extends DrScalaTestCase {
 
   protected InteractionsDJDocument _adapter;
+  protected GlobalModel _globalModel;
   protected InteractionsModel _model;
   protected InteractionsDocument _doc;
   protected MainFrame mf;
@@ -62,6 +63,7 @@ public final class InteractionsDJDocumentTest extends DrScalaTestCase {
       public void run() {
         mf = new MainFrame();
         GlobalModel gm = mf.getModel();
+        _globalModel = gm;
         _model = gm.getInteractionsModel();
         _adapter = gm.getSwingInteractionsDocument();
         _doc = gm.getInteractionsDocument();
@@ -137,14 +139,14 @@ public final class InteractionsDJDocumentTest extends DrScalaTestCase {
       }};
     _model.addListener(restartCommand);
                                    
-    // Reset should clear
-    _model.setWaitingForFirstInterpreter(false);
+//    // Reset should clear
+//    _model.setWaitingForFirstInterpreter(false);
     
     synchronized(_restartLock) { _interpreterRestarted = false; }
       
     // Reset the interactions pane, restarting the interpreter
     File f = _model.getWorkingDirectory();
-    _model.resetInterpreter(f, true);
+    _globalModel.resetInteractions(f);
     
 //    System.err.println("Interpreter reset");
 

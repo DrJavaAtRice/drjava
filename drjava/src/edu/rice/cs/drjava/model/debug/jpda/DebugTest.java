@@ -106,9 +106,9 @@
 //        _log.log("interactionEnded called in resetListener");
 //        interactionEndCount++;
 //      }
-//      public void interpreterChanged(boolean inProgress) {
+//      public void interpreterReplaced(boolean inProgress) {
 //        // Don't notify: happens in the same thread
-//        _log.log("interpreterChanged called in resetListener");
+//        _log.log("interpreterReplaced called in resetListener");
 //        interpreterChangedCount++;
 //      }
 //      public void interpreterResetting() {
@@ -331,7 +331,7 @@
 //    _model.addListener(interpretListener);
 //    synchronized(_notifierLock) {
 //      _asyncResume();
-//      _setPendingNotifies(3);  // interactionEnded, interpreterChanged, currThreadDied
+//      _setPendingNotifies(3);  // interactionEnded, interpreterReplaced, currThreadDied
 //      // we get a currThreadDied here since it's the last thread
 //      while (_pendingNotifies > 0) _notifierLock.wait();
 //    }
@@ -410,7 +410,7 @@
 //    synchronized(_notifierLock) {
 //      _log.log("-------- Resuming --------");
 //      _asyncResume();
-//      _setPendingNotifies(3);  // interactionEnded, interpreterChanged, currThreadDied
+//      _setPendingNotifies(3);  // interactionEnded, interpreterReplaced, currThreadDied
 //      // here, we get a currThreadDied since it's the last thread
 //      while (_pendingNotifies > 0) _notifierLock.wait();
 //    }
@@ -474,7 +474,7 @@
 //    synchronized(_notifierLock) {
 //      _log.log("-------- Resuming --------");
 //      _asyncResume();
-//      _setPendingNotifies(3);  // interactionEnded, interpreterChanged, currThreadDied
+//      _setPendingNotifies(3);  // interactionEnded, interpreterReplaced, currThreadDied
 //      // here, we get a currThreadDied since it's the last thread
 //      while (_pendingNotifies > 0) _notifierLock.wait();
 //    }
@@ -599,7 +599,7 @@
 //    _model.addListener(interpretListener);
 //    synchronized(_notifierLock) {
 //      _asyncStep(Debugger.StepType.STEP_OVER);
-//      _setPendingNotifies(3);  // interactionEnded, interpreterChanged, currThreadDied
+//      _setPendingNotifies(3);  // interactionEnded, interpreterReplaced, currThreadDied
 //      // here, we get a currThreadDied since it's the last thread
 //      while (_pendingNotifies > 0) _notifierLock.wait();
 //    }
@@ -758,7 +758,7 @@
 //    _model.addListener(interpretListener);
 //    synchronized(_notifierLock) {
 //      _asyncResume();
-//      _setPendingNotifies(3);  // interactionEnded, interpreterChanged, currThreadDied
+//      _setPendingNotifies(3);  // interactionEnded, interpreterReplaced, currThreadDied
 //      // here, we get a currThreadDied since it's the last thread
 //      while (_pendingNotifies > 0) _notifierLock.wait();
 //    }

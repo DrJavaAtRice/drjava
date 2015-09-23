@@ -48,6 +48,7 @@ import edu.rice.cs.drjava.model.DefaultGlobalModel;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 //import edu.rice.cs.drjava.model.compiler.LanguageLevelStackTraceMapper;
 import edu.rice.cs.drjava.model.repl.newjvm.MainJVM;
+import edu.rice.cs.util.Log;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.text.ConsoleDocumentInterface;
@@ -61,6 +62,8 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   /** Message to signal that input is required from the console. */
 //  public static final String INPUT_REQUIRED_MESSAGE =
 //    "Please enter input in the Console tab." + _newLine;
+  
+  public static final Log _log = new Log("MainJVM.txt", true);
   
   /** Model that contains the interpreter to use. */
   protected final DefaultGlobalModel _model;
@@ -95,6 +98,7 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   public void replSystemOutPrint(String s) {
     super.replSystemOutPrint(s); // Print s to interactions pane
    _model.systemOutPrint(s);    // Print s to console
+   
   }
   
   /** Called when the repl prints to System.err.  This method can safely be called from outside the event thread.
@@ -103,13 +107,15 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   public void replSystemErrPrint(String s) {
     super.replSystemErrPrint(s);
     _model.systemErrPrint(s);
+    _log.log("Printing string '" + s + "'");
   }
   
   /** Returns a line of text entered by the user at the equivalent of System.in.  This method may be safely called
     * from outside the event thread. */
   public String getConsoleInput() { 
     String s = super.getConsoleInput();
-//    System.err.println("Returning '" + s + "' as console input");
+//    System.err.println("Returning '" + s + "' as console input"); 
+    _log.log("Returning '" + s + "' as console input");
     _model.systemInEcho(s);
     return s; 
   }
@@ -120,6 +126,7 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   protected void _interpreterResetFailed(final Throwable t) {
     Utilities.invokeLater(new Runnable() { 
       public void run() {
+        _log.log("Reset Failed! See the console tab for details.");
         _document.insertBeforeLastPrompt("Reset Failed! See the console tab for details." + StringOps.NEWLINE,
                                          InteractionsDocument.ERROR_STYLE);
          // Print the exception to the console
@@ -131,11 +138,10 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   protected void _interpreterWontStart(final Exception e) {
     Utilities.invokeLater(new Runnable() { 
       public void run() {
-        _document.insertBeforeLastPrompt("JVM failed to start.  Make sure a firewall is not blocking " +
-                                         StringOps.NEWLINE +
-                                         "inter-process communication.  See the console tab for details." +
-                                         StringOps.NEWLINE,
-                                         InteractionsDocument.ERROR_STYLE);
+        String output = "JVM failed to start.  Make sure a firewall is not blocking " +
+          StringOps.NEWLINE + "inter-process communication.  See the console tab for details." + StringOps.NEWLINE;
+        _log.log("inserted '" + output + "' before prompt");
+        _document.insertBeforeLastPrompt(output, InteractionsDocument.ERROR_STYLE);
          // Print the exception to the console
         _model.systemErrPrint(StringOps.getStackTrace(e));  // redundantly moves code to event thread
       }
@@ -148,47 +154,82 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   public void interpreterReady(File wd) {
     _model.resetInteractionsClassPath();  // Done here rather than in the superclass because _model is available here.
     super.interpreterReady(wd);
+    _log.log("****Event: interpreterReady(" + wd +") called");
   }
   
   /** In the event thread, notifies listeners that an interaction has started. */
   public void _notifyInteractionStarted() { 
-    Utilities.invokeLater(new Runnable() { public void run() { _notifier.interactionStarted(); } });
+    Utilities.invokeLater(new Runnable() { public void run() { 
+      _notifier.interactionStarted(); 
+      _log.log("****Event: an interaction has started");
+    } });
   }
   
   /** In the event thread, notifies listeners that an interaction has ended. */
   protected void _notifyInteractionEnded() { 
-    Utilities.invokeLater(new Runnable() { public void run() { _notifier.interactionEnded(); } });
+    Utilities.invokeLater(new Runnable() { public void run() { 
+      _notifier.interactionEnded();
+      _log.log("****Event: the current interaction has ended");
+    } });
   }
   
   /** In the event thread, notifies listeners that an error was present in the interaction. */
   protected void _notifySyntaxErrorOccurred(final int offset, final int length) {
-    Utilities.invokeLater(new Runnable() { public void run() { _notifier.interactionErrorOccurred(offset,length); } });
+    Utilities.invokeLater(new Runnable() { public void run() { 
+      _notifier.interactionErrorOccurred(offset,length);
+      _log.log("****Event: a syntax error occurred in the interactions model");
+    } });
   }
   
-  /** In the event thread, notifies listeners that the interpreter has changed.
+  /** In the event thread, notifies listeners that the interpreter has been replaced. Only runs in event thread.
     * @param inProgress Whether the new interpreter is currently in progress.
     */
-  public void _notifyInterpreterChanged(final boolean inProgress) {
-    Utilities.invokeLater(new Runnable() { public void run() { _notifier.interpreterChanged(inProgress); } });
+  protected void _notifyInterpreterReplaced(final boolean inProgress) {
+//    Utilities.invokeLater(new Runnable() { public void run() { 
+      _notifier.interpreterReplaced(inProgress);
+      _log.log("****Event: the interpreter was changed; inProgess = " + inProgress);
+//    } });
   }
   
-  /** In the event thread, notifies listeners that the interpreter is resetting. */
+  /** Notifies listeners that the interpreter is resetting. Only runs in the event thread */
   protected void _notifyInterpreterResetting() { 
-    Utilities.invokeLater(new Runnable() { public void run() { _notifier.interpreterResetting(); } });
+//    Utilities.invokeLater(new Runnable() { public void run() { 
+    _notifier.interpreterResetting();
+    _log.log("****Event: the interpreter is resetting");
+//    } });
+  }
+  
+  /** In the event thread, notifies listeners that the interpreter is ready. Sometimes called from outside the event
+    * thread. */
+  public void _notifyInterpreterReady(final File wd) {   /* TODO  rename this method */
+//    System.out.println("Asynchronously notifying interpreterReady event listeners");  // DEBUG
+    Utilities.invokeLater(new Runnable() { 
+      public void run() { 
+        _notifier.interpreterReady(wd); 
+        _log.log("****Event: the interpreter is ready with wd " + wd);
+        _document.clearColoring();  // _document is inherited from the abstract superclass InteractionsModel
+      } 
+    });
   }
   
   /** In the event thread, notifies listeners that the interpreter has exited unexpectedly.
     * @param status Status code of the dead process
     */
   protected void _notifyInterpreterExited(final int status) {
-    Utilities.invokeLater(new Runnable() { public void run() { _notifier.interpreterExited(status); } });
+    Utilities.invokeLater(new Runnable() { public void run() { 
+      _notifier.interpreterExited(status); 
+      _log.log("****Event: the interpreter exited unexpectedly with status = " + status);
+    } });
   }
   
   /** In the event thread, notifies listeners that the interpreter reset failed.
     * @param t Throwable causing the failure
     */
   protected void _notifyInterpreterResetFailed(final Throwable t) {
-    Utilities.invokeLater(new Runnable() { public void run() { _notifier.interpreterResetFailed(t); } });
+    Utilities.invokeLater(new Runnable() { public void run() { 
+      _notifier.interpreterResetFailed(t);
+      _log.log("****Event: interpreter reset failed");
+    } });
   }
   
   /** In the event thread, notifies the view that the current interaction is incomplete. */

@@ -105,16 +105,21 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   public static final InterpreterJVM ONLY = new InterpreterJVM();
   
   /** Debugging log. */
-  private static final Log _log  = new Log("GlobalModel.txt", false);
+  private static final Log _log  = new Log("MasterJVM.txt", true);
   
-  // As RMI can lead to parallel threads, all fields must be thread-safe.  Consequently, we use
+  // Since RMI can lead to parallel threads, all fields must be thread-safe.  Consequently, we use
   // concurrent Collections
   
   private final InteractionsPaneOptions _interpreterOptions;
-  private volatile Pair<String, Interpreter> _activeInterpreter;
+//  private volatile Pair<String, Interpreter> _activeInterpreter;
   private final Interpreter _defaultInterpreter;
-  private final ConcurrentHashMap<String, Interpreter> _interpreters;
-  private final /* CONCURRENT */ Set<Interpreter> _busyInterpreters;
+  
+  /** In DrScala, these data structures are used in a degenerate fashion.  _busyInterpreters is either empty if
+    * _defaultInterpreter is available or {_defaultInterpreter} if interpretation is in progress.  In this degenerate
+    * case, I think this information could be recorded in a volatile boolean field.
+    */
+//  private final ConcurrentHashMap<String, Interpreter> _interpreters;
+//  private final /* CONCURRENT */ Set<Interpreter> _busyInterpreters;
 
   private final ClassPathManager _classPathManager;
   private final ClassLoader _interpreterLoader;
@@ -144,15 +149,12 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     // _interpreterOptions = Options.DEFAULT;
     _interpreterOptions = new InteractionsPaneOptions();
 
-    //_defaultInterpreter = new Interpreter(_interpreterOptions, _interpreterLoader);
     _defaultInterpreter = new DrScalaInterpreter();
-    //_defaultInterpreter = new Interpreter(_classPathManager);
-    //_defaultInterpreter = new Interpreter(_interpreterLoader);
-
-    _interpreters = new ConcurrentHashMap<String,Interpreter>();
-    _busyInterpreters = Collections.synchronizedSet(new HashSet<Interpreter>());
-//    _environments = new HashMap<String, Pair<TypeContext, RuntimeBindings>>();
-    _activeInterpreter = Pair.make("", _defaultInterpreter);
+    
+//    _interpreters = new ConcurrentHashMap<String,Interpreter>();
+//    _busyInterpreters = Collections.synchronizedSet(new HashSet<Interpreter>());
+//
+//    _activeInterpreter = Pair.make("", _defaultInterpreter);
   }
  
   /** Actions to perform when this JVM is started (through its superclass, AbstractSlaveJVM). Not synchronized
@@ -194,10 +196,11 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
       }
     }));
     
-    if (_defaultInterpreter == null)
-      System.out.println("_defaultInterpreter is not yet fully initialized when handleStart is called in the InterpreterJVM instance?");
-    else 
-      _defaultInterpreter.start();
+    /* _defaultInterpreter is final bound to an instance of DrScalaInterpreter, so it can NEVER be null once initialized. */ 
+//    if (_defaultInterpreter == null)
+//      System.out.println("_defaultInterpreter is not yet fully initialized when handleStart is called in the InterpreterJVM instance?");
+//    else 
+    _defaultInterpreter.start();
 
     /* On Windows, any frame or dialog opened from Interactions pane will appear *behind* DrScala's frame, unless a 
      * previous frame or dialog is shown here.  Not sure what the difference is, but this hack seems to work.  (I'd
@@ -212,86 +215,49 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     //_dialog("interpreter JVM started");
   }
   
-  /* Concurrent operations on _interpreters. */ 
-  private Interpreter getInterpreter(String name) {
-    return _interpreters.get(name);
-  }
-  private boolean isInterpreterName(String name) {
-    return _interpreters.containsKey(name);
-  }
-  private Interpreter putInterpreter(String name, Interpreter i) {
-    return _interpreters.put(name, i);
-  }
-  // This method must be public because it is part of a declared interface
-  public void removeInterpreter(String name) {
-    _interpreters.remove(name);
-  }
   
-  /* Concurrent operations on _busyInterpreters. */ 
-  private boolean addBusyInterpreter(Interpreter i) {
-    return _busyInterpreters.add(i);
-  }
-  
-  private boolean removeBusyInterpreter(Interpreter i) {
-    return _busyInterpreters.remove(i);
-  }
-  
-  private boolean isBusyInterpreter(Interpreter i) {
-     return _busyInterpreters.contains(i);
-  }
-  
-  /** Interprets the given string of source code in the active interpreter. The result is returned to MainJVM via 
+  /** Interprets the given string of source code in the Scala interpreter. The result is returned to MainJVM via 
     * the interpretResult method.  No synchronization necessary; the code only contains a single read of
-    * local state.
+    * local state.  This method should not be called if the interpreter (as recorded in the MainJVM) is busy.
     * @param s Source code to interpret.
     */
-  public InterpretResult interpret(String s) { return interpret(s, _activeInterpreter.second()); }
   
-//  /** Interprets the given string of source code with the given interpreter. The result is returned to
-//    * MainJVM via the interpretResult method.
-//    * @param s Source code to interpret.
-//    * @param interpreterName Name of the interpreter to use
-//    * @throws IllegalArgumentException if the named interpreter does not exist
-//    */
-//  public InterpretResult interpret(String s, String name) {
-//    Interpreter i = getInterpreter(name);
-//    if (i == null) {
-//      throw new IllegalArgumentException("Interpreter '" + name + "' does not exist.");
-//    }
-//    return interpret(s, i);
-//  }
-  
-  private InterpretResult interpret(String input, Interpreter interpreter) {
-    debug.logStart("Interpret " + input);
+  public InterpretResult interpret(String input) {
+//    Utilities.show("interpret(" + input + ") called in InterpreterJVM running in SLAVE JVM");
     
-    boolean available = addBusyInterpreter(interpreter);
-    if (! available) { debug.logEnd(); return InterpretResult.busy(); }
+    _log.log("interpret(" + input + ") called in InterpreterJVM running in SLAVE JVM");
     
-    // set the thread context class loader, this way NextGen and Mint can use the interpreter's class loader
+    // This may be overkill for DrScala; there is only one loader for the interpreter
     Thread.currentThread().setContextClassLoader(_interpreterLoader);  // _interpreterLoader is final
 
-//    Option<Object> result = null;
     String result = null;
-    try { result = interpreter.interpret(input); }
+    try { result = _defaultInterpreter.interpret(input); }  // may block forever
     catch (InterpreterException e) {
-
+      _log.log("interpret invocation threw InterpreterException: " + e);
       // DEBUGGING PRINTLINE
       System.out.println(e);
       // DEBUGGING PRINTLINE
       
-      debug.logEnd(); return InterpretResult.exception(e);
+//      debug.logEnd(); 
+      return InterpretResult.exception(e);
     }
     catch (Throwable e) {
-      
+      _log.log("interpret invocation threw Throwable: " + e);
       // DEBUGGING PRINTLINE
       System.out.println(e);
       // DEBUGGING PRINTLINE
       
-       debug.logEnd(); return InterpretResult.unexpectedException(e);
+//       debug.logEnd(); 
+      return InterpretResult.unexpectedException(e);
     }
-    finally { removeBusyInterpreter(interpreter); }
 
     return InterpretResult.stringValue(result);
+  }
+  
+  /** Executes internal reset operation of the interpreter. */
+  public void reset() throws RemoteException { 
+    _log.log("reset() called in InterpreterJVM");
+    _defaultInterpreter.reset(); 
   }
 
 //    return result.apply(new OptionVisitor<Object, InterpretResult>() {
@@ -368,7 +334,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
         public Pair<Object,String>[] forException(String message) { return fail(); }
         public Pair<Object,String>[] forEvalException(String message, StackTraceElement[] stackTrace) { return fail(); }
         public Pair<Object,String>[] forUnexpectedException(Throwable t) { return fail(); }
-        public Pair<Object,String>[] forBusy() { return fail(); }
+//        public Pair<Object,String>[] forBusy() { return fail(); }
       });
     }
   }
@@ -419,22 +385,23 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     }
   }
   
-  /** Adds a named Interpreter to the list.
-    * @param name the unique name for the interpreter
-    * @throws IllegalArgumentException if the name is not unique
-    */
-  public void addInterpreter(String name) {
-    synchronized(_stateLock) {
-      if (isInterpreterName(name)) {
-        throw new IllegalArgumentException("'" + name + "' is not a unique interpreter name");
-      }
-//      Interpreter i = new Interpreter(_interpreterOptions, _interpreterLoader);
-      Interpreter i = new DrScalaInterpreter();
-      putInterpreter(name, i);
-    }
-  }
+  /* DrScala only has one interpreter. */
   
-//  /* TODO: revise this to work with DrScala. Does the debugger work at all in DrScala? */
+//  /** Adds a named Interpreter to the list.
+//    * @param name the unique name for the interpreter
+//    * @throws IllegalArgumentException if the name is not unique
+//    */
+//  public void addInterpreter(String name) {
+//    synchronized(_stateLock) {
+//      if (isInterpreterName(name)) {
+//        throw new IllegalArgumentException("'" + name + "' is not a unique interpreter name");
+//      }
+////      Interpreter i = new Interpreter(_interpreterOptions, _interpreterLoader);
+//      Interpreter i = new DrScalaInterpreter();
+//      putInterpreter(name, i);
+//    }
+//  }
+  
 //  /** Adds a named Interpreter in the given environment to the list.  Invoked reflectively by
 //    * the debugger.
 //    * @param name  The unique name for the interpreter
@@ -462,30 +429,32 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
 //    @Override public Iterable<Type> getDeclaredThrownTypes() { return IterUtil.empty(); }
 //  }
   
-  /** Sets the current interpreter to be the one specified by the given name
-    * @param name the unique name of the interpreter to set active
-    * @return Status flags: whether the current interpreter changed, and whether it is busy
-    */
-  public Pair<Boolean, Boolean> setActiveInterpreter(String name) {
-    synchronized(_stateLock) {
-      Interpreter i = getInterpreter(name);
-      if (i == null) { throw new IllegalArgumentException("Interpreter '" + name + "' does not exist."); }
-      boolean changed = (i != _activeInterpreter.second());
-      _activeInterpreter = Pair.make(name, i);
-      return Pair.make(changed, isBusyInterpreter(i));
-    }
-  }
+  /* In DrScala, there is only one interpreter. */
+//  /** Sets the current interpreter to be the one specified by the given name
+//    * @param name the unique name of the interpreter to set active
+//    * @return Status flags: whether the current interpreter changed, and whether it is busy
+//    */
+//  public Pair<Boolean, Boolean> setActiveInterpreter(String name) {
+//    synchronized(_stateLock) {
+//      Interpreter i = getInterpreter(name);
+//      if (i == null) { throw new IllegalArgumentException("Interpreter '" + name + "' does not exist."); }
+//      boolean changed = (i != _activeInterpreter.second());
+//      _activeInterpreter = Pair.make(name, i);
+//      return Pair.make(changed, isBusyInterpreter(i));
+//    }
+//  }
   
-  /** Sets the default interpreter to be active.
-    * @return Status flags: whether the current interpreter changed, and whether it is busy
-    */
-  public Pair<Boolean, Boolean> setToDefaultInterpreter() {
-    synchronized(_stateLock) {
-      boolean changed = (_defaultInterpreter != _activeInterpreter.second());
-      _activeInterpreter = Pair.make("", _defaultInterpreter);
-      return Pair.make(changed, isBusyInterpreter(_defaultInterpreter));
-    }
-  }
+//  /** Sets the default interpreter to be active.
+//    * @return Status flags: whether the current interpreter changed, and whether it is busy
+//    */
+//  public Pair<Boolean, Boolean> setToDefaultInterpreter() {
+//    synchronized(_stateLock) {
+//      boolean changed = (_defaultInterpreter != _activeInterpreter.second());
+//      _activeInterpreter = Pair.make("", _defaultInterpreter);
+//      return Pair.make(changed, isBusyInterpreter(_defaultInterpreter));
+//    }
+//  }
+// 
   
   /** Check that all access of class members is permitted by accessibility controls. */
   public void setEnforceAllAccess(boolean enforce) {
@@ -514,6 +483,9 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
       _interpreterOptions.setRequireVariableType(require);
     }
   }
+  
+  /** Gets the default interpreter */
+  public Interpreter getInterpreter() throws RemoteException { return _defaultInterpreter; }
   
   // ---------- JUnit methods ----------
   /** Sets up a JUnit test suite in the Interpreter JVM and finds which classes are really TestCases classes (by 

@@ -85,7 +85,7 @@ public final class NewJVMTest extends DrScalaTestCase {
 
   public void testPrintln() throws Throwable {
     /* BEWARE: in Scala, System.out.println and System.err.println print Windows style newline strings. */
-    debug.logStart();
+//    debug.logStart();
     _log.log("NewJVMTest.testPrintln executing");
     
     // How do you write to System.err in Scala?  As we have configured the Scala interpreter you don't; it goes to the 
@@ -107,11 +107,11 @@ public final class NewJVMTest extends DrScalaTestCase {
     assertEquals("system out buffer", "out", _jvm.outBuffer());
 //    assertEquals("void return flag", true, _jvm.voidReturnFlag());
     
-    debug.logEnd();
+//    debug.logEnd();
   }
 
   public void testReturnConstant() throws Throwable {
-    debug.logStart();
+//    debug.logStart();
    _log.log("NewJVMTest.testReturnConstant executing");
    
    _jvm.resetState();
@@ -119,11 +119,11 @@ public final class NewJVMTest extends DrScalaTestCase {
 //   _log.log("Returned banned = ' + " + banner + "'");
    assertTrue(_jvm.interpret("val x = 5"));
    assertEquals("result", "x: Int = 5\n", _jvm.returnBuffer());
-   debug.logEnd();
+//   debug.logEnd();
   }
 
   public void testSimpleIfExpression() throws Throwable {
-    debug.logStart();
+//    debug.logStart();
    _log.log("NewJVMTest.testSimpleIfExpression executing");
    
    _jvm.resetState();
@@ -134,11 +134,11 @@ public final class NewJVMTest extends DrScalaTestCase {
    assertTrue(_jvm.interpret("print(\"out\");"));
    assertEquals("out buffer length", 3, _jvm.outBuffer().length());
    assertEquals("system out buffer", "out", _jvm.outBuffer());
-   debug.logEnd();
+//   debug.logEnd();
   }
 
   public void testIfElseExpression() throws Throwable {
-    debug.logStart();
+//    debug.logStart();
    _log.log("NewJVMTest.testIfElseExpression executing");
    
    _jvm.resetState();
@@ -153,11 +153,11 @@ public final class NewJVMTest extends DrScalaTestCase {
    assertTrue(_jvm.interpret("print(\"right\")"));
    assertEquals("out buffer length", 5, _jvm.outBuffer().length());
    assertEquals("system out buffer", "right", _jvm.outBuffer());
-   debug.logEnd();
+//   debug.logEnd();
   }
 
   public void testForLoopExpression() throws Throwable {
-    debug.logStart();
+//    debug.logStart();
    _log.log("NewJVMTest.testForLoopExpression executing");
    _jvm.resetState();
 //   String banner = _jvm.returnBuffer();
@@ -170,11 +170,11 @@ public final class NewJVMTest extends DrScalaTestCase {
    assertTrue(_jvm.interpret("print(i)"));
    assertEquals("out buffer length", 6, _jvm.outBuffer().length());
    assertEquals("system out buffer", "246810", _jvm.outBuffer());
-   debug.logEnd();
+//   debug.logEnd();
   }
 
   public void testWorksAfterRestartConstant() throws Throwable {
-    debug.logStart();
+//    debug.logStart();
     _log.log("NewJVMTest.testWorksAfterRestartConstant executing");
 
     // Check that a constant is returned
@@ -186,30 +186,30 @@ public final class NewJVMTest extends DrScalaTestCase {
     assertEquals("result", "x: Int = 5\n", _jvm.returnBuffer());
     
     // Now restart interpreter
-    _jvm.restartInterpreterJVM(true);
+    _jvm.restartInterpreterJVM();
        
     // Now evaluate another constant
     _jvm.resetState();
     assertTrue(_jvm.interpret("val x = 4"));
     assertEquals("result", "x: Int = 4\n", _jvm.returnBuffer());
     
-    debug.logEnd();
+//    debug.logEnd();
   }
 
 
   public void testThrowRuntimeException() throws Throwable {
-    debug.logStart();
+//    debug.logStart();
     _log.log("NewJVMTest.testThrowRuntimeException executing");
     
     _jvm.resetState();
     assertTrue(_jvm.interpret("throw new RuntimeException();"));
     assertTrue("exception message", _jvm.returnBuffer().startsWith("java.lang.RuntimeException"));
 
-    debug.logEnd();
+//    debug.logEnd();
   }
 
   public void testToStringThrowsRuntimeException() throws Throwable {
-    debug.logStart();
+//    debug.logStart();
     _log.log("NewJVMTest.testToStringThrowsRuntimeException executing");
 
     _jvm.resetState();
@@ -220,62 +220,63 @@ public final class NewJVMTest extends DrScalaTestCase {
     assertTrue("exception should have been thrown by toString",
                result.contains("java.lang.RuntimeException"));
     
-    debug.logEnd();
+//    debug.logEnd();
   }
 
-  /** Ensure that switching to a non-existant interpreter throws an Exception. */
-  public void testSwitchToNonExistantInterpreter() {
-    debug.logStart();
-    
-    try {
-      _jvm.setActiveInterpreter("thisisabadname");
-//      System.err.println("outbuf: " + _jvm.outBuffer);
-      fail("Should have thrown an exception!");
-    }
-    catch (IllegalArgumentException e) {
-      // good, that's what should happen
-    }
-    debug.logEnd();
-  }
+  /** In DrScala, there is ONLY one interpreter so these tests are irrelevant. */
+//  /** Ensure that switching to a non-existant interpreter throws an Exception. */
+//  public void testSwitchToNonExistantInterpreter() {
+//    debug.logStart();
+//    
+//    try {
+//      _jvm.setActiveInterpreter("thisisabadname");
+////      System.err.println("outbuf: " + _jvm.outBuffer);
+//      fail("Should have thrown an exception!");
+//    }
+//    catch (IllegalArgumentException e) {
+//      // good, that's what should happen
+//    }
+//    debug.logEnd();
+//  }
 
-  /* The following method is commented out because switching interpreters apparently hangs the Interpreter JVM. */
-  /** Ensure that MainJVM can correctly switch the active interpreter used by
-   * the interpreter JVM.
-   */
-  public void xtestSwitchActiveInterpreter() throws InterruptedException {
-    debug.logStart();
-       
-    assertTrue(_jvm.interpret("val x = 6;"));
-    _jvm.addInterpreter("monkey");
-
-    // x should be defined in active interpreter
-    _jvm.resetState();
-    assertTrue(_jvm.interpret("val y = x"));
-    assertEquals("result", "y: Int = 6\n", _jvm.returnBuffer());
-
-    // switch interpreter
-//    _jvm.setActiveInterpreter("monkey");
-//    _jvm.resetState();
-//    assertTrue(_jvm.interpret("x"));
-//    assertTrue(_jvm.returnBuffer().contains("error"));
+//  /* The following method is commented out because switching interpreters apparently hangs the Interpreter JVM. */
+//  /** Ensure that MainJVM can correctly switch the active interpreter used by
+//   * the interpreter JVM.
+//   */
+//  public void xtestSwitchActiveInterpreter() throws InterruptedException {
+//    debug.logStart();
+//       
+//    assertTrue(_jvm.interpret("val x = 6;"));
+//    _jvm.addInterpreter("monkey");
 //
-//    // define x to 3 and switch back
-//    assertTrue(_jvm.interpret("val x = 3"));
-//    _jvm.setToDefaultInterpreter();
-//
-//    // x should have its old value
+//    // x should be defined in active interpreter
 //    _jvm.resetState();
 //    assertTrue(_jvm.interpret("val y = x"));
-//    assertEquals("result", "y: Int = 5\n", _jvm.returnBuffer());
+//    assertEquals("result", "y: Int = 6\n", _jvm.returnBuffer());
 //
-//    // test syntax error handling
-//    //  (temporarily disabled until bug 750605 fixed)
-////       _jvm.interpret("x + ");
-////       assertTrue("syntax error was reported",
-////                  ! _jvm.syntaxErrorMsgBuf.equals("") );
-////     }
-    debug.logEnd();
-  }
+//    // switch interpreter
+////    _jvm.setActiveInterpreter("monkey");
+////    _jvm.resetState();
+////    assertTrue(_jvm.interpret("x"));
+////    assertTrue(_jvm.returnBuffer().contains("error"));
+////
+////    // define x to 3 and switch back
+////    assertTrue(_jvm.interpret("val x = 3"));
+////    _jvm.setToDefaultInterpreter();
+////
+////    // x should have its old value
+////    _jvm.resetState();
+////    assertTrue(_jvm.interpret("val y = x"));
+////    assertEquals("result", "y: Int = 5\n", _jvm.returnBuffer());
+////
+////    // test syntax error handling
+////    //  (temporarily disabled until bug 750605 fixed)
+//////       _jvm.interpret("x + ");
+//////       assertTrue("syntax error was reported",
+//////                  ! _jvm.syntaxErrorMsgBuf.equals("") );
+//////     }
+//    debug.logEnd();
+//  }
 
   private static class TestJVMExtension extends MainJVM {
     private static final int WAIT_TIMEOUT = 100000; // time to wait for an interaction to complete
@@ -399,10 +400,10 @@ public final class NewJVMTest extends DrScalaTestCase {
         throw new UnexpectedException(t);
       }
 
-      public Void forBusy() {
-        debug.log();
-        throw new UnexpectedException("MainJVM.interpret called when interpreter was busy!");
-      }
+//      public Void forBusy() {
+//        debug.log();
+//        throw new UnexpectedException("MainJVM.interpret called when interpreter was busy!");
+//      }
     }
   }
 }

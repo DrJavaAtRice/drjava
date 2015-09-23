@@ -122,7 +122,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     * As the test is then run one time per compiler it can find. 
     */
   public void testCompileAllFailsDifferentSourceRoots() throws BadLocationException, IOException, InterruptedException {
-    debug.logStart();
+//    debug.logStart();
     
 //    System.err.println("Starting testCompileAllFailsDifferentSourceRoots");
     
@@ -164,14 +164,14 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     
 //    System.err.println("testCompileAllFailsDifferentSourceRoots completed");
     
-    debug.logEnd();
+//    debug.logEnd();
   }
   
   /** Creates a source file with "package" as a field name and ensures that compile starts but fails due to 
     * the invalid field name.
     */
   public void testCompilePackageAsField() throws BadLocationException, IOException, InterruptedException {
-    debug.logStart();
+//    debug.logStart();
     
 //    System.err.println("Starting testCompilePackageAsField");
     
@@ -196,14 +196,14 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     
 //    System.err.println("testCompilePackageAsField completed");
     
-    debug.logEnd();
+//    debug.logEnd();
   }
   
   /** Creates a source file with "package" as a field name and ensures that compile starts but fails due to the
     * invalid field name. This is different from {@link #testCompilePackageAsField} as it initializes the field. 
     */
   public void testCompilePackageAsField2() throws BadLocationException, IOException, InterruptedException {
-    debug.logStart();
+//    debug.logStart();
     
 //    System.err.println("Starting testCompilePackageAsField2");
     
@@ -228,12 +228,12 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     
     _log.log("testCompilePackageAsField2 completed");
     
-    debug.logEnd();
+//    debug.logEnd();
   }
   
   /** Tests compiling an invalid file and checks to make sure the class file was not created.  */
   public void testCompileMissingCloseCurly() throws BadLocationException, IOException, InterruptedException {
-    debug.logStart();
+//    debug.logStart();
     
     _log.log("Starting testCompileMissingCloseCurly");
     
@@ -256,13 +256,13 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     
     _log.log("testCompileMissingCloseCurly completed");
     
-    debug.logEnd();
+//    debug.logEnd();
   }
   
   /** Puts an otherwise valid package statement inside a class declaration. This better not work! */
   public void testCompileWithPackageStatementInsideClass() throws BadLocationException, IOException, 
     InterruptedException {
-    debug.logStart();
+//    debug.logStart();
     
     _log.log("Starting testCompileWithPackageStatementInsideClass");
     
@@ -298,7 +298,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     
     _log.log("testCompileWithPackageStatementInsideClass completed");
     
-    debug.logEnd();
+//    debug.logEnd();
   }
   
   
@@ -307,7 +307,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     * TODO: rewrite this test for the new error model interface
     */
   public void testCompileFailsCorrectLineNumbers() throws BadLocationException, IOException, InterruptedException {
-    debug.logStart();
+//    debug.logStart();
     
     _log.log("Starting testCompileFailsCorrectLineNumbers");
 //    System.err.println("Starting testCompileFailsCorrectLineNumbers");
@@ -358,12 +358,12 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     _log.log("testCompileFailsCorrectLineNumbers completed");
 //    System.err.println("testCompileFailsCorrectLineNumbers completed");
     
-    debug.logEnd();
+//    debug.logEnd();
   }
   
   /** Tests compiling an invalid file and checks to make sure the class file was not created.  */
   public void testCompileEndWhileParsing() throws BadLocationException, IOException, InterruptedException {
-    debug.logStart();
+//    debug.logStart();
     
     _log.log("Starting testCompileEndWhileParsing");
     
@@ -387,6 +387,6 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
 
     file.delete();
     _log.log("testCompileEndWhileParsing completed");
-    debug.logEnd();
+//    debug.logEnd();
   }
 }

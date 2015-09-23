@@ -37,11 +37,13 @@
 package edu.rice.cs.drjava.model.repl;
 
 import java.io.*;
+import java.awt.EventQueue;
 import java.awt.print.*;
 
 import edu.rice.cs.drjava.model.print.DrScalaBook;
 
 import edu.rice.cs.drjava.model.FileSaveSelector;
+import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.text.ConsoleDocumentInterface;
@@ -55,6 +57,8 @@ import edu.rice.cs.drjava.config.OptionListener;
   * @version $Id: InteractionsDocument.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class InteractionsDocument extends ConsoleDocument {
+  
+  public static Log _log = new Log("MasterJVM.txt", true);
   
   /** Default prompt. */
   public static final String DEFAULT_PROMPT = "> ";
@@ -119,36 +123,43 @@ public class InteractionsDocument extends ConsoleDocument {
   /** Returns whether an interaction is currently in progress. */
   public boolean inProgress() { return ! _document.hasPrompt(); }
   
-  /** Sets the banner in an empty docuemnt. */
+  /** Sets the banner in an empty interactions document. Only runs in event thread. */
   public void setBanner(String banner) {
+    assert EventQueue.isDispatchThread();
     try {
       setPromptPos(0);
       insertText(0, banner, OBJECT_RETURN_STYLE);
       insertPrompt();
+      _log.log("Banner and prompt inserted in empty interactions document");
       _history.moveEnd();
     }
     catch (EditDocumentException e) { throw new UnexpectedException(e); }
   }
     
-  /** Resets the document to a clean state.  Does not reset the history. */
+  /** Resets the document to a clean state.  Does not reset the history. Only runs in the event thread. */
   public void reset(String banner) {
+    assert EventQueue.isDispatchThread();
     try {
-//      System.err.println("Resetting the interactions document with banner '" + banner + "'");
+      _log.log("Resetting the interactions document with banner '" + banner + "' from thread " + Thread.currentThread());
       // Clear interactions document
       setHasPrompt(false);
       setPromptPos(0);
       removeText(0, _document.getLength());
       insertText(0, banner, OBJECT_RETURN_STYLE);
-//      System.err.println("Inserting prompt in cleared interactions pane");
       insertPrompt();
+       _log.log("Banner and prompt inserted in resetting interactions document");
       _history.moveEnd();
       setInProgress(false);  // redundant? also done in InteractionsDocument.interpreterReady(...)
     }
-    catch (EditDocumentException e) { throw new UnexpectedException(e); }
+    catch (EditDocumentException e) { 
+      _log.log("reset in InteractionsDocument threw UnexpectedException " + e);
+      throw new UnexpectedException(e); 
+    }
   }
   
   /** Replaces any text entered past the prompt with the current item in the history. Only runs in event thread. */
   private void _replaceCurrentLineFromHistory() {
+    assert EventQueue.isDispatchThread();
     try {
       _clearCurrentInputText();
       append(_history.getCurrent(), DEFAULT_STYLE);

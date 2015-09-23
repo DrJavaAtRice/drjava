@@ -331,11 +331,10 @@ public interface GlobalModel extends ILoadDocuments {
     */
   public InteractionsDJDocument getSwingInteractionsDocument();
   
-  /** Clears and resets the interactions pane in the specified working directory, provided that the operation has some effect. */
+  /** Clears and resets the interactions pane in the specified working directory, provided that the operation has some effect.
+    * Invoked by "Reset interactions" command (in MainFrame) and as part of other actions such as the run, project loading, 
+    * compilation and unit testing commands.*/
   public void resetInteractions(File wd);
-  
-  /** Clears and resets the interactions pane in the specified working directory. */
-  public void resetInteractions(File wd, boolean forceReset);
   
   /** Interprets the current given text at the prompt in the interactions pane. */
   public void interpretCurrentInteraction();

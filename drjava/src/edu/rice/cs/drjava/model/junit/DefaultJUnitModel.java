@@ -606,23 +606,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
 //    new ScrollableDialog(null, "DefaultJUnitModel.testSuiteEnded(...) called", "", "").show();
    
     Utilities.invokeLater(new Runnable() { public void run() {
-      // disable languge level processing
-//      List<File> files = new ArrayList<File>();
-//      for (OpenDefinitionsDocument odd: _model.getOpenDefinitionsDocuments()) { files.add(odd.getRawFile()); }
-//    Utilities.show("errors.length = " + errors.length + " files = " + files);
-//      
-//      for(JUnitError e: errors) {
-//        try {
-//          e.setStackTrace(_compilerModel.getLLSTM().replaceStackTrace(e.stackTrace(),files));
-//        } catch(Exception ex) { DrScalaErrorHandler.record(ex); }
-//        File f = e.file();
-//        if ((f != null) && (DrJavaFileUtils.isLLFile(f))) {
-//          String dn = DrJavaFileUtils.getJavaForLLFile(f.getName());
-//          StackTraceElement ste = new StackTraceElement(e.className(), "", dn, e.lineNumber());
-//          ste = _compilerModel.getLLSTM().replaceStackTraceElement(ste, f);
-//          e.setLineNumber(ste.getLineNumber());
-//        }
-//      }
+
       _junitErrorModel = new JUnitErrorModel(errors, _model, true);
       _notifyJUnitEnded();
       _testInProgress = false;

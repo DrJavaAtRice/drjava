@@ -338,7 +338,7 @@
 //    // Shutdown the debugger
 //    _log.log("Shutting down...");
 //    InterpretListener interpretListener = new InterpretListener() {
-//      public void interpreterChanged(boolean inProgress) {
+//      public void interpreterReplaced(boolean inProgress) {
 //        // Don't notify: happens in the same thread
 //        interpreterChangedCount++;
 //      }
@@ -660,10 +660,10 @@
 //      }
 //    }
 //    
-//    public void interpreterChanged(boolean inProgress) {
+//    public void interpreterReplaced(boolean inProgress) {
 //      synchronized(_notifierLock) {
 //        interpreterChangedCount++;
-//        _log.log("interpreterChanged " + interpreterChangedCount);
+//        _log.log("interpreterReplaced " + interpreterChangedCount);
 //        _notifyLock();
 //      }
 //    }

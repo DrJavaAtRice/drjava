@@ -36,49 +36,16 @@
 
 package edu.rice.cs.drjava.model.repl;
 
-import java.io.File;
+/** Exception to signify that the interpreter was busy performing a computation when the
+  * executing thread tried to reset the interpreter.
+  *
+  * @version $Id: InterpreterInterruptedException.java 5594 2012-06-21 11:23:40Z rcartwright $
+  */
+public class InterpreterBusyException extends RuntimeException {
+  public final String _toEval;
 
-/** A dummy InteractionsListener that does nothing.
- *  @version $Id: DummyInteractionsListener.java 5594 2012-06-21 11:23:40Z rcartwright $
- */
-public class DummyInteractionsListener implements InteractionsListener {
-  
-  /** Called after an interaction is started by the GlobalModel.  */
-  public void interactionStarted() { }
-
-  /** Called when an interaction has finished running. */
-  public void interactionEnded() { }
-  
-  /** Called when the interactions window generates a syntax error.
-   * @param offset the error's offset into the InteractionsDocument
-   * @param length the length of the error
-   */
-  public void interactionErrorOccurred(int offset, int length) { }
-
-  /** Called when the interactionsJVM has begun resetting. */
-  public void interpreterResetting() { }
-  
-  /** Called when the interactions window is reset. */
-  public void interpreterReady(File wd) { }
-
-  /** Called when the interactions JVM was closed by System.exit
-   * or by being aborted. Immediately after this the interactions
-   * will be reset.
-   * @param status the exit code
-   */
-  public void interpreterExited(int status) { }
-  
-  /** Called if the interpreter reset failed. (Subclasses must maintain listeners.) */
-  public void interpreterResetFailed(Throwable t) { }
-  
-  /** Called when the active interpreter is changed.
-   * @param inProgress Whether the new interpreter is currently processing an interaction (i.e. whether an 
-   * interactionEnded event will be fired)
-   */
-  public void interpreterReplaced(boolean inProgress) { }
-
-  /** Called when enter was typed in the interactions pane but the interaction was incomplete. */
-  public void interactionIncomplete() { }
-  
+  public InterpreterBusyException(String toEval) {
+    super("Interpreter was busy evaluating [" + toEval + "] when restartInteractions was called");
+    _toEval = toEval;
+  }
 }
-

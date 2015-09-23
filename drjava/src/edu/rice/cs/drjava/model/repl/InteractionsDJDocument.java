@@ -65,7 +65,7 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
   private volatile boolean _hasPrompt;
   
   /** A flag indicating that the interpreter was recently reset, and to reset the styles list 
-    * the next time a style is added. Cannot reset immediately because then the styles would be lost while 
+    * the next time a color is added. Cannot reset immediately because then the styles would be lost while 
     * the interactions pane is resetting.
     */
   private volatile boolean _toClear = false;
@@ -218,6 +218,15 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
       _stylesList.add(0, new Pair<Pair<Integer,Integer>,String>
                       (new Pair<Integer,Integer>(Integer.valueOf(start),Integer.valueOf(end)), style));
 //    }
+  }
+  
+  /** Erases all styles information.  Should be used with discretion. Only runs in event thread. */
+  public void _clearStyles() {
+    assert EventQueue.isDispatchThread();
+    synchronized (_stylesList) {
+      _stylesList.clear();
+      _toClear = false;
+    }
   }
   
   /** Accessor method used to copy contents of _stylesList to an array.  Used in test cases. */

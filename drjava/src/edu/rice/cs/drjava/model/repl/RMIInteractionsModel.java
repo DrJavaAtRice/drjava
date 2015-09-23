@@ -41,6 +41,7 @@ import edu.rice.cs.drjava.model.repl.newjvm.InterpreterException;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.tuple.Option;
 import edu.rice.cs.plt.tuple.Pair;
+import edu.rice.cs.util.Log;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.ConsoleDocumentInterface;
 
@@ -54,6 +55,8 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
   * @version $Id: RMIInteractionsModel.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public abstract class RMIInteractionsModel extends InteractionsModel {
+  
+  static final Log _log = new Log("MasterJVM.txt", true);
   
   /** RMI interface to the remote Java interpreter.*/
   protected final MainJVM _jvm;
@@ -73,9 +76,8 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
     * @param toEval command to be evaluated
     */
   protected void _interpretCommand(String toEval) {
-    debug.logStart("Interpret " + toEval);
+    _log.log("_interpretCommand (in RMIInteractionsModel) " + toEval);
     _jvm.interpret(toEval);
-    debug.logEnd();
   }
   
   /** Gets the string representation of the value of a variable in the current interpreter.
@@ -115,98 +117,44 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
     */
   public void addExtraClassPath(File f) { _jvm.addExtraClassPath(f); }
   
-  /** Resets the Java interpreter. If DrScala is in a normal state (implying that _jvm.interpret(...) below will 
-    * succeed, the embedded Interactions document has already been cleared.  Only runs in the event thread. */
-  protected void _resetInterpreter(final File wd, final boolean force) {
-    setToDefaultInterpreter();  // TODO: tear out interpreter selection; DrScala only has one interpreter
+  /** Attempts to reset the Scala interpreter in the slave JVM.  */
+  protected boolean _resetInterpreter(final File wd) {
+
     _jvm.setWorkingDirectory(wd);
     /* Try to reset the interpreter using the internal scala interpreter reset command.  If this fails restart the
      * slave JVM. */
-    /* Already running in the event handling thread, so this invokeLater is unnecessary. */
-//    Utilities.invokeLater(new Runnable() {
-//      public void run() {
-//        Utilities.show("Executing Reset Runnable");
-    /* The following has no effect. */
-//    _document.insertBeforeLastPrompt(" Resetting Interactions ... which can be SLOW\n", InteractionsDocument.ERROR_STYLE);
-    boolean success = _jvm.interpret(":_$$$$$__$$$$$$_-reset");
-    /* NOTE: interpret only returns false when the interpreter is stopped. It throws an exception if the interpreter
-     * is busy, triggering handler code (the uncaughtException method) in DrScalaErrorHandler. */
-    if (success) {
-      _document.reset(generateBanner(wd)); /* Avoids displaying two prompt symbols.  Fix this hack? */
-    }  
-    else _jvm.restartInterpreterJVM(force);
-    _document.clearColoring();
-//      }
-//    });
+    _log.log("_resetInterpreter in RMIInteractions model has been called");
+    boolean success = _jvm.resetInterpreter();  // 
+    _log.log("_resetInterpreter returned " + success);
+    if (success) documentReset();
+    return success;
   }
   
-  /** Adds a named interpreter to the list.
-    * @param name the unique name for the interpreter
-    * @throws IllegalArgumentException if the name is not unique
-    */
-  public void addInterpreter(String name) { _jvm.addInterpreter(name); }
-  
-  /** Removes the interpreter with the given name, if it exists.
-    * @param name Name of the interpreter to remove
-    */
-  public void removeInterpreter(String name) { _jvm.removeInterpreter(name); }
-  
-  /** Sets the active interpreter.
-    * @param name the (unique) name of the interpreter.
-    * @param prompt the prompt the interpreter should have.
-    */
-  public void setActiveInterpreter(String name, String prompt) {
-    Option<Pair<Boolean, Boolean>> result = _jvm.setActiveInterpreter(name);
-    debug.logValue("result", result);
-    if (result.isSome() && result.unwrap().first()) { // interpreter changed
-      boolean inProgress = result.unwrap().second();
-      _updateDocument(prompt, inProgress);
-      _notifyInterpreterChanged(inProgress);
-    }
-  }
-  
-  /** Sets the default interpreter to be the current one. */
-  public void setToDefaultInterpreter() {
-    Option<Pair<Boolean, Boolean>> result = _jvm.setToDefaultInterpreter();
-    if (result.isSome() && result.unwrap().first()) { // interpreter changed
-      boolean inProgress = result.unwrap().second();
-      _updateDocument(InteractionsDocument.DEFAULT_PROMPT, inProgress);
-      _notifyInterpreterChanged(inProgress);
-    }
+  /** Sets the new interpreter to be the current one. */
+  public void setUpNewInterpreter(final boolean inProgress) {
+    EventQueue.invokeLater(new Runnable() {
+      public void run() {
+        _log.log("RMIInteractionsModel.setUpNewInterpreter called");
+        _jvm.restartInterpreterJVM();
+        _notifyInterpreterReplaced(inProgress);
+        EventQueue.invokeLater(new Runnable() { public void run() { documentReset(); } });
+//        _updateDocument(InteractionsDocument.DEFAULT_PROMPT); // Redundant?
+      }
+    });
   }
   
   /** Updates the prompt and status of the document after an interpreter change.
     * Must run in event thread. (TODO: is it okay that related RMI calls occur in the event thread?)
     * @param prompt New prompt to display
-    * @param inProgress whether the interpreter is currently in progress
     */
-  private void _updateDocument(String prompt, boolean inProgress) {
+  private void _updateDocument(String prompt) {
     assert EventQueue.isDispatchThread();
     _document.setPrompt(prompt);
     _document.insertNewline(_document.getLength());
     _document.insertPrompt();
 //            int len = _document.getPromptLength();  
 //            advanceCaret(len);
-    _document.setInProgress(inProgress);
     scrollToCaret();
-  }
-  
-  /** Notifies listeners that the interpreter has changed. (Subclasses must maintain listeners.)
-    * @param inProgress Whether the new interpreter is currently in progress with an interaction, i.e., whether 
-    *        an interactionEnded event will be fired)
-    */
-  protected abstract void _notifyInterpreterChanged(boolean inProgress);
-  
-   /** In the event thread, notifies listeners that the interpreter is ready. Sometimes called from outside the event
-    * thread. */
-  public void _notifyInterpreterReady(final File wd) {   /* TODO  rename this method */
-//    System.out.println("Asynchronously notifying interpreterReady event listeners");  // DEBUG
-    Utilities.invokeLater(new Runnable() { 
-      public void run() { 
-        _notifier.interpreterReady(wd); 
-        _document.clearColoring();
-      } 
-    });
   }
 
   /** Sets whether or not the interpreter should enforce access to all members. */

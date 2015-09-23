@@ -60,17 +60,17 @@ public abstract class InterpretResult implements Serializable {
     public T forException(String message);
     public T forEvalException(String message, StackTraceElement[] stackTrace);
     public T forUnexpectedException(Throwable t);
-    public T forBusy();
+//    public T forBusy();
   }
   
-  public static InterpretResult busy() { return BusyResult.INSTANCE; }
+//  public static InterpretResult busy() { return BusyResult.INSTANCE; }
   
-  // This and later classes are declared explicitly rather than anonymously as a
-  // serialization best practice.
-  private static class BusyResult extends InterpretResult {
-    public static final BusyResult INSTANCE = new BusyResult();
-    public <T> T apply(Visitor<T> v) { return v.forBusy(); }
-  }
+//  // This and later classes are declared explicitly rather than anonymously as a
+//  // serialization best practice.
+//  private static class BusyResult extends InterpretResult {
+//    public static final BusyResult INSTANCE = new BusyResult();
+//    public <T> T apply(Visitor<T> v) { return v.forBusy(); }
+//  }
   
   public static InterpretResult exception(InterpreterException e) { return new ExceptionResult(e); }
   
