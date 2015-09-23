@@ -103,9 +103,9 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
   * @version $Id: DrScala.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class DrScala {
-  public static volatile Log _log = new Log("DrScala.txt", false);
+  public static volatile Log _log = new Log("MasterJVM.txt", true);
   
-  private static final String DEFAULT_MAX_HEAP_SIZE_ARG = "-Xmx128M";
+  private static final String DEFAULT_MAX_HEAP_SIZE_ARG = "-Xmx256M";
   
   private static final ArrayList<String> _filesToOpen = new ArrayList<String>();
   private static final ArrayList<String> _jvmArgs = new ArrayList<String>();
@@ -128,7 +128,7 @@ public class DrScala {
   static volatile boolean _restartedDrScalaUsesRemoteControl = true;
   
   /** Time in millisecond before restarting DrScala to change the heap size, etc. is deemed a success. */
-  private static final int WAIT_BEFORE_DECLARING_SUCCESS = 5000;
+  private static final int WAIT_BEFORE_DECLARING_SUCCESS = 10000;
 
   /** Number of times we retry opening with the remote control. */
   private static final int NUM_REMOTE_CONTROL_RETRIES = 15;
@@ -140,7 +140,7 @@ public class DrScala {
    * config file's location.  (Might be specified on command line.) Instead, use accessor methods to 
    * prevent others from assigning new values. */
   
-  /** Default properties file used by the configuration object, i.e. ".drsclal" in the user's home directory. */
+  /** Default properties file used by the configuration object, i.e. ".drscala" in the user's home directory. */
   public static final File DEFAULT_PROPERTIES_FILE = new File(System.getProperty("user.home"), ".drscala");
   
   /** Properties file used by the configuration object. Defaults to DEFAULT_PROPERTIES_FILE. */
@@ -254,7 +254,7 @@ public class DrScala {
 //      }
       
       // The code below is in a loop so that DrScala can retry launching itself
-      // if it fails the first time after resetting the configuration file.
+      // if it fails the first time after resetting the .
       // This helps for example when the main JVM heap size is too large, and
       // the JVM cannot be created.
       int failCount = 0;

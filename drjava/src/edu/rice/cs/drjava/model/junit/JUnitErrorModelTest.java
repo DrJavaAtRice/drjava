@@ -128,7 +128,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     
   /** Tests that the errors array contains all encountered failures and error in the right order. */
   public void testErrorsArrayInOrder_NOJOIN() throws Exception {
-    debug.logStart();
+//    debug.logStart();
     _log.log("testErrorArrayInOrder_NOJOIN started");
     final JUnitTestListener listener = new JUnitTestListener();
     final OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_FAIL_TEXT);
@@ -199,7 +199,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     
     _log.log("testErrorArrayInOrder complete");
     //_m = new JUnitErrorModel(doc.getDocument(), "MonkeyTestFail", testResults);
-    debug.logEnd();
+//    debug.logEnd();
   }
   
   /** Tests that a VerifyError is reported as an error, rather than
@@ -279,7 +279,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
   /** Test errors that occur in superclass. */
   public void testErrorInSuperClass_NOJOIN() throws Exception {
     _log.log("testErrorInSuperClass_NOJOIN started");
-    debug.logStart();
+//    debug.logStart();
     final OpenDefinitionsDocument doc1 = setupDocument(TEST_ONE);
     final OpenDefinitionsDocument doc2 = setupDocument(TEST_TWO);
     final File file1 = new File(_tempDir, "TestOne.scala");
@@ -351,7 +351,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     assertEquals("The third error is on line 14", 14, _m.getError(2).lineNumber());
     
     _model.removeListener(listener);
-    debug.logEnd();
+//    debug.logEnd();
      _log.log("testErrorInSuperClass_NOJOIN complete");
   }
 }

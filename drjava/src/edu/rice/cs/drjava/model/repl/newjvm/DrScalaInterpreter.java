@@ -7,11 +7,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.HashSet;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
-
-//import edu.rice.cs.dynamicjava.interpreter.RuntimeBindings;
-//import edu.rice.cs.dynamicjava.interpreter.TypeContext;
-//import edu.rice.cs.dynamicjava.interpreter.InterpreterException;  // moved to this package
-//import edu.rice.cs.dynamicjava.Options;
+import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 
 import edu.rice.cs.util.swing.Utilities;
@@ -59,6 +55,8 @@ public class DrScalaInterpreter implements Interpreter {
     * This regex is used to catch those colon commands so they can be ignored.
     */
   final private Pattern scalaColonCmd = Pattern.compile("^\\s*:.*$");
+  
+  final Log _log = new Log("MasterJVM.txt", true);
 
   /* Used to record whether the interpreter has been initialized */
   private volatile boolean _isInitialized = false;
@@ -134,8 +132,8 @@ public class DrScalaInterpreter implements Interpreter {
   /* thread in which ILoop runs */
   private final Thread _iLoopThread = new Thread(new Runnable(){
     public void run() {
-      DrScalaILoop iLoop = new DrScalaILoop(_iLoopReader, _iLoopWriter);
-      Settings s = new Settings();
+      final DrScalaILoop iLoop = new DrScalaILoop(_iLoopReader, _iLoopWriter);
+      final Settings s = new Settings();
       s.processArgumentString("-usejavacp");
       iLoop.process(s);
     }
@@ -151,9 +149,8 @@ public class DrScalaInterpreter implements Interpreter {
       System.err.println("ERROR: unable to add cp, '" + path + "' to the Interpreter classpath.");
   }
 
-  public synchronized void reset() {
-    String res = this._interpret(":reset", true);
-//    System.err.println("result of reset cmd: " + res);
+  public synchronized void reset() { 
+    _interpret(":reset", true); 
   }
   
   /** Initialize the interpreter for use in the interactions pane. */
@@ -197,13 +194,17 @@ public class DrScalaInterpreter implements Interpreter {
 
   /** Public interface for the interpretation; this is separated from the internal 
     * implementation ('_interpret') because 'colon commands' are passed to that
-    * method in order to augment the REPL classpath.
+    * method in order to augment the REPL classpath and to reset the interpreter.
     */
   public String interpret(String input) {
-    if (input.equals(":_$$$$$__$$$$$$_-reset")){
-      this.reset();
-      return "";
-    }
+    
+    /* The following escape has been commented out because reset() was added to this class and resetInterpreter()
+     * was added as a method in InterpreterJVMRemoteI */
+//    if (input.equals(":_$$$$$__$$$$$$_-reset")){
+//      this.reset();
+//      return "";
+//    }
+    _log.log("interpret(" + input + ") called in DrScalaInterpreter in SLAVE JVM");
     Matcher match = scalaColonCmd.matcher(input);
     if (match.matches())
       return "Error:  Scala interpreter colon commands not accepted.\n";
@@ -227,7 +228,7 @@ public class DrScalaInterpreter implements Interpreter {
   private synchronized String _interpret(String input, boolean isCmd) {
     // Perform deferred initialization if necessary
     if (! _isInitialized) _init(); 
-
+    _log.log("_interpret(" + input + ") called in DrScalaInterpreter");
     try {
       /* clear out any leftovers -- there should never be any, however */
       outputStrings.clear();
@@ -235,6 +236,8 @@ public class DrScalaInterpreter implements Interpreter {
       inputStrings.add(isCmd? input : (input + '\n'));
       /* this call blocks until the first line of the return has been received */
       String s = outputStrings.take();
+      
+      _log.log("First line of returned output is " + s);
       
       /* if the prompt or continuation string is returned, we're done */
       if (s.equals("\nscala> ")) return "";

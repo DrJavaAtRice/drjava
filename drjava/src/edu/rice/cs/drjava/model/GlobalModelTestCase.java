@@ -106,7 +106,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
    */
   public void setUp() throws Exception {
     super.setUp();  // declared to throw Exception
-    debug.logStart();
+//    debug.logStart();
     _log.log("Setting up " + this);
     _model = new TestGlobalModel();
     Utilities.invokeAndWait(new Runnable() {
@@ -134,13 +134,13 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     _model.setResetAfterCompile(false);
     
     _log.log("Completed (GlobalModelTestCase) set up of " + this);
-    debug.logEnd();
+//    debug.logEnd();
   }
   
 
   /** Teardown for each test case, which recursively deletes the temporary directory created in setUp. */
   public void tearDown() throws Exception {
-    debug.logStart();
+//    debug.logStart();
     _log.log("Tearing down " + this);
 //    System.err.println("Tearing down " + this);
     _model.dispose();
@@ -157,7 +157,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 
     super.tearDown();
     _log.log("Completed tear down of " + this);
-    debug.logEnd();
+//    debug.logEnd();
 //    System.err.println("Completed tear down of " + this);
   }
 
@@ -620,7 +620,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     protected volatile int interpreterReadyCount;
     protected volatile int interpreterExitedCount;
     protected volatile int interpreterResetFailedCount;
-    protected volatile int interpreterChangedCount;
+    protected volatile int interpreterReplacedCount;
     //protected int interactionCaretPositionChangedCount;
     protected volatile int consoleResetCount;
     protected volatile int saveBeforeCompileCount;
@@ -663,7 +663,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       interactionStartCount = 0;
       interactionEndCount = 0;
       interactionErrorCount = 0;
-      interpreterChangedCount = 0;
+      interpreterReplacedCount = 0;
       //interactionCaretPositionChangedCount = 0;
       consoleResetCount = 0;
       interpreterResettingCount = 0;
@@ -790,7 +790,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     }
 
     public void assertInterpreterChangedCount(int i) {
-      assertEquals("number of times interpreterChanged fired", i, interpreterChangedCount);
+      assertEquals("number of times interpreterReplaced fired", i, interpreterReplacedCount);
     }
 
 //    /** Not used */
@@ -925,7 +925,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       listenerFail("interpreterErrorOccurred fired unexpectedly");
     }
 
-    public void interpreterChanged(boolean inProgress) { listenerFail("interpreterChanged fired unexpectedly"); }
+    public void interpreterReplaced(boolean inProgress) { listenerFail("interpreterReplaced fired unexpectedly"); }
 
 //    /**Not used */
 //    public void interactionCaretPositionChanged(int pos) {

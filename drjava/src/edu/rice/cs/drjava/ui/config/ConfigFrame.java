@@ -358,7 +358,7 @@ public class ConfigFrame extends SwingFrame {
       try { DrScala.getConfig().saveConfiguration(); }
       catch (IOException ioe) {
         JOptionPane.showMessageDialog(this,
-                                      "Could not save changes to your \".drjava\" file in your home directory. \n\n" + ioe,
+                                      "Could not save changes to your \".drscala\" file in your home directory. \n\n" + ioe,
                                       "Could Not Save Changes",
                                       JOptionPane.ERROR_MESSAGE);
         //return false;
@@ -1094,12 +1094,12 @@ public class ConfigFrame extends SwingFrame {
           }
           else {
             JOptionPane.showMessageDialog(ConfigFrame.this,
-                                          "Could not set .drjava file association.",
+                                          "Could not set .drscala file association.",
                                           "File Types Error",
                                           JOptionPane.ERROR_MESSAGE); 
           }
         }
-      }, "Associate .drjava Files with DrJava", this, "This associates .drscala files with DrJava."));
+      }, "Associate .drscala Files with DrScala", this, "This associates .drscala files with DrScala."));
 
       addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
       

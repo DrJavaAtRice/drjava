@@ -75,7 +75,7 @@ public interface InteractionsListener {
     * @param inProgress Whether the new interpreter is currently in processing an interaction (i.e., whether an 
     * interactionEnded event is pending.)
     */
-  public void interpreterChanged(boolean inProgress);
+  public void interpreterReplaced(boolean inProgress);
   
   /** Called when enter was typed in the interactions pane but the interaction was incomplete. */
   public void interactionIncomplete();

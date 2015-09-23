@@ -47,11 +47,13 @@ import java.awt.EventQueue;
 
 import edu.rice.cs.drjava.ui.DrScalaErrorHandler;
 import edu.rice.cs.drjava.ui.InteractionsPane;
+import edu.rice.cs.drjava.ui.avail.DefaultGUIAvailabilityNotifier;
+import edu.rice.cs.drjava.ui.avail.GUIAvailabilityListener;
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.*;
+import edu.rice.cs.util.*;  // imports Log
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.ConsoleDocumentInterface;
 import edu.rice.cs.util.text.ConsoleDocument;
@@ -76,6 +78,11 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     * with print calls. */
   public static final int WRITE_DELAY = 50;
   
+  /** GUI component availability notifier.  An identical copy is heavily used in MainFrame. */
+  final DefaultGUIAvailabilityNotifier _guiNotifier = DefaultGUIAvailabilityNotifier.ONLY;
+  
+  public static final Log _log = new Log("MasterJVM.txt", true);
+  
 //  public static final String _newLine = "\n"; // was StringOps.EOL; but Swing uses '\n' for newLine
   
   /** Keeps track of any listeners to the model. */
@@ -87,11 +94,11 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     */
   protected volatile InteractionsDocument _document;
   
-  /** Whether we are waiting for the interpreter to register for the first time. */
-  protected volatile boolean _waitingForFirstInterpreter;
+//  /** Whether we are waiting for the interpreter to register for the first time. */
+//  protected volatile boolean _waitingForFirstInterpreter;
   
   /** The working directory for the current interpreter. */
-  protected volatile File _workingDirectory;
+  protected volatile File _workingDir;
   
   /** A lock object to prevent print calls to System.out or System.err from flooding the JVM, ensuring the UI remains
     * responsive.  Only public for testing purposes. */
@@ -150,14 +157,9 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     _document = new InteractionsDocument(cDoc, historySize);
     _cDoc = cDoc;
     _writeDelay = writeDelay;
-    _waitingForFirstInterpreter = true;
-    _workingDirectory = wd;
+//    _waitingForFirstInterpreter = true;
+    _workingDir = wd;
     _writerLock = new Object();
-    
-    
-    /* Debugger deactivated in DrScala */
-//    _debugPort = -1;
-//    _debugPortSet = false;
     
     _inputListener = NoInputListener.ONLY;
     Utilities.invokeLater(new Runnable() {
@@ -195,11 +197,12 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     _notifyInteractionIncomplete();
   }
   
-  /** Sets this model's notion of whether it is waiting for the first interpreter to connect.  The interactionsReady
-    * event is not fired for the first interpreter.
-    */
-  public void setWaitingForFirstInterpreter(boolean waiting) { _waitingForFirstInterpreter = waiting; }
-  
+  /* DrScala does not have more than one interpreter. */
+//  /** Sets this model's notion of whether it is waiting for the first interpreter to connect.  The interactionsReady
+//    * event is not fired for the first interpreter.
+//    */
+//  public void setWaitingForFirstInterpreter(boolean waiting) { _waitingForFirstInterpreter = waiting; }
+ 
   /** Interprets the current given text at the prompt in the interactions doc. May run outside the event thread. */
   public void interpretCurrentInteraction() {
 
@@ -317,21 +320,30 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     */
   public abstract Pair<String,String> getVariableToString(String var);
   
-  /** Resets the Java interpreter with working directory wd. Only runs in event thread. */
-  public final void resetInterpreter(File wd, boolean force) {
-    _workingDirectory = wd;
+  public void documentReset() { 
+    _log.log("invoking documentReset()");
+    _document.reset(generateBanner(_workingDir)); 
+    _document.clearColoring();
+     _guiNotifier.available(GUIAvailabilityListener.ComponentType.INTERACTIONS);
+  }
+  
+  /** Resets the Java interpreter with working directory wd. */
+  public final boolean resetInterpreter(File wd) {
+//    assert EventQueue.isDispatchThread();
+    _workingDir = wd;
     _autoImportSet.clear(); // clear list when interpreter is reset
-    _notifyInterpreterResetting();
-    _document.reset(generateBanner(wd));  // clears the embedded InteractionsDocument and re-initializes it
-    _resetInterpreter(wd, force);
+    interpreterResetting();
+//    _notifyInterpreterResetting();
+//    _log.log("Called _notifyInterpreterResetting");  // performed asynchronously in event thread
+    return _resetInterpreter(wd);
   }
   
   /** Resets the interpreter and resets the embedded Interactions document.  This should only be called from 
     * resetInterpreter, never directly. */
-  protected abstract void _resetInterpreter(File wd, boolean force);
+  protected abstract boolean _resetInterpreter(File wd);
   
   /** Returns the working directory for the current interpreter. */
-  public File getWorkingDirectory() { return _workingDirectory; }
+  public File getWorkingDirectory() { return _workingDir; }
   
   /** These add the given path to the classpaths used in the interpreter.
     * @param f  the path to add
@@ -603,6 +615,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
       public void run() {
         _document.addToHistory(_toAddToHistory);
         _document.setInProgress(false);
+        _log.log("_interactionIsOver method inserting prompt in interactions pane");
         _document.insertPrompt();
         _notifyInteractionEnded();
       }
@@ -660,6 +673,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     */
   public void replReturnedResult(String result, String style) {
 //    Utilities.show("InteractionsModel.replReturned(...) passed '" + result + "'");
+    _log.log("InteractionsModel.replReturned(...) passed '" + result + "'");
     _secondToLastError = _lastError;
     _lastError = null;
     if (result.equals("     | ")) {
@@ -722,43 +736,44 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     }
   }
   
-  /** Signifies that the most recent interpretation was preempted by a syntax error.  The integer parameters
-    * support future error highlighting.
-    * @param errorMessage The syntax error message
-    * @param startRow The starting row of the error
-    * @param startCol The starting column of the error
-    * @param endRow The end row of the error
-    * param endCol The end column of the error
-    */
-  public void replReturnedSyntaxError(String errorMessage, String interaction, int startRow, int startCol,
-                                      int endRow, int endCol ) {
-    // Note: this method is currently never called.  The highlighting functionality needs 
-    // to be restored.
-    _secondToLastError = _lastError;
-    _lastError = errorMessage;
-    if (errorMessage != null) {
-      if (errorMessage.endsWith("<EOF>\"")) {
-        interactionContinues();
-        return;
-      }
-    }
-    
-    Pair<Integer,Integer> oAndL =
-      StringOps.getOffsetAndLength(interaction, startRow, startCol, endRow, endCol);
-    
-    _notifySyntaxErrorOccurred(_document.getPromptPos() + oAndL.first().intValue(),oAndL.second().intValue());
-    
-    _document.appendSyntaxErrorResult(errorMessage, interaction, startRow, startCol, endRow, endCol,
-                                      InteractionsDocument.ERROR_STYLE);
-    
-    _interactionIsOver();
-  }
+//  /** Signifies that the most recent interpretation was preempted by a syntax error.  The integer parameters
+//    * support future error highlighting.
+//    * @param errorMessage The syntax error message
+//    * @param startRow The starting row of the error
+//    * @param startCol The starting column of the error
+//    * @param endRow The end row of the error
+//    * param endCol The end column of the error
+//    */
+//  public void replReturnedSyntaxError(String errorMessage, String interaction, int startRow, int startCol,
+//                                      int endRow, int endCol ) {
+//    // Note: this method is currently never called.  The highlighting functionality needs 
+//    // to be restored.
+//    _secondToLastError = _lastError;
+//    _lastError = errorMessage;
+//    if (errorMessage != null) {
+//      if (errorMessage.endsWith("<EOF>\"")) {
+//        interactionContinues();
+//        return;
+//      }
+//    }
+//    
+//    Pair<Integer,Integer> oAndL =
+//      StringOps.getOffsetAndLength(interaction, startRow, startCol, endRow, endCol);
+//    
+//    _notifySyntaxErrorOccurred(_document.getPromptPos() + oAndL.first().intValue(),oAndL.second().intValue());
+//    
+//    _document.appendSyntaxErrorResult(errorMessage, interaction, startRow, startCol, endRow, endCol,
+//                                      InteractionsDocument.ERROR_STYLE);
+//    
+//    _interactionIsOver();
+//  }
   
   /** Signifies that the most recent interpretation contained a call to System.exit.
     * @param status The exit status that will be returned.
     */
   public void replCalledSystemExit(int status) {
 //    Utilities.showDebug("InteractionsModel: replCalledSystemExit(" + status + ") called");
+    _log.log("InteractionsModel.replCalledSystemExit(" + status + ") called");
     _notifyInterpreterExited(status); 
   }
   
@@ -769,28 +784,24 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   
   /** Called when the interpreter starts to reset. */
   public void interpreterResetting() {
-    if (! _waitingForFirstInterpreter) {
-      Utilities.invokeLater(new Runnable() {
-        public void run() {
-          _document.insertBeforeLastPrompt(" Resetting Interactions ...\n", InteractionsDocument.ERROR_STYLE);
-          _document.setInProgress(true);
-        }
-      });
-      
-      
-      /* Debugger deactivated in DrScala */   
-//      // Change to a new debug port to avoid conflicts
-//      try { _createNewDebugPort(); }
-//      catch (IOException ioe) {
-//        // Oh well, leave it at the previous port
-//      }
-      _notifyInterpreterResetting();
-//      Utilities.showDebug("InteractionsModel: interpreterResetting notification complete");
-    }
+    _log.log("InteractionsModel.interpreterResetting called");
+    Utilities.invokeLater(new Runnable() {
+      public void run() {
+        _document.insertBeforeLastPrompt(" Resetting interactions by killing and restarting the interactions JVM.  Be patient ...\n", InteractionsDocument.ERROR_STYLE);
+        _document.setInProgress(true);
+        _notifyInterpreterResetting();
+      }
+    });
   }
   
-  /** Notifies listeners that the interpreter is resetting. (Subclasses must maintain listeners.) */
+  /** Notifies listeners that the interpreter is resetting. (Subclasses must maintain listeners.) 
+    * Only runs in event thread. */
   protected abstract void _notifyInterpreterResetting();
+  
+   /** Notifies listeners that the interpreter has been replaced.
+    * @param inProgress Whether the new interpreter is currently in progress.
+    */
+  protected abstract void _notifyInterpreterReplaced(final boolean inProgress);
   
   /** This method is called by the Main JVM if the Interpreter JVM cannot be exited
     * @param t The Throwable thrown by System.exit
@@ -821,7 +832,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   
   public String getBanner() { return _banner; }
   
-  public String getStartUpBanner() { return generateBanner(_workingDirectory); }
+  public String getStartUpBanner() { return generateBanner(_workingDir); }
   
   /* The method repackages generates the banner corresponding to wd, binds _banner to this value, and returns it. 
    * It is package private so that RMIInteractionsModel inherits it. */
@@ -861,24 +872,18 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   
   /** Called when a new Java interpreter has registered and is ready for use. */
   public void interpreterReady(final File wd) {
-    debug.logStart();
-//    System.err.println("interpreterReady(" + wd + ") called in InteractionsModel");  // DEBUG
-//    System.out.println("_waitingForFirstInterpreter = " + _waitingForFirstInterpreter);  // DEBUG
-    if (! _waitingForFirstInterpreter) {
-      Utilities.invokeLater(new Runnable() {
-        public void run() {
-          _document.reset(generateBanner(wd));
-          _document.setInProgress(false);
-          if (_pane != null) _pane.setCaretPosition(_document.getLength());
-          
-          performDefaultImports();
-          
-//          _notifyInterpreterReady(wd);
-        }
-      });
-    }
-    _waitingForFirstInterpreter = false;
-    debug.logEnd();
+    _log.log("interpreterReady(" + wd + ") called in InteractionsModel");
+    Utilities.invokeLater(new Runnable() {
+      public void run() {
+        _document.setInProgress(false);
+        if (_pane != null) _pane.setCaretPosition(_document.getLength());  
+        performDefaultImports();
+        _notifyInterpreterReady(wd);
+      }
+    });
+//    }
+//    _waitingForFirstInterpreter = false;
+//    debug.logEnd();
   }
 
   /** Perform the default imports of the classes and packages listed in the INTERACTIONS_AUTO_IMPORT_CLASSES. */

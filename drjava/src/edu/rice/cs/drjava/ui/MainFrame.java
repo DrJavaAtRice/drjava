@@ -87,15 +87,14 @@ import edu.rice.cs.drjava.model.definitions.DocumentUIListener;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.drjava.model.definitions.NoSuchDocumentException;
 
-/* Debugger deactivated in DrScala */
-//import edu.rice.cs.drjava.model.debug.*;
-
 import edu.rice.cs.drjava.model.repl.*;
+import edu.rice.cs.drjava.model.repl.newjvm.MainJVM;
 import edu.rice.cs.drjava.model.javadoc.ScaladocModel;
 import edu.rice.cs.drjava.ui.config.ConfigFrame;
 import edu.rice.cs.drjava.ui.predictive.PredictiveInputFrame;
 import edu.rice.cs.drjava.ui.predictive.PredictiveInputModel;
 import edu.rice.cs.drjava.ui.avail.*;
+import edu.rice.cs.drjava.ui.avail.DefaultGUIAvailabilityNotifier;
 import edu.rice.cs.drjava.ui.ClipboardHistoryFrame;
 import edu.rice.cs.drjava.ui.RegionsTreePanel;
 import edu.rice.cs.drjava.project.*;
@@ -303,7 +302,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   volatile private ConfigOptionListeners.MasterJVMXMXListener _masterJvmXmxListener;
   
   /** GUI component availability notifier. */
-  final DefaultGUIAvailabilityNotifier _guiAvailabilityNotifier = new DefaultGUIAvailabilityNotifier();
+  final DefaultGUIAvailabilityNotifier _guiNotifier = DefaultGUIAvailabilityNotifier.ONLY;
   
   /** Window adapter for "pseudo-modal" dialogs, i.e. non-modal dialogs that insist on keeping the focus. */
   protected volatile java.util.HashMap<Window,WindowAdapter> _modalWindowAdapters 
@@ -2141,33 +2140,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public void actionPerformed(ActionEvent ae) { _model.resetConsole(); }
   };
   
-//  /** Shows the DebugConsole. */
-//  private final Action _showDebugConsoleAction = new AbstractAction("Show DrJava Debug Console") {
-//    public void actionPerformed(ActionEvent e) { DrScalaRoot.showDrJavaDebugConsole(MainFrame.this); }
-//  };
-  
   /** Resets the Interactions pane. */
   private final Action _resetInteractionsAction = new AbstractAction("Reset Interactions") {
     public void actionPerformed(ActionEvent ae) {
       /* Revised reset implementation relies on fast internal Scala reset. */
-//      if (! DrScala.getConfig().getSetting(INTERACTIONS_RESET_PROMPT).booleanValue()) {
-        _doResetInteractions();
-        
-        return;
-//      }
-//      
-//      String title = "Confirm Reset Interactions";
-//      String message = "Are you sure you want to reset the Interactions Pane?";
-//      ConfirmCheckBoxDialog dialog =
-//        new ConfirmCheckBoxDialog(MainFrame.this, title, message);
-//      int rc = dialog.show();
-//      if (rc == JOptionPane.YES_OPTION) {
-//        _doResetInteractions();
-//        
-//        if (dialog.getCheckBoxValue()) {
-//          DrScala.getConfig().setSetting(INTERACTIONS_RESET_PROMPT, Boolean.FALSE);
-//        }
-//      }
+      _doResetInteractions();
     }
   };
   
@@ -2177,12 +2154,16 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     // Lots of work, so use another thread.  NOT!
     _interactionsPane.discardUndoEdits();
     /* Relying on lightweight internal reset in Scala interpreter */
-//    new Thread(new Runnable() { 
+    MainJVM._log.log("MainFrame invoking DefaultGlobalModel.resetInteractions");
+//    new Thread(new Runnable() {
 //      public void run() {
-    _model.resetInteractions(_model.getWorkingDirectory(), true);
+    _model.resetInteractions(_model.getWorkingDirectory());
+    MainJVM._log.log("DefaultGlobalModel.resetInteractions complete");
     _closeSystemInAction.setEnabled(true);
+    _enableInteractionsPane();
 //      }
 //    }).start();
+   
   }
   
   /** Defines actions that displays the interactions classpath. */
@@ -3479,73 +3460,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         }
       });
       
-      /* The scala compiler and library are embedded in the drscala.jar file.  We do not have to worry
-       * about selecting another compiler.  All associated Java compilers should be version 8 (1.8) as well,
-       * so much of the infrastructure inherited from DrScala is overkill.
-       */
-      
-//      // The OptionListener for SCALADOC_API_REF_VERSION.
-//      OptionListener<String> choiceOptionListener = new OptionListener<String>() {
-//        public void optionChanged(OptionEvent<String> oce) {
-//          clearJavaAPISet();
-//        }
-//      };
-//      DrScala.getConfig().addOptionListener(SCALADOC_API_REF_VERSION, choiceOptionListener);
-//      
-//      // The OptionListener for SCALADOC_XXX_LINK.
-//      OptionListener<String> link13OptionListener = new OptionListener<String>() {
-//        public void optionChanged(OptionEvent<String> oce) {
-//          String linkVersion = DrScala.getConfig().getSetting(SCALADOC_API_REF_VERSION);
-//          if (linkVersion.equals(SCALADOC_1_3_TEXT) ||
-//              linkVersion.equals(SCALADOC_AUTO_TEXT)) {
-//            clearJavaAPISet();
-//          }
-//        }
-//      };
-//      DrScala.getConfig().addOptionListener(SCALADOC_1_3_LINK, link13OptionListener);
-//      OptionListener<String> link14OptionListener = new OptionListener<String>() {
-//        public void optionChanged(OptionEvent<String> oce) {
-//          String linkVersion = DrScala.getConfig().getSetting(SCALADOC_API_REF_VERSION);
-//          if (linkVersion.equals(SCALADOC_1_4_TEXT) ||
-//              linkVersion.equals(SCALADOC_AUTO_TEXT)) {
-//            clearJavaAPISet();
-//          }
-//        }
-//      };
-//      DrScala.getConfig().addOptionListener(SCALADOC_1_4_LINK, link14OptionListener);
-//      OptionListener<String> link15OptionListener = new OptionListener<String>() {
-//        public void optionChanged(OptionEvent<String> oce) {
-//          String linkVersion = DrScala.getConfig().getSetting(SCALADOC_API_REF_VERSION);
-//          if (linkVersion.equals(SCALADOC_1_5_TEXT) ||
-//              linkVersion.equals(SCALADOC_AUTO_TEXT)) {
-//            clearJavaAPISet();
-//          }
-//        }
-//      };
-//      DrScala.getConfig().addOptionListener(SCALADOC_1_5_LINK, link15OptionListener);
-//      OptionListener<String> link16OptionListener = new OptionListener<String>() {
-//        public void optionChanged(OptionEvent<String> oce) {
-//          String linkVersion = DrScala.getConfig().getSetting(SCALADOC_API_REF_VERSION);
-//          if (linkVersion.equals(SCALADOC_1_6_TEXT) ||
-//              linkVersion.equals(SCALADOC_AUTO_TEXT)) {
-//            clearJavaAPISet();
-//          }
-//        }
-//      };
-//      DrScala.getConfig().addOptionListener(SCALADOC_1_6_LINK, link16OptionListener);
-//      OptionListener<String> linkJUnitOptionListener = new OptionListener<String>() {
-//        public void optionChanged(OptionEvent<String> oce) {
-//          clearJavaAPISet();
-//        }
-//      };
-//      DrScala.getConfig().addOptionListener(JUNIT_LINK, linkJUnitOptionListener);
-//      OptionListener<Vector<String>> additionalLinkOptionListener = new OptionListener<Vector<String>>() {
-//        public void optionChanged(OptionEvent<Vector<String>> oce) {
-//          clearJavaAPISet();
-//        }
-//      };
-//      DrScala.getConfig().addOptionListener(SCALADOC_ADDITIONAL_LINKS, additionalLinkOptionListener);
-      
       OptionListener<Boolean> scanClassesOptionListener = new OptionListener<Boolean>() {
         public void optionChanged(OptionEvent<Boolean> oce) {
           clearCompleteClassSet();
@@ -4680,7 +4594,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   private void _openProjectUpdate() {
     if (_model.isProjectActive()) {
-      _guiAvailabilityNotifier.available(GUIAvailabilityListener.ComponentType.PROJECT);
+      _guiNotifier.available(GUIAvailabilityListener.ComponentType.PROJECT);
       _model.getDocumentNavigator().asContainer().addKeyListener(_historyListener);
       _model.getDocumentNavigator().asContainer().addFocusListener(_focusListenerForRecentDocs);
       _model.getDocumentNavigator().asContainer().addMouseListener(_resetFindReplaceListener);
@@ -4731,7 +4645,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       new BackgroundColorListener(renderer);
       _resetNavigatorPane();
       if (_model.getDocumentCount() == 1) _model.setActiveFirstDocument();
-      _guiAvailabilityNotifier.unavailable(GUIAvailabilityListener.ComponentType.PROJECT);
+      _guiNotifier.unavailable(GUIAvailabilityListener.ComponentType.PROJECT);
       _setUpContextMenus();
       _currentProjFile = FileOps.NULL_FILE;
       return true;
@@ -5414,27 +5328,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       config.setSetting(DIALOG_TABBEDPANES_STATE, DIALOG_TABBEDPANES_STATE.getDefault());
     }
     
-    /* Debugger is deactivated in DrScala */
-//    // "Debugger" frame position and size.
-//    if ((DrScala.getConfig().getSetting(DIALOG_DEBUGFRAME_STORE_POSITION).booleanValue())
-//          && (_debugFrame != null) && (_debugFrame.getFrameState() != null)) {
-//      config.setSetting(DIALOG_DEBUGFRAME_STATE, (_debugFrame.getFrameState().toString()));
-//    }
-//    else {
-//      // Reset to defaults to restore pristine behavior.
-//      config.setSetting(DIALOG_DEBUGFRAME_STATE, DIALOG_DEBUGFRAME_STATE.getDefault());
-//    }
-//    
-//    // Panel heights.
-//    if (_showDebugger) config.setSetting(DEBUG_PANEL_HEIGHT, Integer.valueOf(_debugPanel.getHeight()));
-    
     // Doc list width.
     config.setSetting(DOC_LIST_WIDTH, Integer.valueOf(_docSplitPane.getDividerLocation()));
   }
-  
-  /* Debugger is deactivated in DrScala */
-//  private void _cleanUpDebugger() { if (isDebuggerReady()) _model.getDebugger().shutdown(); }
-  
+
   private void _compile() {
     // now works with multiple files
     
@@ -5685,7 +5582,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     // moved this back into the event thread to fix bug 2848696
     // this code doesn't have to run in an auxiliary thread
     // the actual unit testing later is done in a separate thread
-    _guiAvailabilityNotifier.junitStarted(); // JUNIT and COMPILER
+    _guiNotifier.junitStarted(); // JUNIT and COMPILER
 
     // now also works with multiple documents
 //        hourglassOn();  // moved into the prelude before this thread start  
@@ -5700,7 +5597,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     // moved this back into the event thread to fix bug 2848696
     // this code doesn't have to run in an auxiliary thread
     // the actual unit testing later is done in a separate thread
-    _guiAvailabilityNotifier.junitStarted(); // JUNIT and COMPILER
+    _guiNotifier.junitStarted(); // JUNIT and COMPILER
 
 //        hourglassOn();  // turned off when JUnitStarted event is fired
     if (_model.getDocumentNavigator().isGroupSelected()) {
@@ -5719,7 +5616,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private void _junitProject() {
     updateStatusField("Running JUnit Tests in Project");
     hourglassOn();  // turned off in junitStarted/nonTestCase/_junitInterrupted
-    _guiAvailabilityNotifier.junitStarted(); // JUNIT and COMPILER
+    _guiNotifier.junitStarted(); // JUNIT and COMPILER
     try { _model.getJUnitModel().junitProject(); } 
     catch(UnexpectedException e) { _junitInterrupted(e); }
     catch(Exception e) { _junitInterrupted(new UnexpectedException(e)); }
@@ -5729,7 +5626,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private void _junitAll() {
     updateStatusField("Running All Open Unit Tests");
     hourglassOn();  // turned off in junitStarted/nonTestCase/_junitInterrupted
-    _guiAvailabilityNotifier.junitStarted(); // JUNIT and COMPILER
+    _guiNotifier.junitStarted(); // JUNIT and COMPILER
     try { _model.getJUnitModel().junitAll(); } 
     catch(UnexpectedException e) { _junitInterrupted(e); }
     catch(Exception e) { _junitInterrupted(new UnexpectedException(e)); }
@@ -5981,7 +5878,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       catch(IOException ioe) { /* ignore */ }
       Exception e = DrScala.getConfig().getStartupException();
       MainFrameStatics.showError(this, e, "Error in Config File",
-                               "Could not read the '.drjava' configuration file\n" +
+                               "Could not read the '.drscala' configuration file\n" +
                                "in your home directory.  Starting with default\n" +
                                "values instead.\n\n" + "The problem was:\n");
     }
@@ -6116,13 +6013,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   void _addGUIAvailabilityListener(Action a, GUIAvailabilityListener.ComponentType... components) {
-    _guiAvailabilityNotifier.
-      addListener(new AndGUIAvailabilityActionAdapter(a, _guiAvailabilityNotifier, components));
+    _guiNotifier.
+      addListener(new AndGUIAvailabilityActionAdapter(a, _guiNotifier, components));
   }
 
   void _addGUIAvailabilityListener(Component a, GUIAvailabilityListener.ComponentType... components) {
-    _guiAvailabilityNotifier.
-      addListener(new AndGUIAvailabilityComponentAdapter(a, _guiAvailabilityNotifier, components));
+    _guiNotifier.
+      addListener(new AndGUIAvailabilityComponentAdapter(a, _guiNotifier, components));
   }
   
   void _displayGUIComponentAvailabilityFrame() {
@@ -6132,19 +6029,19 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     frame.getContentPane().setLayout(new BoxLayout(frame.getContentPane(), BoxLayout.PAGE_AXIS));
     for(final GUIAvailabilityListener.ComponentType c: GUIAvailabilityListener.ComponentType.values()) {
       final DelayedThunk<JButton> buttonThunk = DelayedThunk.make();  
-      final JButton button = new JButton(new AbstractAction(c.toString()+" "+_guiAvailabilityNotifier.getCount(c)) {
+      final JButton button = new JButton(new AbstractAction(c.toString()+" "+_guiNotifier.getCount(c)) {
         public void actionPerformed(ActionEvent e) {
-          _guiAvailabilityNotifier.availabilityChanged(c, !buttonThunk.value().getText().endsWith(" 0"));
+          _guiNotifier.availabilityChanged(c, !buttonThunk.value().getText().endsWith(" 0"));
         }
       });
       buttonThunk.set(button);
-      _guiAvailabilityNotifier.addListener(new AndGUIAvailabilityListener(_guiAvailabilityNotifier, c) {
+      _guiNotifier.addListener(new AndGUIAvailabilityListener(_guiNotifier, c) {
         public void availabilityChanged(boolean available) {
-          button.setText(c.toString()+" "+_guiAvailabilityNotifier.getCount(c));
+          button.setText(c.toString()+" "+_guiNotifier.getCount(c));
           button.setSelected(available);
         }
       });
-      button.setSelected(_guiAvailabilityNotifier.isAvailable(c));
+      button.setSelected(_guiNotifier.isAvailable(c));
       frame.add(button);
     }
     frame.pack();
@@ -6158,15 +6055,15 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private void _setUpGUIComponentAvailability() {
 //    _displayGUIComponentAvailabilityFrame();
     
-    _guiAvailabilityNotifier.ensureUnavailable(GUIAvailabilityListener.ComponentType.PROJECT);
-    _guiAvailabilityNotifier.ensureUnavailable(GUIAvailabilityListener.ComponentType.PROJECT_BUILD_DIR);
-    _guiAvailabilityNotifier.ensureUnavailable(GUIAvailabilityListener.ComponentType.PROJECT_MAIN_CLASS);
+    _guiNotifier.ensureUnavailable(GUIAvailabilityListener.ComponentType.PROJECT);
+    _guiNotifier.ensureUnavailable(GUIAvailabilityListener.ComponentType.PROJECT_BUILD_DIR);
+    _guiNotifier.ensureUnavailable(GUIAvailabilityListener.ComponentType.PROJECT_MAIN_CLASS);
     /* Debugger is deactivated in DrScala */
 //    _guiAvailabilityNotifier.ensureUnavailable(GUIAvailabilityListener.ComponentType.DEBUGGER);
 //    _guiAvailabilityNotifier.ensureUnavailable(GUIAvailabilityListener.ComponentType.DEBUGGER_SUSPENDED);
-    _guiAvailabilityNotifier.ensureAvailable(GUIAvailabilityListener.ComponentType.JUNIT);
-    _guiAvailabilityNotifier.ensureAvailable(GUIAvailabilityListener.ComponentType.COMPILER);
-    _guiAvailabilityNotifier.ensureAvailabilityIs(GUIAvailabilityListener.ComponentType.SCALADOC,
+    _guiNotifier.ensureAvailable(GUIAvailabilityListener.ComponentType.JUNIT);
+    _guiNotifier.ensureAvailable(GUIAvailabilityListener.ComponentType.COMPILER);
+    _guiNotifier.ensureAvailabilityIs(GUIAvailabilityListener.ComponentType.SCALADOC,
                                                   _model.getScaladocModel().isAvailable());
   }
   
@@ -8413,10 +8310,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Ensures that the interactions pane is editable after an interaction completes. */
   protected void _enableInteractionsPane() {
+    _log.log("_enableInteractionsPane() called");
     assert EventQueue.isDispatchThread();
     _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
     _interactionsPane.setEditable(true);
     _interactionsController.moveToEnd();
+//    _model.getInteractionsDocument().reset(generateBanner(_model.getWorkingDirectory())); 
     if (_interactionsPane.hasFocus()) _interactionsPane.getCaret().setVisible(true);
     if (_interactionsScriptController != null) _interactionsScriptController.setActionsEnabled();
   }
@@ -9078,7 +8977,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       
       _interactionsPane.endCompoundEdit();
       _disableInteractionsPane();
-      _guiAvailabilityNotifier.unavailable(GUIAvailabilityListener.ComponentType.INTERACTIONS);
+      _guiNotifier.unavailable(GUIAvailabilityListener.ComponentType.INTERACTIONS);
     }
     
     public void interactionEnded() {
@@ -9120,28 +9019,27 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       }
       else im.resetLastErrors(); // reset the last errors, so the dialog works again if it is re-enabled
       _enableInteractionsPane();
-      _guiAvailabilityNotifier.available(GUIAvailabilityListener.ComponentType.INTERACTIONS);
-      _interactionsPane.discardUndoEdits();
-      
+      _guiNotifier.available(GUIAvailabilityListener.ComponentType.INTERACTIONS);
+      _interactionsPane.discardUndoEdits(); 
     }
     
     public void interactionErrorOccurred(final int offset, final int length) {
       _interactionsPane.highlightError(offset, length); 
     }
     
-    /** Called when the active interpreter is changed.
+    /** Called when the interpreter is replaced a new interpreter.
       * @param inProgress Whether the new interpreter is currently in progress with an interaction (i.e., whether an 
-      *        interactionEnded event will be fired)
+      *        interactionEnded event may be fired)
       */
-    public void interpreterChanged(final boolean inProgress) {
-      _guiAvailabilityNotifier.availabilityChanged(GUIAvailabilityListener.ComponentType.INTERACTIONS, !inProgress);
+    public void interpreterReplaced(final boolean inProgress) {
+      _guiNotifier.availabilityChanged(GUIAvailabilityListener.ComponentType.INTERACTIONS, !inProgress);
       if (inProgress) _disableInteractionsPane();
       else _enableInteractionsPane();
     }
     
     public void compileStarted() {
       assert EventQueue.isDispatchThread();
-      _guiAvailabilityNotifier.unavailable(GUIAvailabilityListener.ComponentType.COMPILER);      
+      _guiNotifier.unavailable(GUIAvailabilityListener.ComponentType.COMPILER);      
       showTab(_compilerErrorPanel, true);
       _compilerErrorPanel.setCompilationInProgress();
       _saveAction.setEnabled(false);
@@ -9150,7 +9048,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public void compileEnded(File workDir, final List<? extends File> excludedFiles) {
       assert EventQueue.isDispatchThread();    
       
-      _guiAvailabilityNotifier.available(GUIAvailabilityListener.ComponentType.COMPILER);
+      _guiNotifier.available(GUIAvailabilityListener.ComponentType.COMPILER);
       
       _compilerErrorPanel.reset(excludedFiles.toArray(new File[0]));
       
@@ -9173,7 +9071,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     /** Called if a compilation is aborted. */
     public void compileAborted(Exception e) {
       /* Should probably display a simple popup */
-      _guiAvailabilityNotifier.available(GUIAvailabilityListener.ComponentType.COMPILER);      
+      _guiNotifier.available(GUIAvailabilityListener.ComponentType.COMPILER);      
     }
     
     /** Called after the active compiler has been changed. */
@@ -9244,7 +9142,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public void junitEnded() {
       assert EventQueue.isDispatchThread();
 //      new ScrollableDialog(null, "MainFrame.junitEnded() called", "", "").show();
-      _guiAvailabilityNotifier.junitFinished(); // JUNIT and COMPILER
+      _guiNotifier.junitFinished(); // JUNIT and COMPILER
       
       // Use EventQueue invokeLater to ensure that JUnit panel is "reset" after it is updated with test results
       EventQueue.invokeLater(new Runnable() { public void run() { _junitPanel.reset(); } });
@@ -9257,7 +9155,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       assert EventQueue.isDispatchThread();
       
       hourglassOn();
-      _guiAvailabilityNotifier.scaladocStarted(); // SCALADOC and COMPILER
+      _guiNotifier.scaladocStarted(); // SCALADOC and COMPILER
 
       showTab(_scaladocErrorPanel, true);
       _scaladocErrorPanel.setScaladocInProgress();
@@ -9274,7 +9172,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         _model.refreshActiveDocument();
       }
       finally {
-        _guiAvailabilityNotifier.scaladocFinished(); // SCALADOC and COMPILER
+        _guiNotifier.scaladocFinished(); // SCALADOC and COMPILER
         hourglassOff();
       }
       
@@ -9335,11 +9233,14 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       }
     }
     
-    public void interpreterResetFailed(Throwable t) { interpreterReady(FileOps.NULL_FILE); }
+    public void interpreterResetFailed(Throwable t) {
+      MainJVM._log.log("interpreterReady(" + FileOps.NULL_FILE + ") called in MainFrame.interpreterResetFailed");
+      interpreterReady(FileOps.NULL_FILE); 
+    }
     
     public void interpreterResetting() {
       assert duringInit() || EventQueue.isDispatchThread();
-      _guiAvailabilityNotifier.unavailable(GUIAvailabilityListener.ComponentType.INTERACTIONS);
+      _guiNotifier.unavailable(GUIAvailabilityListener.ComponentType.INTERACTIONS);  // disable Interactions pane
       _closeInteractionsScript();
       _interactionsPane.setEditable(false);
       _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -9349,7 +9250,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       assert duringInit() || EventQueue.isDispatchThread();
       
       interactionEnded();
-      _guiAvailabilityNotifier.available(GUIAvailabilityListener.ComponentType.INTERACTIONS);
+      _guiNotifier.available(GUIAvailabilityListener.ComponentType.INTERACTIONS);   // enable Interactions pane
       
       /* This line was moved here from interpreterResetting because it was possible to get an InputBox in 
        * InteractionsController between interpreterResetting and interpreterReady. Fixes bug #917054 
@@ -9553,7 +9454,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       }
       finally { 
         hourglassOff();
-        _guiAvailabilityNotifier.junitFinished(); // JUNIT and COMPILER
+        _guiNotifier.junitFinished(); // JUNIT and COMPILER
       }
     }
     
@@ -9572,7 +9473,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                     JOptionPane.ERROR_MESSAGE);
       // clean up as junitEnded except hourglassOff (should factored into a private method)
       showTab(_junitPanel, true);
-      _guiAvailabilityNotifier.junitFinished(); // JUNIT and COMPILER
+      _guiNotifier.junitFinished(); // JUNIT and COMPILER
       _junitPanel.reset();
     }
     
@@ -9677,7 +9578,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     /* Changes to the state */
     
     public void projectBuildDirChanged() {
-      _guiAvailabilityNotifier.ensureAvailabilityIs(GUIAvailabilityListener.ComponentType.PROJECT_BUILD_DIR,
+      _guiNotifier.ensureAvailabilityIs(GUIAvailabilityListener.ComponentType.PROJECT_BUILD_DIR,
                                                     isProjectActiveAndBuildDirSet());
     }
     
@@ -9753,7 +9654,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   public void projectRunnableChanged() {
     boolean mainClassSet = isProjectActiveAndMainClassSet();
-    _guiAvailabilityNotifier.ensureAvailabilityIs(GUIAvailabilityListener.ComponentType.PROJECT_MAIN_CLASS,
+    _guiNotifier.ensureAvailabilityIs(GUIAvailabilityListener.ComponentType.PROJECT_MAIN_CLASS,
                                                   mainClassSet);
     if (mainClassSet) {
       _runButton = _updateToolbarButton(_runButton, _runProjectAction);
@@ -9880,7 +9781,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
     finally {
       hourglassOff();
-      _guiAvailabilityNotifier.junitFinished(); // JUNIT and COMPILER
+      _guiNotifier.junitFinished(); // JUNIT and COMPILER
   }
   }
   
@@ -9894,7 +9795,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
     finally {
       hourglassOff();
-      _guiAvailabilityNotifier.junitFinished(); // JUNIT and COMPILER
+      _guiNotifier.junitFinished(); // JUNIT and COMPILER
     }
   }
   

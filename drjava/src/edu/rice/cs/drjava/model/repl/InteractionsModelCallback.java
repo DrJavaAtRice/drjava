@@ -108,15 +108,15 @@ public interface InteractionsModelCallback {
     */
   public void replThrewException(String message, StackTraceElement[] stackTrace);
   
-  /** Signifies that the most recent interpretation was preempted by a syntax error.
-    * @param errorMessage The syntax error message
-    * @param startRow The starting row of the error
-    * @param startCol The starting column of the error
-    * @param endRow The end row of the error
-    * @param endCol The end column of the error
-    */
-  public void replReturnedSyntaxError(String errorMessage, String interaction, int startRow, int startCol,
-                                      int endRow, int endCol);
+//  /** Signifies that the most recent interpretation was preempted by a syntax error.
+//    * @param errorMessage The syntax error message
+//    * @param startRow The starting row of the error
+//    * @param startCol The starting column of the error
+//    * @param endRow The end row of the error
+//    * @param endCol The end column of the error
+//    */
+//  public void replReturnedSyntaxError(String errorMessage, String interaction, int startRow, int startCol,
+//                                      int endRow, int endCol);
   
   /** Signifies that the most recent interpretation contained a call to System.exit.
     * @param status The exit status that will be returned.
@@ -138,6 +138,9 @@ public interface InteractionsModelCallback {
 
   /** Called when the interpreter starts to reset. */
   public void interpreterResetting();
+  
+  /** Called to reset the contents of the interactoins document, including generating a banner. */
+  public void documentReset();
   
   /** Called to assert that a fresh Java interpreter is ready for use either after a start or a restart.
     * Is sometimes preceded by a call to {@code interpreterResetting()}, but not when the interpreter is

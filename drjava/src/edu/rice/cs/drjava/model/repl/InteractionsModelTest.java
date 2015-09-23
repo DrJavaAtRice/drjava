@@ -43,10 +43,13 @@ import edu.rice.cs.drjava.model.FileSaveSelector;
 
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.Log;
+import edu.rice.cs.util.UnexpectedException;
+
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.plt.tuple.Pair;
+
 
 import java.io.File;
 import java.io.IOException;
@@ -724,7 +727,9 @@ public final class InteractionsModelTest extends DrScalaTestCase {
     public void addProjectFilesClassPath(File path) { fail("cannot add to classpath in a test"); }
     public void addExternalFilesClassPath(File path) { fail("cannot add to classpath in a test"); }
     public void addExtraClassPath(File path) { fail("cannot add to classpath in a test"); }
-    protected void _resetInterpreter(File wd, boolean force) { fail("cannot reset interpreter in a test"); }
+    protected boolean _resetInterpreter(File wd) { 
+      throw new UnexpectedException("cannot reset interpreter in a test"); 
+    }
     public List<File> getCompilerBootClassPath() {
       // TODO: figure out what to do here
       return new ArrayList<File>();
@@ -738,6 +743,7 @@ public final class InteractionsModelTest extends DrScalaTestCase {
     protected void _notifySyntaxErrorOccurred(int offset, int length) { }
     protected void _notifyInterpreterExited(int status) { }
     protected void _notifyInterpreterResetting() { }
+    protected void _notifyInterpreterReplaced(final boolean inProgress) { }
     protected void _notifyInterpreterResetFailed(Throwable t) { }
     public void _notifyInterpreterReady(File wd) { }
     protected void _interpreterResetFailed(Throwable t) { }
@@ -762,13 +768,13 @@ public final class InteractionsModelTest extends DrScalaTestCase {
     
     protected void disableSyntaxError() { errorPresent = false; }
     
-    /** Simulates a syntax error in interpretation. */
-    protected void _interpret(String toEval) {
-//      System.err.println("interpret setting toEval to " + toEval);
-      this.toEval = toEval; 
-      if (errorPresent) replReturnedSyntaxError(errorString1, errorString2, -1, -1, -1, -1); // imitate return with syntax error
-      else replReturnedVoid();  // imitate successful return
-    }
+//    /** Simulates a syntax error in interpretation. */
+//    protected void _interpret(String toEval) {
+////      System.err.println("interpret setting toEval to " + toEval);
+//      this.toEval = toEval; 
+//      if (errorPresent) replReturnedSyntaxError(errorString1, errorString2, -1, -1, -1, -1); // imitate return with syntax error
+//      else replReturnedVoid();  // imitate successful return
+//    }
   }
 
   
@@ -815,7 +821,7 @@ public final class InteractionsModelTest extends DrScalaTestCase {
     protected void _interpreterResetFailed(Throwable t) { }
     protected void _interpreterWontStart(Exception e) { }
     protected void _notifyInteractionIncomplete() { _notifyInteractionEnded(); }
-    protected void _notifyInterpreterChanged(boolean inProgress) { }
+    protected void _notifyInterpreterReplaced(boolean inProgress) { }
     
     public void dispose() throws RemoteException { _jvm.dispose(); }
     
@@ -845,21 +851,21 @@ public final class InteractionsModelTest extends DrScalaTestCase {
       _interactionIsOver();
     }
     
-    @Override public void replReturnedSyntaxError(String errorMessage, String interaction, int startRow, int startCol, int endRow,
-                                                  int endCol) {
-      _log.log("replReturnedSyntaxError called");
-      if (errorMessage != null) {
-        if (errorMessage.endsWith("<EOF>\"")) {
-          continuationException = true;
-          syntaxException = false;
-          _interactionIsOver();
-          return;
-        }
-      }
-      syntaxException = true;
-      continuationException = false;
-      _interactionIsOver();
-    }
+//    @Override public void replReturnedSyntaxError(String errorMessage, String interaction, int startRow, int startCol, int endRow,
+//                                                  int endCol) {
+//      _log.log("replReturnedSyntaxError called");
+//      if (errorMessage != null) {
+//        if (errorMessage.endsWith("<EOF>\"")) {
+//          continuationException = true;
+//          syntaxException = false;
+//          _interactionIsOver();
+//          return;
+//        }
+//      }
+//      syntaxException = true;
+//      continuationException = false;
+//      _interactionIsOver();
+//    }
     
     public boolean isContinuationException() { return continuationException; }
     public boolean isSyntaxException() { return syntaxException; }

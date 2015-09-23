@@ -4,6 +4,7 @@ package edu.rice.cs.drjava.model.repl.newjvm;
  * (i.e. a class which implements the 'Interpreter' interface in this package)
  * to a Scala REPL. In theory, this interface should be invariant across 
  * subsequent Scala versions.
+ * NOTE: this interface is used in Scala code supporting access to the Scala REPL.
  */
 public interface ScalaInterpreterAdapter {
   void addClasspath(String path);

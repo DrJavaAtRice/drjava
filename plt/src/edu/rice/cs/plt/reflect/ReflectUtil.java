@@ -52,31 +52,28 @@ public final class ReflectUtil {
   /** Prevents instance creation */
   private ReflectUtil() {}
   
-  /**
-   * A ClassLoader for the bootstrap classes -- those provided by the bootstrap class path in Sun
-   * JVMs.  Note that this is not the actual loader used for bootstrap classes, but rather an immediate
-   * child; for any available class {@code c} ({@code "java.lang.Number"} or {@code "javax.swing.JFrame"},
-   * for example), {@code BOOT_CLASS_LOADER.loadClass(c).getClassLoader()} has value
-   * {@code null}.  When constructing a class loader, there is no need to use this object as a parent --
-   * simply use {@code null} as the parent parameter.
-   */
+  /** A ClassLoader for the bootstrap classes -- those provided by the bootstrap class path in Sun
+    * JVMs.  Note that this is not the actual loader used for bootstrap classes, but rather an immediate
+    * child; for any available class {@code c} ({@code "java.lang.Number"} or {@code "javax.swing.JFrame"},
+    * for example), {@code BOOT_CLASS_LOADER.loadClass(c).getClassLoader()} has value
+    * {@code null}.  When constructing a class loader, there is no need to use this object as a parent --
+    * simply use {@code null} as the parent parameter.
+    */
   public static final ClassLoader BOOT_CLASS_LOADER = new ClassLoader(null) {};
   
-  /**
-   * The value of system property "java.class.path", parsed as a list of files.  Consistent with most
-   * other uses of JVM properties in Java libraries, does not reflect subsequent changes to the property.
-   */
+  /** The value of system property "java.class.path", parsed as a list of files.  Consistent with most
+    * other uses of JVM properties in Java libraries, does not reflect subsequent changes to the property.
+    */
   public static final Iterable<File> SYSTEM_CLASS_PATH = IOUtil.parsePath(System.getProperty("java.class.path", ""));
   
-  /**
-   * Produce the simple name of the given class, as specified by {@link Class#getSimpleName},
-   * with an improved scheme for anonymous classes.  The simple name of a class is generally
-   * the unqualified name used to declare it.  Arrays evaluate to the simple name of their
-   * element type, followed by a pair of brackets.  Anonymous classes, rather than evaluating to an 
-   * empty string, produce something like "anonymous Foo" (where Foo is the supertype).  Assumes
-   * non-anonymous classes follow a naming convention in which the simple name is the suffix
-   * of the full class name following all '.' and '$' characters, and immediately following a
-   * (possibly empty) sequence of digits.
+  /** Produce the simple name of the given class, as specified by {@link Class#getSimpleName},
+    * with an improved scheme for anonymous classes.  The simple name of a class is generally
+    * the unqualified name used to declare it.  Arrays evaluate to the simple name of their
+    * element type, followed by a pair of brackets.  Anonymous classes, rather than evaluating to an 
+    * empty string, produce something like "anonymous Foo" (where Foo is the supertype).  Assumes
+    * non-anonymous classes follow a naming convention in which the simple name is the suffix
+    * of the full class name following all '.' and '$' characters, and immediately following a
+    * (possibly empty) sequence of digits.
    */
   public static String simpleName(Class<?> c) {
     if (c.isArray()) { return simpleName(c.getComponentType()) + "[]"; }

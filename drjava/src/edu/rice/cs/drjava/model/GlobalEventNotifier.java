@@ -400,9 +400,9 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener> impl
     * @param inProgress Whether the new interpreter is processing an interaction (i.e,. whether an interactionEnded
     *        event will be fired)
     */
-  public void interpreterChanged(boolean inProgress) {
+  public void interpreterReplaced(boolean inProgress) {
     _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.interpreterChanged(inProgress); } }
+    try { for (GlobalModelListener l : _listeners) { l.interpreterReplaced(inProgress); } }
     finally { _lock.endRead(); }
   }
   

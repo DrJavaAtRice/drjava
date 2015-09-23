@@ -45,6 +45,13 @@ import edu.rice.cs.plt.lambda.Predicate;
   * Each time the wrapped state value changes, the blocked threads check to see if the new state meets
   * a provided criterion.</p>
   * 
+  * Overview: this class implements a state machine where state changes are externally driven by explicit
+  * calls on the methods set, getAndSet, and compareAndSet.  Some set of threads may be blocked (using
+  * this.wait()) awaiting a state change.  The ensureState and ensureNotState methods block the executing
+  * thread if the specified condition is not already satisified.  Rechecking and (re-waiting on failure)
+  * occurs when a state change (externall driven) occurs.  So the  methods set, getAndSet, and compareAndSet 
+  * methods all perform notifyAll on the waiting threads.
+  * 
   * <p>Ideally, this class would extend {@link ConcurrentBox}.  Unfortunately, the methods of
   * {@link java.util.concurrent.atomic.AtomicReference} are {@code final}, and so they can't be overridden here.
   * Also, since locking is necessary when performing thread notification, these implementations simply use

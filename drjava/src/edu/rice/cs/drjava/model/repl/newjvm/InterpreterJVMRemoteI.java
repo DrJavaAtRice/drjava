@@ -65,34 +65,19 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
   /** Require variable declarations to include an explicit type. */
   public void setRequireVariableType(boolean require) throws RemoteException;
   
-  /** Adds a named Interpreter to the list.
-   * @param name the unique name for the interpreter
-   * @throws IllegalArgumentException if the name is not unique
-   */
-  public void addInterpreter(String name) throws RemoteException;
-  
-  /** Removes the interpreter with the given name, if it exists.
-   * @param name Name of the interpreter to remove
-   */
-  public void removeInterpreter(String name) throws RemoteException;
-  
-  /** Sets the current interpreter to be the one specified by the given name
-    * @param name the unique name of the interpreter to set active
-    * @return Status flags: whether this changes the active interpreter, and whether it is currently in progress
-    */
-  public Pair<Boolean, Boolean> setActiveInterpreter(String name) throws RemoteException;
-  
-  /** Sets the default interpreter to be active.
-    * @return Status flags: whether this changes the active interpreter, and whether it is currently in progress
-    * with an interaction
-    */
-  public Pair<Boolean, Boolean> setToDefaultInterpreter() throws RemoteException;
+  /* In DrScala, there is only one interpreter. */
+
+  /** Gets the default interpreter */
+  public Interpreter getInterpreter() throws RemoteException;
   
   /** Interprets the given string of source code in the active interpreter. The result is returned to MainJVMRemoteI via
     * the interpretResult method.
     * @param s Source code to interpret.
     */
   public InterpretResult interpret(String s) throws RemoteException;
+  
+  /** Executes internal reset operation of the interpreter; fails when interpreter is busy performing a computation. */
+  public void reset() throws RemoteException;
   
   /** Gets the string representation of the value of a variable in the current interpreter.
     * @param var the name of the variable

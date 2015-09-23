@@ -54,30 +54,32 @@ import edu.rice.cs.plt.lambda.WrappedException;
 import edu.rice.cs.plt.reflect.ReflectException;
 import edu.rice.cs.plt.reflect.ReflectUtil;
 
+import edu.rice.cs.util.Log;
+
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 import static edu.rice.cs.plt.debug.DebugUtil.error;
 
-/**
- * An abstract class implementing the logic to invoke and control, via RMI, a second Java virtual 
- * machine. This class is used by subclassing it. (See package documentation for more details.)
- * The state-changing methods of this class consistently block until a precondition for the state
- * change is satisfied &mdash; for example, {@link #quitSlave} cannot complete until a slave is
- * running.  Only one thread may change the state at a time.  Thus, clients should be careful
- * to only invoke state-changing methods when they are guaranteed to succeed (only invoking
- * {@code quitSlave()}, for example, when it is known to have been matched by a successful
- * {@code invokeSlave} invocation).
- *  
- * @version $Id: AbstractMasterJVM.java 5594 2012-06-21 11:23:40Z rcartwright $
- */
+/** An abstract class implementing the logic to invoke and control, via RMI, a second Java virtual 
+  * machine. This class is used by subclassing it. (See package documentation for more details.)
+  * The state-changing methods of this class consistently block until a precondition for the state
+  * change is satisfied &mdash; for example, {@link #quitSlave} cannot complete until a slave is
+  * running.  Only one thread may change the state at a time.  Thus, clients should be careful
+  * to only invoke state-changing methods when they are guaranteed to succeed (only invoking
+  * {@code quitSlave()}, for example, when it is known to have been matched by a successful
+  * {@code invokeSlave} invocation).
+  *  
+  * @version $Id: AbstractMasterJVM.java 5594 2012-06-21 11:23:40Z rcartwright $
+  */
 public abstract class AbstractMasterJVM implements MasterRemote {
   
-  /**
-   * Synchronization strategy: compare-and-swap guarantees that only one thread enters a STARTING, or
-   * QUITTING, or DISPOSED state.  After that, the only state transitions out of STARTING/QUITTING occur 
-   * in the same thread (or a single designated worker thread); all other threads must wait until the
-   * transition to FRESH or RUNNING.
-   */
+  /** Synchronization strategy: compare-and-swap guarantees that only one thread enters a STARTING, or
+    * QUITTING, or DISPOSED state.  After that, the only state transitions out of STARTING/QUITTING occur 
+    * in the same thread (or a single designated worker thread); all other threads must wait until the
+    * transition to FRESH or RUNNING.
+    */
   private enum State { FRESH, STARTING, RUNNING, QUITTING, DISPOSED };
+  
+  private static Log _log = new Log("MasterJVM.txt", true);
   
   /** Loads an instance of the given AbstractSlaveJVM class.  Invoked in the slave JVM. */
   private static class SlaveFactory implements Thunk<AbstractSlaveJVM>, Serializable {
@@ -120,16 +122,14 @@ public abstract class AbstractMasterJVM implements MasterRemote {
     System.setProperty("java.rmi.server.hostname", "127.0.0.1");
   }
   
-  /**
-   * Callback for when the slave JVM has connected, and the bidirectional communications link has been 
-   * established.  Provides access to the newly-created slave JVM.
-   */
+  /** Callback for when the slave JVM has connected, and the bidirectional communications link has been 
+    * established.  Provides access to the newly-created slave JVM.
+    */
   protected abstract void handleSlaveConnected(SlaveRemote newSlave);
   
-  /**
-   * Callback for when the slave JVM has quit.
-   * @param status The exit code returned by the slave JVM.
-   */
+  /** Callback for when the slave JVM has quit.
+    * @param status The exit code returned by the slave JVM.
+    */
   protected abstract void handleSlaveQuit(int status);
   
   /**
@@ -138,13 +138,12 @@ public abstract class AbstractMasterJVM implements MasterRemote {
    */
   protected abstract void handleSlaveWontStart(Exception e);
   
-  /**
-   * Creates and starts the slave JVM.  If the the slave is currently running, waits until it completes.
-   * Also waits until the new process has started up and calls one of {@link #handleSlaveConnected}
-   * or {@link #handleSlaveWontStart} before returning.
-   * @param jvmBuilder  JVMBuilder to use in starting the remote process.
-   * @throws IllegalStateException  If this object has been disposed.
-   */
+  /** Creates and starts the slave JVM.  If the the slave is currently running, waits until it completes.
+    * Also waits until the new process has started up and calls one of {@link #handleSlaveConnected}
+    * or {@link #handleSlaveWontStart} before returning.
+    * @param jvmBuilder  JVMBuilder to use in starting the remote process.
+    * @throws IllegalStateException  If this object has been disposed.
+    */
   protected final void invokeSlave(JVMBuilder jvmBuilder) {
     transition(State.FRESH, State.STARTING);
 
@@ -160,62 +159,69 @@ public abstract class AbstractMasterJVM implements MasterRemote {
 
     SlaveRemote newSlave = null;
     try {
-      debug.logStart("invoking remote JVM process");
+      _log.log("invoking remote JVM process");
       newSlave =
         (SlaveRemote) ConcurrentUtil.exportInProcess(_slaveFactory, tweakedJVMBuilder, new Runnable1<Process>() {
           public void run(Process p) {
-            debug.log("Remote JVM quit");
+            _log.log("Remote JVM quit");
             _monitor.set(State.FRESH);
-            //debug.log("Entered state " + State.FRESH);
-            debug.logStart("handleSlaveQuit");
+            _log.log("Entered state " + State.FRESH + "; Invoking handleSlaveQuit(" + p.exitValue() + ")");
             handleSlaveQuit(p.exitValue());
-            debug.logEnd("handleSlaveQuit");
           }
         });
-      debug.logEnd("invoking remote JVM process");
     }
     catch (Exception e) {
-      debug.log(e);
-      debug.logEnd("invoking remote JVM process (failed)");
+      _log.log("invoking remote JVM process failed with exception " + e);
       _monitor.set(State.FRESH);
-      //debug.log("Entered state " + State.FRESH);
+      _log.log("Entered state " + State.FRESH + "\nInvoking handleSlaveWontStart(" + e + ")");              
       handleSlaveWontStart(e);
     }
 
     if (newSlave != null) {
-      try { newSlave.start(_masterStub.value()); }
+      _log.log("newSlave is not null");
+      try {
+        _log.log("Starting newSlave with arg = '" + _masterStub.value() + "'");
+        newSlave.start(_masterStub.value());   // advances state to RUNNING
+      }
       catch (RemoteException e) {
-        debug.log(e);
+        _log.log("Threw Exception " + e + "\nAttempting to quit with argument '" + newSlave + "'");
         attemptQuit(newSlave);
+        _log.log("Entered state " + State.FRESH + "\nCalling handleSlaveWontStart(" + e + ")");
         _monitor.set(State.FRESH);
-        //debug.log("Entered state " + State.FRESH);
         handleSlaveWontStart(e);
         return;
       }
       
-      handleSlaveConnected(newSlave);
+      _log.log("Calling handleSlaveConnected(" + newSlave + ")");
+      handleSlaveConnected(newSlave);  // calls  _stateMonitor.value().started
       _slave = newSlave;
-      _monitor.set(State.RUNNING);
-      //debug.log("Entered state " + State.RUNNING);
+//      _log.log("Entered new state " + State.RUNNING);
+//      _monitor.set(State.RUNNING);  // already accomplished by newSlave.start() above
     }
   }
   
-  /**
-   * Quits slave JVM.  If a slave is not currently started and running, blocks until that state is reached.
-   * @throws IllegalStateException  If this object has been disposed.
-   */
+  /** Quits slave JVM.  If a slave is not currently started and running, blocks until that state is reached.
+    * @throws IllegalStateException  If this object has been disposed.
+    */
   protected final void quitSlave() {
+    _log.log("quitSlave called; state is " + _monitor.value());
     transition(State.RUNNING, State.QUITTING);
     attemptQuit(_slave);
     _slave = null;
+    _log.log("Entered state " + State.FRESH);
     _monitor.set(State.FRESH);
-    //debug.log("Entered state " + State.FRESH);
   }
     
   /** Make a best attempt to invoke {@code slave.quit()}.  Log an error if it fails. */
   private static void attemptQuit(SlaveRemote slave) {
-    try { slave.quit(); }
-    catch (RemoteException e) { error.log("Unable to complete slave.quit()", e); }
+    try { 
+      slave.quit();
+      _log.log("Called slave.quit()");
+    }
+    catch (RemoteException e) { 
+      _log.log("Unable to complete slave.quit(); rhrew " + e);
+      error.log("Unable to complete slave.quit()", e); 
+    }
   }
   
   /**
@@ -231,22 +237,25 @@ public abstract class AbstractMasterJVM implements MasterRemote {
     }
   }
   
-  /**
-   * Make a thread-safe state transition.  Blocks until the {@code from} state is reached and this
-   * thread is successful in performing the transition (only one thread can do so at a time).  Throws
-   * an IllegalStateException if the DISPOSED state is reached first, since there is never a transition
-   * out of the disposed state (the alternative is to block permanently). 
-   */
+  /** Transition from State.STARTING to State.RUNNING; used in MainJVM from which State is hidden. */
+  protected void _enterRunningState() { transition(State.STARTING, State.RUNNING); }
+  
+  /** Make a thread-safe state transition.  Blocks until the {@code from} state is reached and this
+    * thread is successful in performing the transition (only one thread can do so at a time).  Throws
+    * an IllegalStateException if the DISPOSED state is reached first, since there is never a transition
+    * out of the disposed state (the alternative is to block permanently). 
+    */
   private void transition(State from, State to) {
+    _log.log("AbstractMasterJVM.transition(" + from + ", " + to + ") called");
     State s = _monitor.value();
     // watch all state transitions until from->to is successful or the DISPOSED state is reached
     while (!(s.equals(from) && _monitor.compareAndSet(from, to))) {
       if (s.equals(State.DISPOSED)) { throw new IllegalStateException("In disposed state"); }
-      debug.log("Waiting for transition from " + s + " to " + from);
+      _log.log("Waiting for transition from " + s + " to " + from);
       try { s = _monitor.ensureNotState(s); }
       catch (InterruptedException e) { throw new UnexpectedException(e); }
     }
-    //debug.log("Entered state " + to);
+   _log.log("Entered state " + to);
   }
   
   protected boolean isDisposed() { return _monitor.value().equals(State.DISPOSED); }

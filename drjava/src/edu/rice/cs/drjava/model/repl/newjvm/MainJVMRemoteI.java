@@ -42,12 +42,10 @@ import edu.rice.cs.util.newjvm.*;
 import edu.rice.cs.drjava.model.junit.JUnitError;
 import edu.rice.cs.util.classloader.ClassFileError;
 
-/**
- * This interface specifies the methods that the Main JVM exposes
- * for the InterpreterJVM to call.
- *
- * @version $Id: MainJVMRemoteI.java 5594 2012-06-21 11:23:40Z rcartwright $
- */
+/** This interface specifies the methods that the Main JVM exposesb for the InterpreterJVM to call.
+  *
+  * @version $Id: MainJVMRemoteI.java 5594 2012-06-21 11:23:40Z rcartwright $
+  */
 public interface MainJVMRemoteI extends MasterRemote {
   
   /** Forwards a call to System.err from InterpreterJVM to the MainJVM for output to the user.
@@ -117,5 +115,4 @@ public interface MainJVMRemoteI extends MasterRemote {
     *
     public void notifyDebugInterpreterAssignment(String name) throws RemoteException;
     */
-  
 }

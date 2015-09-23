@@ -1653,19 +1653,6 @@ public interface OptionConstants {
   public static final BooleanOption DETACH_TABBEDPANES =
     new BooleanOption("tabbedpanes.detach", Boolean.FALSE);
   
-    
-  /* Debugger deactivated in DrScala */
-//  /** The last state of the "Debugger" frame. */
-//  public static final StringOption DIALOG_DEBUGFRAME_STATE = new StringOption("debugger.state", "default");
-//  
-//  /** Whether to save and restore window size and position at startUp/shutdown. */
-//  public static final BooleanOption DIALOG_DEBUGFRAME_STORE_POSITION =
-//    new BooleanOption("debugger.store.position", Boolean.TRUE);
-//  
-//  /** Whether the debugger is detached from the MainFrame. */
-//  public static final BooleanOption DETACH_DEBUGGER =
-//    new BooleanOption("debugger.detach", Boolean.FALSE);
-  
   /** The last state of the "Create Jar from Project" dialog. */
   public static final StringOption DIALOG_JAROPTIONS_STATE = new StringOption("dialog.jaroptions.state", "default");
   

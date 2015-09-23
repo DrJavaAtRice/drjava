@@ -55,6 +55,7 @@ import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.drjava.model.compiler.DummyCompilerListener;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
+import edu.rice.cs.drjava.model.repl.InterpreterBusyException;
 
 /* Debugger deactivated in DrScala */
 //import edu.rice.cs.drjava.model.debug.Breakpoint;
@@ -106,6 +107,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
   */
 public class DefaultGlobalModel extends AbstractGlobalModel {
   /* FIELDS */
+  public static int BUSY_WAIT_DELAY = 500;  // wait 500 milliseconds between attempts to get the starting interpreter
   
   /* static Log _log inherited from AbstractGlobalModel */
   
@@ -114,10 +116,11 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   /** The document used in the Interactions model. */
   protected final InteractionsDJDocument _interactionsDocument;
   
-  /** RMI interface to the Interactions JVM. */
-  final MainJVM _jvm; 
+  /** RMI interface to the Interactions JVM. 
+    * TODO: Should all such communication be routed through the InteractionsModel?*/
+  final MainJVM _mainJVM; 
   
-  private final Thread _jvmStarter; // thread that invokes _jvm.startInterpreterJVM()
+  private final Thread _interpreterJVMStarter; // thread that invokes _jvm.startInterpreterJVM()
   
   /** Interface between the InteractionsDocument and the JavaInterpreter, which runs in a separate JVM. */
   protected final DefaultInteractionsModel _interactionsModel;
@@ -136,7 +139,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       File buildDir = _state.getBuildDirectory();
       if (buildDir != null) {
         //        System.out.println("adding for reset: " + _state.getBuildDirectory().getAbsolutePath());
-        _jvm.addBuildDirectoryClassPath(IOUtil.attemptAbsoluteFile(buildDir));
+        _mainJVM.addBuildDirectoryClassPath(IOUtil.attemptAbsoluteFile(buildDir));
       }
     }
     
@@ -144,7 +147,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     
     public void interpreterExited(int status) { }
     
-    public void interpreterChanged(boolean inProgress) { }
+    public void interpreterReplaced(boolean inProgress) { }
     
     public void interactionIncomplete() { }
   };
@@ -160,7 +163,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     }
     public void activeCompilerChanged() {
       File workDir = _interactionsModel.getWorkingDirectory();
-      resetInteractions(workDir, true);  // use same working directory as current interpreter
+      resetInteractions(workDir);  // use same working directory as current interpreter
     }
   };
   
@@ -215,16 +218,16 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
 //    Utilities.show("_scaladocModel = " + _scaladocModel);
     
     File workDir = Utilities.TEST_MODE ? new File(System.getProperty("user.home")) : getWorkingDirectory();
-    _jvm = new MainJVM(workDir);
+    _mainJVM = new MainJVM(workDir);
 //    AbstractMasterJVM._log.log(this + " has created a new MainJVM");
     _compilerModel = new DefaultCompilerModel(this, compilers);     
-    _junitModel = new DefaultJUnitModel(_jvm, _compilerModel, this);
+    _junitModel = new DefaultJUnitModel(_mainJVM, _compilerModel, this);
     _interactionsDocument = new InteractionsDJDocument(_notifier);
     
-    _interactionsModel = new DefaultInteractionsModel(this, _jvm, _interactionsDocument, workDir);
+    _interactionsModel = new DefaultInteractionsModel(this, _mainJVM, _interactionsDocument, workDir);
     _interactionsModel.addListener(_interactionsListener);
-    _jvm.setInteractionsModel(_interactionsModel);
-    _jvm.setJUnitModel(_junitModel);
+    _mainJVM.setInteractionsModel(_interactionsModel);
+    _mainJVM.setJUnitModel(_junitModel);
     
     /* Debugger deactivated in DrScala */
 //    _setupDebugger();
@@ -240,10 +243,10 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     //      This is obnoxiously order-dependent, but it works for now.
     _compilerModel.addListener(_clearInteractionsListener);
     
-    _jvmStarter = new Thread("Start interpreter JVM") {
-      public void run() { _jvm.startInterpreterJVM(); }
+    _interpreterJVMStarter = new Thread("Start interpreter JVM") {
+      public void run() { _mainJVM.startInterpreterJVM(); }
     };
-    _jvmStarter.start();
+    _interpreterJVMStarter.start();
     
 // Lightweight parsing has been disabled until we have something that is beneficial and works better in the background.    
 //    _parsingControl = new DefaultLightWeightParsingControl(this);
@@ -399,7 +402,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     _state.setBuildDirectory(f);
     if (f != FileOps.NULL_FILE) {
       //      System.out.println("adding: " + f.getAbsolutePath());
-      _jvm.addBuildDirectoryClassPath(IOUtil.attemptAbsoluteFile(f));
+      _mainJVM.addBuildDirectoryClassPath(IOUtil.attemptAbsoluteFile(f));
     }
     
     _notifier.projectBuildDirChanged();
@@ -432,40 +435,69 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   /** Prepares this model to be thrown away.  Never called in practice outside of quit(), except in tests. */
   public void dispose() {
     ensureJVMStarterFinished();
-    _jvm.dispose();
+    _mainJVM.dispose();
     _notifier.removeAllListeners();  // removes the global model listeners!
   }
 
   /** Ensures that the _jvmStarter thread has executed. Never called in practice outside of GlobalModelTestCase.setUp(). */
   public void ensureJVMStarterFinished() {
-    try { _jvmStarter.join(); } // some tests were reach this point before _jvmStarter has completed
+    try { _interpreterJVMStarter.join(); } // some tests were reach this point before _jvmStarter has completed
     catch (InterruptedException e) { throw new UnexpectedException(e); }
   }
   
   /** Disposes of external resources. Kills the slave JVM. */
-  public void disposeExternalResources() { _jvm.stopInterpreterJVM(); }
+  public void disposeExternalResources() { _mainJVM.stopInterpreterJVM(); }
   
-  public void resetInteractions(File wd) { resetInteractions(wd, false); }
-  
-  /** Clears and resets the slave JVM with working directory wd. Also clears the console if the option is 
-    * indicated (on by default).  The reset operation is suppressed if {@code wd} matches its working directory (or
-    * wd is null), and forceReset is false.  {@code wd} may be {@code null} if a valid directory cannot be determined.
-    * In that case, the former working directory is used.  This method may run outside the event thread.
+  /** Resets the interactions pane with specified working directory. Also clears the console if the option is indicated 
+    * (on by default).  {@code wd} may be {@code null} if a valid directory cannot be determined. In that case, the 
+    * former working directory is used.
+    * This method may run outside the event thread.  This method is universally used to reset the interations pane; it
+    * may need to wait until a new interpreter can be started.
     */
-  public void resetInteractions(File wd, boolean forceReset) {
+  public void resetInteractions(File wd) {
     assert _interactionsModel._pane != null;
     
-    debug.logStart();
+    MainJVM._log.log("DefaultGlobalModel.resetInteractions(" + wd + ") called.");
+    
+//    debug.logStart();
+    
+    /* Determine new working directory. */
     File workDir = _interactionsModel.getWorkingDirectory();
     if (wd == null) { wd = workDir; }
-    forceReset |= isClassPathChanged();
-    forceReset |= !wd.equals(workDir);
+    MainJVM._log.log("Old Working Directory is: " + workDir + " New Working Directory is: " + wd);
+    
     // update the setting
     DrScala.getConfig().setSetting(LAST_INTERACTIONS_DIRECTORY, wd);
-//    getDebugger().setAutomaticTraceEnabled(false);
-    _interactionsModel.resetInterpreter(wd, forceReset);
-    debug.logEnd();
+    
+    // Try to reset the interpreter internally without killing and restarting the slave JVM
+    try {
+      boolean success = _interactionsModel.resetInterpreter(wd);
+      MainJVM._log.log("_interationsModel.resetInterpreter(" + wd + ") returned " + success);
+      if (! success) {
+        // Internal reset failed by returning false
+        MainJVM._log.log("Fast reset failed forcing a full reset");
+        _hardResetInteractions(false);
+      }
+    }
+      
+//    catch(InterruptedException e) { /* ignore: should never happen */ }
+    catch(InterpreterBusyException e) {
+      //  Internal reset failed by throwing an exception. 
+      MainJVM._log.log("Attempt to perform internal reset threw InterpreterBusy exception forcing a full reset.");
+      _hardResetInteractions(true);
+    }
+    
+    MainJVM._log.log("Reset is complete");   
+//    debug.logEnd();
   }
+  
+  /** Reset the interactions pane by terminating the slave JVM. */
+  private void _hardResetInteractions(final boolean inProgress) {
+    MainJVM._log.log("performing a hard reset of interactions pane");
+    _interactionsModel.setUpNewInterpreter(inProgress);
+    MainJVM._log.log("Interpreter restarted");
+  }
+    
   
   /** Interprets the current given text at the prompt in the interactions pane. */
   public void interpretCurrentInteraction() { _interactionsModel.interpretCurrentInteraction(); }
@@ -534,7 +566,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   
   /** Returns the current class path in use by the Interpreter JVM. */
   public Iterable<File> getInteractionsClassPath() {
-    return _jvm.getClassPath().unwrap(IterUtil.<File>empty());
+    return _mainJVM.getClassPath().unwrap(IterUtil.<File>empty());
   }
   
   /** Sets whether or not the Interactions JVM will be reset after a compilation succeeds.  This should ONLY be used 
@@ -667,7 +699,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       workDir = getWorkingDirectory();
       
       // Reset interactions to the working directory
-      resetInteractions(workDir, !workDir.equals(oldWorkDir));
+      resetInteractions(workDir);
     }
     
     /** Runs the main method in this document in the interactions pane after resetting interactions with the source
