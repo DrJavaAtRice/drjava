@@ -563,8 +563,8 @@ public class ConfigFrame extends SwingFrame {
                                                  startsWith("com.jgoodies.looks.plastic."));
     addOptionComponent(panel, plasticComponent);
 
-    //ToolbarOptionComponent is a degenerate option component
-    addOptionComponent(panel, new ToolbarOptionComponent("Toolbar Buttons", this,
+    //ToolBarOptionComponent is a degenerate option component
+    addOptionComponent(panel, new ToolBarOptionComponent("ToolBar Buttons", this,
                                                   "How to display the toolbar buttons."));
     addOptionComponent(panel, newBooleanOptionComponent(OptionConstants.LINEENUM_ENABLED));
    

@@ -3342,16 +3342,15 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       
       // initialize menu bar and actions
       _setUpActions();
-      _setUpMenuBar(_menuBar,
-                    _fileMenu, _editMenu, _toolsMenu, _projectMenu, _debugMenu, _languageLevelMenu, _helpMenu);
+      _setUpMenuBar(_menuBar, _fileMenu, _editMenu, _toolsMenu, _projectMenu, _debugMenu, _languageLevelMenu, _helpMenu);
       setJMenuBar(_menuBar);
       
       //    _setUpDocumentSelector();
       _setUpContextMenus();
       
       // Create toolbar and buttons
-      _undoButton = _createManualToolbarButton(_undoAction);
-      _redoButton = _createManualToolbarButton(_redoAction);
+      _undoButton = _createManualToolBarButton(_undoAction);
+      _redoButton = _createManualToolBarButton(_redoAction);
       
       // initialize _toolBar
       _setUpToolBar();
@@ -3495,10 +3494,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       config.addOptionListener(FONT_MAIN, new MainFontOptionListener());
       config.addOptionListener(FONT_LINE_NUMBERS, new LineNumbersFontOptionListener());
       config.addOptionListener(FONT_DOCLIST, new DoclistFontOptionListener());
-      config.addOptionListener(FONT_TOOLBAR, new ToolbarFontOptionListener());
-      config.addOptionListener(TOOLBAR_ICONS_ENABLED, new ToolbarOptionListener());
-      config.addOptionListener(TOOLBAR_TEXT_ENABLED, new ToolbarOptionListener());
-      config.addOptionListener(TOOLBAR_ENABLED, new ToolbarOptionListener());
+      config.addOptionListener(FONT_TOOLBAR, new ToolBarFontOptionListener());
+      config.addOptionListener(TOOLBAR_ICONS_ENABLED, new ToolBarOptionListener());
+      config.addOptionListener(TOOLBAR_TEXT_ENABLED, new ToolBarOptionListener());
+      config.addOptionListener(TOOLBAR_ENABLED, new ToolBarOptionListener());
       config.addOptionListener(LINEENUM_ENABLED, new LineEnumOptionListener());
       config.addOptionListener(DEFINITIONS_LINE_NUMBER_COLOR, new LineEnumColorOptionListener());
       config.addOptionListener(DEFINITIONS_LINE_NUMBER_BACKGROUND_COLOR, new LineEnumColorOptionListener());
@@ -4723,8 +4722,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   private void _setUpProjectButtons(File projectFile) {
-    _compileButton = _updateToolbarButton(_compileButton, _compileProjectAction);
-    _junitButton = _updateToolbarButton(_junitButton, _junitProjectAction);
+    _compileButton = _updateToolBarButton(_compileButton, _compileProjectAction);
+    _junitButton = _updateToolBarButton(_junitButton, _junitProjectAction);
     _recentProjectManager.updateOpenFiles(projectFile);
   }
   
@@ -6436,19 +6435,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                   _setUpLanguageLevelMenu(mask, false), _setUpHelpMenu(mask, false));
   }
 
-  void _setUpMenuBar(JMenuBar menuBar,
-                     JMenu fileMenu,
-                     JMenu editMenu,
-                     JMenu toolsMenu,
-                     JMenu projectMenu,
-                     JMenu debugMenu,
-                     JMenu languageLevelMenu,
-                     JMenu helpMenu) {
+  void _setUpMenuBar(JMenuBar menuBar, JMenu fileMenu, JMenu editMenu, JMenu toolsMenu, JMenu projectMenu, 
+                     JMenu debugMenu, JMenu languageLevelMenu, JMenu helpMenu) {
     menuBar.add(fileMenu);
     menuBar.add(editMenu);
     menuBar.add(toolsMenu);
     menuBar.add(projectMenu);
-    if (_showDebugger && (debugMenu!=null)) menuBar.add(debugMenu);
+    if (_showDebugger && (debugMenu != null)) menuBar.add(debugMenu);
     menuBar.add(languageLevelMenu);
     menuBar.add(helpMenu);
     // Plastic-specific style hints
@@ -7062,7 +7055,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   /** Creates a toolbar button for undo and redo, which behave differently. */
-  JButton _createManualToolbarButton(Action a) {
+  JButton _createManualToolBarButton(Action a) {
     final JButton ret;
     Font buttonFont = DrJava.getConfig().getSetting(FONT_TOOLBAR);
     
@@ -7094,8 +7087,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     return ret;
   }
   
-  /** Sets up all buttons for the toolbar except for undo and redo, which use _createManualToolbarButton. */
-  public JButton _createToolbarButton(Action a) {
+  /** Sets up all buttons for the toolbar except for undo and redo, which use _createManualToolBarButton. */
+  public JButton _createToolBarButton(Action a) {
     boolean useText = DrJava.getConfig().getSetting(TOOLBAR_TEXT_ENABLED).booleanValue();
     boolean useIcons = DrJava.getConfig().getSetting(TOOLBAR_ICONS_ENABLED).booleanValue();
     Font buttonFont = DrJava.getConfig().getSetting(FONT_TOOLBAR);
@@ -7109,14 +7102,14 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   /** Removes the button b from the toolbar and creates new button in its place.  Only runs in the event thread. */
-  public JButton _updateToolbarButton(JButton b, Action a) {
-    final JButton result = _createToolbarButton(a);
+  public JButton _updateToolBarButton(JButton b, Action a) {
+    final JButton result = _createToolBarButton(a);
     
     int index = _toolBar.getComponentIndex(b);
     _toolBar.remove(b);
     _toolBar.add(result, index);
     
-    _fixToolbarHeights();
+    _fixToolBarHeights();
     
     return result;
   }
@@ -7131,17 +7124,17 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
 //     _toolBar.addSeparator();
     
     // New, open, save, close
-    _toolBar.add(_createToolbarButton(_newAction));
-    _toolBar.add(_createToolbarButton(_openFileOrProjectAction));
-    _toolBar.add(_createToolbarButton(_saveAction));
-    _closeButton = _createToolbarButton(_closeAction);
+    _toolBar.add(_createToolBarButton(_newAction));
+    _toolBar.add(_createToolBarButton(_openFileOrProjectAction));
+    _toolBar.add(_createToolBarButton(_saveAction));
+    _closeButton = _createToolBarButton(_closeAction);
     _toolBar.add(_closeButton);
     
     // Cut, copy, paste
     _toolBar.addSeparator();
-    _toolBar.add(_createToolbarButton(cutAction));
-    _toolBar.add(_createToolbarButton(copyAction));
-    _toolBar.add(_createToolbarButton(pasteAction));
+    _toolBar.add(_createToolBarButton(cutAction));
+    _toolBar.add(_createToolBarButton(copyAction));
+    _toolBar.add(_createToolBarButton(pasteAction));
     
     // Undo, redo
     // Simple workaround, for now, for bug # 520742:
@@ -7155,23 +7148,23 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     // Find
     _toolBar.addSeparator();
-    _toolBar.add(_createToolbarButton(_findReplaceAction));
+    _toolBar.add(_createToolBarButton(_findReplaceAction));
     
     // Compile, reset, abort
     _toolBar.addSeparator();
-    _toolBar.add(_compileButton = _createToolbarButton(_compileAllAction));
-    _toolBar.add(_createToolbarButton(_resetInteractionsAction));
+    _toolBar.add(_compileButton = _createToolBarButton(_compileAllAction));
+    _toolBar.add(_createToolBarButton(_resetInteractionsAction));
     
     // Run, Junit, and JavaDoc
     _toolBar.addSeparator();
     
-    _toolBar.add(_runButton = _createToolbarButton(_runAction));
-    _toolBar.add(_junitButton = _createToolbarButton(_junitAllAction));
-    _toolBar.add(_createToolbarButton(_javadocAllAction));
+    _toolBar.add(_runButton = _createToolBarButton(_runAction));
+    _toolBar.add(_junitButton = _createToolBarButton(_junitAllAction));
+    _toolBar.add(_createToolBarButton(_javadocAllAction));
     
     // DrJava Errors
     _toolBar.addSeparator();
-    _errorsButton = _createToolbarButton(_errorsAction);
+    _errorsButton = _createToolBarButton(_errorsAction);
     _errorsButton.setVisible(false);
     _errorsButton.setBackground(DrJava.getConfig().getSetting(DRJAVA_ERRORS_BUTTON_COLOR));
     _toolBar.add(_errorsButton);
@@ -7194,7 +7187,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           _runAction.putValue(Action.LONG_DESCRIPTION,
                               "Run the main method of the current document"); 
         }
-        // _runButton = _updateToolbarButton(_runButton, _runAction);
+        // _runButton = _updateToolBarButton(_runButton, _runAction);
         projectRunnableChanged();
       }
     };
@@ -7204,7 +7197,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                        getSetting(OptionConstants.SMART_RUN_FOR_APPLETS_AND_PROGRAMS)));
     
     // Correct the vertical height of the buttons.
-    _fixToolbarHeights();
+    _fixToolBarHeights();
     
     // Plastic-specific style hints
     if(Utilities.isPlasticLaf()) {
@@ -7225,7 +7218,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Update the toolbar's buttons, following any change to TOOLBAR_ICONS_ENABLED, TOOLBAR_TEXT_ENABLED, or 
     * FONT_TOOLBAR (name, style, text)
     */
-  private void _updateToolbarButtons() {
+  private void _updateToolBarButtons() {
     _updateToolBarVisible();
     Component[] buttons = _toolBar.getComponents();
     
@@ -7276,11 +7269,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
     
     // Correct the vertical height of the buttons.
-    _fixToolbarHeights();
+    _fixToolBarHeights();
   }
   
   /** Ensures that all toolbar buttons have the same height. */
-  private void _fixToolbarHeights() {
+  private void _fixToolBarHeights() {
     Component[] buttons = _toolBar.getComponents();
     
     // First, find the maximum height of all the buttons.
@@ -9749,9 +9742,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _model.getDocumentNavigator().asContainer().addMouseListener(_resetFindReplaceListener);
 //      new ScrollableDialog(null, "Closing JUnit Error Panel in MainFrame", "", "").show();
       removeTab(_junitPanel);
-      _runButton = _updateToolbarButton(_runButton, _runAction);
-      _compileButton = _updateToolbarButton(_compileButton, _compileAllAction);
-      _junitButton = _updateToolbarButton(_junitButton, _junitAllAction);
+      _runButton = _updateToolBarButton(_runButton, _runAction);
+      _compileButton = _updateToolBarButton(_compileButton, _compileAllAction);
+      _junitButton = _updateToolBarButton(_junitButton, _junitAllAction);
       projectRunnableChanged();
     }
     
@@ -9812,10 +9805,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _guiAvailabilityNotifier.ensureAvailabilityIs(GUIAvailabilityListener.ComponentType.PROJECT_MAIN_CLASS,
                                                   mainClassSet);
     if (mainClassSet) {
-      _runButton = _updateToolbarButton(_runButton, _runProjectAction);
+      _runButton = _updateToolBarButton(_runButton, _runProjectAction);
     }
     else {
-      _runButton = _updateToolbarButton(_runButton, _runAction);
+      _runButton = _updateToolBarButton(_runButton, _runAction);
     }
   }
   
@@ -10052,8 +10045,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   /** The OptionListener for FONT_TOOLBAR */
-  private class ToolbarFontOptionListener implements OptionListener<Font> {
-    public void optionChanged(OptionEvent<Font> oce) { _updateToolbarButtons(); }
+  private class ToolBarFontOptionListener implements OptionListener<Font> {
+    public void optionChanged(OptionEvent<Font> oce) { _updateToolBarButtons(); }
   }
   
   /** The OptionListener for DEFINITIONS_NORMAL_COLOR */
@@ -10067,8 +10060,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   /** The OptionListener for TOOLBAR options */
-  private class ToolbarOptionListener implements OptionListener<Boolean> {
-    public void optionChanged(OptionEvent<Boolean> oce) { _updateToolbarButtons(); }
+  private class ToolBarOptionListener implements OptionListener<Boolean> {
+    public void optionChanged(OptionEvent<Boolean> oce) { _updateToolBarButtons(); }
   }
   
   /** The OptionListener for LINEENUM_ENABLED. */

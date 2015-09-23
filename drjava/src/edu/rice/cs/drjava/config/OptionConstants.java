@@ -255,7 +255,7 @@ public interface OptionConstants {
   /** List of open documents */
   public static final FontOption FONT_DOCLIST = new FontOption("font.doclist", DefaultFont.getDefaultDocListFont());
   
-  /** Toolbar buttons */
+  /** ToolBar buttons */
   public static final FontOption FONT_TOOLBAR = new FontOption("font.toolbar", Font.decode("dialog-10"));
   
   /** Whether to draw anti-aliased text.  (Slightly slower.) */

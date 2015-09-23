@@ -73,8 +73,8 @@ public class ConfigDescriptions {
     add(OptionConstants.PLASTIC_THEMES, "Plastic Theme", 
         "Pick the theme to be used by the Plastic family of Look and Feels");
     
-    //ToolbarOptionComponent is a degenerate option component
-    // addOptionComponent(panel, new ToolbarOptionComponent("Toolbar Buttons"
+    //ToolBarOptionComponent is a degenerate option component
+    // addOptionComponent(panel, new ToolBarOptionComponent("ToolBar Buttons"
     //                                               "How to display the toolbar buttons."));
     add(OptionConstants.LINEENUM_ENABLED,
         "Show All Line Numbers",
@@ -131,7 +131,7 @@ public class ConfigDescriptions {
         "Cannot be displayed larger than the Main Font.</html>");
     add(OptionConstants.FONT_DOCLIST, "Document List Font",
         "The font used in the list of open documents.");
-    add(OptionConstants.FONT_TOOLBAR, "Toolbar Font",
+    add(OptionConstants.FONT_TOOLBAR, "ToolBar Font",
         "The font used in the toolbar buttons.");
     add(OptionConstants.TEXT_ANTIALIAS, "Use anti-aliased text",
         "Whether to graphically smooth the text.");
