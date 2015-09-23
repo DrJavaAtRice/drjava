@@ -194,13 +194,16 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     */
   public void setWaitingForFirstInterpreter(boolean waiting) { _waitingForFirstInterpreter = waiting; }
   
-  /** Interprets the current given text at the prompt in the interactions doc. May run outside the event thread. */
+  /** Interprets the current given text at the prompt in the interactions doc. May be executed outside of the event
+    * thread. */
   public void interpretCurrentInteraction() {
 
     Utilities.invokeLater(new Runnable() {
       public void run() {
         
         if (_document.inProgress()) return;  // Don't start a new interaction while one is in progress
+        
+        _document.addToHistory(_toAddToHistory);  // moved from _interactionIsOver in response to bug #952
         
         String text = _document.getCurrentInteraction();
         String toEval = text.trim();
@@ -586,7 +589,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   public void _interactionIsOver() {
     Utilities.invokeLater(new Runnable() {
       public void run() {
-        _document.addToHistory(_toAddToHistory);
+//      ;  // moved to interpretCurrentInteraction in response to Bug #952
         _document.setInProgress(false);
         _document.insertPrompt();
         _notifyInteractionEnded();

@@ -254,6 +254,7 @@ public class DefaultCompilerModel implements CompilerModel {
     }
     
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.compileStarted(); } });
+    
     try {
       if (! packageErrors.isEmpty()) { _distributeErrors(packageErrors); }
       else {

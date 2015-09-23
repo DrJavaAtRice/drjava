@@ -1990,7 +1990,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   /** Performs any needed operations on the model after project files have been closed.  This method is not 
     * responsible for closing any files; both the files in the project and the project file have already been 
-    * closed (by MainFrame._closeProject()).  Resets interations unless suppressReset is true.
+    * closed (by MainFrame._closeProject()).  Resets interations unless suppressReset is true, which only happens
+    * when DrJava is quitting.
     */
   public void closeProject(boolean suppressReset) {
     setDocumentNavigator(new AWTContainerNavigatorFactory<OpenDefinitionsDocument>().
@@ -2697,7 +2698,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     * The GlobalModel interacts with DefinitionsDocuments through this wrapper.<br>
     * This call was formerly called the <code>DefinitionsDocumentHandler</code> but was renamed (2004-Jun-8) to be more
     * descriptive/intuitive.
-    * Note that this class has a natural ordering that determines a coarser equivalence relation than equals.
+    * 
+    * Note that this class has a natural ordering based on hashCode (with LexiName as a tiebreaker) that determines a 
+    * coarser equivalence relation than equals.
+    * NOTE: do not override equals or hashCode for this class or any descendants because objects of this class are mutable
+    * and used as hash keys.
     */
   class ConcreteOpenDefDoc implements OpenDefinitionsDocument {
     
@@ -2770,7 +2775,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         _cacheAdapter = _cache.register(this, ddr);
       } catch(IllegalStateException e) { throw new UnexpectedException(e); }
       
-      /* The following table is not affected by inconsistency between hashCode/equals in DocumentRegion, because
+      /* The following table is not affected by the inconsistency between hashCode and equals in DocumentRegion, because
        * BrowserDocumentRegion is NOT a subclass of DocumentRegion. */
       _browserRegions = new HashSet<BrowserDocumentRegion>();
     }
@@ -3651,7 +3656,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     public String toString() { return getFileName(); }
     
-    /** Orders ODDs by their lexical names.  Note that equals defines a finer equivalence relation than compareTo. */
+    /** Orders ODDs by <hashCode, LexiName>.  Note that equals defines a finer equivalence relation than compareTo because
+      * unequal ODDs could have the same LexiName. */
     public int compareTo(OpenDefinitionsDocument o) { 
       int diff = hashCode() - o.hashCode();
       if (diff != 0) return diff;

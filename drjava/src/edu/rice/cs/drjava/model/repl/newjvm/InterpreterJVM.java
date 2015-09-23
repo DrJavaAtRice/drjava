@@ -358,11 +358,11 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
       if (c.equals(Double.class))    { return "double"+sb.toString()+" or "+c.getSimpleName()+sb.toString(); }
       if (c.equals(Boolean.class))   { return "boolean"+sb.toString()+" or "+c.getSimpleName()+sb.toString(); }
       if (c.equals(Character.class)) { return "char"+sb.toString()+" or "+c.getSimpleName()+sb.toString(); }
-      else return c.getName()+sb.toString();
+      else return c.getName() + sb.toString();
     }
     else {
       // if it's an array, we can distinguish boxed types and primitive types
-      return c.getName()+sb.toString();
+      return c.getName() + sb.toString();
     }
   }
   

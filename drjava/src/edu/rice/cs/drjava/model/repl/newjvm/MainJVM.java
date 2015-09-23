@@ -152,37 +152,31 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    */
   public void stopInterpreterJVM() { _state.value().stop(); }
   
-  /**
-   * Get a "fresh" interpreter JVM.  Has the same effect as {@link #startInterpreterJVM} if no interpreter
-   * is running.  If a currently-running JVM is already "fresh", it is still stopped and restarted when
-   * {@code force} is true.
-   */
+  /** Get a "fresh" interpreter JVM.  Has the same effect as {@link #startInterpreterJVM} if no interpreter
+    * is running.  If a currently-running JVM is already "fresh", it is still stopped and restarted when
+    * {@code force} is true.
+    */
   public void restartInterpreterJVM(boolean force) { _state.value().restart(force); }
     
-  /**
-   * Stop the interpreter JVM, do not restart it, and terminate the RMI server associated with this object.
-   * May be useful when a number of different MainJVM objects are created (such as when running tests).
-   */
+  /** Stop the interpreter JVM, do not restart it, and terminate the RMI server associated with this object.
+    * May be useful when a number of different MainJVM objects are created (such as when running tests).
+    */
   public void dispose() { _state.value().dispose(); }
   
-  
-  /*
-   * === AbstractMasterJVM methods ===
-   */
 
-  /**
-   * Callback for when the slave JVM has connected, and the bidirectional communications link has been 
-   * established.  Provides access to the newly-created slave JVM.
-   */
+  /* === AbstractMasterJVM methods === */
+
+  /** Callback for when the slave JVM has connected, and the bidirectional communications link has been 
+    * established.  Provides access to the newly-created slave JVM.
+    */
   protected void handleSlaveConnected(SlaveRemote newSlave) {
     InterpreterJVMRemoteI slaveCast = (InterpreterJVMRemoteI) newSlave;
     _state.value().started(slaveCast);
   }
-
-  /**
-   * Callback for when the slave JVM has quit.
-   * @param status The exit code returned by the slave JVM.
-   */
+  
+  /** Callback for when the slave JVM has quit.
+    * @param status The exit code returned by the slave JVM.
+    */
   protected void handleSlaveQuit(int status) {
     debug.logValue("Slave quit", "status", status);
     _state.value().stopped(status);
@@ -514,7 +508,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   }
   
   /** Sets the default interpreter to be the current one.  The result is "none" if
-   * the remote JVM is unavailable or if an exception occurs.  Blocks until the interpreter is connected.
+    * the remote JVM is unavailable or if an exception occurs.  Blocks until the interpreter is connected.
     * @return Status flags: whether the current interpreter changed, and whether it is busy; or "none" on an error
     */
   public Option<Pair<Boolean, Boolean>> setToDefaultInterpreter() {
@@ -888,7 +882,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     }
     
     public void restart(boolean force) {
-      if (_state.compareAndSet(this, new RestartingState())) {
+      if (_state.compareAndSet(this, new RestartingState())) {  // Advance to RestartingState
         _interactionsModel.interpreterResetting();
         quitSlave();
       }

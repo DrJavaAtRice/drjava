@@ -77,7 +77,7 @@ public abstract class Javac160FilteringCompiler extends JavacCompiler {
         // edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("jdk160.txt",true);
         // LOG.log("Filtering exe files from classpath.");
         InputStream is = Javac160FilteringCompiler.class.getResourceAsStream("/junit.jar");
-        if (is!=null) {
+        if (is != null) {
           // LOG.log("\tjunit.jar found");
           tempJUnit = edu.rice.cs.plt.io.IOUtil.createAndMarkTempFile(PREFIX,SUFFIX);
           FileOutputStream fos = new FileOutputStream(tempJUnit);
@@ -140,7 +140,7 @@ public abstract class Javac160FilteringCompiler extends JavacCompiler {
         while (i.hasNext()) {
           if (filter.accept(i.next())) { i.remove(); }
         }
-        if (_tempJUnit!=null) { filteredClassPath.add(_tempJUnit); }
+        if (_tempJUnit != null) { filteredClassPath.add(_tempJUnit); }
       }
     }
     return filteredClassPath;

@@ -48,8 +48,7 @@ import javax.swing.text.BadLocationException;
   */
 public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSuccessTestCase {
 
-  /** Tests calling compileAll with different source roots works.
-   */
+  /** Tests calling compileAll with different source roots works. */
   public void testCompileAllDifferentSourceRoots() throws BadLocationException, IOException, InterruptedException {
 //    System.out.println("testCompileAllDifferentSourceRoots()");
     File aDir = new File(_tempDir, "a");

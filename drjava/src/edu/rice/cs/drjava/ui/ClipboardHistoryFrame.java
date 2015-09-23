@@ -194,6 +194,7 @@ public class ClipboardHistoryFrame extends SwingFrame {
   }
 
   /** Initialize the frame. */
+  @SuppressWarnings("all")
   private void init() {
     addComponentListener(new java.awt.event.ComponentAdapter() {
       public void componentResized(ComponentEvent e) {

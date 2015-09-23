@@ -118,6 +118,8 @@ public class JDKToolsLibrary {
   
   public static String adapterForDebugger(JavaVersion.FullVersion version) {
     switch (version.majorVersion()) {
+      case FUTURE:
+      case JAVA_8:
       case JAVA_7:
       case JAVA_6:
       case JAVA_5: return "edu.rice.cs.drjava.model.debug.jpda.JPDADebugger";
@@ -130,12 +132,13 @@ public class JDKToolsLibrary {
       List<File> bootClassPath = null;
       String bootProp = System.getProperty("sun.boot.class.path");
       if (bootProp != null) { bootClassPath = CollectUtil.makeList(IOUtil.parsePath(bootProp)); }
-      File toolsJar = edu.rice.cs.drjava.DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.JAVAC_LOCATION);
+      File toolsJar = 
+        edu.rice.cs.drjava.DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.JAVAC_LOCATION);
       try {
         Class<?>[] sig = { FullVersion.class, String.class, List.class };
         Object[] args = { version, "the runtime class path", bootClassPath };
         CompilerInterface attempt = (CompilerInterface) ReflectUtil.loadObject(className, sig, args);
-        msg("                 attempt = " + attempt + ", isAvailable() = "+attempt.isAvailable());
+        msg("                 attempt = " + attempt + ", isAvailable() = " + attempt.isAvailable());
         if (attempt.isAvailable()) { return attempt; }
       }
       catch (ReflectException e) { /* can't load */ }

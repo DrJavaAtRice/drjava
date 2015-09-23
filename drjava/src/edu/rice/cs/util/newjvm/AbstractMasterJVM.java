@@ -138,13 +138,12 @@ public abstract class AbstractMasterJVM implements MasterRemote {
    */
   protected abstract void handleSlaveWontStart(Exception e);
   
-  /**
-   * Creates and starts the slave JVM.  If the the slave is currently running, waits until it completes.
-   * Also waits until the new process has started up and calls one of {@link #handleSlaveConnected}
-   * or {@link #handleSlaveWontStart} before returning.
-   * @param jvmBuilder  JVMBuilder to use in starting the remote process.
-   * @throws IllegalStateException  If this object has been disposed.
-   */
+  /** Creates and starts the slave JVM.  If the the slave is currently running, waits until it completes.
+    * Also waits until the new process has started up and calls one of {@link #handleSlaveConnected}
+    * or {@link #handleSlaveWontStart} before returning.
+    * @param jvmBuilder  JVMBuilder to use in starting the remote process.
+    * @throws IllegalStateException  If this object has been disposed.
+    */
   protected final void invokeSlave(JVMBuilder jvmBuilder) {
     transition(State.FRESH, State.STARTING);
 
@@ -200,10 +199,9 @@ public abstract class AbstractMasterJVM implements MasterRemote {
     }
   }
   
-  /**
-   * Quits slave JVM.  If a slave is not currently started and running, blocks until that state is reached.
-   * @throws IllegalStateException  If this object has been disposed.
-   */
+  /** Quits slave JVM.  If a slave is not currently started and running, blocks until that state is reached.
+    * @throws IllegalStateException  If this object has been disposed.
+    */
   protected final void quitSlave() {
     transition(State.RUNNING, State.QUITTING);
     attemptQuit(_slave);
@@ -231,12 +229,11 @@ public abstract class AbstractMasterJVM implements MasterRemote {
     }
   }
   
-  /**
-   * Make a thread-safe state transition.  Blocks until the {@code from} state is reached and this
-   * thread is successful in performing the transition (only one thread can do so at a time).  Throws
-   * an IllegalStateException if the DISPOSED state is reached first, since there is never a transition
-   * out of the disposed state (the alternative is to block permanently). 
-   */
+  /** Make a thread-safe state transition.  Blocks until the {@code from} state is reached and this
+    * thread is successful in performing the transition (only one thread can do so at a time).  Throws
+    * an IllegalStateException if the DISPOSED state is reached first, since there is never a transition
+    * out of the disposed state (the alternative is to block permanently). 
+    */
   private void transition(State from, State to) {
     State s = _monitor.value();
     // watch all state transitions until from->to is successful or the DISPOSED state is reached

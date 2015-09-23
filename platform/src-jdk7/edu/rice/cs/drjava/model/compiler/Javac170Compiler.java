@@ -60,9 +60,9 @@ import edu.rice.cs.plt.io.IOUtil;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 import static edu.rice.cs.plt.debug.DebugUtil.error;
 
-/** An implementation of JavacCompiler that supports compiling with the java 1.7.0 compiler.  Must be compiled
- *  using javac 1.7.0.  
- *
+/** An implementation of JavacCompiler that supports compiling with the java 1.7.0 or later compiler.  Must be compiled
+ *  using javac 1.7.0 or later.
+ * **TODO** Rename this class as Javac170PlusCompiler.java
  *  @version $Id$
  */
 public class Javac170Compiler extends JavacCompiler { // Javac170FilteringCompiler {

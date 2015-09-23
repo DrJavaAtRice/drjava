@@ -430,11 +430,11 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   
   public void resetInteractions(File wd) { resetInteractions(wd, false); }
   
-  /** Clears and resets the slave JVM with working directory wd. Also clears the console if the option is 
-    * indicated (on by default).  The reset operation is suppressed if the existing slave JVM has not been
-    * used, {@code wd} matches its working directory, and forceReset is false.  {@code wd} may be {@code null}
-    * if a valid directory cannot be determined.  In that case, the former working directory is used.  This
-    * method may run outside the event thread.
+  /** Clears and resets the slave JVM with working directory wd. Also clears the console if the option is indicated
+    * (on by default).  The reset operation is suppressed (as an optimization) if the existing slave JVM has not been
+    * used, {@code wd} matches its working directory, and forceReset is false.  {@code wd} may be {@code null} if a 
+    * valid directory cannot be determined.  In that case, the former working directory is used.  This method may run 
+    * outside the event thread.
     */
   public void resetInteractions(File wd, boolean forceReset) {
     assert _interactionsModel._pane != null;
@@ -446,6 +446,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     forceReset |= !wd.equals(workDir);
     // update the setting
     DrJava.getConfig().setSetting(LAST_INTERACTIONS_DIRECTORY, wd);
+    
     getDebugger().setAutomaticTraceEnabled(false);
     _interactionsModel.resetInterpreter(wd, forceReset);
     debug.logEnd();
