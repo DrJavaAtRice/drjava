@@ -48,6 +48,7 @@ import java.awt.EventQueue;
 import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
 import edu.rice.cs.drjava.ui.InteractionsPane;
 import edu.rice.cs.util.FileOpenSelector;
+import edu.rice.cs.util.Log;
 import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.UnexpectedException;
@@ -75,6 +76,8 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   /** Number of milliseconds to wait after each println, to prevent the JVM from being flooded
     * with print calls. */
   public static final int WRITE_DELAY = 50;
+  
+  public static Log _log = new Log("Interactions.txt", false);
   
 //  public static final String _newLine = "\n"; // was StringOps.EOL; but Swing uses '\n' for newLine
   
@@ -105,9 +108,6 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   
   /** Whether the debug port has already been set.  If not, calling getDebugPort will generate an available port. */
   private volatile boolean _debugPortSet;
-  
-  /** The String added to history when the interaction is complete or an error is thrown */
-  private volatile String _toAddToHistory = "";
   
   /** The input listener to listen for requests to System.in. */
   protected volatile InputListener _inputListener;
@@ -203,13 +203,15 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
         
         if (_document.inProgress()) return;  // Don't start a new interaction while one is in progress
         
-        _document.addToHistory(_toAddToHistory);  // moved from _interactionIsOver in response to bug #952
-        
         String text = _document.getCurrentInteraction();
         String toEval = text.trim();
-        _prepareToInterpret(toEval);  // Writes a newLine!
+        _prepareToInterpret(toEval);  // Writes a newLine
 //        if (toEval.startsWith("java ")) toEval = _transformJavaCommand(toEval);
 //        else if (toEval.startsWith("applet ")) toEval = _transformAppletCommand(toEval);
+        
+        _log.log("Adding to history '" + toEval + "'");
+        _document.addToHistory(toEval);  // moved from _interactionIsOver in response to bug #952
+        
         toEval = transformCommands(toEval);
         if (DrJava.getConfig().getSetting(OptionConstants.DEBUG_AUTO_IMPORT).booleanValue() &&
             toEval.startsWith("import ")) {
@@ -223,7 +225,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
             line = line.substring("import ".length());
             String substr = line;
             int endPos = 0;
-            while((endPos<substr.length()) &&
+            while((endPos < substr.length()) &&
                   ((Character.isJavaIdentifierPart(substr.charAt(endPos))) ||
                    (substr.charAt(endPos) == '.') ||
                    (substr.charAt(endPos) == '*'))) ++endPos;
@@ -236,11 +238,12 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
             line = line.substring(1).trim();
           } while(line.startsWith("import "));
         }
-//          System.err.println("Preparing to interpret '" + toEval  + "'");
+        _log.log("Preparing to interpret '" + toEval  + "'");
         final String evalText = toEval;
 
         new Thread(new Runnable() { 
-          public void run() { 
+          public void run() {
+            _log.log("InteractionsModel.interpretCurrentInteraction is interpreting '" + evalText + "'");
             try { interpret(evalText); } 
             catch(Throwable t) { DrJavaErrorHandler.record(t); }
           } 
@@ -282,8 +285,6 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     _addNewline();
     _notifyInteractionStarted();
     _document.setInProgress(true);
-    _toAddToHistory = text; // _document.addToHistory(text);
-    //Do not add to history immediately in case the user is not finished typing when they press return
   }
   
   /** Appends a newLine to _document assuming that the Write Lock is already held.  Must run in the event thread. */
