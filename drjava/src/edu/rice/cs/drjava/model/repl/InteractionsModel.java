@@ -106,6 +106,9 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   /** Port used by the debugger to connect to the Interactions JVM. Uniquely created in getDebugPort(). */
   private volatile int _debugPort;
   
+  /** The String added to history when the interaction is complete or an error is thrown */
+  private volatile String _toAddToHistory = "";
+  
   /** Whether the debug port has already been set.  If not, calling getDebugPort will generate an available port. */
   private volatile boolean _debugPortSet;
   
@@ -209,9 +212,6 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
 //        if (toEval.startsWith("java ")) toEval = _transformJavaCommand(toEval);
 //        else if (toEval.startsWith("applet ")) toEval = _transformAppletCommand(toEval);
         
-        _log.log("Adding to history '" + toEval + "'");
-        _document.addToHistory(toEval);  // moved from _interactionIsOver in response to bug #952
-        
         toEval = transformCommands(toEval);
         if (DrJava.getConfig().getSetting(OptionConstants.DEBUG_AUTO_IMPORT).booleanValue() &&
             toEval.startsWith("import ")) {
@@ -285,6 +285,8 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     _addNewline();
     _notifyInteractionStarted();
     _document.setInProgress(true);
+    _toAddToHistory = text; // _document.addToHistory(text);
+    //Do not add to history immediately in case the user is not finished typing when they press return
   }
   
   /** Appends a newLine to _document assuming that the Write Lock is already held.  Must run in the event thread. */
@@ -590,7 +592,8 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   public void _interactionIsOver() {
     Utilities.invokeLater(new Runnable() {
       public void run() {
-//      ;  // moved to interpretCurrentInteraction in response to Bug #952
+        _log.log("Adding to history '" + toEval + "'");
+        _document.addToHistory(_toAddToHistory);  // better place for this action despite bug report #952
         _document.setInProgress(false);
         _document.insertPrompt();
         _notifyInteractionEnded();
