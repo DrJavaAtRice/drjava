@@ -592,7 +592,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   public void _interactionIsOver() {
     Utilities.invokeLater(new Runnable() {
       public void run() {
-        _log.log("Adding to history '" + toEval + "'");
+        _log.log("Adding to history '" + _toAddToHistory + "'");
         _document.addToHistory(_toAddToHistory);  // better place for this action despite bug report #952
         _document.setInProgress(false);
         _document.insertPrompt();
