@@ -9,32 +9,25 @@
  *    Brock Janiczak - initial API and implementation
  *    
  *******************************************************************************/
-package edu.rice.cs.drjava.ui.coverage;
+package edu.rice.cs.drjava.model.coverage;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintStream;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Constructor;
-import java.util.*;
 
-import edu.rice.cs.plt.collect.CollectUtil;
-import edu.rice.cs.util.swing.Utilities;
+import java.util.Map;
+import java.util.List;
+import java.util.HashMap;
+import java.util.ArrayList;
 
 import org.jacoco.core.analysis.Analyzer;
 import org.jacoco.core.analysis.CoverageBuilder;
 import org.jacoco.core.analysis.IBundleCoverage;
-import org.jacoco.core.tools.ExecFileLoader;
 import org.jacoco.core.analysis.IClassCoverage;
 import org.jacoco.core.analysis.ICounter;
 import org.jacoco.core.data.ExecutionDataStore;
 import org.jacoco.core.data.SessionInfoStore;
 import org.jacoco.core.instr.Instrumenter;
-import org.jacoco.core.runtime.IRuntime;
-import org.jacoco.core.runtime.LoggerRuntime;
-import org.jacoco.core.runtime.RuntimeData;
+
 import org.jacoco.report.DirectorySourceFileLocator;
 import org.jacoco.report.FileMultiReportOutput;
 import org.jacoco.report.IReportVisitor;

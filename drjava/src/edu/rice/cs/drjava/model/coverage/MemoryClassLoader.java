@@ -1,8 +1,8 @@
-package edu.rice.cs.drjava.ui.coverage;
+package edu.rice.cs.drjava.model.coverage;
 
-import java.util.*;
+import java.util.Map;
+import java.util.HashMap;
 import java.lang.ClassLoader;
-import edu.rice.cs.util.swing.Utilities;
 
 /**
  * A class loader that loads classes from in-memory data.

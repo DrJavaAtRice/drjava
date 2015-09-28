@@ -40,6 +40,9 @@ import junit.framework.*;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
@@ -64,31 +67,16 @@ import static edu.rice.cs.plt.debug.DebugUtil.error;
 
 import edu.rice.cs.drjava.model.compiler.LanguageLevelStackTraceMapper;
 
-// For JaCoCo:
-import java.io.Writer;
-import java.io.BufferedWriter;
-import java.io.OutputStreamWriter;
-import java.io.FileOutputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import org.jacoco.core.analysis.Analyzer;
 import org.jacoco.core.analysis.CoverageBuilder;
 import org.jacoco.core.analysis.IBundleCoverage;
-import org.jacoco.core.tools.ExecFileLoader;
-import org.jacoco.core.analysis.IClassCoverage;
-import org.jacoco.core.analysis.ICounter;
 import org.jacoco.core.data.ExecutionDataStore;
 import org.jacoco.core.data.SessionInfoStore;
 import org.jacoco.core.instr.Instrumenter;
 import org.jacoco.core.runtime.IRuntime;
 import org.jacoco.core.runtime.LoggerRuntime;
 import org.jacoco.core.runtime.RuntimeData;
-import org.jacoco.report.DirectorySourceFileLocator;
-import org.jacoco.report.FileMultiReportOutput;
-import org.jacoco.report.IReportVisitor;
-import org.jacoco.report.html.HTMLFormatter;
-import edu.rice.cs.plt.collect.CollectUtil;
-import edu.rice.cs.drjava.ui.coverage.*;
+import edu.rice.cs.drjava.model.coverage.*;
 
 /** Runs in the InterpreterJVM. Runs tests given a classname and formats the results into a (serializable) array of 
   * JUnitError that can be passed back to the MainJVM.

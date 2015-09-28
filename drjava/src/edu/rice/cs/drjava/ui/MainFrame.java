@@ -92,7 +92,7 @@ import edu.rice.cs.drjava.model.debug.*;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.javadoc.JavadocModel;
 import edu.rice.cs.drjava.ui.config.ConfigFrame;
-import edu.rice.cs.drjava.ui.coverage.*;
+import edu.rice.cs.drjava.ui.coverage.CoverageFrame;
 import edu.rice.cs.drjava.ui.predictive.PredictiveInputFrame;
 import edu.rice.cs.drjava.ui.predictive.PredictiveInputModel;
 import edu.rice.cs.drjava.ui.avail.*;
