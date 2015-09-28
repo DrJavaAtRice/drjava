@@ -48,8 +48,8 @@ import edu.rice.cs.util.newjvm.*;
   */
 public interface InterpreterJVMRemoteI extends SlaveRemote {
   
-  public List<String> findTestClasses(List<String> classNames, List<File> files)
-    throws RemoteException;
+  public List<String> findTestClasses(List<String> classNames, 
+    List<File> files, boolean doCoverage) throws RemoteException;
   
   public boolean runTestSuite() throws RemoteException;
   

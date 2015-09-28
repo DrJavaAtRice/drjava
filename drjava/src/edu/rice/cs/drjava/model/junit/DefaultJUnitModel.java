@@ -495,81 +495,12 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
         }
       }
     }
+
     catch(Exception e) {
       //new ScrollableDialog(null, "UnexceptedExceptionThrown", e.toString(), "").show();
       throw new UnexpectedException(e); // triggers _junitInterrupted which runs hourglassOff
     }
     
-    // JaCoCo: Create instrumented versions of class files.
-    ReportGenerator rg = null;
-    RuntimeData myData = null;
-    ArrayList<File> myInstrumentedFiles = null;
-    IRuntime myRuntime = null;
-
-    if (coverage) {
-        // Prepare to generate a JaCoCo report
-        try {
-            rg = new ReportGenerator(_model, 
-                _model.getDocumentNavigator().getSelectedDocuments(), 
-                new File("/tmp/JaCoCo"));
-        } catch (Exception e) {
-            throw new UnexpectedException(e);
-        }
-
-        myData = new RuntimeData();
-        myInstrumentedFiles = new ArrayList<File>();
-        myRuntime = new LoggerRuntime();
-
-        // The Instrumenter creates a modified version of our test target class
-        // that contains additional probes for execution data recording:
-        ArrayList<byte[]> instrumenteds = new ArrayList<byte[]>();
-        for (int i = 0 ; i< files.size() ; i++) {
-
-            // Instrument the i-th file
-            try {
-                final Instrumenter instr = new Instrumenter(myRuntime);
-                final byte[] instrumented = instr.instrument(rg.getTargetClass(
-                    files.get(i)), classNames.get(i));
-                String[] pathParts = files.get(i).getAbsolutePath().split("/");
-
-                // Write this instrumented class to a file in /tmp/
-                FileOutputStream fos = new FileOutputStream("/tmp/" + 
-                    pathParts[pathParts.length - 1].substring(0, 
-                    pathParts[pathParts.length - 1].length() - 4) + "class");
-                fos.write(instrumented);
-                fos.close();
-
-                // Keep track of all of the instrumented files
-                myInstrumentedFiles.add(new File("/tmp/" + 
-                    pathParts[pathParts.length - 1]));
-                instrumenteds.add(instrumented);
-
-            } catch (Exception e) {
-                StringWriter stackTrace = new StringWriter();
-                e.printStackTrace(new PrintWriter(stackTrace));
-                Utilities.show("INSTRUMENTATION EXCEPTION: " + stackTrace.toString());
-                continue;
-            }
-        }
-
-        // Now we're ready to run our instrumented class and need to startup the
-        // runtime first:
-        try {
-            myRuntime.startup(myData);
-        } catch (Exception e) {
-            throw new UnexpectedException(e);
-        }
-
-        _jvm.setWorkingDirectory(new File("/tmp"));
-        Utilities.show("Set working directory.");
-        _jvm.restartInterpreterJVM(true);
-        Utilities.show("Restarted interpreter.");
-    } 
-
-    final RuntimeData data = myData;
-    final ArrayList<File> instrumentedFiles = myInstrumentedFiles;
-    final IRuntime runtime = myRuntime;
-
     /** Run the junit test suite that has already been set up on the slave JVM */
     _testInProgress = true;
     // System.err.println("Spawning test thread");
@@ -587,12 +518,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
         synchronized(_compilerModel.getCompilerLock()) {
           // synchronized over _compilerModel to ensure that compilation and junit testing are mutually exclusive.
           /** Set up junit test suite on slave JVM; get TestCase classes forming that suite */
-          List<String> tests;
-          if (coverage) {
-            tests = _jvm.findTestClasses(classNames, instrumentedFiles).unwrap(null);
-          } else {
-            tests = _jvm.findTestClasses(classNames, files).unwrap(null);
-          }
+          List<String> tests = _jvm.findTestClasses(classNames, files, coverage).unwrap(null);
 
           if (tests == null || tests.isEmpty()) {
             nonTestCase(allTests, false);
@@ -617,47 +543,6 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
 
     }).start();
     
-    // At the end of test execution we collect execution data and shutdown
-    // the runtime:
-    //highlight(rg, true);
-    if (coverage) {
-      Utilities.show("Collecting session info...");
-      final ExecutionDataStore executionData = new ExecutionDataStore();
-      final SessionInfoStore sessionInfos = new SessionInfoStore();
-      myData.collect(executionData, sessionInfos, false);
-      runtime.shutdown();
-
-      // Together with the original class definition we can calculate coverage
-      // information:
-      final CoverageBuilder coverageBuilder = new CoverageBuilder();
-      final Analyzer analyzer = new Analyzer(executionData, coverageBuilder);
-
-      try {
-          for (int i = 0; i< classNames.size(); i++) {
-              Utilities.show("className = " + classNames.get(i));
-              analyzer.analyzeClass(rg.getTargetClass(files.get(i)), 
-                  classNames.get(i));
-          }
-
-          //printCoverage(coverageBuilder);
-
-          // Run the structure analyzer on a single class folder to build up
-          // the coverage model. The process would be similar if your classes
-          // were in a jar file. Typically you would create a bundle for each
-          // class folder and each jar you want in your report. If you have
-          // more than one bundle you will need to add a grouping node to your
-          // report
-          Utilities.show("rg.getSourceDirectory().getName() = " + rg.getSourceDirectory().getName());
-          final IBundleCoverage bundleCoverage = coverageBuilder.getBundle(
-              rg.getSourceDirectory().getName());
-          rg.createReport(bundleCoverage, executionData, sessionInfos);
-      } catch (Exception e) {
-          StringWriter stackTrace = new StringWriter();
-          e.printStackTrace(new PrintWriter(stackTrace));
-          Utilities.show("ANALYSIS EXCEPTION: " + stackTrace.toString());
-      }
-
-    }
  }
    
 //-------------------------------- Helpers --------------------------------//

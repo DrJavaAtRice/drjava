@@ -17,9 +17,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Constructor;
 import java.util.*;
 
 import edu.rice.cs.plt.collect.CollectUtil;
+import edu.rice.cs.util.swing.Utilities;
 
 import org.jacoco.core.analysis.Analyzer;
 import org.jacoco.core.analysis.CoverageBuilder;
@@ -60,42 +63,13 @@ public class ReportGenerator {
  
     private  CoverageBuilder cb;
  
-    /**
-     * A class loader that loads classes from in-memory data.
-     */
-    public static class MemoryClassLoader extends ClassLoader {
-
-        private final Map<String, byte[]> definitions = 
-            new HashMap<String, byte[]>();
-
-        /**
-         * Add a in-memory representation of a class.
-         * 
-         * @param name  name of the class
-         * @param bytes class definition
-         */
-        public void addDefinition(final String name, final byte[] bytes) {
-            definitions.put(name, bytes);
-        }
-
-        @Override
-        protected Class<?> loadClass(final String name, final boolean resolve)
-            throws ClassNotFoundException {
-            final byte[] bytes = definitions.get(name);
-            if (bytes != null) {
-                return defineClass(name, bytes, 0, bytes.length);
-            }
-            return super.loadClass(name, resolve);
-        }
-    }
-
     /** Public getters and setters */
-    public InputStream getTargetClass(final String name) {
+    public static InputStream getTargetClass(final String name) {
         final String resource = '/' + name.replace('.', '/') + ".class";
-        return getClass().getResourceAsStream(resource);
+        return ReportGenerator.class.getResourceAsStream(resource);
     }
  
-    public InputStream getTargetClass(final File file) throws Exception {
+    public static InputStream getTargetClass(final File file) throws Exception {
         return new FileInputStream(file.getCanonicalPath().replace(".java",
             ".class"));
     }
@@ -177,28 +151,30 @@ public class ReportGenerator {
         this.targetNames = targetNames;
         this.reportDirectory = destDirectory;
         this.mainClassFileName = getTargetClassName(docs.get(0).getFile());
+        //this.testClasses = _model.getJUnitModel().getTestClasses(docs);
     }
 
     /**
      * Create a new generator based for the given project.
      */
-    public ReportGenerator(final GlobalModel _model, 
-        File sourceDirectory, String mainClassPath, File destDirectory) 
-        throws Exception  {
+    //public ReportGenerator(final GlobalModel _model, 
+    //    File sourceDirectory, String mainClassPath, File destDirectory) 
+    //    throws Exception  {
 
-        this.sourceDirectory = sourceDirectory;
-        this.reportDirectory = destDirectory; 
-        this.title = sourceDirectory.getName();  
-        this.mainClassFileName = mainClassPath;
+    //    this.sourceDirectory = sourceDirectory;
+    //    this.reportDirectory = destDirectory; 
+    //    this.title = sourceDirectory.getName();  
+    //    this.mainClassFileName = mainClassPath;
 
-        this.targets = rec_init_src(sourceDirectory);
-        ArrayList<String> targetNames = new ArrayList<String>();
-        for (File f: targets) {
-            targetNames.add(getTargetClassName(f));
-        }
+    //    this.targets = rec_init_src(sourceDirectory);
+    //    ArrayList<String> targetNames = new ArrayList<String>();
+    //    for (File f: targets) {
+    //        targetNames.add(getTargetClassName(f));
+    //    }
 
-        this.targetNames = targetNames;
-    }
+    //    this.testClasses = _model.getJUnitModel().getTestClasses(null); // @rebecca: TODO
+    //    this.targetNames = targetNames;
+    //}
 
     public List<File> rec_init_src(File sourceDirectory) {
 
@@ -273,8 +249,6 @@ public class ReportGenerator {
         }
 
         final Class<?> mainClass = memoryClassLoader.loadClass(mainClassFileName);
-
-        // Execute the test target class 
         Method meth = mainClass.getMethod("main", String[].class);
         String[] params = new String[]{}; // init params accordingly
         meth.invoke(null, (Object) params); // static method doesn't have an instance
@@ -306,18 +280,18 @@ public class ReportGenerator {
         // more than one bundle you will need to add a grouping node to your
         // report
         final IBundleCoverage bundleCoverage = coverageBuilder.getBundle(title);
-        createReport(bundleCoverage, executionData, sessionInfos);
+        createReport(bundleCoverage, executionData, sessionInfos, this.sourceDirectory);
     }
 
-    public void createReport(final IBundleCoverage bundleCoverage, 
+    public static void createReport(final IBundleCoverage bundleCoverage, 
         ExecutionDataStore executionData, 
-        SessionInfoStore sessionInfos) throws IOException {
+        SessionInfoStore sessionInfos, File sourceDirectory) throws IOException {
 
         // Create a concrete report visitor based on some supplied
         // configuration. In this case we use the defaults
         final HTMLFormatter htmlFormatter = new HTMLFormatter();
         final IReportVisitor visitor = htmlFormatter.
-            createVisitor(new FileMultiReportOutput(reportDirectory));
+            createVisitor(new FileMultiReportOutput(new File("/tmp/")));
 
         // Initialize the report with all of the execution and session
         // information. At this point the report doesn't know about the

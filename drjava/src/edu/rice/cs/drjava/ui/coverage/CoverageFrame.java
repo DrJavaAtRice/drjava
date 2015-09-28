@@ -236,12 +236,12 @@ public class CoverageFrame extends SwingFrame {
                  highlight(generator, true);
              
              } else {
-                  final ReportGenerator generator = new ReportGenerator(_model, 
-                      _srcRootSelector.getFileFromField(), 
-                      _mainDocumentSelector.getText(), 
-                      _outputDirSelector.getFileFromField());
-                  generator.create();
-                  highlight(generator, false);
+                 //final ReportGenerator generator = new ReportGenerator(_model, 
+                 //     _srcRootSelector.getFileFromField(), 
+                 //     _mainDocumentSelector.getText(), 
+                 //     _outputDirSelector.getFileFromField());
+                 //generator.create();
+                 //highlight(generator, false);
              }
              
          } catch (Exception e) {

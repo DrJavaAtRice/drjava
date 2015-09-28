@@ -70,6 +70,8 @@ import edu.rice.cs.plt.concurrent.CompletionMonitor;
 import edu.rice.cs.util.newjvm.*;
 import edu.rice.cs.util.classloader.ClassFileError;
 
+import edu.rice.cs.util.swing.Utilities;
+
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /**
@@ -384,9 +386,17 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    */
   public boolean addBuildDirectoryClassPath(File f) {
     InterpreterJVMRemoteI remote = _state.value().interpreter(false);
-    if (remote == null) { return false; }
-    try { remote.addBuildDirectoryClassPath(f); return true; }
-    catch (RemoteException e) { _handleRemoteException(e); return false; }
+    if (remote == null) { 
+        return false; 
+    }
+    try { 
+        remote.addBuildDirectoryClassPath(f); 
+        return true; 
+    }
+    catch (RemoteException e) { 
+        _handleRemoteException(e); 
+        return false; 
+    }
   }
   
   /**
@@ -448,10 +458,11 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     * @param files the associated file
     * @return the class names that are actually test cases
     */
-  public Option<List<String>> findTestClasses(List<String> classNames, List<File> files) {
+  public Option<List<String>> findTestClasses(List<String> classNames, 
+    List<File> files, boolean doCoverage) {
     InterpreterJVMRemoteI remote = _state.value().interpreter(false);
     if (remote == null) { return Option.none(); }
-    try { return Option.some(remote.findTestClasses(classNames, files)); }
+    try { return Option.some(remote.findTestClasses(classNames, files, doCoverage)); }
     catch (RemoteException e) { _handleRemoteException(e); return Option.none(); }
   }
   
