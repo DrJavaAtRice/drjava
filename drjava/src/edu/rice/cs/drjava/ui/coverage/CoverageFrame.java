@@ -58,6 +58,8 @@ import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.model.compiler.CompilerListener;
 import edu.rice.cs.drjava.model.compiler.DummyCompilerListener;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
+import edu.rice.cs.drjava.model.junit.JUnitResultTuple;
+
 import edu.rice.cs.drjava.config.Option;
 import edu.rice.cs.drjava.config.OptionParser;
 import edu.rice.cs.drjava.config.OptionConstants;
@@ -97,7 +99,7 @@ public class CoverageFrame extends SwingFrame {
 
     private final JButton _okButton;
     private final JButton _cancelButton;
-    private final JCheckBox _useCurrentFile;
+    //private final JCheckBox _useCurrentFile;
     private final JCheckBox _openHTMLBrowser;
 
     private final JPanel _mainPanel;
@@ -123,32 +125,23 @@ public class CoverageFrame extends SwingFrame {
         _model = _mainFrame.getModel();
         _mainPanel= new JPanel();
 
-        _useCurrentFile = new JCheckBox(
-            "Generete report for current selected file", false);
-        _useCurrentFile.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                _srcRootSelector.setEnabled(!_useCurrentFile.isSelected());
-                _mainDocumentSelector.setEnabled(!_useCurrentFile.isSelected());
-                selectFile.setEnabled(!_useCurrentFile.isSelected()); 
-            }
-        });
+        //_useCurrentFile = new JCheckBox(
+        //    "Generete report for current selected file", true);
+        //_useCurrentFile.addActionListener(new ActionListener(){
+        //    @Override
+        //    public void actionPerformed(ActionEvent e) {
+        //        _srcRootSelector.setEnabled(!_useCurrentFile.isSelected());
+        //        _mainDocumentSelector.setEnabled(!_useCurrentFile.isSelected());
+        //        selectFile.setEnabled(!_useCurrentFile.isSelected()); 
+        //    }
+        //});
 
         _openHTMLBrowser = new JCheckBox(
-            "Open web browser to display the report", false);
+            "Open web browser to display the report", true);
  
         Action okAction = new AbstractAction("Ok") {
             public void actionPerformed(ActionEvent e) {
-                boolean successful = generateReport();
-                if (successful) { 
-                    CoverageFrame.this.setVisible(false);
-                    if (_openHTMLBrowser.isSelected()) {
-                        String indexURL = 
-                            _outputDirSelector.getFileFromField().getPath()
-                            + "/index.html";
-                        displayReportUsingDefaultBrowser(indexURL);
-                    }
-                }
+                startJUnit();
             }
         };
         _okButton = new JButton(okAction);
@@ -226,23 +219,11 @@ public class CoverageFrame extends SwingFrame {
          _outputDirSelector.setFileField(file);
     }
 
-    public boolean generateReport(){
+    public boolean startJUnit(){
         try {
-             if (_useCurrentFile.isSelected()) {
-                 final ReportGenerator generator = new ReportGenerator(_model, 
-                      _model.getDocumentNavigator().getSelectedDocuments(),
-                      _outputDirSelector.getFileFromField());
-                 generator.create();
-                 highlight(generator, true);
-             
-             } else {
-                 //final ReportGenerator generator = new ReportGenerator(_model, 
-                 //     _srcRootSelector.getFileFromField(), 
-                 //     _mainDocumentSelector.getText(), 
-                 //     _outputDirSelector.getFileFromField());
-                 //generator.create();
-                 //highlight(generator, false);
-             }
+             _model.getJUnitModel().setCoverage(true);
+             _mainFrame._junitAll(); 
+             CoverageFrame.this.setVisible(false);
              
          } catch (Exception e) {
              displayErrorMessage(e);
@@ -252,7 +233,18 @@ public class CoverageFrame extends SwingFrame {
         return true;
     }
 
-    private void highlight(ReportGenerator generator, boolean selOnly) {
+    public void generateReport() {
+        if (_openHTMLBrowser.isSelected()) {
+            String indexURL = _outputDirSelector.getFileFromField().getPath()
+                     + "/index.html";
+            this.displayReportUsingDefaultBrowser(indexURL);
+        }
+
+        //this.highlight(_model.getJUnitModel().getResult().getLineColors(), true);
+        this._model.getJUnitModel().setCoverage(false);
+    }
+
+    private void highlight(Map<String, List<String>> lineColors, boolean selOnly) {
     
         Iterator<OpenDefinitionsDocument> iter;
         if (!selOnly) {
@@ -268,8 +260,7 @@ public class CoverageFrame extends SwingFrame {
             final DefinitionsPane pane = _mainFrame.getDefPaneGivenODD(o);
 
             try {
-                ArrayList<String> colors = generator.getLineColorsForClass(
-                    o.getQualifiedClassName());
+                List<String> colors = lineColors.get(o.getQualifiedClassName());
           
                 for (int i = 0; i < colors.size(); i++) {
                     String color = colors.get(i);
@@ -379,11 +370,11 @@ public class CoverageFrame extends SwingFrame {
         Insets compInsets  = new Insets(5, 5, 0, 10);
 
         // CheckBox for using current selected files
-        c.weightx = 0.0;
-        c.gridwidth = GridBagConstraints.REMAINDER;
-        c.insets = compInsets;
-        gridbag.setConstraints(_useCurrentFile, c);
-        panel.add(_useCurrentFile);
+        //c.weightx = 0.0;
+        //c.gridwidth = GridBagConstraints.REMAINDER;
+        //c.insets = compInsets;
+        //gridbag.setConstraints(_useCurrentFile, c);
+        //panel.add(_useCurrentFile);
 
         // CheckBox for opening HTML report in web browser
         c.weightx = 0.0;
@@ -393,7 +384,7 @@ public class CoverageFrame extends SwingFrame {
         panel.add(_openHTMLBrowser);
 
         // Project Root
-        c.weightx = 0.0;
+        /*c.weightx = 0.0;
         c.gridwidth = 1;
         c.insets = labelInsets;
 
@@ -409,10 +400,10 @@ public class CoverageFrame extends SwingFrame {
 
         JPanel prPanel = _srcRootPanel();
         gridbag.setConstraints(prPanel, c);
-        panel.add(prPanel);
+        panel.add(prPanel);*/
 
         // Main Document file
-        c.weightx = 0.0;
+        /*c.weightx = 0.0;
         c.gridwidth = 1;
         c.insets = labelInsets;
 
@@ -433,7 +424,7 @@ public class CoverageFrame extends SwingFrame {
 
         c.weightx = 0.0;
         c.gridwidth = 1;
-        c.insets = labelInsets;
+        c.insets = labelInsets;*/
 
         // Output Directory
         JLabel wdLabel = new JLabel("Output Directory");

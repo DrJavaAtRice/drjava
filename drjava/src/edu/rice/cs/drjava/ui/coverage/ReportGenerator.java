@@ -12,7 +12,6 @@
 package edu.rice.cs.drjava.ui.coverage;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
@@ -53,27 +52,10 @@ import edu.rice.cs.drjava.model.*;
  */
 public class ReportGenerator {
 
-    private final String title;
-
-    private final File sourceDirectory;
-    private final File reportDirectory;
-    private final List<File> targets;
-    private final ArrayList<String> targetNames;
-    private final String mainClassFileName;
+    private final String reportDirectoryPath;
  
-    private  CoverageBuilder cb;
+    private  CoverageBuilder coverageBuilder;
  
-    /** Public getters and setters */
-    public static InputStream getTargetClass(final String name) {
-        final String resource = '/' + name.replace('.', '/') + ".class";
-        return ReportGenerator.class.getResourceAsStream(resource);
-    }
- 
-    public static InputStream getTargetClass(final File file) throws Exception {
-        return new FileInputStream(file.getCanonicalPath().replace(".java",
-            ".class"));
-    }
-
     private String getTargetClassName(final OpenDefinitionsDocument doc) 
         throws Exception {
 
@@ -87,13 +69,13 @@ public class ReportGenerator {
         return name;
     }
 
-    private String getTargetClassName(final File file) throws Exception {
-        String ClassName = file.getPath().replace(sourceDirectory.getPath() + 
-            "/", "").replace(".java", "").replace(".class", "").
-            replace("/", ".");
+    //private String getTargetClassName(final File file) throws Exception {
+    //    String ClassName = file.getPath().replace(sourceDirectory.getPath() + 
+    //        "/", "").replace(".java", "").replace(".class", "").
+    //        replace("/", ".");
 
-        return ClassName;
-    }
+    //    return ClassName;
+    //}
 
     private void printCounter(final String unit, final ICounter counter) {
         final Integer missed = Integer.valueOf(counter.getMissedCount());
@@ -113,68 +95,10 @@ public class ReportGenerator {
         return "";
     }
 
-    /**
-     * Create a new generator based for the given file.
-     * 
-     */
-    public ReportGenerator(final GlobalModel _model, 
-        final List<OpenDefinitionsDocument> docs, 
-        final File destDirectory) throws Exception  {
-
-        File src = docs.get(0).getFile().getParentFile(); 
-        String packageName = docs.get(0).getPackageName();
-        if (!packageName.equals("")) {
-            // If there's package, go up until the root dir  
-            int numUp = packageName.split("\\.").length;
-            for (int i = 0; i< numUp ; i++) {
-                src = src.getParentFile();
-            }
-        }
-        this.sourceDirectory = src;
-        this.title = src.getName();
-
-        List<File> targets = new ArrayList<File>();
-        for (File dir:CollectUtil.makeList(_model.getClassPath())) {
-            if (!dir.isDirectory() || dir.getName().equals("lib") || 
-                dir.getName().equals("base") || dir.getName().equals("test")) {
-                continue;
-            }
-            targets.addAll(rec_init_target(dir));
-        }
-        this.targets = targets;
-
-        ArrayList<String> targetNames = new ArrayList<String>();
-        for (File f: targets) {
-            targetNames.add(getTargetClassName(f));
-        }
-
-        this.targetNames = targetNames;
-        this.reportDirectory = destDirectory;
-        this.mainClassFileName = getTargetClassName(docs.get(0).getFile());
-        //this.testClasses = _model.getJUnitModel().getTestClasses(docs);
+    public ReportGenerator(String reportDirectoryPath, CoverageBuilder coverageBuilder) { 
+        this.reportDirectoryPath = reportDirectoryPath;
+        this.coverageBuilder = coverageBuilder;
     }
-
-    /**
-     * Create a new generator based for the given project.
-     */
-    //public ReportGenerator(final GlobalModel _model, 
-    //    File sourceDirectory, String mainClassPath, File destDirectory) 
-    //    throws Exception  {
-
-    //    this.sourceDirectory = sourceDirectory;
-    //    this.reportDirectory = destDirectory; 
-    //    this.title = sourceDirectory.getName();  
-    //    this.mainClassFileName = mainClassPath;
-
-    //    this.targets = rec_init_src(sourceDirectory);
-    //    ArrayList<String> targetNames = new ArrayList<String>();
-    //    for (File f: targets) {
-    //        targetNames.add(getTargetClassName(f));
-    //    }
-
-    //    this.testClasses = _model.getJUnitModel().getTestClasses(null); // @rebecca: TODO
-    //    this.targetNames = targetNames;
-    //}
 
     public List<File> rec_init_src(File sourceDirectory) {
 
@@ -215,75 +139,7 @@ public class ReportGenerator {
         return files;
     }
 
-    /**
-     * Create the report.
-     * @throws Exception 
-     */
-    public void create(/* List<String> classNames, List<File> files */) throws Exception {
- 
-        // For instrumentation and runtime we need a IRuntime instance
-        // to collect execution data:
-        final IRuntime runtime = new LoggerRuntime();
-
-        // The Instrumenter creates a modified version of our test target class
-        // that contains additional probes for execution data recording:
-        ArrayList<byte[]> instrumenteds = new ArrayList<byte[]>();
-        for (int i = 0 ; i< targets.size() ; i++) {
-            final Instrumenter instr = new Instrumenter(runtime);
-            final byte[] instrumented = instr.instrument(getTargetClass(
-                targets.get(i)), targetNames.get(i));
-            instrumenteds.add(instrumented);
-        }
-
-        // Now we're ready to run our instrumented class and need to startup the
-        // runtime first:
-        final RuntimeData data = new RuntimeData();
-        runtime.startup(data);
-
-        // In this tutorial we use a special class loader to directly load the
-        // instrumented class definition from a byte[] instances.
-        final MemoryClassLoader memoryClassLoader = new MemoryClassLoader();
-        for (int i = 0; i< targetNames.size(); i++) {
-            memoryClassLoader.addDefinition(targetNames.get(i), 
-                instrumenteds.get(i));
-        }
-
-        final Class<?> mainClass = memoryClassLoader.loadClass(mainClassFileName);
-        Method meth = mainClass.getMethod("main", String[].class);
-        String[] params = new String[]{}; // init params accordingly
-        meth.invoke(null, (Object) params); // static method doesn't have an instance
-
-        // At the end of test execution we collect execution data and shutdown
-        // the runtime:
-        final ExecutionDataStore executionData = new ExecutionDataStore();
-        final SessionInfoStore sessionInfos = new SessionInfoStore();
-        data.collect(executionData, sessionInfos, false);
-        runtime.shutdown();
- 
-        // Together with the original class definition we can calculate coverage
-        // information:
-        final CoverageBuilder coverageBuilder = new CoverageBuilder();
-        final Analyzer analyzer = new Analyzer(executionData, coverageBuilder);
-
-        for (int i = 0; i< targetNames.size(); i++) {
-            analyzer.analyzeClass(getTargetClass(targets.get(i)), 
-                targetNames.get(i));
-        }
-  
-        this.cb = coverageBuilder;
-        printCoverage(coverageBuilder);
-
-        // Run the structure analyzer on a single class folder to build up
-        // the coverage model. The process would be similar if your classes
-        // were in a jar file. Typically you would create a bundle for each
-        // class folder and each jar you want in your report. If you have
-        // more than one bundle you will need to add a grouping node to your
-        // report
-        final IBundleCoverage bundleCoverage = coverageBuilder.getBundle(title);
-        createReport(bundleCoverage, executionData, sessionInfos, this.sourceDirectory);
-    }
-
-    public static void createReport(final IBundleCoverage bundleCoverage, 
+    public void createReport(final IBundleCoverage bundleCoverage, 
         ExecutionDataStore executionData, 
         SessionInfoStore sessionInfos, File sourceDirectory) throws IOException {
 
@@ -291,7 +147,7 @@ public class ReportGenerator {
         // configuration. In this case we use the defaults
         final HTMLFormatter htmlFormatter = new HTMLFormatter();
         final IReportVisitor visitor = htmlFormatter.
-            createVisitor(new FileMultiReportOutput(new File("/tmp/")));
+            createVisitor(new FileMultiReportOutput(new File(this.reportDirectoryPath)));
 
         // Initialize the report with all of the execution and session
         // information. At this point the report doesn't know about the
@@ -308,16 +164,22 @@ public class ReportGenerator {
         visitor.visitEnd();
     }
  
-    /** Public getters and setters */
-    public File getSourceDirectory() {
-        return this.sourceDirectory;
+    public Map<String, List<String>> getLineColors(List<String> classNames) {
+
+        Map<String, List<String>> lineColors = new HashMap<String, List<String>>();
+        for (String className : classNames) {
+            lineColors.put(className, this.getLineColorsForClass(className));
+        }
+        return lineColors;
+
     }
 
+        
     public ArrayList<String> getLineColorsForClass(String className) {
          
         ArrayList<String> lineColors = new ArrayList<String>();
          
-        for (final IClassCoverage cc : cb.getClasses()) {
+        for (final IClassCoverage cc : coverageBuilder.getClasses()) {
             if (!cc.getName().equals(className)) {
                 continue;
             }

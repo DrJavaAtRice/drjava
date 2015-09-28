@@ -63,6 +63,7 @@ import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.drjava.model.junit.JUnitModelCallback;
 import edu.rice.cs.drjava.model.junit.JUnitTestManager;
 import edu.rice.cs.drjava.model.junit.JUnitError;
+import edu.rice.cs.drjava.model.junit.JUnitResultTuple;
 import edu.rice.cs.drjava.model.repl.InteractionsPaneOptions;
 
 import edu.rice.cs.dynamicjava.Options;
@@ -75,6 +76,8 @@ import javax.swing.JDialog;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 import static edu.rice.cs.plt.debug.DebugUtil.error;
+
+import edu.rice.cs.util.swing.Utilities;
 
 /** This is the main class for the interpreter JVM.  All public methods except those involving remote calls (callbacks) 
   * use synchronizazion on _stateLock (unless synchronization has no effect).  The class is not ready for remote
@@ -527,8 +530,8 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     * and does not involve mutable local state.
     * @return false if no test suite is cached; true otherwise
     */
-  public boolean runTestSuite() throws RemoteException { 
-      return _junitTestManager.runTestSuite(); 
+  public JUnitResultTuple runTestSuite() throws RemoteException { 
+      return _junitTestManager.runTestSuite();
   }
   
   /** Notifies Main JVM that JUnit has been invoked on a non TestCase class.  Unsynchronized because it contains a 

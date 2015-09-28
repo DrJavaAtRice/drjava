@@ -131,6 +131,8 @@ import static edu.rice.cs.util.XMLConfig.XMLConfigException;
 import static edu.rice.cs.plt.object.ObjectUtil.hash;
 import static edu.rice.cs.drjava.ui.MainFrameStatics.*;
 
+import edu.rice.cs.drjava.model.junit.JUnitResultTuple;
+
 /** DrJava's main window. */
 public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetListener {
   private static final Log _log = new Log("MainFrame.txt", false);
@@ -1126,7 +1128,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   };
 
   public void showCoverageFrame() {   
-	 _coverageFrame.setOutputDir(_model.getWorkingDirectory());
+    _coverageFrame.setOutputDir(_model.getWorkingDirectory());
     _coverageFrame.setVisible(true);
     _coverageFrame.toFront(); 
   }
@@ -5838,17 +5840,19 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   /** Tests all open documents. */
-  private void _junitAll() {
+  // @rebecca TODO: keep this private
+  public JUnitResultTuple _junitAll() {
     updateStatusField("Running All Open Unit Tests");
     hourglassOn();  // turned off in junitStarted/nonTestCase/_junitInterrupted
     _guiAvailabilityNotifier.junitStarted(); // JUNIT and COMPILER
     try { 
-        _model.getJUnitModel().setCoverage(true); 
-        _model.getJUnitModel().junitAll(); 
+        return _model.getJUnitModel().junitAll(); 
     } catch(UnexpectedException e) { 
         _junitInterrupted(e); 
+        return new JUnitResultTuple(false, null);
     } catch(Exception e) { 
         _junitInterrupted(new UnexpectedException(e)); 
+        return new JUnitResultTuple(false, null);
     }
   }
   
@@ -9382,7 +9386,14 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
 //      new ScrollableDialog(null, "MainFrame.junitEnded() called", "", "").show();
       _guiAvailabilityNotifier.junitFinished(); // JUNIT and COMPILER
       // Use EventQueue invokeLater to ensure that JUnit panel is "reset" after it is updated with test results
-      EventQueue.invokeLater(new Runnable() { public void run() { _junitPanel.reset(); } });
+      EventQueue.invokeLater(new Runnable() { 
+        public void run() { 
+          _junitPanel.reset();
+          if (_model.getJUnitModel().getCoverage()) {
+            _coverageFrame.generateReport(); 
+          }
+        }
+      });
       _model.refreshActiveDocument();
     }
     

@@ -49,6 +49,9 @@ public interface JUnitModel {
   /** set the forceTestSuffix flag that forces class names in projects to end in "Test */
   public void setCoverage(boolean c);
   public void setForceTestSuffix(boolean b);
+
+  public JUnitResultTuple getResult(); 
+  public boolean getCoverage();
   
   //-------------------------- Listener Management --------------------------//
   
@@ -74,26 +77,26 @@ public interface JUnitModel {
     * associated with a file is not a test case, it will be ignored.  Synchronized against the compiler 
     * model to prevent testing and compiling at the same time, which would create invalid results.
     */
-  public void junitAll();
+  public JUnitResultTuple junitAll();
   
   /** Creates a JUnit test suite over all currently open project documents and runs it.  If 
     * the class file associated with a file is not a test case, it will be ignored.  Synchronized 
     * against the compiler model to prevent testing and compiling at the same time, which would 
     * create invalid results.
     */
-  public void junitProject();
+  public JUnitResultTuple junitProject();
   
   /** Runs JUnit over a list of documents.  Synchronized against the compiler model to prevent 
     * testing and compiling at the same time, which would create invalid results.
     * @param lod the list of documents that are to be run through JUnit testing.
     */
-  public void junitDocs(List<OpenDefinitionsDocument> lod);
+  public JUnitResultTuple junitDocs(List<OpenDefinitionsDocument> lod);
   
   /** Runs JUnit over a single document.  Synchronized against the compiler model to prevent testing
     * and compiling at the same time, which would create invalid results.
     * @param doc the document to be run under JUnit
     */
-  public void junit(OpenDefinitionsDocument doc) throws ClassNotFoundException, IOException;
+  public JUnitResultTuple junit(OpenDefinitionsDocument doc) throws ClassNotFoundException, IOException;
   
 //  /** Forwards the classnames and files to the test manager to test all of them.
 //    * @param qualifiedClassnames a list of all the qualified class names to test.

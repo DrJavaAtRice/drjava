@@ -42,6 +42,7 @@ import java.io.File;
 
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.util.newjvm.*;
+import edu.rice.cs.drjava.model.junit.JUnitResultTuple;
 
 /** This interface specifies the methods that the interpreter JVM exposes for the MainJVM to call.
   * @version $Id$
@@ -51,7 +52,7 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
   public List<String> findTestClasses(List<String> classNames, 
     List<File> files, boolean doCoverage) throws RemoteException;
   
-  public boolean runTestSuite() throws RemoteException;
+  public JUnitResultTuple runTestSuite() throws RemoteException;
   
   /** Check that all access of class members is permitted by accessibility controls. */
   public void setEnforceAllAccess(boolean enforce) throws RemoteException;

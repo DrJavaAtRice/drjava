@@ -50,6 +50,7 @@ import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.junit.JUnitError;
 import edu.rice.cs.drjava.model.junit.JUnitModelCallback;
+import edu.rice.cs.drjava.model.junit.JUnitResultTuple;
 import edu.rice.cs.drjava.model.debug.DebugModelCallback;
 import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
@@ -470,11 +471,18 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    * Runs the JUnit test suite already cached in the Interpreter JVM.  Blocks until the remote JVM is available.
    * Returns {@code false} if no test suite is cached, the remote JVM is unavailable, or an error occurs.
    */
-  public boolean runTestSuite() { 
+  public JUnitResultTuple runTestSuite() { 
     InterpreterJVMRemoteI remote = _state.value().interpreter(true);
-    if (remote == null) { return false; }
-    try { return remote.runTestSuite(); }
-    catch (RemoteException e) { _handleRemoteException(e); return false; }
+    if (remote == null) { 
+        return new JUnitResultTuple(false, null); 
+    }
+    try {
+        return remote.runTestSuite();
+    }
+    catch (RemoteException e) { 
+        _handleRemoteException(e); 
+        return new JUnitResultTuple(false, null); 
+    }
   }
   
 //  /** Updates the security manager in slave JVM */
