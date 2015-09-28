@@ -299,7 +299,7 @@ public class JUnitTestManager {
             ReportGenerator rg = new ReportGenerator("/tmp/", coverageBuilder); 
             rg.createReport(bundleCoverage, executionData, 
                 sessionInfos, this.files.get(0).getParentFile());
-            lineColors = rg.getLineColors(this.classNames);
+            lineColors = rg.getAllLineColors();
 
         } catch (Exception e) {
             StringWriter stackTrace = new StringWriter();
