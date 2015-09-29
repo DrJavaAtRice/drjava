@@ -333,6 +333,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     
     File configTools = DrJava.getConfig().getSetting(JAVAC_LOCATION);
     if (configTools != FileOps.NULL_FILE) {
+      // TODO: reference to subclass in next line is a code smell!
       JDKToolsLibrary fromConfig = JarJDKToolsLibrary.makeFromFile(configTools, this, JDKDescriptor.NONE);
       if (fromConfig.isValid()) { 
         JarJDKToolsLibrary.msg("From config: " + fromConfig);
@@ -341,19 +342,6 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       else { JarJDKToolsLibrary.msg("From config: invalid " + fromConfig); }
     }
     else { JarJDKToolsLibrary.msg("From config: not set"); }
-    
-    Iterable<JDKToolsLibrary> allFromRuntime = JDKToolsLibrary.makeFromRuntime(this);
-
-    for(JDKToolsLibrary fromRuntime: allFromRuntime) {
-      if (fromRuntime.isValid()) {
-        if (!results.containsKey(getLibraryKey(LibraryKey.PRIORITY_RUNTIME, fromRuntime))) {
-          JarJDKToolsLibrary.msg("From runtime: " + fromRuntime);
-          results.put(getLibraryKey(LibraryKey.PRIORITY_RUNTIME, fromRuntime), fromRuntime);
-        }
-        else { JarJDKToolsLibrary.msg("From runtime: duplicate " + fromRuntime); }
-      }
-      else { JarJDKToolsLibrary.msg("From runtime: invalid " + fromRuntime); }
-    }
     
     Iterable<JarJDKToolsLibrary> fromSearch = JarJDKToolsLibrary.search(this);
     for (JDKToolsLibrary t : fromSearch) {
@@ -365,14 +353,35 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       // give a lower priority to built-in compilers
       int priority = (edu.rice.cs.util.FileOps.getDrJavaFile().equals(tVersion.location())) ?
         LibraryKey.PRIORITY_BUILTIN : LibraryKey.PRIORITY_SEARCH;
-      if (!results.containsKey(getLibraryKey(priority, t))) {
+      if (! results.containsKey(getLibraryKey(priority, t))) {
         JarJDKToolsLibrary.msg("\tadded");
         results.put(getLibraryKey(priority, t), t);
       }
       else { JarJDKToolsLibrary.msg("\tduplicate"); }
     }
     
-    return IterUtil.reverse(results.values());
+    // Only include a runtime compiler/library if the list of results is otherwise empty; in recent versions
+    // of Java, the runtime classpath sometimes does not include rt.jar for the current version (in the JVM executing
+    // this code).  This is a bit a kludge; it should be fixed in a comprehensive revision of the JDKToolsLibrary code
+    
+    if (results.isEmpty()) {
+      Iterable<JDKToolsLibrary> allFromRuntime = JDKToolsLibrary.makeFromRuntime(this);
+
+      for(JDKToolsLibrary fromRuntime: allFromRuntime) {
+        if (fromRuntime.isValid()) {
+          if (! results.containsKey(getLibraryKey(LibraryKey.PRIORITY_RUNTIME, fromRuntime))) {
+            JarJDKToolsLibrary.msg("From runtime: " + fromRuntime);
+            results.put(getLibraryKey(LibraryKey.PRIORITY_RUNTIME, fromRuntime), fromRuntime);
+          }
+          else { JarJDKToolsLibrary.msg("From runtime: duplicate " + fromRuntime); }
+        }
+        else { JarJDKToolsLibrary.msg("From runtime: invalid " + fromRuntime); }
+      }
+    }
+    
+    Iterable<JDKToolsLibrary> libraries = IterUtil.reverse(results.values());
+    JarJDKToolsLibrary.msg("Returning libraries: '" + libraries);
+    return libraries;
   }
   
 //  public void junitAll() { _state.junitAll(); }

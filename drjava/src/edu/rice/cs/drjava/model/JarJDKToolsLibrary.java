@@ -137,7 +137,8 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     return super.toString() + " at " + _location + ", boot classpath: " + bootClassPath();
   }
 
-  /** Create a JarJDKToolsLibrary from a specific {@code "tools.jar"} or {@code "classes.jar"} file. */
+  /** Create a JarJDKToolsLibrary from a specific {@code "tools.jar"} or {@code "classes.jar"} file. 
+    * NOTE: Why isn't this method in JDKToolsLibrary? */
   public static JarJDKToolsLibrary makeFromFile(File f, GlobalModel model, JDKDescriptor desc) {
     return makeFromFile(f, model, desc, new ArrayList<File>());
   }
