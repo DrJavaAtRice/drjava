@@ -172,7 +172,7 @@ public class CoverageFrame extends SwingFrame {
         }
 
         //this.highlight(_model.getJUnitModel().getResult().getLineColors(), false);
-        this._model.getJUnitModel().setCoverage(false);
+        this._model.getJUnitModel().setCoverage(false, "");
     }
 
     /** 
@@ -295,7 +295,8 @@ public class CoverageFrame extends SwingFrame {
      * Begins JUnit testing with code coverage. 
      */
     private void startJUnit(){
-         _model.getJUnitModel().setCoverage(true);
+         _model.getJUnitModel().setCoverage(true, 
+             this._outputDirSelector.getFileFromField().getPath());
          _mainFrame._junitAll(); 
          CoverageFrame.this.setVisible(false);
     }

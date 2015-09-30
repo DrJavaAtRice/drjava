@@ -105,6 +105,7 @@ public class JUnitTestManager {
   private List<File> _testFiles = null;
   
   // For JaCoCo
+  private String coverageOutdir = null;
   private IRuntime runtime = null;
   private RuntimeData myData = null;
   private List<String> classNames = null;
@@ -122,7 +123,9 @@ public class JUnitTestManager {
     * @param files the files corresponding to classNames
     */
   public List<String> findTestClasses(final List<String> classNames, 
-    final List<File> files, boolean doCoverage) {
+    final List<File> files, CoverageMetadata coverageMetadata) {
+
+    boolean doCoverage = coverageMetadata.getFlag();
 
     // Set up the loader
     final ClassLoader loader;
@@ -131,6 +134,7 @@ public class JUnitTestManager {
     } else {
 
         // JaCoCo: Create instrumented versions of class files.
+        this.coverageOutdir = coverageMetadata.getOutdirPath();
         this.runtime = new LoggerRuntime();
         this.myData = new RuntimeData();
         this.classNames = classNames;
@@ -256,16 +260,18 @@ public class JUnitTestManager {
       _jmc.testSuiteEnded(errors);
 
 
-    if (this.runtime != null) {
+    if (this.runtime != null) { /* doCoverage was true */
 
-        // Collect session info (including which code was executed)
+        /* Collect session info (including which code was executed) */
         final ExecutionDataStore executionData = new ExecutionDataStore();
         final SessionInfoStore sessionInfos = new SessionInfoStore();
         myData.collect(executionData, sessionInfos, false);
         this.runtime.shutdown();
 
-        // Together with the original class definition we can calculate coverage
-        // information:
+        /**
+         * Together with the original class definitions we can calculate 
+         * coverage information
+         */
         final CoverageBuilder coverageBuilder = new CoverageBuilder();
         final Analyzer analyzer = new Analyzer(executionData, coverageBuilder);
 
@@ -276,15 +282,18 @@ public class JUnitTestManager {
                     replace(".java", ".class")), this.classNames.get(j));
             }
 
-            // Run the structure analyzer on a single class folder to build up
-            // the coverage model. The process would be similar if your classes
-            // were in a jar file. Typically you would create a bundle for each
-            // class folder and each jar you want in your report. If you have
-            // more than one bundle you will need to add a grouping node to your
-            // report
+            /**
+             * Run the structure analyzer on a single class folder to build up
+             * the coverage model. The process would be similar if the classes
+             * were in a jar file; typically you would create a bundle for each
+             * class folder and each jar you want in your report. If you have
+             * more than one bundle you will need to add a grouping node to your
+             * report
+             */
             final IBundleCoverage bundleCoverage = coverageBuilder.getBundle(
                 this.files.get(0).getParentFile().getName());
-            ReportGenerator rg = new ReportGenerator("/tmp/", coverageBuilder); 
+            ReportGenerator rg = new ReportGenerator(this.coverageOutdir, 
+                coverageBuilder); 
             rg.createReport(bundleCoverage, executionData, 
                 sessionInfos, this.files.get(0).getParentFile());
             lineColors = rg.getAllLineColors();
@@ -295,7 +304,7 @@ public class JUnitTestManager {
             Utilities.show(stackTrace.toString());
         }
 
-        // Reset the runtime
+        /* Reset the runtime */
         this.runtime = null;
       }
     }

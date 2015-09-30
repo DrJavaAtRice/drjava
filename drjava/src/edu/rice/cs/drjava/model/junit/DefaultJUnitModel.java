@@ -87,12 +87,14 @@ import org.objectweb.asm.*;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 import edu.rice.cs.drjava.model.compiler.LanguageLevelStackTraceMapper;
 
+import edu.rice.cs.drjava.model.coverage.CoverageMetadata;
+
 /** Manages unit testing via JUnit.
   * @version $Id$
   */
 public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
-  
-  private boolean coverage = false;
+
+  private CoverageMetadata coverageMetadata = null;
 
   /** log for use in debugging */
   private static Log _log = new Log("DefaultJUnitModel.txt", false);
@@ -145,14 +147,20 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   
   //-------------------------- Field Setters --------------------------------//
   
-  public void setCoverage(boolean c) { this.coverage = c; }
+  public void setCoverage(boolean coverage, String outdirPath) { 
+      this.coverageMetadata = new CoverageMetadata(coverage, outdirPath); 
+  }
+
   public void setForceTestSuffix(boolean b) { _forceTestSuffix = b; }
   
   //------------------------ Simple Predicates ------------------------------//
   
   public boolean isTestInProgress() { return _testInProgress;  }
   public JUnitResultTuple getResult() { return this.result; }
-  public boolean getCoverage() { return this.coverage; }
+
+  public boolean getCoverage() { 
+      return (this.coverageMetadata != null) ? this.coverageMetadata.getFlag() : false; 
+  }
   
   //------------------------Listener Management -----------------------------//
   
@@ -498,7 +506,8 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
         synchronized(_compilerModel.getCompilerLock()) {
           // synchronized over _compilerModel to ensure that compilation and junit testing are mutually exclusive.
           /** Set up junit test suite on slave JVM; get TestCase classes forming that suite */
-          List<String> tests = _jvm.findTestClasses(classNames, files, coverage).unwrap(null);
+          List<String> tests = _jvm.findTestClasses(classNames, files, 
+              coverageMetadata).unwrap(null);
 
           if (tests == null || tests.isEmpty()) {
             nonTestCase(allTests, false);

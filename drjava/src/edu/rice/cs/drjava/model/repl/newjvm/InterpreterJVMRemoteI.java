@@ -43,6 +43,7 @@ import java.io.File;
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.util.newjvm.*;
 import edu.rice.cs.drjava.model.junit.JUnitResultTuple;
+import edu.rice.cs.drjava.model.coverage.CoverageMetadata;
 
 /** This interface specifies the methods that the interpreter JVM exposes for the MainJVM to call.
   * @version $Id$
@@ -50,7 +51,7 @@ import edu.rice.cs.drjava.model.junit.JUnitResultTuple;
 public interface InterpreterJVMRemoteI extends SlaveRemote {
   
   public List<String> findTestClasses(List<String> classNames, 
-    List<File> files, boolean doCoverage) throws RemoteException;
+    List<File> files, CoverageMetadata coverageMetadata) throws RemoteException;
   
   public JUnitResultTuple runTestSuite() throws RemoteException;
   

@@ -64,6 +64,7 @@ import edu.rice.cs.drjava.model.junit.JUnitModelCallback;
 import edu.rice.cs.drjava.model.junit.JUnitTestManager;
 import edu.rice.cs.drjava.model.junit.JUnitError;
 import edu.rice.cs.drjava.model.junit.JUnitResultTuple;
+import edu.rice.cs.drjava.model.coverage.CoverageMetadata;
 import edu.rice.cs.drjava.model.repl.InteractionsPaneOptions;
 
 import edu.rice.cs.dynamicjava.Options;
@@ -522,8 +523,8 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     * @return the class names that are actually test cases
     */
   public List<String> findTestClasses(List<String> classNames, 
-    List<File> files, boolean doCoverage) throws RemoteException {
-    return _junitTestManager.findTestClasses(classNames, files, doCoverage);
+    List<File> files, CoverageMetadata coverageMetadata) throws RemoteException {
+    return _junitTestManager.findTestClasses(classNames, files, coverageMetadata);
   }
   
   /** Runs JUnit test suite already cached in the Interpreter JVM.  Unsynchronized because it contains a remote call

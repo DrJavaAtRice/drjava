@@ -51,6 +51,7 @@ import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.junit.JUnitError;
 import edu.rice.cs.drjava.model.junit.JUnitModelCallback;
 import edu.rice.cs.drjava.model.junit.JUnitResultTuple;
+import edu.rice.cs.drjava.model.coverage.CoverageMetadata;
 import edu.rice.cs.drjava.model.debug.DebugModelCallback;
 import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
@@ -460,11 +461,18 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     * @return the class names that are actually test cases
     */
   public Option<List<String>> findTestClasses(List<String> classNames, 
-    List<File> files, boolean doCoverage) {
+    List<File> files, CoverageMetadata coverageMetadata) {
     InterpreterJVMRemoteI remote = _state.value().interpreter(false);
-    if (remote == null) { return Option.none(); }
-    try { return Option.some(remote.findTestClasses(classNames, files, doCoverage)); }
-    catch (RemoteException e) { _handleRemoteException(e); return Option.none(); }
+    if (remote == null) { 
+        return Option.none(); 
+    }
+
+    try { 
+        return Option.some(remote.findTestClasses(classNames, files, coverageMetadata)); 
+    } catch (RemoteException e) { 
+      _handleRemoteException(e); 
+      return Option.none(); 
+    }
   }
   
   /**
