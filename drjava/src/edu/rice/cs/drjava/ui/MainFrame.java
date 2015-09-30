@@ -138,15 +138,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private static final int CONSOLE_TAB = 1;
   private static final String ICON_PATH = "/edu/rice/cs/drjava/ui/icons/";
   
-  /* Debugger deactivated in DrScala */
-//  private static final String DEBUGGER_OUT_OF_SYNC =
-//    " Current document is out of sync with the debugger and should be recompiled!";
-//  
-//  /** Number of milliseconds to wait before displaying "Stepping..." message after a step is requested in 
-//    * the debugger.
-//    */
-//  private static final int DEBUG_STEP_TIMER_VALUE = 3000;
-  
   // ------ Field Declarations -------
   
   /** The model which controls all logic in DrScala. */
@@ -3269,27 +3260,20 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _editMenu = _setUpEditMenu(mask, true);
       _toolsMenu = _setUpToolsMenu(mask, true);
       _projectMenu = _setUpProjectMenu(mask, true);
-
-      
-      /* Debugger is deactivated in DrScala */
-//      _debugMenu = null;
-//      if (_showDebugger) _debugMenu = _setUpDebugMenu(mask, true);
-      
       _helpMenu = _setUpHelpMenu(mask, true);
       
       // initialize menu bar and actions
       _setUpActions();
       /* Omit _debugMenu until debugging actions are implemented correctly */
-      _setUpMenuBar(_menuBar,
-                    _fileMenu, _editMenu, _toolsMenu, _projectMenu, /* _debugMenu, */ _helpMenu);
+      _setUpMenuBar(_menuBar, _fileMenu, _editMenu, _toolsMenu, _projectMenu, _helpMenu);
       setJMenuBar(_menuBar);
       
       //    _setUpDocumentSelector();
       _setUpContextMenus();
       
       // Create toolbar and buttons
-      _undoButton = _createManualToolbarButton(_undoAction);
-      _redoButton = _createManualToolbarButton(_redoAction);
+      _undoButton = _createManualToolBarButton(_undoAction);
+      _redoButton = _createManualToolBarButton(_redoAction);
       
       // initialize _toolBar
       _setUpToolBar();
@@ -3328,33 +3312,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       
       // set up the menu bars on other frames
       _tabbedPanesFrame.setUpMenuBar();
-      
-      /* Debugger deactivated in DrScala */
-//      // Create detachable debug frame
-//      if (_debugPanel != null) { // using debugger
-//        _debugFrame = new DetachedFrame("Debugger", MainFrame.this, new Runnable1<DetachedFrame>() {
-//          public void run(DetachedFrame frame) {
-//            frame.getContentPane().add(_debugPanel);
-//          }
-//        }, new Runnable1<DetachedFrame>() {
-//          public void run(DetachedFrame frame) {
-//            _debugSplitPane.setTopComponent(_docSplitPane);
-//            _debugSplitPane.setBottomComponent(_debugPanel);
-//            _mainSplit.setTopComponent(_debugSplitPane);
-//          }
-//        });
-//        _debugFrame.addWindowListener(new WindowAdapter() {
-//          public void windowClosing(WindowEvent we) {
-//            if (_debugFrame == null) return; // debugger not used
-//            _detachDebugFrameMenuItem.setSelected(false);
-//            DrScala.getConfig().setSetting(DETACH_DEBUGGER, false);
-//          }
-//        });
-//        _debugFrame.setUpMenuBar();
-//      }
-//      else { // not using debugger
-//        _debugFrame = null;
-//      }
       
       // Set frame icon
       setIconImage(MainFrame.getIcon("drscala64.png").getImage());
@@ -3435,9 +3392,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       config.addOptionListener(FONT_LINE_NUMBERS, new LineNumbersFontOptionListener());
       config.addOptionListener(FONT_DOCLIST, new DoclistFontOptionListener());
       config.addOptionListener(FONT_TOOLBAR, new ToolbarFontOptionListener());
-      config.addOptionListener(TOOLBAR_ICONS_ENABLED, new ToolbarOptionListener());
-      config.addOptionListener(TOOLBAR_TEXT_ENABLED, new ToolbarOptionListener());
-      config.addOptionListener(TOOLBAR_ENABLED, new ToolbarOptionListener());
+      config.addOptionListener(TOOLBAR_ICONS_ENABLED, new ToolBarOptionListener());
+      config.addOptionListener(TOOLBAR_TEXT_ENABLED, new ToolBarOptionListener());
+      config.addOptionListener(TOOLBAR_ENABLED, new ToolBarOptionListener());
       config.addOptionListener(LINEENUM_ENABLED, new LineEnumOptionListener());
       config.addOptionListener(DEFINITIONS_LINE_NUMBER_COLOR, new LineEnumColorOptionListener());
       config.addOptionListener(DEFINITIONS_LINE_NUMBER_BACKGROUND_COLOR, new LineEnumColorOptionListener());
@@ -6267,10 +6224,24 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** This allows us to intercept key events when compiling testing and turn them off when the glass pane is up. */
   static class MenuBar extends JMenuBar {
     private final MainFrame _mf;
-    public MenuBar(MainFrame mf) { _mf = mf; }
+    public MenuBar(MainFrame mf) { 
+      _mf = mf;}
     public boolean processKeyBinding(KeyStroke ks, KeyEvent e, int condition, boolean pressed) {
       if (_mf.getAllowKeyEvents()) return super.processKeyBinding(ks, e, condition, pressed);
       return false;
+    }
+  }
+    
+  /** Update the menubar's buttons, following any change to FONT_TOOLBAR (name, style, text) */
+  private void _updateMenuBarButtons() {
+    Component[] buttons = _menuBar.getComponents();
+    Font toolbarFont = DrScala.getConfig().getSetting(FONT_TOOLBAR);
+    
+    for (int i = 0; i < buttons.length; i++) {
+      if (buttons[i] instanceof JButton) {  
+        JButton b = (JButton) buttons[i];
+        b.setFont(toolbarFont);
+      }
     }
   }
   
@@ -6293,27 +6264,19 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     */
   void _setUpMenuBar(JMenuBar menuBar) {
     int mask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
-    _setUpMenuBar(menuBar,
-                  _setUpFileMenu(mask, false), _setUpEditMenu(mask, false), _setUpToolsMenu(mask, false),
-                  _setUpProjectMenu(mask, false), /* _showDebugger ? _setUpDebugMenu(mask, false) : null, */
-                  _setUpHelpMenu(mask, false));
+    _setUpMenuBar(menuBar, _setUpFileMenu(mask, false), _setUpEditMenu(mask, false), _setUpToolsMenu(mask, false),
+                  _setUpProjectMenu(mask, false), _setUpHelpMenu(mask, false));
   }
 
   /* Defining a method that takes an argument for each menu is very rigid! */
-  void _setUpMenuBar(JMenuBar menuBar,
-                     JMenu fileMenu,
-                     JMenu editMenu,
-                     JMenu toolsMenu,
-                     JMenu projectMenu,
-                  /*   JMenu debugMenu, */   
+  void _setUpMenuBar(JMenuBar menuBar, JMenu fileMenu, JMenu editMenu, JMenu toolsMenu, JMenu projectMenu, 
                      JMenu helpMenu) {
     menuBar.add(fileMenu);
     menuBar.add(editMenu);
     menuBar.add(toolsMenu);
     menuBar.add(projectMenu);
-    /* Omit until debugger is specified and implemented correctly. */
-//    if (_showDebugger && (debugMenu!=null)) menuBar.add(debugMenu);
     menuBar.add(helpMenu);
+    
     // Plastic-specific style hints
     if(Utilities.isPlasticLaf()) {
       menuBar.putClientProperty(com.jgoodies.looks.Options.HEADER_STYLE_KEY, com.jgoodies.looks.HeaderStyle.BOTH);
@@ -6724,133 +6687,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     return projectMenu;
   }
   
-  /* Debugger deactivated in DrScala */
-//  /** Creates and returns a debug menu.
-//    * @param mask the keystroke modifier to be used
-//    * @param updateKeyboardManager true if the keyboard manager should be updated; pass true only for MainFrame!
-//    */
-//  private JMenu _setUpDebugMenu(int mask, boolean updateKeyboardManager) {
-//    JMenu debugMenu = new JMenu("Debugger");
-//    PlatformFactory.ONLY.setMnemonic(debugMenu,KeyEvent.VK_D);
-//    // Enable debugging item
-//    JMenuItem tempDebuggerEnabledMenuItem = MainFrameStatics.newCheckBoxMenuItem(_toggleDebuggerAction);
-//    tempDebuggerEnabledMenuItem.setSelected(false);
-//    _setMenuShortcut(tempDebuggerEnabledMenuItem, _toggleDebuggerAction, KEY_DEBUG_MODE_TOGGLE, updateKeyboardManager);
-//    debugMenu.add(tempDebuggerEnabledMenuItem);
-//    if (_debuggerEnabledMenuItem == null) {
-//      // assign the first time
-//      _debuggerEnabledMenuItem = tempDebuggerEnabledMenuItem;
-//    }
-//    else {
-//      // otherwise link this item to the first item
-//      final WeakReference<JMenuItem> weakRef = new WeakReference<JMenuItem>(tempDebuggerEnabledMenuItem);
-//      _debuggerEnabledMenuItem.addItemListener(new ItemListener() {
-//        public void itemStateChanged(ItemEvent e) {
-//          JMenuItem temp = weakRef.get();
-//          if (temp!=null) {
-//            temp.setSelected(_debuggerEnabledMenuItem.isSelected());
-//          }
-//          else {
-//            // weak reference cleared, remove this listener
-//            _debuggerEnabledMenuItem.removeItemListener(this);
-//          }
-//        }
-//      });
-//    }
-//    
-//    debugMenu.addSeparator();
-//    
-//    _addMenuItem(debugMenu, _toggleBreakpointAction, KEY_DEBUG_BREAKPOINT_TOGGLE, updateKeyboardManager);
-//    //_printBreakpointsMenuItem = debugMenu.add(_printBreakpointsAction);
-//    //_clearAllBreakpointsMenuItem =
-//    _addMenuItem(debugMenu, _clearAllBreakpointsAction, KEY_DEBUG_CLEAR_ALL_BREAKPOINTS, updateKeyboardManager);
-//    _addMenuItem(debugMenu, _breakpointsPanelAction, KEY_DEBUG_BREAKPOINT_PANEL, updateKeyboardManager);
-//    debugMenu.addSeparator();
-//    
-//    //_addMenuItem(debugMenu, _suspendDebugAction, KEY_DEBUG_SUSPEND, updateKeyboardManager);
-//    _addMenuItem(debugMenu, _resumeDebugAction, KEY_DEBUG_RESUME, updateKeyboardManager);
-//    _addMenuItem(debugMenu, _stepIntoDebugAction, KEY_DEBUG_STEP_INTO, updateKeyboardManager);
-//    _addMenuItem(debugMenu, _stepOverDebugAction, KEY_DEBUG_STEP_OVER, updateKeyboardManager);
-//    _addMenuItem(debugMenu, _stepOutDebugAction, KEY_DEBUG_STEP_OUT, updateKeyboardManager);
-//    
-//    JMenuItem tempAutomaticTraceMenuItem = MainFrameStatics.newCheckBoxMenuItem(_automaticTraceDebugAction);
-//    _setMenuShortcut(tempAutomaticTraceMenuItem, _automaticTraceDebugAction, KEY_DEBUG_AUTOMATIC_TRACE,
-//                     updateKeyboardManager);
-//    debugMenu.add(tempAutomaticTraceMenuItem);
-//    if (_automaticTraceMenuItem==null) {
-//      // assign the first time
-//      _automaticTraceMenuItem = tempAutomaticTraceMenuItem;
-//    }
-//    else {
-//      // otherwise link this item to the first item
-//      final WeakReference<JMenuItem> weakRef = new WeakReference<JMenuItem>(tempAutomaticTraceMenuItem);
-//      _automaticTraceMenuItem.addItemListener(new ItemListener() {
-//        public void itemStateChanged(ItemEvent e) {
-//          JMenuItem temp = weakRef.get();
-//          if (temp!=null) {
-//            temp.setSelected(_automaticTraceMenuItem.isSelected());
-//          }
-//          else {
-//            // weak reference cleared, remove this listener
-//            _automaticTraceMenuItem.removeItemListener(this);
-//          }
-//        }
-//      });
-//    }
-//    
-//    debugMenu.addSeparator();
-//    JMenuItem tempDetachDebugFrameMenuItem = MainFrameStatics.newCheckBoxMenuItem(_detachDebugFrameAction);
-//    tempDetachDebugFrameMenuItem.setSelected(DrScala.getConfig().getSetting(DETACH_DEBUGGER));
-//    _setMenuShortcut(tempDetachDebugFrameMenuItem, _detachDebugFrameAction, KEY_DETACH_DEBUGGER, updateKeyboardManager);
-//    debugMenu.add(tempDetachDebugFrameMenuItem);
-//    if (_detachDebugFrameMenuItem==null) {
-//      // assign the first time
-//      _detachDebugFrameMenuItem = tempDetachDebugFrameMenuItem;
-//    }
-//    else {
-//      // otherwise link this item to the first item
-//      final WeakReference<JMenuItem> weakRef = new WeakReference<JMenuItem>(tempDetachDebugFrameMenuItem);
-//      _detachDebugFrameMenuItem.addItemListener(new ItemListener() {
-//        public void itemStateChanged(ItemEvent e) {
-//          JMenuItem temp = weakRef.get();
-//          if (temp!=null) {
-//            temp.setSelected(_detachDebugFrameMenuItem.isSelected());
-//          }
-//          else {
-//            // weak reference cleared, remove this listener
-//            _detachDebugFrameMenuItem.removeItemListener(this);
-//          }
-//        }
-//      });
-//    }
-//    
-//    // Start off disabled
-//    _setDebugMenuItemsEnabled(false);
-//    
-//    // Add the menu to the menu bar
-//    return debugMenu;
-//  }
-  
-  /* Debugger is deactivated in DrScala */
-//  /** Called every time the debug mode checkbox is toggled. The resume and step
-//    * functions should always be disabled.
-//    */
-//  private void _setDebugMenuItemsEnabled(boolean isEnabled) {
-//    _debuggerEnabledMenuItem.setSelected(isEnabled);
-//    _guiAvailabilityNotifier.ensureUnavailable(GUIAvailabilityListener.ComponentType.DEBUGGER_SUSPENDED);
-//    if (_showDebugger) { _debugPanel.setAutomaticTraceButtonText(); }
-//  }
-//  
-//  /** Enables and disables the appropriate menu items in the debug menu depending upon the state of the current thread.
-//    * @param isSuspended is true when the current thread has just been suspended
-//    *        false if the current thread has just been resumed
-//    */
-//  private void _setThreadDependentDebugMenuItems(boolean isSuspended) {
-//    _guiAvailabilityNotifier.ensureAvailabilityIs(GUIAvailabilityListener.ComponentType.DEBUGGER_SUSPENDED,
-//                                                  isSuspended);
-//    if (_showDebugger) { _debugPanel.setAutomaticTraceButtonText(); }
-//  }
-  
   /** Creates and returns a help menu.
     * @param mask the keystroke modifier to be used
     * @param updateKeyboardManager true if the keyboard manager should be updated; pass true only for MainFrame!
@@ -6871,9 +6707,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
 //    _addMenuItem(helpMenu, _exportProjectInOldFormatAction, KEY_EXPORT_OLD, updateKeyboardManager);
     return helpMenu;
   }
-  
+
   /** Creates a toolbar button for undo and redo, which behave differently. */
-  JButton _createManualToolbarButton(Action a) {
+  JButton _createManualToolBarButton(Action a) {
     final JButton ret;
     Font buttonFont = DrScala.getConfig().getSetting(FONT_TOOLBAR);
     
@@ -6905,7 +6741,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     return ret;
   }
   
-  /** Sets up all buttons for the toolbar except for undo and redo, which use _createManualToolbarButton. */
+  /** Sets up all buttons for the toolbar except for undo and redo, which use _createManualToolBarButton. */
   public JButton _createToolbarButton(Action a) {
     boolean useText = DrScala.getConfig().getSetting(TOOLBAR_TEXT_ENABLED).booleanValue();
     boolean useIcons = DrScala.getConfig().getSetting(TOOLBAR_ICONS_ENABLED).booleanValue();
@@ -7037,7 +6873,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Update the toolbar's buttons, following any change to TOOLBAR_ICONS_ENABLED, TOOLBAR_TEXT_ENABLED, or 
     * FONT_TOOLBAR (name, style, text)
     */
-  private void _updateToolbarButtons() {
+  private void _updateToolBarButtons() {
     _updateToolBarVisible();
     Component[] buttons = _toolBar.getComponents();
     
@@ -9898,7 +9734,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** The OptionListener for FONT_TOOLBAR */
   private class ToolbarFontOptionListener implements OptionListener<Font> {
-    public void optionChanged(OptionEvent<Font> oce) { _updateToolbarButtons(); }
+    public void optionChanged(OptionEvent<Font> oce) { 
+      _updateToolBarButtons();
+      _updateMenuBarButtons();  // Hack to support changing the MenuBar font    
+    }
   }
   
   /** The OptionListener for DEFINITIONS_NORMAL_COLOR */
@@ -9912,8 +9751,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   /** The OptionListener for TOOLBAR options */
-  private class ToolbarOptionListener implements OptionListener<Boolean> {
-    public void optionChanged(OptionEvent<Boolean> oce) { _updateToolbarButtons(); }
+  private class ToolBarOptionListener implements OptionListener<Boolean> {
+    public void optionChanged(OptionEvent<Boolean> oce) { 
+      _updateToolBarButtons(); 
+      _updateMenuBarButtons();  // Hack to support changing the MenuBar font  
+    }
   }
   
   /** The OptionListener for LINEENUM_ENABLED. */

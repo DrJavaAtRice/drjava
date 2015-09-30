@@ -71,9 +71,6 @@ public class ConfigDescriptions {
     add(LOOK_AND_FEEL, "Look and Feel", "Changes the general appearance of DrScala.");
     add(PLASTIC_THEMES, "Plastic Theme", "Pick the theme to be used by the Plastic family of Look and Feels");
     
-    //ToolbarOptionComponent is a degenerate option component
-    // addOptionComponent(panel, new ToolbarOptionComponent("Toolbar Buttons"
-    //                                               "How to display the toolbar buttons."));
     add(LINEENUM_ENABLED, "Show All Line Numbers",
         "Whether to show line numbers on the left side of the Definitions Pane.");
     
