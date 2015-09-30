@@ -314,7 +314,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** For saving files. We have a persistent dialog to keep track of the last directory from which we saved. */
   private volatile JFileChooser _saveChooser;
-  
+
   /** Filter for drjava project files (.drjava and .xml and .pjt) */
   private final javax.swing.filechooser.FileFilter _projectFilter = new javax.swing.filechooser.FileFilter() {
     public boolean accept(File f) {
@@ -5841,18 +5841,18 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Tests all open documents. */
   // @rebecca TODO: keep this private
-  public JUnitResultTuple _junitAll() {
+  public void _junitAll() {
+
     updateStatusField("Running All Open Unit Tests");
     hourglassOn();  // turned off in junitStarted/nonTestCase/_junitInterrupted
     _guiAvailabilityNotifier.junitStarted(); // JUNIT and COMPILER
+
     try { 
-        return _model.getJUnitModel().junitAll(); 
+        _model.getJUnitModel().junitAll(); 
     } catch(UnexpectedException e) { 
         _junitInterrupted(e); 
-        return new JUnitResultTuple(false, null);
     } catch(Exception e) { 
         _junitInterrupted(new UnexpectedException(e)); 
-        return new JUnitResultTuple(false, null);
     }
   }
   
@@ -9390,7 +9390,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         public void run() { 
           _junitPanel.reset();
           if (_model.getJUnitModel().getCoverage()) {
-            _coverageFrame.displayReport(); 
+            _coverageFrame.displayReport(_model.getJUnitModel().getLastResult());
           }
         }
       });

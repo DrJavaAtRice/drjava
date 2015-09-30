@@ -531,7 +531,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     * and does not involve mutable local state.
     * @return false if no test suite is cached; true otherwise
     */
-  public JUnitResultTuple runTestSuite() throws RemoteException { 
+  public boolean runTestSuite() throws RemoteException { 
       return _junitTestManager.runTestSuite();
   }
   

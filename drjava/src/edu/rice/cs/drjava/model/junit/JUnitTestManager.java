@@ -110,13 +110,19 @@ public class JUnitTestManager {
   private RuntimeData myData = null;
   private List<String> classNames = null;
   private List<File> files = null;
+  private JUnitResultTuple lastResult = new JUnitResultTuple(false, null);
 
   /** Standard constructor */
   public JUnitTestManager(JUnitModelCallback jmc, Lambda<ClassLoader, ClassLoader> loaderFactory) {
     _jmc = jmc;
     _loaderFactory = loaderFactory;
   }
-  
+
+  /** @return result of the last JUnit run */  
+  public JUnitResultTuple getLastResult() {
+    return this.lastResult;
+  }
+
   /** Find the test classes among the given classNames and accumulate them in
     * TestSuite for junit.  Returns null if a test suite is already pending.
     * @param classNames the class names that are test class candidates
@@ -157,20 +163,17 @@ public class JUnitTestManager {
             } catch (Exception e) {
                 StringWriter stackTrace = new StringWriter();
                 e.printStackTrace(new PrintWriter(stackTrace));
-                //Utilities.show("INSTRUMENTATION EXCEPTION: " + stackTrace.toString());
-
+                //Utilities.show("Exception during instrumentation: " + stackTrace.toString());
             }
         }
 
         loader = new MemoryClassLoader();
         for (int i = 0; i < classNames.size(); i++) {
-            //Utilities.show("adding class: " + classNames.get(i));
             ((MemoryClassLoader)loader).addDefinition(classNames.get(i), instrumenteds.get(i));
         }
 
         try {
             this.runtime.startup(myData);
-            //Utilities.show("sessionID: " + myData.getSessionId());
         } catch (Exception e) {
             throw new UnexpectedException(e);
         }
@@ -217,23 +220,23 @@ public class JUnitTestManager {
     * @return false if no test suite (even an empty one) has been set up
     */
   @SuppressWarnings("unchecked")
-  public /* synchronized */ JUnitResultTuple runTestSuite() {
+  public /* synchronized */ boolean runTestSuite() {
 
     _log.log("runTestSuite() called");
     
     if (_testClassNames == null || _testClassNames.isEmpty()) {
-        return new JUnitResultTuple(false, null);
+        this.lastResult = new JUnitResultTuple(false, null);
+        return false;
     }
     Map<String, List<String>> lineColors = null;
 
-//    Utilities.show("runTestSuite() in SlaveJVM called");
+    //Utilities.show("runTestSuite() in SlaveJVM called");
     
     try {
-//      System.err.println("Calling _testRunner.runSuite(...)");
+      //System.err.println("Calling _testRunner.runSuite(...)");
       TestResult result = _testRunner.runSuite(_suite);
       
       JUnitError[] errors = new JUnitError[result.errorCount() + result.failureCount()];
-      
       Enumeration<TestFailure> failures = result.failures();
       Enumeration<TestFailure> errEnum = result.errors();
       
@@ -241,24 +244,18 @@ public class JUnitTestManager {
 
       while (errEnum.hasMoreElements()) {
         TestFailure tErr = errEnum.nextElement();
-//        Utilities.show("Processing error " + tErr);
         errors[i] = _makeJUnitError(tErr, _testClassNames, true, _testFiles);
         i++;
       }
-//      Utilities.show("Finished processing errors");
+
       while (failures.hasMoreElements()) {
         TestFailure tFail = failures.nextElement();
-//        Utilities.show("Processing failure " + tFail);
         errors[i] = _makeJUnitError(tFail, _testClassNames, false, _testFiles);
         i++;
       }
-//      new ScrollableDialog(null, "Slave JVM: testSuite ended with errors", "", Arrays.toString(errors)).show();
-//      Utilities.show("Finished processing failures");
-//      Utilities.show("errors = " + Arrays.toString(errors));
        
       _reset();
       _jmc.testSuiteEnded(errors);
-
 
     if (this.runtime != null) { /* doCoverage was true */
 
@@ -297,11 +294,13 @@ public class JUnitTestManager {
             rg.createReport(bundleCoverage, executionData, 
                 sessionInfos, this.files.get(0).getParentFile());
             lineColors = rg.getAllLineColors();
+            this.lastResult = new JUnitResultTuple(true, lineColors);
 
         } catch (Exception e) {
             StringWriter stackTrace = new StringWriter();
             e.printStackTrace(new PrintWriter(stackTrace));
-            Utilities.show(stackTrace.toString());
+            //Utilities.show(stackTrace.toString());
+            this.lastResult = new JUnitResultTuple(false, null);
         }
 
         /* Reset the runtime */
@@ -310,16 +309,17 @@ public class JUnitTestManager {
     }
 
     catch (Exception e) { 
+      this.lastResult = new JUnitResultTuple(false, null);
       JUnitError[] errors = new JUnitError[1];      
       errors[0] = new JUnitError(null, -1, -1, e.getMessage(), false, "", "", 
         e.toString(), e.getStackTrace());
       _reset();
       _jmc.testSuiteEnded(errors);
-//      new ScrollableDialog(null, "Slave JVM: testSuite ended with errors", "", Arrays.toString(errors)).show();
+      //new ScrollableDialog(null, "Slave JVM: testSuite ended with errors", "", Arrays.toString(errors)).show();
     }
-    _log.log("Exiting runTestSuite()");
 
-    return new JUnitResultTuple(true, lineColors);
+    _log.log("Exiting runTestSuite()");
+    return this.lastResult.getRetval();
   }
   
   private void _reset() {

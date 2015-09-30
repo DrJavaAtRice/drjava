@@ -57,7 +57,6 @@ import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.model.compiler.CompilerListener;
 import edu.rice.cs.drjava.model.compiler.DummyCompilerListener;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
-import edu.rice.cs.drjava.model.junit.JUnitResultTuple;
 
 import edu.rice.cs.drjava.config.Option;
 import edu.rice.cs.drjava.config.OptionParser;
@@ -80,6 +79,8 @@ import edu.rice.cs.util.swing.FileChooser;
 import edu.rice.cs.util.swing.HighlightManager.HighlightInfo;
 import edu.rice.cs.util.swing.SwingFrame;
 import edu.rice.cs.util.swing.Utilities;
+
+import edu.rice.cs.drjava.model.junit.JUnitResultTuple;
 
 import javax.swing.filechooser.FileFilter;
 
@@ -163,16 +164,22 @@ public class CoverageFrame extends SwingFrame {
     /**
      * Displays the report in the browser, if requested by the user. 
      */
-    public void displayReport() {
+    public void displayReport(JUnitResultTuple result) {
 
-        if (_openHTMLBrowser.isSelected()) {
-            String indexURL = _outputDirSelector.getFileFromField().getPath()
+        /* Only display the result if testing was successful */
+        //if (result.getRetval()) {
+            if (_openHTMLBrowser.isSelected()) {
+                String indexURL = _outputDirSelector.getFileFromField().getPath()
                      + "/index.html";
-            this.displayReportUsingDefaultBrowser(indexURL);
-        }
+                this.displayReportUsingDefaultBrowser(indexURL);
+            }
 
-        //this.highlight(_model.getJUnitModel().getResult().getLineColors(), false);
-        this._model.getJUnitModel().setCoverage(false, "");
+            //this.highlight(_mainFrame.getLastJUnitResult().getLineColors(), false);
+            this._model.getJUnitModel().setCoverage(false, "");
+        //} 
+        //else {
+        //    /* If testing failed, display an error message. */
+        //}
     }
 
     /** 

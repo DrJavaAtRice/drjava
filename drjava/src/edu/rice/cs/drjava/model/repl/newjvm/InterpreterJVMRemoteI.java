@@ -53,7 +53,7 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
   public List<String> findTestClasses(List<String> classNames, 
     List<File> files, CoverageMetadata coverageMetadata) throws RemoteException;
   
-  public JUnitResultTuple runTestSuite() throws RemoteException;
+  public boolean runTestSuite() throws RemoteException;
   
   /** Check that all access of class members is permitted by accessibility controls. */
   public void setEnforceAllAccess(boolean enforce) throws RemoteException;

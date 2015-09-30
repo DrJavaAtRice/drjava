@@ -94,7 +94,7 @@ import edu.rice.cs.drjava.model.coverage.CoverageMetadata;
   */
 public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
 
-  private CoverageMetadata coverageMetadata = null;
+  private CoverageMetadata coverageMetadata = new CoverageMetadata(false, "");
 
   /** log for use in debugging */
   private static Log _log = new Log("DefaultJUnitModel.txt", false);
@@ -129,8 +129,6 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   /** The document used to display JUnit test results.  Used only for testing. */
   private final SwingDocument _junitDoc = new SwingDocument();
   
-  private volatile JUnitResultTuple result = new JUnitResultTuple(false, null);
-
   /** Main constructor.
     * @param jvm RMI interface to a secondary JVM for running tests
     * @param compilerModel the CompilerModel, used only as a lock to prevent simultaneous test and compile
@@ -156,7 +154,11 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   //------------------------ Simple Predicates ------------------------------//
   
   public boolean isTestInProgress() { return _testInProgress;  }
-  public JUnitResultTuple getResult() { return this.result; }
+  public JUnitResultTuple getLastResult() { 
+    return new JUnitResultTuple(false, null);
+    // @rebecca TODO: why does this result in not finding any test classes?
+    // return this._jvm.getLastJUnitResult(); 
+  }
 
   public boolean getCoverage() { 
       return (this.coverageMetadata != null) ? this.coverageMetadata.getFlag() : false; 
@@ -186,19 +188,19 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   /** Creates a JUnit test suite over all currently open documents and runs it.  If the class file 
     * associated with a file is not a test case, it is ignored.  
     */
-  public JUnitResultTuple junitAll() { return junitDocs(_model.getOpenDefinitionsDocuments()); }
+  public void junitAll() { junitDocs(_model.getOpenDefinitionsDocuments()); }
   
   /** Creates a JUnit test suite over all currently open documents and runs it.  If a class file associated with a 
     * source file is not a test case, it will be ignored.  Synchronized against the compiler model to prevent 
     * testing and compiling at the same time, which would create invalid results.
     */
-  public JUnitResultTuple junitProject() {
+  public void junitProject() {
     LinkedList<OpenDefinitionsDocument> lod = new LinkedList<OpenDefinitionsDocument>();
     
     for (OpenDefinitionsDocument doc : _model.getOpenDefinitionsDocuments()) { 
       if (doc.inProjectPath()) lod.add(doc);
     }
-    return junitOpenDefDocs(lod, true);
+    junitOpenDefDocs(lod, true);
   }
   
 //  /** Forwards the classnames and files to the test manager to test all of them; does not notify 
@@ -235,10 +237,10 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
 //    }
 //  }
   
-  public JUnitResultTuple junitDocs(List<OpenDefinitionsDocument> lod) { return junitOpenDefDocs(lod, true); }
+  public void junitDocs(List<OpenDefinitionsDocument> lod) { junitOpenDefDocs(lod, true); }
   
   /** Runs JUnit on the current document.  Forces the user to compile all open documents before proceeding. */
-  public JUnitResultTuple junit(OpenDefinitionsDocument doc) throws ClassNotFoundException, IOException {
+  public void junit(OpenDefinitionsDocument doc) throws ClassNotFoundException, IOException {
     debug.logStart("junit(doc)");
 //    new ScrollableDialog(null, "junit(" + doc + ") called in DefaultJunitModel", "", "").show();
     File testFile;
@@ -247,25 +249,25 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
       if (testFile == null) {  // document is untitiled: abort unit testing and return
         nonTestCase(false, false);
         debug.logEnd("junit(doc): no corresponding file");
-        return new JUnitResultTuple(false, null);
+        return;
       }
     } 
     catch(FileMovedException fme) { /* do nothing */ }
     
     LinkedList<OpenDefinitionsDocument> lod = new LinkedList<OpenDefinitionsDocument>();
     lod.add(doc);
-    return junitOpenDefDocs(lod, false);
+    junitOpenDefDocs(lod, false);
   }
   
   /** Ensures that all documents have been compiled since their last modification and then delegates the actual testing
     * to _rawJUnitOpenTestDocs. */
-  private JUnitResultTuple junitOpenDefDocs(final List<OpenDefinitionsDocument> lod, final boolean allTests) {
+  private void junitOpenDefDocs(final List<OpenDefinitionsDocument> lod, final boolean allTests) {
     // If a test is running, don't start another one.
 
 //    System.err.println("junitOpenDefDocs(" + lod + ", " + allTests + ", " + _testInProgress + ")");
     
     // Check_testInProgress flag
-    if (_testInProgress) return new JUnitResultTuple(false, null);
+    if (_testInProgress) return;
     
     // Reset the JUnitErrorModel, fixes bug #907211 "Test Failures Not Cleared Properly".
     _junitErrorModel = new JUnitErrorModel(new JUnitError[0], null, false);
@@ -315,17 +317,16 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
       _testInProgress = true;
       _notifyCompileBeforeJUnit(testAfterCompile, outOfSync);
       _testInProgress = false;
-      return new JUnitResultTuple(false, null);
     }
     
-    else return _rawJUnitOpenDefDocs(lod, allTests);
+    else _rawJUnitOpenDefDocs(lod, allTests);
   }
   
   /** Runs all TestCases in the document list lod; assumes all documents have been compiled. It finds the TestCase 
     * classes by searching the build directories for the documents.  Note: caller must respond to thrown exceptions 
     * by invoking _junitUnitInterrupted (to run hourglassOff() and reset the unit testing UI).
     */
-  private JUnitResultTuple _rawJUnitOpenDefDocs(List<OpenDefinitionsDocument> 
+  private void _rawJUnitOpenDefDocs(List<OpenDefinitionsDocument> 
     lod, final boolean allTests) {
 
     File buildDir = _model.getBuildDirectory();
@@ -518,8 +519,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
         try {
           _notifyJUnitStarted(); 
           // The false return value could be changed to an exception.
-          result = _jvm.runTestSuite();  
-          boolean testsPresent = result.getRetval();
+          boolean testsPresent = _jvm.runTestSuite();
           if (!testsPresent) {
               throw new RemoteException("No unit test classes were passed to the slave JVM");
           }
@@ -528,13 +528,10 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
           // Unit testing aborted; cleanup; hourglassOff already called in junitStarted
           _notifyJUnitEnded();  // balances junitStarted()
           _testInProgress = false;
-          result = new JUnitResultTuple(false, null);
         }
       }
 
     }).start();
-
-    return this.result;
  }
    
 //-------------------------------- Helpers --------------------------------//
