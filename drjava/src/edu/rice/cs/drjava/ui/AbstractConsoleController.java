@@ -39,8 +39,6 @@ package edu.rice.cs.drjava.ui;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.Color;
-import java.awt.Font;
-
 import javax.swing.*;
 import javax.swing.text.*;
 
@@ -51,7 +49,6 @@ import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionListener;
 import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.model.repl.*;
-import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.drjava.model.ClipboardHistoryModel;
 import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.text.EditDocumentInterface;
@@ -108,7 +105,7 @@ public abstract class AbstractConsoleController /* implements Serializable */ {
   /** Adds AttributeSets as named styles to the Swing console document. */
   protected void _addDocumentStyles() {
     // Default
-    _interactionsDJDocument.setDocStyle(InteractionsDocument.DEFAULT_STYLE, _defaultStyle);
+    _interactionsDJDocument.setDocStyle(ConsoleDocument.DEFAULT_STYLE, _defaultStyle);
     
     // System.out
     _systemOutStyle.addAttributes(_defaultStyle);

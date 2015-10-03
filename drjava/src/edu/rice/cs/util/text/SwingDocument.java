@@ -36,7 +36,6 @@
 
 package edu.rice.cs.util.text;
 
-import java.awt.EventQueue;
 import java.awt.print.Pageable;
 
 import javax.swing.text.DefaultStyledDocument;
@@ -45,8 +44,6 @@ import javax.swing.text.Position;
 import javax.swing.text.BadLocationException;
 
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.swing.Utilities;
-
 import java.util.HashMap;
 
 /** A swing implementation of the toolkit-independent EditDocumentInterface.  This document should use the 

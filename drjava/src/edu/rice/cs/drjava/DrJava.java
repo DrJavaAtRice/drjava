@@ -56,10 +56,7 @@ import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.FileOps;
 import edu.rice.cs.drjava.model.DrJavaFileUtils;
-
-import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /** Startup class for DrJava consisting entirely of static members.  The main method reads the .drjava file (creating 
   * one if none exists) to get the critical information required to start the main JVM for DrJava: 

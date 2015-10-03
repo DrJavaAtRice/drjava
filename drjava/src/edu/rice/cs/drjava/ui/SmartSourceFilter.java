@@ -37,9 +37,6 @@
 package edu.rice.cs.drjava.ui;
 
 import java.io.File;
-import javax.swing.filechooser.FileFilter;
-import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.DrJavaRoot;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.DrJavaFileUtils;
 

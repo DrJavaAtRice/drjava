@@ -42,12 +42,8 @@ import java.io.File;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import edu.rice.cs.util.Log;
-import edu.rice.cs.util.StringOps;
-import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.lambda.Lambda;
@@ -59,8 +55,6 @@ import java.lang.reflect.Modifier;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 import static edu.rice.cs.plt.debug.DebugUtil.error;
-
-import edu.rice.cs.drjava.model.compiler.LanguageLevelStackTraceMapper;
 
 /** Runs in the InterpreterJVM. Runs tests given a classname and formats the results into a (serializable) array of 
   * JUnitError that can be passed back to the MainJVM.
@@ -138,7 +132,6 @@ public class JUnitTestManager {
     * so no need for explicit synchronization.
     * @return false if no test suite (even an empty one) has been set up
     */
-  @SuppressWarnings("unchecked")
   public /* synchronized */ boolean runTestSuite() {
     
     _log.log("runTestSuite() called");

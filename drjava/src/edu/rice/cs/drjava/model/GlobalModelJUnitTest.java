@@ -36,10 +36,6 @@
 
 package edu.rice.cs.drjava.model;
 
-import junit.framework.*;
-
-import java.awt.EventQueue;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.List;

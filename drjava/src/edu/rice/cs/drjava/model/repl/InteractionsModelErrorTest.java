@@ -36,44 +36,24 @@
 
 package edu.rice.cs.drjava.model.repl;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.model.*;
-import edu.rice.cs.drjava.model.repl.newjvm.MainJVM;
 
-import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.Log;
-import edu.rice.cs.util.swing.Utilities;
-//import edu.rice.cs.util.text.ConsoleDocument;
-import edu.rice.cs.util.text.EditDocumentException;
 import javax.swing.text.BadLocationException;
 import edu.rice.cs.plt.tuple.Pair;
 
 
 import edu.rice.cs.drjava.model.repl.newjvm.*;
-import edu.rice.cs.drjava.DrJavaTestCase;
 
 import edu.rice.cs.plt.tuple.OptionVisitor;
 import edu.rice.cs.plt.reflect.ReflectUtil;
-import edu.rice.cs.plt.text.TextUtil;
 
-import edu.rice.cs.dynamicjava.Options;
 import edu.rice.cs.dynamicjava.interpreter.*;
-import edu.rice.cs.dynamicjava.symbol.*;
-import edu.rice.cs.dynamicjava.symbol.type.Type;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.StringWriter;
-import java.io.PrintWriter;
-import java.util.List;
-import java.util.ArrayList;
-
-import java.rmi.RemoteException;
 
 import edu.rice.cs.drjava.model.GlobalModelTestCase;
-
-import static edu.rice.cs.drjava.model.repl.InteractionsModelTest.TestInteractionsModel;
-import static edu.rice.cs.drjava.model.repl.InteractionsModelTest.IncompleteInputInteractionsModel;
 
 /** Tests errors in an InteractionsModel.
   * @version $Id: InteractionsModelErrorTest.java 5236 2010-04-27 01:43:36Z mgricken $
@@ -143,7 +123,6 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
   }
 
   /** Tests that we get the correct 'cannot access its superinterface' error for non-public classes. */
-  @SuppressWarnings("unchecked")
   public void testInterpretExtendNonPublic()
     throws BadLocationException, IOException, InterruptedException, InterpreterException {
     _log.log("testInterpretExtendNonPublic started");
@@ -177,7 +156,6 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
   }
   
   /** Tests that we don't get an error for public classes. */
-  @SuppressWarnings("unchecked")
   public void testInterpretExtendPublic()
     throws BadLocationException, IOException, InterruptedException, InterpreterException {
     _log.log("testInterpretExtendPublic started");
@@ -205,7 +183,6 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
   }
   
   /** Tests that we get the correct 'cannot access its superinterface' error for non-public classes. */
-  @SuppressWarnings("unchecked")
   public void testInterpretExtendNonPublicClass()
     throws BadLocationException, IOException, InterruptedException, InterpreterException {
     _log.log("testInterpretExtendNonPublic started");
@@ -239,7 +216,6 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
   }
   
   /** Tests that we don't get an error for public classes. */
-  @SuppressWarnings("unchecked")
   public void testInterpretExtendPublicClass()
     throws BadLocationException, IOException, InterruptedException, InterpreterException {
     _log.log("testInterpretExtendPublic started");
@@ -267,7 +243,6 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
   }
   
   /** Test that we get the right package using getPackage(). */
-  @SuppressWarnings("unchecked")
   public void testInterpretGetPackageClass()
     throws BadLocationException, IOException, InterruptedException, InterpreterException {
     _log.log("testInterpretGetPackageClass started");
@@ -300,7 +275,6 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
   }
   
   /** Test that we get the right package using getPackage() with anonymous inner classes defined in the Interactions Pane. */
-  @SuppressWarnings("unchecked")
   public void testInterpretGetPackageAnonymous()
     throws BadLocationException, IOException, InterruptedException, InterpreterException {
     _log.log("testInterpretGetPackageAnonymous started");

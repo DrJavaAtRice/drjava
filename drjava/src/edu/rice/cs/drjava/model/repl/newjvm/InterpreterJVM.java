@@ -36,7 +36,6 @@
 
 package edu.rice.cs.drjava.model.repl.newjvm;
 
-import java.lang.reflect.*;
 import java.util.*;
 import java.io.*;
 
@@ -51,7 +50,6 @@ import edu.rice.cs.util.InputStreamRedirector;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.newjvm.*;
-import edu.rice.cs.plt.collect.CollectUtil;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.reflect.ReflectUtil;
 import edu.rice.cs.plt.tuple.Option;
@@ -65,7 +63,6 @@ import edu.rice.cs.drjava.model.junit.JUnitTestManager;
 import edu.rice.cs.drjava.model.junit.JUnitError;
 import edu.rice.cs.drjava.model.repl.InteractionsPaneOptions;
 
-import edu.rice.cs.dynamicjava.Options;
 import edu.rice.cs.dynamicjava.interpreter.*;
 import edu.rice.cs.dynamicjava.symbol.*;
 import edu.rice.cs.dynamicjava.symbol.type.Type;

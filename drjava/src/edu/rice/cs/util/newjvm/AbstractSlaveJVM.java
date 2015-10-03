@@ -41,7 +41,6 @@ import edu.rice.cs.plt.concurrent.ConcurrentUtil;
 import java.rmi.*;
 
 import static edu.rice.cs.plt.debug.DebugUtil.error;
-import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /** A partial implementation of a {@link SlaveRemote} that provides the quit functionality and that also periodically 
   * checks if the master is still alive and automatically quits if not.

@@ -60,7 +60,6 @@ import javax.swing.InputMap;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 import javax.swing.border.Border;
-import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.MutableAttributeSet;
@@ -85,8 +84,6 @@ import edu.rice.cs.drjava.model.repl.InteractionsDJDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsListener;
 import edu.rice.cs.drjava.model.repl.InteractionsModel;
 
-import edu.rice.cs.drjava.config.OptionConstants;
-
 import edu.rice.cs.util.swing.DelegatingAction;
 
 import edu.rice.cs.plt.lambda.Lambda;
@@ -94,7 +91,6 @@ import edu.rice.cs.plt.concurrent.CompletionMonitor;
 import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.UnexpectedException;
 
-import static edu.rice.cs.plt.debug.DebugUtil.debug;
 /* TODO: clean up mixed references to _adapter and _doc which point to almost the same thing (an 
  * InteractionsDJDocument versus an InteractionsDocument. */
 
@@ -219,7 +215,7 @@ public class InteractionsController extends AbstractConsoleController {
           StyleConstants.setComponent(inputAttributes, _box);
           
           /* Insert box in document. */
-          _doc.insertBeforeLastPrompt(" ", InteractionsDocument.DEFAULT_STYLE);
+          _doc.insertBeforeLastPrompt(" ", ConsoleDocument.DEFAULT_STYLE);
           
           // bind INPUT_BOX_STYLE to inputAttributes in the associated InteractionsDJDocument 
           _interactionsDJDocument.setDocStyle(INPUT_BOX_STYLE, inputAttributes);
@@ -227,7 +223,7 @@ public class InteractionsController extends AbstractConsoleController {
           // and insert the symbol for the input box with the correct style (identifying it as our InputBox)
           _doc.insertBeforeLastPrompt(INPUT_BOX_SYMBOL, INPUT_BOX_STYLE);
           
-          _doc.insertBeforeLastPrompt("\n", InteractionsDocument.DEFAULT_STYLE);
+          _doc.insertBeforeLastPrompt("\n", ConsoleDocument.DEFAULT_STYLE);
           
           _box.setVisible(true);
           EventQueue.invokeLater(new Runnable() { public void run() { _box.requestFocusInWindow(); } });

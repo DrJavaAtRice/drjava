@@ -37,7 +37,6 @@
 package edu.rice.cs.drjava.model;
 
 import edu.rice.cs.drjava.DrJava;
-
 import edu.rice.cs.drjava.model.compiler.CompilerListener;
 import edu.rice.cs.drjava.model.repl.InteractionsDocument;
 import edu.rice.cs.drjava.model.junit.JUnitModel;
@@ -53,15 +52,16 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.swing.AsyncTask;
+import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.text.EditDocumentException;
 
 import javax.swing.text.BadLocationException;
+
 import java.io.File;
 import java.io.IOException;
 import java.rmi.UnmarshalException;
 import java.util.regex.*;
 import java.util.List;
-import junit.framework.Assert;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
@@ -343,7 +343,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     Utilities.invokeAndWait(new Runnable() {
       public void run() {
         interactionsDoc.setInProgress(false);  // for some reason, the inProgress state can be true when interpret is invoked
-        interactionsDoc.append(input, InteractionsDocument.DEFAULT_STYLE);
+        interactionsDoc.append(input, ConsoleDocument.DEFAULT_STYLE);
       }
     });
     
@@ -378,7 +378,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   /** Appends the input string to the interactions pane and interprets it. */
   protected void interpretIgnoreResult(String input) throws EditDocumentException {
     InteractionsDocument interactionsDoc = _model.getInteractionsDocument();
-    interactionsDoc.append(input, InteractionsDocument.DEFAULT_STYLE);
+    interactionsDoc.append(input, ConsoleDocument.DEFAULT_STYLE);
     try { _model.interpretCurrentInteraction(); }
     catch(RuntimeException re) { // On Windows, UnmarshalExceptions are sometime thrown
       Throwable cause = re.getCause();

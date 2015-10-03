@@ -49,7 +49,6 @@ import java.io.File;
 
 import edu.rice.cs.drjava.model.DrJavaFileUtils;
 import edu.rice.cs.drjava.model.debug.DebugException;
-import edu.rice.cs.drjava.model.compiler.LanguageLevelStackTraceMapper;
 
 /** Keeps track of DocumentDebugActions that are waiting to be resolved when the classes they corresponed to are 
   * prepared.  (Only DocumentDebugActions have reference types which can be prepared.)

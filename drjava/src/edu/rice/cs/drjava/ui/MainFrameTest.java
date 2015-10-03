@@ -45,8 +45,10 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.Toolkit;
+
 import javax.swing.*;
 import javax.swing.text.*;
+
 import java.io.*;
 import java.util.List;
 
@@ -55,11 +57,9 @@ import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.repl.InteractionsDocumentTest.TestBeep;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.plt.io.IOUtil;
-import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.*;
 import edu.rice.cs.util.text.*;
 import edu.rice.cs.util.swing.Utilities;
-import edu.rice.cs.drjava.model.compiler.CompilerListener;
 
 /** Test functions of MainFrame.
   * @version $Id$
@@ -310,7 +310,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     assertTrue("UI's int. doc. should equals Model's int. doc.", pane.getDocument() == doc);
     
     int origLength = doc.getLength();
-    doc.insertText(1, "typed text", InteractionsDocument.DEFAULT_STYLE);
+    doc.insertText(1, "typed text", ConsoleDocument.DEFAULT_STYLE);
     Utilities.clearEventQueue();
     assertEquals("Document should not have changed.", origLength, doc.getLength());
     _log.log("testCorrectInteractionsDocument completed");
@@ -440,7 +440,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   }
   
   private KeyEvent makeFindKeyEvent(Component c, long when) {
-    return new KeyEvent(c, KeyEvent.KEY_PRESSED, when, KeyEvent.CTRL_MASK, KeyEvent.VK_F, 'F');
+    return new KeyEvent(c, KeyEvent.KEY_PRESSED, when, InputEvent.CTRL_MASK, KeyEvent.VK_F, 'F');
   }
   
   /** Ensure that all key events are disabled when the glass pane is up. */

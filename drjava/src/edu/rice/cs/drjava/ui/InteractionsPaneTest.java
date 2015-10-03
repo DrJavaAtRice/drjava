@@ -48,8 +48,10 @@ import edu.rice.cs.drjava.model.repl.InteractionsModel;
 import edu.rice.cs.drjava.model.repl.InteractionsModelTest.TestInteractionsModel;
 import edu.rice.cs.drjava.ui.InteractionsController;
 import edu.rice.cs.util.swing.Utilities;
+import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.plt.concurrent.CompletionMonitor;
+
 import java.util.Date;
 
 /** Test functions of InteractionsPane.
@@ -107,7 +109,7 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
   
   /** Tests that moving the caret left when it's already at the prompt will cycle it to the end of the line. */
   public void testCaretMovementCyclesWhenAtPrompt() throws EditDocumentException {
-    _doc.append("test text", InteractionsDocument.DEFAULT_STYLE);
+    _doc.append("test text", ConsoleDocument.DEFAULT_STYLE);
     Utilities.invokeAndWait(new Runnable() {
       public void run() {
         _controller.moveToPrompt();
@@ -119,7 +121,7 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
   
   /** Tests that moving the caret right when it's already at the end will cycle it to the prompt. */
   public void testCaretMovementCyclesWhenAtEnd() throws EditDocumentException {
-    _doc.append("test text", InteractionsDocument.DEFAULT_STYLE);
+    _doc.append("test text", ConsoleDocument.DEFAULT_STYLE);
     Utilities.invokeAndWait(new Runnable() { 
       public void run() {
         _controller.moveToEnd();
@@ -207,7 +209,7 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
   
   /** Tests that the caret is moved properly when the current interaction is cleared. */
   public void testClearCurrentInteraction() throws EditDocumentException {
-    _doc.append("typed text", InteractionsDocument.DEFAULT_STYLE);
+    _doc.append("typed text", ConsoleDocument.DEFAULT_STYLE);
     Utilities.invokeAndWait(new Runnable() { public void run() { _controller.moveToEnd(); } });
     
     _doc.clearCurrentInteraction();
@@ -221,7 +223,7 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
     Utilities.clearEventQueue(); // wait until pending event queue tranactions have completed.
     int origLength = _doc.getLength();
     Utilities.invokeAndWait(new Runnable() {
-      public void run() { _doc.insertText(1, "typed text", InteractionsDocument.DEFAULT_STYLE); }
+      public void run() { _doc.insertText(1, "typed text", ConsoleDocument.DEFAULT_STYLE); }
     });
     assertEquals("Document should not have changed.", origLength, _doc.getLength());
   }
@@ -357,7 +359,7 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
     final InteractionsDJDocument doc = (InteractionsDJDocument)_pane.getDJDocument();
     Utilities.invokeAndWait(new Runnable(){
       public void run() {
-        _doc.append("Undo test text 1",InteractionsDocument.DEFAULT_STYLE);
+        _doc.append("Undo test text 1",ConsoleDocument.DEFAULT_STYLE);
         String newText = _doc.getText();
         doc.getUndoManager().undo();
         assertEquals("Undo did not remove added text",_doc.getText(),oldText);
@@ -376,15 +378,15 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
     
     Utilities.invokeAndWait(new Runnable(){
       public void run() {
-        _doc.append("Undo test text",InteractionsDocument.DEFAULT_STYLE);
+        _doc.append("Undo test text",ConsoleDocument.DEFAULT_STYLE);
         
         
-        _pane.processKeyEvent(new KeyEvent(_pane, PRESSED, (new Date()).getTime(), KeyEvent.SHIFT_DOWN_MASK, KeyEvent.VK_ENTER, UNDEFINED));
+        _pane.processKeyEvent(new KeyEvent(_pane, PRESSED, (new Date()).getTime(), InputEvent.SHIFT_DOWN_MASK, KeyEvent.VK_ENTER, UNDEFINED));
         _pane.processKeyEvent(new KeyEvent(_pane, RELEASED, (new Date()).getTime(), SHIFT, KeyEvent.VK_ENTER, UNDEFINED));
         
         String newOldText = _doc.getText();
         
-        _doc.append("More text",InteractionsDocument.DEFAULT_STYLE);
+        _doc.append("More text",ConsoleDocument.DEFAULT_STYLE);
         
         doc.getUndoManager().undo();
         

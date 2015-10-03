@@ -38,6 +38,7 @@ package edu.rice.cs.drjava.ui;
 
 import javax.swing.*;
 import javax.swing.event.*;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.util.List;
@@ -273,8 +274,8 @@ public class ClipboardHistoryFrame extends SwingFrame {
 
     c.fill = GridBagConstraints.BOTH;
     c.weighty = 1.0;
-    contentPane.add(new JScrollPane(_historyList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
-                                    JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED), 
+    contentPane.add(new JScrollPane(_historyList, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, 
+                                    ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED), 
                     c);
     
     _previewArea = new JTextArea("");
@@ -284,8 +285,8 @@ public class ClipboardHistoryFrame extends SwingFrame {
     _previewArea.setFont(DrJava.getConfig().getSetting(OptionConstants.FONT_MAIN));
     _previewArea.setDisabledTextColor(DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR));
     c.weighty = 2.0;
-    contentPane.add(new JScrollPane(_previewArea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
-                                    JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED), 
+    contentPane.add(new JScrollPane(_previewArea, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, 
+                                    ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED), 
                     c);
     
     c.anchor = GridBagConstraints.SOUTH;

@@ -36,8 +36,6 @@
 
 package edu.rice.cs.drjava.ui.avail;
 
-import edu.rice.cs.drjava.model.EventNotifier;
-
 /**
  * Convenience methods for starting and finishing tasks that use multiple
  * components.

@@ -43,15 +43,14 @@ import edu.rice.cs.drjava.ui.CommonCloseButton;
 
 import java.awt.*;
 import java.awt.event.*;
+
 import javax.swing.table.*;
-import javax.swing.event.TableModelListener;
-import javax.swing.event.TableModelEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.MouseInputListener;
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import javax.swing.plaf.basic.BasicTableUI;
+
 import java.util.Vector;
 import java.util.List;
 import java.util.ArrayList;
@@ -213,8 +212,8 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
     }
     
     // add components
-    _tableScrollPane = new JScrollPane(_table, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-                                       JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    _tableScrollPane = new JScrollPane(_table, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+                                       ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     JPanel tablesPanel = new JPanel(new BorderLayout());
     tablesPanel.add(_tableScrollPane, BorderLayout.CENTER);
     tablesPanel.add(_buttonTable, BorderLayout.SOUTH);

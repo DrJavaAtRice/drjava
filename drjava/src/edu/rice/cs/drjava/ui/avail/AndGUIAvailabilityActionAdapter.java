@@ -36,9 +36,6 @@
 
 package edu.rice.cs.drjava.ui.avail;
 
-import edu.rice.cs.drjava.model.EventNotifier;
-
-import java.util.HashMap;
 import javax.swing.Action;
 
 /**

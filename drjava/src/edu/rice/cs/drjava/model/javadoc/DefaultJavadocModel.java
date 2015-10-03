@@ -42,7 +42,6 @@ import java.io.BufferedReader;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 import java.awt.EventQueue;
 
 import edu.rice.cs.plt.lambda.Thunk;

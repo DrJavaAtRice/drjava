@@ -44,6 +44,7 @@ import java.lang.ref.WeakReference;
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.text.LayeredHighlighter;
+
 import java.awt.event.*;
 import java.awt.*;
 
@@ -172,7 +173,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
       }
       else {
         JLabel l = (JLabel) _defaultRenderer.getListCellRendererComponent(list, color, row, sel, hasFocus);
-        l.setHorizontalAlignment(JLabel.CENTER);
+        l.setHorizontalAlignment(SwingConstants.CENTER);
         renderer = l;
       }
       // Taken out because this is a 1.5 method; not sure if it's necessary

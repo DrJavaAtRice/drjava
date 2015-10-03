@@ -82,7 +82,6 @@ import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.plt.reflect.ReflectUtil;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.io.IOUtil;
-import edu.rice.cs.plt.tuple.Pair;
 
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.FileOps;
@@ -336,28 +335,28 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       // TODO: reference to subclass in next line is a code smell!
       JDKToolsLibrary fromConfig = JarJDKToolsLibrary.makeFromFile(configTools, this, JDKDescriptor.NONE);
       if (fromConfig.isValid()) { 
-        JarJDKToolsLibrary.msg("From config: " + fromConfig);
+        JDKToolsLibrary.msg("From config: " + fromConfig);
         results.put(getLibraryKey(LibraryKey.PRIORITY_CONFIG, fromConfig), fromConfig);
       }
-      else { JarJDKToolsLibrary.msg("From config: invalid " + fromConfig); }
+      else { JDKToolsLibrary.msg("From config: invalid " + fromConfig); }
     }
-    else { JarJDKToolsLibrary.msg("From config: not set"); }
+    else { JDKToolsLibrary.msg("From config: not set"); }
     
     Iterable<JarJDKToolsLibrary> fromSearch = JarJDKToolsLibrary.search(this);
     for (JDKToolsLibrary t : fromSearch) {
       JavaVersion.FullVersion tVersion = t.version();
-      JarJDKToolsLibrary.msg("From search: " + t);
+      JDKToolsLibrary.msg("From search: " + t);
       JavaVersion.FullVersion coarsenedVersion = coarsenVersion(tVersion);
-      JarJDKToolsLibrary.msg("\ttVersion: " + tVersion+" " + tVersion.vendor());
-      JarJDKToolsLibrary.msg("\tcoarsenedVersion: " + coarsenedVersion + " " + coarsenedVersion.vendor());
+      JDKToolsLibrary.msg("\ttVersion: " + tVersion+" " + tVersion.vendor());
+      JDKToolsLibrary.msg("\tcoarsenedVersion: " + coarsenedVersion + " " + coarsenedVersion.vendor());
       // give a lower priority to built-in compilers
       int priority = (edu.rice.cs.util.FileOps.getDrJavaFile().equals(tVersion.location())) ?
         LibraryKey.PRIORITY_BUILTIN : LibraryKey.PRIORITY_SEARCH;
       if (! results.containsKey(getLibraryKey(priority, t))) {
-        JarJDKToolsLibrary.msg("\tadded");
+        JDKToolsLibrary.msg("\tadded");
         results.put(getLibraryKey(priority, t), t);
       }
-      else { JarJDKToolsLibrary.msg("\tduplicate"); }
+      else { JDKToolsLibrary.msg("\tduplicate"); }
     }
     
     // Only include a runtime compiler/library if the list of results is otherwise empty; in recent versions
@@ -370,17 +369,17 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       for(JDKToolsLibrary fromRuntime: allFromRuntime) {
         if (fromRuntime.isValid()) {
           if (! results.containsKey(getLibraryKey(LibraryKey.PRIORITY_RUNTIME, fromRuntime))) {
-            JarJDKToolsLibrary.msg("From runtime: " + fromRuntime);
+            JDKToolsLibrary.msg("From runtime: " + fromRuntime);
             results.put(getLibraryKey(LibraryKey.PRIORITY_RUNTIME, fromRuntime), fromRuntime);
           }
-          else { JarJDKToolsLibrary.msg("From runtime: duplicate " + fromRuntime); }
+          else { JDKToolsLibrary.msg("From runtime: duplicate " + fromRuntime); }
         }
-        else { JarJDKToolsLibrary.msg("From runtime: invalid " + fromRuntime); }
+        else { JDKToolsLibrary.msg("From runtime: invalid " + fromRuntime); }
       }
     }
     
     Iterable<JDKToolsLibrary> libraries = IterUtil.reverse(results.values());
-    JarJDKToolsLibrary.msg("Returning libraries: '" + libraries);
+    JDKToolsLibrary.msg("Returning libraries: '" + libraries);
     return libraries;
   }
   

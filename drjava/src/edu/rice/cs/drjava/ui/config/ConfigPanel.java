@@ -38,9 +38,9 @@ package edu.rice.cs.drjava.ui.config;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+
 import java.awt.event.*;
 import java.awt.*;
-
 // TODO: Check synchronization.
 import java.util.Vector;
 
@@ -78,7 +78,7 @@ public class ConfigPanel extends JPanel {
     panel.add(panel2, BorderLayout.NORTH);
     
     JScrollPane scroll = 
-      new JScrollPane(panel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+      new JScrollPane(panel, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     scroll.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), _title));
     
     // Fix increment on scrollbar

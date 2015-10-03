@@ -43,7 +43,6 @@ import edu.rice.cs.drjava.model.print.DrJavaBook;
 
 import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.text.ConsoleDocumentInterface;
 import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.util.text.ConsoleDocument;
@@ -308,7 +307,7 @@ public class InteractionsDocument extends ConsoleDocument {
   /** Returns the string that the user has entered at the current prompt. Forwards to getCurrentInput(). */
   public String getCurrentInteraction() { return getCurrentInput(); }
   
-  public String getDefaultStyle() { return InteractionsDocument.DEFAULT_STYLE; }
+  public String getDefaultStyle() { return ConsoleDocument.DEFAULT_STYLE; }
   
   /** This method tells the document to prepare all the DrJavaBook and PagePrinter objects. */
   public void preparePrintJob() {

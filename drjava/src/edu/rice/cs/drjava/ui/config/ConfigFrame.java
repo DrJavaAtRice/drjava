@@ -55,12 +55,9 @@ import edu.rice.cs.drjava.ui.*;
 import edu.rice.cs.drjava.ui.KeyBindingManager.KeyStrokeData;
 import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.util.FileOps;
-import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.FileSelectorComponent;
 import edu.rice.cs.util.swing.DirectoryChooser;
 import edu.rice.cs.util.swing.SwingFrame;
-import edu.rice.cs.util.swing.SwingWorker;
-import edu.rice.cs.util.swing.ProcessingDialog;
 import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.plt.reflect.JavaVersion;
 
