@@ -83,12 +83,9 @@ import edu.rice.cs.drjava.model.junit.JUnitModel;
 import edu.rice.cs.plt.collect.CollectUtil;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.io.IOUtil;
-<<<<<<< HEAD
 import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.plt.reflect.ReflectUtil;
 import edu.rice.cs.plt.tuple.Pair;
-=======
->>>>>>> a37294e57e8fd91b157f1af7c6326586bca411d7
 
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.FileOps;
@@ -377,7 +374,6 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     // tools.jar.
     
     if (results.isEmpty()) {
-<<<<<<< HEAD
       /* Build a JDKToolsLibrary from this JVM runtime (which has DrJava.jar on the classpath) using the embedded Eclipse compiler, no
        * debugger and no javadoc.  The latter two tools are provided by the tools.jar library in a Java JDK.  No JDK is available.
        */

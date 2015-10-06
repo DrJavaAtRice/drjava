@@ -1259,13 +1259,6 @@ public interface OptionConstants {
     JAVADOC_1_3_TEXT, JAVADOC_1_4_TEXT, JAVADOC_1_5_TEXT };
   static final ArrayList<String> linkVersionDeprecated = new ArrayList<String>(Arrays.asList(linkDeprecated));  
   
-  /** Constants for the URLs of Sun's system class documentation for different versions of Java. */
-//  public static final StringOption JAVADOC_1_3_LINK =
-//    new StringOption("javadoc.1.3.link", "http://download.oracle.com/javase/1.3/docs/api");
-//  public static final StringOption JAVADOC_1_4_LINK =
-//    new StringOption("javadoc.1.4.link", "http://download.oracle.com/javase/1.4.2/docs/api");
-//  public static final StringOption JAVADOC_1_5_LINK =
-//    new StringOption("javadoc.1.5.link", "http://download.oracle.com/javase/1.5.0/docs/api");
   public static final StringOption JAVADOC_1_6_LINK =
     new StringOption("javadoc.1.6.link", "http://download.oracle.com/javase/6/docs/api");
   public static final StringOption JAVADOC_1_7_LINK =

@@ -1643,15 +1643,15 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   /** Generate Java API class list. */
-  public static Set<JavaAPIListEntry> _generateJavaAPISet(String base, String stripPrefix, String suffix) {
-    URL url = MainFrame.class.getResource("/edu/rice/cs/drjava/docs/javaapi"+suffix);
-    return _generateJavaAPISet(base, stripPrefix, url);
+  public static Set<JavaAPIListEntry> _generateJavaAPISet(String suffix) {
+    URL url = MainFrame.class.getResource("/edu/rice/cs/drjava/docs/javaapi" + suffix);
+    return _generateJavaAPISet(url);
   }
   
   /** Generate Java API class list. */
-  public static Set<JavaAPIListEntry> _generateJavaAPISet(String base, String stripPrefix, URL url) {
+  public static Set<JavaAPIListEntry> _generateJavaAPISet(URL url) {
     Set<JavaAPIListEntry> s = new HashSet<JavaAPIListEntry>();
-    if (url==null) return s;
+    if (url == null) return s;
     try {
       InputStream urls = url.openStream();
       InputStreamReader is = null;
@@ -1660,21 +1660,26 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         is = new InputStreamReader(urls);
         br = new BufferedReader(is);
         String line = br.readLine();
-        while(line != null) {
+        while (line != null) {
           final String aText = "<a href=\"";
           int aPos = line.toLowerCase().indexOf(aText);
           int aEndPos = line.toLowerCase().indexOf(".html\" ",aPos);
-          if ((aPos>=0) && (aEndPos>=0)) {
-            String link = line.substring(aPos+aText.length(), aEndPos);
-            String fullClassName = link.substring(stripPrefix.length()).replace('/', '.');
+          if ((aPos >= 0) && (aEndPos >= 0)) {
+            String link = line.substring(aPos + aText.length(), aEndPos);
+            String fullClassName = link.replace('/', '.');
             String simpleClassName = fullClassName;
+            System.err.println("link = '" + link + "'; simpleClassName = '" + simpleClassName + "'");
             int lastDot = fullClassName.lastIndexOf('.');
-            if (lastDot>=0) { simpleClassName = fullClassName.substring(lastDot + 1); }
+            if (lastDot >= 0) { simpleClassName = fullClassName.substring(lastDot + 1); }
             try {
-              URL pageURL = new URL(base + link + ".html");
+              URL pageURL = new URL(link + ".html");
+              System.err.println("URL is: " + pageURL);
               s.add(new JavaAPIListEntry(simpleClassName, fullClassName, pageURL));
             }
-            catch(MalformedURLException mue) { /* ignore, we'll just not put this class in the list */ }
+            catch(MalformedURLException mue) { 
+              System.err.println("MalformedURLException on " + link + ".html");
+            /* ignore, we'll just not put this class in the list */ 
+            }
           }
           line = br.readLine();
         }
@@ -1744,34 +1749,30 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         suffix = "/allclasses-1.6.html";
       }
       else if (linkVersion.equals(JAVADOC_1_7_TEXT)) {
-        base = DrJava.getConfig().getSetting(JAVADOC_1_7_LINK) + "/";
-        stripPrefix = ""; // nothing needs to be stripped, links in 1.7 Javadoc are relative
+//        base = DrJava.getConfig().getSetting(JAVADOC_1_7_LINK) + "/";
+//        stripPrefix = ""; // nothing needs to be stripped, links in 1.7 Javadoc are relative
         suffix = "/allclasses-1.7.html";
       }
       else if (linkVersion.equals(JAVADOC_1_8_TEXT)) {
-        base = DrJava.getConfig().getSetting(JAVADOC_1_8_LINK) + "/";
-        stripPrefix = ""; // nothing needs to be stripped, links in 1.8 Javadoc are relative
+//        base = DrJava.getConfig().getSetting(JAVADOC_1_8_LINK) + "/";
+//        stripPrefix = ""; // nothing needs to be stripped, links in 1.8 Javadoc are relative
         suffix = "/allclasses-1.8.html";
       }
       if (!suffix.equals("")) {
-        _javaAPISet.addAll(_generateJavaAPISet(base, stripPrefix, suffix));
+        _javaAPISet.addAll(_generateJavaAPISet(suffix));
       }
       else {
         // no valid Javadoc URL
       }
       
       // add JUnit
-      Set<JavaAPIListEntry> junitAPIList = _generateJavaAPISet(DrJava.getConfig().getSetting(JUNIT_LINK) + "/",
-                                                               "", // relative links
-                                                               "/allclasses-concjunit4.7.html");
+      Set<JavaAPIListEntry> junitAPIList = _generateJavaAPISet("/allclasses-concjunit4.7.html");
       _javaAPISet.addAll(junitAPIList);
       
       // add additional Javadoc libraries
       for(String url: DrJava.getConfig().getSetting(JAVADOC_ADDITIONAL_LINKS)) {
         try {
-          Set<JavaAPIListEntry> additionalList = _generateJavaAPISet(url + "/",
-                                                                     "", // relative links
-                                                                     new URL(url+"/allclasses-frame.html"));
+          Set<JavaAPIListEntry> additionalList = _generateJavaAPISet(new URL(url+"/allclasses-frame.html"));
           _javaAPISet.addAll(additionalList);
         }
         catch(MalformedURLException mue) { /* ignore, we'll just not put this class in the list */ }
