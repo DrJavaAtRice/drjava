@@ -36,6 +36,11 @@
 
 package edu.rice.cs.util;
 
+import java.io.StringWriter;
+import java.io.PrintWriter;
+import java.util.Arrays;
+import edu.rice.cs.util.swing.Utilities;
+
 /** An exception which DrJava throws on an unexpected error.
   * Many times, we have to catch BadLocationExceptions in
   * code that accesses DefinitionDocument, even if we know for a
@@ -46,12 +51,20 @@ package edu.rice.cs.util;
   * @version $Id$
   */
 public class UnexpectedException extends RuntimeException {
+  
+  public static void throwRuntimeException(Throwable t) {
+    if (t instanceof RuntimeException) throw (RuntimeException) t;
+    else throw new UnexpectedException(t);
+  }
 
   private Throwable _value;
 
    /** Constructs an unexpected exception with <code>value.toString()</code> as it's message. */
   public UnexpectedException(Throwable value) {
     super(value.toString());
+    StringWriter sw = new StringWriter();
+    new Throwable("").printStackTrace(new PrintWriter(sw));
+//    Utilities.show("UnexpectedException(" + value.toString() + ") created.  Backtrace is:\n" + sw.toString());
     _value = value;
   }
 
@@ -68,7 +81,7 @@ public class UnexpectedException extends RuntimeException {
 
   /** Constructs a new RuntimeException to report specified message */
   public UnexpectedException(String msg) {
-    this(new RuntimeException(msg));
+    this(new RuntimeException(msg == null ? "" : msg));
   }
 
   /** Returns the contained exception. */

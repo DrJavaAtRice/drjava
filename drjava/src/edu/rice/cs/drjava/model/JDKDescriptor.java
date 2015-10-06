@@ -184,7 +184,7 @@ public abstract class JDKDescriptor {
       return JDKToolsLibrary.adapterForDebugger(guessedVersion);
     }
     public boolean containsCompiler(File f) { return true; }
-    public JavaVersion getMinimumMajorVersion() { return JavaVersion.JAVA_1_1; }
+    public JavaVersion getMinimumMajorVersion() { return JavaVersion.JAVA_6; }
     public Iterable<File> getAdditionalCompilerFiles(File compiler) throws FileNotFoundException {
       return IterUtil.empty();
     }
@@ -201,7 +201,7 @@ public abstract class JDKDescriptor {
         try {
           JarFile jf = new JarFile(jarOrDir);
           for(String fn: fileNames) {
-            if (jf.getJarEntry(fn)==null) return false;
+            if (jf.getJarEntry(fn) == null) return false;
           }
           return true;
         }

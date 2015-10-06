@@ -46,7 +46,7 @@ import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
 import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
 import edu.rice.cs.util.DirectorySelector;
 
-/** Javadoc model to use when javadoc is unavailable.
+/** Javadoc model to use when javadoc is unavailable. TODO: make this class a singleton.
   * @version $Id$
   */
 public class NoJavadocAvailable implements JavadocModel {
@@ -60,7 +60,6 @@ public class NoJavadocAvailable implements JavadocModel {
   }
   
   public boolean isAvailable() { return false; }
-  
   
   /** Add a JavadocListener to the model.
     * @param listener a listener that reacts to Javadoc events

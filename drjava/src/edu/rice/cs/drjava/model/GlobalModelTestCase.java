@@ -1238,40 +1238,40 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     }
      
     @Override public void junitStarted() {
-      if (printMessages) System.out.println("listener.junitStarted");
+      _log.log("listener.junitStarted");
       synchronized(this) { junitStartCount++; }
     }
     @Override public void junitSuiteStarted(int numTests) {
-      if (printMessages) System.out.println("listener.junitSuiteStarted, numTests = " + numTests);
+      _log.log("listener.junitSuiteStarted, numTests = " + numTests);
       assertJUnitStartCount(1);
       synchronized(this) { junitSuiteStartedCount++; }
     }
     @Override public void junitTestStarted(String name) {
-      if (printMessages) System.out.println("  listener.junitTestStarted, " + name);
+      _log.log("  listener.junitTestStarted, " + name);
       synchronized(this) { junitTestStartedCount++; }
     }
     @Override public void junitTestEnded(String name, boolean wasSuccessful, boolean causedError) {
-      if (printMessages) System.out.println("  listener.junitTestEnded, name = " + name + " succ = " + wasSuccessful + 
+      _log.log("  listener.junitTestEnded, name = " + name + " succ = " + wasSuccessful + 
                                             " err = " + causedError);
       synchronized(this) { junitTestEndedCount++; }
       assertEquals("junitTestEndedCount should be same as junitTestStartedCount", junitTestEndedCount, 
                    junitTestStartedCount);
     }
     @Override public void nonTestCase(boolean isTestAll, boolean didCompileFail) {
-      if (printMessages) System.out.println("listener.nonTestCase, isTestAll=" + isTestAll);
+      _log.log("listener.nonTestCase, isTestAll=" + isTestAll);
       synchronized(this) { nonTestCaseCount++; }
       _log.log("nonTestCase() called; notifying JUnitDone");
       _notifyJUnitDone();
     }
     @Override public void classFileError(ClassFileError e) {
-      if (printMessages) System.out.println("listener.classFileError, e=" + e);
+      _log.log("listener.classFileError, e=" + e);
       synchronized(this) { classFileErrorCount++; }
       _log.log("classFileError() called; notifying JUnitDone");
       _notifyJUnitDone();
     }
     @Override public void junitEnded() {
       // assertJUnitSuiteStartedCount(1);
-      if (printMessages) System.out.println("junitEnded event!");
+      _log.log("junitEnded event!");
       synchronized(this) { junitEndCount++; }
       _log.log("junitEnded() called; notifying JUnitDone");
       _notifyJUnitDone();

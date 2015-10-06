@@ -348,9 +348,9 @@ public class DefaultCompilerModel implements CompilerModel {
       
       List<? extends File> preprocessedFiles = _compileLanguageLevelsFiles(files, errors, classPath, bootClassPath);
       
-      System.err.println("Compiler is using classPath = '" + classPath + "; bootClassPath = '" + bootClassPath + "'");
+      System.out.println("Compiler is using classPath = '" + classPath + "';  bootClassPath = '" + bootClassPath + "'");
       
-      if (preprocessedFiles != null) System.err.println("Performed Language Level Translation of " + preprocessedFiles);
+      if (preprocessedFiles != null) System.out.println("Performed Language Level Translation of " + preprocessedFiles);
       if (errors.isEmpty()) {
         CompilerInterface compiler = getActiveCompiler();
         

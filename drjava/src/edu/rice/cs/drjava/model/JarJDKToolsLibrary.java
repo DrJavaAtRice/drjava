@@ -159,7 +159,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     boolean isSupported = JavaVersion.CURRENT.supports(version.majorVersion());
     Iterable<File> additionalCompilerFiles = IterUtil.empty();
 
-    // JDKDescriptor.NONE will require JavaVersion.CURRENT to be at least JavaVersion.JAVA_1_1,
+    // JDKDescriptor.NONE requires JavaVersion.CURRENT to be at least JavaVersion.JAVA_6,
     // i.e. it will always be supported
     isSupported |= JavaVersion.CURRENT.supports(desc.getMinimumMajorVersion());
     try {
@@ -235,14 +235,14 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
           // can't use loadLibraryAdapter because we need to preempt the whole package
           ClassLoader debugLoader = new PreemptingClassLoader(new PathClassLoader(loader, path), debuggerPackage);
           Debugger attempt = (Debugger) ReflectUtil.loadObject(debugLoader, debuggerAdapter, sig, model);        
-          JDKToolsLibrary.msg("                 debugger="+attempt.getClass().getName());
+          JDKToolsLibrary.msg("                 debugger=" + attempt.getClass().getName());
           if (attempt.isAvailable()) { debugger = attempt; }
         }
         catch (ReflectException e) {
-          JDKToolsLibrary.msg("                 no debugger, ReflectException "+e); /* can't load */
+          JDKToolsLibrary.msg("                 no debugger, ReflectException " + e); /* can't load */
         }
         catch (LinkageError e) {
-          JDKToolsLibrary.msg("                 no debugger, LinkageError "+e);  /* can't load */
+          JDKToolsLibrary.msg("                 no debugger, LinkageError " + e);  /* can't load */
         }
       }
       

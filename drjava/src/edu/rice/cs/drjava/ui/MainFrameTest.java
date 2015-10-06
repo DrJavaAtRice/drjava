@@ -642,7 +642,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     _log.log("File saved and compiled");
     
     if (! IOUtil.deleteRecursively(_tempDir))
-      System.out.println("Couldn't fully delete directory " + _tempDir.getAbsolutePath() + "\nDo it by hand.\n");
+      System.err.println("Couldn't fully delete directory " + _tempDir.getAbsolutePath() + "\nDo it by hand.\n");
     
     _log.log("testDancingUIFileOpened completed");
   }
@@ -710,7 +710,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     }
     
     if (! IOUtil.deleteRecursively(_tempDir)) {
-      System.out.println("Couldn't fully delete directory " + _tempDir.getAbsolutePath() + "\nDo it by hand.\n");
+      System.err.println("Couldn't fully delete directory " + _tempDir.getAbsolutePath() + "\nDo it by hand.\n");
     }
     _log.log("testDancingUIFileClosed completed");
   }

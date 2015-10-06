@@ -194,7 +194,7 @@ public class ClipboardHistoryFrame extends SwingFrame {
   }
 
   /** Initialize the frame. */
-  @SuppressWarnings("all")
+//  @SuppressWarnings("all")
   private void init() {
     addComponentListener(new java.awt.event.ComponentAdapter() {
       public void componentResized(ComponentEvent e) {
@@ -223,7 +223,7 @@ public class ClipboardHistoryFrame extends SwingFrame {
     });
     _historyList.setFont(DrJava.getConfig().getSetting(OptionConstants.FONT_MAIN));
     _historyList.setCellRenderer(new DefaultListCellRenderer()  {
-      public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+      public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
         Component c = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
         c.setForeground(DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR));
         return c;

@@ -1064,7 +1064,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     interpretIgnoreResult(s3);
     listener.waitInteractionDone();
     
-    System.err.println("history is '" + _model.getHistoryAsString() + "'");
+//    System.err.println("history is '" + _model.getHistoryAsString() + "'");
     // check that the history contains the correct value
     assertEquals("History and getHistoryAsString should be the same.",
                  s1 + newLine + s2 + newLine + s3 + newLine,

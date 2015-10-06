@@ -41,10 +41,10 @@ import junit.framework.*;
 
 import edu.rice.cs.util.UnexpectedException;
 
-/** DrJava's own testrunner. It updates the document in the JUnit pane as error and failure events are fired.  These methods run in
-  * an auxiliary thread.
- *  @version $Id$
- */
+/** DrJava's own testrunner. It updates the document in the JUnit pane as error and failure events are fired.  
+  * These methods run inan auxiliary thread.
+  *  @version $Id$
+  */
 public class JUnitTestRunner extends BaseTestRunner {
   
   /** Receives updates on the test suite's progress. */

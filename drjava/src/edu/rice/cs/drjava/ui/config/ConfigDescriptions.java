@@ -285,9 +285,6 @@ public class ConfigDescriptions {
     add(OptionConstants.JAVADOC_LINK_VERSION,
         "Java Version for Javadoc Links", 
         "Version of Java for generating links to online Javadoc documentation.");
-    add(OptionConstants.JAVADOC_1_5_LINK,
-        "Javadoc 1.5 URL",
-        "URL for the Java 1.5 API, for generating links to library classes.");
     add(OptionConstants.JAVADOC_1_6_LINK,
         "Javadoc 1.6 URL",
         "URL for the Java 1.6 API, for generating links to library classes.");

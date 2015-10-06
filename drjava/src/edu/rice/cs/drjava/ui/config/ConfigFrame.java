@@ -857,8 +857,6 @@ public class ConfigFrame extends SwingFrame {
     addOptionComponent(panel, 
                        newForcedChoiceOptionComponent(OptionConstants.JAVADOC_LINK_VERSION));
     addOptionComponent(panel, 
-                       newStringOptionComponent(OptionConstants.JAVADOC_1_5_LINK));
-    addOptionComponent(panel, 
                        newStringOptionComponent(OptionConstants.JAVADOC_1_6_LINK));
     addOptionComponent(panel, 
                        newStringOptionComponent(OptionConstants.JAVADOC_1_7_LINK));

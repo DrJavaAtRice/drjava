@@ -50,12 +50,11 @@ public enum JavaVersion {
   JAVA_8 { public String versionString() { return "8"; } },
   FUTURE { public String versionString() { return ">8"; } };
   
-  /**
-   * The currently-available Java version, based on the {@code "java.class.version"} property.  Ideally, a {@code true}
-   * result  for {@code JavaVersion.CURRENT.supports(v)} implies that all APIs associated with that version are
-   * available  at runtime.  However, we do not attempt to (and cannot, in general) guarantee that the boot class path
-   * or Java installation have not been modified to only support certain API classes.
-   */
+  /** The currently-available Java version, based on the {@code "java.class.version"} property.  Ideally, a {@code true}
+    * result  for {@code JavaVersion.CURRENT.supports(v)} implies that all APIs associated with that version are
+    * available  at runtime.  However, we do not attempt to (and cannot, in general) guarantee that the boot class path
+    * or Java installation have not been modified to only support certain API classes.
+    */
   public static final JavaVersion CURRENT = parseClassVersion(System.getProperty("java.class.version", ""));
   
   /** The currently-available Java version, based on the {@code "java.version"} property. */

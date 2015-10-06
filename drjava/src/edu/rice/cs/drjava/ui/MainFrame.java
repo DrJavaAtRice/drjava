@@ -1735,29 +1735,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       if (linkVersion.equals(JAVADOC_AUTO_TEXT)) {
         // use the compiler's version of the Java API Javadoc
         JavaVersion ver = _model.getCompilerModel().getActiveCompiler().version();
-        if (ver == JavaVersion.JAVA_1_4) linkVersion = JAVADOC_1_4_TEXT;
-        else if (ver == JavaVersion.JAVA_5) linkVersion = JAVADOC_1_5_TEXT;
-        else if (ver == JavaVersion.JAVA_6) linkVersion = JAVADOC_1_6_TEXT;
+        if (ver == JavaVersion.JAVA_6) linkVersion = JAVADOC_1_6_TEXT;
         else if (ver == JavaVersion.JAVA_7) linkVersion = JAVADOC_1_7_TEXT;
         else if (ver == JavaVersion.JAVA_8) linkVersion = JAVADOC_1_8_TEXT;
         else linkVersion = JAVADOC_1_7_TEXT;   // default
       }
-      if (linkVersion.equals(JAVADOC_1_3_TEXT)) {
-        base = DrJava.getConfig().getSetting(JAVADOC_1_3_LINK) + "/";
-        stripPrefix = ""; // nothing needs to be stripped, links in 1.3 Javadoc are relative
-        suffix = "/allclasses-1.3.html";
-      }
-      else if (linkVersion.equals(JAVADOC_1_4_TEXT)) {
-        base = DrJava.getConfig().getSetting(JAVADOC_1_4_LINK) + "/";
-        stripPrefix = ""; // nothing needs to be stripped, links in 1.4 Javadoc are relative
-        suffix = "/allclasses-1.4.html";
-      }
-      else if (linkVersion.equals(JAVADOC_1_5_TEXT)) {
-        base = DrJava.getConfig().getSetting(JAVADOC_1_5_LINK) + "/";
-        stripPrefix = ""; // nothing needs to be stripped, links in 1.5 Javadoc are relative
-        suffix = "/allclasses-1.5.html";
-      }
-      else if (linkVersion.equals(JAVADOC_1_6_TEXT)) {
+      if (linkVersion.equals(JAVADOC_1_6_TEXT)) {
         // at one point, the links in the 1.6 Javadoc were absolute, and this is how we dealt with that
         // base = ""; // links in 1.6 Javadoc are absolute, so nothing needs to be added to get an absolute URL
         // // but we do need to strip the absolute part to get correct fully-qualified class names
@@ -3529,36 +3512,36 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       DrJava.getConfig().addOptionListener(JAVADOC_API_REF_VERSION, choiceOptionListener);
       
       // The OptionListener for JAVADOC_XXX_LINK.
-      OptionListener<String> link13OptionListener = new OptionListener<String>() {
-        public void optionChanged(OptionEvent<String> oce) {
-          String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
-          if (linkVersion.equals(JAVADOC_1_3_TEXT) ||
-              linkVersion.equals(JAVADOC_AUTO_TEXT)) {
-            clearJavaAPISet();
-          }
-        }
-      };
-      DrJava.getConfig().addOptionListener(JAVADOC_1_3_LINK, link13OptionListener);
-      OptionListener<String> link14OptionListener = new OptionListener<String>() {
-        public void optionChanged(OptionEvent<String> oce) {
-          String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
-          if (linkVersion.equals(JAVADOC_1_4_TEXT) ||
-              linkVersion.equals(JAVADOC_AUTO_TEXT)) {
-            clearJavaAPISet();
-          }
-        }
-      };
-      DrJava.getConfig().addOptionListener(JAVADOC_1_4_LINK, link14OptionListener);
-      OptionListener<String> link15OptionListener = new OptionListener<String>() {
-        public void optionChanged(OptionEvent<String> oce) {
-          String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
-          if (linkVersion.equals(JAVADOC_1_5_TEXT) ||
-              linkVersion.equals(JAVADOC_AUTO_TEXT)) {
-            clearJavaAPISet();
-          }
-        }
-      };
-      DrJava.getConfig().addOptionListener(JAVADOC_1_5_LINK, link15OptionListener);
+//      OptionListener<String> link13OptionListener = new OptionListener<String>() {
+//        public void optionChanged(OptionEvent<String> oce) {
+//          String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
+//          if (linkVersion.equals(JAVADOC_1_3_TEXT) ||
+//              linkVersion.equals(JAVADOC_AUTO_TEXT)) {
+//            clearJavaAPISet();
+//          }
+//        }
+//      };
+//      DrJava.getConfig().addOptionListener(JAVADOC_1_3_LINK, link13OptionListener);
+//      OptionListener<String> link14OptionListener = new OptionListener<String>() {
+//        public void optionChanged(OptionEvent<String> oce) {
+//          String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
+//          if (linkVersion.equals(JAVADOC_1_4_TEXT) ||
+//              linkVersion.equals(JAVADOC_AUTO_TEXT)) {
+//            clearJavaAPISet();
+//          }
+//        }
+//      };
+//      DrJava.getConfig().addOptionListener(JAVADOC_1_4_LINK, link14OptionListener);
+//      OptionListener<String> link15OptionListener = new OptionListener<String>() {
+//        public void optionChanged(OptionEvent<String> oce) {
+//          String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
+//          if (linkVersion.equals(JAVADOC_1_5_TEXT) ||
+//              linkVersion.equals(JAVADOC_AUTO_TEXT)) {
+//            clearJavaAPISet();
+//          }
+//        }
+//      };
+//      DrJava.getConfig().addOptionListener(JAVADOC_1_5_LINK, link15OptionListener);
       
       OptionListener<String> link16OptionListener = new OptionListener<String>() {
         public void optionChanged(OptionEvent<String> oce) {

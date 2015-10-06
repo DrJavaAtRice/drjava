@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2015, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -296,12 +296,13 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     * an array here is used as the return type rather than an {@code Option<Object>} --
     * an empty array corresponds to "none," and a singleton array corresponds to a "some."
     */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked","rawtypes"})
   public Pair<Object,String>[] getVariable(String var) {
     synchronized(_stateLock) {
       InterpretResult ir = interpret(var);
       return ir.apply(new InterpretResult.Visitor<Pair<Object,String>[]>() {
         public Pair<Object,String>[] fail() { return new Pair[0]; }
+//        public Pair<Object,String>[] fail() { return (Pair<Object,String>[]) new Pair<?,?>[0]; }
         public Pair<Object,String>[] value(Object val) {
           return new Pair[] { new Pair<Object,String>(val, getClassName(val.getClass())) };
         }

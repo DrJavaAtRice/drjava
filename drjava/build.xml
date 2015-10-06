@@ -43,6 +43,7 @@
   <property name="java7-home" value="${env.JAVA7_HOME}" />
   <property name="java6-home" value="${env.JAVA6_HOME}" />
   <property name="java5-home" value="${env.JAVA5_HOME}" />
+  <echo message = "java.home = ${java.home}" />
   <property name="launch4j-home" value="${env.LAUNCH4J_HOME}" />
   <property name="clover-jar" value="${env.CLOVER_JAR}" />
   <property name="findbugs-home" value="${env.FINDBUGS_HOME}" />
@@ -69,7 +70,9 @@
 <!--  <extendclasspath path="lib/buildlib/junit.jar" /> -->
 
   <fileset id="libs" dir="lib" includes="*.jar" /> <!-- Only include jars that are at the top level (not in buildlib) -->
-  
+  <fileset id="jrelibs" dir="${java.home}/lib" includes="*.jar" /> 
+  <echo message="jrelibs = ${jrelibs}" />
+  <fileset id="extlibs" dir="${java.home}/lib/ext" includes="*.jar" /> 
   <!-- Use ConcJUnit if use-concjunit is not defined and we are not running Java 7. -->
   <!-- ConcJUnit is currently incompatible with Java 7. -->
   <if>
@@ -213,7 +216,7 @@
        Compilation Targets
        ******************* -->
        
-  <!-- The following target assumes that javac resolves a Java 7 compiler -->
+  <!-- The following target assumes that javac resolves a Java 8 compiler -->
   <target name="compile" depends="generate-source, do-compile, copy-resources, unjar-libs"
           description="Compile all source files (after generating the source)">
   </target>
@@ -231,17 +234,19 @@
     </move>
     
     <javac srcdir="src" destdir="classes/base" source="1.6" target="1.6"
-           bootclasspath="${java7-runtime}" sourcepath="" includeAntRuntime="no"
-           executable="javac" fork="yes" memoryMaximumSize="1024M"
-           debug="on" optimize="off" deprecation="on"	>
+           bootclasspath="${java8-runtime}" sourcepath="" includeAntRuntime="no"
+           executable="${java8-home}/bin/javac" fork="yes" memoryMaximumSize="1024M"
+           debug="on" optimize="off" deprecation="on" >
       <classpath>
         <!-- TODO: Remove this dependency on tools.jar by refactoring and moving all the dependent
              debugger code into the "platform" module -->
-        <pathelement location="${java7-tools}" />
+        <pathelement location="${java8-tools}" />
         <fileset refid="libs" />
+	<fileset refid="jrelibs" />
+        <fileset refid="extlibs" />
         <pathelement location="lib/buildlib/junit.jar" />
         <pathelement location="lib/buildlib/netbeans-memory-leak-utils.jar" />
-        <pathelement location="classes/base" />
+<!--    <pathelement location="classes/base" />  THIS directory is typically empty at the start of this step -->
       </classpath>
       <compilerarg value="-Xlint" />
       <!-- Ignore serial warnings, because they occur for every Throwable definition (among others) -->
