@@ -38,6 +38,7 @@ package edu.rice.cs.util.swing;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -197,7 +198,7 @@ public class FileSelectorStringComponent extends JPanel {
       _chooser.setSelectedFile(f);
     }
     int returnValue = _chooser.showDialog(_parent, null);
-    if (returnValue == FileChooser.APPROVE_OPTION) {
+    if (returnValue == JFileChooser.APPROVE_OPTION) {
       File chosen = _chooser.getSelectedFile();
       if (chosen != null) { setFileField(chosen); }
     }

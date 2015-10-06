@@ -45,7 +45,6 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.Set;
 import java.util.HashSet;
 import java.util.Collections;
 import java.util.jar.JarFile;
@@ -404,7 +403,6 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     
     String javaHome = System.getProperty("java.home");
     String envJavaHome = null;
-    String envJava7Home = null;
     String programFiles = null;
     String systemDrive = null;
     if (JavaVersion.CURRENT.supports(JavaVersion.JAVA_5)) {
@@ -729,6 +727,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
             descriptors = attemptToLoadDescriptor(descriptors, name);
           }
         }
+        jf.close();
       }
       else {
         final String DESC_PATH = "edu/rice/cs/drjava/model/compiler/descriptors";

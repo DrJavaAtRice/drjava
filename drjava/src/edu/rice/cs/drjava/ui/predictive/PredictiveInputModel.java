@@ -583,6 +583,7 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
    * @param strategy matching strategy to use
    * @param items varargs/array of items
    */
+  @SafeVarargs
   public PredictiveInputModel(boolean ignoreCase, MatchingStrategy<T> strategy, T... items) {
     _ignoreCase = ignoreCase;
     _strategy = strategy;
@@ -615,7 +616,8 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
   /** Sets the list
     * @param items varargs/array of items
     */
-  public void setItems(T... items) {
+  @SafeVarargs
+  public final void setItems(T... items) {
     _items = new ArrayList<T>(items.length);
     for(T s: items) _items.add(s);
     Collections.sort(_items);

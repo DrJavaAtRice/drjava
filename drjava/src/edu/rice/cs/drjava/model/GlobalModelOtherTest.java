@@ -552,7 +552,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     });
     
 //    Utilities.clearEventQueue();
-    assertInteractionsContains(DefaultGlobalModel.DOCUMENT_OUT_OF_SYNC_MSG);
+    assertInteractionsContains(AbstractGlobalModel.DOCUMENT_OUT_OF_SYNC_MSG);
     Utilities.clearEventQueue();  
     // Killing time here; Slave JVM may not have released Foo.class so that the file can be deleted on Windows.
     

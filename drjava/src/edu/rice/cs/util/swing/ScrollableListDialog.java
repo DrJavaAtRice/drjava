@@ -335,7 +335,6 @@ public class ScrollableListDialog<T> extends JDialog {
    * @param additional The list of components
    */
   protected void _addAdditionalComponents(JPanel buttonPanel, List<JComponent> additional) {
-    int i = 0;
     for (JComponent c: additional) {
       buttonPanel.add(c);
     }

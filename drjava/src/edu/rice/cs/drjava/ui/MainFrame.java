@@ -41,17 +41,16 @@ import javax.swing.border.*;
 import javax.swing.event.*;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.text.*;
+
 import java.awt.event.*;
 import java.awt.*;
 import java.awt.print.*;
 import java.awt.dnd.*;
 import java.beans.*;
-
 import java.io.*;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
@@ -76,7 +75,6 @@ import edu.rice.cs.drjava.DrJavaRoot;
 import edu.rice.cs.drjava.RemoteControlClient;
 import edu.rice.cs.drjava.RemoteControlServer;
 import edu.rice.cs.drjava.platform.*;
-import edu.rice.cs.drjava.config.FileConfiguration;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.compiler.CompilerListener;
@@ -96,15 +94,12 @@ import edu.rice.cs.drjava.ui.avail.*;
 import edu.rice.cs.drjava.ui.ClipboardHistoryFrame;
 import edu.rice.cs.drjava.ui.RegionsTreePanel;
 import edu.rice.cs.drjava.project.*;
-
 import edu.rice.cs.plt.concurrent.JVMBuilder;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.iter.IterUtil;
-import edu.rice.cs.plt.lambda.DelayedThunk;
 import edu.rice.cs.plt.lambda.*;
 import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.plt.tuple.Pair;
-
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.docnavigation.*;
 import edu.rice.cs.drjava.model.FileMovedException;
@@ -115,17 +110,14 @@ import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.swing.*;
-import edu.rice.cs.util.swing.ProcessingDialog;
 import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.text.SwingDocument;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.XMLConfig;
-
 import static edu.rice.cs.drjava.config.OptionConstants.KEY_NEW_CLASS_FILE;
 import static edu.rice.cs.drjava.ui.RecentFileManager.*;
 import static edu.rice.cs.drjava.ui.predictive.PredictiveInputModel.*;
 import static edu.rice.cs.util.XMLConfig.XMLConfigException;
-import static edu.rice.cs.plt.object.ObjectUtil.hash;
 import static edu.rice.cs.drjava.ui.MainFrameStatics.*;
 
 /** DrJava's main window. */
@@ -2286,8 +2278,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private final Action _newDrJavaInstanceAction = new AbstractAction("New DrJava Instance...") {
     public void actionPerformed(ActionEvent ae) {
       try {
-        Process p = JVMBuilder.DEFAULT.classPath(FileOps.getDrJavaFile()).
-          start(DrJava.class.getName(), "-new");
+        JVMBuilder.DEFAULT.classPath(FileOps.getDrJavaFile()).start(DrJava.class.getName(), "-new");
       }
       catch(IOException ioe) { MainFrameStatics.showIOError(MainFrame.this, ioe); }
     }
@@ -4863,7 +4854,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     int result = chooser.showDialog(openDir);
     File dir = chooser.getSelectedDirectory();    
     chooser.removeChoosableFileFilter(ff);
-    if (result != DirectoryChooser.APPROVE_OPTION)  return; // canceled or error
+    if (result != JFileChooser.APPROVE_OPTION)  return; // canceled or error
     
     boolean rec = _openRecursiveCheckBox.isSelected();
     DrJava.getConfig().setSetting(OptionConstants.OPEN_FOLDER_RECURSIVE, Boolean.valueOf(rec));
@@ -7405,8 +7396,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _interactionsController.setNextPaneAction(_switchToNextPaneAction);
     
     JScrollPane interactionsScroll = 
-      new BorderlessScrollPane(_interactionsPane, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-                               JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+      new BorderlessScrollPane(_interactionsPane, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
+                               ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     _interactionsContainer.add(interactionsScroll, BorderLayout.CENTER);
     
     if (_showDebugger) {
@@ -8048,8 +8039,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     // Add to a scroll pane
     final JScrollPane scroll = 
-      new BorderlessScrollPane(pane, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
-                               JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+      new BorderlessScrollPane(pane, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, 
+                               ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     pane.setScrollPane(scroll);
     //scroll.setBorder(null); // removes all default borders (MacOS X installs default borders)
     
@@ -10306,7 +10297,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           EventQueue.invokeLater(new Runnable() { 
             public void run() { // interpret with the added import
               try {
-                im.append(code, InteractionsDocument.DEFAULT_STYLE);
+                im.append(code, ConsoleDocument.DEFAULT_STYLE);
                 im.interpretCurrentInteraction();
               }
               finally { hourglassOff(); }

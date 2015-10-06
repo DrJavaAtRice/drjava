@@ -37,8 +37,6 @@
 package edu.rice.cs.drjava.config;
 
 import java.util.HashMap;
-import java.util.ResourceBundle;
-import java.util.MissingResourceException;
 
 /** The association of an OptionName with the ability to parse something to type T; the intended type 
   * parameterization is covariant: if U extends T, then OptionParser<U> extends OptionParser<T>.

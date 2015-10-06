@@ -38,12 +38,10 @@ package edu.rice.cs.drjava.model.repl;
 
 import java.io.*;
 import java.net.ServerSocket;
-import java.util.List;
 import java.util.ArrayList;
 import java.util.HashSet;
 
 import javax.swing.text.BadLocationException;
-import java.awt.EventQueue;
 
 import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
 import edu.rice.cs.drjava.ui.InteractionsPane;
@@ -52,7 +50,6 @@ import edu.rice.cs.util.Log;
 import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.*;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.ConsoleDocumentInterface;
 import edu.rice.cs.util.text.ConsoleDocument;
@@ -258,7 +255,6 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     final StringBuilder sb = new StringBuilder();
     
     for(String s: classes) {
-      String name = s.trim();
       if (s.length() > 0) {
         sb.append("import ");
         sb.append(s.trim());
@@ -290,7 +286,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   }
   
   /** Appends a newLine to _document assuming that the Write Lock is already held.  Must run in the event thread. */
-  public void _addNewline() { append(StringOps.NEWLINE, InteractionsDocument.DEFAULT_STYLE); }
+  public void _addNewline() { append(StringOps.NEWLINE, ConsoleDocument.DEFAULT_STYLE); }
   
   /** Interprets the given command.
     * @param toEval command to be evaluated. */
@@ -383,7 +379,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     }
     String text = buf.toString().trim();
 //          System.err.println("Histtory is: '" + text + "'");
-    append(text, InteractionsDocument.DEFAULT_STYLE);
+    append(text, ConsoleDocument.DEFAULT_STYLE);
     interpretCurrentInteraction();  
 //    System.err.println("Interpreting loaded history");
     
@@ -531,7 +527,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     */
   public void replSystemOutPrint(final String s) {
     Utilities.invokeLater(new Runnable() {
-      public void run() { _document.insertBeforeLastPrompt(s, InteractionsDocument.SYSTEM_OUT_STYLE); }
+      public void run() { _document.insertBeforeLastPrompt(s, ConsoleDocument.SYSTEM_OUT_STYLE); }
     });
     if (delayCount == 0) {
       scrollToCaret();
@@ -548,7 +544,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     */
   public void replSystemErrPrint(final String s) {
       Utilities.invokeLater(new Runnable() {
-        public void run() { _document.insertBeforeLastPrompt(s, InteractionsDocument.SYSTEM_ERR_STYLE); } 
+        public void run() { _document.insertBeforeLastPrompt(s, ConsoleDocument.SYSTEM_ERR_STYLE); } 
       });
       if (delayCount == 0) {
         scrollToCaret();
@@ -854,7 +850,6 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     final StringBuilder sb = new StringBuilder();
     
     for(String s: classes) {
-      String name = s.trim();
       if (s.length() > 0) {
         sb.append("import ");
         sb.append(s.trim());

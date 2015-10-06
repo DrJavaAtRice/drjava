@@ -44,15 +44,13 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.Version;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.FileConfiguration;
+
 import javax.swing.*;
 import javax.swing.border.*;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.ChangeEvent;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.*;
 import java.awt.*;
-
 import java.io.*;
 import java.net.URL;
 import java.util.Map;
@@ -109,7 +107,7 @@ public class AboutDialog extends JDialog implements ActionListener {
 
   public void buildGUI(Container cp) {
     cp.setLayout(new BorderLayout());
-    JLabel drjava = createImageLabel(DRJAVA,JLabel.LEFT);
+    JLabel drjava = createImageLabel(DRJAVA,SwingConstants.LEFT);
     if (drjava != null) {
       drjava.setBorder(new CompoundBorder(new EmptyBorder(5,5,5,5), drjava.getBorder()));
       drjava.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -268,7 +266,7 @@ public class AboutDialog extends JDialog implements ActionListener {
   }
 
   public static JPanel createBorderedLabel(ImageInfo info, EmptyBorder pad) {
-    JLabel label = createImageLabel(info,JLabel.CENTER);
+    JLabel label = createImageLabel(info,SwingConstants.CENTER);
     if (label == null) return null;
     JPanel panel = new JPanel(new GridLayout(1,1));
     panel.setOpaque(true);

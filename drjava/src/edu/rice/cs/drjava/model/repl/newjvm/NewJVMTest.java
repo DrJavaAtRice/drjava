@@ -47,8 +47,6 @@ import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import java.io.StringWriter;
-import java.io.PrintWriter;
 import java.rmi.RemoteException;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;

@@ -38,7 +38,6 @@ package edu.rice.cs.util;
 
 import java.io.*;
 import java.util.*;
-import java.util.jar.*;
 import java.security.*;
 
 /** Create a property file with MD5 checksums

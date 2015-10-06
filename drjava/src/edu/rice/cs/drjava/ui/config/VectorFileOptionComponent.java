@@ -39,11 +39,7 @@ package edu.rice.cs.drjava.ui.config;
 
 import java.awt.event.*;
 import java.io.File;
-import javax.swing.filechooser.FileFilter;
 import javax.swing.*;
-
-import java.util.Vector;
-import java.util.List;
 
 import edu.rice.cs.drjava.ui.*;
 import edu.rice.cs.drjava.config.*;

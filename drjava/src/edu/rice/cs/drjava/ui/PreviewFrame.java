@@ -40,6 +40,7 @@ import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.border.MatteBorder;
 import javax.swing.border.EmptyBorder;
+
 import java.awt.event.*;
 import java.awt.*;
 import java.awt.print.*;
@@ -184,8 +185,8 @@ public abstract class PreviewFrame extends SwingFrame {
     //zooming modification
     _previewScroll = new JScrollPane(previewHolder);
     //_previewScroll = new JScrollPane(cp);
-    _previewScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-    _previewScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+    _previewScroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    _previewScroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
     tbCont.add(_toolBar,BorderLayout.NORTH);
     tbCont.add(Box.createVerticalStrut(10),BorderLayout.SOUTH);
     tbCont.setBorder(new EmptyBorder(0,0,5,0));

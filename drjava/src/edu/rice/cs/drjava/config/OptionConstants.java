@@ -51,7 +51,6 @@ import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
 import edu.rice.cs.drjava.platform.PlatformFactory;
-import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.util.FileOps;
 
 import static java.awt.Event.*;

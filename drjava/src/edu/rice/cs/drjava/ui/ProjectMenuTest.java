@@ -52,7 +52,6 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
 
 import java.awt.EventQueue;
-import java.awt.Toolkit;
 import java.io.*;
 import java.util.List;
 

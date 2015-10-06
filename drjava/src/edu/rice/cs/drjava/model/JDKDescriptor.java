@@ -45,7 +45,6 @@ import java.util.Collections;
 
 import edu.rice.cs.drjava.model.JDKToolsLibrary;
 import edu.rice.cs.plt.reflect.JavaVersion;
-import edu.rice.cs.plt.reflect.JavaVersion.FullVersion;
 import edu.rice.cs.plt.iter.IterUtil;
 
 /** A description of a JDK.
@@ -200,15 +199,20 @@ public abstract class JDKDescriptor {
       if (jarOrDir.isFile()) {
         try {
           JarFile jf = new JarFile(jarOrDir);
-          for(String fn: fileNames) {
-            if (jf.getJarEntry(fn) == null) return false;
+          for (String fn: fileNames) {
+
+            if (jf.getJarEntry(fn)==null) {
+              jf.close();
+              return false;
+            }
           }
+          jf.close();
           return true;
         }
         catch(IOException ioe) { return false; }
       }
       else if (jarOrDir.isDirectory()) {
-        for(String fn: fileNames) {
+        for (String fn: fileNames) {
           if (!(new File(jarOrDir,fn).exists())) return false;
         }
         return true;
@@ -230,10 +234,8 @@ public abstract class JDKDescriptor {
         }
         throw new FileNotFoundException("None of "+IterUtil.toString(IterUtil.make(fileNames), "", ", ", "") +
                                         " found in " + dir);
-
       }
       throw new FileNotFoundException(dir + " is not a directory");
-
     }
   }
 }

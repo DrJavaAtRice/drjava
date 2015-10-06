@@ -47,7 +47,6 @@ import java.util.*;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
-import edu.rice.cs.drjava.config.Option;
 import edu.rice.cs.drjava.model.DJError;
 import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
@@ -61,7 +60,6 @@ import edu.rice.cs.util.swing.ScrollableListDialog;
 import edu.rice.cs.util.swing.Utilities;
 
 import edu.rice.cs.javalanglevels.*;
-import edu.rice.cs.javalanglevels.parser.*;
 import edu.rice.cs.javalanglevels.tree.*;
 
 import edu.rice.cs.plt.io.IOUtil;
@@ -69,8 +67,6 @@ import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.collect.CollectUtil;
 // import edu.rice.cs.plt.tuple.Pair;  
 // TODO: use the preceding pair class instead of javalanglevels.Pair; must change javalanglevels code as well 
-
-import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /** Default implementation of the CompilerModel interface. This implementation is used for normal DrJava execution
   * (as opposed to testing DrJava).

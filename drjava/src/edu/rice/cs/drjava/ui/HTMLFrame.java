@@ -40,6 +40,7 @@ import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.border.*;
 import javax.swing.text.html.*;
+
 import java.awt.event.*;
 import java.awt.*;
 import java.net.*;
@@ -152,7 +153,7 @@ public class HTMLFrame extends SwingFrame {
   private static JButton makeButton(Action a, int horTextPos, int left, int right) {
     JButton j = new JButton(a);
     j.setHorizontalTextPosition(horTextPos);
-    j.setVerticalTextPosition(JButton.CENTER);
+    j.setVerticalTextPosition(SwingConstants.CENTER);
     //Insets i = j.getMargin();
     //j.setMargin(new Insets(i.top,left,i.bottom,right));
     j.setMargin(new Insets(3,left+3,3,right+3));
@@ -189,8 +190,8 @@ public class HTMLFrame extends SwingFrame {
     _splitPaneHolder.add(_splitPane);
     // _splitPane.setBorder(new CompoundBorder(new EmptyBorder(0,5,0,5),_splitPane.getBorder()));
     _closeButton = new JButton(_closeAction);
-    _backButton = makeButton(_backAction,JButton.RIGHT,0,3);
-    _forwardButton = makeButton(_forwardAction,JButton.LEFT,3,0);
+    _backButton = makeButton(_backAction,SwingConstants.RIGHT,0,3);
+    _forwardButton = makeButton(_forwardAction,SwingConstants.LEFT,3,0);
     _backAction.setEnabled(false);
     _forwardAction.setEnabled(false);
     _closePanel = new JPanel(new BorderLayout());

@@ -132,7 +132,7 @@ public class DrJavaRestart {
                     dest.getAbsolutePath());
           }
           LOG.log("Restarting...");
-          Process p = JVMBuilder.DEFAULT.classPath(exec).start(DrJava.class.getName(), "-new", "-delete-after-restart", args[2]);
+          JVMBuilder.DEFAULT.classPath(exec).start(DrJava.class.getName(), "-new", "-delete-after-restart", args[2]);
           LOG.log("Done with DrJavaRestart");
           System.exit(0);
         }
@@ -201,7 +201,7 @@ public class DrJavaRestart {
           }
           if (macOpenFile.exists()) {
             LOG.log("Restarting using ProcessBuilder...");
-            Process p = new ProcessBuilder()
+            new ProcessBuilder()
               .command(macOpenFile.getAbsolutePath(), exec.getAbsolutePath())
               .redirectErrorStream(true)
               .start();
@@ -210,7 +210,7 @@ public class DrJavaRestart {
           else {
             LOG.log("Restarting using JVMBuilder...");
             exec = new File(exec,"Contents/Resources/Java/drjava.jar");
-            Process p = JVMBuilder.DEFAULT.classPath(exec).start(DrJava.class.getName(), "-new", "-delete-after-restart", args[2]);
+            JVMBuilder.DEFAULT.classPath(exec).start(DrJava.class.getName(), "-new", "-delete-after-restart", args[2]);
             LOG.log("Done with DrJavaRestart");
             System.exit(0);
           }

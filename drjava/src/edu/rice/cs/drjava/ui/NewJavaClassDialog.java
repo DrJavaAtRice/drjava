@@ -44,25 +44,14 @@ import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.Color;
 import java.awt.EventQueue;
-import java.io.IOException;
-import java.io.File;
-import java.net.URL;
-import java.util.*;
 import javax.swing.*;
-import javax.swing.event.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.Dimension;
 import javax.swing.text.JTextComponent;
-import javax.swing.text.BadLocationException;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.config.OptionConstants;
-import edu.rice.cs.drjava.ui.predictive.PredictiveInputFrame;
-import edu.rice.cs.drjava.ui.predictive.PredictiveInputModel;
-import edu.rice.cs.drjava.model.DummyOpenDefDoc;
-import edu.rice.cs.drjava.platform.PlatformFactory;
-import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 
 import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.plt.lambda.Runnable3;
@@ -72,7 +61,6 @@ import edu.rice.cs.util.swing.SwingFrame;
 import edu.rice.cs.util.swing.Utilities;
 
 import static edu.rice.cs.drjava.ui.MainFrameStatics.*;
-import static edu.rice.cs.drjava.ui.predictive.PredictiveInputModel.*;
 
 /** Generates Java source from information entered in the "New Class" dialog.
   * @version $Id$

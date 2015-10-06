@@ -38,7 +38,9 @@ package edu.rice.cs.drjava.ui.config;
 
 import java.awt.*;
 import java.awt.event.*;
+
 import javax.swing.*;
+
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.*;
 import edu.rice.cs.util.swing.SwingFrame;
@@ -85,7 +87,7 @@ public class ColorOptionComponent extends OptionComponent<Color,JPanel> {
     
     _colorField = new JTextField();
     _colorField.setEditable(false);
-    _colorField.setHorizontalAlignment(JTextField.CENTER);
+    _colorField.setHorizontalAlignment(SwingConstants.CENTER);
     _panel = new JPanel(new BorderLayout());
     _panel.add(_colorField, BorderLayout.CENTER);
     _panel.add(_button, BorderLayout.EAST);

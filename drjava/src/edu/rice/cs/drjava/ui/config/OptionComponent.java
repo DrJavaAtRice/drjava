@@ -37,8 +37,8 @@
 package edu.rice.cs.drjava.ui.config;
 
 import javax.swing.*;
-import java.awt.*;
 
+import java.awt.*;
 import java.io.Serializable;
 import java.util.Vector;
 
@@ -64,7 +64,7 @@ public abstract class OptionComponent<T,C extends JComponent> implements Seriali
     _option = option;
     _labelText = labelText;
     _label = new JLabel(_labelText);
-    _label.setHorizontalAlignment(JLabel.RIGHT);
+    _label.setHorizontalAlignment(SwingConstants.RIGHT);
     _parent = parent;
     if (option != null) {
       DrJava.getConfig().addOptionListener(option, new OptionListener<T>() {

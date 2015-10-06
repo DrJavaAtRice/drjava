@@ -40,15 +40,9 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.table.*;
-import javax.swing.*;
-
 import java.util.*;
 
-import edu.rice.cs.drjava.*;
-import edu.rice.cs.drjava.ui.*;
 import edu.rice.cs.drjava.config.*;
-import edu.rice.cs.util.swing.SwingFrame;
-import edu.rice.cs.util.swing.CheckBoxJList;
 import edu.rice.cs.util.swing.SwingFrame;
 import edu.rice.cs.util.swing.Utilities;
 

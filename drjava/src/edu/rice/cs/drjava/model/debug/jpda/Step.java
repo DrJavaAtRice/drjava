@@ -40,8 +40,6 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.debug.DebugException;
 
-import java.util.StringTokenizer;
-
 import com.sun.jdi.*;
 import com.sun.jdi.request.*;
 

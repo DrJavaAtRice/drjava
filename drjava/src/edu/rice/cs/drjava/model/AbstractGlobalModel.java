@@ -83,7 +83,6 @@ import javax.swing.text.Style;
 import javax.swing.ProgressMonitor;
 
 import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.DrJavaRoot;
 import edu.rice.cs.drjava.config.Option;
 import edu.rice.cs.drjava.config.OptionParser;
 import edu.rice.cs.drjava.config.OptionConstants;
@@ -947,7 +946,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public void setCustomManifest(String manifest) { _manifest = manifest; }
   }
   
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   protected void removePreviousListeners() {
     for(Map.Entry<OptionParser<?>, OptionListener<?>> e: LISTENERS_TO_REMOVE.entrySet()) {
       // all keys should be full Option instances, not just OptionParser instances
@@ -958,7 +957,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     LISTENERS_TO_REMOVE.clear();
   }
   
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   protected void addNewListeners(Map<OptionParser<?>,String> newValues) {
     for(OptionParser<?> key: newValues.keySet()) {
       // all keys should be full Option instances, not just OptionParser instances
@@ -1426,15 +1425,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         _notifier.handleAlreadyOpenDocument(d);
         _notifier.fileOpened(d);
       }
-    }                                   
+    }
     
-    if (retDocs != null) {
-      return retDocs.toArray(new OpenDefinitionsDocument[0]);
-    }
-    else {
-      //if we didn't open any files, then it's just as if they cancelled it...
-      throw new OperationCanceledException();
-    }
+    return retDocs.toArray(new OpenDefinitionsDocument[0]);
   }
   
   
@@ -1649,7 +1642,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     * @param file where to save the project
     * @param info
     */
-  @SuppressWarnings("unchecked")
   public ProjectProfile _makeProjectProfile(File file, HashMap<OpenDefinitionsDocument, DocumentInfoGetter> info) 
     throws IOException {    
     ProjectProfile builder = new ProjectProfile(file);
@@ -2108,7 +2100,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     _bookmarkManager.removeRegions(doc);
     
     // The following copy operation is dictated by the silly "no comodification" constraint on Collection iterators
-    @SuppressWarnings("unchecked")
     List<RegionManager<MovingDocumentRegion>> managers = new ArrayList<RegionManager<MovingDocumentRegion>>(_findResultsManagers);
     for (RegionManager<MovingDocumentRegion> rm: managers) rm.removeRegions(doc);
     doc.clearBrowserRegions();

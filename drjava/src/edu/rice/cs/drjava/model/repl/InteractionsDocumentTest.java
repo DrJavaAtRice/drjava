@@ -37,6 +37,7 @@
 package edu.rice.cs.drjava.model.repl;
 
 import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.text.EditDocumentException;
 
 /** Tests the functionality of the InteractionsDocument.  Most history functionality is tested in HistoryTest.
@@ -62,7 +63,7 @@ public final class InteractionsDocumentTest extends DrJavaTestCase {
     int origLength = _doc.getLength();
 
     // Try to insert into the banner
-    _doc.insertText(1, "text", InteractionsDocument.DEFAULT_STYLE);
+    _doc.insertText(1, "text", ConsoleDocument.DEFAULT_STYLE);
     assertEquals("Number of beeps", 1, testBeep.numBeeps);
     assertEquals("Doc length", origLength, _doc.getLength());
   }
@@ -70,8 +71,8 @@ public final class InteractionsDocumentTest extends DrJavaTestCase {
   /** Tests that clear current interaction works. */
   public void testClearCurrent() throws EditDocumentException {
     int origLength = _doc.getLength();
-    _doc.insertText(origLength, "text", InteractionsDocument.DEFAULT_STYLE);
-    _doc.insertBeforeLastPrompt("before", InteractionsDocument.DEFAULT_STYLE);
+    _doc.insertText(origLength, "text", ConsoleDocument.DEFAULT_STYLE);
+    _doc.insertBeforeLastPrompt("before", ConsoleDocument.DEFAULT_STYLE);
     assertEquals("Length after inserts", origLength + 10, _doc.getLength()); // orig + "before" + "text"
     _doc.clearCurrentInteraction();
     assertEquals("Length after clear", origLength + 6, _doc.getLength()); // orig + "before"
@@ -84,8 +85,8 @@ public final class InteractionsDocumentTest extends DrJavaTestCase {
     String newBanner = "THIS IS A NEW BANNER\n";
     assertEquals("Contents before insert", banner + prompt, _doc.getDocText(0, _doc.getLength()));
     // Insert some text
-    _doc.insertText(_doc.getLength(), "text", InteractionsDocument.DEFAULT_STYLE);
-    _doc.insertBeforeLastPrompt("before", InteractionsDocument.DEFAULT_STYLE);
+    _doc.insertText(_doc.getLength(), "text", ConsoleDocument.DEFAULT_STYLE);
+    _doc.insertBeforeLastPrompt("before", ConsoleDocument.DEFAULT_STYLE);
     assertEquals("Contents before reset", banner + "before" + prompt + "text",  
                  _doc.getDocText(0, _doc.getLength()));
     _doc.reset(newBanner);
@@ -95,7 +96,7 @@ public final class InteractionsDocumentTest extends DrJavaTestCase {
   /** Tests that inserting a newline works. */
   public void testInsertNewline() throws EditDocumentException {
     int origLength = _doc.getLength();
-    _doc.insertText(origLength, "command", InteractionsDocument.DEFAULT_STYLE);
+    _doc.insertText(origLength, "command", ConsoleDocument.DEFAULT_STYLE);
     assertEquals("current interaction before newline", "command", _doc.getCurrentInteraction());
     _doc.insertNewline(origLength + 2);
     assertEquals("current interaction after newline", "co" + "\n" /* formerly StringOps.EOL */ + "mmand",

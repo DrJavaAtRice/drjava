@@ -129,7 +129,7 @@ public class ExternalProcessPanel extends AbortablePanel {
         public void run() {
           while((_is != null) || (_erris != null)) {
             try {
-              Thread.sleep(edu.rice.cs.drjava.DrJava.getConfig().
+              Thread.sleep((long) edu.rice.cs.drjava.DrJava.getConfig().
                              getSetting(edu.rice.cs.drjava.config.OptionConstants.FOLLOW_FILE_DELAY));
             }
             catch(InterruptedException ie) { /* ignore */ }

@@ -716,8 +716,6 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
       equals(OptionConstants.ConcJUnitCheckChoices.ALL);
     boolean noLucky = DrJava.getConfig().getSetting(OptionConstants.CONCJUNIT_CHECKS_ENABLED).
       equals(OptionConstants.ConcJUnitCheckChoices.NO_LUCKY);
-    boolean onlyThreads = DrJava.getConfig().getSetting(OptionConstants.CONCJUNIT_CHECKS_ENABLED).
-      equals(OptionConstants.ConcJUnitCheckChoices.ONLY_THREADS);
     boolean none = DrJava.getConfig().getSetting(OptionConstants.CONCJUNIT_CHECKS_ENABLED).
       equals(OptionConstants.ConcJUnitCheckChoices.NONE);
     // "threads" is enabled as long as the setting isn't NONE

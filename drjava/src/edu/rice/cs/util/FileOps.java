@@ -377,6 +377,7 @@ public abstract class FileOps {
     }
     
     stream.close();
+    buffered.close();
     return out.toByteArray();
   }
   
@@ -1237,8 +1238,10 @@ public abstract class FileOps {
           // now let's check if it contains DrJava
           if (jf.getJarEntry(edu.rice.cs.drjava.DrJava.class.getName().replace('.', '/') + ".class") != null) {
             found = f;
+            jf.close();
             break;
           }
+          jf.close();
         }
       }
       catch(IOException e) { /* ignore, we'll continue with the next classpath item */ }

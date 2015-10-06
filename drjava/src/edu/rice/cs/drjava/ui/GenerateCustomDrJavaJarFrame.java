@@ -42,7 +42,6 @@ import java.io.*;
 import java.util.zip.*;
 import java.util.*;
 import javax.swing.*;
-import javax.swing.event.*;
 import javax.swing.border.EmptyBorder;
 
 import edu.rice.cs.util.*;
@@ -251,7 +250,6 @@ public class GenerateCustomDrJavaJarFrame extends SwingFrame {
             sb.setLength(0);
             new Thread() {
               public void run() {
-                boolean result = true;
                 try {
                   final ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(jarOut));
                   final Runnable noRunnable = new Runnable() {
@@ -528,6 +526,7 @@ public class GenerateCustomDrJavaJarFrame extends SwingFrame {
         }
       }
     }
+    zf.close();
     return result;
   }
   
