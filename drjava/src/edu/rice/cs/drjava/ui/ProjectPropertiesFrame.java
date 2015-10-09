@@ -49,14 +49,9 @@ import javax.swing.event.*;
 import javax.swing.border.EmptyBorder;
 
 import edu.rice.cs.drjava.model.SingleDisplayModel;
-import edu.rice.cs.drjava.config.Option;
 import edu.rice.cs.drjava.config.OptionParser;
 import edu.rice.cs.drjava.config.OptionConstants;
-import edu.rice.cs.drjava.config.OptionListener;
-import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.ui.config.*;
-import edu.rice.cs.drjava.DrJava;
-
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.collect.CollectUtil;
 import edu.rice.cs.plt.lambda.Runnable1;
@@ -64,14 +59,11 @@ import edu.rice.cs.plt.lambda.LambdaUtil;
 
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.AbsRelFile;
-import edu.rice.cs.util.swing.FileSelectorComponent;
 import edu.rice.cs.util.swing.DirectorySelectorComponent;
 import edu.rice.cs.util.swing.DirectoryChooser;
 import edu.rice.cs.util.swing.FileChooser;
 import edu.rice.cs.util.swing.SwingFrame;
 import edu.rice.cs.util.swing.Utilities;
-
-import javax.swing.filechooser.FileFilter;
 
 /** A frame for setting Project Preferences */
 public class ProjectPropertiesFrame extends SwingFrame {

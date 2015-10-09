@@ -64,17 +64,27 @@ public class DocumentRegion implements OrderedDocumentRegion {
   }
   
   /** Defines the equality relation on DocumentRegions.  This equivalence relation is consistent with the equivalence
-    * relation induced by the compareTo method.
+    * relation induced by the compareTo method.  NOTE: using DocumentRegions as hash keys does not work because this
+    * class is mutable and this class does not override hashCode (which would not work anyway!).
     */
+  @Override
   public final boolean equals(Object o) {
     if (o == null || ! (o instanceof IDocumentRegion)) return false;
     IDocumentRegion r = (IDocumentRegion) o;
     return getDocument() == r.getDocument() && getStartOffset() == r.getStartOffset() && getEndOffset() == r.getEndOffset();
   }
   
+  /** A trivial override of hashCode to satisfy javac, which complains if hashCode is not overridden.
+    * WARNING: This overriding leaves the hashCode function unchanged making it inconsisent with equality.  Hence, only
+    * Identity based hash tables should use this type as keys. Since this class is mutable, there is NO overriding of 
+    * hashCode that will work for conventional (equals-based) hash tables.*/
+  @Override
+  public final int hashCode() { return super.hashCode(); }
+  
   /** Totally orders regions lexicographically based on (_doc, endOffset, startOffset). This method is typically applied
     * to regions within the same document. 
     */
+  @Override
   public int compareTo(OrderedDocumentRegion r) {
     int docRel = getDocument().compareTo(r.getDocument());
     if (docRel != 0) return docRel;
@@ -90,9 +100,6 @@ public class DocumentRegion implements OrderedDocumentRegion {
     int start2 = r.getStartOffset();
     return start1 - start2;
   }
-  
-  /** WARNING: The hashCode function is left unchanged making it inconsisent with equality.  Hence, only Identity based 
-    * hash tables should use this type as keys. */
   
   /** @return the document, or null if it hasn't been established yet */
   public OpenDefinitionsDocument getDocument() { return _doc; }

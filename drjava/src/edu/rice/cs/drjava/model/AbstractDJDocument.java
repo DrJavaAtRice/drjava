@@ -144,7 +144,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   
   /** Constructor used in super calls from DefinitionsDocument and InteractionsDJDocument. */
   protected AbstractDJDocument() { 
-    this(new Indenter(DrJava.getConfig().getSetting(INDENT_LEVEL).intValue()));
+    this(new Indenter(DrJava.getConfig().getSetting(INDENT_INC).intValue()));
   }
   
   /** Constructor used from anonymous test classes. */
@@ -179,13 +179,13 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * @param indent the size of indent that you want for the document
     */
   public void setIndent(final int indent) {
-    DrJava.getConfig().setSetting(INDENT_LEVEL, indent);
+    DrJava.getConfig().setSetting(INDENT_INC, indent);
     this._indent = indent;
   }
   
   protected void _removeIndenter() {
 //    System.err.println("REMOVE INDENTER called");
-    DrJava.getConfig().removeOptionListener(INDENT_LEVEL, _listener1);
+    DrJava.getConfig().removeOptionListener(INDENT_INC, _listener1);
     DrJava.getConfig().removeOptionListener(AUTO_CLOSE_COMMENTS, _listener2);
   }
   
@@ -197,7 +197,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
 //    System.err.println("Installing Indent Option Listener for " + this);
     _listener1 = new OptionListener<Integer>() {
       public void optionChanged(OptionEvent<Integer> oce) {
-//        System.err.println("Changing INDENT_LEVEL for " + this + " to " + oce.value);
+//        System.err.println("Changing INDENT_INC for " + this + " to " + oce.value);
         indenter.buildTree(oce.value);
       }
     };
@@ -205,11 +205,11 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     _listener2 = new OptionListener<Boolean>() {
       public void optionChanged(OptionEvent<Boolean> oce) {
 //        System.err.println("Reconfiguring indenter to use AUTO_CLOSE_COMMENTS = " + oce.value);
-        indenter.buildTree(DrJava.getConfig().getSetting(INDENT_LEVEL));
+        indenter.buildTree(DrJava.getConfig().getSetting(INDENT_INC));
       }
     };
     
-    DrJava.getConfig().addOptionListener(INDENT_LEVEL, _listener1);
+    DrJava.getConfig().addOptionListener(INDENT_INC, _listener1);
     DrJava.getConfig().addOptionListener(AUTO_CLOSE_COMMENTS, _listener2);
   }
   
@@ -969,10 +969,10 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
         setCurrentLocation(lineStart);
         // Indent, updating current location if necessary.
 //          Utilities.showDebug("Indenting line at offset " + selStart);
-        if (_indentLine(reason)) {
-          setCurrentLocation(oldPosition.getOffset()); // moves currentLocation back to original offset on line
-          if (onlySpacesBeforeCurrent()) move(_getWhiteSpace());  // passes any additional spaces before firstNonWS
-        }
+        _indentLine(reason);
+
+        setCurrentLocation(oldPosition.getOffset()); // moves currentLocation back to original offset on line
+        if (onlySpacesBeforeCurrent()) move(_getWhiteSpace());  // passes any additional spaces before firstNonWS
       }
       else _indentBlock(selStart, selEnd, reason, pm);
     }
@@ -1009,7 +1009,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       Position walkerPos = this.createUnwrappedPosition(walker);
       // Indent current line
       // We ignore current location info from each line, because it probably doesn't make sense in a block context.
-      _indentLine(reason);  // this operation is atomic
+      _indentLine(reason);  // this operation is atomic; boolean result is discarded
       // Move back to walker spot
       setCurrentLocation(walkerPos.getOffset());
       walker = walkerPos.getOffset();
@@ -1031,7 +1031,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   }
   
   /** Indents a line using the Indenter.  Public ONLY for testing purposes. */
-  public boolean _indentLine(Indenter.IndentReason reason) { return getIndenter().indent(this, reason); }
+  public void _indentLine(Indenter.IndentReason reason) { getIndenter().indent(this, reason); }
   
   /** Returns the "intelligent" beginning of line.  If currPos is to the right of the first 
     * non-whitespace character, the position of the first non-whitespace character is returned.  
@@ -1501,7 +1501,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
 //    */
 //  private boolean cachedPosInBlockComment(final int pos) {
 //    
-//    // Check cache
+//// Check cache
 //    final Query key = new Query.PosInBlockComment(pos);
 //    final Boolean cached = (Boolean) _checkCache(key);
 //    if (cached != null) return cached.booleanValue();

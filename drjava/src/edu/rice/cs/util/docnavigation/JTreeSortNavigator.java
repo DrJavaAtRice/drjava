@@ -269,12 +269,10 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
       addTopLevelGroupToRoot(parent);
     }
     
-    int countFolders = 0;
     int i;
     for (i = 0; i < numChildren; i++) {
       parentsKid = ((DefaultMutableTreeNode)parent.getChildAt(i));
       if (parentsKid instanceof InnerNode<?,?>) {
-        countFolders++;
         oldName = parentsKid.toString();
         if ((newName.toUpperCase().compareTo(oldName.toUpperCase()) < 0)) break;
       } 
@@ -733,7 +731,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     for(TreePath p: ps) {
       TreeNode n = (TreeNode) p.getLastPathComponent();
       if (n instanceof LeafNode) {
-        l.add((ItemT)((LeafNode)n).getData());
+        l.add((ItemT)((LeafNode<?>)n).getData());
       }
     }
     return l;

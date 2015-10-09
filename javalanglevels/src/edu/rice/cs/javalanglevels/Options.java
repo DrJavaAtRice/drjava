@@ -47,7 +47,7 @@ public class Options {
   private final Iterable<? extends File> _bootClassPath;
   private final Iterable<? extends File> _classPath;
   
-  public static final Options DEFAULT = new Options(JavaVersion.JAVA_5, EmptyIterable.<File>make());
+  public static final Options DEFAULT = new Options(JavaVersion.JAVA_6, EmptyIterable.<File>make());
   
   public Options(JavaVersion javaVersion, Iterable<? extends File> classPath) {
     this(javaVersion, classPath, IOUtil.parsePath(System.getProperty("sun.boot.class.path", "")));

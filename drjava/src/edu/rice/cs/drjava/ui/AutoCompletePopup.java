@@ -38,25 +38,9 @@ package edu.rice.cs.drjava.ui;
 
 import java.awt.event.*;
 import java.awt.Component;
-import java.awt.Container;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
-import java.awt.Insets;
-import java.awt.Color;
-import java.awt.EventQueue;
-import java.io.IOException;
-import java.io.File;
-import java.net.URL;
 import java.util.*;
 import javax.swing.*;
-import javax.swing.event.*;
-import javax.swing.border.EmptyBorder;
-import java.awt.Dimension;
-import javax.swing.text.JTextComponent;
-import javax.swing.text.BadLocationException;
-
 import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.ui.predictive.PredictiveInputFrame;
 import edu.rice.cs.drjava.ui.predictive.PredictiveInputModel;
@@ -68,7 +52,6 @@ import edu.rice.cs.plt.lambda.*;
 import edu.rice.cs.plt.iter.*;
 import edu.rice.cs.plt.collect.UnionSet;
 
-import edu.rice.cs.util.swing.SwingFrame;
 import edu.rice.cs.util.swing.Utilities;
 
 import static edu.rice.cs.drjava.ui.MainFrameStatics.*;
@@ -357,7 +340,6 @@ public class AutoCompletePopup {
       acceptedActions.iterator();
     Iterator<KeyStroke> ksIt = actionKeyStrokes.iterator();
     for(int i=0; i<acceptedActions.size(); ++i) {
-      final int acceptedActionIndex = i;
       final String name = nameIt.next();
       final Runnable3<AutoCompletePopupEntry,Integer,Integer> runnable = actionIt.next();
       final KeyStroke ks = ksIt.next();

@@ -157,7 +157,7 @@ public class TryCatchBodyTypeChecker extends BodyTypeChecker {
       _bd1.addEnclosingData(_sd1);
       _bd1.addFinalVars(((MethodData)_bd1).getParams());
       _tcbtc = new TryCatchBodyTypeChecker(_bd1, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData, JExpression>>());
-      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, EmptyIterable.<File>make());
+      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_6, EmptyIterable.<File>make());
       _tcbtc._importedPackages.addFirst("java.lang");
     }
     

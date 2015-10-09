@@ -37,6 +37,7 @@
 package edu.rice.cs.drjava.ui.config;
 
 import javax.swing.*;
+
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.*;
 import edu.rice.cs.util.swing.FontChooser;
@@ -68,7 +69,7 @@ public class FontOptionComponent extends OptionComponent<Font,JPanel> {
     _fontField = new JTextField();
     _fontField.setEditable(false);
     _fontField.setBackground(Color.white);
-    _fontField.setHorizontalAlignment(JTextField.CENTER);
+    _fontField.setHorizontalAlignment(SwingConstants.CENTER);
     _panel = new JPanel(new BorderLayout());
     _panel.add(_fontField, BorderLayout.CENTER);
     _panel.add(_button, BorderLayout.EAST);

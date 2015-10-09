@@ -716,7 +716,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     return getQualifiedSymbolData(qualClassName, SourceInfo.NONE);
   }
   
-  /** Tries to find (or in some cases creates) the SymbolData for the fiven fully qualified class name.  It
+  /** Tries to find (or in some cases creates) the SymbolData for the given fully qualified class name.  It
     * searches imported files, primitive types, as well as types in the symbol table. */
   protected SymbolData getQualifiedSymbolData(String qualClassName, SourceInfo si) {
     return getQualifiedSymbolData(qualClassName, si, false, false, true);
@@ -1174,7 +1174,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
           public void execute() { 
             SymbolData newSd = _identifyType(typeName, si, enclosingClassName);
             if (newSd == null || newSd == SymbolData.NOT_FOUND) 
-              System.err.println("****** In fixUp, the type " + typeName + " at " + si + " was NOT found.");
+//              System.err.println("****** In fixUp, the type " + typeName + " at " + si + " was NOT found.");
 //            assert newSd != null && newSd != SymbolData.NOT_FOUND;  // TODO !!!: Expand to error message?
             if (newSd != null) varData[j].setType(newSd);
           }
@@ -2785,8 +2785,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       assertEquals("should find the resolved symbol data in the symbol table", sd2, result);
       assertFalse("should not be a continuation", sd2.isContinuation());
       
-      //test java.lang classes that need to be looked up
-      //want to resolve
+      //test java.lang classes that need to be looked up and resolved
       SymbolData stringSD = new SymbolData("java.lang.String");
       SymbolData newsd1 = testLLVisitor.getQualifiedSymbolData("java.lang.String", SourceInfo.NONE, true, true, true);
       assertEquals("should have correct name.", stringSD.getName(), newsd1.getName());

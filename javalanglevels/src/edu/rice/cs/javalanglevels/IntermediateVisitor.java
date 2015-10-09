@@ -45,8 +45,12 @@ import edu.rice.cs.plt.iter.*;
 
 import junit.framework.TestCase;
 
-/** Top-level Language Level Visitor that represents the Intermediate Language Level.  Enforces constraints during the
-  * first walk of the AST (checking for langauge specific errors and building the symbol table).
+/** Top-level Language Level Visitor that represents the Intermediate Language Level which in recent versions
+  * of DrJava is the only supported subset of full Java.  It is also called the "Functional Language Level" 
+  * because it is intended to enforce the immutability of data.  This visitor enforces the syntactic constraints
+  * required to ensure immutability of program data.  It does not perform type checking.
+  * This first walk of the AST checks for syntactic deviations for the immutable restrictions and builds the 
+  * symbol table).
   * This class enforces things that are common to all contexts reachable at the Intermediate Language Level 
   * (i.e., inside class bodies, method bodies, interface bodies, etc), but also enforces specific top level 
   * constraints (i.e. you cannot have try catch statements at the top level, etc.)
@@ -665,7 +669,7 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       errors = new LinkedList<Pair<String, JExpressionIF>>();
       LanguageLevelConverter.symbolTable.clear();
       LanguageLevelConverter._newSDs.clear();
-      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, IterUtil.make(new File("lib/buildlib/junit.jar")));
+      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_6, IterUtil.make(new File("lib/buildlib/junit.jar")));
       visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>();      
 //      _hierarchy = new Hashtable<String, TypeDefBase>();
       
@@ -674,7 +678,7 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
                                     continuations,
                                     new LinkedList<Command>(),
                                     new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>());
-      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, IterUtil.make(new File("lib/buildlib/junit.jar")));
+      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_6, IterUtil.make(new File("lib/buildlib/junit.jar")));
       _iv._classesInThisFile = new HashSet<String>();
       _iv.continuations = new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>();
 //      _iv._resetNonStaticFields();
@@ -883,7 +887,7 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       
       SourceInfo noInfo = SourceInfo.NONE;
       
-      //only primative types boolean, char, int, and double are allowed at Intermediate level. 
+      // Originally, only primitivetypes boolean, char, int, and double were allowed at Intermediate level. 
       PrimitiveType i = new PrimitiveType(noInfo, "int");
       PrimitiveType c = new PrimitiveType(noInfo, "char");
       PrimitiveType d = new PrimitiveType(noInfo, "double");
@@ -901,7 +905,7 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       b.visit(_iv);
       assertEquals("After visiting boolean, errors should still be 0", 0, errors.size());
       
-      // now the types that formerly threw errors:
+      // Now all primitive types are allowed including the following which formerly threw errors:
       
       PrimitiveType byt = new PrimitiveType(noInfo, "byte");
       PrimitiveType s = new PrimitiveType(noInfo, "short");

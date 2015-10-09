@@ -1896,11 +1896,11 @@ public class BalancingStreamTokenizerTest extends TestCase {
 //    BalancingStreamTokenizer tok = make("''test''", '\'');
 //    tok.defaultTwoQuoteSetup();
 //    String s = tok.getNextToken();
-//    // System.err.println(s);
+//// System.err.println(s);
 //    assertEquals("'test'", s);
 //    assertEquals(BalancingStreamTokenizer.Token.QUOTED, tok.token());
 //    s = tok.getNextToken();
-//    // System.err.println(s);
+//// System.err.println(s);
 //    assertEquals(null, s);
 //    assertEquals(BalancingStreamTokenizer.Token.END, tok.token());
 //  }

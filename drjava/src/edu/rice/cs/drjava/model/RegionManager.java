@@ -72,9 +72,9 @@ public interface RegionManager<R extends IDocumentRegion> {
   public Collection<R> getRegionsOverlapping(OpenDefinitionsDocument odd, int startOffset, int endOffset);
 
   /** Tests if specified region r is contained in this manager.
-      * @param r  The region
-      * @return  whether the manager contains region r
-      */
+    * @param r  The region
+    * @return  whether the manager contains region r
+    */
   public boolean contains(R r);
   
   /** Add the supplied DocumentRegion to the manager.

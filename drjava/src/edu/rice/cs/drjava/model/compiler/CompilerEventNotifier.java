@@ -41,8 +41,6 @@ import java.util.List;
 
 import edu.rice.cs.drjava.model.EventNotifier;
 
-import static edu.rice.cs.plt.debug.DebugUtil.debug;
-
 /**
  * Keeps track of all listeners to a CompilerModel, and has the ability
  * to notify them of some event.

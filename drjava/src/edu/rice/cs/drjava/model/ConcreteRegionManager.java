@@ -103,7 +103,7 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
   
 //  private static <R extends OrderedDocumentRegion> SortedSet<R> reverse(SortedSet<R> inputSet) {
 //    if (inputSet.isEmpty()) return inputSet;
-//    /* Create outputSet with reverse ordering. */
+///* Create outputSet with reverse ordering. */
 //    SortedSet<R> outputSet = new TreeSet<R>(new Comparator<OrderedDocumentRegion>() { 
 //      public int compare(OrderedDocumentRegion o1, OrderedDocumentRegion o2) { return - o1.compareTo(o2); } 
 //    });
@@ -209,12 +209,12 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
 //    
 //    assert EventQueue.isDispatchThread();
 //    
-//    /* First try finding the rightmost region on the same line containing the selection. Unnecessary in Java 6.0. */
+///* First try finding the rightmost region on the same line containing the selection. Unnecessary in Java 6.0. */
 //    int lineStart = odd._getLineStartPos(startOffset);
 //    
 //    @SuppressWarnings("unchecked")
 //    SortedSet<R> tail = getTailSet((R) newDocumentRegion(odd, lineStart, endOffset));
-//    // tail is sorted by <startOffset, endOffset>; tail may be empty
+//// tail is sorted by <startOffset, endOffset>; tail may be empty
 //    R match = null;
 //    for (R r: tail) {
 //      if (r.getStartOffset() <= startOffset) {
@@ -224,11 +224,11 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
 //    }
 //    if (match != null) return match;
 //    
-//    /* No match found starting on same line; look for best match starting on preceding lines. */
+///* No match found starting on same line; look for best match starting on preceding lines. */
 //    @SuppressWarnings("unchecked")
 //    SortedSet<R> revHead = reverse(getHeadSet((R) newDocumentRegion(odd, lineStart, lineStart))); // linear cost! Ugh!
 //    
-//    /* Find first match in revHead */
+///* Find first match in revHead */
 //    Iterator<R> it = revHead.iterator();  // In Java 6.0, it is computable in constant time from headSet using reverseIterator
 //    
 //    R next;
@@ -239,7 +239,7 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
 //    
 //    if (match == null) return null; // no match found
 //   
-//    /* Try to improve the match by narrowing endOffset. */
+///* Try to improve the match by narrowing endOffset. */
 //    while (it.hasNext()) { 
 //      next = it.next();
 //      if (next.getStartOffset() < match.getStartOffset()) return match;  // no more improvement possible
@@ -398,9 +398,9 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
     for (R r: getRegions()) removeRegion(r);
 //    final ArrayList<R> regions = getRegions();
 ////    System.err.println("ConcreteRegionManager.clearRegions() called with regions = " + regions);
-//    // Notify all listeners for this manager that all regions are being removed; listener access _regions and _documents
+//// Notify all listeners for this manager that all regions are being removed; listener access _regions and _documents
 //    _notifyRegionsRemoved(regions);  // fails to close the associated panel because _documents not yet cleared.
-//    // Remove all regions in this manager
+//// Remove all regions in this manager
 //    _regions.clear();
 //    _documents.clear();
   }

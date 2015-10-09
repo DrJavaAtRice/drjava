@@ -37,8 +37,10 @@
 package edu.rice.cs.util.swing;
 
 import edu.rice.cs.util.swing.Utilities;
+
 import java.awt.*;
 import java.awt.event.*;
+
 import javax.swing.*;
 import javax.swing.border.*;
 //import java.io.Serializable;
@@ -120,8 +122,8 @@ public class ScrollableDialog /* implements Serializable */ {
     
     // Add components
     _textScroll = new BorderlessScrollPane(_textArea,
-                                           JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-                                           wrap?JScrollPane.HORIZONTAL_SCROLLBAR_NEVER:JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+                                           ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
+                                           wrap?ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER:ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     JPanel scrollWrapper = new JPanel(new BorderLayout(0,5));
     scrollWrapper.setBorder(new EmptyBorder(5,5,0,5));
     scrollWrapper.add(new JLabel(header),BorderLayout.NORTH);

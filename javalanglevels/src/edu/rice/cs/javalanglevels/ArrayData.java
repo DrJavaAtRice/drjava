@@ -145,59 +145,42 @@ public class ArrayData extends SymbolData {
   /** Returns true only under the following conditions: 
    *  if assignTo is a class, assignTo must be java.lang.Object.
    *  if assignTo is an interferface, then it must be Serializable or Clonable.
-   *  if assignTo is an array, then if this's element type is a primitive assignTo must have the same primitive element
-   *    type and
-   *  if this's element type is a reference type, this's reference type must be assignable to assignTo's element type.
+   *  if assignTo is an array, then if the element type of this is
+   *    (i) a primitive type, then assignTo must have the same primitive element type, and
+   *   (ii) a reference type, then the reference type of this must be assignable to assignTo's element type.
    */
-  public boolean isAssignableTo(SymbolData assignTo, JavaVersion version) {
+  public boolean isAssignableTo(SymbolData assignTo, boolean allowAutoboxing) {
     if (assignTo instanceof ArrayData) {
-      if (this.getElementType().isPrimitiveType()) {
-        return this.getElementType() == ((ArrayData)assignTo).getElementType();
-      }
-      else if (((ArrayData)assignTo).getElementType().isPrimitiveType()) {
-        return false;
-      }
-      else {
-        return this.getElementType().isAssignableTo(((ArrayData)assignTo).getElementType(), version);
-      }
+      ArrayData thatArray = (ArrayData) assignTo;
+      if (this.getElementType().isPrimitiveType()) return getElementType() == thatArray.getElementType();
+      else if (thatArray.getElementType().isPrimitiveType()) return false;
+      else return this.getElementType().isAssignableTo(thatArray.getElementType());
     }
-    else {
-      return this.isSubClassOf(assignTo);
-    }
+    else return this.isSubClassOf(assignTo);
   }
   
   /** Return true iff
-    * castTo is a class type and is Object
-    * castTo is an interface type that is Serializable or Clonable
-    * castTo is an array type then this and castTo must have element types that are either the same primitive type or
+    *   (i) castTo is a class type and is Object
+    *  (ii) castTo is an interface type that is Serializable or Clonable
+    * (iii) castTo is an array type and this and castTo must have element types that are either the same primitive type or
     *   (both reference types and this's element type must be castable to castTo's element type)
     */
-  public boolean isCastableTo(SymbolData castTo, JavaVersion version) {
+  public boolean isCastableTo(SymbolData castTo) {
     if (castTo instanceof ArrayData) {
-      if (this.getElementType().isPrimitiveType()) {
-        return this.getElementType() == ((ArrayData)castTo).getElementType();
-      }
-      else if (((ArrayData)castTo).getElementType().isPrimitiveType()) {
-        return false;
-      }
-      else {
-        return this.getElementType().isCastableTo(((ArrayData)castTo).getElementType(), version);
-      }
+      ArrayData thatArray = (ArrayData) castTo;
+      SymbolData thatEltType = thatArray.getElementType();
+      if (getElementType().isPrimitiveType()) return getElementType() == thatEltType;
+      else if (thatEltType.isPrimitiveType()) return false;
+      else return getElementType().isCastableTo(thatEltType);
     }
-    else if (this.isSubClassOf(castTo)) {
-      return true;
-    }
-    else {
-      return this.isSubClassOf(castTo);
-    }
+    else if (isSubClassOf(castTo)) return true;
+    else return isSubClassOf(castTo);
   }
   
-  /**
-   * Return the dimensions of this array (the level of nesting until a non-array element type is found).
-   */
+  /** Return the dimensions of this array (the level of nesting until a non-array element type is found). */
   public int getDimensions() {
     int dim = 1;
-    SymbolData curData = this.getElementType();
+    SymbolData curData = getElementType();
     while(curData instanceof ArrayData) {
       dim ++;
       curData = ((ArrayData) curData).getElementType();
@@ -332,24 +315,19 @@ public class ArrayData extends SymbolData {
     public void testIsAssignableTo() {
       //if assignTo is a class, it must be java.lang.Object
       SymbolData object = llv.symbolTable.get("java.lang.Object");
-      assertTrue(_ad.isAssignableTo(object, JavaVersion.JAVA_5));
-      assertTrue(_ad.isAssignableTo(object, JavaVersion.JAVA_1_4));
+      assertTrue(_ad.isAssignableTo(object,true));
       
       SymbolData notObject = new SymbolData("somethingRandom");
-      assertFalse(_ad.isAssignableTo(notObject, JavaVersion.JAVA_5));
-      assertFalse(_ad.isAssignableTo(notObject, JavaVersion.JAVA_1_4));
+      assertFalse(_ad.isAssignableTo(notObject, true));
       
       //if assignTo is an interface, then it must be Serializable or Clonable
       SymbolData serializable = _ad.getInterfaces().get(0);
       SymbolData clonable = _ad.getInterfaces().get(1);
       notObject.setInterface(true);
       
-      assertTrue(_ad.isAssignableTo(serializable, JavaVersion.JAVA_5));
-      assertTrue(_ad.isAssignableTo(serializable, JavaVersion.JAVA_1_4));
-      assertTrue(_ad.isAssignableTo(clonable, JavaVersion.JAVA_5));
-      assertTrue(_ad.isAssignableTo(clonable, JavaVersion.JAVA_1_4));
-      assertFalse(_ad.isAssignableTo(notObject, JavaVersion.JAVA_5));
-      assertFalse(_ad.isAssignableTo(notObject, JavaVersion.JAVA_1_4));
+      assertTrue(_ad.isAssignableTo(serializable, true));
+      assertTrue(_ad.isAssignableTo(clonable, true));
+      assertFalse(_ad.isAssignableTo(notObject, true));
 
       //if array is an array of primatives, then assign to must have primitive types that must match exactly
       _ad = new ArrayData(SymbolData.INT_TYPE, llv, si);
@@ -358,14 +336,10 @@ public class ArrayData extends SymbolData {
       ArrayData charArray = new ArrayData(SymbolData.CHAR_TYPE, llv, si);
       ArrayData objArray = new ArrayData(object, llv, si);
       
-      assertTrue(_ad.isAssignableTo(intArray, JavaVersion.JAVA_5));
-      assertTrue(_ad.isAssignableTo(intArray, JavaVersion.JAVA_1_4));
-      assertFalse(_ad.isAssignableTo(charArray, JavaVersion.JAVA_5));
-      assertFalse(_ad.isAssignableTo(charArray, JavaVersion.JAVA_1_4));
-      assertFalse(_ad.isAssignableTo(doubleArray, JavaVersion.JAVA_5));
-      assertFalse(_ad.isAssignableTo(doubleArray, JavaVersion.JAVA_1_4));
-      assertFalse(_ad.isAssignableTo(objArray, JavaVersion.JAVA_5));
-      assertFalse(_ad.isAssignableTo(objArray, JavaVersion.JAVA_1_4));
+      assertTrue(_ad.isAssignableTo(intArray, true));
+      assertFalse(_ad.isAssignableTo(charArray, true));
+      assertFalse(_ad.isAssignableTo(doubleArray, true));
+      assertFalse(_ad.isAssignableTo(objArray, true));
 
       
       //if array is an array of reference types, then reference types must be assignable to element type
@@ -375,38 +349,28 @@ public class ArrayData extends SymbolData {
       notObject.setInterface(false);
       ArrayData randomArray = new ArrayData(notObject, llv, si);
 
-      assertTrue(_ad.isAssignableTo(objArray, JavaVersion.JAVA_5));
-      assertTrue(_ad.isAssignableTo(objArray, JavaVersion.JAVA_1_4));
-      assertTrue(_ad.isAssignableTo(_ad, JavaVersion.JAVA_5));
-      assertTrue(_ad.isAssignableTo(_ad, JavaVersion.JAVA_1_4));
-      assertFalse(_ad.isAssignableTo(randomArray, JavaVersion.JAVA_5));
-      assertFalse(_ad.isAssignableTo(randomArray, JavaVersion.JAVA_1_4));
-      assertFalse(_ad.isAssignableTo(intArray, JavaVersion.JAVA_5));
-      assertFalse(_ad.isAssignableTo(intArray, JavaVersion.JAVA_1_4));
+      assertTrue(_ad.isAssignableTo(objArray, true));
+      assertTrue(_ad.isAssignableTo(_ad, true));
+      assertFalse(_ad.isAssignableTo(randomArray, true));
+      assertFalse(_ad.isAssignableTo(intArray, true));
     }
    
     
     public void testIsCastableTo() {
       //if castTo is a class type and Object, should work
       SymbolData object = llv.symbolTable.get("java.lang.Object");
-      assertTrue(_ad.isCastableTo(object, JavaVersion.JAVA_5));
-      assertTrue(_ad.isCastableTo(object, JavaVersion.JAVA_1_4));
+      assertTrue(_ad.isCastableTo(object));
       
       //if castTo is an interface, then it must be Serializable or Clonable
       SymbolData serializable = _ad.getInterfaces().get(0);
       SymbolData clonable = _ad.getInterfaces().get(1);
       
-      assertTrue(_ad.isAssignableTo(serializable, JavaVersion.JAVA_5));
-      assertTrue(_ad.isAssignableTo(serializable, JavaVersion.JAVA_1_4));
-      assertTrue(_ad.isAssignableTo(clonable, JavaVersion.JAVA_5));
-      assertTrue(_ad.isAssignableTo(clonable, JavaVersion.JAVA_1_4));
+      assertTrue(_ad.isAssignableTo(serializable));
+      assertTrue(_ad.isAssignableTo(clonable));
 
       //anything non-array type should break
       SymbolData notObject = new SymbolData("somethingRandom");
-      assertFalse(_ad.isCastableTo(notObject, JavaVersion.JAVA_5));
-      assertFalse(_ad.isCastableTo(notObject, JavaVersion.JAVA_1_4));
-
-      
+      assertFalse(_ad.isCastableTo(notObject));
      
       //if castTo is an array and the array elements can be cast to its elements, should work
       
@@ -417,14 +381,10 @@ public class ArrayData extends SymbolData {
       ArrayData charArray = new ArrayData(SymbolData.CHAR_TYPE, llv, si);
       ArrayData objArray = new ArrayData(object, llv, si);
       
-      assertTrue(_ad.isCastableTo(intArray, JavaVersion.JAVA_5));
-      assertTrue(_ad.isCastableTo(intArray, JavaVersion.JAVA_1_4));
-      assertFalse(_ad.isCastableTo(charArray, JavaVersion.JAVA_5));
-      assertFalse(_ad.isCastableTo(charArray, JavaVersion.JAVA_1_4));
-      assertFalse(_ad.isCastableTo(doubleArray, JavaVersion.JAVA_5));
-      assertFalse(_ad.isCastableTo(doubleArray, JavaVersion.JAVA_1_4));
-      assertFalse(_ad.isCastableTo(objArray, JavaVersion.JAVA_5));
-      assertFalse(_ad.isCastableTo(objArray, JavaVersion.JAVA_1_4));
+      assertTrue(_ad.isCastableTo(intArray));
+      assertFalse(_ad.isCastableTo(charArray));
+      assertFalse(_ad.isCastableTo(doubleArray));;
+      assertFalse(_ad.isCastableTo(objArray));
 
       
       //if array is an array of reference types, then reference types must be castable to element type
@@ -434,20 +394,14 @@ public class ArrayData extends SymbolData {
       notObject.setInterface(false);
       ArrayData randomArray = new ArrayData(notObject, llv, si);
 
-      assertTrue(_ad.isCastableTo(objArray, JavaVersion.JAVA_5));
-      assertTrue(_ad.isCastableTo(objArray, JavaVersion.JAVA_1_4));
-      assertTrue(_ad.isCastableTo(_ad, JavaVersion.JAVA_5));
-      assertTrue(_ad.isCastableTo(_ad, JavaVersion.JAVA_1_4));
-      assertFalse(_ad.isCastableTo(randomArray, JavaVersion.JAVA_5));
-      assertFalse(_ad.isCastableTo(randomArray, JavaVersion.JAVA_1_4));
-      assertFalse(_ad.isCastableTo(intArray, JavaVersion.JAVA_5));
-      assertFalse(_ad.isCastableTo(intArray, JavaVersion.JAVA_1_4));
+      assertTrue(_ad.isCastableTo(objArray));
+      assertTrue(_ad.isCastableTo(_ad));
+      assertFalse(_ad.isCastableTo(randomArray));
+      assertFalse(_ad.isCastableTo(intArray));
 
       _ad = new ArrayData(object, llv, si);
-      assertTrue(_ad.isCastableTo(new ArrayData(integerSd, llv, si), JavaVersion.JAVA_5));
-      assertTrue(_ad.isCastableTo(new ArrayData(integerSd, llv, si), JavaVersion.JAVA_1_4));
-      assertFalse(_ad.isCastableTo(new ArrayData(SymbolData.INT_TYPE, llv, si), JavaVersion.JAVA_5));
-      assertFalse(_ad.isCastableTo(new ArrayData(SymbolData.INT_TYPE, llv, si), JavaVersion.JAVA_1_4));
+      assertTrue(_ad.isCastableTo(new ArrayData(integerSd, llv, si)));
+      assertFalse(_ad.isCastableTo(new ArrayData(SymbolData.INT_TYPE, llv, si)));
     }
   }
 }

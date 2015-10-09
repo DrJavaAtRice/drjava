@@ -39,7 +39,7 @@ package edu.rice.cs.drjava.model;
 import java.io.File;
 
 /** The minimal interface for all region classes.  Excludes a document field because DummyDocumentRegions are created before
-  * their corresponding document.
+  * their corresponding document.  TODO: rename as IRegion.
   * @version $Id$
   */
 public interface FileRegion extends Region {

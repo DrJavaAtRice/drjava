@@ -147,8 +147,8 @@ public class DocumentRegionTest extends DrJavaTestCase {
     assertTrue("Region found", rm.getRegionsOverlapping(_doc, 6, 14).contains(r1)); 
     assertTrue("Region found", rm.getRegionsOverlapping(_doc, 6, 14).contains(r2));
     
-//    // r2 and r3 are the same region, so the region will be reused
-//    // and we get r2 back
+//// r2 and r3 are the same region, so the region will be reused
+//// and we get r2 back
     DocumentRegion r3 = new DocumentRegion(_doc, 13, 17);
 //    rm.addRegion(r3);
 //    assertTrue(r2==rm.getRegionAt(_doc, 15));

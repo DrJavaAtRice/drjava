@@ -452,7 +452,7 @@ public class JPDADebugger implements Debugger {
           indexStr = indexStr.trim();   
           // System.out.println("\t\tindexStr: "+indexStr);   
           try {   
-            Integer index = new Integer(indexStr);   
+            new Integer(indexStr);   
             // System.out.println("\t\tindex: "+index);   
           }   
           catch(NumberFormatException nfe) { return false; }   
@@ -629,7 +629,6 @@ public class JPDADebugger implements Debugger {
     */
   public StackTraceElement getLLStackTraceElement(Location l, List<File> files) {
     // map Java line numbers to LL line numbers
-    int lineNum = l.lineNumber();
     String sourceName = null;
     try { sourceName = l.sourceName(); }
     catch(com.sun.jdi.AbsentInformationException aie) { sourceName = null; }
@@ -758,15 +757,13 @@ public class JPDADebugger implements Debugger {
   public Pair<Location, OpenDefinitionsDocument> preloadDocument(Location location) {
     assert EventQueue.isDispatchThread();
     OpenDefinitionsDocument doc = null;
-    Location lll = null;  /* Location in source file; adjusted for LL file if necessary. */
+
+    final List<File> files = new ArrayList<File>();
+    for(OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()) { files.add(odd.getRawFile()); }
+    Location lll = getLLLocation(location, files); /* Location in source file; adjusted for LL file if necessary. */
     
     String fileName;
     try {
-      final List<File> files = new ArrayList<File>();
-      for (OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()) { files.add(odd.getRawFile()); }
-      lll = getLLLocation(location, files);
-      
-      
       fileName = lll.sourcePath();
 
       // Check source root set (open files)
@@ -779,8 +776,6 @@ public class JPDADebugger implements Debugger {
     }
     catch(AbsentInformationException e) {
       // No stored doc, look on the source root set (later, also the sourcepath)
-      final List<File> files = new ArrayList<File>();
-      for(OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()) { files.add(odd.getRawFile()); }
 
       ReferenceType rt = location.declaringType();
       fileName = null;
@@ -797,8 +792,9 @@ public class JPDADebugger implements Debugger {
           className = className.substring(0, indexOfDollar);
         }
         
-        for(File f: files) {
+        for(OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()) {
           // TODO: What about Habanero Java extension?
+          File f = odd.getRawFile();
           for(String ext: DrJavaFileUtils.getSourceFileExtensions()) {
             if (f.getName().equals(className + ext)) {
               fileName = f.getName();
@@ -824,7 +820,6 @@ public class JPDADebugger implements Debugger {
         }
       }
     }
-    if (lll == null) lll = location;
     return Pair.make(lll, doc);
   }
   
@@ -1273,7 +1268,7 @@ public class JPDADebugger implements Debugger {
 //  private void scrollToSource(LocatableEvent e) {
 //    Location location = e.location();
 //    
-//    // First see if doc is stored
+//// First see if doc is stored
 //    EventRequest request = e.request();
 //    Object docProp = request.getProperty("document");
 //    if ((docProp != null) && (docProp instanceof OpenDefinitionsDocument)) {

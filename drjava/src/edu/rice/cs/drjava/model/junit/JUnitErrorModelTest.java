@@ -332,7 +332,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
 //    
 //    listener.assertJUnitStartCount(1);
 //    
-//    // Clear document so we can make sure it's written to after startJUnit
+//// Clear document so we can make sure it's written to after startJUnit
 //    _model.getJUnitModel().getJUnitDocument().remove(0, _model.getJUnitModel().getJUnitDocument().getLength() - 1);
 //    
 //    _m = _model.getJUnitModel().getJUnitErrorModel();

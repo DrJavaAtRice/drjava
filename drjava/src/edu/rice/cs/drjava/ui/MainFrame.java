@@ -41,17 +41,16 @@ import javax.swing.border.*;
 import javax.swing.event.*;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.text.*;
+
 import java.awt.event.*;
 import java.awt.*;
 import java.awt.print.*;
 import java.awt.dnd.*;
 import java.beans.*;
-
 import java.io.*;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
@@ -76,7 +75,6 @@ import edu.rice.cs.drjava.DrJavaRoot;
 import edu.rice.cs.drjava.RemoteControlClient;
 import edu.rice.cs.drjava.RemoteControlServer;
 import edu.rice.cs.drjava.platform.*;
-import edu.rice.cs.drjava.config.FileConfiguration;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.compiler.CompilerListener;
@@ -99,15 +97,12 @@ import edu.rice.cs.drjava.ui.avail.*;
 import edu.rice.cs.drjava.ui.ClipboardHistoryFrame;
 import edu.rice.cs.drjava.ui.RegionsTreePanel;
 import edu.rice.cs.drjava.project.*;
-
 import edu.rice.cs.plt.concurrent.JVMBuilder;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.iter.IterUtil;
-import edu.rice.cs.plt.lambda.DelayedThunk;
 import edu.rice.cs.plt.lambda.*;
 import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.plt.tuple.Pair;
-
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.docnavigation.*;
 import edu.rice.cs.drjava.model.FileMovedException;
@@ -118,17 +113,14 @@ import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.swing.*;
-import edu.rice.cs.util.swing.ProcessingDialog;
 import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.text.SwingDocument;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.XMLConfig;
-
 import static edu.rice.cs.drjava.config.OptionConstants.KEY_NEW_CLASS_FILE;
 import static edu.rice.cs.drjava.ui.RecentFileManager.*;
 import static edu.rice.cs.drjava.ui.predictive.PredictiveInputModel.*;
 import static edu.rice.cs.util.XMLConfig.XMLConfigException;
-import static edu.rice.cs.plt.object.ObjectUtil.hash;
 import static edu.rice.cs.drjava.ui.MainFrameStatics.*;
 
 import edu.rice.cs.drjava.model.junit.JUnitResultTuple;
@@ -1749,15 +1741,15 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   /** Generate Java API class list. */
-  public static Set<JavaAPIListEntry> _generateJavaAPISet(String base, String stripPrefix, String suffix) {
-    URL url = MainFrame.class.getResource("/edu/rice/cs/drjava/docs/javaapi"+suffix);
-    return _generateJavaAPISet(base, stripPrefix, url);
+  public static Set<JavaAPIListEntry> _generateJavaAPISet(String suffix) {
+    URL url = MainFrame.class.getResource("/edu/rice/cs/drjava/docs/javaapi" + suffix);
+    return _generateJavaAPISet(url);
   }
   
   /** Generate Java API class list. */
-  public static Set<JavaAPIListEntry> _generateJavaAPISet(String base, String stripPrefix, URL url) {
+  public static Set<JavaAPIListEntry> _generateJavaAPISet(URL url) {
     Set<JavaAPIListEntry> s = new HashSet<JavaAPIListEntry>();
-    if (url==null) return s;
+    if (url == null) return s;
     try {
       InputStream urls = url.openStream();
       InputStreamReader is = null;
@@ -1766,21 +1758,26 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         is = new InputStreamReader(urls);
         br = new BufferedReader(is);
         String line = br.readLine();
-        while(line != null) {
+        while (line != null) {
           final String aText = "<a href=\"";
           int aPos = line.toLowerCase().indexOf(aText);
           int aEndPos = line.toLowerCase().indexOf(".html\" ",aPos);
-          if ((aPos>=0) && (aEndPos>=0)) {
-            String link = line.substring(aPos+aText.length(), aEndPos);
-            String fullClassName = link.substring(stripPrefix.length()).replace('/', '.');
+          if ((aPos >= 0) && (aEndPos >= 0)) {
+            String link = line.substring(aPos + aText.length(), aEndPos);
+            String fullClassName = link.replace('/', '.');
             String simpleClassName = fullClassName;
+            System.err.println("link = '" + link + "'; simpleClassName = '" + simpleClassName + "'");
             int lastDot = fullClassName.lastIndexOf('.');
-            if (lastDot>=0) { simpleClassName = fullClassName.substring(lastDot + 1); }
+            if (lastDot >= 0) { simpleClassName = fullClassName.substring(lastDot + 1); }
             try {
-              URL pageURL = new URL(base + link + ".html");
+              URL pageURL = new URL(link + ".html");
+              System.err.println("URL is: " + pageURL);
               s.add(new JavaAPIListEntry(simpleClassName, fullClassName, pageURL));
             }
-            catch(MalformedURLException mue) { /* ignore, we'll just not put this class in the list */ }
+            catch(MalformedURLException mue) { 
+              System.err.println("MalformedURLException on " + link + ".html");
+            /* ignore, we'll just not put this class in the list */ 
+            }
           }
           line = br.readLine();
         }
@@ -1833,28 +1830,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       if (linkVersion.equals(JAVADOC_AUTO_TEXT)) {
         // use the compiler's version of the Java API Javadoc
         JavaVersion ver = _model.getCompilerModel().getActiveCompiler().version();
-        if (ver == JavaVersion.JAVA_1_4) linkVersion = JAVADOC_1_4_TEXT;
-        else if (ver == JavaVersion.JAVA_5) linkVersion = JAVADOC_1_5_TEXT;
-        else if (ver == JavaVersion.JAVA_6) linkVersion = JAVADOC_1_6_TEXT;
+        if (ver == JavaVersion.JAVA_6) linkVersion = JAVADOC_1_6_TEXT;
         else if (ver == JavaVersion.JAVA_7) linkVersion = JAVADOC_1_7_TEXT;
-        else linkVersion = JAVADOC_1_3_TEXT;   // ???? This looks like the wrong default; I would version 7.
+        else if (ver == JavaVersion.JAVA_8) linkVersion = JAVADOC_1_8_TEXT;
+        else linkVersion = JAVADOC_1_7_TEXT;   // default
       }
-      if (linkVersion.equals(JAVADOC_1_3_TEXT)) {
-        base = DrJava.getConfig().getSetting(JAVADOC_1_3_LINK) + "/";
-        stripPrefix = ""; // nothing needs to be stripped, links in 1.3 Javadoc are relative
-        suffix = "/allclasses-1.3.html";
-      }
-      else if (linkVersion.equals(JAVADOC_1_4_TEXT)) {
-        base = DrJava.getConfig().getSetting(JAVADOC_1_4_LINK) + "/";
-        stripPrefix = ""; // nothing needs to be stripped, links in 1.4 Javadoc are relative
-        suffix = "/allclasses-1.4.html";
-      }
-      else if (linkVersion.equals(JAVADOC_1_5_TEXT)) {
-        base = DrJava.getConfig().getSetting(JAVADOC_1_5_LINK) + "/";
-        stripPrefix = ""; // nothing needs to be stripped, links in 1.5 Javadoc are relative
-        suffix = "/allclasses-1.5.html";
-      }
-      else if (linkVersion.equals(JAVADOC_1_6_TEXT)) {
+      if (linkVersion.equals(JAVADOC_1_6_TEXT)) {
         // at one point, the links in the 1.6 Javadoc were absolute, and this is how we dealt with that
         // base = ""; // links in 1.6 Javadoc are absolute, so nothing needs to be added to get an absolute URL
         // // but we do need to strip the absolute part to get correct fully-qualified class names
@@ -1866,30 +1847,30 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         suffix = "/allclasses-1.6.html";
       }
       else if (linkVersion.equals(JAVADOC_1_7_TEXT)) {
-        base = DrJava.getConfig().getSetting(JAVADOC_1_7_LINK) + "/";
-        stripPrefix = ""; // nothing needs to be stripped, links in 1.7 Javadoc are relative
+//        base = DrJava.getConfig().getSetting(JAVADOC_1_7_LINK) + "/";
+//        stripPrefix = ""; // nothing needs to be stripped, links in 1.7 Javadoc are relative
         suffix = "/allclasses-1.7.html";
       }
-      
+      else if (linkVersion.equals(JAVADOC_1_8_TEXT)) {
+//        base = DrJava.getConfig().getSetting(JAVADOC_1_8_LINK) + "/";
+//        stripPrefix = ""; // nothing needs to be stripped, links in 1.8 Javadoc are relative
+        suffix = "/allclasses-1.8.html";
+      }
       if (!suffix.equals("")) {
-        _javaAPISet.addAll(_generateJavaAPISet(base, stripPrefix, suffix));
+        _javaAPISet.addAll(_generateJavaAPISet(suffix));
       }
       else {
         // no valid Javadoc URL
       }
       
       // add JUnit
-      Set<JavaAPIListEntry> junitAPIList = _generateJavaAPISet(DrJava.getConfig().getSetting(JUNIT_LINK) + "/",
-                                                               "", // relative links
-                                                               "/allclasses-concjunit4.7.html");
+      Set<JavaAPIListEntry> junitAPIList = _generateJavaAPISet("/allclasses-concjunit4.7.html");
       _javaAPISet.addAll(junitAPIList);
       
       // add additional Javadoc libraries
       for(String url: DrJava.getConfig().getSetting(JAVADOC_ADDITIONAL_LINKS)) {
         try {
-          Set<JavaAPIListEntry> additionalList = _generateJavaAPISet(url + "/",
-                                                                     "", // relative links
-                                                                     new URL(url+"/allclasses-frame.html"));
+          Set<JavaAPIListEntry> additionalList = _generateJavaAPISet(new URL(url+"/allclasses-frame.html"));
           _javaAPISet.addAll(additionalList);
         }
         catch(MalformedURLException mue) { /* ignore, we'll just not put this class in the list */ }
@@ -2396,8 +2377,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private final Action _newDrJavaInstanceAction = new AbstractAction("New DrJava Instance...") {
     public void actionPerformed(ActionEvent ae) {
       try {
-        Process p = JVMBuilder.DEFAULT.classPath(FileOps.getDrJavaFile()).
-          start(DrJava.class.getName(), "-new");
+        JVMBuilder.DEFAULT.classPath(FileOps.getDrJavaFile()).start(DrJava.class.getName(), "-new");
       }
       catch(IOException ioe) { MainFrameStatics.showIOError(MainFrame.this, ioe); }
     }
@@ -3290,7 +3270,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _debugSplitPane = new BorderlessSplitPane(JSplitPane.VERTICAL_SPLIT, true);
       _mainSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true, _docSplitPane, _tabbedPane);
 // Lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
-//    // The OptionListener for LIGHTWEIGHT_PARSING_ENABLED.
+//// The OptionListener for LIGHTWEIGHT_PARSING_ENABLED.
 //    OptionListener<Boolean> parsingEnabledListener = new OptionListener<Boolean>() {
 //      public void optionChanged(OptionEvent<Boolean> oce) {
 //        if (oce.value) {
@@ -3435,16 +3415,15 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       
       // initialize menu bar and actions
       _setUpActions();
-      _setUpMenuBar(_menuBar,
-                    _fileMenu, _editMenu, _toolsMenu, _projectMenu, _debugMenu, _languageLevelMenu, _helpMenu);
+      _setUpMenuBar(_menuBar, _fileMenu, _editMenu, _toolsMenu, _projectMenu, _debugMenu, _languageLevelMenu, _helpMenu);
       setJMenuBar(_menuBar);
       
       //    _setUpDocumentSelector();
       _setUpContextMenus();
       
       // Create toolbar and buttons
-      _undoButton = _createManualToolbarButton(_undoAction);
-      _redoButton = _createManualToolbarButton(_redoAction);
+      _undoButton = _createManualToolBarButton(_undoAction);
+      _redoButton = _createManualToolBarButton(_redoAction);
       
       // initialize _toolBar
       _setUpToolBar();
@@ -3588,10 +3567,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       config.addOptionListener(FONT_MAIN, new MainFontOptionListener());
       config.addOptionListener(FONT_LINE_NUMBERS, new LineNumbersFontOptionListener());
       config.addOptionListener(FONT_DOCLIST, new DoclistFontOptionListener());
-      config.addOptionListener(FONT_TOOLBAR, new ToolbarFontOptionListener());
-      config.addOptionListener(TOOLBAR_ICONS_ENABLED, new ToolbarOptionListener());
-      config.addOptionListener(TOOLBAR_TEXT_ENABLED, new ToolbarOptionListener());
-      config.addOptionListener(TOOLBAR_ENABLED, new ToolbarOptionListener());
+      config.addOptionListener(FONT_TOOLBAR, new ToolBarFontOptionListener());
+      config.addOptionListener(TOOLBAR_ICONS_ENABLED, new ToolBarOptionListener());
+      config.addOptionListener(TOOLBAR_TEXT_ENABLED, new ToolBarOptionListener());
+      config.addOptionListener(TOOLBAR_ENABLED, new ToolBarOptionListener());
       config.addOptionListener(LINEENUM_ENABLED, new LineEnumOptionListener());
       config.addOptionListener(DEFINITIONS_LINE_NUMBER_COLOR, new LineEnumColorOptionListener());
       config.addOptionListener(DEFINITIONS_LINE_NUMBER_BACKGROUND_COLOR, new LineEnumColorOptionListener());
@@ -3623,36 +3602,37 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       DrJava.getConfig().addOptionListener(JAVADOC_API_REF_VERSION, choiceOptionListener);
       
       // The OptionListener for JAVADOC_XXX_LINK.
-      OptionListener<String> link13OptionListener = new OptionListener<String>() {
-        public void optionChanged(OptionEvent<String> oce) {
-          String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
-          if (linkVersion.equals(JAVADOC_1_3_TEXT) ||
-              linkVersion.equals(JAVADOC_AUTO_TEXT)) {
-            clearJavaAPISet();
-          }
-        }
-      };
-      DrJava.getConfig().addOptionListener(JAVADOC_1_3_LINK, link13OptionListener);
-      OptionListener<String> link14OptionListener = new OptionListener<String>() {
-        public void optionChanged(OptionEvent<String> oce) {
-          String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
-          if (linkVersion.equals(JAVADOC_1_4_TEXT) ||
-              linkVersion.equals(JAVADOC_AUTO_TEXT)) {
-            clearJavaAPISet();
-          }
-        }
-      };
-      DrJava.getConfig().addOptionListener(JAVADOC_1_4_LINK, link14OptionListener);
-      OptionListener<String> link15OptionListener = new OptionListener<String>() {
-        public void optionChanged(OptionEvent<String> oce) {
-          String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
-          if (linkVersion.equals(JAVADOC_1_5_TEXT) ||
-              linkVersion.equals(JAVADOC_AUTO_TEXT)) {
-            clearJavaAPISet();
-          }
-        }
-      };
-      DrJava.getConfig().addOptionListener(JAVADOC_1_5_LINK, link15OptionListener);
+//      OptionListener<String> link13OptionListener = new OptionListener<String>() {
+//        public void optionChanged(OptionEvent<String> oce) {
+//          String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
+//          if (linkVersion.equals(JAVADOC_1_3_TEXT) ||
+//              linkVersion.equals(JAVADOC_AUTO_TEXT)) {
+//            clearJavaAPISet();
+//          }
+//        }
+//      };
+//      DrJava.getConfig().addOptionListener(JAVADOC_1_3_LINK, link13OptionListener);
+//      OptionListener<String> link14OptionListener = new OptionListener<String>() {
+//        public void optionChanged(OptionEvent<String> oce) {
+//          String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
+//          if (linkVersion.equals(JAVADOC_1_4_TEXT) ||
+//              linkVersion.equals(JAVADOC_AUTO_TEXT)) {
+//            clearJavaAPISet();
+//          }
+//        }
+//      };
+//      DrJava.getConfig().addOptionListener(JAVADOC_1_4_LINK, link14OptionListener);
+//      OptionListener<String> link15OptionListener = new OptionListener<String>() {
+//        public void optionChanged(OptionEvent<String> oce) {
+//          String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
+//          if (linkVersion.equals(JAVADOC_1_5_TEXT) ||
+//              linkVersion.equals(JAVADOC_AUTO_TEXT)) {
+//            clearJavaAPISet();
+//          }
+//        }
+//      };
+//      DrJava.getConfig().addOptionListener(JAVADOC_1_5_LINK, link15OptionListener);
+      
       OptionListener<String> link16OptionListener = new OptionListener<String>() {
         public void optionChanged(OptionEvent<String> oce) {
           String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
@@ -3662,12 +3642,37 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           }
         }
       };
+      
+      OptionListener<String> link17OptionListener = new OptionListener<String>() {
+        public void optionChanged(OptionEvent<String> oce) {
+          String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
+          if (linkVersion.equals(JAVADOC_1_7_TEXT) ||
+              linkVersion.equals(JAVADOC_AUTO_TEXT)) {
+            clearJavaAPISet();
+          }
+        }
+      };
+      
+      OptionListener<String> link18OptionListener = new OptionListener<String>() {
+        public void optionChanged(OptionEvent<String> oce) {
+          String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
+          if (linkVersion.equals(JAVADOC_1_8_TEXT) ||
+              linkVersion.equals(JAVADOC_AUTO_TEXT)) {
+            clearJavaAPISet();
+          }
+        }
+      };
+      
       DrJava.getConfig().addOptionListener(JAVADOC_1_6_LINK, link16OptionListener);
+      DrJava.getConfig().addOptionListener(JAVADOC_1_7_LINK, link17OptionListener);
+      DrJava.getConfig().addOptionListener(JAVADOC_1_8_LINK, link18OptionListener);
+      
       OptionListener<String> linkJUnitOptionListener = new OptionListener<String>() {
         public void optionChanged(OptionEvent<String> oce) {
           clearJavaAPISet();
         }
       };
+       
       DrJava.getConfig().addOptionListener(JUNIT_LINK, linkJUnitOptionListener);
       OptionListener<Vector<String>> additionalLinkOptionListener = new OptionListener<Vector<String>>() {
         public void optionChanged(OptionEvent<Vector<String>> oce) {
@@ -4791,8 +4796,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   private void _setUpProjectButtons(File projectFile) {
-    _compileButton = _updateToolbarButton(_compileButton, _compileProjectAction);
-    _junitButton = _updateToolbarButton(_junitButton, _junitProjectAction);
+    _compileButton = _updateToolBarButton(_compileButton, _compileProjectAction);
+    _junitButton = _updateToolBarButton(_junitButton, _junitProjectAction);
     _recentProjectManager.updateOpenFiles(projectFile);
   }
   
@@ -4949,7 +4954,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     int result = chooser.showDialog(openDir);
     File dir = chooser.getSelectedDirectory();    
     chooser.removeChoosableFileFilter(ff);
-    if (result != DirectoryChooser.APPROVE_OPTION)  return; // canceled or error
+    if (result != JFileChooser.APPROVE_OPTION)  return; // canceled or error
     
     boolean rec = _openRecursiveCheckBox.isSelected();
     DrJava.getConfig().setSetting(OptionConstants.OPEN_FOLDER_RECURSIVE, Boolean.valueOf(rec));
@@ -6507,19 +6512,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                   _setUpLanguageLevelMenu(mask, false), _setUpHelpMenu(mask, false));
   }
 
-  void _setUpMenuBar(JMenuBar menuBar,
-                     JMenu fileMenu,
-                     JMenu editMenu,
-                     JMenu toolsMenu,
-                     JMenu projectMenu,
-                     JMenu debugMenu,
-                     JMenu languageLevelMenu,
-                     JMenu helpMenu) {
+  void _setUpMenuBar(JMenuBar menuBar, JMenu fileMenu, JMenu editMenu, JMenu toolsMenu, JMenu projectMenu, 
+                     JMenu debugMenu, JMenu languageLevelMenu, JMenu helpMenu) {
     menuBar.add(fileMenu);
     menuBar.add(editMenu);
     menuBar.add(toolsMenu);
     menuBar.add(projectMenu);
-    if (_showDebugger && (debugMenu!=null)) menuBar.add(debugMenu);
+    if (_showDebugger && (debugMenu != null)) menuBar.add(debugMenu);
     menuBar.add(languageLevelMenu);
     menuBar.add(helpMenu);
     // Plastic-specific style hints
@@ -7137,7 +7136,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   /** Creates a toolbar button for undo and redo, which behave differently. */
-  JButton _createManualToolbarButton(Action a) {
+  JButton _createManualToolBarButton(Action a) {
     final JButton ret;
     Font buttonFont = DrJava.getConfig().getSetting(FONT_TOOLBAR);
     
@@ -7169,8 +7168,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     return ret;
   }
   
-  /** Sets up all buttons for the toolbar except for undo and redo, which use _createManualToolbarButton. */
-  public JButton _createToolbarButton(Action a) {
+  /** Sets up all buttons for the toolbar except for undo and redo, which use _createManualToolBarButton. */
+  public JButton _createToolBarButton(Action a) {
     boolean useText = DrJava.getConfig().getSetting(TOOLBAR_TEXT_ENABLED).booleanValue();
     boolean useIcons = DrJava.getConfig().getSetting(TOOLBAR_ICONS_ENABLED).booleanValue();
     Font buttonFont = DrJava.getConfig().getSetting(FONT_TOOLBAR);
@@ -7184,14 +7183,14 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   /** Removes the button b from the toolbar and creates new button in its place.  Only runs in the event thread. */
-  public JButton _updateToolbarButton(JButton b, Action a) {
-    final JButton result = _createToolbarButton(a);
+  public JButton _updateToolBarButton(JButton b, Action a) {
+    final JButton result = _createToolBarButton(a);
     
     int index = _toolBar.getComponentIndex(b);
     _toolBar.remove(b);
     _toolBar.add(result, index);
     
-    _fixToolbarHeights();
+    _fixToolBarHeights();
     
     return result;
   }
@@ -7206,17 +7205,17 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
 //     _toolBar.addSeparator();
     
     // New, open, save, close
-    _toolBar.add(_createToolbarButton(_newAction));
-    _toolBar.add(_createToolbarButton(_openFileOrProjectAction));
-    _toolBar.add(_createToolbarButton(_saveAction));
-    _closeButton = _createToolbarButton(_closeAction);
+    _toolBar.add(_createToolBarButton(_newAction));
+    _toolBar.add(_createToolBarButton(_openFileOrProjectAction));
+    _toolBar.add(_createToolBarButton(_saveAction));
+    _closeButton = _createToolBarButton(_closeAction);
     _toolBar.add(_closeButton);
     
     // Cut, copy, paste
     _toolBar.addSeparator();
-    _toolBar.add(_createToolbarButton(cutAction));
-    _toolBar.add(_createToolbarButton(copyAction));
-    _toolBar.add(_createToolbarButton(pasteAction));
+    _toolBar.add(_createToolBarButton(cutAction));
+    _toolBar.add(_createToolBarButton(copyAction));
+    _toolBar.add(_createToolBarButton(pasteAction));
     
     // Undo, redo
     // Simple workaround, for now, for bug # 520742:
@@ -7230,25 +7229,24 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     // Find
     _toolBar.addSeparator();
-    _toolBar.add(_createToolbarButton(_findReplaceAction));
+    _toolBar.add(_createToolBarButton(_findReplaceAction));
     
     // Compile, reset, abort
     _toolBar.addSeparator();
-    _toolBar.add(_compileButton = _createToolbarButton(_compileAllAction));
-    _toolBar.add(_createToolbarButton(_resetInteractionsAction));
+    _toolBar.add(_compileButton = _createToolBarButton(_compileAllAction));
+    _toolBar.add(_createToolBarButton(_resetInteractionsAction));
     
     // Run, Junit, and JavaDoc
     _toolBar.addSeparator();
     
-    _toolBar.add(_runButton = _createToolbarButton(_runAction));
-    _toolBar.add(_junitButton = _createToolbarButton(_junitAllAction));
-    _toolBar.add(_createToolbarButton(_javadocAllAction));
-    _toolBar.add(_coverageButton = _createToolbarButton(_coverageAction));    
-
+    _toolBar.add(_runButton = _createToolBarButton(_runAction));
+    _toolBar.add(_junitButton = _createToolBarButton(_junitAllAction));
+    _toolBar.add(_createToolBarButton(_javadocAllAction));
+    _toolBar.add(_coverageButton = _createToolBarButton(_coverageAction));    
 
     // DrJava Errors
     _toolBar.addSeparator();
-    _errorsButton = _createToolbarButton(_errorsAction);
+    _errorsButton = _createToolBarButton(_errorsAction);
     _errorsButton.setVisible(false);
     _errorsButton.setBackground(DrJava.getConfig().getSetting(DRJAVA_ERRORS_BUTTON_COLOR));
     _toolBar.add(_errorsButton);
@@ -7271,7 +7269,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           _runAction.putValue(Action.LONG_DESCRIPTION,
                               "Run the main method of the current document"); 
         }
-        // _runButton = _updateToolbarButton(_runButton, _runAction);
+        // _runButton = _updateToolBarButton(_runButton, _runAction);
         projectRunnableChanged();
       }
     };
@@ -7281,7 +7279,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                        getSetting(OptionConstants.SMART_RUN_FOR_APPLETS_AND_PROGRAMS)));
     
     // Correct the vertical height of the buttons.
-    _fixToolbarHeights();
+    _fixToolBarHeights();
     
     // Plastic-specific style hints
     if(Utilities.isPlasticLaf()) {
@@ -7302,7 +7300,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Update the toolbar's buttons, following any change to TOOLBAR_ICONS_ENABLED, TOOLBAR_TEXT_ENABLED, or 
     * FONT_TOOLBAR (name, style, text)
     */
-  private void _updateToolbarButtons() {
+  private void _updateToolBarButtons() {
     _updateToolBarVisible();
     Component[] buttons = _toolBar.getComponents();
     
@@ -7353,11 +7351,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
     
     // Correct the vertical height of the buttons.
-    _fixToolbarHeights();
+    _fixToolBarHeights();
   }
   
   /** Ensures that all toolbar buttons have the same height. */
-  private void _fixToolbarHeights() {
+  private void _fixToolBarHeights() {
     Component[] buttons = _toolBar.getComponents();
     
     // First, find the maximum height of all the buttons.
@@ -7506,8 +7504,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _interactionsController.setNextPaneAction(_switchToNextPaneAction);
     
     JScrollPane interactionsScroll = 
-      new BorderlessScrollPane(_interactionsPane, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-                               JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+      new BorderlessScrollPane(_interactionsPane, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
+                               ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     _interactionsContainer.add(interactionsScroll, BorderLayout.CENTER);
     
     if (_showDebugger) {
@@ -7939,7 +7937,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       }
     });
     
-//    // This listener updates the _cachedCaretPosition in the _interactionsController when the cursor is manually set.
+//// This listener updates the _cachedCaretPosition in the _interactionsController when the cursor is manually set.
 //    _interactionsPane.addMouseListener(new MouseInputAdapter() {
 //      public void mouseClicked(MouseEvent e) { 
 //        _interactionsController.setCachedCaretPos(_interactionsPane.viewToModel(e.getPoint()));
@@ -8149,8 +8147,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     // Add to a scroll pane
     final JScrollPane scroll = 
-      new BorderlessScrollPane(pane, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
-                               JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+      new BorderlessScrollPane(pane, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, 
+                               ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     pane.setScrollPane(scroll);
     //scroll.setBorder(null); // removes all default borders (MacOS X installs default borders)
     
@@ -8288,9 +8286,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _docSplitPane.setRightComponent(scroll); //crazy line
     _docSplitPane.setDividerLocation(oldLocation);
     
-//    // if the current def pane is uneditable, that means we arrived here from a compile with errors.  We're
-//    // guaranteed to make it editable again when we return from the compilation, so we take the state
-//    // with us.  We guarantee only one definitions pane is un-editable at any time.
+//// if the current def pane is uneditable, that means we arrived here from a compile with errors.  We're
+//// guaranteed to make it editable again when we return from the compilation, so we take the state
+//// with us.  We guarantee only one definitions pane is un-editable at any time.
 //    if (_currentDefPane.isEditable()) {
 //      _currentDefPane = (DefinitionsPane) scroll.getViewport().getView();
     _currentDefPane.notifyActive();
@@ -8303,7 +8301,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
 //      _currentDefPane.notifyActive();
 //      _currentDefPane.setEditable(false);
 //    }
-//    // reset the undo/redo menu items
+//// reset the undo/redo menu items
     resetUndo();
     _updateDebugStatus();
   }
@@ -9833,9 +9831,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _model.getDocumentNavigator().asContainer().addMouseListener(_resetFindReplaceListener);
 //      new ScrollableDialog(null, "Closing JUnit Error Panel in MainFrame", "", "").show();
       removeTab(_junitPanel);
-      _runButton = _updateToolbarButton(_runButton, _runAction);
-      _compileButton = _updateToolbarButton(_compileButton, _compileAllAction);
-      _junitButton = _updateToolbarButton(_junitButton, _junitAllAction);
+      _runButton = _updateToolBarButton(_runButton, _runAction);
+      _compileButton = _updateToolBarButton(_compileButton, _compileAllAction);
+      _junitButton = _updateToolBarButton(_junitButton, _junitAllAction);
       projectRunnableChanged();
     }
     
@@ -9896,10 +9894,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _guiAvailabilityNotifier.ensureAvailabilityIs(GUIAvailabilityListener.ComponentType.PROJECT_MAIN_CLASS,
                                                   mainClassSet);
     if (mainClassSet) {
-      _runButton = _updateToolbarButton(_runButton, _runProjectAction);
+      _runButton = _updateToolBarButton(_runButton, _runProjectAction);
     }
     else {
-      _runButton = _updateToolbarButton(_runButton, _runAction);
+      _runButton = _updateToolBarButton(_runButton, _runAction);
     }
   }
   
@@ -10136,8 +10134,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   /** The OptionListener for FONT_TOOLBAR */
-  private class ToolbarFontOptionListener implements OptionListener<Font> {
-    public void optionChanged(OptionEvent<Font> oce) { _updateToolbarButtons(); }
+  private class ToolBarFontOptionListener implements OptionListener<Font> {
+    public void optionChanged(OptionEvent<Font> oce) { _updateToolBarButtons(); }
   }
   
   /** The OptionListener for DEFINITIONS_NORMAL_COLOR */
@@ -10151,8 +10149,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   /** The OptionListener for TOOLBAR options */
-  private class ToolbarOptionListener implements OptionListener<Boolean> {
-    public void optionChanged(OptionEvent<Boolean> oce) { _updateToolbarButtons(); }
+  private class ToolBarOptionListener implements OptionListener<Boolean> {
+    public void optionChanged(OptionEvent<Boolean> oce) { _updateToolBarButtons(); }
   }
   
   /** The OptionListener for LINEENUM_ENABLED. */
@@ -10414,7 +10412,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           EventQueue.invokeLater(new Runnable() { 
             public void run() { // interpret with the added import
               try {
-                im.append(code, InteractionsDocument.DEFAULT_STYLE);
+                im.append(code, ConsoleDocument.DEFAULT_STYLE);
                 im.interpretCurrentInteraction();
               }
               finally { hourglassOff(); }

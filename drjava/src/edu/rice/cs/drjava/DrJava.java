@@ -56,10 +56,7 @@ import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.FileOps;
 import edu.rice.cs.drjava.model.DrJavaFileUtils;
-
-import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /** Startup class for DrJava consisting entirely of static members.  The main method reads the .drjava file (creating 
   * one if none exists) to get the critical information required to start the main JVM for DrJava: 
@@ -386,8 +383,9 @@ public class DrJava {
     }
     catch(Throwable t) {
       // Show any errors to the System.err and in an DrJavaErrorHandler
-      System.out.println(t.getClass().getName() + ": " + t.getMessage());
-      t.printStackTrace(System.err);System.out.println("error thrown");
+      System.err.println(t.getClass().getName() + ": " + t.getMessage());
+      t.printStackTrace(System.err);
+      System.err.println("error thrown");
       DrJavaErrorHandler.record(t);
     }
   }
@@ -506,7 +504,7 @@ public class DrJava {
     * @throws IllegalStateException if config has already been assigned
     */
   static FileConfiguration _initConfig() throws IllegalStateException {
-//    // Make sure someone doesn't try to change the config object.
+//// Make sure someone doesn't try to change the config object.
 //    if (_config != null) throw new IllegalStateException("Can only call initConfig once!");
     
     FileConfiguration config;

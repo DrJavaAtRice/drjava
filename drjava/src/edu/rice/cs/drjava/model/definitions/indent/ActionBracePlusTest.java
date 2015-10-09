@@ -75,8 +75,7 @@ public final class ActionBracePlusTest extends IndentRulesTestCase {
   }
   
 
-  public void testSpaceSuffix() throws BadLocationException
-  {
+  public void xtestSpaceSuffix() throws BadLocationException {
     _action = new ActionBracePlus(1);
     
     // (2) 
@@ -164,8 +163,7 @@ public final class ActionBracePlusTest extends IndentRulesTestCase {
 
   }
   
-  public void testLargeSuffix() throws BadLocationException
-  {
+  public void testLargeSuffix() throws BadLocationException {
     _action = new ActionBracePlus(3);
     
     // (6) 
@@ -188,8 +186,7 @@ public final class ActionBracePlusTest extends IndentRulesTestCase {
     assertEquals("Line aligned to open paren.", _aligned, _doc.getText());
   }
   
-  public void testComment() throws BadLocationException
-  {
+  public void testComment() throws BadLocationException {
     _action = new ActionBracePlus(3);
     
     // (7) 

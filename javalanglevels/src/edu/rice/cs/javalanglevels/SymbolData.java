@@ -35,17 +35,22 @@
  * END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.javalanglevels;
 
+import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.javalanglevels.tree.*;
 import edu.rice.cs.javalanglevels.parser.JExprParser;
-import java.util.*;
 
+import java.util.*;
 import junit.framework.TestCase;
 
-import edu.rice.cs.plt.reflect.JavaVersion;
+import static edu.rice.cs.javalanglevels.LanguageLevelConverter.*;
 
 /** Represents the data for a given class.  There are two states of SymbolData.  One is a continuation which
   * is created when a type is referenced, but the corresponding class has not been read for its members.  The
   * other is a complete SymbolData containing all of the member data.
+  * Corky: The distinction between SymbolData and InstanceData is a CROCK!  The sensible data definition is:
+  * TypeData ::= InstanceData || PrimitiveData
+  * These names are atrocious.  It should read:
+  * Type := Reference || Primitive
   */
 public class SymbolData extends TypeData {
   
@@ -53,18 +58,13 @@ public class SymbolData extends TypeData {
   
   /** This anonymous class represents the boolean primitive type */
   public static final SymbolData BOOLEAN_TYPE = new PrimitiveData("boolean") {
-    
-    /** You can only cast a boolean primitive to a boolean primitive or a Boolean object (in 1.5). */
-    public boolean isCastableTo(SymbolData castTo, JavaVersion version) {
-      return isAssignableTo(castTo, version);
-    }
-    
-    /** Returns true if the specified SymbolData is a boolean type. */
-    public boolean isAssignableTo(SymbolData toCheck, JavaVersion version) {
+      
+    /** Returns true if this is assignable to the specified SymbolData. */
+    public boolean isAssignableTo(SymbolData toCheck, boolean allowAutoboxing) {
       if (toCheck == null) return false;
-      if (LanguageLevelConverter.versionSupportsAutoboxing(version) && !toCheck.isPrimitiveType()) {
+      if (allowAutoboxing && !toCheck.isPrimitiveType()) {
         SymbolData autoBoxMe = LanguageLevelConverter.symbolTable.get("java.lang.Boolean");
-        return (autoBoxMe != null && autoBoxMe.isAssignableTo(toCheck, version));
+        return autoBoxMe.isAssignableTo(toCheck, allowAutoboxing);
       }
       return toCheck == BOOLEAN_TYPE;
     }
@@ -73,20 +73,23 @@ public class SymbolData extends TypeData {
   /** This anonymous class represents the char primitive type. */
   public static final SymbolData CHAR_TYPE = new PrimitiveData("char") {
     
-    /** You can cast a char to a char, int, long, float, double or short or byte or Character object (in 1.5) */
-    public boolean isCastableTo(SymbolData castTo, JavaVersion version) {
-      return isAssignableTo(castTo, version) || castTo == SymbolData.SHORT_TYPE || castTo == SymbolData.BYTE_TYPE;
+    /** You can cast a char primitive to a byte, int, long, float, double or short or byte or Byte object. */
+    public boolean isCastableTo(SymbolData castTo) {
+      return isAssignableTo(castTo);
     }
-
-    /** You can assign a char primitive to a char, int, long, float, double or Character object (in 1.5) */
-    public boolean isAssignableTo(SymbolData assignTo, JavaVersion version) {
+    
+    /** You can assign a char primitive to a char, int, long, float, double or Character object. */
+    public boolean isAssignableTo(SymbolData assignTo, boolean allowAutoboxing) {
       if (assignTo == null) return false;
-      if (LanguageLevelConverter.versionSupportsAutoboxing(version) && !assignTo.isPrimitiveType()) {
+      if (allowAutoboxing && ! assignTo.isPrimitiveType()) {
         SymbolData autoBoxMe = LanguageLevelConverter.symbolTable.get("java.lang.Character");
-        return autoBoxMe != null && autoBoxMe.isAssignableTo(assignTo, version);
+        return autoBoxMe.isAssignableTo(assignTo, allowAutoboxing);
       }
-
-      return assignTo == SymbolData.INT_TYPE || 
+      
+      return 
+        assignTo == SymbolData.BYTE_TYPE ||
+        assignTo == SymbolData.SHORT_TYPE ||
+        assignTo == SymbolData.INT_TYPE || 
         assignTo == SymbolData.LONG_TYPE || 
         assignTo == SymbolData.FLOAT_TYPE || 
         assignTo == SymbolData.DOUBLE_TYPE || 
@@ -97,21 +100,22 @@ public class SymbolData extends TypeData {
   /** This anonymous class represents the byte primitive type */
   public static final SymbolData BYTE_TYPE = new PrimitiveData("byte") {
     
-    /** You can cast a byte primitive to a char, int, long, float, double or short or byte or Byte object (in 1.5) */
-    public boolean isCastableTo(SymbolData castTo, JavaVersion version) {
-      return isAssignableTo(castTo, version) || castTo == SymbolData.CHAR_TYPE;
+    /** You can cast a byte primitive to a char, int, long, float, double or short or byte or Byte object. */
+    public boolean isCastableTo(SymbolData castTo) {
+      return isAssignableTo(castTo) || castTo == SymbolData.CHAR_TYPE;
     }
 
-    /** You can assign a byte primitive to a byte, short, int, long, float, double, or Byte object(in 1.5). */
-    public boolean isAssignableTo(SymbolData assignTo, JavaVersion version) {
+    /** You can assign a byte primitive to a byte, short, int, long, float, double, or Byte object. */
+    public boolean isAssignableTo(SymbolData assignTo, boolean allowAutoboxing) {
       if (assignTo == null) return false;
 
-      if (LanguageLevelConverter.versionSupportsAutoboxing(version) && !assignTo.isPrimitiveType()) {
+      if (allowAutoboxing && !assignTo.isPrimitiveType()) {
         SymbolData autoBoxMe = LanguageLevelConverter.symbolTable.get("java.lang.Byte");
-        return autoBoxMe != null && autoBoxMe.isAssignableTo(assignTo, version);
+        return autoBoxMe.isAssignableTo(assignTo, allowAutoboxing);
       }
 
-      return assignTo == SymbolData.BYTE_TYPE || 
+      return 
+        assignTo == SymbolData.BYTE_TYPE || 
         assignTo == SymbolData.SHORT_TYPE || 
         assignTo == SymbolData.INT_TYPE || 
         assignTo == SymbolData.LONG_TYPE || 
@@ -123,68 +127,66 @@ public class SymbolData extends TypeData {
   /** This anonymous class represents the short primitive type. */
   public static final SymbolData SHORT_TYPE = new PrimitiveData("short") {
     
-    /** You can cast a short primitive to a char, int, long, float, double or short or byte or Short object (in 1.5) */
-    public boolean isCastableTo(SymbolData castTo, JavaVersion version) {
-      return isAssignableTo(castTo, version) || castTo == SymbolData.CHAR_TYPE || castTo == SymbolData.BYTE_TYPE;
+    /** You can cast a short primitive to a char, int, long, float, double or short or byte or Short object. */
+    public boolean isCastableTo(SymbolData castTo) {
+      return isAssignableTo(castTo, true) || castTo == SymbolData.CHAR_TYPE || castTo == SymbolData.BYTE_TYPE;
     }
 
-    /** You can assign a short primitive to a short, int, long, float, double, or Short object(in 1.5) */
-    public boolean isAssignableTo(SymbolData assignTo, JavaVersion version) {
+    /** You can assign a short primitive to a short, int, long, float, double, or Short object. */
+    public boolean isAssignableTo(SymbolData assignTo, boolean allowAutoboxing) {
       if (assignTo == null) return false;
 
-      if (LanguageLevelConverter.versionSupportsAutoboxing(version) && !assignTo.isPrimitiveType()) {
+      if (allowAutoboxing && !assignTo.isPrimitiveType()) {
         SymbolData autoBoxMe = LanguageLevelConverter.symbolTable.get("java.lang.Short");
-        return autoBoxMe != null && autoBoxMe.isAssignableTo(assignTo, version);
+        return autoBoxMe != null && autoBoxMe.isAssignableTo(assignTo, allowAutoboxing);
       }
       
-      return assignTo==SymbolData.SHORT_TYPE || 
-        assignTo == SymbolData.INT_TYPE || 
-        assignTo == SymbolData.LONG_TYPE || 
-        assignTo == SymbolData.FLOAT_TYPE || 
-        assignTo == SymbolData.DOUBLE_TYPE; 
+      return assignTo == SymbolData.SHORT_TYPE || assignTo == SymbolData.INT_TYPE || assignTo == SymbolData.LONG_TYPE || 
+        assignTo == SymbolData.FLOAT_TYPE || assignTo == SymbolData.DOUBLE_TYPE; 
     }
   };
   
   /** This anonymous class represents the int primitive type. */
   public static final SymbolData INT_TYPE = new PrimitiveData("int") {
     
-    /** You can cast a int primitive to a char, int, long, float, double or short or byte or Short object (in 1.5) */
-    public boolean isCastableTo(SymbolData castTo, JavaVersion version) {
-      return isAssignableTo(castTo, version) || castTo == SymbolData.CHAR_TYPE || castTo == SymbolData.SHORT_TYPE 
-        || castTo == SymbolData.BYTE_TYPE;
+    /** You can cast a int primitive to a char, int, long, float, double or short or byte or Integer object. */
+    public boolean isCastableTo(SymbolData castTo) {
+      return isAssignableTo(castTo) || castTo == SymbolData.LONG_TYPE || castTo == SymbolData.INT_TYPE || 
+        castTo == SymbolData.DOUBLE_TYPE || castTo == SymbolData.FLOAT_TYPE || castTo == SymbolData.CHAR_TYPE || 
+        castTo == SymbolData.SHORT_TYPE || castTo == SymbolData.BYTE_TYPE;
     }
 
-    /** You can assign a int primitive to a int, long, float, double, or Integer/Long/Float/Double or
-      * Number/Object type (in 1.5) */
-    public boolean isAssignableTo(SymbolData assignTo, JavaVersion version) {
+    /** You can assign a int primitive to a int, long, float, double, or Integer. O*/
+    public boolean isAssignableTo(SymbolData assignTo, boolean allowAutoboxing) {
       if (assignTo == null) return false;
 
-      if (LanguageLevelConverter.versionSupportsAutoboxing(version) && !assignTo.isPrimitiveType()) {
+      if (allowAutoboxing && ! assignTo.isPrimitiveType()) {
         SymbolData autoBoxMe = LanguageLevelConverter.symbolTable.get("java.lang.Integer");
-        return autoBoxMe != null && autoBoxMe.isAssignableTo(assignTo, version);
+        return autoBoxMe.isAssignableTo(assignTo, allowAutoboxing);
       }
 
-      return assignTo == SymbolData.INT_TYPE || assignTo == SymbolData.LONG_TYPE || 
+      return assignTo == SymbolData.INT_TYPE ||  assignTo == SymbolData.LONG_TYPE || 
         assignTo == SymbolData.FLOAT_TYPE ||  assignTo == SymbolData.DOUBLE_TYPE;
     }
   };
   
-  /** This represents the long primitive */
-  public static final SymbolData LONG_TYPE = new PrimitiveData("long"){
+  /** This field represents the long primitive */
+  public static final SymbolData LONG_TYPE = new PrimitiveData("long") {
     
-    /** You can cast a long primitive to a char, int, long, float, double or short or byte or Short object (in 1.5) */
-    public boolean isCastableTo(SymbolData castTo, JavaVersion version) {
-      return isAssignableTo(castTo, version) || castTo == SymbolData.CHAR_TYPE || castTo == SymbolData.INT_TYPE || 
+    /** You can cast a long primitive to a char, int, long, float, double or short or byte or Short object. */
+    public boolean isCastableTo(SymbolData castTo) {
+      return isAssignableTo(castTo) || castTo == SymbolData.CHAR_TYPE || castTo == SymbolData.INT_TYPE || 
         castTo == SymbolData.SHORT_TYPE || castTo == SymbolData.BYTE_TYPE;
     }
 
-    /** You can assign a long primitive to a long, float, double, or Long object(in 1.5) */
-    public boolean isAssignableTo(SymbolData assignTo, JavaVersion version) {
-      if (assignTo == null) {return false;}
+    /** You can assign a long primitive to a long, float, double, or Long object. */
+    public boolean isAssignableTo(SymbolData assignTo, boolean allowAutoboxing) {
+      
+      if (assignTo == null) return false;
 
-      if (LanguageLevelConverter.versionSupportsAutoboxing(version) && !assignTo.isPrimitiveType()) {
+      if (allowAutoboxing && !assignTo.isPrimitiveType()) {
         SymbolData autoBoxMe = LanguageLevelConverter.symbolTable.get("java.lang.Long");
-        return autoBoxMe != null && autoBoxMe.isAssignableTo(assignTo, version);
+        return autoBoxMe.isAssignableTo(assignTo, allowAutoboxing);
       }
 
       return assignTo == SymbolData.LONG_TYPE || 
@@ -197,19 +199,19 @@ public class SymbolData extends TypeData {
   /** This represents the float primitive */
   public static final SymbolData FLOAT_TYPE = new PrimitiveData("float"){
     
-    /** You can cast a float primitive to a char, int, long, float, double or short or byte or Short object (in 1.5) */
-    public boolean isCastableTo(SymbolData castTo, JavaVersion version) {
-      return isAssignableTo(castTo, version) || castTo == SymbolData.CHAR_TYPE || castTo == SymbolData.INT_TYPE 
+    /** You can cast a float primitive to a char, int, long, float, double or short or byte or Short object */
+    public boolean isCastableTo(SymbolData castTo) {
+      return isAssignableTo(castTo, true) || castTo == SymbolData.CHAR_TYPE || castTo == SymbolData.INT_TYPE 
         || castTo == SymbolData.LONG_TYPE || castTo == SymbolData.SHORT_TYPE || castTo == SymbolData.BYTE_TYPE;
     }
 
-    /** You can assign a float primitive to a float, double, or Float object(in 1.5) */
-    public boolean isAssignableTo(SymbolData assignTo, JavaVersion version) {
+    /** You can assign a float primitive to a float, double, or Float object. */
+    public boolean isAssignableTo(SymbolData assignTo, boolean allowAutoboxing) {
       if (assignTo == null) return false;
 
-      if (LanguageLevelConverter.versionSupportsAutoboxing(version) && !assignTo.isPrimitiveType()) {
+      if (allowAutoboxing && !assignTo.isPrimitiveType()) {
         SymbolData autoBoxMe = LanguageLevelConverter.symbolTable.get("java.lang.Float");
-        return autoBoxMe != null && autoBoxMe.isAssignableTo(assignTo, version);
+        return autoBoxMe != null && autoBoxMe.isAssignableTo(assignTo, allowAutoboxing);
       }
 
       return assignTo == SymbolData.FLOAT_TYPE || assignTo == SymbolData.DOUBLE_TYPE;
@@ -221,43 +223,43 @@ public class SymbolData extends TypeData {
     
     /** A double primitive can be cast to a char, int, long, float, double, short or byte primitive or a Float
       * or Double object,  */
-    public boolean isCastableTo(SymbolData castTo, JavaVersion version) {
-      return isAssignableTo(castTo, version) || castTo == SymbolData.CHAR_TYPE || castTo == SymbolData.INT_TYPE 
+    public boolean isCastableTo(SymbolData castTo) {
+      return isAssignableTo(castTo, true) || castTo == SymbolData.CHAR_TYPE || castTo == SymbolData.INT_TYPE 
         || castTo == SymbolData.LONG_TYPE || castTo == SymbolData.DOUBLE_TYPE || castTo == SymbolData.SHORT_TYPE 
         || castTo == SymbolData.BYTE_TYPE;
     }
 
-    /** You can assign a double primitive to a float, double, or Float object(in 1.5) */
-    public boolean isAssignableTo(SymbolData assignTo, JavaVersion version) {
-      if (assignTo == null) { return false; }
+    /** You can assign a double primitive to a float, double, or Float object. */
+    public boolean isAssignableTo(SymbolData assignTo, boolean allowAutoboxing) {
+      if (assignTo == null) return false; 
 
-      if (LanguageLevelConverter.versionSupportsAutoboxing(version) && ! assignTo.isPrimitiveType()) {
+      if (allowAutoboxing && ! assignTo.isPrimitiveType()) {
         SymbolData autoBoxMe = LanguageLevelConverter.symbolTable.get("java.lang.Double");
-        return autoBoxMe != null && autoBoxMe.isAssignableTo(assignTo, version);
+        return autoBoxMe != null && autoBoxMe.isAssignableTo(assignTo, allowAutoboxing);
       }
       return assignTo == SymbolData.DOUBLE_TYPE; 
     }
   };
   
-  /** Used for the void type. */
+  /** Used for the void type. Not the same as java.lang.Void !! */
   public static final SymbolData VOID_TYPE = new PrimitiveData("void") {
   
     /** A void value cannot be cast to anything */
-    public boolean isCastableTo(SymbolData castTo, JavaVersion version) { return false; }
+    public boolean isCastableTo(SymbolData castTo) { return false; }
     
     /** A void value can be assigned to itself */
-    public boolean isAssignableTo(SymbolData toCheck, JavaVersion version) { return this == toCheck; }
+    public boolean isAssignableTo(SymbolData toCheck, boolean allowAutoboxing) { return this == toCheck; }
   };
   
   /** Used for an exception */
   public static final SymbolData EXCEPTION = new SymbolData("exception") {
     /** You cannot cast an exception to anything. */
-    public boolean isCastableTo(SymbolData castTo, JavaVersion version) { return false; }
+    public boolean isCastableTo(SymbolData castTo) { return false; }
     
     /** Returns true, because an exception takes the place of a return.
       * This SymbolData is only used when the user has thrown an Exception.
       */
-    public boolean isAssignableTo(SymbolData toCheck, JavaVersion version) { return true; }
+    public boolean isAssignableTo(SymbolData toCheck, boolean allowAutoboxing) { return true; }
     
   };
 
@@ -265,52 +267,62 @@ public class SymbolData extends TypeData {
   public static final SymbolData NOT_FOUND = new SymbolData("not found") {
   
     /** A not-found value cannot be cast to anything */
-    public boolean isCastableTo(SymbolData castTo, JavaVersion version) { return false; }
+    public boolean isCastableTo(SymbolData castTo) { return false; }
     
     /** A not-found value cannot be assigned to anything */
-    public boolean isAssignableTo(SymbolData toCheck, JavaVersion version) { return false; }
+    public boolean isAssignableTo(SymbolData toCheck, boolean allowAutoboxing) { return false; }
   };
   
  /** Singleton class representing null*/
   public static final SymbolData NULL_TYPE = new SymbolData("null") {
 
     /** You can cast null to any reference type (i.e. something that is not a primitive). */
-    public boolean isCastableTo(SymbolData castTo, JavaVersion version) {
-      return isAssignableTo(castTo, version);
+    public boolean isCastableTo(SymbolData castTo) {
+      return isAssignableTo(castTo, true);
     }
 
     /** You can assign a null to any reference (non-primitive) type */
-    public boolean isAssignableTo(SymbolData assignTo, JavaVersion version) {
+    public boolean isAssignableTo(SymbolData assignTo, boolean allowAutoboxing) {
       return (assignTo != null) && ! assignTo.isPrimitiveType();
     }
-    
   };
+  
+  
   
   /** Used when 2 or more SymbolDatas could match*/
   public static final SymbolData AMBIGUOUS_REFERENCE = new SymbolData("ambiguous reference") {
     /** An ambiguous reference cannot be cast to anything */
-    public boolean isCastableTo(SymbolData castTo, JavaVersion version) { return false; }
+    public boolean isCastableTo(SymbolData castTo) { return false; }
     
     /** An ambiguous reference cannot be assigned to anything */
-    public boolean isAssignableTo(SymbolData toCheck, JavaVersion version) { return false; }
+    public boolean isAssignableTo(SymbolData toCheck, boolean allowAutoboxing) { return false; }
   };
   
   /** Used when a this constructor invocation is seen. */
   public static final SymbolData THIS_CONSTRUCTOR = new SymbolData("this constructor") {
     /** Cannot be cast to anything */
-    public boolean isCastableTo(SymbolData castTo, JavaVersion version) { return false; }
+    public boolean isCastableTo(SymbolData castTo) { return false; }
     
     /** Cannot be assigned to anything */
-    public boolean isAssignableTo(SymbolData toCheck, JavaVersion version) { return false; }
+    public boolean isAssignableTo(SymbolData toCheck, boolean allowAutoboxing) { return false; }
   };
   
+//  /* OBJECT is not fully initialized until it is entered in the LanguageLevelConverter symbolTable. */
+//  private static final SymbolData OBJECT = new SymbolData("java.lang.Object") {
+//    /** Can be cast to anything */
+//    public boolean isCastableTo(SymbolData castTo) { return true; }
+//    
+//    /** Can only be assigned to Object */
+//    public boolean isAssignableTo(SymbolData toCheck, boolean allowAutoboxing) { return toCheck == this; }
+//  };
+    
   /** Used when a super constructor invocation is seen. */
   public static final SymbolData SUPER_CONSTRUCTOR = new SymbolData("super constructor") {
     /** Cannot be cast to anything */
-    public boolean isCastableTo(SymbolData castTo, JavaVersion version) { return false; }
+    public boolean isCastableTo(SymbolData castTo) { return false; }
     
     /** Cannot be assigned to anything */
-    public boolean isAssignableTo(SymbolData toCheck, JavaVersion version) { return false; }
+    public boolean isAssignableTo(SymbolData toCheck, boolean allowAutoboxing) { return false; }
   };
 
   /** Do some initialization*/
@@ -453,34 +465,37 @@ public class SymbolData extends TypeData {
     _instanceData = new InstanceData(this);
   }
   
-  /** No reference type is a Primitive type. */
+  /** No reference type is a Primitive type. Overridden in class PrimitiveType. */
   public boolean isPrimitiveType() { return false; }
   
   public String toString() {
     if (_isContinuation) return "? " + _name;
     return "!" + _name;
   }
+    
+  /** Returns true if the primitive boolean type is assignable to the specified SymbolData. Autoboxing is
+    * allowed in all supported versions of Java. */
+  public boolean isAssignableTo(SymbolData toCheck) { return isAssignableTo(toCheck, true); }
 
-  /**
-   * See if this can be assigned to assignTo.
-   * An assignment is legal:
-   *   1. if this is a class type
-   *      - if assignTo is a class type, then the types must be the same, or this must be a subclass of assignTo
-   *      - if assignTo is an interface, then we must implement it.
-   *      - if assignTo is an array, then it is not assignable.
-   *  2. if this is an interface
-   *      - if assignTo is a class, assignTo must be java.lang.Object.
-   *      - if assignTo is an interface, then the types must be the same, or this must be a subinterface of assignTo.
-   *      - if assignTo is an array, then it is not assignable
-   * All of these rules are followed in isSubclassOf(), which traverses the hierarchy.
-   */
-   public boolean isAssignableTo(SymbolData assignTo, JavaVersion version) {
+  /** See if this can be assigned to assignTo.
+    * An assignment is legal:
+    *   1. if this is a class type
+    *      - if assignTo is a class type, then the types must be the same, or this must be a subclass of assignTo
+    *      - if assignTo is an interface, then we must implement it.
+    *      - if assignTo is an array, then it is not assignable.
+    *  2. if this is an interface
+    *      - if assignTo is a class, assignTo must be java.lang.Object.
+    *      - if assignTo is an interface, then the types must be the same, or this must be a subinterface of assignTo.
+    *      - if assignTo is an array, then it is not assignable
+    * All of these rules are followed in isSubclassOf(), which traverses the hierarchy.
+    */
+   public boolean isAssignableTo(SymbolData assignTo, boolean allowAutoboxing) {
      if (assignTo != null) {
-       if (assignTo.isPrimitiveType() && LanguageLevelConverter.versionSupportsAutoboxing(version)) { 
+       if (assignTo.isPrimitiveType() && allowAutoboxing) { 
          // You never box the left, so see if this can be unboxed to be a primitive.
          SymbolData unboxedType = this.unbox();
          if (unboxedType == null) return false;
-         else return unboxedType.isAssignableTo(assignTo, version);
+         else return unboxedType.isAssignableTo(assignTo, allowAutoboxing);
        }
        else return this.isSubClassOf(assignTo);
      }
@@ -493,19 +508,34 @@ public class SymbolData extends TypeData {
    
    /** If this SymbolData is a wrapper class for a primitive, return the primitive type.  Else return null.
      * @return the Primitive this SymbolData wraps, if there is one.  Otherwise return null.
+     * TODO: convert this method and the nexxt to simple instance methods with the correct binding for each primitive type.
      */
    private SymbolData unbox() {
      String name = getName();
-     if (name.equals("java.lang.Integer")) {return SymbolData.INT_TYPE;}
-     if (name.equals("java.lang.Character")) {return SymbolData.CHAR_TYPE;}
-     if (name.equals("java.lang.Short")) {return SymbolData.SHORT_TYPE;}
-     if (name.equals("java.lang.Byte")) {return SymbolData.BYTE_TYPE;}
-     if (name.equals("java.lang.Float")) {return SymbolData.FLOAT_TYPE;}
-     if (name.equals("java.lang.Double")) {return SymbolData.DOUBLE_TYPE;}
-     if (name.equals("java.lang.Long")) {return SymbolData.LONG_TYPE;}
-     if (name.equals("java.lang.Boolean")) {return SymbolData.BOOLEAN_TYPE;}
+     if (name.equals("java.lang.Integer"))   return INT_TYPE;
+     if (name.equals("java.lang.Character")) return CHAR_TYPE;
+     if (name.equals("java.lang.Short"))     return SHORT_TYPE;
+     if (name.equals("java.lang.Byte"))      return BYTE_TYPE;
+     if (name.equals("java.lang.Float"))     return FLOAT_TYPE;
+     if (name.equals("java.lang.Double"))    return DOUBLE_TYPE;
+     if (name.equals("java.lang.Long"))      return LONG_TYPE;
+     if (name.equals("java.lang.Boolean"))   return BOOLEAN_TYPE;
      return null;
    }
+   
+   /** The inverse of unbox(). */
+   public SymbolData box() {
+     if (this == INT_TYPE)     return LanguageLevelConverter.symbolTable.get("java.lang.Integer");
+     if (this == CHAR_TYPE)    return LanguageLevelConverter.symbolTable.get("java.lang.Character");
+     if (this == SHORT_TYPE)   return LanguageLevelConverter.symbolTable.get("java.lang.Short");
+     if (this == BYTE_TYPE)    return LanguageLevelConverter.symbolTable.get("java.lang.Byte");
+     if (this == FLOAT_TYPE)   return LanguageLevelConverter.symbolTable.get("java.lang.Float");
+     if (this == DOUBLE_TYPE)  return LanguageLevelConverter.symbolTable.get("java.lang.Double");
+     if (this == LONG_TYPE)    return LanguageLevelConverter.symbolTable.get("java.lang.Long");
+     if (this == BOOLEAN_TYPE) return LanguageLevelConverter.symbolTable.get("java.lang.Boolean");
+     return this;
+   }
+   
 
   /**
    * See if this can be cast as a castTo.
@@ -526,57 +556,51 @@ public class SymbolData extends TypeData {
    * @param castTo  The TypeData we are trying to cast to.  (castTo) this
    * @return true  If the cast is legal, false otherwise.
    */
-   public boolean isCastableTo(SymbolData castTo, JavaVersion version) {
-     if (castTo != null) {
-       if (castTo.isPrimitiveType()) { 
-         if (LanguageLevelConverter.versionSupportsAutoboxing(version)) { 
-           //You never box the left, so see if this can be unboxed to be a primitive.
-           SymbolData unboxedType = this.unbox();
-           if (unboxedType == null) {return false;}
-           else {return unboxedType.isCastableTo(castTo, version);}
-         }
-         else {return false;} //without autoboxing, cannot cast an object to a primitive
-       }
+   public boolean isCastableTo(SymbolData castTo) {
+     if (castTo == null) return false;
+     
+     if (castTo.isPrimitiveType()) { 
+       //You never autobox the left, so see if this can be unboxed to be a primitive.
+       SymbolData unboxedType = this.unbox();
+       if (unboxedType == null) return false;
+       else return unboxedType.isCastableTo(castTo);
+     }
+     
+     // castTo is an InstanceType 
+     
+     else if (! this.isInterface()) { // this is a class
+       if (! castTo.isInterface()) //castTo is a class or array type
+         return this.isSubClassOf(castTo) || castTo.isSubClassOf(this); 
+       else  //castTo is an interface
+         return (! castTo.hasModifier("final") || castTo.isSubClassOf(this));
+     }
+     
+     else { // this is an interface
        
-       else if (!this.isInterface()) { //we're a class
-         if (!castTo.isInterface()) {//castTo is a class or array
-           return this.isSubClassOf(castTo) || castTo.isSubClassOf(this);
-         }
-         
-         else { //castTo is an interface
-           return (!castTo.hasModifier("final") || castTo.isSubClassOf(this));
-         }
-         
-       }
+       if (! castTo.isInterface()) //castTo is a class or array
+         return ! castTo.hasModifier("final") || castTo.isSubClassOf(this);
        
-       else { // this is an interface
+       else { // castTo is an interface
+         // return false if this and castTo contain methods with the same signature but different return types.
          
-         if (!castTo.isInterface()) {//castTo is a class or array
-           return !castTo.hasModifier("final") || castTo.isSubClassOf(this);
-         }
-         
-         else { // castTo is an interface
-           // return false if this and castTo contain methods with the same signature but different return types.
-           if (LanguageLevelConverter.versionSupportsAutoboxing(version)) return true; 
-           for (MethodData md: this.getMethods()) {
-             if (checkDifferentReturnTypes(md, castTo, false, version)) {
-               /* TypeChecker._addError("Types " + this.getName() + " and " + castTo.getName() + " are incompatible.  
-                  Both implement " + md.getName() + " but have different return types", md.getSourceInfo()); */
-               return false;
-             }
+         for (MethodData md: this.getMethods()) {
+           if (checkDifferentReturnTypes(md, castTo, false, true)) {
+             /* TypeChecker._addError("Types " + this.getName() + " and " + castTo.getName() + " are incompatible.  
+              Both implement " + md.getName() + " but have different return types", md.getSourceInfo()); */
+             return false;
            }
-           return true;
          }
+         return true;
        }
      }
-     return false;
    }
+
 
    /** Depth-first traversal of the tree of enclosing data checking to see if sd is above this SymbolData 
      * in the class hierarchy.
      */
    public boolean isSubClassOf(SymbolData sd) {
-    if (sd == null) return false;
+    if (sd == null || sd.isPrimitiveType() || this.isPrimitiveType()) return false;
     if (this.equals(sd)) return true;
     if (sd.isInterface()) {
       for (SymbolData i: _interfaces) {
@@ -615,8 +639,9 @@ public class SymbolData extends TypeData {
   /** @return the InstanceData corresponding to this class. */
   public InstanceData getInstanceData() { return _instanceData; }
 
-  /** Sets the InstanceData for this class to the specified value. */
-  public void setInstanceData(InstanceData id) { _instanceData = id; }
+  /* never used */
+//  /** Sets the InstanceData for this class to the specified value. */
+//  public void setInstanceData(InstanceData id) { _instanceData = id; }
   
   /** @return the package */
   public String getPackage() { return _package; }
@@ -810,6 +835,7 @@ public class SymbolData extends TypeData {
     }
     return success;
   }
+
   
   /** Checks to see if a variable with the same name as vr has already been defined in the scope of this data.  If so, 
     * return true.  Otherwise, return false.
@@ -929,56 +955,45 @@ public class SymbolData extends TypeData {
     }
     return null;
   }
-  
-  
 
-  /** @return true if this is a primitive boolean or a Boolean with autoboxing enabled*/
-  boolean isBooleanType(JavaVersion version) {
-    return this == BOOLEAN_TYPE || 
-      (getName().equals("java.lang.Boolean") && LanguageLevelConverter.versionSupportsAutoboxing(version));
+  /** @return true if this is a primitive boolean or a Boolean */
+  boolean isBooleanType() {
+    return this == BOOLEAN_TYPE || getName().equals("java.lang.Boolean");
   }
   
-
-  /** @return true if this is a primitive char or a Character with autoboxing enabled*/
-  boolean isCharType(JavaVersion version) {
-    return this == CHAR_TYPE || (getName().equals("java.lang.Character") && 
-                                 LanguageLevelConverter.versionSupportsAutoboxing(version));
+  /** @return true if this is a primitive char or a Character */
+  boolean isCharType() {
+    return this == CHAR_TYPE || getName().equals("java.lang.Character");
   }
     
-  /** @return true if this is a primitive byte or a Byte with autoboxing enabled*/
-  boolean isByteType(JavaVersion version) {
-    return this == BYTE_TYPE || (getName().equals("java.lang.Byte") && 
-                                 LanguageLevelConverter.versionSupportsAutoboxing(version));
+  /** @return true if this is a primitive byte or a Byte */
+  boolean isByteType() {
+    return this == BYTE_TYPE || getName().equals("java.lang.Byte");
   }
   
-  /** @return true if this is a primitive short or a Short with autoboxing enabled*/
-  boolean isShortType(JavaVersion version) {
-    return this == SHORT_TYPE || (getName().equals("java.lang.Short") && 
-                                  LanguageLevelConverter.versionSupportsAutoboxing(version));
+  /** @return true if this is a primitive short or a Short */
+  boolean isShortType() {
+    return this == SHORT_TYPE || getName().equals("java.lang.Short"); 
   }
   
-  /**@return true if this is a primitive int or an Integer with autoboxing enabled*/
-  boolean isIntType(JavaVersion version) {
-    return this==INT_TYPE || (getName().equals("java.lang.Integer") && 
-                              LanguageLevelConverter.versionSupportsAutoboxing(version));
+  /**@return true if this is a primitive int or an Integer. */
+  boolean isIntType() {
+    return this == INT_TYPE || getName().equals("java.lang.Integer");
   }
   
-  /**@return true if this is a primitive long or a Long with autoboxing enabled*/
-  boolean isLongType(JavaVersion version) {
-    return this == LONG_TYPE || (this.getName().equals("java.lang.Long") && 
-                                 LanguageLevelConverter.versionSupportsAutoboxing(version));
+  /**@return true if this is a primitive long or a Long. */
+  boolean isLongType() {
+    return this == LONG_TYPE || getName().equals("java.lang.Long");
   }
   
-  /**@return true if this is a primitive char or a Character with autoboxing enabled*/
-  boolean isFloatType(JavaVersion version) {
-    return this == FLOAT_TYPE || (getName().equals("java.lang.Float") && 
-                                  LanguageLevelConverter.versionSupportsAutoboxing(version));
+  /**@return true if this is a primitive float or a Float. */
+  boolean isFloatType() {
+    return this == FLOAT_TYPE || getName().equals("java.lang.Float");
   }
   
-  /**@return true if this is a primitive double or a Double with autoboxing enabled*/
-  boolean isDoubleType(JavaVersion version) {
-    return this == DOUBLE_TYPE || 
-      (getName().equals("java.lang.Double") && LanguageLevelConverter.versionSupportsAutoboxing(version));
+  /**@return true if this is a primitive double or a Double. */
+  boolean isDoubleType() {
+    return this == DOUBLE_TYPE || getName().equals("java.lang.Double");
   }
   
   /** Compares the ModifiersAndVisibility of the 2 method data to determine if overwriting can override the access 
@@ -998,8 +1013,8 @@ public class SymbolData extends TypeData {
   }
   
   /**Call checkDifferentReturnTypes with addError set to true by default*/
-  protected static boolean checkDifferentReturnTypes(MethodData md, SymbolData sd, JavaVersion version) {
-      return checkDifferentReturnTypes(md, sd, true, version);
+  protected static boolean checkDifferentReturnTypes(MethodData md, SymbolData sd, boolean allowAutoBoxing) {
+      return checkDifferentReturnTypes(md, sd, true, allowAutoBoxing);
     }
   
   /** Called to make sure that no method has the same name and parameters as a method it inherits while having
@@ -1011,7 +1026,7 @@ public class SymbolData extends TypeData {
     * @return  Whether there exists a conflict
     */
   protected static boolean checkDifferentReturnTypes(MethodData md, SymbolData sd, boolean addError, 
-                                                     JavaVersion version) {
+                                                     boolean allowAutoBoxing) {
     // We only want to check the super class and interfaces, not outer classes.
     ArrayList<SymbolData> interfaces = sd.getInterfaces();    
     LinkedList<SymbolData> enclosingData = new LinkedList<SymbolData>();
@@ -1026,9 +1041,9 @@ public class SymbolData extends TypeData {
       MethodData matchingMd = repeatedSignature(currSd.getMethods(), md);
       if (matchingMd != null) {
         if (matchingMd.hasModifier("private")) return false;
-        boolean subclass = md.getReturnType().isSubClassOf(matchingMd.getReturnType());
-        if (matchingMd.getReturnType() != md.getReturnType() && ! subclass && 
-            LanguageLevelConverter.versionIs15(version)) {
+//        System.err.println("[cdrt] corresponding return types are: " + md.getReturnType() + ", " + matchingMd.getReturnType());
+        boolean isSubclass = md.getReturnType().isSubClassOf(matchingMd.getReturnType());
+        if (matchingMd.getReturnType() != md.getReturnType() && ! isSubclass ) {
           StringBuffer methodSignature = new StringBuffer(md.getName() + "(");
           VariableData[] params = md.getParams();
           for (int i = 0; i < params.length; i++) {
@@ -1037,13 +1052,11 @@ public class SymbolData extends TypeData {
           }
           methodSignature.append(")");
           String methodSigString = methodSignature.toString();
-          // This entire method is only called from the type checker, so add an error to its error list.
+          // This entire method may be called from the type checker, so add an error to its error list if indicated
           if (addError) { 
-            TypeChecker.errors.addLast(new Pair<String, JExpressionIF>(methodSigString + " in " + sd.getName() + 
-                                                                       " cannot override " + methodSigString + " in " +
-                                                                       currSd.getName() + 
-                                                                       "; attempting to use different return types",
-                                                                       md.getJExpression())); }
+            String msg = methodSigString + " in " + sd.getName() + " cannot override " + methodSigString + " in " +
+              currSd.getName() + "; attempting to use different return types";
+            TypeChecker.errors.addLast(new Pair<String, JExpressionIF>(msg, md.getJExpression())); }
           return true;
         }
         
@@ -1064,7 +1077,7 @@ public class SymbolData extends TypeData {
           return true;
         }
       }
-      else if (checkDifferentReturnTypes(md, currSd, version)) return true;
+      else if (checkDifferentReturnTypes(md, currSd, true)) return true;
     }
     return false;
   }
@@ -1258,60 +1271,37 @@ public class SymbolData extends TypeData {
         this == SymbolData.BYTE_TYPE);
   }
   
-  /**@return true if this Symbol Data is a primitive type that is a number type or is
-   * a Object number type with autoboxing enabled.*/
-  public boolean isNumberType(JavaVersion version) {
-    if (!LanguageLevelConverter.versionSupportsAutoboxing(version)) {
-      return isNumberTypeWithoutAutoboxing();
-    }
-    if (this.isDoubleType(version) ||
-        this.isFloatType(version) ||
-        this.isLongType(version) ||
-        this.isIntType(version) ||        
-        this.isCharType(version) ||
-        this.isShortType(version) ||
-        this.isByteType(version)) {
-      return true;
-    }
-    return false;
+  /** return true if this symbol corresponds to a numeric type. */
+  public boolean isNumberType() { return isNumberType(true); }
+  
+  /**@return true if this Symbol Data is a numeric primitive type or is
+   * an Object number type with autoboxing enabled.*/
+  public boolean isNumberType(boolean allowAutoboxing) {
+    if (! allowAutoboxing) return isNumberTypeWithoutAutoboxing();
+    else return isNumberTypeWithAutoboxing();
   }
-
+  
+  public boolean isNumberTypeWithAutoboxing() { return isDoubleType() || isFloatType() || isNonFloatNumberType(); }
+  
+  public boolean isNonFloatNumberType() { 
+    return isLongType() || isIntType() || isCharType() || isShortType() || isByteType();
+  }
 
   /**@return true if this is a non float or boolean type, with autoboxing if it is allowed, or without autoboxing*/
-  public boolean isNonFloatOrBooleanType(JavaVersion version) {
-    if (!LanguageLevelConverter.versionSupportsAutoboxing(version)) {
-      return isNonFloatOrBooleanTypeWithoutAutoboxing();
-    }
-
-    return (this.isIntType(version) ||
-        this.isLongType(version) ||
-        this.isCharType(version) ||
-        this.isShortType(version) ||
-        this.isByteType(version) ||
-        this.isBooleanType(version));
-  }
+  public boolean isNonFloatOrBooleanType() { return isNonFloatNumberType() || isBooleanType(); }
 
   /** @return true if this is a non float or boolean type, without autoboxing*/
   public boolean isNonFloatOrBooleanTypeWithoutAutoboxing() {
-    return (this==SymbolData.INT_TYPE ||
-        this==SymbolData.LONG_TYPE ||
-        this==SymbolData.CHAR_TYPE ||
-        this==SymbolData.SHORT_TYPE ||
-        this==SymbolData.BYTE_TYPE ||
-        this==SymbolData.BOOLEAN_TYPE);
-    
+    return (this == SymbolData.INT_TYPE || this == SymbolData.LONG_TYPE || this == SymbolData.CHAR_TYPE ||
+        this == SymbolData.SHORT_TYPE || this == SymbolData.BYTE_TYPE || this == SymbolData.BOOLEAN_TYPE);
   }
   
-  
-  /**
-   * Returns true if the provided Object is equal to this symbol data.
-   * SymbolDatas are equal if their fields are the same.
+  /** Returns true if Object obj is structurally equal to this. 
    * */
   public boolean equals(Object obj) {
     if (obj == null) return false;
-    if ((obj.getClass() != this.getClass())) { //|| (obj.hashCode() != this.hashCode())) {
-      return false;
-    }
+    if (obj.getClass() != this.getClass()) return false;
+    
     SymbolData sd = (SymbolData) obj;    
 
     /*Return true if the fields are all .equals.*/
@@ -1397,16 +1387,17 @@ public class SymbolData extends TypeData {
     private ModifiersAndVisibility _publicFinalMav = 
       new ModifiersAndVisibility(SourceInfo.NONE, new String[]{"public", "final"});
     
-    public SymbolDataTest() {
-      this("");
-    }
-    public SymbolDataTest(String name) {
-      super(name);
-    }
+    private SymbolData _objectSymbol;   // bound to SymbolData for "java.lang.Object" in setUp()
+    
+    public SymbolDataTest() { this(""); }
+    public SymbolDataTest(String name) { super(name); }
     
     public void setUp() {
       _sd = new SymbolData("i.like.monkey");
       LanguageLevelVisitor.errors = new LinkedList<Pair<String, JExpressionIF>>();
+      /* ensure that symbolTable is loaded */
+      _objectSymbol = LanguageLevelConverter.OBJECT;
+      
     }
     
     public void testRepeatedSignatures() {
@@ -1492,6 +1483,7 @@ public class SymbolData extends TypeData {
                                      null);
       superSd.addMethod(md);
       _sd.setSuperClass(superSd);
+      
       // Test with an exact copy of the method.
       MethodData md2 = new MethodData("methodName",
                                       _publicMav,
@@ -1501,8 +1493,9 @@ public class SymbolData extends TypeData {
                                       new String[0],
                                       _sd,
                                       null);
-      assertFalse("There should not be a conflict.", checkDifferentReturnTypes(md2, _sd, JavaVersion.JAVA_5));
+      assertFalse("There should not be a conflict.", checkDifferentReturnTypes(md2, _sd, true));
       assertEquals("There should not be an error.", 0, TypeChecker.errors.size());
+      
       // Test with an exact copy of the method except for differing return types.
       MethodData md3 = new MethodData("methodName",
                                       _publicMav,
@@ -1512,18 +1505,19 @@ public class SymbolData extends TypeData {
                                       new String[0],
                                       _sd,
                                       null);
-      assertTrue("There should be a conflict.", checkDifferentReturnTypes(md3, _sd, JavaVersion.JAVA_5));
+      assertTrue("There should be a conflict.", checkDifferentReturnTypes(md3, _sd, true));
       assertEquals("There should be one error.", 1, TypeChecker.errors.size());
       assertEquals("The error message should be correct.", 
                    "methodName() in i.like.monkey cannot override methodName() in superClass;" + 
                    " attempting to use different return types",
                    TypeChecker.errors.get(0).getFirst());
+      
       // Create a super super class and give it a method.
       SymbolData superSuperSd = new SymbolData("superSuperClass");
       MethodData md4 = new MethodData("superSuperMethodName",
                                       _publicMav,
                                       new TypeParameter[0],
-                                      SymbolData.INT_TYPE,
+                                      _objectSymbol,
                                       new VariableData[] { new VariableData(SymbolData.CHAR_TYPE) },
                                       new String[0],
                                       superSuperSd,
@@ -1531,18 +1525,20 @@ public class SymbolData extends TypeData {
       md4.getParams()[0].setEnclosingData(md4);
       superSuperSd.addMethod(md4);
       superSd.setSuperClass(superSuperSd);
+      
       // Test with an exact copy except for differing parameters.
       MethodData md5 = new MethodData("superSuperMethodName",
                                       _publicMav,
                                       new TypeParameter[0],
-                                      SymbolData.INT_TYPE,
+                                      _objectSymbol,
                                       new VariableData[0],
                                       new String[0],
                                       null,
                                       null);
-      assertFalse("There should not be a conflict.", checkDifferentReturnTypes(md5, _sd, JavaVersion.JAVA_5));
+      assertFalse("There should not be a conflict.", checkDifferentReturnTypes(md5, _sd, true));
       assertEquals("There should still be one error.", 1, TypeChecker.errors.size());
-      // Test with an exact copy except for diffeing return types.
+      
+      // Test with an exact copy except for differing return types.
       MethodData md6 = new MethodData("superSuperMethodName",
                                       _publicMav,
                                       new TypeParameter[0],
@@ -1552,46 +1548,46 @@ public class SymbolData extends TypeData {
                                       null,
                                       null);
       md6.getParams()[0].setEnclosingData(md6);
-      assertTrue("There should be a conflict.", checkDifferentReturnTypes(md6, _sd, JavaVersion.JAVA_5));
+      assertTrue("There should be a conflict.", checkDifferentReturnTypes(md6, _sd, true));
       assertEquals("There should be two errors.", 2, TypeChecker.errors.size());
       
       //Test a method that restricts the mav of the super class's method
       MethodData md7 = new MethodData("superSuperMethodName",
                                       _privateMav,
                                       new TypeParameter[0],
-                                      SymbolData.INT_TYPE,
+                                      _objectSymbol,
                                       new VariableData[] { new VariableData(SymbolData.CHAR_TYPE) },
                                       new String[0],
                                       new SymbolData("myData"),
                                       null);
-
       md7.getParams()[0].setEnclosingData(md7);
-      assertTrue("There should be a conflict", checkDifferentReturnTypes(md7, _sd, JavaVersion.JAVA_5));
+      assertTrue("There should be a conflict", checkDifferentReturnTypes(md7, _sd, true));
       assertEquals("There should be three errors", 3, TypeChecker.errors.size());
       assertEquals("The error message should be correct", 
                    "superSuperMethodName in myData cannot override superSuperMethodName in " + superSuperSd.getName() + 
                    ".  You are attempting to assign weaker access priviledges. In " + superSuperSd.getName() + 
-                   ", superSuperMethodName was public", TypeChecker.errors.get(2).getFirst());
-                                      
+                   ", superSuperMethodName was public", TypeChecker.errors.get(2).getFirst());                                   
       
       //Test a method that narrows the return type of the super class's method
       SymbolData stringSd = new SymbolData("java.lang.String");
       stringSd.setIsContinuation(false);
-      stringSd.setSuperClass(SymbolData.INT_TYPE);
+      stringSd.setSuperClass(_objectSymbol);
       
       MethodData md8 = new MethodData("superSuperMethodName",
                                       _publicMav,
                                       new TypeParameter[0],
                                       stringSd,
-                                      new VariableData[] {new VariableData(SymbolData.CHAR_TYPE)},
+                                      new VariableData[] { new VariableData(SymbolData.CHAR_TYPE) },
                                       new String[0],
                                       new SymbolData("myData"),
-                                      null);
+                                      null);;
+        
+//      System.err.println("**** The three errors are: \n" + TypeChecker.errors);
                                       
-      assertFalse("There should be no conflict", checkDifferentReturnTypes(md8, _sd, JavaVersion.JAVA_5));
+      assertFalse("There should be no conflict", checkDifferentReturnTypes(md8, _sd, true));
       assertEquals("There should still be 3 errors", 3, TypeChecker.errors.size());
       /* Java 1.4 is not supported. */
-//      assertTrue("There should be a conflict in 1.4", checkDifferentReturnTypes(md8, _sd, JavaVersion.JAVA_1_4));
+//      assertTrue("There should be a conflict in 1.4", checkDifferentReturnTypes(md8, _sd, false));
 //      assertEquals("There should now be 4 errors", 4, TypeChecker.errors.size());
 //      assertEquals("The error message should be correct", TypeChecker.errors.getLast().getFirst(), 
 //                   "superSuperMethodName(char) in superClass cannot override superSuperMethodName(char) in " + 
@@ -1708,22 +1704,35 @@ public class SymbolData extends TypeData {
     }
     
     public void testIsNumberType() {
-      assertTrue(SymbolData.INT_TYPE.isNumberType(JavaVersion.JAVA_5));
-      assertTrue(new SymbolData("java.lang.Integer").isNumberType(JavaVersion.JAVA_5));
-      assertTrue(SymbolData.DOUBLE_TYPE.isNumberType(JavaVersion.JAVA_5));
-      assertTrue(new SymbolData("java.lang.Double").isNumberType(JavaVersion.JAVA_5));
-      assertTrue(SymbolData.LONG_TYPE.isNumberType(JavaVersion.JAVA_5));
-      assertTrue(new SymbolData("java.lang.Long").isNumberType(JavaVersion.JAVA_5));
-      assertTrue(SymbolData.CHAR_TYPE.isNumberType(JavaVersion.JAVA_5));
-      assertTrue(new SymbolData("java.lang.Character").isNumberType(JavaVersion.JAVA_5));
-      assertTrue(SymbolData.FLOAT_TYPE.isNumberType(JavaVersion.JAVA_5));
-      assertTrue(new SymbolData("java.lang.Float").isNumberType(JavaVersion.JAVA_5));
-      assertTrue(SymbolData.SHORT_TYPE.isNumberType(JavaVersion.JAVA_5));
-      assertTrue(new SymbolData("java.lang.Short").isNumberType(JavaVersion.JAVA_5));
-      assertTrue(SymbolData.BYTE_TYPE.isNumberType(JavaVersion.JAVA_5));
-      assertTrue(new SymbolData("java.lang.Byte").isNumberType(JavaVersion.JAVA_5));     
-      assertFalse(SymbolData.BOOLEAN_TYPE.isNumberType(JavaVersion.JAVA_5));
-      assertFalse(new SymbolData("java.lang.Boolean").isNumberType(JavaVersion.JAVA_5));
+      assertTrue(SymbolData.INT_TYPE.isNumberType());
+      assertTrue(new SymbolData("java.lang.Integer").isNumberType());
+      assertTrue(SymbolData.DOUBLE_TYPE.isNumberType());
+      assertTrue(new SymbolData("java.lang.Double").isNumberType());
+      assertTrue(SymbolData.LONG_TYPE.isNumberType());
+      assertTrue(new SymbolData("java.lang.Long").isNumberType());
+      assertTrue(SymbolData.CHAR_TYPE.isNumberType());
+      assertTrue(new SymbolData("java.lang.Character").isNumberType());
+      assertTrue(SymbolData.FLOAT_TYPE.isNumberType());
+      assertTrue(new SymbolData("java.lang.Float").isNumberType());
+      assertTrue(SymbolData.SHORT_TYPE.isNumberType());
+      assertTrue(new SymbolData("java.lang.Short").isNumberType());
+      assertTrue(SymbolData.BYTE_TYPE.isNumberType());
+      assertTrue(new SymbolData("java.lang.Byte").isNumberType());     
+      assertFalse(SymbolData.BOOLEAN_TYPE.isNumberType());
+      assertFalse(new SymbolData("java.lang.Boolean").isNumberType());
+    }
+    
+     public void testBoxedTypes() {
+      assertEquals("INT_TYPE boxing", symbolTable.get("java.lang.Integer"), SymbolData.INT_TYPE.box());
+      assertEquals("DOUBLE_TYPE boxing", symbolTable.get("java.lang.Double"), SymbolData.DOUBLE_TYPE.box());
+      assertEquals("LONG_TYPE boxing", symbolTable.get("java.lang.Long"), SymbolData.LONG_TYPE.box());
+      assertEquals("LONG_TYPE boxing", symbolTable.get("java.lang.Long"), SymbolData.LONG_TYPE.box());
+      assertEquals("CHAR_TYPE boxing", symbolTable.get("java.lang.Character"), SymbolData.CHAR_TYPE.box());
+      assertEquals("FLOAT_TYPE boxing", symbolTable.get("java.lang.Float"), SymbolData.FLOAT_TYPE.box());
+      assertEquals("CHAR_TYPE boxing", symbolTable.get("java.lang.Character"), SymbolData.CHAR_TYPE.box());
+      assertEquals("SHORT_TYPE boxing", symbolTable.get("java.lang.Short"), SymbolData.SHORT_TYPE.box());
+      assertEquals("BYTE_TYPE boxing", symbolTable.get("java.lang.Byte"), SymbolData.BYTE_TYPE.box());
+      assertEquals("BOOLEAN_TYPE boxing", symbolTable.get("java.lang.Boolean"), SymbolData.BOOLEAN_TYPE.box());     
     }
 
     public void testIsNumberTypeWithoutAutoboxing() {
@@ -1747,140 +1756,140 @@ public class SymbolData extends TypeData {
 
     
     public void testIsIntType() {
-      assertTrue(SymbolData.INT_TYPE.isIntType(JavaVersion.JAVA_5));
-      assertTrue((new SymbolData("java.lang.Integer")).isIntType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.DOUBLE_TYPE.isIntType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Double")).isIntType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.LONG_TYPE.isIntType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Long")).isIntType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.CHAR_TYPE.isIntType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Character")).isIntType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.FLOAT_TYPE.isIntType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Float")).isIntType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.SHORT_TYPE.isIntType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Short")).isIntType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.BYTE_TYPE.isIntType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Byte")).isIntType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.BOOLEAN_TYPE.isIntType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Boolean")).isIntType(JavaVersion.JAVA_5));
+      assertTrue(SymbolData.INT_TYPE.isIntType());
+      assertTrue((new SymbolData("java.lang.Integer")).isIntType());
+      assertFalse(SymbolData.DOUBLE_TYPE.isIntType());
+      assertFalse((new SymbolData("java.lang.Double")).isIntType());
+      assertFalse(SymbolData.LONG_TYPE.isIntType());
+      assertFalse((new SymbolData("java.lang.Long")).isIntType());
+      assertFalse(SymbolData.CHAR_TYPE.isIntType());
+      assertFalse((new SymbolData("java.lang.Character")).isIntType());
+      assertFalse(SymbolData.FLOAT_TYPE.isIntType());
+      assertFalse((new SymbolData("java.lang.Float")).isIntType());
+      assertFalse(SymbolData.SHORT_TYPE.isIntType());
+      assertFalse((new SymbolData("java.lang.Short")).isIntType());
+      assertFalse(SymbolData.BYTE_TYPE.isIntType());
+      assertFalse((new SymbolData("java.lang.Byte")).isIntType());
+      assertFalse(SymbolData.BOOLEAN_TYPE.isIntType());
+      assertFalse((new SymbolData("java.lang.Boolean")).isIntType());
     }
     
 
     public void testIsDoubleType() {
-      assertFalse(SymbolData.INT_TYPE.isDoubleType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Integer")).isDoubleType(JavaVersion.JAVA_5));
-      assertTrue(SymbolData.DOUBLE_TYPE.isDoubleType(JavaVersion.JAVA_5));
-      assertTrue((new SymbolData("java.lang.Double")).isDoubleType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.CHAR_TYPE.isDoubleType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Character")).isDoubleType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.FLOAT_TYPE.isDoubleType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Float")).isDoubleType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.SHORT_TYPE.isDoubleType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Short")).isDoubleType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.BYTE_TYPE.isDoubleType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Byte")).isDoubleType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.BOOLEAN_TYPE.isDoubleType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Boolean")).isDoubleType(JavaVersion.JAVA_5));
+      assertFalse(SymbolData.INT_TYPE.isDoubleType());
+      assertFalse((new SymbolData("java.lang.Integer")).isDoubleType());
+      assertTrue(SymbolData.DOUBLE_TYPE.isDoubleType());
+      assertTrue((new SymbolData("java.lang.Double")).isDoubleType());
+      assertFalse(SymbolData.CHAR_TYPE.isDoubleType());
+      assertFalse((new SymbolData("java.lang.Character")).isDoubleType());
+      assertFalse(SymbolData.FLOAT_TYPE.isDoubleType());
+      assertFalse((new SymbolData("java.lang.Float")).isDoubleType());
+      assertFalse(SymbolData.SHORT_TYPE.isDoubleType());
+      assertFalse((new SymbolData("java.lang.Short")).isDoubleType());
+      assertFalse(SymbolData.BYTE_TYPE.isDoubleType());
+      assertFalse((new SymbolData("java.lang.Byte")).isDoubleType());
+      assertFalse(SymbolData.BOOLEAN_TYPE.isDoubleType());
+      assertFalse((new SymbolData("java.lang.Boolean")).isDoubleType());
     }
     
     public void testIsCharType() {
-      assertFalse(SymbolData.INT_TYPE.isCharType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Integer")).isCharType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.DOUBLE_TYPE.isCharType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Double")).isCharType(JavaVersion.JAVA_5));
-      assertTrue(SymbolData.CHAR_TYPE.isCharType(JavaVersion.JAVA_5));
-      assertTrue((new SymbolData("java.lang.Character")).isCharType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.FLOAT_TYPE.isCharType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Float")).isCharType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.SHORT_TYPE.isCharType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Short")).isCharType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.BYTE_TYPE.isCharType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Byte")).isCharType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.BOOLEAN_TYPE.isCharType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Boolean")).isCharType(JavaVersion.JAVA_5));
+      assertFalse(SymbolData.INT_TYPE.isCharType());
+      assertFalse((new SymbolData("java.lang.Integer")).isCharType());
+      assertFalse(SymbolData.DOUBLE_TYPE.isCharType());
+      assertFalse((new SymbolData("java.lang.Double")).isCharType());
+      assertTrue(SymbolData.CHAR_TYPE.isCharType());
+      assertTrue((new SymbolData("java.lang.Character")).isCharType());
+      assertFalse(SymbolData.FLOAT_TYPE.isCharType());
+      assertFalse((new SymbolData("java.lang.Float")).isCharType());
+      assertFalse(SymbolData.SHORT_TYPE.isCharType());
+      assertFalse((new SymbolData("java.lang.Short")).isCharType());
+      assertFalse(SymbolData.BYTE_TYPE.isCharType());
+      assertFalse((new SymbolData("java.lang.Byte")).isCharType());
+      assertFalse(SymbolData.BOOLEAN_TYPE.isCharType());
+      assertFalse((new SymbolData("java.lang.Boolean")).isCharType());
     }
     
     public void testIsFloatType() {
-      assertFalse(SymbolData.INT_TYPE.isFloatType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Integer")).isFloatType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.DOUBLE_TYPE.isFloatType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Double")).isFloatType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.CHAR_TYPE.isFloatType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Character")).isFloatType(JavaVersion.JAVA_5));
-      assertTrue(SymbolData.FLOAT_TYPE.isFloatType(JavaVersion.JAVA_5));
-      assertTrue((new SymbolData("java.lang.Float")).isFloatType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.SHORT_TYPE.isFloatType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Short")).isFloatType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.BYTE_TYPE.isFloatType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Byte")).isFloatType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.BOOLEAN_TYPE.isFloatType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Boolean")).isFloatType(JavaVersion.JAVA_5));
+      assertFalse(SymbolData.INT_TYPE.isFloatType());
+      assertFalse((new SymbolData("java.lang.Integer")).isFloatType());
+      assertFalse(SymbolData.DOUBLE_TYPE.isFloatType());
+      assertFalse((new SymbolData("java.lang.Double")).isFloatType());
+      assertFalse(SymbolData.CHAR_TYPE.isFloatType());
+      assertFalse((new SymbolData("java.lang.Character")).isFloatType());
+      assertTrue(SymbolData.FLOAT_TYPE.isFloatType());
+      assertTrue((new SymbolData("java.lang.Float")).isFloatType());
+      assertFalse(SymbolData.SHORT_TYPE.isFloatType());
+      assertFalse((new SymbolData("java.lang.Short")).isFloatType());
+      assertFalse(SymbolData.BYTE_TYPE.isFloatType());
+      assertFalse((new SymbolData("java.lang.Byte")).isFloatType());
+      assertFalse(SymbolData.BOOLEAN_TYPE.isFloatType());
+      assertFalse((new SymbolData("java.lang.Boolean")).isFloatType());
     }
     
     
     public void testIsByteType() {
-      assertFalse(SymbolData.INT_TYPE.isByteType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Integer")).isByteType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.DOUBLE_TYPE.isByteType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Double")).isByteType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.CHAR_TYPE.isByteType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Character")).isByteType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.FLOAT_TYPE.isByteType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Float")).isByteType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.SHORT_TYPE.isByteType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Short")).isByteType(JavaVersion.JAVA_5));
-      assertTrue(SymbolData.BYTE_TYPE.isByteType(JavaVersion.JAVA_5));
-      assertTrue((new SymbolData("java.lang.Byte")).isByteType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.BOOLEAN_TYPE.isByteType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Boolean")).isByteType(JavaVersion.JAVA_5));
+      assertFalse(SymbolData.INT_TYPE.isByteType());
+      assertFalse((new SymbolData("java.lang.Integer")).isByteType());
+      assertFalse(SymbolData.DOUBLE_TYPE.isByteType());
+      assertFalse((new SymbolData("java.lang.Double")).isByteType());
+      assertFalse(SymbolData.CHAR_TYPE.isByteType());
+      assertFalse((new SymbolData("java.lang.Character")).isByteType());
+      assertFalse(SymbolData.FLOAT_TYPE.isByteType());
+      assertFalse((new SymbolData("java.lang.Float")).isByteType());
+      assertFalse(SymbolData.SHORT_TYPE.isByteType());
+      assertFalse((new SymbolData("java.lang.Short")).isByteType());
+      assertTrue(SymbolData.BYTE_TYPE.isByteType());
+      assertTrue((new SymbolData("java.lang.Byte")).isByteType());
+      assertFalse(SymbolData.BOOLEAN_TYPE.isByteType());
+      assertFalse((new SymbolData("java.lang.Boolean")).isByteType());
     }
     
     public void testIsBooleanType() {
-      assertFalse(SymbolData.INT_TYPE.isBooleanType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Integer")).isBooleanType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.DOUBLE_TYPE.isBooleanType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Double")).isBooleanType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.CHAR_TYPE.isBooleanType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Character")).isBooleanType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.FLOAT_TYPE.isBooleanType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Float")).isBooleanType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.SHORT_TYPE.isBooleanType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Short")).isBooleanType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.BYTE_TYPE.isBooleanType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Byte")).isBooleanType(JavaVersion.JAVA_5));
-      assertTrue(SymbolData.BOOLEAN_TYPE.isBooleanType(JavaVersion.JAVA_5));
-      assertTrue((new SymbolData("java.lang.Boolean")).isBooleanType(JavaVersion.JAVA_5));
+      assertFalse(SymbolData.INT_TYPE.isBooleanType());
+      assertFalse((new SymbolData("java.lang.Integer")).isBooleanType());
+      assertFalse(SymbolData.DOUBLE_TYPE.isBooleanType());
+      assertFalse((new SymbolData("java.lang.Double")).isBooleanType());
+      assertFalse(SymbolData.CHAR_TYPE.isBooleanType());
+      assertFalse((new SymbolData("java.lang.Character")).isBooleanType());
+      assertFalse(SymbolData.FLOAT_TYPE.isBooleanType());
+      assertFalse((new SymbolData("java.lang.Float")).isBooleanType());
+      assertFalse(SymbolData.SHORT_TYPE.isBooleanType());
+      assertFalse((new SymbolData("java.lang.Short")).isBooleanType());
+      assertFalse(SymbolData.BYTE_TYPE.isBooleanType());
+      assertFalse((new SymbolData("java.lang.Byte")).isBooleanType());
+      assertTrue(SymbolData.BOOLEAN_TYPE.isBooleanType());
+      assertTrue((new SymbolData("java.lang.Boolean")).isBooleanType());
     }
     
     public void testIsNonFloatOrBooleanType() {
-      assertTrue(SymbolData.INT_TYPE.isNonFloatOrBooleanType(JavaVersion.JAVA_5));
-      assertTrue(new SymbolData("java.lang.Integer").isNonFloatOrBooleanType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.DOUBLE_TYPE.isNonFloatOrBooleanType(JavaVersion.JAVA_5));
-      assertFalse(new SymbolData("java.lang.Double").isNonFloatOrBooleanType(JavaVersion.JAVA_5));
-      assertTrue(SymbolData.CHAR_TYPE.isNonFloatOrBooleanType(JavaVersion.JAVA_5));
-      assertTrue(new SymbolData("java.lang.Character").isNonFloatOrBooleanType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.FLOAT_TYPE.isNonFloatOrBooleanType(JavaVersion.JAVA_5));
-      assertFalse(new SymbolData("java.lang.Float").isNonFloatOrBooleanType(JavaVersion.JAVA_5));
-      assertTrue(SymbolData.SHORT_TYPE.isNonFloatOrBooleanType(JavaVersion.JAVA_5));
-      assertTrue(new SymbolData("java.lang.Short").isNonFloatOrBooleanType(JavaVersion.JAVA_5));
-      assertTrue(SymbolData.BYTE_TYPE.isNonFloatOrBooleanType(JavaVersion.JAVA_5));
-      assertTrue(new SymbolData("java.lang.Byte").isNonFloatOrBooleanType(JavaVersion.JAVA_5));
-      assertTrue(SymbolData.LONG_TYPE.isNonFloatOrBooleanType(JavaVersion.JAVA_5));
-      assertTrue(new SymbolData("java.lang.Long").isNonFloatOrBooleanType(JavaVersion.JAVA_5));
-      assertTrue(SymbolData.BOOLEAN_TYPE.isNonFloatOrBooleanType(JavaVersion.JAVA_5));
-      assertTrue(new SymbolData("java.lang.Boolean").isNonFloatOrBooleanType(JavaVersion.JAVA_5));
+      assertTrue(SymbolData.INT_TYPE.isNonFloatOrBooleanType());
+      assertTrue(new SymbolData("java.lang.Integer").isNonFloatOrBooleanType());
+      assertFalse(SymbolData.DOUBLE_TYPE.isNonFloatOrBooleanType());
+      assertFalse(new SymbolData("java.lang.Double").isNonFloatOrBooleanType());
+      assertTrue(SymbolData.CHAR_TYPE.isNonFloatOrBooleanType());
+      assertTrue(new SymbolData("java.lang.Character").isNonFloatOrBooleanType());
+      assertFalse(SymbolData.FLOAT_TYPE.isNonFloatOrBooleanType());
+      assertFalse(new SymbolData("java.lang.Float").isNonFloatOrBooleanType());
+      assertTrue(SymbolData.SHORT_TYPE.isNonFloatOrBooleanType());
+      assertTrue(new SymbolData("java.lang.Short").isNonFloatOrBooleanType());
+      assertTrue(SymbolData.BYTE_TYPE.isNonFloatOrBooleanType());
+      assertTrue(new SymbolData("java.lang.Byte").isNonFloatOrBooleanType());
+      assertTrue(SymbolData.LONG_TYPE.isNonFloatOrBooleanType());
+      assertTrue(new SymbolData("java.lang.Long").isNonFloatOrBooleanType());
+      assertTrue(SymbolData.BOOLEAN_TYPE.isNonFloatOrBooleanType());
+      assertTrue(new SymbolData("java.lang.Boolean").isNonFloatOrBooleanType());
       
     }
     
     public void testIsNonFloatOrBooleanTypeWithoutAutoboxing() {
-      assertTrue(SymbolData.INT_TYPE.isNonFloatOrBooleanType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.DOUBLE_TYPE.isNonFloatOrBooleanType(JavaVersion.JAVA_5));
-      assertTrue(SymbolData.CHAR_TYPE.isNonFloatOrBooleanType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.FLOAT_TYPE.isNonFloatOrBooleanType(JavaVersion.JAVA_5));
-      assertTrue(SymbolData.SHORT_TYPE.isNonFloatOrBooleanType(JavaVersion.JAVA_5));
-      assertTrue(SymbolData.BYTE_TYPE.isNonFloatOrBooleanType(JavaVersion.JAVA_5));
-      assertTrue(SymbolData.LONG_TYPE.isNonFloatOrBooleanType(JavaVersion.JAVA_5));
-      assertTrue(SymbolData.BOOLEAN_TYPE.isNonFloatOrBooleanType(JavaVersion.JAVA_5));
+      assertTrue(SymbolData.INT_TYPE.isNonFloatOrBooleanType());
+      assertFalse(SymbolData.DOUBLE_TYPE.isNonFloatOrBooleanType());
+      assertTrue(SymbolData.CHAR_TYPE.isNonFloatOrBooleanType());
+      assertFalse(SymbolData.FLOAT_TYPE.isNonFloatOrBooleanType());
+      assertTrue(SymbolData.SHORT_TYPE.isNonFloatOrBooleanType());
+      assertTrue(SymbolData.BYTE_TYPE.isNonFloatOrBooleanType());
+      assertTrue(SymbolData.LONG_TYPE.isNonFloatOrBooleanType());
+      assertTrue(SymbolData.BOOLEAN_TYPE.isNonFloatOrBooleanType());
     }
     
     
@@ -2120,8 +2129,8 @@ public class SymbolData extends TypeData {
       assertTrue("subClass is a subclass of its super class", _sd.isSubClassOf(superC));
       
       //subclass of subclass of provided data
-      superC._superClass = SymbolData.CHAR_TYPE;
-      assertTrue("subClass is a subclass of its super class's super class", _sd.isSubClassOf(SymbolData.CHAR_TYPE));
+      superC._superClass = _objectSymbol;
+      assertTrue("subClass is a subclass of its super class's super class", _sd.isSubClassOf(_objectSymbol));
       
       //Interface
       SymbolData myData = new SymbolData("yes");

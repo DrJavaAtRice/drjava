@@ -42,12 +42,8 @@ import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.tuple.OptionVisitor;
 import edu.rice.cs.plt.reflect.ReflectUtil;
-import edu.rice.cs.plt.text.TextUtil;
 
-import edu.rice.cs.dynamicjava.Options;
 import edu.rice.cs.dynamicjava.interpreter.*;
-import edu.rice.cs.dynamicjava.symbol.*;
-import edu.rice.cs.dynamicjava.symbol.type.Type;
 
 /** Tests the functionality of the repl interpreter.
   * @version $Id$
@@ -102,7 +98,7 @@ public class JavaInterpreterTest extends DrJavaTestCase {
 
   /** Make sure interpreting simple constants works.
     * Note that strings and characters are quoted. */
-  @SuppressWarnings({"unchecked", "rawtypes"})
+  @SuppressWarnings({"unchecked","rawtypes"})
   public void testConstants() throws InterpreterException {
     Pair<String,Object>[] cases = new Pair[] {
       Pair.make("5", (Object) new Integer(5)),
@@ -119,7 +115,7 @@ public class JavaInterpreterTest extends DrJavaTestCase {
   }
 
   /** Test simple operations with Booleans */
-  @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"unchecked","rawtypes"})
   public void testBooleanOps() throws InterpreterException {
     Pair<String,Object>[] cases = new Pair[] {
       //and
@@ -141,7 +137,7 @@ public class JavaInterpreterTest extends DrJavaTestCase {
   }
 
   /** Tests short circuiting */
-  @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"unchecked","rawtypes"})
   public void testShortCircuit() throws InterpreterException {
     Pair<String,Object>[] cases = new Pair[] {
       Pair.make("false && (3 == 1/0)", (Object) Boolean.FALSE),
@@ -151,7 +147,7 @@ public class JavaInterpreterTest extends DrJavaTestCase {
   }
 
   /** Tests integer operations. */
-  @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"unchecked","rawtypes"})
   public void testIntegerOps() throws InterpreterException {
     Pair<String,Object>[] cases = new Pair[] {
       // plus
@@ -201,7 +197,7 @@ public class JavaInterpreterTest extends DrJavaTestCase {
   /**
    * Test double operations.
    */
-  @SuppressWarnings({"unchecked", "rawtypes"})
+  @SuppressWarnings({"unchecked","rawtypes"})
   public void testDoubleOps() throws InterpreterException {
     Pair<String,Object>[] cases = new Pair[]{
       // less than
@@ -237,7 +233,7 @@ public class JavaInterpreterTest extends DrJavaTestCase {
   /**
    * Test string operations
    */
-  @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"unchecked","rawtypes"})
   public void testStringOps() throws InterpreterException {
     Pair<String,Object>[] cases = new Pair[] {
       // concatenation
@@ -252,7 +248,7 @@ public class JavaInterpreterTest extends DrJavaTestCase {
   /**
    * Test character operations.
    */
-  @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"unchecked","rawtypes"})
   public void testCharacterOps()  throws InterpreterException{
     Pair<String,Object>[] cases = new Pair[] {
       // equals
@@ -265,7 +261,7 @@ public class JavaInterpreterTest extends DrJavaTestCase {
    * Tests that String and character declarations do not return
    * a result, while the variables themselves return a quoted result.
    */
-  @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"unchecked","rawtypes"})
   public void testSemicolon() throws InterpreterException {
     Pair<String,Object>[] cases = new Pair[] {
       Pair.make("'c' == 'c'", (Object) Boolean.valueOf('c' == 'c')),
@@ -284,7 +280,7 @@ public class JavaInterpreterTest extends DrJavaTestCase {
   /**
    * Tests that null can be used in instanceof expressions.
    */
-  @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"unchecked","rawtypes"})
   public void testNullInstanceOf() throws InterpreterException {
     Pair<String,Object>[] cases = new Pair[] {
       Pair.make("null instanceof Object", (Object) Boolean.valueOf(null instanceof Object)),
@@ -297,7 +293,6 @@ public class JavaInterpreterTest extends DrJavaTestCase {
    * Tests simple variable definitions which broke the initial implementation
    * of variable redefinition (tested by testVariableRedefinition).
    */
-  @SuppressWarnings("unchecked")
   public void testVariableDefinition() throws InterpreterException {
     _interpreter.interpret("int a = 5;");
     _interpreter.interpret("int b = a;");
@@ -308,7 +303,7 @@ public class JavaInterpreterTest extends DrJavaTestCase {
   /**
    * Tests that variables are assigned default values.
    */
-  @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"unchecked","rawtypes"})
   public void testVariableDefaultValues() throws InterpreterException {
     _interpreter.interpret("byte b");
     _interpreter.interpret("short s");
@@ -463,11 +458,11 @@ public class JavaInterpreterTest extends DrJavaTestCase {
 //  /** Test that the value of a variable can be queried externally. */
 //  public void testQueryVariableExternally() {
 //    _interpreter.defineVariable("x", 7);
-//    // Get value of variable externally
+//// Get value of variable externally
 //    assertEquals("external query for x",
 //                 new Integer(7), _interpreter.getVariable("x"));
 //
-//    // Undefined variable
+//// Undefined variable
 //    try {
 //      _interpreter.getVariable("undefined");
 //      fail("Should have thrown IllegalStateException");
@@ -511,7 +506,7 @@ public class JavaInterpreterTest extends DrJavaTestCase {
 //    * given the value of the ALLOW_PRIVATE_ACCESS configuration option.
 //    */
 //  public void testAllowPrivateAccess() throws InterpreterException {
-//    // The real option listener is in DefaultGlobalModel, so add one here.
+//// The real option listener is in DefaultGlobalModel, so add one here.
 //    DrJava.getConfig().addOptionListener(OptionConstants.ALLOW_PRIVATE_ACCESS, new OptionListener<Boolean>() {
 //      public void optionChanged(OptionEvent<Boolean> oce) {
 //        _interpreter.setPrivateAccessible(oce.value.booleanValue());

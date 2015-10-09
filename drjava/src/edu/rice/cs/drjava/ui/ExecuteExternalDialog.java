@@ -37,10 +37,7 @@
 package edu.rice.cs.drjava.ui;
 
 import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.config.OptionConstants;
-import edu.rice.cs.drjava.config.PropertyMaps;
 import edu.rice.cs.drjava.config.*;
-
 import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.plt.lambda.LambdaUtil;
 import edu.rice.cs.plt.concurrent.CompletionMonitor;
@@ -60,6 +57,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.*;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.*;
@@ -1061,7 +1059,7 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     _mainFrame.removeModalWindowAdapter(this);
     int returnValue = _dirChooser.showDialog(wd);
     _mainFrame.installModalWindowAdapter(this, LambdaUtil.NO_OP, CANCEL);      
-    if (returnValue == DirectoryChooser.APPROVE_OPTION) {
+    if (returnValue == JFileChooser.APPROVE_OPTION) {
       File chosen = _dirChooser.getSelectedDirectory();
       if (chosen != null) { pane.setText(chosen.toString()); };
     }
@@ -1081,7 +1079,7 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     _mainFrame.removeModalWindowAdapter(this);
     int returnValue = _fileChooser.showOpenDialog(this);
     _mainFrame.installModalWindowAdapter(this, LambdaUtil.NO_OP, CANCEL);      
-    if (returnValue == DirectoryChooser.APPROVE_OPTION) {
+    if (returnValue == JFileChooser.APPROVE_OPTION) {
       File chosen = _fileChooser.getSelectedFile();
       if (chosen != null) { pane.setText(chosen.toString()); } else { pane.setText(""); }
     }

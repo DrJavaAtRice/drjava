@@ -45,6 +45,8 @@ import junit.framework.TestCase;
 /** Represents the data for an instantiation of a class.  When you actually create an object of some type,
   * an InstanceData represents what you have created.  Each InstanceData has a pointer to the SymbolData of its
   * class type.
+  * Corky: the distinction between an InstanceData and the symbol entry for a class is a COMPLETE CROCK!  This
+  * class should not exist.
   */
 public class InstanceData extends TypeData {
   

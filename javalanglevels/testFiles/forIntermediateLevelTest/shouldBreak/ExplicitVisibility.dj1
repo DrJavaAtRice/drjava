@@ -1,8 +1,0 @@
-public class ExplicitVisibility {
-  private int i;
-  public int q;
-  
-  public int explicitMethod() {
-    return i;
-  }
-}

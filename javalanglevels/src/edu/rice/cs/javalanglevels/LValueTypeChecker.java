@@ -270,7 +270,7 @@ public class LValueTypeChecker extends JExpressionIFAbstractVisitor<TypeData> {
       _ta = _lvtc._testAssignableInstance;
       _lvtc._bob.errors = new LinkedList<Pair<String, JExpressionIF>>();
       LanguageLevelConverter.symbolTable.clear();
-//      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, IterUtil.<File>empty());
+//      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_6, IterUtil.<File>empty());
       _lvtc._bob._importedPackages.addFirst("java.lang");
     }
     

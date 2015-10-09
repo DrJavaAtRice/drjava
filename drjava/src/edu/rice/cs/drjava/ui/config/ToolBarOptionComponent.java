@@ -53,7 +53,7 @@ import edu.rice.cs.util.swing.SwingFrame;
  * their setting.
  * @version $Id$
  */
-public class ToolbarOptionComponent extends OptionComponent<Boolean,JComponent> {
+public class ToolBarOptionComponent extends OptionComponent<Boolean,JComponent> {
 
   private JRadioButton _noneButton;
   private JRadioButton _textButton;
@@ -74,7 +74,7 @@ public class ToolbarOptionComponent extends OptionComponent<Boolean,JComponent> 
    * @param title the title for this panel
    * @param parent the parent frame
    */
-  public ToolbarOptionComponent(String title, SwingFrame parent) {
+  public ToolBarOptionComponent(String title, SwingFrame parent) {
     super(title, parent);
 
     _noneButton = new JRadioButton(NONE);
@@ -134,7 +134,7 @@ public class ToolbarOptionComponent extends OptionComponent<Boolean,JComponent> 
   }
 
   /** Constructor that allows for a tooltip description. */
-  public ToolbarOptionComponent(String title, SwingFrame parent, String description) {
+  public ToolBarOptionComponent(String title, SwingFrame parent, String description) {
     this(title, parent);
     setDescription(description);
   }

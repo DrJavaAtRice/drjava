@@ -50,12 +50,11 @@ public enum JavaVersion {
   JAVA_8 { public String versionString() { return "8"; } },
   FUTURE { public String versionString() { return ">8"; } };
   
-  /**
-   * The currently-available Java version, based on the {@code "java.class.version"} property.  Ideally, a {@code true}
-   * result  for {@code JavaVersion.CURRENT.supports(v)} implies that all APIs associated with that version are
-   * available  at runtime.  However, we do not attempt to (and cannot, in general) guarantee that the boot class path
-   * or Java installation have not been modified to only support certain API classes.
-   */
+  /** The currently-available Java version, based on the {@code "java.class.version"} property.  Ideally, a {@code true}
+    * result  for {@code JavaVersion.CURRENT.supports(v)} implies that all APIs associated with that version are
+    * available  at runtime.  However, we do not attempt to (and cannot, in general) guarantee that the boot class path
+    * or Java installation have not been modified to only support certain API classes.
+    */
   public static final JavaVersion CURRENT = parseClassVersion(System.getProperty("java.class.version", ""));
   
   /** The currently-available Java version, based on the {@code "java.version"} property. */
@@ -65,10 +64,9 @@ public enum JavaVersion {
                      System.getProperty("java.vm.vendor", ""),
                      null);
   
-  /**
-   * {@code true} iff this version is at least as recent as {@code v}, and thus can be expected to 
-   * support {@code v}'s APIs (as long as the required features are backwards-compatible)
-   */
+  /** {@code true} iff this version is at least as recent as {@code v}, and thus can be expected to 
+    * support {@code v}'s APIs (as long as the required features are backwards-compatible)
+    */
   public boolean supports(JavaVersion v) { return compareTo(v) >= 0; }
 
   /** Produce the version number as a string */

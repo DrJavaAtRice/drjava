@@ -1,5 +1,0 @@
-/**Arrays are not allowed at the Intermediate level.*/
-class Arrays {
-  int[] myArray;
-  char[] otherArray;
-}

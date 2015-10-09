@@ -105,7 +105,7 @@ public class InterfaceBodyTypeChecker extends SpecialTypeChecker {
     if (md == null) {
       throw new RuntimeException("Internal Program Error: Could not find the method " + that.getName().getText() + " in interface " + _symbolData.getName() + ".  Please report this bug.");
     }
-    SymbolData.checkDifferentReturnTypes(md, _symbolData, LanguageLevelConverter.OPT.javaVersion());
+    SymbolData.checkDifferentReturnTypes(md, _symbolData, true);
     return resRes;
   }
   
@@ -176,7 +176,7 @@ public class InterfaceBodyTypeChecker extends SpecialTypeChecker {
       _ibbtc = 
         new InterfaceBodyTypeChecker(_sd1, new File(""), "", new LinkedList<String>(), new LinkedList<String>(),
                                      new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData, JExpression>>());
-      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, EmptyIterable.<File>make());
+      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_6, EmptyIterable.<File>make());
       _ibbtc._importedPackages.addFirst("java.lang");
     }
     

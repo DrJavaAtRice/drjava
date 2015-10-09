@@ -173,7 +173,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     Data d = enclosingData;
     SymbolData result = null;
     while (d != null && result == null) {
-      result = enclosingData.getInnerClassOrInterface(className);
+      result = d.getInnerClassOrInterface(className);
       d = d.getOuterData();
     }
       
@@ -312,6 +312,8 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
   }
   
   /** Finds and returns all matching methods.  Assumes that the correct SymbolData is passed in.
+    * Comment: the coding of this method is STUPID; it finds matches with autoboxing even when matches without autoboxing
+    *          exist.  The latter always take priority!
     * @param methodName  The name of the method.
     * @param enclosingSD  The SymbolData we're currently searching for the method.
     * @param arguments  The types of the arguments to the method.
@@ -327,16 +329,11 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     LinkedList<MethodData> mds = enclosingSD.getMethods();
     Iterator<MethodData> iter = mds.iterator();
     LinkedList<MethodData> matching = new LinkedList<MethodData>();
-    LinkedList<MethodData> matchingWithAutoBoxing = new LinkedList<MethodData>();
-//    if (enclosingSD.getName().equals("NonEmpty"))
-//      System.err.println("Starting search for method " + methodName + " in " + enclosingSD);
+    LinkedList<MethodData> matchingWithAutoboxing = new LinkedList<MethodData>();
+
     while (iter.hasNext()) {
       MethodData md = iter.next();
-//      System.err.println("Testing method " + md.getName());
-//      if (md.getName().equals("NonEmpty")) {
-//        System.err.println("*** for NonEmpty(), params length = " + md.getParams().length + "; args length = " 
-//                             + arguments.length);
-//      }
+      
       // Check that the names match.
       if (md.getName().equals(methodName) && md.getParams().length == arguments.length) {
         VariableData[] vds = md.getParams();
@@ -345,8 +342,12 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
         
         // First check to see if any methods exist that match the invocation without using autoboxing
         for (i = 0; i < vds.length && i < arguments.length; i++) {
-          matches = matches && 
-            _isAssignableFromWithoutAutoboxing(vds[i].getType().getSymbolData(), arguments[i].getSymbolData());
+          
+          boolean match_i = _isAssignableFromWithoutAutoboxing(vds[i].getType().getSymbolData(), arguments[i].getSymbolData());
+//          if (! match_i & _isAssignableFrom(vds[i].getType().getSymbolData(), arguments[i].getSymbolData()))
+//            System.err.println("*** Only match with autoboxing *** " + vds[i].getType().getSymbolData() + ", " + 
+//                               arguments[i].getSymbolData());
+          matches = matches && match_i;                      
           if (matches == false) break;
         }
         
@@ -354,35 +355,17 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
         if (matches && checkAccess(jexpr, md.getMav(), md.getName(), enclosingSD, thisSD, "method")) {
           matching.addLast(md);
         }
-
+        
         if (matches == false) { // Didn't match the method directly; try to match it with autoboxing
-//          if (enclosingSD.getName().equals("NonEmpty")) {
-//            System.err.println("*** Looking for autoboxing match for NonEmpty");
-//            System.err.println("vds = " + Arrays.toString(vds) + " arguments = " + Arrays.toString(arguments));
-//          }
+          
           matches = true;
           // Now check to see if any methods exist that match the invocation while using autoboxing.
-          for (i = 0; i < vds.length && i < arguments.length; i++) {
-            if  (enclosingSD.getName().equals("NonEmpty")) {
-              SymbolData parmSD = vds[i].getType().getSymbolData();
-//              System.err.println("vds[" + i + "].getType().getSymbolData() = " + parmSD);
-              SymbolData argSD = arguments[i].getSymbolData();
-//              System.err.println("arguments[" + i + "].getSymbolData() = " + argSD);
-              if (argSD.equals(SymbolData.INT_TYPE) && parmSD.equals(symbolTable.get("java.lang.Object")))
-                assert _isAssignableFrom(parmSD, argSD);
-            }
-            matches = matches && _isAssignableFrom(vds[i].getType().getSymbolData(), arguments[i].getSymbolData());
-            if (matches == false) {
-              if (enclosingSD.getName().equals("NonEmpty"))
-//                System.err.println("No match found for NonEmpty using autoboxing");
-              break;
-            }
-          }
-
-          // if all arguments checked out, check the access stuff.
-          if (matches && checkAccess(jexpr, md.getMav(), md.getName(), enclosingSD, thisSD, "method")) {
-            matchingWithAutoBoxing.addLast(md);
-          }
+          matches = matches && _isAssignableFrom(vds[i].getType().getSymbolData(), arguments[i].getSymbolData());
+        }
+        
+        // if all arguments checked out, check the access stuff.
+        if (matches && checkAccess(jexpr, md.getMav(), md.getName(), enclosingSD, thisSD, "method")) {
+          matchingWithAutoboxing.addLast(md);
         }
       }
     }
@@ -392,22 +375,17 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
         Pair<LinkedList<MethodData>, LinkedList<MethodData>> p = 
           _getMatchingMethods(methodName, sup, arguments, jexpr, isConstructor, thisSD);
         matching.addAll(p.getFirst());
-        matchingWithAutoBoxing.addAll(p.getSecond());
+        matchingWithAutoboxing.addAll(p.getSecond());
       }
       if (enclosingSD.getSuperClass() != null) {
         Pair<LinkedList<MethodData>, LinkedList<MethodData>> p = 
           _getMatchingMethods(methodName, enclosingSD.getSuperClass(), arguments, jexpr, isConstructor, thisSD);
         matching.addAll(p.getFirst());
-        matchingWithAutoBoxing.addAll(p.getSecond());
+        matchingWithAutoboxing.addAll(p.getSecond());
       }
     }
-//    if (methodName.equals("NonEmpty")) {
-//      System.err.println("***** enclosingSD = " + enclosingSD + "; thisSD = " + thisSD + "; matching methods: " 
-//                           + matching);
-//      System.err.println("***** matching methods with autoboxing: " + matchingWithAutoBoxing);
-//    }
     
-    return new Pair<LinkedList<MethodData>, LinkedList<MethodData>> (matching, matchingWithAutoBoxing);
+    return new Pair<LinkedList<MethodData>, LinkedList<MethodData>> (matching, matchingWithAutoboxing);
   }
       
   /** Finds which SymbolData this method is in, beginning at this SymbolData and recursively visiting super classes.
@@ -426,26 +404,23 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     Pair<LinkedList<MethodData>, LinkedList<MethodData>> p = _getMatchingMethods(methodName, enclosingSD, arguments, 
                                                                                  jexpr, isConstructor, thisSD);
     LinkedList<MethodData> matching = p.getFirst();
-    LinkedList<MethodData> matchingWithAutoBoxing = p.getSecond();
+    LinkedList<MethodData> matchingWithAutoboxing = p.getSecond();
     
-    // if this is not a constructor, matching and matchingWithAutoBoxing are both empty, and there is a outer data,
+    // if this is not a constructor, matching and matchingWithAutoboxing are both empty, and there is a outer data,
     // then look at outer data
     SymbolData currData = enclosingSD;
-    while (!isConstructor && matching.isEmpty() && matchingWithAutoBoxing.isEmpty() && 
+    while (!isConstructor && matching.isEmpty() && matchingWithAutoboxing.isEmpty() && 
            currData.getOuterData() != null) {
       currData = currData.getOuterData().getSymbolData();
       p = _getMatchingMethods(methodName, currData, arguments, jexpr, isConstructor, thisSD);
       matching = p.getFirst();
-      matchingWithAutoBoxing = p.getSecond();
+      matchingWithAutoboxing = p.getSecond();
     }
     
-    if (matching.size() == 1) return matching.getFirst();
-    if (matching.size() > 1)  return selectMostSpecificMethod(matching, arguments, jexpr);
-    if (matchingWithAutoBoxing.size() == 1) return matchingWithAutoBoxing.getFirst();
-    if (matchingWithAutoBoxing.size() > 1) return selectMostSpecificMethod(matchingWithAutoBoxing, arguments, jexpr);
-
-    //if nothing matched at all, return null
-    return null;
+    if (matching.size() > 0) return selectMostSpecificMethod(matching, arguments, jexpr, false);
+    if (matchingWithAutoboxing.size() > 0) return selectMostSpecificMethod(matchingWithAutoboxing, arguments, jexpr, true);
+    
+    return null;  // no matches found
   }
   
   /** Finds which SymbolData this method is in, beginning at this SymbolData and recursively visiting super classes.
@@ -462,26 +437,14 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     */
   protected MethodData _lookupMethod(String methodName, SymbolData enclosingSD, InstanceData[] arguments, 
                                      JExpression jexpr, String errorMsg, boolean isConstructor, SymbolData thisSD) {
-//    if (enclosingSD.isContinuation() && jexpr != null) {
-//      SymbolData newSD = getSymbolData(enclosingSD.getName(), enclosingSD, jexpr);
-//      if (newSD != null) {
-//        System.err.println("Replacing " + enclosingSD + " by " + newSD);
-//        if (methodName == "getName()" || methodName == "getName") {
-//          System.err.println("The methods of " + enclosingSD + " are: \n" + enclosingSD.getMethods());
-//          throw new UnexpectedException("Computation aborted");
-////          System.err.println("The methods of " + newSD + " are: \n" + newSD.getMethods());
-//        }
-//        enclosingSD = newSD;
-//      }
-//    }
+
     if (! isConstructor && methodName.equals(LanguageLevelVisitor.getUnqualifiedClassName(enclosingSD.getName()))) {
       _addError("The keyword 'new' is required to invoke a constructor", jexpr);
     }
     
     MethodData md = _lookupMethodHelper(methodName, enclosingSD, arguments, jexpr, isConstructor, thisSD);
-    if (md != null) {
-      return md;
-    }
+    if (md != null) return md;
+    
     // None of the methods matched the signature.
     StringBuffer message = new StringBuffer(errorMsg + methodName);
     message.append("(");
@@ -497,30 +460,35 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     return null;
   }
   
-  /** Assumes that all methods in list have the same name and the same number of arguments.  Selects the method with 
-    * the most specific signature.  Assumes that each method does not require the application of any 1.5+ specific 
-    * features.
-    * @param list  The list of methods used 
+  /** Assumes that all methods in list have the same name, the same number of arguments, and match the calling 
+    * arguments.  Selects the method with the most specific signature.  
+    * @param list       The list of matching methods
+    * @param arguments  The list of argument types in the method call
+    * @param allowAutoboxing  Whether autoboxing is allowed in the matching process
     * @return  The most specific method among the methods in the given list
     */
   private static MethodData selectMostSpecificMethod(List<MethodData> list, InstanceData[] arguments, 
-                                                         JExpression jexpr) {
+                                                     JExpression jexpr, boolean allowAutoboxing) {
     if (list.isEmpty()) return null;
+    if (list.size() == 1) return list.get(0);
     Iterator<MethodData> it = list.iterator();
     MethodData best = it.next();
     MethodData ambiguous = null; // there is no ambiguous other method at first
-    while (it.hasNext()) {
+    while (it.hasNext()) {  // always executes at least once (should be converted to do while)
       MethodData curr = it.next();
       SymbolData[] bestParams = new SymbolData[best.getParams().length];
       SymbolData[] currParams = new SymbolData[curr.getParams().length];
       
-      boolean better1 = false; // whether 'best' is better than 'curr'
-      boolean better2 = false; // whether 'curr' is better than 'best'
+      boolean better1 = false; // whether 'best' so far is better than 'curr'
+      boolean better2 = false; // whether 'curr' is better than 'best' so far
       for (int i = 0; i < bestParams.length; i++) {
         SymbolData bp = best.getParams()[i].getType().getSymbolData();
         SymbolData cp = curr.getParams()[i].getType().getSymbolData();
-        boolean fromCurrToBest = cp.isAssignableTo(bp, LanguageLevelConverter.OPT.javaVersion());
-        boolean fromBestToCurr = bp.isAssignableTo(cp, LanguageLevelConverter.OPT.javaVersion());
+
+        boolean fromCurrToBest = cp.isAssignableTo(bp, allowAutoboxing);
+        boolean fromBestToCurr = bp.isAssignableTo(cp, allowAutoboxing);
+        
+        // Note: with autoboxing, both can be true!
         bestParams[i] = bp;
         currParams[i] = cp;
                   
@@ -534,12 +502,12 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       
       // decide which is more specific or whether they are ambiguous
       if (better1 == better2) { // neither is better than the other
-        // Handle overridden methods
+        // Adjudicate conflicting matches
         if (Arrays.equals(bestParams, currParams)) {
           SymbolData c1 = best.getSymbolData();
           SymbolData c2 = curr.getSymbolData();
-          boolean c1IsSuperOrSame = c2.isAssignableTo(c1, LanguageLevelConverter.OPT.javaVersion());
-          boolean c2IsSuperOrSame = c1.isAssignableTo(c2, LanguageLevelConverter.OPT.javaVersion());
+          boolean c1IsSuperOrSame = c2.isAssignableTo(c1, allowAutoboxing);
+          boolean c2IsSuperOrSame = c1.isAssignableTo(c2, allowAutoboxing);
           if (c1IsSuperOrSame && !c2IsSuperOrSame) { // c2 is more specific
             best = curr;
             continue;
@@ -555,6 +523,10 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
         ambiguous = null; // no more ambiguity
       }
     }
+    /* Check if arg types are the same up to autoboxing/unboxing.  If so, there is no ambiguity and return either
+     * arg-type-list.  Note: this check is not completely accurate and returns the wrong answer/arg-type-list in some
+     * cases, but fixing the problem requires a major refactoring.  TODO: fix this bug. */
+
     if (ambiguous != null) {
       StringBuffer invokeArgs = new StringBuffer("(");
       StringBuffer ambigArgs = new StringBuffer("(");
@@ -783,9 +755,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
   /** Return a TypeData array of the specified size. */
   protected TypeData[] makeArrayOfRetType(int len) { return new TypeData[len]; }
 
-  /** This method is called by default from cases that do not 
-    * override forCASEOnly.
-    **/
+  /** This method is called by default from cases that do not override forCASEOnly. **/
   protected TypeData defaultCase(JExpressionIF that) { return null; }
 
   public TypeData forClassDefOnly(ClassDef that, TypeData mavRes, TypeData nameRes, TypeData[] typeParametersRes,
@@ -808,7 +778,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
   public TypeData forInnerInterfaceDefOnly(InnerInterfaceDef that, TypeData mavRes, TypeData nameRes, 
                                            TypeData[] typeParamRes, TypeData[] superinterfacesRes, TypeData bodyRes) {
     return forJExpressionOnly(that);
-    // replaces forInterfaceDefOnly(that, mavRes, nameRes, typeParamRes, superinterfacesRes, bodyRes);
+    // replaces forInterfaceDefOnly(that, mavRes, nameRes, typeParamRes, superinterfacesRes, bodyRes); // Whjfor
   }
 
   public TypeData forInstanceInitializerOnly(InstanceInitializer that, TypeData codeRes) {
@@ -849,99 +819,131 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     return forJExpressionOnly(that);//StatementOnly(that);
   }
 
-  public TypeData forTryCatchStatementOnly(TryCatchStatement that, TypeData tryBlockRes, 
-                                           TypeData[] catchBlocksRes) {
+  public TypeData forTryCatchStatementOnly(TryCatchStatement that, TypeData tryBlockRes, TypeData[] catchBlocksRes) {
     return forJExpressionOnly(that);//StatementOnly(that);
   }
 
-  public TypeData forMethodDefOnly(MethodDef that, TypeData mavRes, TypeData[] typeParamsRes, 
-                                   TypeData resRes, TypeData nameRes, TypeData paramsRes, 
-                                   TypeData[] throwsRes) {
+  public TypeData forMethodDefOnly(MethodDef that, TypeData mavRes, TypeData[] typeParamsRes, TypeData resRes, 
+                                   TypeData nameRes, TypeData paramsRes, TypeData[] throwsRes) {
     return resRes; //forJExpressionOnly(that);
   }
   public TypeData forConcreteMethodDefOnly(ConcreteMethodDef that, TypeData mavRes, TypeData[] typeParamsRes, 
-                                           TypeData resRes, TypeData nameRes, TypeData paramsRes, 
-                                           TypeData[] throwsRes, TypeData bodyRes) {
-    return forMethodDefOnly(that, mavRes, typeParamsRes, resRes, nameRes, paramsRes, 
-                            throwsRes);
+                                           TypeData resRes, TypeData nameRes, TypeData paramsRes, TypeData[] throwsRes,
+                                           TypeData bodyRes) {
+    return forMethodDefOnly(that, mavRes, typeParamsRes, resRes, nameRes, paramsRes, throwsRes);
   }
   
-  /** Returns the common super type of the two types provided.*/
-  protected SymbolData getCommonSuperTypeBaseCase(SymbolData sdLeft, SymbolData sdRight) {
-    if (sdLeft == SymbolData.EXCEPTION) { return sdRight; }
-    if (sdRight == SymbolData.EXCEPTION) { return sdLeft; }
-    if (_isAssignableFrom(sdLeft, sdRight)) {return sdLeft;}
-    if (_isAssignableFrom(sdRight, sdLeft)) {return sdRight;}
+  /** Assumes neither sdLeft or sdRight is null;
+    * Returns the common super type of the two types provided the requisite analysis is trivial. 
+    * Returns null otherwise. */
+  protected static SymbolData getCommonSuperTypeBaseCase(SymbolData sdLeft, SymbolData sdRight) {
+//    System.err.println("***** Computing CommonSuperTypeBaseCase of " + sdLeft + ", " + sdRight);
+    if (sdLeft == SymbolData.EXCEPTION) return sdRight;
+    if (sdRight == SymbolData.EXCEPTION) return sdLeft;
+    if (sdLeft == sdRight) return sdLeft;
+    if (sdRight.isAssignableTo(sdLeft)) return sdLeft;
+    if (sdLeft.isAssignableTo(sdRight)) return sdRight;
     return null;
   }
+
+    /** Check if the two given SymbolDatas corresponding to types have a common super type.  If so, return it, 
+      * else return null. NOTE: null means ill-typed! */
+  protected static SymbolData getCommonSuperType(SymbolData s1, SymbolData s2) {
+    if (s1 == null || s2 == null) return null;
+    if (s1 == SymbolData.NOT_FOUND || s2 == SymbolData.NOT_FOUND) return SymbolData.NOT_FOUND;
+
+//    if (s1 == null) return s2;  // NOTE: Makes no sense since null means ill-typed
+//    if (s2 == null) return s1;  // NOTE: Makes no sense since null means ill-typed
+    
+    // See if s1 and s2 have a trivial common type.
+    SymbolData sd = getCommonSuperTypeBaseCase(s1, s2);  
+    if (sd != null)  {
+//      System.err.println("CommonSuperType is " + sd);
+      return sd; 
+    }
+    
+    // Preceding code eliminates possibility that s1, s2 are either null or SymbolData.NOT_FOUND;
+    // Box both types and recur on the super class chain of s1.
+//    System.err.println("[gcst] Working on Superclass relationships. s1.getSuperClass() = " + s1.getSuperClass());
+//    System.err.println("Types before boxing are " + s1 + ", " + s2);
+//    System.err.println("Corresponding boxed types are " + s1.box() + ", " + s2.box());
+    if (s1.isPrimitiveType()) s1 = s1.box();
+    if (s2.isPrimitiveType()) s2 = s2.box();
+//    System.err.println("Boxed Types are: " + s1 + ", " + s2);
+//    System.err.println("Boxed Types from symbolTable are: " + symbolTable.get("java.lang.Byte") + ", " + 
+//                       symbolTable.get("java.lang.Boolean"));
+    sd = getCommonSuperType(s1.getSuperClass(), s2);
+    if (sd != null) {
+//      System.err.println("CommonSuperType is " + sd);
+      return sd;
+    }
+    // Recur on each interface.
+    for (SymbolData currSd : s1.getInterfaces()) {
+//      System.err.println("[gcst] Recurring on (" + currSd + ", " + s2 + ")");
+      sd = getCommonSuperType(currSd, s2);
+      if (sd != null) {
+//        System.err.println("CommonSuperType is " + sd);
+        return sd;
+      }
+    }
+    // s1 and s2 are instance types but have no supertype other than Object
+//    System.err.println("CommonSuperType is " + LanguageLevelConverter.OBJECT);
+    return LanguageLevelConverter.OBJECT;
+  }
   
-  /** Return whether the value on the right can be assigned to the value on the left. 
-    * Uses autoboxing if the user has java 1.5.
-    */
+  /** Return whether the value on the right can be assigned to the value on the left. */
   protected static boolean _isAssignableFrom(SymbolData sdLeft, SymbolData sdRight) {
     if (sdRight == null) return false;
-//    System.err.println("Java Version = " + LanguageLevelConverter.OPT.javaVersion());
-    assert LanguageLevelConverter.versionSupportsAutoboxing(LanguageLevelConverter.OPT.javaVersion());
-    return sdRight.isAssignableTo(sdLeft, LanguageLevelConverter.OPT.javaVersion());
+    return sdRight.isAssignableTo(sdLeft);
   }
   
   /** Return whether the value on the right can be assigned to the value on the left.  Does not use autoboxing. */
-  protected boolean _isAssignableFromWithoutAutoboxing(SymbolData sdLeft, SymbolData sdRight) {
+  protected static boolean _isAssignableFromWithoutAutoboxing(SymbolData sdLeft, SymbolData sdRight) {
     
-    if (sdRight == null) { return false; }
-    return sdRight.isAssignableTo(sdLeft, JavaVersion.JAVA_1_4);  // Version 1.4 used to turn off autoboxing
+    if (sdRight == null) return false;
+    return sdRight.isAssignableTo(sdLeft, false);  // autoboxing turned off!
   }
 
-  /**
-   * The method will add an error for each abstract method in the current SymbolData's inheritance hierarchy
-   * that does not have a concrete implementation.
-   * @param sd  The SymbolData for the current class definition
-   * @param classDef  The current ClassDef
-   */
+  /** The method will add an error for each abstract method in the current SymbolData's inheritance hierarchy
+    * that does not have a concrete implementation.
+    * @param sd  The SymbolData for the current class definition
+    * @param classDef  The current ClassDef
+    */
   protected void _checkAbstractMethods(SymbolData sd, JExpression classDef) {
-    if (sd.hasModifier("abstract") || sd.isInterface()) {
-      // Our work here is done because an abstract class has no constraints to implement.
-      return;
-    }
+    if (sd.hasModifier("abstract") || sd.isInterface()) return;
     LinkedList<MethodData> mds = sd.getMethods();
     
-    //add all concrete methods from our super classes--this is to fix the case where you and your super class extend
-    //the same interface, and your super class concretely implements the methods--you do not have to also implement them.
-    //there are other generalizations of this case.
-    //TODO: Consider optimizing this--it may be slow.
+    // Add all concrete methods from the super classes--this handles the case where this and a super class extend
+    // the same interface, and the super class concretely implements the methods so this does not have to implement
+    // them.
+    // TODO: Handle missing cases and consider optimizing this--it may be slow.
     LinkedList<MethodData> cmds = _cloneMethodDataList(mds);
-    SymbolData superD = sd.getSuperClass();
-    while (superD != null && !superD.getName().equals("java.lang.Object")) {
+    SymbolData superD = sd.getSuperClass(); 
+    while (superD != null && ! superD.getName().equals("java.lang.Object")) {
       LinkedList<MethodData> smds = superD.getMethods();
       for (MethodData md: smds) {
-        if (!md.hasModifier("abstract")) {// && SymbolData.repeatedSignature(cmds, md, false) == null) {
-          cmds.addLast(md);
-        }
+        if (! md.hasModifier("abstract")) cmds.addLast(md);
       }
       superD = superD.getSuperClass();
     }
-    
-    // TODO: Check all enclosingDatas (interfaces too).
+      
+    // TODO: Check all superTypes (interfaces too).
     _checkAbstractMethodsHelper(sd, sd.getSuperClass(), cmds, classDef);
-    //check interfaces as well:
-    for (SymbolData iSD: sd.getInterfaces()) {
-      _checkAbstractMethodsHelper(sd, iSD, cmds, classDef);
-    }
+    //check interfaces as well
+    for (SymbolData iSD: sd.getInterfaces()) { _checkAbstractMethodsHelper(sd, iSD, cmds, classDef); }
   }
   
-  /**
-   * This checks a superclass of the original SymbolData.  If this class is not abstract, then we are
-   * done because this concrete class must have implemented all the abstract methods above it.
-   * @param origSd  The SymbolData for the current class definition
-   * @param sd  The SymbolData for the class in origSd's superclass hierarchy that we're currently examining
-   * @param concreteMds  The list of MethodDatas of concrete methods that we've seen so far
-   * @param classDef  The original ClassDef
-   */
+  /** This checks a superclass of the original SymbolData.  If this class is not abstract, then we are
+    * done because this concrete class must have implemented all the abstract methods above it.
+    * @param origSd  The SymbolData for the current class definition
+    * @param sd  The SymbolData for the class in origSd's superclass hierarchy that we're currently examining
+    * @param concreteMds  The list of MethodDatas of concrete methods that we've seen so far
+    * @param classDef  The original ClassDef
+    */
   private void _checkAbstractMethodsHelper(SymbolData origSd, SymbolData sd, LinkedList<MethodData> concreteMds, 
                                            JExpression classDef) {
-    if (sd == null || (!sd.hasModifier("abstract") && !sd.isInterface())) {
-      return;
-    }
+    if (sd == null || (!sd.hasModifier("abstract") && !sd.isInterface())) return;
+
     // Gets its abstract methods and make sure they're in concreteMds.
     LinkedList<MethodData> mds = sd.getMethods();
     Iterator<MethodData> iter = mds.iterator();
@@ -956,9 +958,9 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
             message = new StringBuffer("This anonymous inner class must override the abstract method: " + md.getName());
           }
           else {
-            message = new StringBuffer(origSd.getName() 
-                                         + " must be declared abstract or must override the abstract method: " 
-                                         + md.getName());
+            message = 
+              new StringBuffer(origSd.getName() + " must be declared abstract or must override the abstract method: " + 
+                               md.getName());
           }
           VariableData[] params = md.getParams();
           InstanceData[] arguments = new InstanceData[params.length];
@@ -1055,7 +1057,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
   public TypeData forClassDef(ClassDef that) {
     
     SymbolData objectSD = getSymbolData("java.lang.Object", that, true, false);
-    assert SymbolData.INT_TYPE.isAssignableTo(objectSD, LanguageLevelConverter.OPT.javaVersion());
+    assert SymbolData.INT_TYPE.isAssignableTo(objectSD, true);
   
     String className = getQualifiedClassName(that.getName().getText());
     SymbolData sd = getSymbolData(className, that, true, false);
@@ -1347,6 +1349,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     
     private TypeChecker _btc;
     
+    /* Class symbols for testing */
     private SymbolData _sd1;
     private SymbolData _sd2;
     private SymbolData _sd3;
@@ -1364,9 +1367,11 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       LanguageLevelConverter.loadSymbolTable();
 
       _btc = new TypeChecker(new File(""), "", new LinkedList<String>(), new LinkedList<String>());
-      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, EmptyIterable.<File>make());
+      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_6, EmptyIterable.<File>make());
       _btc._importedPackages.addFirst("java.lang");
       _errorAdded = false;
+      
+      // define assorted class symbol entries (but they are not inserted in symbolTable)
       _sd1 = new SymbolData("i.like.monkey");
       _sd2 = new SymbolData("i.like.giraffe");
       _sd3 = new SymbolData("zebra");
@@ -1376,64 +1381,15 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       
       _object = symbolTable.get("java.lang.Object");
       assert _object != null;
-//      o.setIsContinuation(false);
-//      o.setMav(_publicMav);
-//      symbolTable.put("java.lang.Object", o);
-      
       assert symbolTable.get("java.lang.Double") != null;
-//      Double.setIsContinuation(false);
-//      Double.setMav(_publicMav);
-//      Double.setSuperClass(o);   // a white lie for this test
-//      symbolTable.put("java.lang.Double", Double);
-      
-      assert symbolTable.get("java.lang.Float") != null;
-//      Float.setIsContinuation(false);
-//      Float.setMav(_publicMav);
-//      Float.setSuperClass(o);    // a white lie for this test
-//      symbolTable.put("java.lang.Float", Float);
-      
-      assert symbolTable.get("java.lang.Long") != null;
-//      Long.setIsContinuation(false);
-//      Long.setMav(_publicMav);
-//      Long.setSuperClass(o);     // a white lie for this test
-//      symbolTable.put("java.lang.Long", Long);
-            
-      assert symbolTable.get("java.lang.Integer") != null;
-//      Integer.setIsContinuation(false);
-//      Integer.setMav(_publicMav);
-//      Integer.setSuperClass(o);   // a white lie for this test
-//      symbolTable.put("java.lang.Integer", Integer);
-            
-      assert symbolTable.get("java.lang.Short") != null;
-//      Short.setIsContinuation(false);
-//      Short.setMav(_publicMav);
-//      Short.setSuperClass(o);   // a white lie for this test
-//      symbolTable.put("java.lang.Short", Short);
-      
+      assert symbolTable.get("java.lang.Float") != null;    
+      assert symbolTable.get("java.lang.Long") != null;          
+      assert symbolTable.get("java.lang.Integer") != null;          
+      assert symbolTable.get("java.lang.Short") != null;  
       assert symbolTable.get("java.lang.Character") != null;
-//      Character.setIsContinuation(false);
-//      Character.setMav(_publicMav);
-//      Character.setSuperClass(o);   // a white lie for this test     
-//      symbolTable.put("java.lang.Character", Character);
-      
-      assert symbolTable.get("java.lang.Byte") != null;
-//      Byte.setIsContinuation(false);
-//      Byte.setMav(_publicMav);
-//      Byte.setSuperClass(o);   // a white lie for this test        
-//      symbolTable.put("java.lang.Byte", Byte);
-      
-      assert symbolTable.get("java.lang.Boolean") != null;
-//      Boolean.setIsContinuation(false);
-//      Boolean.setMav(_publicMav);
-//      Boolean.setSuperClass(o);   // a white lie for this test   
-//      symbolTable.put("java.lang.Boolean", Boolean);
-         
+      assert symbolTable.get("java.lang.Byte") != null;   
+      assert symbolTable.get("java.lang.Boolean") != null;    
       assert symbolTable.get("java.lang.String") != null;
-//      SymbolData string = new SymbolData("java.lang.String");
-//      string.setIsContinuation(false);
-//      string.setMav(_publicMav);
-//      string.setSuperClass(_object);   // a white lie for this test   
-//      symbolTable.put("java.lang.String", string);
     }
     
     public void test_getData() {
@@ -1450,10 +1406,8 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       _sd3.setIsContinuation(false);
       SymbolData sd = symbolTable.get("java.lang.Object");
       sd.setPackage("java.lang");
-      assertEquals("Should get _sd3 from the Symboltable.", _sd3, 
-                   _btc.getSymbolData("zebra", NULL_LITERAL, true, true));
-      assertEquals("Should get sd from the Symboltable.", sd, 
-                   _btc.getSymbolData("java.lang.Object", NULL_LITERAL, true, true));
+      assertEquals("Should get _sd3 from the Symboltable.", _sd3, _btc.getSymbolData("zebra", NULL_LITERAL, true, true));
+      assertEquals("Should get sd from the Symboltable.", sd, _btc.getSymbolData("java.lang.Object", NULL_LITERAL, true, true));
       _btc.getSymbolData("koala", NULL_LITERAL, true, true);
       
       assertEquals("Should be one error", 1, errors.size());
@@ -1941,7 +1895,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       assertTrue("Should be able to assign an array to an interface of java.io.Serializable", 
                  _btc._isAssignableFrom(symbolTable.get("java.io.Serializable"), integerArray));
 
-      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, EmptyIterable.<File>make());
+      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_6, EmptyIterable.<File>make());
       assertFalse("Should not be assignable.", 
                   _btc._isAssignableFrom(symbolTable.get("java.lang.Double"), SymbolData.INT_TYPE));
       assertFalse("Should not be assignable.", 
@@ -2490,7 +2444,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
                    errors.getLast().getFirst());
     }
     
-    public void testAutoBoxingAndUnboxing() {
+    public void testAutoboxingAndUnboxing() {
       //Test that autoboxing works for a method invocation going from java.lang.Integer to int
       Expression e = new SimpleMethodInvocation(NONE,
                                                 new Word(NONE, "myMethod"),
@@ -2520,6 +2474,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       
       vd1 = new VariableData("i", _publicMav, symbolTable.get("java.lang.Double"), true, null);
       vd2 = new VariableData("i", _publicMav, SymbolData.DOUBLE_TYPE, true, _sd1);
+      // change method definition embedded in _sd1
       _sd1.setVars(new LinkedList<VariableData>());
       _sd1.addVar(vd2);
       _sd1.setMethods(new LinkedList<MethodData>());
@@ -2534,8 +2489,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
 
       assertEquals("There should be no errors", 0, errors.size());
 
-      
-      //Test that autoboxing can find the correct method def.
+      //Test that autoboxing can find the correct method def when analogous boxed and unboxed methods are available..
       _sd1.setVars(new LinkedList<VariableData>());
       _sd1.addVar(vd2);
       _sd1.addVar(new VariableData("t", _publicMav, SymbolData.BOOLEAN_TYPE, false, _sd1));
@@ -2543,9 +2497,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
                                     SymbolData.BOOLEAN_TYPE, new VariableData[] {vd2}, new String[0], null, 
                                     NULL_LITERAL));
       
-      Expression e2 = new SimpleAssignmentExpression(NONE,
-                                                     new SimpleNameReference(NONE, new Word(NONE, "t")),
-                                                     e);
+      Expression e2 = new SimpleAssignmentExpression(NONE, new SimpleNameReference(NONE, new Word(NONE, "t")), e);
                   
       BodyItemI[] bii2 = new BodyItemI[] {new ExpressionStatement(NONE, e2)};
       BracedBody b2 = new BracedBody(NONE, bii2);

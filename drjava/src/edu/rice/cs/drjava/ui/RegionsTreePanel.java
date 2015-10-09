@@ -934,7 +934,7 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
 //    
 //    DefaultMutableTreeNode docNode = _docToTreeNode.get(odd);
 //    
-//    // Find the document node for this region
+//// Find the document node for this region
 //
 //    while(docNode.getChildCount() > 0) {
 //      DefaultMutableTreeNode node = (DefaultMutableTreeNode)docNode.getFirstChild();

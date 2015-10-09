@@ -47,12 +47,8 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import edu.rice.cs.util.Log;
-import edu.rice.cs.util.StringOps;
-import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.lambda.Lambda;
@@ -77,6 +73,8 @@ import org.jacoco.core.runtime.IRuntime;
 import org.jacoco.core.runtime.LoggerRuntime;
 import org.jacoco.core.runtime.RuntimeData;
 import edu.rice.cs.drjava.model.coverage.*;
+
+import edu.rice.cs.util.UnexpectedException;
 
 /** Runs in the InterpreterJVM. Runs tests given a classname and formats the results into a (serializable) array of 
   * JUnitError that can be passed back to the MainJVM.
@@ -219,7 +217,6 @@ public class JUnitTestManager {
     * so no need for explicit synchronization.
     * @return false if no test suite (even an empty one) has been set up
     */
-  @SuppressWarnings("unchecked")
   public /* synchronized */ boolean runTestSuite() {
 
     _log.log("runTestSuite() called");

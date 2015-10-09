@@ -47,29 +47,29 @@ import java.util.*;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
-import edu.rice.cs.drjava.config.Option;
 import edu.rice.cs.drjava.model.DJError;
 import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.DrJavaFileUtils;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
-import edu.rice.cs.plt.io.IOUtil;
-import edu.rice.cs.plt.iter.IterUtil;
-import edu.rice.cs.plt.collect.CollectUtil;
+
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.swing.Utilities;
-import edu.rice.cs.javalanglevels.*;
-import edu.rice.cs.javalanglevels.parser.*;
-import edu.rice.cs.javalanglevels.tree.*;
 import edu.rice.cs.util.swing.ScrollableListDialog;
+import edu.rice.cs.util.swing.Utilities;
 
-import static edu.rice.cs.plt.debug.DebugUtil.debug;
+import edu.rice.cs.javalanglevels.*;
+import edu.rice.cs.javalanglevels.tree.*;
+
+import edu.rice.cs.plt.io.IOUtil;
+import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.plt.collect.CollectUtil;
+// import edu.rice.cs.plt.tuple.Pair;  
+// TODO: use the preceding pair class instead of javalanglevels.Pair; must change javalanglevels code as well 
 
 /** Default implementation of the CompilerModel interface. This implementation is used for normal DrJava execution
-  * (as opposed to testing DrJava).  TO DO: convert edu.rice.cs.util.Pair to edu.rice.cs.plt.tuple.Pair; requires 
-  * making the same conversion in javalanglevels.
+  * (as opposed to testing DrJava).
   * @version $Id$
   */
 public class DefaultCompilerModel implements CompilerModel {
@@ -254,6 +254,7 @@ public class DefaultCompilerModel implements CompilerModel {
     }
     
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.compileStarted(); } });
+    
     try {
       if (! packageErrors.isEmpty()) { _distributeErrors(packageErrors); }
       else {
@@ -343,6 +344,9 @@ public class DefaultCompilerModel implements CompilerModel {
       
       List<? extends File> preprocessedFiles = _compileLanguageLevelsFiles(files, errors, classPath, bootClassPath);
       
+      System.out.println("Compiler is using classPath = '" + classPath + "';  bootClassPath = '" + bootClassPath + "'");
+      
+      if (preprocessedFiles != null) System.out.println("Performed Language Level Translation of " + preprocessedFiles);
       if (errors.isEmpty()) {
         CompilerInterface compiler = getActiveCompiler();
         
@@ -382,8 +386,8 @@ public class DefaultCompilerModel implements CompilerModel {
     * @return  An updated list for compilation containing no Language Levels files, or @code{null}
     *          if there were no Language Levels files to process.
     */
-  private List<File> _compileLanguageLevelsFiles(List<File> files, List<DJError> errors,
-                                                 Iterable<File> classPath, Iterable<File> bootClassPath) {
+  private List<File> _compileLanguageLevelsFiles(List<File> files, List<DJError> errors, Iterable<File> classPath, 
+                                                 Iterable<File> bootClassPath) {
     /* Construct the collection of files to be compild by javac, renaming any language levels (.dj*) files to the 
      * corresponding java (.java) files.  By using a HashSet, we avoid creating duplicates in this collection.
      */
@@ -535,18 +539,20 @@ public class DefaultCompilerModel implements CompilerModel {
       
       /* Perform language levels conversion, creating corresponding .java files. */
       LanguageLevelConverter llc = new LanguageLevelConverter();
-      Options llOpts;
+      Options llOpts;  /* Options passed as arguments to LLConverter */
       if (bootClassPath == null) { llOpts = new Options(getActiveCompiler().version(), classPath); }
       else { llOpts = new Options(getActiveCompiler().version(), classPath, bootClassPath); }
       
-      // NOTE: the following workaround ("_testFileSort(files)" instead of simply "files") may no longer be necessary.
-      /* Perform the conversion incorporating the following Bug Workaround:  Forward references can generate spurious 
+      // NOTE: the workaround "_testFileSort(files)" instead of simply "files") may no longer be necessary.
+      
+      /* Perform the LL conversion incorporating the following workaround:  Forward references can generate spurious 
        * conversion errors in some cases.  This problem can be mitigated by compiling JUnit test files (with names
        * containing the substring "Test") last.  
        */
       Map<File,Set<String>> sourceToTopLevelClassMap = new HashMap<File,Set<String>>();
       Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> llErrors = 
         llc.convert(_testFileSort(files).toArray(new File[0]), llOpts, sourceToTopLevelClassMap);
+      
       /* Add any errors encountered in conversion to the compilation error log. */
       errors.addAll(_parseExceptions2CompilerErrors(llErrors.getFirst()));
       errors.addAll(_visitorErrors2CompilerErrors(llErrors.getSecond()));
@@ -635,64 +641,64 @@ public class DefaultCompilerModel implements CompilerModel {
 //    _compilers.add(compiler);
 //  }
   
-  /** Delete the .class files that match the following pattern:
-    * XXX.dj? --> XXX.class
-    *             XXX$*.class
-    * @param sourceToTopLevelClassMap a map from directories to classes in them
-    */
-  public void smartDeleteClassFiles(Map<File,Set<String>> sourceToTopLevelClassMap) {
-    final File buildDir = _model.getBuildDirectory();
-    final File sourceDir = _model.getProjectRoot();
-    // Accessing the disk is the most costly part; therefore, we want to scan each directory only once.
-    // We create a map from parent directory to class names in that directory.
-    // Then we scan the files in each directory and delete files that match the class names listed for it.
-    // dirToClassNameMap: key=parent directory, value=set of classes in this directory
-    Map<File,Set<String>> dirToClassNameMap = new HashMap<File,Set<String>>();
-    for(Map.Entry<File,Set<String>> e: sourceToTopLevelClassMap.entrySet()) {
-      try {
-        File dir = e.getKey().getParentFile();
-        if (buildDir != null && buildDir != FileOps.NULL_FILE &&
-            sourceDir != null && sourceDir != FileOps.NULL_FILE) {
-          // build directory set
-          String rel = edu.rice.cs.util.FileOps.stringMakeRelativeTo(dir,sourceDir);
-          dir = new File(buildDir,rel);
-        }
-        Set<String> classNames = dirToClassNameMap.get(dir);
-        if (classNames == null) classNames = new HashSet<String>();
-        classNames.addAll(e.getValue());
-        dirToClassNameMap.put(dir,classNames);
-//          System.out.println(e.getKey() + " --> " + dir);
-//          for(String name: e.getValue()) {
-//            System.out.println("\t" + name);
+//  /** Delete the .class files that match the following pattern:
+//    * XXX.dj? --> XXX.class
+//    *             XXX$*.class
+//    * @param sourceToTopLevelClassMap a map from directories to classes in them
+//    */
+//  public void smartDeleteClassFiles(Map<File,Set<String>> sourceToTopLevelClassMap) {
+//    final File buildDir = _model.getBuildDirectory();
+//    final File sourceDir = _model.getProjectRoot();
+//    // Accessing the disk is the most costly part; therefore, we want to scan each directory only once.
+//    // We create a map from parent directory to class names in that directory.
+//    // Then we scan the files in each directory and delete files that match the class names listed for it.
+//    // dirToClassNameMap: key=parent directory, value=set of classes in this directory
+//    Map<File,Set<String>> dirToClassNameMap = new HashMap<File,Set<String>>();
+//    for(Map.Entry<File,Set<String>> e: sourceToTopLevelClassMap.entrySet()) {
+//      try {
+//        File dir = e.getKey().getParentFile();
+//        if (buildDir != null && buildDir != FileOps.NULL_FILE &&
+//            sourceDir != null && sourceDir != FileOps.NULL_FILE) {
+//          // build directory set
+//          String rel = edu.rice.cs.util.FileOps.stringMakeRelativeTo(dir,sourceDir);
+//          dir = new File(buildDir,rel);
+//        }
+//        Set<String> classNames = dirToClassNameMap.get(dir);
+//        if (classNames == null) classNames = new HashSet<String>();
+//        classNames.addAll(e.getValue());
+//        dirToClassNameMap.put(dir,classNames);
+////          System.out.println(e.getKey() + " --> " + dir);
+////          for(String name: e.getValue()) {
+////            System.out.println("\t" + name);
+////          }
+//      }
+//      catch(IOException ioe) { /* we'll fail to delete this, but that's better than deleting something we shouldn't */ }
+//    }
+//    // Now that we have a map from parent directories to the class names that should be deleted
+//    // in them, we scan the files in each directory, then check if the names match the class names.      
+//    for(final Map.Entry<File,Set<String>> e: dirToClassNameMap.entrySet()) {
+////        System.out.println("Processing dir: " + e.getKey());
+////        System.out.println("\t" + java.util.Arrays.toString(e.getValue().toArray(new String[0])));
+//      e.getKey().listFiles(new java.io.FilenameFilter() {
+//        public boolean accept(File dir, String name) {
+////            System.out.println("\t" + name);
+//          int endPos = name.lastIndexOf(".class");
+//          if (endPos < 0) return false; // can't be a class file
+//          int dollarPos = name.indexOf('$');
+//          if ((dollarPos >= 0) && (dollarPos < endPos)) endPos = dollarPos;
+//          // class name goes to the .class or the first $, whichever comes first
+//          Set<String> classNames = e.getValue();
+//          if (classNames.contains(name.substring(0,endPos))) { 
+//            // this is a class file that is generated from a .dj? file
+//            new File(dir, name).delete();
+//            // don't need to return true, we're deleting the file here already
+////              System.out.println("\t\tDeleted");
 //          }
-      }
-      catch(IOException ioe) { /* we'll fail to delete this, but that's better than deleting something we shouldn't */ }
-    }
-    // Now that we have a map from parent directories to the class names that should be deleted
-    // in them, we scan the files in each directory, then check if the names match the class names.      
-    for(final Map.Entry<File,Set<String>> e: dirToClassNameMap.entrySet()) {
-//        System.out.println("Processing dir: " + e.getKey());
-//        System.out.println("\t" + java.util.Arrays.toString(e.getValue().toArray(new String[0])));
-      e.getKey().listFiles(new java.io.FilenameFilter() {
-        public boolean accept(File dir, String name) {
-//            System.out.println("\t" + name);
-          int endPos = name.lastIndexOf(".class");
-          if (endPos < 0) return false; // can't be a class file
-          int dollarPos = name.indexOf('$');
-          if ((dollarPos >= 0) && (dollarPos < endPos)) endPos = dollarPos;
-          // class name goes to the .class or the first $, whichever comes first
-          Set<String> classNames = e.getValue();
-          if (classNames.contains(name.substring(0,endPos))) { 
-            // this is a class file that is generated from a .dj? file
-            new File(dir, name).delete();
-            // don't need to return true, we're deleting the file here already
-//              System.out.println("\t\tDeleted");
-          }
-          return false;
-        }
-      });
-    }
-  }
+//          return false;
+//        }
+//      });
+//    }
+//  }
   
   /** returns the LanguageLevelStackTraceMapper
     * @return the LanguageLevelStackTraceMapper

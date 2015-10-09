@@ -45,8 +45,10 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.Toolkit;
+
 import javax.swing.*;
 import javax.swing.text.*;
+
 import java.io.*;
 import java.util.List;
 
@@ -55,11 +57,9 @@ import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.repl.InteractionsDocumentTest.TestBeep;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.plt.io.IOUtil;
-import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.*;
 import edu.rice.cs.util.text.*;
 import edu.rice.cs.util.swing.Utilities;
-import edu.rice.cs.drjava.model.compiler.CompilerListener;
 
 /** Test functions of MainFrame.
   * @version $Id$
@@ -114,15 +114,15 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   }
   
   JButton _but;
-  /** Tests that the returned JButton of <code>createManualToolbarButton</code>:
+  /** Tests that the returned JButton of <code>createManualToolBarButton</code>:
     * 1. Is disabled upon return.
     * 2. Inherits the tooltip of the Action parameter <code>a</code>.
     */
-  public void testCreateManualToolbarButton() {
+  public void testCreateManualToolBarButton() {
     final Action a = new AbstractAction("Test Action") { public void actionPerformed(ActionEvent ae) { } };
     
     a.putValue(Action.LONG_DESCRIPTION, "test tooltip");
-    Utilities.invokeAndWait(new Runnable() { public void run() { _but = _frame._createManualToolbarButton(a); } });
+    Utilities.invokeAndWait(new Runnable() { public void run() { _but = _frame._createManualToolBarButton(a); } });
     
     assertTrue("Returned JButton is enabled.", ! _but.isEnabled());
     assertEquals("Tooltip text not set.", "test tooltip", _but.getToolTipText());
@@ -310,7 +310,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     assertTrue("UI's int. doc. should equals Model's int. doc.", pane.getDocument() == doc);
     
     int origLength = doc.getLength();
-    doc.insertText(1, "typed text", InteractionsDocument.DEFAULT_STYLE);
+    doc.insertText(1, "typed text", ConsoleDocument.DEFAULT_STYLE);
     Utilities.clearEventQueue();
     assertEquals("Document should not have changed.", origLength, doc.getLength());
     _log.log("testCorrectInteractionsDocument completed");
@@ -341,7 +341,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     final DefinitionsPane pane = _frame.getCurrentDefPane();
     final OpenDefinitionsDocument doc = pane.getOpenDefDocument();
     
-    setConfigSetting(OptionConstants.INDENT_LEVEL, Integer.valueOf(2));
+    setConfigSetting(OptionConstants.INDENT_INC, Integer.valueOf(2));
 
     Utilities.invokeAndWait(new Runnable() { 
       public void run() { 
@@ -440,7 +440,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   }
   
   private KeyEvent makeFindKeyEvent(Component c, long when) {
-    return new KeyEvent(c, KeyEvent.KEY_PRESSED, when, KeyEvent.CTRL_MASK, KeyEvent.VK_F, 'F');
+    return new KeyEvent(c, KeyEvent.KEY_PRESSED, when, InputEvent.CTRL_MASK, KeyEvent.VK_F, 'F');
   }
   
   /** Ensure that all key events are disabled when the glass pane is up. */
@@ -642,7 +642,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     _log.log("File saved and compiled");
     
     if (! IOUtil.deleteRecursively(_tempDir))
-      System.out.println("Couldn't fully delete directory " + _tempDir.getAbsolutePath() + "\nDo it by hand.\n");
+      System.err.println("Couldn't fully delete directory " + _tempDir.getAbsolutePath() + "\nDo it by hand.\n");
     
     _log.log("testDancingUIFileOpened completed");
   }
@@ -710,7 +710,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     }
     
     if (! IOUtil.deleteRecursively(_tempDir)) {
-      System.out.println("Couldn't fully delete directory " + _tempDir.getAbsolutePath() + "\nDo it by hand.\n");
+      System.err.println("Couldn't fully delete directory " + _tempDir.getAbsolutePath() + "\nDo it by hand.\n");
     }
     _log.log("testDancingUIFileClosed completed");
   }

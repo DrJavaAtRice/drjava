@@ -47,6 +47,7 @@ import edu.rice.cs.util.swing.RightClickMouseAdapter;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.text.*;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -391,7 +392,7 @@ public class JUnitPanel extends ErrorPanel {
       setCaretPosition(0);
     }
     
-//    /** Checks the document being tested to see if it's in sync. If not,
+///** Checks the document being tested to see if it's in sync. If not,
 //      * displays a message in the document in the test output pane.
 //      */
 //    private void _checkSync(Document doc) {
@@ -419,8 +420,8 @@ public class JUnitPanel extends ErrorPanel {
       _stackTextArea.setEditable(false);
       _stackTextArea.setLineWrap(false);
       JScrollPane scroll = new BorderlessScrollPane(_stackTextArea,
-                                                    JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-                                                    JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+                                                    ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+                                                    ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
       
       ActionListener closeListener = new ActionListener() {
         public void actionPerformed(ActionEvent e) {
@@ -463,7 +464,7 @@ public class JUnitPanel extends ErrorPanel {
       _showStackTraceButton.setEnabled(false);
     }
     
-//    /** Updates the UI to a new look and feel.  Need to update the contained popup menu as well.
+///** Updates the UI to a new look and feel.  Need to update the contained popup menu as well.
 //      * Currently, we don't support changing the look and feel on the fly, so this is disabled.
 //      */     
 //    public void updateUI() {

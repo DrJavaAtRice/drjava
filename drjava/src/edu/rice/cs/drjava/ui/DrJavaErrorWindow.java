@@ -40,6 +40,7 @@ import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.text.*;
 import javax.swing.border.*;
+
 import java.awt.event.*;
 import java.awt.*;
 import java.util.Map;
@@ -48,6 +49,7 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.BorderlessScrollPane;
+import edu.rice.cs.drjava.model.JDKToolsLibrary;
 import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.plt.lambda.LambdaUtil;
@@ -151,8 +153,8 @@ public class DrJavaErrorWindow extends JDialog {
     _bottomPanel.add(_buttonPanel, BorderLayout.EAST);
 
     _stackTraceScroll = new BorderlessScrollPane(_stackTrace,
-                                                 JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-                                                 JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+                                                 ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
+                                                 ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
     _errorInfo = new JEditorPane("text/html", HEADER_HTML+NO_ERRORS_HTML);
     _errorInfo.setEditable(false);
     _errorInfo.setBackground(getContentPane().getBackground());    
@@ -353,7 +355,7 @@ public class DrJavaErrorWindow extends JDialog {
     b.append(Runtime.getRuntime().availableProcessors());
     b.append("\n\n");
     b.append("Compiler Discovery Log:\n");
-    b.append(edu.rice.cs.drjava.model.JarJDKToolsLibrary.LOG_STRINGWRITER.toString());
+    b.append(JDKToolsLibrary.LOG_STRINGWRITER.toString());
     b.append("\n\n");
     
     // filter out user.dir, user.home and user.name

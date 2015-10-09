@@ -43,8 +43,6 @@ import java.util.List;
 import java.util.ArrayList;
 
 import edu.rice.cs.drjava.model.repl.newjvm.ClassPathManager;
-import edu.rice.cs.drjava.model.AbstractGlobalModel;
-
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.ConsoleDocument;
@@ -98,7 +96,7 @@ public class SimpleInteractionsModel extends InteractionsModel {
     catch (InterpreterException e) {
       StringWriter msg = new StringWriter();
       e.printUserMessage(new PrintWriter(msg));
-      _document.appendExceptionResult(msg.toString(), InteractionsDocument.DEFAULT_STYLE);
+      _document.appendExceptionResult(msg.toString(), ConsoleDocument.DEFAULT_STYLE);
     }
     finally { _interactionIsOver(); }
   }

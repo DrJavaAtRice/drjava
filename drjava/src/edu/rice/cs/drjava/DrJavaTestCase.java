@@ -69,6 +69,8 @@ public class DrJavaTestCase extends TestCase {
     Utilities.TEST_MODE = true;
     final String newName = System.getProperty("drjava.test.config");
     assert newName != null;
+    
+//    Utilities.show("newName = '" + newName + "'");
 
     if (newName != null) {  // in deployed code, assertion checking may be turned off
       Utilities.invokeAndWait(new Runnable() {

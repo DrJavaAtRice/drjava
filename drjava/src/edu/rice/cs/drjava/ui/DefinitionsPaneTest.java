@@ -38,14 +38,13 @@ package edu.rice.cs.drjava.ui;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
-import edu.rice.cs.drjava.model.MultiThreadedTestCase;
 import edu.rice.cs.drjava.model.*;
-import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.swing.Utilities;
 
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
+
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -53,6 +52,8 @@ import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Vector;
 import java.util.Date;
+
+import junit.framework.Assert;
 
 /** Tests the Definitions Pane
   * @version $Id$
@@ -732,9 +733,9 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
 
   static class KeyTestListener implements KeyListener {
     
-    public void keyPressed(KeyEvent e) { DefinitionsPaneTest.fail("Unexpected keypress " + e); }
-    public void keyReleased(KeyEvent e) { DefinitionsPaneTest.fail("Unexpected keyrelease " + e); }
-    public void keyTyped(KeyEvent e) { DefinitionsPaneTest.fail("Unexpected keytyped " + e);  }
+    public void keyPressed(KeyEvent e) { Assert.fail("Unexpected keypress " + e); }
+    public void keyReleased(KeyEvent e) { Assert.fail("Unexpected keyrelease " + e); }
+    public void keyTyped(KeyEvent e) { Assert.fail("Unexpected keytyped " + e);  }
     public boolean done() { return true; }
   }
   

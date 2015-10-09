@@ -73,7 +73,7 @@ public class QuestionStartAfterOpenBrace extends IndentRuleQuestion {
       return false;
     int bracePos = lineStart - info.distance();    
     
-//    // Get brace's end of line
+//// Get brace's end of line
     int braceEndLinePos = doc._getLineEndPos(bracePos);
     
     // Get position of next non-WS char (not in comments)

@@ -127,7 +127,7 @@ public class FindReplaceMachineTest extends DrJavaTestCase {
   }
   
 //  public void testCreateMachineFail() {
-//    // before 0
+//// before 0
 //    try {
 //      _initFrm(-2);
 //      System.err.println(_frm.getStartOffset() + " " +
@@ -138,7 +138,7 @@ public class FindReplaceMachineTest extends DrJavaTestCase {
 //      // expected: -2 is not a valid offset.
 //    }
 //
-//    // after doc.getLength()
+//// after doc.getLength()
 //    try {
 //      _initFrm(5);
 //      System.out.println(_frm.getStartOffset() + " " +

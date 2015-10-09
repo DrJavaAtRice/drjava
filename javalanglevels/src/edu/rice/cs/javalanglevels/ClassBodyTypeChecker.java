@@ -291,7 +291,7 @@ public class ClassBodyTypeChecker extends SpecialTypeChecker {
     _checkReturnType(md.getReturnType(), (SymbolData) bodyRes, that);
     if (md.getReturnType() != null) {
       // Ensure that this method doesn't override another method with a different return type.
-      SymbolData.checkDifferentReturnTypes(md, _symbolData, LanguageLevelConverter.OPT.javaVersion());
+      SymbolData.checkDifferentReturnTypes(md, _symbolData, true);
     }
     
     // This is not used because this call eventually invokes the forUninitializedVariableDeclarator method above.
@@ -331,7 +331,7 @@ public class ClassBodyTypeChecker extends SpecialTypeChecker {
     if (md == null) {
       throw new RuntimeException("Internal Program Error: Could not find the method " + that.getName().getText() + " in class " + _symbolData.getName() +".  Please report this bug.");
     }
-    SymbolData.checkDifferentReturnTypes(md, _symbolData, LanguageLevelConverter.OPT.javaVersion());
+    SymbolData.checkDifferentReturnTypes(md, _symbolData, true);
 
     return resRes;
   }
@@ -391,7 +391,7 @@ public class ClassBodyTypeChecker extends SpecialTypeChecker {
       _cbbtc = 
         new ClassBodyTypeChecker(_sd1, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), 
                                  new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData, JExpression>>());
-      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, EmptyIterable.<File>make());
+      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_6, EmptyIterable.<File>make());
       _cbbtc._importedPackages.addFirst("java.lang");
     }
     

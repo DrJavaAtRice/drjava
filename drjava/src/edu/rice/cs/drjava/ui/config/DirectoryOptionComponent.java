@@ -37,7 +37,6 @@
 package edu.rice.cs.drjava.ui.config;
 
 import java.io.File;
-import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.filechooser.FileFilter;
 

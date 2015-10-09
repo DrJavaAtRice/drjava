@@ -123,7 +123,6 @@ public class SpecialTypeChecker extends TypeChecker {
      return result;
 
   }
-
   
   /** TODO: Move this code to where it is needed?
     * Do any extra processing of this MethodInvocation, based on what level it is found at.
@@ -198,23 +197,28 @@ public class SpecialTypeChecker extends TypeChecker {
     return null;
   }
   
-  /*This is not supported at any Language Level.  It should have been caught during the first pass.*/  
-  public TypeData forInstanceInitializer(InstanceInitializer that) {
-    throw new RuntimeException("Internal Program Error: Instance Initializers are not supported." + 
-                               "  This should have been caught before the Type Checker Pass.  Please report this bug.");
-  }
-
-  /*This is not supported at any Language Level.  It should have been caught during the first pass.*/  
-  public TypeData forStaticInitializer(StaticInitializer that) {
-    throw new RuntimeException("Internal Program Error: Static Initializers are not supported." +
-                               "  This should have been caught before the Type Checker Pass.  Please report this bug.");
-  }
-  
-  /*This is not supported at any Language Level.  It should have been caught during the first pass.*/  
-  public TypeData forLabeledStatement(LabeledStatement that) {
-    throw new RuntimeException("Internal Program Error: Labeled Statements are not supported." + 
-                               "  This should have been caught before the Type Checker Pass.  Please report this bug.");
-  }
+  /* In the reformulation of language levels, the function level permits the following which do not perform
+   * mutation per se. Hence, these overrides are commented out. */
+//  
+//  /*This is not supported at any Language Level.  It should have been caught during the first pass.*/  
+//  public TypeData forInstanceInitializer(InstanceInitializer that) {
+//    throw new RuntimeException("Internal Program Error: Instance Initializers are not supported." + 
+//                               "  This should have been caught before the Type Checker Pass.  Please report this bug.");
+//  }
+//
+//  /*This is not supported at any Language Level.  It should have been caught during the first pass.*/  
+//  public TypeData forStaticInitializer(StaticInitializer that) {
+//    throw new RuntimeException("Internal Program Error: Static Initializers are not supported." +
+//                               "  This should have been caught before the Type Checker Pass.  Please report this bug.");
+//  }
+//  
+  /* Originally, this was not supported at any Language Level.  Now it is supported since it does not directly
+   * perform data mutation. */
+//  public TypeData forLabeledStatement(LabeledStatement that) {
+//    
+//    throw new RuntimeException("Internal Program Error: Labeled Statements are not supported." + 
+//                               "  This should have been caught before the Type Checker Pass.  Please report this bug.");
+//  }
   
   /** Visits the expression with a new ExpressionTypeChecker, and return the result of that visitation.
     * Keep track of what variables get values within the expression.
@@ -369,7 +373,7 @@ public class SpecialTypeChecker extends TypeChecker {
 
         if (result[i] != null) {
           if (assertFound(result[i], (JExpression) that.getItems()[i])) {
-            if (!result[i].getSymbolData().isAssignableTo(elementType, LanguageLevelConverter.OPT.javaVersion())) {
+            if (! result[i].getSymbolData().isAssignableTo(elementType, true)) {
               _addError("The elements of this initializer should have type " + elementType.getName() + " but element "
                           + i + " has type " + result[i].getSymbolData().getName(), (JExpression) that.getItems()[i]);
             }
@@ -577,7 +581,7 @@ public class SpecialTypeChecker extends TypeChecker {
       LanguageLevelConverter.symbolTable.clear();
       _stc = new SpecialTypeChecker(null, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), 
                    new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData, JExpression>>());
-      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, EmptyIterable.<File>make());
+      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_6, EmptyIterable.<File>make());
         _stc._importedPackages.addFirst("java.lang");
       _sd1 = new SymbolData("i.like.monkey");
       _sd2 = new SymbolData("i.like.giraffe");

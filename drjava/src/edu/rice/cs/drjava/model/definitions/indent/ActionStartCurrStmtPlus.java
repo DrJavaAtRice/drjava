@@ -60,8 +60,8 @@ public class ActionStartCurrStmtPlus extends IndentRuleAction {
     * @return true if the caller should update the current location itself,
     * false if the indenter has already handled this
     */
-  public boolean indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
-    boolean supResult = super.indentLine(doc, reason);
+  public void indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
+    super.indentLine(doc, reason);
 
     /** This method is simply a call to getIndentOfCurrStmt, which is fully tested in IndentHelperTest, so no additional
       * tests are provided for this class.
@@ -75,7 +75,5 @@ public class ActionStartCurrStmtPlus extends IndentRuleAction {
 
     indent = indent + _suffix;
     doc.setTab(indent, doc.getCurrentLocation());
-    
-    return supResult;
   }
 }

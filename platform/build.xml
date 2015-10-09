@@ -14,7 +14,6 @@
 <project name="platform" default="help">
 
   <property name="readable-project-name" value="DrJava Platform-Specific Classes" />
-  <property name="svn-repository" value="https://drjava.svn.sourceforge.net/svnroot/drjava" />
 
   <!-- Properties loaded from a file -->
   <property name="props" value="../ant.properties" />
@@ -81,8 +80,6 @@
     <echo message="variables may need to be defined (depending on the target invoked):" />
     <echo message="PATH: The 'javac' command is used for compilation;" />
     <echo message="      the 'java' command is used by default in testing/running; " />
-    <echo message="      the 'svn' command is used to generate version numbers and " />
-    <echo message="      in Subversion targets" />
     <echo message="DRJAVA_JAR: Location of the drjava.jar file (most classes here " />
     <echo message="            implement interfaces defined there)." />
     <echo message="JAVA5_HOME: Home folder of the Java 5 JDK" />
@@ -265,8 +262,7 @@
     <!-- Make the directories if they don't already exist -->
     <mkdir dir="classes/base-${platform-tag}" />
     <mkdir dir="classes/test-${platform-tag}" />
-    <!-- To eliminate confusion, we force recompilation whenever this is invoked (can't delete the directories
-         because they contain svn versioning data) -->
+    <!-- To eliminate confusion, we force recompilation whenever this is invoked -->
     <delete>
       <fileset dir="classes/base-${platform-tag}" includes="**/*" />  
       <fileset dir="classes/test-${platform-tag}" includes="**/*" />  
@@ -638,9 +634,6 @@
       <fileset dir="${basedir}" defaultexcludes="no">
         <include name="TEST*" />
         <include name="src-*/**/*.class" />
-        <include name="svn-info.txt" />
-        <!-- We could get rid of backups, but "update" ignores them, so they're okay.
-             (doesn't work if defaultexcludes is "yes") -->
         <!-- <include name="**/*~" /> -->
         <!-- Get rid of pesky OS helper files (doesn't work if defaultexcludes is "yes") -->
         <include name="**/.DS_Store" />
@@ -667,65 +660,6 @@
     
   </target>
 
-
-
-  <!-- ******************
-       Subversion Targets 
-       ****************** -->
-  
-  <target name="update" depends="clean" description="Reconcile source with the Subversion archive">
-    <echo message="Running Subversion update" />
-    <exec executable="svn" failonerror="yes">
-      <arg value="update" />
-    </exec>
-    <exec executable="svn" failonerror="yes">
-      <arg value="status" />
-    </exec>
-  </target>
-  
-  <target name="commit" depends="update" 
-          description="Commit source to the Subversion archive">
-    <exec executable="svn" failonerror="yes">
-      <arg value="status" />
-    </exec>
-    <input message="Please enter a log message for the commit: "
-           addproperty="svn-commit-message" />
-    <echo message="Running Subversion commit" />
-    <exec executable="svn" failonerror="yes">
-      <arg value="commit" />
-      <arg value="-m" />
-      <arg value="${svn-commit-message}" />
-    </exec>
-  </target>
-
-  <target name="tag" depends="update, resolve-version-tag" unless="skip-tag"
-          description="Copy the working copy to a new Subversion tag (after updating)">
-    <echo message="Creating a new Subversion tag with name ${version-tag}"/>
-    <exec executable="svn" failonerror="yes">
-      <arg value="copy" />
-      <arg value="${basedir}" />
-      <arg value="${svn-repository}/tags/${version-tag}" />
-      <arg value="-m" />
-      <arg value="Created tag ${version-tag}" />
-    </exec>
-  </target>
-  
-  <target name="branch" depends="update" 
-          description="Copy the working copy to a new Subversion branch (after updating)">
-    <echo message="This will create a new branch from your working copy.  If there are changes " />
-    <echo message="in your copy that have not been committed, you may want to do so first, " />
-    <echo message="so that there's a clear branch point for merging later." />
-    <input message="Enter a name for the new branch: "
-           addproperty="svn-branch-name" />
-    <echo message="Creating a new Subversion branch ${svn-branch-name}" />
-    <exec executable="svn" failonerror="yes">
-      <arg value="copy" />
-      <arg value="${basedir}" />
-      <arg value="${svn-repository}/branches/${svn-branch-name}" />
-      <arg value="-m" />
-      <arg value="Created branch ${svn-branch-name}" />
-    </exec>
-  </target>
 
 
 
@@ -769,25 +703,6 @@
     </antcall>
   </target>
        
-  <!-- *** If some release targets are removed, the dependencies here should be modified *** -->
-  <target name="release"
-          depends="update, tag, src-zip, jar-app" 
-          description="Make a development release">
-    <delete dir="${version-tag}" />
-  </target>
-  
-  <target name="src-zip" depends="resolve-version-tag" unless="skip-tag">
-    <echo message="Creating ${version-tag}-src.zip" />
-    <exec executable="svn" failonerror="yes">
-      <arg value="export" />
-      <arg value="${svn-repository}/tags/${version-tag}" />
-      <arg value="${version-tag}/src" />
-    </exec>
-    <zip destfile="${version-tag}-src.zip">
-      <zipfileset dir="${version-tag}/src" prefix="${version-tag}/src" />
-    </zip>
-  </target>
-  
   <target name="jar-app" depends="jar, assert-jar-exists, resolve-version-tag">
     <echo message="Creating ${version-tag}.jar" />
     <copy file="${ant.project.name}.jar" tofile="${version-tag}.jar" />
@@ -822,7 +737,7 @@
   
   <!-- Standardize all newline character sequences.  Subversion takes care of this 
        automatically, but sometimes files crop up with the wrong sequence.
-       Use "svn status" after running this to see which files were fixed. -->
+       Use "git status" after running this to see which files were fixed. -->
   <target name="fix-newlines" description="Standardize newline character sequences in all text files">
     <!-- If we're in Windows, use \r\n -->
     <condition property="newline-code" value="crlf">
@@ -1197,7 +1112,7 @@
               value="edu.rice.cs.plt.ant.OneLineJUnitResultFormatter" />
   </target>
   
-  <target name="resolve-version-tag" depends="resolve-svn-revision">
+  <target name="resolve-version-tag">
     <!-- Get a timestamp based on GMT, rather than local time -->
     <tstamp>
       <format property="DSTAMP" pattern="yyyyMMdd" timezone="GMT" />
@@ -1205,38 +1120,9 @@
       <format property="TODAY" pattern="MMMM dd yyyy" timezone="GMT" />
     </tstamp>
     <property name="version-tag"
-              value="${ant.project.name}${tag-append}-${DSTAMP}-r${svn-revision}" />
+              value="${ant.project.name}${tag-append}-${DSTAMP}-${TSTAMP}" />
   </target>  
 
-  <!-- Sets is-modified if "svn status" has non-empty output. -->
-  <target name="resolve-is-modified" depends="clean">
-    <exec executable="svn" failonerror="yes" outputproperty="svn-status">
-      <arg value="status" />
-    </exec>
-    <condition property="is-modified">
-      <not>
-        <equals arg1="${svn-status}" arg2="" />
-      </not>
-    </condition>
-  </target>
-  
-  <!-- Sets svn-revision to the current "Last Changed Rev" of "svn info". -->
-  <target name="resolve-svn-revision">
-    <exec executable="svn" failonerror="yes" output="svn-info.txt">
-      <arg value="info" />
-    </exec>
-    <loadfile property="svn-revision" srcfile="svn-info.txt">
-      <filterchain>
-        <linecontains>
-          <contains value="Last Changed Rev: " />
-        </linecontains>
-        <replacestring from="Last Changed Rev: " to="" />
-        <striplinebreaks/>
-      </filterchain>
-    </loadfile>
-    <delete file="svn-info.txt" />
-  </target>
-  
 
   <!-- Sets "already-generated" if "generate-file" is more recent than "generate-sourcefile";
        otherwise, the out-of-date target file is deleted (if it exists).  Note that, since

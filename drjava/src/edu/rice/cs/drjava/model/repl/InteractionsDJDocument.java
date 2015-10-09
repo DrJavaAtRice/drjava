@@ -225,7 +225,7 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
     synchronized(_stylesList) {
       // TODO: file javac bug report concerning placement of @SuppressWarnings.  Fails if rhs of result binding is used as body of 
       // return statement.
-      @SuppressWarnings({"unchecked", "rawtypes"})
+      @SuppressWarnings({"unchecked","rawtypes"})
       Pair<Pair<Integer, Integer>, String>[] result = _stylesList.toArray(new Pair[0]);
       return result;
     }

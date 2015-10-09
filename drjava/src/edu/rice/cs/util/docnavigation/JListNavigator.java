@@ -248,7 +248,7 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList<ItemT> implemen
   public ArrayList<ItemT> getDocuments() { 
     synchronized(_model) {
 //    Cast forced by lousy generic typing of DefaultListModel in Java 1.5
-      @SuppressWarnings("unchecked") Enumeration<ItemT> items = _model.elements();
+      Enumeration<ItemT> items = _model.elements();
       ArrayList<ItemT> result = new ArrayList<ItemT>(_model.size());
       while (items.hasMoreElements()) result.add(items.nextElement());
       return result;                               
@@ -352,7 +352,7 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList<ItemT> implemen
   public int getDocumentSelectedCount() { return getSelectionCount(); }
   
   /** @return the documents currently selected. Only runs in event thread. */
-  @SuppressWarnings("unchecked") public java.util.List<ItemT> getSelectedDocuments() {
+  public java.util.List<ItemT> getSelectedDocuments() {
 //    Object[] selected = getSelectedValues();
 //    ArrayList<ItemT> l = new ArrayList<ItemT>(selected.length);
 //    for (Object o: selected) { l.add((ItemT)o); }

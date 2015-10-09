@@ -64,8 +64,6 @@ import edu.rice.cs.drjava.DrJava;
 
 import static edu.rice.cs.util.XMLConfig.XMLConfigException;
 
-import edu.rice.cs.plt.text.TextUtil;
-
 /** This parser loads XML configuration files using the XMLConfig class in the util package.
  * 
  *  <p> If at some point new information is to be stored in the project file, the following places in the code that need to
@@ -380,7 +378,7 @@ public class XMLProjectFileParser extends ProjectFileParserFacade {
     return rList;
   }
   
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   protected Map<OptionParser<?>,String> readStoredPreferences() {
     HashMap<OptionParser<?>,String> storedPreferences = new HashMap<OptionParser<?>,String>();
     List<Node> prefs = _xc.getNodes("preferences/preference");

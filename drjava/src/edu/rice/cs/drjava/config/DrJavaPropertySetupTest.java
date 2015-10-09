@@ -43,8 +43,6 @@ import edu.rice.cs.util.*;
 
 import java.io.*;
 
-import static edu.rice.cs.plt.debug.DebugUtil.debug;
-
 /**
  * Tests for the variables and language constructs that can be used in external processes.
  * @author Mathias Ricken
@@ -965,29 +963,27 @@ public class DrJavaPropertySetupTest extends MultiThreadedTestCase {
   
   public void testControlFlow() throws CloneNotSupportedException {
     PropertyMaps pm = PropertyMaps.TEMPLATE.clone();
-    DrJavaProperty p;
 
     // if
-    p = pm.getProperty("Misc","if");
+    pm.getProperty("Misc","if");
     
     // for
-    p = pm.getProperty("Misc","for");
+    pm.getProperty("Misc","for");
     
     // var
-    p = pm.getProperty("Misc","var");
+    pm.getProperty("Misc","var");
     
     // var.set
-    p = pm.getProperty("Misc","var.set");
+    pm.getProperty("Misc","var.set");
   }
   
   public void testXML() throws CloneNotSupportedException {
     PropertyMaps pm = PropertyMaps.TEMPLATE.clone();
-    DrJavaProperty p;
 
     // xml.in
-    p = pm.getProperty("Misc","xml.in");
+    pm.getProperty("Misc","xml.in");
     
     // xml.out.action
-    p = pm.getProperty("Misc","xml.out.action");
+    pm.getProperty("Misc","xml.out.action");
   }
 }

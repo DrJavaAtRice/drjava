@@ -73,8 +73,8 @@ public class ConfigDescriptions {
     add(OptionConstants.PLASTIC_THEMES, "Plastic Theme", 
         "Pick the theme to be used by the Plastic family of Look and Feels");
     
-    //ToolbarOptionComponent is a degenerate option component
-    // addOptionComponent(panel, new ToolbarOptionComponent("Toolbar Buttons"
+    //ToolBarOptionComponent is a degenerate option component
+    // addOptionComponent(panel, new ToolBarOptionComponent("ToolBar Buttons"
     //                                               "How to display the toolbar buttons."));
     add(OptionConstants.LINEENUM_ENABLED,
         "Show All Line Numbers",
@@ -131,7 +131,7 @@ public class ConfigDescriptions {
         "Cannot be displayed larger than the Main Font.</html>");
     add(OptionConstants.FONT_DOCLIST, "Document List Font",
         "The font used in the list of open documents.");
-    add(OptionConstants.FONT_TOOLBAR, "Toolbar Font",
+    add(OptionConstants.FONT_TOOLBAR, "ToolBar Font",
         "The font used in the toolbar buttons.");
     add(OptionConstants.TEXT_ANTIALIAS, "Use anti-aliased text",
         "Whether to graphically smooth the text.");
@@ -285,15 +285,15 @@ public class ConfigDescriptions {
     add(OptionConstants.JAVADOC_LINK_VERSION,
         "Java Version for Javadoc Links", 
         "Version of Java for generating links to online Javadoc documentation.");
-    add(OptionConstants.JAVADOC_1_5_LINK,
-        "Javadoc 1.5 URL",
-        "URL for the Java 1.5 API, for generating links to library classes.");
     add(OptionConstants.JAVADOC_1_6_LINK,
         "Javadoc 1.6 URL",
         "URL for the Java 1.6 API, for generating links to library classes.");
     add(OptionConstants.JAVADOC_1_7_LINK,
         "Javadoc 1.7 URL",
         "URL for the Java 1.7 API, for generating links to library classes.");
+    add(OptionConstants.JAVADOC_1_8_LINK,
+        "Javadoc 1.8 URL",
+        "URL for the Java 1.8 API, for generating links to library classes.");
     add(OptionConstants.JUNIT_LINK,
         "JUnit URL",
         "URL for the JUnit API, for \"Open Java API Javadoc\".");
@@ -464,7 +464,7 @@ public class ConfigDescriptions {
         "The number of days between automatic new version checks.");
     
     /* Dialog box options */
-    add(OptionConstants.INDENT_LEVEL,
+    add(OptionConstants.INDENT_INC,
         "Indent Level",
         "The number of spaces to use for each level of indentation.");
     add(OptionConstants.RECENT_FILES_MAX_SIZE, "Recent Files List Size",

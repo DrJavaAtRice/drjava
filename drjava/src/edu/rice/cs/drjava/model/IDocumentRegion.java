@@ -41,13 +41,5 @@ public interface IDocumentRegion extends Region {
   
   /** @return the document, or null if it hasn't been established yet */
   public OpenDefinitionsDocument getDocument();
-//  /** @return the start position */
-//  public Position getStartPosition();
-//  /** @return the end offset */
-//  public Position getEndPosition();
-//  /** @return the corresponding MutableTreeNode. */
-//  public DefaultMutableTreeNode getTreeNode();
-//  /** Sets the MutableTreeNode corresponding to this region. */
-//  public void setTreeNode(DefaultMutableTreeNode n);
 }
 

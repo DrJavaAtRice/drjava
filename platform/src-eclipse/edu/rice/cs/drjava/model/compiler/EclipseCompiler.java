@@ -40,57 +40,64 @@ import java.lang.reflect.Method;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.Iterator;
-import java.util.ResourceBundle;
-import java.util.Locale;
 
-// Uses JDK 1.6.0 tools classes
-import javax.tools.JavaFileManager;
+// Uses JDK 1.7.0 tools classes
 import javax.tools.JavaFileObject;
-import javax.tools.Diagnostic;
-import javax.tools.DiagnosticListener;
-import javax.tools.StandardJavaFileManager;
 import javax.tools.JavaCompiler;
-import javax.tools.StandardLocation;
+import javax.tools.Diagnostic;
+import javax.tools.DiagnosticCollector;
+import javax.tools.StandardJavaFileManager;
+import javax.tools.ToolProvider;
 
 // DJError class is not in the same package as this
 import edu.rice.cs.drjava.model.DJError;
+import edu.rice.cs.util.Log;
+import edu.rice.cs.util.swing.Utilities;
 
-import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.model.compiler.Javac160FilteringCompiler;
 import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.plt.io.IOUtil;
-import edu.rice.cs.plt.iter.IterUtil;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 import static edu.rice.cs.plt.debug.DebugUtil.error;
 
-/** An implementation of JavacCompiler that supports compiling with the Eclipse compiler.  Must be compiled
-  *  using javac 1.6.0.
+/** An implementation of JavacCompiler that supports the Eclipse compiler.  Since Eclipse 3.3, the Eclipse compiler
+  * supports the Java API specification, so this class is a very slight modification of the Javac170Compiler adapter.
+  * This code assumes that the Eclipse compiler requires the same filtering context as other Java 7+ compilers.
+  * Must be compiled using a conforming Java 7+ compiler.
+  * 
+  * This class is tailored to a specific version of the Eclipse compiler which is easily changed.  See COMPILER_VERSION.
+  * 
+  * TODO: refactor the compiler adapters so that all standard compiler API code is in the drjava code base,
+  * rather than a combination of the drjava code base and the platform code base.
   *
-  * TODO: figure out if filtering is necessary with the Eclipse compiler
   *  @version $Id$
   */
-public class EclipseCompiler extends Javac160FilteringCompiler {
-    public EclipseCompiler(JavaVersion.FullVersion version, String location, List<? extends File> defaultBootClassPath) {
+
+public class EclipseCompiler extends JavacCompiler { 
+  
+  public EclipseCompiler(JavaVersion.FullVersion version, String location, List<? extends File> defaultBootClassPath) {
     super(version, location, defaultBootClassPath);
   }
+
+
+  public static final String COMPILER_VERSION = "4.5";
+  public static final Log _log = new Log("EclipseCompiler.txt",true);
   
+  public String getName() { return "Eclipse Compiler " + COMPILER_VERSION; }
+  
+  public String getDescription() { return getName() + " from runtime class path (drjava jar file)"; }
+    
   public boolean isAvailable() {
     try {
-      // Diagnostic was introduced in the Java 1.6 compiler
-      Class<?> diagnostic = Class.forName("javax.tools.Diagnostic");
-      diagnostic.getMethod("getKind");
-      // and check for Eclipse compiler
-      Class.forName("org.eclipse.jdt.internal.compiler.tool.EclipseCompiler");
+      // Check for Eclipse compiler
+      Class.forName("org.eclipse.jdt.core.compiler.batch.BatchCompiler");
       return true;
     }
     catch (Exception e) { return false; }
     catch (LinkageError e) { return false; }
   }
-  
   
   /** Compile the given files.
     *  @param files  Source files to compile.
@@ -105,45 +112,71 @@ public class EclipseCompiler extends Javac160FilteringCompiler {
     *  @return Errors that occurred. If no errors, should be zero length (not null).
     */
   public List<? extends DJError> compile(List<? extends File> files, List<? extends File> classPath, 
-                                         List<? extends File> sourcePath, File destination, 
-                                         List<? extends File> bootClassPath, String sourceVersion, boolean showWarnings) {
+                                               List<? extends File> sourcePath, File destination, 
+                                               List<? extends File> bootClassPath, String sourceVersion, boolean showWarnings) {
     debug.logStart("compile()");
     debug.logValues(new String[]{ "this", "files", "classPath", "sourcePath", "destination", "bootClassPath", 
       "sourceVersion", "showWarnings" },
                     this, files, classPath, sourcePath, destination, bootClassPath, sourceVersion, showWarnings);
-    List<File> filteredClassPath = null;
-    if (classPath!=null) {
-      filteredClassPath = new LinkedList<File>(classPath);
-      
-      if (_filterExe) {
-        FileFilter filter = IOUtil.extensionFilePredicate("exe");
-        Iterator<? extends File> i = filteredClassPath.iterator();
-        while (i.hasNext()) {
-          if (filter.accept(i.next())) { i.remove(); }
-        }
-        if (_tempJUnit!=null) { filteredClassPath.add(_tempJUnit); }
-      }
-    }
-    
+
+    Iterable<String> options = _createOptions(classPath, sourcePath, destination, bootClassPath, sourceVersion, showWarnings);
     LinkedList<DJError> errors = new LinkedList<DJError>();
-    
+
+    // This is the class that javax.tools.ToolProvider.getSystemJavaCompiler() uses.
+    // We create an instance of that class directly, bypassing ToolProvider, because ToolProvider returns null
+    // if DrJava is started with just the JRE, instead of with the JDK, even if tools.jar is later made available
+    // to the class loader.
     JavaCompiler compiler = new org.eclipse.jdt.internal.compiler.tool.EclipseCompiler();
-    CompilerErrorListener diagnosticListener = new CompilerErrorListener(errors);
-    StandardJavaFileManager fileManager = compiler.getStandardFileManager(diagnosticListener, null, null);
-    Iterable<? extends JavaFileObject> compilationUnits = fileManager.getJavaFileObjectsFromFiles(files);
-    Writer out = new OutputStreamWriter(new OutputStream() { // silent
-      public void write(int b) { }
-    });
-//    Writer out = null;
-    Iterable<String> classes = null; // no classes for annotation processing  
-    Iterable<String> options = _getOptions(fileManager,
-                                           filteredClassPath, sourcePath, destination,
-                                           bootClassPath, sourceVersion, showWarnings);
     
+    /** Default FileManager provided by Context class */
+    DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<JavaFileObject>();
+    StandardJavaFileManager fileManager = compiler.getStandardFileManager(diagnostics, null, null);    
+    Iterable<? extends JavaFileObject> fileObjects = fileManager.getJavaFileObjectsFromFiles(files);
+    _log.log("diagnostics = " + diagnostics + "\nfileManager = " + fileManager + "\nfileObjects = " + fileObjects);
     try {
-      JavaCompiler.CompilationTask task = compiler.getTask(out, fileManager, diagnosticListener, options, classes, compilationUnits);
-      boolean res = task.call();
-      if (!res && (errors.size()==0)) throw new AssertionError("Compile failed. There should be compiler errors, but there aren't.");
+      _log.log("Calling '" + compiler + "' with options " + options);
+      compiler.getTask(null, fileManager, diagnostics, options, null, fileObjects).call();
+     _log.log("Compiler call returned");
+      
+      List<Diagnostic<? extends JavaFileObject>> dList = diagnostics.getDiagnostics();
+      if (dList != null) {
+        
+        for (Diagnostic<? extends JavaFileObject> d: diagnostics.getDiagnostics()) {
+          _log.log("Processing diagnostic " + d);
+          
+          Diagnostic.Kind dt = d.getKind();
+          _log.log(" Kind = " + dt);
+          boolean isWarning = false;  // init required by javac
+          
+          switch (dt) {
+            case OTHER:             continue; // skip, do not record
+            case NOTE:              continue; // skip, do not record
+            case MANDATORY_WARNING: isWarning = true; break;
+            case WARNING:           isWarning = true; break;
+            case ERROR:             isWarning = false; break;
+          }
+          
+          
+          /* The new Java 6.0 Diagnostic interface appears to be broken.  The expression d.getSource().getName() returns a 
+           * non-existent path--the name of the test file (allocated as a TEMP file) appended to the source root for 
+           * DrJava--in GlobalModelCompileErrorsTest.testCompileFailsCorrectLineNumbers().  The expression 
+           * d.getSource().toUri().getPath() returns the correct result as does ((JCDiagnostic) d).getSourceName(). */
+          if (d.getSource() != null) {
+            _log.log("Name = " + d.getSource().getName() + " LineNo = " + d.getLineNumber() + " ColNo = " + 
+                     d.getColumnNumber() + " Msg = '" + d.getMessage(null) + "'");
+            errors.add(new DJError(new File(d.getSource().getName()),
+//                                   new File(d.getSource().toUri().getPath()), // d.getSource().getName() fails! 
+                                   ((int) d.getLineNumber()) - 1,  // javac starts counting at 1
+                                   ((int) d.getColumnNumber()) - 1, 
+                                   d.getMessage(null),    // null is the locale
+                                   isWarning));
+          }
+          else {
+            errors.add(new DJError(d.getMessage(null), isWarning));
+          }
+        }
+      }
+      fileManager.close();
     }
     catch(Throwable t) {  // compiler threw an exception/error (typically out of memory error)
       errors.addFirst(new DJError("Compile exception: " + t, false));
@@ -154,143 +187,32 @@ public class EclipseCompiler extends Javac160FilteringCompiler {
     return errors;
   }
   
-  public String getName() {
-    try {
-      ResourceBundle bundle = ResourceBundle.getBundle("org.eclipse.jdt.internal.compiler.batch.messages");
-      String ecjVersion = bundle.getString("compiler.version");
-      int commaPos = ecjVersion.indexOf(',');
-      if (commaPos>=0) { ecjVersion = ecjVersion.substring(0, commaPos); }
-      return "Eclipse Compiler "+ecjVersion;
-    }
-    catch(Throwable t) {
-      return "Eclipse Compiler " + _version.versionString();
-    }
-  }
-  
-  // add an option if it is not an empty string
-  private static void addOption(List<String> options, String s) {
-    if (s.length()>0) options.add(s);
-  }
-  
-  private Iterable<String> _getOptions(StandardJavaFileManager fileManager,
-                                       List<? extends File> classPath, List<? extends File> sourcePath, File destination, 
-                                       List<? extends File> bootClassPath, String sourceVersion, boolean showWarnings) {
-    
-//    System.err.println("classPath: "+classPath);
-//    System.err.println("sourcePath: "+sourcePath);
-//    System.err.println("destination: "+destination);
-//    System.err.println("bootClassPath: "+bootClassPath);
-    
+  private Iterable<String> _createOptions(List<? extends File> classPath, List<? extends File> sourcePath, File destination, 
+                                          List<? extends File> bootClassPath, String sourceVersion, boolean showWarnings) {    
     if (bootClassPath == null) { bootClassPath = _defaultBootClassPath; }
-    
-    List<String> options = new ArrayList<String>();
-//    for (Map.Entry<String, String> e : CompilerOptions.getOptions(showWarnings).entrySet()) {
-//      addOption(options,e.getKey());
-//      addOption(options,e.getValue());
-//    }
-    boolean isEnabled = DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.SHOW_UNCHECKED_WARNINGS);
-    addOption(options,"-warn:"+(isEnabled?"+":"-")+"unchecked");
-    addOption(options,"-warn:"+(isEnabled?"+":"-")+"raw");
-    
-    isEnabled = DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.SHOW_DEPRECATION_WARNINGS);
-    addOption(options,"-warn:"+(isEnabled?"+":"-")+"allDeprecation");
-    
-    // -Xlint:path doesn't seem to exist for Eclipse compiler
-//    isEnabled = DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.SHOW_PATH_WARNINGS);
-//    addOption(options,"-warn:"+(isEnabled?"+":"-")+"unchecked");
-    
-    isEnabled = DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.SHOW_SERIAL_WARNINGS);
-    addOption(options,"-warn:"+(isEnabled?"+":"-")+"serial");
-    
-    isEnabled = DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.SHOW_FINALLY_WARNINGS);
-    addOption(options,"-warn:"+(isEnabled?"+":"-")+"finally");
-    
-    isEnabled = DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.SHOW_FALLTHROUGH_WARNINGS);
-    addOption(options,"-warn:"+(isEnabled?"+":"-")+"fallthrough");
-    
-    //Should be setable some day?
-    addOption(options,"-g");
-    
-    if (classPath != null) {
-      addOption(options,"-classpath");
-      addOption(options,IOUtil.pathToString(classPath));
-      try {
-        fileManager.setLocation(StandardLocation.CLASS_PATH, classPath);
-      }
-      catch(IOException ioe) { /* ignore, just don't set the path */ }
+
+    LinkedList<String> options = new LinkedList<String>();
+    for (Map.Entry<String, String> e : CompilerOptions.getOptions(showWarnings).entrySet()) {
+      options.add(e.getKey());
+      if (e.getValue().length()>0) options.add(e.getValue());
     }
-    if (sourcePath != null) {
-      addOption(options,"-sourcepath");
-      addOption(options,IOUtil.pathToString(sourcePath));
-      try {
-        fileManager.setLocation(StandardLocation.SOURCE_PATH, sourcePath);
-      }
-      catch(IOException ioe) { /* ignore, just don't set the path */ }        
-    }
-    if (destination != null) {
-      addOption(options,"-d");
-      addOption(options,destination.getPath());
-      try {
-        fileManager.setLocation(StandardLocation.CLASS_OUTPUT, IterUtil.asIterable(destination));
-      }
-      catch(IOException ioe) { /* ignore, just don't set the path */ }
-    }
-    if (bootClassPath != null) {
-      addOption(options,"-bootclasspath");
-      addOption(options,IOUtil.pathToString(bootClassPath));
-      try {
-        fileManager.setLocation(StandardLocation.PLATFORM_CLASS_PATH, bootClassPath);
-      }
-      catch(IOException ioe) { /* ignore, just don't set the path */ }
-    }
-    if (sourceVersion != null) {
-      addOption(options,"-source");
-      addOption(options,sourceVersion);
-    }
-    if (!showWarnings) {
-      addOption(options,"-nowarn");
-    }
+    options.add("-g");
+
+    if (classPath != null) { options.add("-classpath"); options.add(IOUtil.pathToString(classPath)); }
+    if (sourcePath != null) { options.add("-sourcepath"); options.add(IOUtil.pathToString(sourcePath)); }
+    if (destination != null) { options.add("-d"); options.add(destination.getPath()); }
+    // omit bootclassPath argument; the Eclipse compiler retrieves it from the executing JVM by default
+//    if (bootClassPath != null) { options.add("-bootclasspath"); options.add(IOUtil.pathToString(bootClassPath)); }
+    if (sourceVersion != null) { options.add("-source"); options.add(sourceVersion); }
+    if (!showWarnings) { options.add("-nowarn"); }
     
+    // Bug fix: if "-target" is not present, Iterables in for-each loops cause compiler errors
+    if (sourceVersion != null) { options.add("-target"); options.add(sourceVersion); }
+    /* The following line is commented out because it does not work for Java 8. */
+//    else { options.add("-target"); options.add("1.7"); }
+
     return options;
   }
-  
-  /** We need to embed a DiagnosticListener in our own Context.  This listener will build a CompilerError list. */
-  private static class CompilerErrorListener implements DiagnosticListener<JavaFileObject> {
-    
-    private List<? super DJError> _errors;
-    
-    public CompilerErrorListener(List<? super DJError> errors) {
-      _errors = errors;
-    }
-    
-    public void report(Diagnostic<? extends JavaFileObject> d) {
-      Diagnostic.Kind dt = d.getKind();
-      boolean isWarning = false;  // init required by javac
-      
-      switch (dt) {
-        case OTHER:             return;
-        case NOTE:              return;
-        case MANDATORY_WARNING: isWarning = true; break;
-        case WARNING:           isWarning = true; break;
-        case ERROR:             isWarning = false; break;
-      }
-      
-      /* The new Java 6.0 Diagnostic interface appears to be broken.  The expression d.getSource().getName() returns a 
-       * non-existent path--the name of the test file (allocated as a TEMP file) appended to the source root for 
-       * DrJava--in GlobalModelCompileErrorsTest.testCompileFailsCorrectLineNumbers().  The expression 
-       * d.getSource().toUri().getPath() returns the correct result as does ((JCDiagnostic) d).getSourceName(). */
-      
-      if (d.getSource()!=null) {
-        _errors.add(new DJError(new File(d.getSource().toUri().getPath()), // d.getSource().getName() fails! 
-                                ((int) d.getLineNumber()) - 1,  // javac starts counting at 1
-                                ((int) d.getColumnNumber()) - 1, 
-                                d.getMessage(Locale.getDefault()),    // JVM default locale
-                                isWarning));
-      }
-      else {
-        _errors.add(new DJError(d.getMessage(Locale.getDefault()), isWarning));
-      }
-    }
-  }
-  
+
 }
+  

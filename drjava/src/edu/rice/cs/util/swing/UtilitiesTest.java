@@ -36,16 +36,7 @@
 
 package edu.rice.cs.util.swing;
 
-import java.awt.EventQueue;
-import java.awt.*;
-import java.awt.event.*;
 import javax.swing.*;
-import java.awt.datatransfer.*;
-
-import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.StringOps;
-
-import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
 
 import junit.framework.*;
 

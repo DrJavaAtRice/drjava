@@ -43,7 +43,6 @@ import edu.rice.cs.drjava.model.GlobalEventNotifier;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.BraceReduction;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.HighlightStatus;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelStates;
-import edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedToken;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
 
@@ -103,7 +102,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     // document is:
     // Start:a/*b=>c */"\\{}()
     assertEquals("2.4", true, _reduced.currentToken().isGap());
-    assertEquals("2.5", ReducedToken.INSIDE_BLOCK_COMMENT, _reduced.currentToken().getState());
+    assertEquals("2.5", ReducedModelStates.INSIDE_BLOCK_COMMENT, _reduced.currentToken().getState());
     _reduced.move(2);
     // document is:
     // Start:a/*bc =>*/"\{}()
@@ -144,13 +143,13 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     _doc.insertString(3, "*", null);
     _doc.move(-4);
     assertEquals("1", "/*", _reduced.currentToken().getType());
-    assertEquals("2", ReducedToken.FREE, _reduced.currentToken().getState());
+    assertEquals("2", ReducedModelStates.FREE, _reduced.currentToken().getState());
     _reduced.move(2);
     assertEquals("3", "*", _reduced.currentToken().getType());
-    assertEquals("4", ReducedToken.INSIDE_BLOCK_COMMENT, _reduced.currentToken().getState());
+    assertEquals("4", ReducedModelStates.INSIDE_BLOCK_COMMENT, _reduced.currentToken().getState());
     _reduced.move(1);
     assertEquals("5", "*/", _reduced.currentToken().getType());
-    assertEquals("6", ReducedToken.FREE, _reduced.currentToken().getState());
+    assertEquals("6", ReducedModelStates.FREE, _reduced.currentToken().getState());
   }
   
   /** Test inserting a slash between a star-slash combo.
@@ -163,13 +162,13 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     _doc.insertString(3, "/", null);
     _doc.move(-4);
     assertEquals("1", "/*", _reduced.currentToken().getType());
-    assertEquals("2", ReducedToken.FREE, _reduced.currentToken().getState());
+    assertEquals("2", ReducedModelStates.FREE, _reduced.currentToken().getState());
     _reduced.move(2);
     assertEquals("3", "*/", _reduced.currentToken().getType());
-    assertEquals("4", ReducedToken.FREE, _reduced.currentToken().getState());
+    assertEquals("4", ReducedModelStates.FREE, _reduced.currentToken().getState());
     _reduced.move(2);
     assertEquals("5", "/", _reduced.currentToken().getType());
-    assertEquals("6", ReducedToken.FREE, _reduced.currentToken().getState());
+    assertEquals("6", ReducedModelStates.FREE, _reduced.currentToken().getState());
   }
   
   /** Test inserting a star between a slash-star combo.
@@ -182,13 +181,13 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     _doc.insertString(1, "*", null);
     _doc.move(-2);
     assertEquals("1", "/*", _reduced.currentToken().getType());
-    assertEquals("2", ReducedToken.FREE, _reduced.currentToken().getState());
+    assertEquals("2", ReducedModelStates.FREE, _reduced.currentToken().getState());
     _reduced.move(2);
     assertEquals("3", "*", _reduced.currentToken().getType());
-    assertEquals("4", ReducedToken.INSIDE_BLOCK_COMMENT, _reduced.currentToken().getState());
+    assertEquals("4", ReducedModelStates.INSIDE_BLOCK_COMMENT, _reduced.currentToken().getState());
     _reduced.move(1);
     assertEquals("5", "*/", _reduced.currentToken().getType());
-    assertEquals("6", ReducedToken.FREE, _reduced.currentToken().getState());
+    assertEquals("6", ReducedModelStates.FREE, _reduced.currentToken().getState());
   }
   
   /** Test removal of text. */
@@ -204,7 +203,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     _reduced.move(-2);
     assertEquals("1.2", "/*", _reduced.currentToken().getType());
     _reduced.move(2);
-    assertEquals("1.3", ReducedToken.INSIDE_BLOCK_COMMENT, _reduced.getStateAtCurrent());
+    assertEquals("1.3", ReducedModelStates.INSIDE_BLOCK_COMMENT, _reduced.getStateAtCurrent());
   }
   
   /** Make sure the vector is consistent: all elements immediately adjoin one another (no overlap), and make sure all
@@ -951,7 +950,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
       "}\n";
     
     _doc.addUndoableEditListener(_doc.getUndoManager());
-    DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL,Integer.valueOf(2));
+    DrJava.getConfig().setSetting(OptionConstants.INDENT_INC,Integer.valueOf(2));
 //    Utilities.clearEventQueue();
     _doc.insertString(0, text, null);
     assertEquals("insertion",text, _doc.getText()); 
@@ -993,7 +992,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
       "//}\n";
     
     _doc.addUndoableEditListener(_doc.getUndoManager());
-    DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL,Integer.valueOf(2));
+    DrJava.getConfig().setSetting(OptionConstants.INDENT_INC,Integer.valueOf(2));
 //    Utilities.clearEventQueue();
     _doc.insertString(0,text,null);
     assertEquals("insertion",text, _doc.getText());
@@ -1042,7 +1041,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     CompoundUndoManager undoManager = _doc.getUndoManager();
     
     _doc.addUndoableEditListener(undoManager);
-    DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL,Integer.valueOf(2));
+    DrJava.getConfig().setSetting(OptionConstants.INDENT_INC,Integer.valueOf(2));
 //    Utilities.clearEventQueue();
     // 1
     
@@ -1115,7 +1114,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("Should have indented correctly.", indented,
                  _doc.getText());
     
-//    // Try to undo the nested edit
+//// Try to undo the nested edit
 //    try {
 //      _doc.getUndoManager().undo();
 //      fail("Should not have allowed undoing a nested edit.");

@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2015, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,6 @@
 
 package edu.rice.cs.drjava.model.repl.newjvm;
 
-import java.lang.reflect.*;
 import java.util.*;
 import java.io.*;
 
@@ -51,7 +50,6 @@ import edu.rice.cs.util.InputStreamRedirector;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.newjvm.*;
-import edu.rice.cs.plt.collect.CollectUtil;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.reflect.ReflectUtil;
 import edu.rice.cs.plt.tuple.Option;
@@ -67,7 +65,6 @@ import edu.rice.cs.drjava.model.junit.JUnitResultTuple;
 import edu.rice.cs.drjava.model.coverage.CoverageMetadata;
 import edu.rice.cs.drjava.model.repl.InteractionsPaneOptions;
 
-import edu.rice.cs.dynamicjava.Options;
 import edu.rice.cs.dynamicjava.interpreter.*;
 import edu.rice.cs.dynamicjava.symbol.*;
 import edu.rice.cs.dynamicjava.symbol.type.Type;
@@ -304,12 +301,13 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     * an array here is used as the return type rather than an {@code Option<Object>} --
     * an empty array corresponds to "none," and a singleton array corresponds to a "some."
     */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked","rawtypes"})
   public Pair<Object,String>[] getVariable(String var) {
     synchronized(_stateLock) {
       InterpretResult ir = interpret(var);
       return ir.apply(new InterpretResult.Visitor<Pair<Object,String>[]>() {
         public Pair<Object,String>[] fail() { return new Pair[0]; }
+//        public Pair<Object,String>[] fail() { return (Pair<Object,String>[]) new Pair<?,?>[0]; }
         public Pair<Object,String>[] value(Object val) {
           return new Pair[] { new Pair<Object,String>(val, getClassName(val.getClass())) };
         }
@@ -366,11 +364,11 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
       if (c.equals(Double.class))    { return "double"+sb.toString()+" or "+c.getSimpleName()+sb.toString(); }
       if (c.equals(Boolean.class))   { return "boolean"+sb.toString()+" or "+c.getSimpleName()+sb.toString(); }
       if (c.equals(Character.class)) { return "char"+sb.toString()+" or "+c.getSimpleName()+sb.toString(); }
-      else return c.getName()+sb.toString();
+      else return c.getName() + sb.toString();
     }
     else {
       // if it's an array, we can distinguish boxed types and primitive types
-      return c.getName()+sb.toString();
+      return c.getName() + sb.toString();
     }
   }
   

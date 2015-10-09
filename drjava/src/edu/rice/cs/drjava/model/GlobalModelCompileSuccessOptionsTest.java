@@ -43,8 +43,6 @@ import javax.swing.text.BadLocationException;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 
-import edu.rice.cs.util.swing.Utilities;
-
 /**
  * Tests to ensure that compilation succeeds when expected.
  * 

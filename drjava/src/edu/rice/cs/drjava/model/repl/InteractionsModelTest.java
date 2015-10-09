@@ -50,8 +50,6 @@ import edu.rice.cs.plt.tuple.Pair;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.StringWriter;
-import java.io.PrintWriter;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -95,7 +93,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     Utilities.invokeAndWait(new Runnable() { 
       public void run() { 
         doc.reset("This is a test"); 
-        doc.append(typed, InteractionsDocument.DEFAULT_STYLE); 
+        doc.append(typed, ConsoleDocument.DEFAULT_STYLE); 
       }
     });
     
@@ -146,7 +144,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     // Insert text and evaluate
     Utilities.invokeAndWait(new Runnable() { 
       public void run() { 
-        doc.append(code, InteractionsDocument.DEFAULT_STYLE); // spawns an event queue task
+        doc.append(code, ConsoleDocument.DEFAULT_STYLE); // spawns an event queue task
       } 
     });
     
@@ -189,7 +187,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     Utilities.invokeAndWait(new Runnable() { 
       public void run() {
         doc.reset("This is a test");
-        doc.append(code, InteractionsDocument.DEFAULT_STYLE);
+        doc.append(code, ConsoleDocument.DEFAULT_STYLE);
       }
     });
     
@@ -214,7 +212,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     Utilities.invokeAndWait(new Runnable() { 
       public void run() {
         doc.reset("This is a test");
-        doc.append(code, InteractionsDocument.DEFAULT_STYLE);
+        doc.append(code, ConsoleDocument.DEFAULT_STYLE);
       }
     });
 //    Utilities.clearEventQueue();
@@ -639,7 +637,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     model._logInteractionStart();
     Utilities.invokeAndWait(new Runnable() { 
       public void run() { 
-        doc.insertText(doc.getLength(), code, InteractionsDocument.DEFAULT_STYLE);
+        doc.insertText(doc.getLength(), code, ConsoleDocument.DEFAULT_STYLE);
         model.setSyntaxErrorStrings("Encountered Unexpected \"<EOF>\"", "public class A {\n");
       }
     });
@@ -663,7 +661,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     model.disableSyntaxError();
     model._logInteractionStart();
     Utilities.invokeAndWait(new Runnable() { 
-      public void run() { doc.insertText(doc.getLength(), code1, InteractionsDocument.DEFAULT_STYLE); }
+      public void run() { doc.insertText(doc.getLength(), code1, ConsoleDocument.DEFAULT_STYLE); }
     });
 //    Utilities.clearEventQueue();
     _model.interpretCurrentInteraction();
@@ -876,7 +874,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
 //    private volatile boolean _interactionDone = false;       // records when the interaction is done
 //    private final Object _interactionLock = new Object();    // lock for _interactionDone
 //    
-//    /** Relying on the default constructor. */
+///** Relying on the default constructor. */
 //    
 //    public void interactionEnded() {
 //      synchronized(_interactionLock) { 

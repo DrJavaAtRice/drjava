@@ -48,5 +48,5 @@ public interface IndentRule {
     * @param reason The reason that indentation was initiated, specified in Indenter
     * @return true if the caller should update the current location itself, false if the indenter has already handled it
     */
-  public boolean indentLine(AbstractDJDocument doc, Indenter.IndentReason reason);
+  public void indentLine(AbstractDJDocument doc, Indenter.IndentReason reason);
 }

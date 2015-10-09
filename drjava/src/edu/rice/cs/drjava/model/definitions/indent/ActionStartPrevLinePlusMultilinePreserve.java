@@ -76,7 +76,7 @@ class ActionStartPrevLinePlusMultilinePreserve extends IndentRuleAction {
     * @param reason The reason that the indentation is taking place
     * @return this is always false, since we are updating the cursor location
     */
-  public boolean indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
+  public void indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
     try {
       // copy it so any changes are not remembered
       String[] suffices = new String[_suffices.length];
@@ -103,11 +103,8 @@ class ActionStartPrevLinePlusMultilinePreserve extends IndentRuleAction {
       //  javax.swing.JOptionPane.showMessageDialog(null, "\"" + suffices[i] + "\"", "suffices[" + i + "]", 
       //    javax.swing.JOptionPane.PLAIN_MESSAGE);
       a = new ActionStartPrevLinePlusMultiline(suffices, _cursorLine, _cursorPos);
-      return a.indentLine(doc, reason);
+      a.indentLine(doc, reason);
     }
-    catch (BadLocationException e) {
-      // Shouldn't happen
-      throw new UnexpectedException(e);
-    }
+    catch (BadLocationException e) { throw new UnexpectedException(e); /* Shouldn't happen */ }
   }
 }

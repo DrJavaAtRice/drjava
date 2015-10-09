@@ -32,7 +32,6 @@
   <property environment="env" />
   <property name="java7-home" value="${env.JAVA7_HOME}" />
   <property name="java6-home" value="${env.JAVA6_HOME}" />
-  <property name="java5-home" value="${env.JAVA5_HOME}" />
   <property name="clover-jar" value="${env.CLOVER_JAR}" />
   <property name="findbugs-home" value="${env.FINDBUGS_HOME}" />
   
@@ -75,8 +74,6 @@
     <echo message="      the 'java' command is used by default in testing/running; " />
     <echo message="      the 'svn' command is used to generate version numbers and " />
     <echo message="      in Subversion targets" />
-    <echo message="JAVA5_HOME: Home folder of the Java 5 JRE or JDK (required for" />
-    <echo message="            compiling and '-5' targets)" />
     <echo message="JAVA6_HOME: Home folder of the Java 6 JRE or JDK (required for" />
     <echo message="            '-6' targets)" />
     <echo message="JAVA7_HOME: Home folder of the Java 7 JRE or JDK (required for" />
@@ -159,8 +156,8 @@
       <fileset dir="classes/test" includes="**/*" />
     </move>
     
-    <javac srcdir="src" destdir="classes/base" source="1.5" target="1.5"
-           bootclasspath="${java5-runtime}" sourcepath="" includeAntRuntime="no"
+    <javac srcdir="src" destdir="classes/base" source="1.6" target="1.6"
+           bootclasspath="${java7-runtime}" sourcepath="" includeAntRuntime="no"
            executable="javac" fork="yes" memoryMaximumSize="512M"
            debug="on" optimize="off" deprecation="on"	>
       <classpath>
@@ -252,14 +249,15 @@
     </antcall>
   </target>
   
-  <target name="test-5" depends="compile, resolve-java5-exec" unless="skip-test"
-          description="Run all tests under Java 5 (after compiling); use -Dtest-spec=... to filter">
+<!--
+  <target name="test-8" depends="compile, resolve-java8-exec" unless="skip-test"
+          description="Run all tests under Java 8 (after compiling); use -Dtest-spec=... to filter">
     <antcall target="iterate-tests">
-      <param name="test-jvm" value="${java5-exec}" />
+      <param name="test-jvm" value="${java8-exec}" />
     </antcall>
-  </target>
-  
-  
+  </
+-->
+
   <target name="iterate-tests" depends="resolve-test-formatter-class">
     <!-- Calls do-test, unless that is overridden by the caller -->
     <property name="do-test-target" value="do-test" />
@@ -428,7 +426,7 @@
         <fileset refid="libs" />
         <pathelement location="lib/buildlib/junit.jar" />
       </classpath>
-      <link href="http://java.sun.com/j2se/1.5/docs/api" />
+      <link href="http://docs.oracle.com/javase/7/docs/api" />
       <link href="http://junit.org/junit/javadoc/3.8.1" />
       <!-- Additional external library APIs may be listed here -->
     </javadoc>
@@ -441,8 +439,10 @@
   <target name="clover-6" depends="clean, setup-clover, test-6, report-clover" 
           description="Generate a Clover test coverage report under Java 6" />
   
-  <target name="clover-5" depends="clean, setup-clover, test-5, report-clover" 
-          description="Generate a Clover test coverage report under Java 5" />
+<!--
+  <target name="clover-8" depends="clean, setup-clover, test-8, report-clover" 
+          description="Generate a Clover test coverage report under Java 8" />
+-->
   
   <target name="report-clover" depends="resolve-version-tag">
     <echo message="Generating Clover report" />
@@ -943,6 +943,7 @@
   
   <!-- Sets svn-revision to the current "Last Changed Rev" of "svn info". -->
   <target name="resolve-svn-revision">
+    <!--
     <exec executable="svn" failonerror="yes" output="svn-info.txt">
       <arg value="info" />
     </exec>
@@ -956,6 +957,7 @@
       </filterchain>
     </loadfile>
     <delete file="svn-info.txt" />
+    -->
   </target>
   
 

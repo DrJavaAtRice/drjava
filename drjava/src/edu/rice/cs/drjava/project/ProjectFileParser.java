@@ -263,16 +263,16 @@ public class ProjectFileParser extends ProjectFileParserFacade {
         return c.getRest().accept(this);
       }
   
-      public List<Integer> forBoolAtom(BoolAtom b) {
+      public List<Integer> forBoolAtom(Atom.Bool b) {
         throw new PrivateProjectException("unexpected boolean found, int expected");
       }
       
-      public List<Integer> forNumberAtom(NumberAtom n) {
+      public List<Integer> forNumberAtom(Atom.Number n) {
         intList.add(Integer.valueOf(n.intValue()));
         return intList;
       }
       
-      public List<Integer> forTextAtom(TextAtom t) {
+      public List<Integer> forTextAtom(Atom.Text t) {
         throw new PrivateProjectException("unexpected string found where number expected: " + t.getText());
       }
       
@@ -387,13 +387,13 @@ public class ProjectFileParser extends ProjectFileParserFacade {
       throw new PrivateProjectException("Found an empty node, expected a labeled node");
     }
     public String forCons(Cons c) { return c.getFirst().accept(this); }
-    public String forBoolAtom(BoolAtom b) {
+    public String forBoolAtom(Atom.Bool b) {
       throw new PrivateProjectException("Found a boolean, expected a label");
     }
-    public String forNumberAtom(NumberAtom n) {
+    public String forNumberAtom(Atom.Number n) {
       throw new PrivateProjectException("Found a number, expected a label");
     }
-    public String forTextAtom(TextAtom t) { return t.getText(); }
+    public String forTextAtom(Atom.Text t) { return t.getText(); }
   };
   
   /** Retrieves the number of a node.  The node should either be a list with its first element being a number atom, 
@@ -407,11 +407,11 @@ public class ProjectFileParser extends ProjectFileParserFacade {
       throw new PrivateProjectException("Found an empty node, expected an integer");
     }
     public Integer forCons(Cons c) { return c.getFirst().accept(this); }
-    public Integer forBoolAtom(BoolAtom b) {
+    public Integer forBoolAtom(Atom.Bool b) {
       throw new PrivateProjectException("Found a boolean, expected an integer");
     }
-    public Integer forNumberAtom(NumberAtom n) { return n.intValue(); }
-    public Integer forTextAtom(TextAtom t) {
+    public Integer forNumberAtom(Atom.Number n) { return n.intValue(); }
+    public Integer forTextAtom(Atom.Text t) {
       throw new PrivateProjectException("Found a string '" + t + "', expected an integer");
     }
   };

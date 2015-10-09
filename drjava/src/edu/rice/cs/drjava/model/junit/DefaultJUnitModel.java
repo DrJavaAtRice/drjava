@@ -39,24 +39,14 @@ package edu.rice.cs.drjava.model.junit;
 import java.awt.EventQueue;
 import java.io.File;
 import java.io.IOException;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.FileReader;
 import java.rmi.RemoteException;
 
 import java.util.List;
 import java.util.LinkedList;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.TreeMap;
-import java.util.jar.JarFile;
-import java.util.jar.JarEntry;
-
-import javax.swing.JOptionPane;
-
 import edu.rice.cs.drjava.config.BooleanOption;
 import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.FileMovedException;
@@ -74,7 +64,6 @@ import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.lambda.Box;
 import edu.rice.cs.plt.lambda.SimpleBox;
-import edu.rice.cs.plt.concurrent.JVMBuilder;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.classloader.ClassFileError;
@@ -85,7 +74,6 @@ import edu.rice.cs.util.Log;
 import org.objectweb.asm.*;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
-import edu.rice.cs.drjava.model.compiler.LanguageLevelStackTraceMapper;
 
 import edu.rice.cs.drjava.model.coverage.CoverageMetadata;
 
@@ -388,9 +376,6 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     /* Source files corresonding to potential test class files */
     final ArrayList<File> files = new ArrayList<File>();
     
-    /* Flag indicating if project is open */
-    boolean isProject = _model.isProjectActive();
-    
     try {
       for (File dir: classDirs) { // foreach class file directory
 //        System.err.println("Examining directory " + dir);
@@ -476,8 +461,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
               File sourceFile = new File(sourceFileName);
               classNames.add(className.value());
               files.add(sourceFile);
-              System.err.println("Class " + className + "added to classNames.   File " + sourceFileName + 
-                                 " added to files.");
+              _log.log("Class " + className + "added to classNames.   File " + sourceFileName + " added to files.");
             }
             catch(IOException e) { /* ignore it; can't read class file */ }
           }

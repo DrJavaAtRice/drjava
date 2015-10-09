@@ -48,8 +48,6 @@ import edu.rice.cs.drjava.model.DJError;
 import edu.rice.cs.drjava.model.DrJavaFileUtils;
 import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.plt.reflect.JavaVersion;
-import edu.rice.cs.util.swing.Utilities;
-
 import javax.swing.filechooser.FileFilter;
 import edu.rice.cs.drjava.ui.SmartSourceFilter;
 
@@ -141,13 +139,9 @@ public abstract class JavacCompiler implements CompilerInterface {
     * @param s full command line, i.e. "run MyClass 1 2 3"
     * @param c class to be run, i.e. MyClass.class
     */
-  @SuppressWarnings("unchecked")
   public static void runCommand(String s, Class<?> c) throws Throwable {
     if (s.endsWith(";"))  s = _deleteSemiColon(s);
     List<String> tokens = ArgumentTokenizer.tokenize(s, true);
-    final String classNameWithQuotes = tokens.get(1); // this is "MyClass"
-    final String className =
-      classNameWithQuotes.substring(1, classNameWithQuotes.length() - 1); // removes quotes, becomes MyClass
     String[] args = new String[tokens.size() - 2];
     for (int i = 2; i < tokens.size(); i++) {
       String t = tokens.get(i);
@@ -296,8 +290,6 @@ public abstract class JavacCompiler implements CompilerInterface {
     If a), then DrJava inserts "code=MyClass" as argument 0.
     If b), then DrJava performs the same as "applet MyClass" (see above).
     If c), then DrJava executes MyClass.main (traditional java behavior).
-    
-    It formerly was static, but it is overriden in ScalacCompiler.
     */
   public String transformRunCommand(String s) {    
     if (s.endsWith(";"))  s = _deleteSemiColon(s);
@@ -566,7 +558,7 @@ public abstract class JavacCompiler implements CompilerInterface {
 //       "}\n" +
 //    "}");
 //    
-//    // System.out.println(command);
+//// System.out.println(command);
 //
 //    return command.toString();
 //  }
