@@ -295,9 +295,9 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     else return new Object[] { arr[0].first() };
   }
   
-  public JUnitResultTuple getLastJUnitResult() {
-    return this._junitTestManager.getLastResult();
-  }
+  //public JUnitResultTuple getLastJUnitResult() {
+  //  return this._junitTestManager.getLastResult();
+  //}
 
   /** Gets the value and type string of the variable with the given name in the current interpreter.
     * Invoked reflectively by the debugger.  To simplify the inter-process exchange,

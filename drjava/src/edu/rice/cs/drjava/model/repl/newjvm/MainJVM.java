@@ -142,11 +142,11 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     _startupClassPath = ReflectUtil.SYSTEM_CLASS_PATH;
   }
   
-  public JUnitResultTuple getLastJUnitResult() {
-    InterpreterJVMRemoteI remote = _state.value().interpreter(false);
-    if (remote == null) { return new JUnitResultTuple(false, null); }
-    return remote.getLastJUnitResult(); 
-  }
+  //public JUnitResultTuple getLastJUnitResult() {
+  //  InterpreterJVMRemoteI remote = _state.value().interpreter(false);
+  //  if (remote == null) { return new JUnitResultTuple(false, null); }
+  //  return remote.getLastJUnitResult(); 
+  //}
 
   /*
    * === Startup and shutdown methods ===
