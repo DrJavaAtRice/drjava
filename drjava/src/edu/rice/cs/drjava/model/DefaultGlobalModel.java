@@ -49,9 +49,12 @@ import java.util.TreeMap;
 
 import edu.rice.cs.drjava.DrJava;
 
-import edu.rice.cs.drjava.model.FileSaveSelector;
-import edu.rice.cs.drjava.model.compiler.DummyCompilerListener;
 import edu.rice.cs.drjava.config.BooleanOption;
+import edu.rice.cs.drjava.model.FileSaveSelector;
+import edu.rice.cs.drjava.model.JDKDescriptor;
+import edu.rice.cs.drjava.model.compiler.DummyCompilerListener;
+import edu.rice.cs.drjava.model.compiler.EclipseCompiler;
+import edu.rice.cs.drjava.model.compiler.descriptors.EclipseDescriptor;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.drjava.model.debug.Breakpoint;
@@ -76,12 +79,12 @@ import edu.rice.cs.drjava.model.compiler.DefaultCompilerModel;
 import edu.rice.cs.drjava.model.compiler.CompilerInterface;
 import edu.rice.cs.drjava.model.junit.DefaultJUnitModel;
 import edu.rice.cs.drjava.model.junit.JUnitModel;
-import edu.rice.cs.util.text.ConsoleDocument;
 
-import edu.rice.cs.plt.reflect.JavaVersion;
-import edu.rice.cs.plt.reflect.ReflectUtil;
+import edu.rice.cs.plt.collect.CollectUtil;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.io.IOUtil;
+import edu.rice.cs.plt.reflect.JavaVersion;
+import edu.rice.cs.plt.reflect.ReflectUtil;
 import edu.rice.cs.plt.tuple.Pair;
 
 import edu.rice.cs.util.FileOpenSelector;
@@ -91,6 +94,7 @@ import edu.rice.cs.util.AbsRelFile;
 import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
+import edu.rice.cs.util.text.ConsoleDocument;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
@@ -191,13 +195,16 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   public DefaultGlobalModel() {
     Iterable<? extends JDKToolsLibrary> tools = findLibraries();
     List<CompilerInterface> compilers = new LinkedList<CompilerInterface>();
+    
+    /* Note: the only debugger used in DrJava is JPDADebugger in the DrJava code base.  But this debugger relies
+     * on machinery provided by tools.jar library included in every Java JDK. If no tools.jar library is found,
+     * DrJava creates a degenerate library containing the Eclipse compiler and no debugger or javadoc tool.
+     */
     _debugger = null;
     _javadocModel = null;
     for (JDKToolsLibrary t : tools) {
-      // drop testing that the compiler supports JAVA_5; Scala does NOT
-      if (t.compiler().isAvailable() /* && t.version().supports(JavaVersion.JAVA_5) */) {
-          compilers.add(t.compiler());
-      }
+//      Utilities.show("Found tools.jar library: " + t);
+      if (t.compiler().isAvailable() && t.version().supports(JavaVersion.JAVA_6)) compilers.add(t.compiler());
       if (_debugger == null && t.debugger().isAvailable()) { _debugger = t.debugger(); }
       if (_javadocModel == null && t.javadoc().isAvailable()) { _javadocModel = t.javadoc(); }
     }
@@ -334,46 +341,57 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     
     File configTools = DrJava.getConfig().getSetting(JAVAC_LOCATION);
     if (configTools != FileOps.NULL_FILE) {
+      // TODO: reference to subclass in next line is a code smell!
       JDKToolsLibrary fromConfig = JarJDKToolsLibrary.makeFromFile(configTools, this, JDKDescriptor.NONE);
       if (fromConfig.isValid()) { 
-        JarJDKToolsLibrary.msg("From config: " + fromConfig);
+        JDKToolsLibrary._log.log("From config: " + fromConfig);
         results.put(getLibraryKey(LibraryKey.PRIORITY_CONFIG, fromConfig), fromConfig);
       }
-      else { JarJDKToolsLibrary.msg("From config: invalid " + fromConfig); }
+      else { JDKToolsLibrary._log.log("From config: invalid " + fromConfig); }
     }
-    else { JarJDKToolsLibrary.msg("From config: not set"); }
-    
-    Iterable<JDKToolsLibrary> allFromRuntime = JDKToolsLibrary.makeFromRuntime(this);
-
-    for(JDKToolsLibrary fromRuntime: allFromRuntime) {
-      if (fromRuntime.isValid()) {
-        if (!results.containsKey(getLibraryKey(LibraryKey.PRIORITY_RUNTIME, fromRuntime))) {
-          JarJDKToolsLibrary.msg("From runtime: " + fromRuntime);
-          results.put(getLibraryKey(LibraryKey.PRIORITY_RUNTIME, fromRuntime), fromRuntime);
-        }
-        else { JarJDKToolsLibrary.msg("From runtime: duplicate " + fromRuntime); }
-      }
-      else { JarJDKToolsLibrary.msg("From runtime: invalid " + fromRuntime); }
-    }
+    else { JDKToolsLibrary._log.log("From config: not set"); }
     
     Iterable<JarJDKToolsLibrary> fromSearch = JarJDKToolsLibrary.search(this);
     for (JDKToolsLibrary t : fromSearch) {
       JavaVersion.FullVersion tVersion = t.version();
-      JarJDKToolsLibrary.msg("From search: " + t);
+      JDKToolsLibrary._log.log("From search: " + t);
       JavaVersion.FullVersion coarsenedVersion = coarsenVersion(tVersion);
-      JarJDKToolsLibrary.msg("\ttVersion: " + tVersion+" " + tVersion.vendor());
-      JarJDKToolsLibrary.msg("\tcoarsenedVersion: " + coarsenedVersion + " " + coarsenedVersion.vendor());
+      JDKToolsLibrary._log.log("\tVersion: " + tVersion+" " + tVersion.vendor());
+      JDKToolsLibrary._log.log("\tCoarsened Version: " + coarsenedVersion + " " + coarsenedVersion.vendor());
+
       // give a lower priority to built-in compilers
       int priority = (edu.rice.cs.util.FileOps.getDrJavaFile().equals(tVersion.location())) ?
         LibraryKey.PRIORITY_BUILTIN : LibraryKey.PRIORITY_SEARCH;
-      if (!results.containsKey(getLibraryKey(priority, t))) {
-        JarJDKToolsLibrary.msg("\tadded");
+      if (! results.containsKey(getLibraryKey(priority, t))) {
+        JDKToolsLibrary._log.log("\tadded ");
         results.put(getLibraryKey(priority, t), t);
       }
-      else { JarJDKToolsLibrary.msg("\tduplicate"); }
+      else { JDKToolsLibrary._log.log("\tduplicate"); }
     }
     
-    return IterUtil.reverse(results.values());
+    // Only create a JDKToolslibrary for the embedded Eclipse compiler if the list of results is otherwise empty.  
+    // This library does not include javadoc since Eclipse relies on the javadoc tool bundled in a Sun/Oracle/OpenJDK
+    // tools.jar.
+    
+    if (results.isEmpty()) {
+      /* Build a JDKToolsLibrary from this JVM runtime (which has DrJava.jar on the classpath) using the embedded Eclipse compiler, no
+       * debugger and no javadoc.  The latter two tools are provided by the tools.jar library in a Java JDK.  No JDK is available.
+       */
+      String path = System.getProperty("sun.boot.class.path");
+      List<File> bootClassPath = CollectUtil.makeList(IOUtil.parsePath(path));
+      JDKDescriptor descriptor = EclipseDescriptor.ONLY; 
+      CompilerInterface compiler = new EclipseCompiler(JavaVersion.CURRENT_FULL, null /* on runtime class path */, bootClassPath); 
+      Debugger debugger = NoDebuggerAvailable.ONLY;
+      JavadocModel javadoc = new NoJavadocAvailable(this);  // TODO: convert this class to a singleton
+      JDKToolsLibrary eclipseLibrary = new JDKToolsLibrary(JavaVersion.CURRENT_FULL, descriptor , compiler, debugger, javadoc);
+      
+      JDKToolsLibrary._log.log("Returning library: " + eclipseLibrary);
+      return IterUtil.singleton(eclipseLibrary);
+    }
+    
+    Iterable<JDKToolsLibrary> libraries = IterUtil.reverse(results.values());
+    JDKToolsLibrary._log.log("Returning libraries: " + libraries);
+    return libraries;
   }
   
 //  public void junitAll() { _state.junitAll(); }
@@ -431,11 +449,11 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   
   public void resetInteractions(File wd) { resetInteractions(wd, false); }
   
-  /** Clears and resets the slave JVM with working directory wd. Also clears the console if the option is 
-    * indicated (on by default).  The reset operation is suppressed if the existing slave JVM has not been
-    * used, {@code wd} matches its working directory, and forceReset is false.  {@code wd} may be {@code null}
-    * if a valid directory cannot be determined.  In that case, the former working directory is used.  This
-    * method may run outside the event thread.
+  /** Clears and resets the slave JVM with working directory wd. Also clears the console if the option is indicated
+    * (on by default).  The reset operation is suppressed (as an optimization) if the existing slave JVM has not been
+    * used, {@code wd} matches its working directory, and forceReset is false.  {@code wd} may be {@code null} if a 
+    * valid directory cannot be determined.  In that case, the former working directory is used.  This method may run 
+    * outside the event thread.
     */
   public void resetInteractions(File wd, boolean forceReset) {
     assert _interactionsModel._pane != null;
@@ -447,6 +465,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     forceReset |= !wd.equals(workDir);
     // update the setting
     DrJava.getConfig().setSetting(LAST_INTERACTIONS_DIRECTORY, wd);
+    
     getDebugger().setAutomaticTraceEnabled(false);
     _interactionsModel.resetInterpreter(wd, forceReset);
     debug.logEnd();
@@ -807,7 +826,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     * TODO: Ensure that this is used wherever appropriate.
     */
   public Iterable<File> getClassPath() {
-    Iterable<File> result = IterUtil.empty();
+    Iterable<File> result = IterUtil.<File>empty();
     
     if (isProjectActive()) {
       File buildDir = getBuildDirectory();

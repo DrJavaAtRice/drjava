@@ -47,6 +47,7 @@ import edu.rice.cs.util.swing.RightClickMouseAdapter;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.text.*;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -419,8 +420,8 @@ public class JUnitPanel extends ErrorPanel {
       _stackTextArea.setEditable(false);
       _stackTextArea.setLineWrap(false);
       JScrollPane scroll = new BorderlessScrollPane(_stackTextArea,
-                                                    JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-                                                    JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+                                                    ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+                                                    ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
       
       ActionListener closeListener = new ActionListener() {
         public void actionPerformed(ActionEvent e) {

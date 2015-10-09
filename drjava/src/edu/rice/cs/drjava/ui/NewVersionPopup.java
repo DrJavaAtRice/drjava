@@ -368,6 +368,7 @@ public class NewVersionPopup extends JDialog {
           else {
             // this is a jar or exe file, check that it can be opened as a JarFile
             JarFile jf = new JarFile(destFile);
+            jf.close();
           }
           
           // we got to this point, assume that we have successfully downloaded everything
@@ -380,10 +381,10 @@ public class NewVersionPopup extends JDialog {
             public void run() {
               try {
                 LOG.log("Restarting...");
-                Process p = JVMBuilder.DEFAULT.classPath(tempClassFile).start(DrJavaRestart.class.getName(),
-                                                                              finalDestFile.getAbsolutePath(),
-                                                                              targetFile.getAbsolutePath(),
-                                                                              tempClassFile.getAbsolutePath());
+                JVMBuilder.DEFAULT.classPath(tempClassFile).start(DrJavaRestart.class.getName(),
+                                                                  finalDestFile.getAbsolutePath(),
+                                                                  targetFile.getAbsolutePath(),
+                                                                  tempClassFile.getAbsolutePath());
               }
               catch(Exception e) {
                 LOG.log("Exception in shutdown hook: "+e);

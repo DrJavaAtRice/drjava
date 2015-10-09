@@ -36,22 +36,16 @@
 
 package edu.rice.cs.drjava.model.compiler;
 
-import java.awt.EventQueue;
 import java.io.File;
-import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.FileReader;
 
 import java.util.List;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.TreeMap;
 
 import edu.rice.cs.drjava.model.GlobalModel;
-import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.DrJavaFileUtils;
-import edu.rice.cs.util.swing.Utilities;
 
 /** Class used to get TreeMaps with dj* to java line number (and vise versa) conversions */
 public class LanguageLevelStackTraceMapper {
@@ -187,8 +181,7 @@ public class LanguageLevelStackTraceMapper {
     int lineNo = 1;
     oneToOne.put(lineNo,lineNo);
     try {
-      String rdLine;
-      while((rdLine = bufReader.readLine()) != null) {
+      while(bufReader.readLine() != null) {
         ++lineNo;
         oneToOne.put(lineNo,lineNo);
       }

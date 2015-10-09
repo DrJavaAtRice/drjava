@@ -47,7 +47,6 @@ import edu.rice.cs.drjava.config.OptionConstants;
 import java.awt.EventQueue;
 
 import javax.swing.text.BadLocationException;
-import javax.swing.JOptionPane;
 import java.awt.Component;
 
 /** Implementation of logic of find/replace over a document.

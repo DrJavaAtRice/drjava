@@ -710,8 +710,7 @@ public class ClassBodyFullJavaVisitor extends FullJavaVisitor {
     }
     
     public void xtestForInnerClassDef() {
-      SymbolData obj = new SymbolData("java.lang.Object");
-      LanguageLevelConverter.symbolTable.put("java.lang.Object", obj);
+      SymbolData obj = LanguageLevelConverter.symbolTable.get("java.lang.Object");
       InnerClassDef cd1 = new InnerClassDef(SourceInfo.NONE, _packageMav, new Word(SourceInfo.NONE, "Bart"),
                                             new TypeParameter[0], new ClassOrInterfaceType(SourceInfo.NONE, "java.lang.Object", new Type[0]), new ReferenceType[0], 
                                             new BracedBody(SourceInfo.NONE, new BodyItemI[0]));

@@ -58,8 +58,8 @@ import java.util.Vector;
 
 import javax.swing.*;
 import javax.swing.text.*;
-import javax.swing.text.SimpleAttributeSet;
 import javax.swing.border.EmptyBorder;
+
 import java.awt.datatransfer.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -165,8 +165,8 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     // We make the vertical scrollbar always there.
     // If we don't, when it pops up it cuts away the right edge of the
     // text. Very bad.
-    _scroller = new BorderlessScrollPane(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-                                         JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+    _scroller = new BorderlessScrollPane(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
+                                         ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
     
     _leftPanel.add(_scroller, BorderLayout.CENTER);
     _leftPanel.add(_errorNavPanel, BorderLayout.EAST);

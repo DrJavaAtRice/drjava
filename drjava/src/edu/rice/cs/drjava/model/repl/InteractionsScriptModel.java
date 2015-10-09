@@ -37,9 +37,10 @@
 package edu.rice.cs.drjava.model.repl;
 
 import java.awt.EventQueue;
-
 import java.util.List;
+
 import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.text.EditDocumentException;
 
 /** Manages the execution of a Interactions History as a script of individual commands.  Useful for presentations.
@@ -112,7 +113,7 @@ public class InteractionsScriptModel /* implements Serializable */ {
     try {
       _doc.clearCurrentInteraction();
       String text = _interactions.get(_currentInteraction);
-      _doc.insertText(_doc.getLength(), text, InteractionsDocument.DEFAULT_STYLE);
+      _doc.insertText(_doc.getLength(), text, ConsoleDocument.DEFAULT_STYLE);
     }
     catch (EditDocumentException dae) {
       throw new UnexpectedException(dae);

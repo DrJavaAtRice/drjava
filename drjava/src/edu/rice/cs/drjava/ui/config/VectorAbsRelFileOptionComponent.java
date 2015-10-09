@@ -44,13 +44,9 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.*;
 import javax.swing.table.*;
 
-import java.util.Vector;
-import java.util.List;
-
 import edu.rice.cs.drjava.ui.*;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.util.swing.SwingFrame;
-import edu.rice.cs.util.swing.CheckBoxJList;
 
 /** Graphical form of a VectorOption for the Extra Classpath/Sourcepath options.
   * Uses a file chooser for each AbsRelFile element.

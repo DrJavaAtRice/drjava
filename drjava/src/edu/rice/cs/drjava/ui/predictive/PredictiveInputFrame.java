@@ -40,6 +40,7 @@ import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.Keymap;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.util.Collection;
@@ -53,9 +54,7 @@ import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.plt.lambda.LambdaUtil;
-
 import edu.rice.cs.util.swing.SwingFrame;
-import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.drjava.DrJavaRoot;
 
 /** Frame with predictive string input based on a list of strings. */
@@ -210,7 +209,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     _strategies = strategies;
     @SuppressWarnings("unchecked")
     PredictiveInputModel.MatchingStrategy<T>[] strategyArray =  // UGLY
-      (PredictiveInputModel.MatchingStrategy<T>[]) IterUtil.toArray(_strategies, PredictiveInputModel.MatchingStrategy.class);
+      IterUtil.toArray(_strategies, PredictiveInputModel.MatchingStrategy.class);
     _strategyBox = new JComboBox<PredictiveInputModel.MatchingStrategy<T>>(strategyArray);
     _currentStrategy = _strategies.get(0);
     _pim = new PredictiveInputModel<T>(ignoreCase, _currentStrategy, items);
@@ -236,6 +235,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
    *  @param actions actions to be performed when the user closes the frame, e.g. "OK" and "Cancel"; "Cancel" has to be last
    *  @param items varargs/array of items
    */
+  @SafeVarargs
   public PredictiveInputFrame(SwingFrame owner, String title, boolean force, boolean ignoreCase, InfoSupplier<? super T> info, 
                               List<PredictiveInputModel.MatchingStrategy<T>> strategies,
                               java.util.List<CloseAction<T>> actions, int cancelIndex, T... items) {
@@ -341,7 +341,8 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     * @param ignoreCase true if case should be ignored
     * @param items varargs/array of items
     */
-  public void setItems(boolean ignoreCase, T... items) {
+  @SafeVarargs
+  public final void setItems(boolean ignoreCase, T... items) {
     _pim = new PredictiveInputModel<T>(ignoreCase, _currentStrategy, items);
     removeListener();
     updateTextField();
@@ -380,7 +381,6 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     */
   public String getText() {
     if (_force) {
-      @SuppressWarnings("unchecked") 
       T item = _matchList.getSelectedValue();
       return (item == null) ? "" : _currentStrategy.force(item,_textField.getText());
     }
@@ -392,7 +392,6 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     */
   public T getItem() {
     if (!_force && _pim.getMatchingItems().size() == 0) return null;
-    @SuppressWarnings("unchecked") 
     T item = _matchList.getSelectedValue();
     return item;
   }
@@ -591,8 +590,8 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
 
     c.fill = GridBagConstraints.BOTH;
     c.weighty = 1.0;
-    contentPane.add(new JScrollPane(_matchList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
-                                    JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED), 
+    contentPane.add(new JScrollPane(_matchList, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, 
+                                    ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED), 
                     c);
     
     c.anchor = GridBagConstraints.SOUTHWEST;
@@ -761,7 +760,6 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
   private void updateInfo() {
     if (_info == null) return;
     if (_matchList.getModel().getSize() > 0) {
-      @SuppressWarnings("unchecked") 
       T item = _matchList.getSelectedValue();
       _infoLabel.setText("Path:   " + _info.value(item));
       _infoLabel.setToolTipText(_info.value(item));

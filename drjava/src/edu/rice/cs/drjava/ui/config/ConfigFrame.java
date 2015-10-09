@@ -55,12 +55,9 @@ import edu.rice.cs.drjava.ui.*;
 import edu.rice.cs.drjava.ui.KeyBindingManager.KeyStrokeData;
 import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.util.FileOps;
-import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.FileSelectorComponent;
 import edu.rice.cs.util.swing.DirectoryChooser;
 import edu.rice.cs.util.swing.SwingFrame;
-import edu.rice.cs.util.swing.SwingWorker;
-import edu.rice.cs.util.swing.ProcessingDialog;
 import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.plt.reflect.JavaVersion;
 
@@ -563,8 +560,8 @@ public class ConfigFrame extends SwingFrame {
                                                  startsWith("com.jgoodies.looks.plastic."));
     addOptionComponent(panel, plasticComponent);
 
-    //ToolbarOptionComponent is a degenerate option component
-    addOptionComponent(panel, new ToolbarOptionComponent("Toolbar Buttons", this,
+    //ToolBarOptionComponent is a degenerate option component
+    addOptionComponent(panel, new ToolBarOptionComponent("ToolBar Buttons", this,
                                                   "How to display the toolbar buttons."));
     addOptionComponent(panel, newBooleanOptionComponent(OptionConstants.LINEENUM_ENABLED));
    
@@ -857,13 +854,11 @@ public class ConfigFrame extends SwingFrame {
     addOptionComponent(panel, 
                        newForcedChoiceOptionComponent(OptionConstants.JAVADOC_LINK_VERSION));
     addOptionComponent(panel, 
-                       newStringOptionComponent(OptionConstants.JAVADOC_1_5_LINK));
-    addOptionComponent(panel, 
                        newStringOptionComponent(OptionConstants.JAVADOC_1_6_LINK));
     addOptionComponent(panel, 
                        newStringOptionComponent(OptionConstants.JAVADOC_1_7_LINK));
     addOptionComponent(panel, 
-                       newStringOptionComponent(OptionConstants.JAVADOC_1_8b_LINK));
+                       newStringOptionComponent(OptionConstants.JAVADOC_1_8_LINK));
     addOptionComponent(panel, 
                        newStringOptionComponent(OptionConstants.JUNIT_LINK));
 

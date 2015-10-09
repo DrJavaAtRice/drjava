@@ -42,7 +42,6 @@ import edu.rice.cs.plt.concurrent.ConcurrentUtil;
 import edu.rice.cs.plt.concurrent.JVMBuilder;
 import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.plt.lambda.LambdaUtil;
-import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.jar.JarBuilder;
 import edu.rice.cs.util.jar.ManifestWriter;
 import edu.rice.cs.util.swing.FileChooser;
@@ -53,7 +52,6 @@ import edu.rice.cs.util.swing.SwingWorker;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.swing.ProcessingDialog;
 import edu.rice.cs.util.swing.ScrollableListDialog;
-import edu.rice.cs.util.StreamRedirectThread;
 import edu.rice.cs.util.FileOps;
 
 import javax.swing.*;
@@ -61,6 +59,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileFilter;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowEvent;
@@ -484,7 +483,7 @@ public class JarOptionsDialog extends SwingFrame {
       }
     });
     
-    editDialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+    editDialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     editDialog.addWindowListener(new WindowAdapter(){
       public void WindowClosed(WindowEvent e){
         manifest.setText(_customManifestText);

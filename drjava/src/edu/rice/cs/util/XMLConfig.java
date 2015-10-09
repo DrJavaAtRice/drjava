@@ -48,41 +48,36 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.*;
 import java.util.*;
 
-/**
- * XML configuration management.
- * <p/>
- * This class uses DOM paths of a specific form to refer to nodes in the XML document.
- * Consider this XML structure:
- * <foo a="foo.a">
- *   <bar>abc</bar>
- *   <fum fee="xyz">def</fum>
- * </foo>
- * The path "foo/bar" refers to the value "abc".
- * The path "foo/fum" refers to the value "def".
- * If this form is used, there may be only #text or #comment nodes in the node. All #text nodes will be
- * concatenated and then stripped of whitespace at the beginning and the end.
- * The path "foo/fum.fee" refers to the value "xyz".
- * The path "foo.a" refers to the value "foo.a".
- *
- * When using getMultiple, any node or attribute name can be substituted with "*" to get all elements:
- * The path "foo/*" returns both the value "abc" and "def".
- * @author Mathias Ricken
- */
+/** XML configuration management.
+  * <p/>
+  * This class uses DOM paths of a specific form to refer to nodes in the XML document.
+  * Consider this XML structure:
+  * <foo a="foo.a">
+  *   <bar>abc</bar>
+  *   <fum fee="xyz">def</fum>
+  * </foo>
+  * The path "foo/bar" refers to the value "abc".
+  * The path "foo/fum" refers to the value "def".
+  * If this form is used, there may be only #text or #comment nodes in the node. All #text nodes will be
+  * concatenated and then stripped of whitespace at the beginning and the end.
+  * The path "foo/fum.fee" refers to the value "xyz".
+  * The path "foo.a" refers to the value "foo.a".
+  *
+  * When using getMultiple, any node or attribute name can be substituted with "*" to get all elements:
+  * The path "foo/*" returns both the value "abc" and "def".
+  * @author Mathias Ricken
+  */
 public class XMLConfig {
-  /** Newline string.
-   */
+  /** Newline string. */
   public static final String NL = System.getProperty("line.separator");
   
-  /** XML document.
-   */
+  /** XML document. */
   private Document _document;
   
-  /** XMLConfig to delegate to, or null.
-   */
+  /** XMLConfig to delegate to, or null. */
   private XMLConfig _parent = null;
   
-  /** Node where this XMLConfig starts if delegation is used, or null.
-   */
+  /** Node where this XMLConfig starts if delegation is used, or null. */
   private Node _startNode = null;
   
   /** Creates an empty configuration.

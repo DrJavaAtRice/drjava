@@ -36,12 +36,6 @@
 
 package edu.rice.cs.util;
 
-import java.io.*;
-
-import java.util.Date;
-import java.text.SimpleDateFormat;
-import java.util.TimeZone;
-
 /** Runnable with extended stack trace. Catches all thrown exceptions and rethrows them
   * with the stack trace of the creation site of this RunnableEST appended.
   * This makes it possible to find out where the Runnable was created.

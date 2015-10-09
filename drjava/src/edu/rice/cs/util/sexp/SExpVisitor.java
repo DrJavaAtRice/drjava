@@ -48,10 +48,10 @@ public interface SExpVisitor<Ret> {
   
   public Ret forCons(Cons c);
   
-  public Ret forBoolAtom(BoolAtom b);
+  public Ret forBoolAtom(Atom.Bool b);
   
-  public Ret forNumberAtom(NumberAtom n);
+  public Ret forNumberAtom(Atom.Number n);
   
-  public Ret forTextAtom(TextAtom t);
+  public Ret forTextAtom(Atom.Text t);
   
 }

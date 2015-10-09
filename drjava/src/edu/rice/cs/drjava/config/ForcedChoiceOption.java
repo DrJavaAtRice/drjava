@@ -40,53 +40,48 @@ import java.util.Collection;
 import java.util.Iterator;
 
 
-/**
- * Class defining a configuration option that requires a choice between
- * mutually-exclusive possible values.  Values are stored as Strings, though
- * this could be extended to any type with a fairly simple refactoring.
- * @version $Id$
- */
-public class ForcedChoiceOption extends Option<String>
-{
+/** Class defining a configuration option that requires a choice between
+  * mutually-exclusive possible values.  Values are stored as Strings, though
+  * this could be extended to any type with a fairly simple refactoring.
+  * @version $Id$
+  */
+public class ForcedChoiceOption extends Option<String> {
   private Collection<String> _choices;
   private Collection<String> _deprecated; // these will automatically be changed to the default
-
+  
   /** @param key The name of this option.
-   * @param def The default value of the option.
-   * @param choices A collection of all possible values of this Option, as Strings.
-   */
+    * @param def The default value of the option.
+    * @param choices A collection of all possible values of this Option, as Strings.
+    */
   public ForcedChoiceOption(String key, String def, Collection<String> choices) {
     this(key, def, choices, Arrays.asList(new String[0]));
   }
 
   /** @param key The name of this option.
-   * @param def The default value of the option.
-   * @param choices A collection of all possible values of this Option, as Strings.
-   * @param deprecated A collection of values that are deprecated and that should be changed to the default.
-   */
-  public ForcedChoiceOption(String key, String def, Collection<String> choices,
-                            Collection<String> deprecated) {
+    * @param def The default value of the option.
+    * @param choices A collection of all possible values of this Option, as Strings.
+    * @param deprecated A collection of values that are deprecated and that should be changed to the default.
+    */
+  public ForcedChoiceOption(String key, String def, Collection<String> choices, Collection<String> deprecated) {
     super(key,def);
     _choices = choices;
     _deprecated = deprecated;
   }
 
   /** Checks whether the parameter String is a legal value for this option.
-   * The input String must be formatted exactly like the original, as defined
-   * by String.equals(String).
-   * @param s the value to check
-   * @return true if s is legal, false otherwise
-   */
-  public boolean isLegal(String s) {
-    return _choices.contains(s);
-  }
+    * The input String must be formatted exactly like the original, as defined
+    * by String.equals(String).
+    * @param s the value to check
+    * @return true if s is legal, false otherwise
+    */
+  public boolean isLegal(String s) { return _choices.contains(s); }
 
   /** Checks whether the parameter String is a deprecated value for this option.
-   * The input String must be formatted exactly like the original, as defined
-   * by String.equals(String).
-   * @param s the value to check
-   * @return true if s is deprecated, false otherwise
-   */
+    * The input String must be formatted exactly like the original, as defined
+    * by String.equals(String).
+    * @param s the value to check
+    * @return true if s is deprecated, false otherwise
+    */
   public boolean isDeprecated(String s) {
     return _deprecated.contains(s);
   }

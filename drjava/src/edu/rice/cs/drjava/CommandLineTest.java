@@ -197,7 +197,7 @@ public final class CommandLineTest extends DrJavaTestCase {
           _log.log("File initialization (setUp) is complete");
         }
         catch (IOException e) {
-          System.out.print("createTempFile failed.  This should not happen.");
+          System.err.print("createTempFile failed.  This should not happen.");
           throw new RuntimeException(e.toString());
         }
       }

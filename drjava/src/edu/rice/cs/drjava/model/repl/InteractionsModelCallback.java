@@ -133,11 +133,10 @@ public interface InteractionsModelCallback {
   /** Called when the interpreter starts to reset. */
   public void interpreterResetting();
   
-  /**
-   * Called to assert that a fresh Java interpreter is ready for use either after a start or a restart.
-   * Is sometimes preceded by a call to {@code interpreterResetting()}, but not when the interpreter is
-   * first starting or is already fresh.
-   */
+  /** Called to assert that a fresh Java interpreter is ready for use either after a start or a restart.
+    * Is sometimes preceded by a call to {@code interpreterResetting()}, but not when the interpreter is
+    * first starting or is already fresh.
+    */
   public void interpreterReady(File wd);
   
   /** A compiler can instruct DrJava to include additional elements for the boot

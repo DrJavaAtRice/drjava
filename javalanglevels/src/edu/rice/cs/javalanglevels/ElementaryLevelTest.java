@@ -114,11 +114,11 @@ public class ElementaryLevelTest extends TestCase {
         return pathName.getAbsolutePath().endsWith(".dj0");
       }});
     
-    System.err.println("testFiles for testShouldBeErrors = " + Arrays.toString(testFiles)); 
+//    System.err.println("testFiles for testShouldBeErrors = " + Arrays.toString(testFiles)); 
     Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
     for (int i = 0; i < testFiles.length; i++) {
       LanguageLevelConverter llc1 = new LanguageLevelConverter();
-      System.err.println("TESTING " + testFiles[i]);
+//      System.err.println("TESTING " + testFiles[i]);
       result = llc1.convert(new File[]{ testFiles[i] }, new Options(JavaVersion.JAVA_6, EmptyIterable.<File>make()));
 //      System.err.println("Test result = " + result);
       assertTrue("should be parse exceptions or visitor exceptions in file " + testFiles[i].getName(),

@@ -38,6 +38,7 @@ package edu.rice.cs.util.swing;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -233,7 +234,7 @@ public class DirectorySelectorComponent extends JPanel {
     
     // Get the file from the chooser
     int returnValue = _chooser.showDialog(_file);
-    if (returnValue == DirectoryChooser.APPROVE_OPTION) {
+    if (returnValue == JFileChooser.APPROVE_OPTION) {
       File chosen = _chooser.getSelectedDirectory();
       if (chosen != null) setFileField(chosen);
     }

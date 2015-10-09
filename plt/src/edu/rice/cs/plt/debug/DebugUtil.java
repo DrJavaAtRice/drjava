@@ -57,26 +57,24 @@ public final class DebugUtil {
   /** Prevents instance creation */
   private DebugUtil() {}
   
-  /**
-   * A globally-accessible debugging log, declared in the spirit of {@link System#out}.  This log is intended to 
-   * record information that would be useful in a debugging session, but that is too detailed for typical program 
-   * executions.  By default, its value is a {@link VoidLog}; logging behavior may be changed by setting the system
-   * property {@code plt.debug.log}, or by directly setting this field (it is declared {@code volatile} so that 
-   * changes take immediate effect in all threads).
-   * 
-   * @see #initializeLogs
-   */
+  /** A globally-accessible debugging log, declared in the spirit of {@link System#out}.  This log is intended to 
+    * record information that would be useful in a debugging session, but that is too detailed for typical program 
+    * executions.  By default, its value is a {@link VoidLog}; logging behavior may be changed by setting the system
+    * property {@code plt.debug.log}, or by directly setting this field (it is declared {@code volatile} so that 
+    * changes take immediate effect in all threads).
+    * 
+    * @see #initializeLogs
+    */
   public static volatile Log debug;
 
-  /**
-   * A globally-accessible error log, declared in the spirit of {@link System#out}.  This log is intended to 
-   * record errors that should be noted, but that do not require the propagation of an exception.  By default, 
-   * its value is a {@link VoidLog}; logging behavior may be changed by setting the system
-   * property {@code plt.error.log}, or by directly setting this field (it is declared 
-   * {@code volatile} so that changes take immediate effect in all threads).
-   * 
-   * @see #initializeLogs
-   */
+  /** A globally-accessible error log, declared in the spirit of {@link System#out}.  This log is intended to 
+    * record errors that should be noted, but that do not require the propagation of an exception.  By default, 
+    * its value is a {@link VoidLog}; logging behavior may be changed by setting the system
+    * property {@code plt.error.log}, or by directly setting this field (it is declared 
+    * {@code volatile} so that changes take immediate effect in all threads).
+    * 
+    * @see #initializeLogs
+    */
   public static volatile Log error;
   
   static { initializeLogs(); }

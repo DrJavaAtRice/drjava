@@ -47,29 +47,29 @@ import java.util.*;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
-import edu.rice.cs.drjava.config.Option;
 import edu.rice.cs.drjava.model.DJError;
 import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.DrJavaFileUtils;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
-import edu.rice.cs.plt.io.IOUtil;
-import edu.rice.cs.plt.iter.IterUtil;
-import edu.rice.cs.plt.collect.CollectUtil;
+
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.swing.Utilities;
-import edu.rice.cs.javalanglevels.*;
-import edu.rice.cs.javalanglevels.parser.*;
-import edu.rice.cs.javalanglevels.tree.*;
 import edu.rice.cs.util.swing.ScrollableListDialog;
+import edu.rice.cs.util.swing.Utilities;
 
-import static edu.rice.cs.plt.debug.DebugUtil.debug;
+import edu.rice.cs.javalanglevels.*;
+import edu.rice.cs.javalanglevels.tree.*;
+
+import edu.rice.cs.plt.io.IOUtil;
+import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.plt.collect.CollectUtil;
+// import edu.rice.cs.plt.tuple.Pair;  
+// TODO: use the preceding pair class instead of javalanglevels.Pair; must change javalanglevels code as well 
 
 /** Default implementation of the CompilerModel interface. This implementation is used for normal DrJava execution
-  * (as opposed to testing DrJava).  TO DO: convert edu.rice.cs.util.Pair to edu.rice.cs.plt.tuple.Pair; requires 
-  * making the same conversion in javalanglevels.
+  * (as opposed to testing DrJava).
   * @version $Id$
   */
 public class DefaultCompilerModel implements CompilerModel {
@@ -254,6 +254,7 @@ public class DefaultCompilerModel implements CompilerModel {
     }
     
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.compileStarted(); } });
+    
     try {
       if (! packageErrors.isEmpty()) { _distributeErrors(packageErrors); }
       else
@@ -342,6 +343,9 @@ public class DefaultCompilerModel implements CompilerModel {
       
       List<? extends File> preprocessedFiles = _compileLanguageLevelsFiles(files, errors, classPath, bootClassPath);
       
+      System.out.println("Compiler is using classPath = '" + classPath + "';  bootClassPath = '" + bootClassPath + "'");
+      
+      if (preprocessedFiles != null) System.out.println("Performed Language Level Translation of " + preprocessedFiles);
       if (errors.isEmpty()) {
         CompilerInterface compiler = getActiveCompiler();
         
@@ -381,8 +385,8 @@ public class DefaultCompilerModel implements CompilerModel {
     * @return  An updated list for compilation containing no Language Levels files, or @code{null}
     *          if there were no Language Levels files to process.
     */
-  private List<File> _compileLanguageLevelsFiles(List<File> files, List<DJError> errors,
-                                                 Iterable<File> classPath, Iterable<File> bootClassPath) {
+  private List<File> _compileLanguageLevelsFiles(List<File> files, List<DJError> errors, Iterable<File> classPath, 
+                                                 Iterable<File> bootClassPath) {
     /* Construct the collection of files to be compild by javac, renaming any language levels (.dj*) files to the 
      * corresponding java (.java) files.  By using a HashSet, we avoid creating duplicates in this collection.
      */
@@ -534,7 +538,7 @@ public class DefaultCompilerModel implements CompilerModel {
       
       /* Perform language levels conversion, creating corresponding .java files. */
       LanguageLevelConverter llc = new LanguageLevelConverter();
-      Options llOpts;
+      Options llOpts;  /* Options passed as arguments to LLConverter */
       if (bootClassPath == null) { llOpts = new Options(getActiveCompiler().version(), classPath); }
       else { llOpts = new Options(getActiveCompiler().version(), classPath, bootClassPath); }
       

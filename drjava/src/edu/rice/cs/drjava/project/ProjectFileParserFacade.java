@@ -57,6 +57,7 @@ public class ProjectFileParserFacade {
     int read = fr.read();
     if (read==-1) {
       // empty project file, throw exception
+      fr.close();
       throw new MalformedProjectFileException("Empty project file.");
     }
     if (((char)read) != ';') {
@@ -68,6 +69,7 @@ public class ProjectFileParserFacade {
     read = fr.read();
     if (read==-1) {
       // project file just contained ";", throw exception
+      fr.close();
       throw new MalformedProjectFileException("Incomplete project file.");
     }
     if (((char)read) != ';') {

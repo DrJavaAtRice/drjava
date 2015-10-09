@@ -73,7 +73,7 @@ import edu.rice.cs.plt.iter.IterUtil;
   * <p>
   * Since the cache and document managers can both be concurrently accessed from multiple threads, the methods in the
   * DocumentCache and DocManager classes are synchronized.  Some operations require locks on both the cache and a
-  * document manager, but the code is written so that none of require these locks to be held simultaneously.
+  * document manager, but the code is written so that none of them require these locks to be held simultaneously.
   */
 
 public class DocumentCache {
@@ -86,6 +86,7 @@ public class DocumentCache {
   /** invariant _residentQueue.size() <= CACHE_SIZE */
   private volatile int CACHE_SIZE;
   
+  /** Data structure representing the queue of resident unmodified documents. */
   private final LinkedHashSet<DocManager> _residentQueue;
   
   private final Object _cacheLock = new Object();
@@ -140,11 +141,15 @@ public class DocumentCache {
   private static final int UNTITLED = 1;     // An untitled document not in queue (may or may not be modified)
   private static final int NOT_IN_QUEUE = 2; // Virtualized and not in the QUEUE
   private static final int UNMANAGED = 3;    // A modified, titled document not in the queue
+  
   /** Note: before extending this table, check that the extension does not conflict with isUnmangedOrUntitled() */
   
   /** Manages the retrieval of a document for a corresponding open definitions document.  This manager only 
     * maintains its document data if it contained in _residentQueue, which is maintained using a round-robin
     * replacement scheme.
+    * 
+    * NOTE: DO NOT OVERRIDE hashcode or equals for DocManager or any descendant of DocManager!  DocManagers are mutable
+    * yet they are used as hash keys.
     */
   private class DocManager implements DCacheAdapter {
     

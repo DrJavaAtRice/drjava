@@ -203,13 +203,18 @@ public class JarCreationTest extends DrJavaTestCase {
 
       JarInputStream jarStream = new JarInputStream(new FileInputStream(f), true);
 
-      JarEntry ent = jarStream.getNextJarEntry();
-      assertTrue("should have JarTest", ent != null);
-      assertEquals("names should match", "JarTest.java", ent.getName());
-
-      ent = jarStream.getNextJarEntry();
-      assertTrue("should have JarTest", ent != null);
-      assertEquals("names should match", "dir/JarTest.java", ent.getName());
+      try {
+        JarEntry ent = jarStream.getNextJarEntry();
+        assertTrue("should have JarTest", ent != null);
+        assertEquals("names should match", "JarTest.java", ent.getName());
+  
+        ent = jarStream.getNextJarEntry();
+        assertTrue("should have JarTest", ent != null);
+        assertEquals("names should match", "dir/JarTest.java", ent.getName());
+      }
+      finally {
+        jarStream.close();
+      }
     }
     catch (IOException e) {
       e.printStackTrace();

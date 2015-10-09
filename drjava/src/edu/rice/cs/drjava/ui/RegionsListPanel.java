@@ -249,7 +249,6 @@ public abstract class RegionsListPanel<R extends IDocumentRegion> extends Tabbed
   /** @return the usser object in the list associated with the region, or null if not found */
   protected RegionListUserObj<R> getUserObjForRegion(R r) {
     for(int i = 0; i < _listModel.size(); ++i) {
-      @SuppressWarnings("unchecked") 
       RegionListUserObj<R> userObj = _listModel.get(i);
       if ((userObj.region().getStartOffset() == r.getStartOffset()) &&
           (userObj.region().getEndOffset() == r.getEndOffset()) &&

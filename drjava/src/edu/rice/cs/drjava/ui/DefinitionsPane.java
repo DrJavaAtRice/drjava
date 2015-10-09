@@ -40,6 +40,7 @@ import javax.swing.*;
 import javax.swing.undo.*;
 import javax.swing.event.*;
 import javax.swing.text.*;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.util.List;
@@ -60,7 +61,6 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelState;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.debug.Breakpoint;
-
 import static edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelStates.*;
 
 /** The pane in which work on a given OpenDefinitionsDocument occurs. A DefinitionsPane is tied to a single document,
@@ -1071,8 +1071,8 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     _scrollPane.getVerticalScrollBar().setValue(_savedVScroll);
     _scrollPane.getHorizontalScrollBar().setValue(_savedHScroll);
     // Explicitly set scrollbar policies fixing bug #1445898 
-    _scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-    _scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    _scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+    _scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
   }
   
   // if the pane is inactive, use the state stored in the fields, otherwise use the super method

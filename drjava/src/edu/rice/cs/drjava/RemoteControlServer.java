@@ -37,8 +37,6 @@
 package edu.rice.cs.drjava;
 
 import edu.rice.cs.drjava.ui.MainFrame;
-import edu.rice.cs.util.FileOpenSelector;
-import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.drjava.config.OptionConstants;
 
 import java.io.*;

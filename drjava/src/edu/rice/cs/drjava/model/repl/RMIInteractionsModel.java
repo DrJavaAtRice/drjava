@@ -80,11 +80,11 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
     * @param var the name of the variable
     */
   public Pair<String,String> getVariableToString(String var) {
-    System.out.println("getVariableToString: "+var);
+    System.out.println("getVariableToString: " + var);
     Option<Pair<String,String>> result = _jvm.getVariableToString(var);
-    System.out.println("\tresult.isNone? "+result.isNone());
+    System.out.println("\tresult.isNone? " + result.isNone());
     Pair<String,String> retval = result.unwrap(new Pair<String,String>("",""));
-    System.out.println("\tretval: "+retval);
+    System.out.println("\tretval: " + retval);
     return retval;
   }
   

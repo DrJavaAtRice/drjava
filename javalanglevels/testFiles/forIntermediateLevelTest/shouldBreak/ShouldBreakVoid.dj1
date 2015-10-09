@@ -1,5 +1,0 @@
-
-class ShouldBreakVoid extends Object{
-   void badMethod() {
-  }
-}

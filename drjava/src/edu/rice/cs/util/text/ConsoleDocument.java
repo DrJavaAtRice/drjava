@@ -39,8 +39,6 @@ package edu.rice.cs.util.text;
 import java.io.*;
 import java.awt.EventQueue;
 import java.awt.print.*;
-import java.awt.EventQueue;
-
 import edu.rice.cs.drjava.model.print.DrJavaBook;
 
 import edu.rice.cs.drjava.model.FileSaveSelector;

@@ -45,7 +45,6 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.Set;
 import java.util.HashSet;
 import java.util.Collections;
 import java.util.jar.JarFile;
@@ -137,7 +136,8 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     return super.toString() + " at " + _location + ", boot classpath: " + bootClassPath();
   }
 
-  /** Create a JarJDKToolsLibrary from a specific {@code "tools.jar"} or {@code "classes.jar"} file. */
+  /** Create a JarJDKToolsLibrary from a specific {@code "tools.jar"} or {@code "classes.jar"} file. 
+    * NOTE: Why isn't this method in JDKToolsLibrary? */
   public static JarJDKToolsLibrary makeFromFile(File f, GlobalModel model, JDKDescriptor desc) {
     return makeFromFile(f, model, desc, new ArrayList<File>());
   }
@@ -158,7 +158,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     boolean isSupported = JavaVersion.CURRENT.supports(version.majorVersion());
     Iterable<File> additionalCompilerFiles = IterUtil.empty();
 
-    // JDKDescriptor.NONE will require JavaVersion.CURRENT to be at least JavaVersion.JAVA_1_1,
+    // JDKDescriptor.NONE requires JavaVersion.CURRENT to be at least JavaVersion.JAVA_6,
     // i.e. it will always be supported
     isSupported |= JavaVersion.CURRENT.supports(desc.getMinimumMajorVersion());
     try {
@@ -209,7 +209,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
           bootClassPath.add(f);
           for(File acf: additionalCompilerFiles) { bootClassPath.add(acf); };
         }
-        if (additionalBootClassPath!=null) { bootClassPath.addAll(additionalBootClassPath); }
+        if (additionalBootClassPath != null) { bootClassPath.addAll(additionalBootClassPath); }
         if (bootClassPath.isEmpty()) { bootClassPath = null; } // null defers to the compiler's default behavior
 
         try {
@@ -234,14 +234,14 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
           // can't use loadLibraryAdapter because we need to preempt the whole package
           ClassLoader debugLoader = new PreemptingClassLoader(new PathClassLoader(loader, path), debuggerPackage);
           Debugger attempt = (Debugger) ReflectUtil.loadObject(debugLoader, debuggerAdapter, sig, model);        
-          JDKToolsLibrary.msg("                 debugger="+attempt.getClass().getName());
+          JDKToolsLibrary.msg("                 debugger=" + attempt.getClass().getName());
           if (attempt.isAvailable()) { debugger = attempt; }
         }
         catch (ReflectException e) {
-          JDKToolsLibrary.msg("                 no debugger, ReflectException "+e); /* can't load */
+          JDKToolsLibrary.msg("                 no debugger, ReflectException " + e); /* can't load */
         }
         catch (LinkageError e) {
-          JDKToolsLibrary.msg("                 no debugger, LinkageError "+e);  /* can't load */
+          JDKToolsLibrary.msg("                 no debugger, LinkageError " + e);  /* can't load */
         }
       }
       
@@ -403,7 +403,6 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     
     String javaHome = System.getProperty("java.home");
     String envJavaHome = null;
-    String envJava7Home = null;
     String programFiles = null;
     String systemDrive = null;
     if (JavaVersion.CURRENT.supports(JavaVersion.JAVA_5)) {
@@ -464,13 +463,15 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
 
     /* Entries for Linux java packages */
     addIfDir(new File("/usr/lib/jvm"), roots);
+    addIfDir(new File("/usr/lib/jvm/java-8-oracle"), roots);
+    addIfDir(new File("/usr/lib/jvm/java-8-openjdk"), roots);
     addIfDir(new File("/usr/lib/jvm/java-7-oracle"), roots);
     addIfDir(new File("/usr/lib/jvm/java-7-openjdk"), roots);
     addIfDir(new File("/usr/lib/jvm/java-6-sun"), roots);
     addIfDir(new File("/usr/lib/jvm/java-6-openjdk"), roots);
     addIfDir(new File("/usr/lib/jvm/java-1.5.0-sun"), roots);
 
-    addIfDir(new File("/home/javaplt/java/Linux-i686"), roots);
+//    addIfDir(new File("/home/javaplt/java/Linux-i686"), roots);
     
     return roots;
   }
@@ -726,6 +727,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
             descriptors = attemptToLoadDescriptor(descriptors, name);
           }
         }
+        jf.close();
       }
       else {
         final String DESC_PATH = "edu/rice/cs/drjava/model/compiler/descriptors";

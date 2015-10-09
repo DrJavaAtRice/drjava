@@ -373,7 +373,7 @@ public class SpecialTypeChecker extends TypeChecker {
 
         if (result[i] != null) {
           if (assertFound(result[i], (JExpression) that.getItems()[i])) {
-            if (!result[i].getSymbolData().isAssignableTo(elementType, LanguageLevelConverter.OPT.javaVersion())) {
+            if (! result[i].getSymbolData().isAssignableTo(elementType, true)) {
               _addError("The elements of this initializer should have type " + elementType.getName() + " but element "
                           + i + " has type " + result[i].getSymbolData().getName(), (JExpression) that.getItems()[i]);
             }

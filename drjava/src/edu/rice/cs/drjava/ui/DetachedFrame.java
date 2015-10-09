@@ -44,8 +44,6 @@ import java.awt.Point;
 import java.awt.Dimension;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
 import java.util.StringTokenizer;
@@ -55,7 +53,6 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.swing.*;
 
-import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionListener;
 import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.ui.KeyBindingManager;

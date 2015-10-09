@@ -37,7 +37,6 @@
 package edu.rice.cs.drjava.model;
 
 import edu.rice.cs.drjava.DrJava;
-
 import edu.rice.cs.drjava.model.compiler.CompilerListener;
 import edu.rice.cs.drjava.model.repl.InteractionsDocument;
 import edu.rice.cs.drjava.model.junit.JUnitModel;
@@ -53,15 +52,16 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.swing.AsyncTask;
+import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.text.EditDocumentException;
 
 import javax.swing.text.BadLocationException;
+
 import java.io.File;
 import java.io.IOException;
 import java.rmi.UnmarshalException;
 import java.util.regex.*;
 import java.util.List;
-import junit.framework.Assert;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
@@ -343,7 +343,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     Utilities.invokeAndWait(new Runnable() {
       public void run() {
         interactionsDoc.setInProgress(false);  // for some reason, the inProgress state can be true when interpret is invoked
-        interactionsDoc.append(input, InteractionsDocument.DEFAULT_STYLE);
+        interactionsDoc.append(input, ConsoleDocument.DEFAULT_STYLE);
       }
     });
     
@@ -378,7 +378,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   /** Appends the input string to the interactions pane and interprets it. */
   protected void interpretIgnoreResult(String input) throws EditDocumentException {
     InteractionsDocument interactionsDoc = _model.getInteractionsDocument();
-    interactionsDoc.append(input, InteractionsDocument.DEFAULT_STYLE);
+    interactionsDoc.append(input, ConsoleDocument.DEFAULT_STYLE);
     try { _model.interpretCurrentInteraction(); }
     catch(RuntimeException re) { // On Windows, UnmarshalExceptions are sometime thrown
       Throwable cause = re.getCause();
@@ -1238,40 +1238,40 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     }
      
     @Override public void junitStarted() {
-      if (printMessages) System.out.println("listener.junitStarted");
+      _log.log("listener.junitStarted");
       synchronized(this) { junitStartCount++; }
     }
     @Override public void junitSuiteStarted(int numTests) {
-      if (printMessages) System.out.println("listener.junitSuiteStarted, numTests = " + numTests);
+      _log.log("listener.junitSuiteStarted, numTests = " + numTests);
       assertJUnitStartCount(1);
       synchronized(this) { junitSuiteStartedCount++; }
     }
     @Override public void junitTestStarted(String name) {
-      if (printMessages) System.out.println("  listener.junitTestStarted, " + name);
+      _log.log("  listener.junitTestStarted, " + name);
       synchronized(this) { junitTestStartedCount++; }
     }
     @Override public void junitTestEnded(String name, boolean wasSuccessful, boolean causedError) {
-      if (printMessages) System.out.println("  listener.junitTestEnded, name = " + name + " succ = " + wasSuccessful + 
+      _log.log("  listener.junitTestEnded, name = " + name + " succ = " + wasSuccessful + 
                                             " err = " + causedError);
       synchronized(this) { junitTestEndedCount++; }
       assertEquals("junitTestEndedCount should be same as junitTestStartedCount", junitTestEndedCount, 
                    junitTestStartedCount);
     }
     @Override public void nonTestCase(boolean isTestAll, boolean didCompileFail) {
-      if (printMessages) System.out.println("listener.nonTestCase, isTestAll=" + isTestAll);
+      _log.log("listener.nonTestCase, isTestAll=" + isTestAll);
       synchronized(this) { nonTestCaseCount++; }
       _log.log("nonTestCase() called; notifying JUnitDone");
       _notifyJUnitDone();
     }
     @Override public void classFileError(ClassFileError e) {
-      if (printMessages) System.out.println("listener.classFileError, e=" + e);
+      _log.log("listener.classFileError, e=" + e);
       synchronized(this) { classFileErrorCount++; }
       _log.log("classFileError() called; notifying JUnitDone");
       _notifyJUnitDone();
     }
     @Override public void junitEnded() {
       // assertJUnitSuiteStartedCount(1);
-      if (printMessages) System.out.println("junitEnded event!");
+      _log.log("junitEnded event!");
       synchronized(this) { junitEndCount++; }
       _log.log("junitEnded() called; notifying JUnitDone");
       _notifyJUnitDone();

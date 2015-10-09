@@ -44,9 +44,6 @@ import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.plt.reflect.PathClassLoader;
 
-import static edu.rice.cs.plt.debug.DebugUtil.error;
-import static edu.rice.cs.plt.debug.DebugUtil.debug;
-
 /**
  * Maintains a dynamic class path, allowing entries to be incrementally added in the appropriate
  * place in the list.  This class is used in the interpreter JVM, and may be accessed concurrently.

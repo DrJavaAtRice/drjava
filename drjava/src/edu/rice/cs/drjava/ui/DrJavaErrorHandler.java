@@ -44,8 +44,6 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.drjava.config.OptionConstants;
-//import edu.rice.cs.plt.swing.SwingUtil;
-import edu.rice.cs.util.Log;
 
 /** The handle() method in this class is called every time an uncaught exception propagates to an AWT action.
  *  The static log() method can be used to put log entries into the error log but continue execution.
@@ -137,7 +135,7 @@ public class DrJavaErrorHandler implements Thread.UncaughtExceptionHandler {
     * @return true if this is the Swing bug */
   public static boolean isSwingBugArrayIndexOufOfBoundsExceptionInCharWidth(Throwable thrown) {
     // only ignore on Sun/Oracle JVMs
-    if (!edu.rice.cs.plt.reflect.JavaVersion.CURRENT_FULL.vendor().
+    if (! edu.rice.cs.plt.reflect.JavaVersion.CURRENT_FULL.vendor().
           equals(edu.rice.cs.plt.reflect.JavaVersion.VendorType.ORACLE)) return false;
     
     // only ignore if current version is older than 6.0_18 (6.0_18 > JavaVersion.CURRENT_FULL)

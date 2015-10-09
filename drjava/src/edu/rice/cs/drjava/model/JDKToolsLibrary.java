@@ -36,8 +36,9 @@
 
 package edu.rice.cs.drjava.model;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.io.File;
 
 import edu.rice.cs.plt.reflect.ReflectUtil;
@@ -46,7 +47,6 @@ import edu.rice.cs.plt.reflect.JavaVersion.FullVersion;
 import edu.rice.cs.plt.reflect.ReflectException;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.collect.CollectUtil;
-import edu.rice.cs.plt.object.ObjectUtil;
 
 import edu.rice.cs.drjava.model.compiler.CompilerInterface;
 import edu.rice.cs.drjava.model.compiler.NoCompilerAvailable;
@@ -57,12 +57,17 @@ import edu.rice.cs.drjava.model.javadoc.NoJavadocAvailable;
 import edu.rice.cs.drjava.model.javadoc.DefaultJavadocModel;
 import edu.rice.cs.drjava.model.JDKDescriptor;
 
-/** 
- * Provides dynamic access to the interface of a JDK's tools.jar classes.  This level of indirection
- * eliminates the need to have specific tools.jar classes available statically (and the resulting need
- * to reset the JVM if they are not), and makes it possible to interface with multiple tools.jar
- * libraries simultaneously.
- */
+import edu.rice.cs.util.Log;
+
+/** Provides dynamic access to the interface of a JDK's tools.jar classes.  This level of indirection
+  * eliminates the need to have specific tools.jar classes available statically (and the resulting need
+  * to reset the JVM if they are not), and makes it possible to interface with multiple tools.jar
+  * libraries simultaneously.  This class is concretely instantiated only to create a degenerate
+  * library containing the embedded Eclipse compiler when no JDK is available.  Since the most commonly
+  * used JDKs are not open source, we dynamically search for them.  If none is found, we fall back on
+  * the Eclipse compiler with no debugger and no javadoc.
+  * TODO: embed tools.jar from several openJDK distributions?  The resulting footprint may be too large.
+  */
 public class JDKToolsLibrary {
   
   private final FullVersion _version;
@@ -71,7 +76,7 @@ public class JDKToolsLibrary {
   private final JavadocModel _javadoc;
   private final JDKDescriptor _jdkDescriptor; // JDKDescriptor.NONE if none
   
-  /* package private */ static edu.rice.cs.util.Log _log = new edu.rice.cs.util.Log("JDKToolsLibrary.txt", false);
+  /* package private */ static Log _log = new Log("JDKToolsLibrary.txt", false);
   
   protected JDKToolsLibrary(FullVersion version, JDKDescriptor jdkDescriptor, CompilerInterface compiler, 
                             Debugger debugger, JavadocModel javadoc) {
@@ -118,6 +123,8 @@ public class JDKToolsLibrary {
   
   public static String adapterForDebugger(JavaVersion.FullVersion version) {
     switch (version.majorVersion()) {
+      case FUTURE:
+      case JAVA_8:
       case JAVA_7:
       case JAVA_6:
       case JAVA_5: return "edu.rice.cs.drjava.model.debug.jpda.JPDADebugger";
@@ -126,17 +133,20 @@ public class JDKToolsLibrary {
   }
 
   protected static CompilerInterface getCompilerInterface(String className, FullVersion version) {
+    msg("getCompilerInterface(" + className + ", " + version + ")");
     if (className != null) {
       List<File> bootClassPath = null;
       String bootProp = System.getProperty("sun.boot.class.path");
       if (bootProp != null) { bootClassPath = CollectUtil.makeList(IOUtil.parsePath(bootProp)); }
-      File toolsJar = edu.rice.cs.drjava.DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.JAVAC_LOCATION);
       try {
         Class<?>[] sig = { FullVersion.class, String.class, List.class };
         Object[] args = { version, "the runtime class path", bootClassPath };
         CompilerInterface attempt = (CompilerInterface) ReflectUtil.loadObject(className, sig, args);
-        msg("                 attempt = " + attempt + ", isAvailable() = "+attempt.isAvailable());
-        if (attempt.isAvailable()) { return attempt; }
+        msg("Attempting " + attempt + ", isAvailable() = " + attempt.isAvailable());
+        if (attempt.isAvailable()) {
+          msg("In this successful attempt, args were:" + Arrays.toString(args));
+          return attempt; 
+        }
       }
       catch (ReflectException e) { /* can't load */ }
       catch (LinkageError e) { /* can't load */ }
@@ -144,68 +154,58 @@ public class JDKToolsLibrary {
     return NoCompilerAvailable.ONLY;
   }
   
-  /** Create a JDKToolsLibrary from the runtime class path (or, more accurately, from the class
-   * loader that loaded this class.
-   */
-  public static Iterable<JDKToolsLibrary> makeFromRuntime(GlobalModel model) {
-    FullVersion version = JavaVersion.CURRENT_FULL;
-
-    String compilerAdapter = adapterForCompiler(version);
-    msg("makeFromRuntime: compilerAdapter="+compilerAdapter);
-    CompilerInterface compiler = getCompilerInterface(compilerAdapter, version);
-    msg("                 compiler="+compiler.getClass().getName());
-    
-    Debugger debugger = NoDebuggerAvailable.ONLY;
-    String debuggerAdapter = adapterForDebugger(version);
-    if (debuggerAdapter != null) {
-      try {
-        msg("                 loading debugger: "+debuggerAdapter);
-        Debugger attempt = (Debugger) ReflectUtil.loadObject(debuggerAdapter, new Class<?>[]{GlobalModel.class}, model);
-        msg("                 debugger="+attempt.getClass().getName());
-        if (attempt.isAvailable()) { debugger = attempt; }
-      }
-      catch (ReflectException e) { msg("                 no debugger, ReflectException "+e); /* can't load */ }
-      catch (LinkageError e) { msg("                 no debugger, LinkageError "+e);  /* can't load */ }
-    }
-    
-    JavadocModel javadoc = new NoJavadocAvailable(model);
-    try {
-      Class.forName("com.sun.tools.javadoc.Main");
-      javadoc = new DefaultJavadocModel(model, null, ReflectUtil.SYSTEM_CLASS_PATH);
-    }
-    catch (ClassNotFoundException e) { /* can't load */ }
-    catch (LinkageError e) { /* can't load (probably not necessary, but might as well catch it) */ }
-
-    List<JDKToolsLibrary> list = new ArrayList<JDKToolsLibrary>();
-    
-    if (compiler != NoCompilerAvailable.ONLY) {
-      // if we have found a compiler, add it
-      msg("                 compiler found");
-      list.add(new JDKToolsLibrary(version, JDKDescriptor.NONE, compiler, debugger, javadoc));
-    }
-      
-    msg("                 compilers found: " + list.size());
-    
-    if (list.size() == 0) {
-      // no compiler found, i.e. compiler == NoCompilerAvailable.ONLY
-      msg("                 no compilers found, adding NoCompilerAvailable library");
-      list.add(new JDKToolsLibrary(version, JDKDescriptor.NONE, NoCompilerAvailable.ONLY, debugger, javadoc));
-    }
-    
-    return list;
-  }
+  /* No longer used. */
+//  /** Create a JDKToolsLibrary from the runtime class path (or, more accurately, from the class
+//    * loader that loaded this class).
+//    */
+//  public static Iterable<JDKToolsLibrary> makeFromRuntime(GlobalModel model) {
+//    FullVersion version = JavaVersion.CURRENT_FULL;
+//
+//    String compilerAdapter = adapterForCompiler(version);
+//    msg("makeFromRuntime: version = " + version + "; compilerAdapter = " + compilerAdapter);
+//    CompilerInterface compiler = getCompilerInterface(compilerAdapter, version);
+//    msg("                 compiler = " + compiler.getClass().getName());
+//    
+//    Debugger debugger = NoDebuggerAvailable.ONLY;
+//    String debuggerAdapter = adapterForDebugger(version);
+//    if (debuggerAdapter != null) {
+//      try {
+//        msg("                 loading debugger: " + debuggerAdapter);
+//        Debugger attempt = (Debugger) ReflectUtil.loadObject(debuggerAdapter, new Class<?>[]{GlobalModel.class}, model);
+//        msg("                 debugger = " + attempt.getClass().getName());
+//        if (attempt.isAvailable()) { debugger = attempt; }
+//      }
+//      catch (ReflectException e) { msg("                 no debugger, ReflectException " + e); /* can't load */ }
+//      catch (LinkageError e) {     msg("                 no debugger, LinkageError " + e);  /* can't load */ }
+//    }
+//    
+//    JavadocModel javadoc = new NoJavadocAvailable(model);
+//    try {
+//      Class.forName("com.sun.tools.javadoc.Main");
+//      javadoc = new DefaultJavadocModel(model, null, ReflectUtil.SYSTEM_CLASS_PATH);
+//    }
+//    catch (ClassNotFoundException e) { /* can't load */ }
+//    catch (LinkageError e) { /* can't load (probably not necessary, but might as well catch it) */ }
+//
+//    List<JDKToolsLibrary> list = new ArrayList<JDKToolsLibrary>();
+//    
+//    if (compiler != NoCompilerAvailable.ONLY) {
+//      // if we have found a compiler, add it
+//      msg("                 compiler found");
+//      list.add(new JDKToolsLibrary(version, JDKDescriptor.NONE, compiler, debugger, javadoc));
+//    }
+//      
+//    msg("                 compilers found: " + list.size());
+//    
+//    if (list.size() == 0) {
+//      // no compiler found, i.e. compiler == NoCompilerAvailable.ONLY
+//      msg("                 no compilers found, adding NoCompilerAvailable library");
+//      list.add(new JDKToolsLibrary(version, JDKDescriptor.NONE, NoCompilerAvailable.ONLY, debugger, javadoc));
+//    }
+//    
+//    return list;
+//  }
   
-  public static final java.io.StringWriter LOG_STRINGWRITER = new java.io.StringWriter();
-//  protected static final java.io.PrintWriter LOG_PW = new java.io.PrintWriter(LOG_STRINGWRITER);
-  
-  public static void msg(String s) {  _log.log(s);   
-//    try {   
-//      java.io.PrintWriter pw = new java.io.PrintWriter(new java.io.FileWriter(new File(new File(System.getProperty("user.home")),   
-//                                                                                       "FindCompilers.txt").getAbsolutePath(),true));   
-//      pw.println(s);
-////      LOG_PW.println(s);
-//      pw.close();   
-//    }   
-//    catch(java.io.IOException ioe) { }   
-  }
+  public static final java.io.StringWriter LOG_STRINGWRITER = new java.io.StringWriter();  
+  public static void msg(String s) { _log.log(s); }
 }

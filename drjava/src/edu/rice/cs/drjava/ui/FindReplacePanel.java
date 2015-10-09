@@ -56,11 +56,9 @@ import edu.rice.cs.drjava.model.FindResult;
 import edu.rice.cs.drjava.model.ClipboardHistoryModel;
 import edu.rice.cs.drjava.model.MovingDocumentRegion;
 import edu.rice.cs.drjava.model.RegionManager;
-
 import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.BorderlessScrollPane;
-import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.SwingDocument;
 
 /** The tabbed panel that handles requests for finding and replacing text.
@@ -444,8 +442,8 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     
     BorderlessScrollPane _findPane = new BorderlessScrollPane(_findField);
     BorderlessScrollPane _replacePane = new BorderlessScrollPane(_replaceField);
-    _findPane.setHorizontalScrollBarPolicy(BorderlessScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-    _replacePane.setHorizontalScrollBarPolicy(BorderlessScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    _findPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    _replacePane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     
     JPanel findPanel = new JPanel(new BorderLayout(5,5));
     findPanel.add(findLabelPanel, BorderLayout.WEST);

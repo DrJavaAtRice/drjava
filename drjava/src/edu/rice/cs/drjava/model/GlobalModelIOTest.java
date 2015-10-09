@@ -37,8 +37,8 @@
 package edu.rice.cs.drjava.model;
 
 import java.io.*;
-
 import java.util.List;
+
 import javax.swing.text.BadLocationException;
 
 import edu.rice.cs.drjava.DrJava;
@@ -53,7 +53,6 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.util.swing.Utilities;
-
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /** Test I/O functions of the global model.  TODO: move document observations to event thread.
@@ -207,6 +206,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
   /** Initiates a file open, but cancels. */
   public void testCancelOpenFile() throws BadLocationException, IOException {
     
+    @SuppressWarnings("unused")
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     assertNumOpenDocs(2);
     
@@ -413,7 +413,9 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
   /** Initiates a file open, but cancels. */
   public void testCancelOpenMultipleFiles() throws BadLocationException, IOException {
     
+    @SuppressWarnings("unused")
     OpenDefinitionsDocument doc1 = setupDocument(FOO_TEXT);
+    @SuppressWarnings("unused")
     OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
     assertNumOpenDocs(3);
     
@@ -1064,6 +1066,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     interpretIgnoreResult(s3);
     listener.waitInteractionDone();
     
+//    System.err.println("history is '" + _model.getHistoryAsString() + "'");
     // check that the history contains the correct value
     assertEquals("History and getHistoryAsString should be the same.",
                  s1 + newLine + s2 + newLine + s3 + newLine,

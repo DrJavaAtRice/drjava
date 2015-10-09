@@ -94,7 +94,7 @@ public class LessPanel extends AbortablePanel {
           public void run() {
             while(_fr != null) {
               try {
-                Thread.sleep(edu.rice.cs.drjava.DrJava.getConfig().
+                Thread.sleep((long) edu.rice.cs.drjava.DrJava.getConfig().
                                getSetting(edu.rice.cs.drjava.config.OptionConstants.FOLLOW_FILE_DELAY));
               }
               catch(InterruptedException ie) { /* ignore */ }

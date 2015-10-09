@@ -1,10 +1,6 @@
 package edu.rice.cs.drjava.ui;
 
-import javax.swing.JMenu;
-import edu.rice.cs.drjava.model.AbstractGlobalModel;
-import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import junit.framework.TestCase;
-import junit.framework.TestSuite;
 
 /** Tests for NewNewJavaClassDialog.
   * @version $Id$
