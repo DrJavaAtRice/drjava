@@ -49,7 +49,12 @@ import edu.rice.cs.plt.iter.*;
 import junit.framework.TestCase;
 
 /** Does Type Checking that is not dependent on the enclosing body.  Also does top level type checking.  Common
-  * to all langauge levels. */
+  * to all langauge levels. 
+  * Where is the symbol table??  It is buried in a static field of LanguageLevelConverter.  In an older version of
+  * this code, it was apparently passed to the constructor of this class as an argument (a much better design), but this
+  * design was abandoned when refactoring should have been performed instead.  There is no symbol table class and methods
+  * naturally belonging to this class were implemented as static methods (!!); these methods could not easily reach
+  * the symbol table unless it too was made static.  Horrible design. */
 public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implements JExpressionIFVisitor<TypeData> {
   
   public static final SourceInfo NONE = SourceInfo.NONE;
@@ -195,13 +200,15 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
   }
 
   /** Returns the SymbolData corresponding to the name className, assuming that className
-    * does not refer to an unqualified or partially-qualified inner class.
+    * does not refer to an unqualified or partially-qualified inner class.  What are the extra parameters for?  Should
+    * this be re-implemented as LanguageLevelConverter.symbolTable.get ??  It is UGLY but simple.
     * */
   public SymbolData getSymbolData(String className, JExpression jexpr, boolean giveException, boolean runnableNotOkay) {
     // Check qualified class name (which is no different at elementary level)
     SourceInfo si = jexpr.getSourceInfo();
     
     // Create a dummy LLV; this seems awkward.  TODO:  refactor
+    // This code is not awkward; it is OBSCENE. symbolTable is static in LanguageLevelConverter. A code stench.
     LanguageLevelVisitor llv = 
       new LanguageLevelVisitor(_file, 
                                _package,
@@ -884,7 +891,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     
     if (s1 == null && s1 != SymbolData.NOT_FOUND) return s2;
     if (s2 == null && s1 != SymbolData.NOT_FOUND) return s1;
-    if (s1==null || s2 == null) return null;
+    if (s1 == null || s2 == null) return null;
     if (s1 == SymbolData.EXCEPTION) return s2; 
     if (s2 == SymbolData.EXCEPTION) return s1; 
     
@@ -898,7 +905,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     if (s1.getSuperClass() == null) {
       //return null;
       //since we know that Object should be the super class of everything, return Object.
-      return getSymbolData("java.lang.Object", _data, new NullLiteral(SourceInfo.NONE));
+      return LanguageLevelConverter.symbolTable.get("java.lang.Object");
     }
     
     // Recur on the super class chain.   

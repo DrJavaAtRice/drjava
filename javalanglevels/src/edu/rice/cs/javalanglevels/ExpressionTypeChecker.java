@@ -1442,19 +1442,19 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
     Expression conseq = that.getForTrue();
     Expression alt = that.getForFalse();
     
-    TypeData conditionType = visit(condition);
-    TypeData conseqType = visit(conseq);
-    TypeData altType = visit(alt);
-    TypeData returnType = getCommonSuperTypeBase(conseqType.getSymbolData(), altType.getSymbolData());
+    TypeData conditionType = condition.visit(this);
+    TypeData conseqType = conseq.visit(this);
+    TypeData altType = alt.visit(this);
+    TypeData returnType = getCommonSuperType(conseqType.getSymbolData(), altType.getSymbolData());
     
-    if (! conditionType.getSymbolData().isAssignable(SymbolData.BOOLEAN_TYPE, JAVA_VERSION)) {
+    if (! conditionType.getSymbolData().isAssignableTo(SymbolData.BOOLEAN_TYPE, JAVA_VERSION)) {
       _addError("The test in this conditional has type " + conditionType.getName() + " instead of boolean.", that);
       return returnType;
     }
     
     if (returnType == null) {
       _addError("The type " + conseqType.getName() + " of the consequent and the type " + altType.getName() +
-                "of this conditional are not compatible");
+                "of this conditional are not compatible", that);
       return returnType;
     } 
     return returnType; 

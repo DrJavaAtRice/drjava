@@ -696,23 +696,27 @@ public class BodyTypeChecker extends SpecialTypeChecker {
   // Return the common superclass or null if there exists a block that doesn't return a value(except the finally block) 
     if (tryBlockRes == null || tryBlockRes == SymbolData.NOT_FOUND.getInstanceData()) 
       return finallyBlock_result;
-    TypeData leastRestrictiveType = tryBlockRes;
+    SymbolData leastRestrictiveType = tryBlockRes.getSymbolData();
     for (int i = 0; i < catchBlocksRes.length; i++) {
-      if (catchBlocksRes[i] == null) return finallyBlock_result;
-      if (catchBlocksRes[i] != SymbolData.NOT_FOUND.getInstanceData() && 
-          _isAssignableFrom(catchBlocksRes[i].getSymbolData(), leastRestrictiveType.getSymbolData())) {
-        leastRestrictiveType = catchBlocksRes[i];
-      }
+      InstanceData cbr = catchBlocksRes[i];
+      if (cbr == null) return finallyBlock_result;
+      if (cbr ==  SymbolData.NOT_FOUND.getInstanceData()) return cbr;
+      if (_isAssignableFrom(catchBlocksRes[i].getSymbolData(), leastRestrictiveType.getSymbolData()))
+        leastRestrictiveType = catchBlocksRes[i].getSymbolData();
+      else leastRestrictiveType = getCommonSuperType(leastRestrictiveType.getSymbolData(), leastRestrictiveType);
     }
 
-    SymbolData result;
-    if (leastRestrictiveType == null && finallyBlock_result == null) return null;
-    else if (leastRestrictiveType == null) result = getCommonSuperType(null, finallyBlock_result.getSymbolData());
-    else if (finallyBlock_result == null) result = getCommonSuperType(leastRestrictiveType.getSymbolData(), null);
-    else result = getCommonSuperType(leastRestrictiveType.getSymbolData(), finallyBlock_result.getSymbolData()); 
-   
-    if (result != null) return result.getInstanceData();
-    return null;
+    if (leastRestrictiveType == null) return null;
+//    else if (leastRestrictiveType == null) result = getCommonSuperType(null, finallyBlock_result.getSymbolData());
+    else {
+      SymbolData result;
+      if (finallyBlock_result == null) 
+        result = getCommonSuperType(leastRestrictiveType.getSymbolData(), null);
+      else
+        result = getCommonSuperType(leastRestrictiveType.getSymbolData(), finallyBlock_result.getSymbolData());
+      if (result == null) return null;
+      else return result.getInstanceData();
+    }
   }
   
   /** Return true if the Exception is unchecked, and false otherwise.

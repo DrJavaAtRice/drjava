@@ -155,7 +155,9 @@ public class LanguageLevelConverter {
   
   /** Uses the ASM class reader to read the class file corresponding to the class in the specified directory, and uses
     * the information from ASM to build a SymbolData corresponding to the class.  Ensures that the returned SymbolData
-    * (if any) is inserted in the symbolTable.
+    * (if any) is inserted in the symbolTable.  Silently fails returning null instead of throwing an exception.
+    * Relies on fact that a static variable, namely LanguageLevelConverter.symbolTable holds the symbol table. UGHH!!
+    * There should be a symbol table object and this method should be an instance method of that object!!
     * @param qualifiedClassName  The fully qualified class name of the class we are looking up
     * @param programRoot  The directory where the class is located.
     * @return The SymbolData for the class file if the class file was found; null otherwise.

@@ -78,7 +78,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
   protected static LinkedList<Pair<String, JExpressionIF>> errors;
   
   /** Stores the classes we have referenced, and all their information, once they are resolved.  Bound to static field
-    * LanguageLevelConverter.symboltable. */
+    * LanguageLevelConverter.symboltable. UGHH!! WHY?? */
   public final Symboltable symbolTable;
   
   /** A table of the names of symbols for which dummy symbol entries (continuations) have been created and resolution 
@@ -120,7 +120,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
   /** A list of package names imported by the current file. */
   LinkedList<String> _importedPackages;
   
-  // A mapping from in scope generic type parameters to their bounds.  
+  // A mapping from in scope generic type parameters to their bounds.  // Why are we processing generic types?
   public HashMap<String, SymbolData> _genericTypes;
   
   /** The fully qualified class names for top level ClassDefs and InterfaceDefs in the current file that have not

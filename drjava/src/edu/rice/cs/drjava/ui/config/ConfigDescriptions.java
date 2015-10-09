@@ -293,7 +293,10 @@ public class ConfigDescriptions {
         "URL for the Java 1.6 API, for generating links to library classes.");
     add(OptionConstants.JAVADOC_1_7_LINK,
         "Javadoc 1.7 URL",
-        "URL for the Java 1.7 API, for generating links to library classes.");
+        "URL for the Java 1.8 API, for generating links to library classes.");
+     add(OptionConstants.JAVADOC_1_8_LINK,
+        "Javadoc 1.8 URL",
+        "URL for the Java 1.8 API, for generating links to library classes.");
     add(OptionConstants.JUNIT_LINK,
         "JUnit URL",
         "URL for the JUnit API, for \"Open Java API Javadoc\".");

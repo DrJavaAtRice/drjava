@@ -863,6 +863,8 @@ public class ConfigFrame extends SwingFrame {
     addOptionComponent(panel, 
                        newStringOptionComponent(OptionConstants.JAVADOC_1_7_LINK));
     addOptionComponent(panel, 
+                       newStringOptionComponent(OptionConstants.JAVADOC_1_8b_LINK));
+    addOptionComponent(panel, 
                        newStringOptionComponent(OptionConstants.JUNIT_LINK));
 
     VectorStringOptionComponent additionalJavadoc =

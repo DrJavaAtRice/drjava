@@ -1249,14 +1249,15 @@ public interface OptionConstants {
   static final String JAVADOC_1_5_TEXT = "1.5";
   static final String JAVADOC_1_6_TEXT = "1.6";
   static final String JAVADOC_1_7_TEXT = "1.7";
+  static final String JAVADOC_1_8_TEXT = "1.8";
   static final String JAVADOC_AUTO_TEXT = "use compiler version"; // for "Open Java API Javadoc"
   
   static final String[] linkChoices = new String[]{
-    JAVADOC_NONE_TEXT, JAVADOC_1_5_TEXT, JAVADOC_1_6_TEXT, JAVADOC_1_7_TEXT };
+    JAVADOC_NONE_TEXT, JAVADOC_1_6_TEXT, JAVADOC_1_7_TEXT, JAVADOC_1_8_TEXT };
   static final ArrayList<String> linkVersionChoices = new ArrayList<String>(Arrays.asList(linkChoices));
 
   static final String[] linkDeprecated = new String[]{
-    JAVADOC_1_3_TEXT, JAVADOC_1_4_TEXT };
+    JAVADOC_1_3_TEXT, JAVADOC_1_5_TEXT, JAVADOC_1_4_TEXT };
   static final ArrayList<String> linkVersionDeprecated = new ArrayList<String>(Arrays.asList(linkDeprecated));  
   
   /** Constants for the URLs of Sun's system class documentation for different versions of Java. */
@@ -1270,6 +1271,8 @@ public interface OptionConstants {
     new StringOption("javadoc.1.6.link", "http://download.oracle.com/javase/6/docs/api");
   public static final StringOption JAVADOC_1_7_LINK =
     new StringOption("javadoc.1.7.link", "http://download.oracle.com/javase/7/docs/api/");
+  public static final StringOption JAVADOC_1_8_LINK = 
+    new StringOption("javadoc.1.8.link", "http://download.oracle.com/javase/8/docs/api/");
   
   /** The version of Java to use for links to Javadoc for system classes. */
   public static final ForcedChoiceOption JAVADOC_LINK_VERSION =
@@ -1277,7 +1280,8 @@ public interface OptionConstants {
                            (System.getProperty("java.specification.version").startsWith("1.5") ? JAVADOC_1_5_TEXT : 
                               (System.getProperty("java.specification.version").startsWith("1.6") ? JAVADOC_1_6_TEXT : 
                                  JAVADOC_1_7_TEXT)),
-                           linkVersionChoices, linkVersionDeprecated);
+                           linkVersionChoices, 
+                           linkVersionDeprecated);
   
   static final String[] apiJavadocChoices = new String[] {
     JAVADOC_1_5_TEXT, JAVADOC_1_6_TEXT, JAVADOC_1_7_TEXT, JAVADOC_AUTO_TEXT};
