@@ -257,6 +257,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     LinkedList<OpenDefinitionsDocument> lod = new LinkedList<OpenDefinitionsDocument>();
     lod.add(doc);
     junitOpenDefDocs(lod, false);
+    debug.logEnd("junit(doc)");
   }
   
   /** Ensures that all documents have been compiled since their last modification and then delegates the actual testing
@@ -268,7 +269,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     
     // Check_testInProgress flag
     if (_testInProgress) return;
-    
+
     // Reset the JUnitErrorModel, fixes bug #907211 "Test Failures Not Cleared Properly".
     _junitErrorModel = new JUnitErrorModel(new JUnitError[0], null, false);
 
@@ -326,8 +327,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     * classes by searching the build directories for the documents.  Note: caller must respond to thrown exceptions 
     * by invoking _junitUnitInterrupted (to run hourglassOff() and reset the unit testing UI).
     */
-  private void _rawJUnitOpenDefDocs(List<OpenDefinitionsDocument> 
-    lod, final boolean allTests) {
+  private void _rawJUnitOpenDefDocs(List<OpenDefinitionsDocument> lod, final boolean allTests) {
 
     File buildDir = _model.getBuildDirectory();
 

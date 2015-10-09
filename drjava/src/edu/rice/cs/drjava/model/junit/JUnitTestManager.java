@@ -229,6 +229,7 @@ public class JUnitTestManager {
         return false;
     }
     Map<String, List<String>> lineColors = null;
+    this.lastResult = new JUnitResultTuple(true, null);
 
     //Utilities.show("runTestSuite() in SlaveJVM called");
     
@@ -300,7 +301,6 @@ public class JUnitTestManager {
             StringWriter stackTrace = new StringWriter();
             e.printStackTrace(new PrintWriter(stackTrace));
             //Utilities.show(stackTrace.toString());
-            this.lastResult = new JUnitResultTuple(false, null);
         }
 
         /* Reset the runtime */
@@ -309,10 +309,8 @@ public class JUnitTestManager {
     }
 
     catch (Exception e) { 
-      this.lastResult = new JUnitResultTuple(false, null);
       JUnitError[] errors = new JUnitError[1];      
-      errors[0] = new JUnitError(null, -1, -1, e.getMessage(), false, "", "", 
-        e.toString(), e.getStackTrace());
+      errors[0] = new JUnitError(null, -1, -1, e.getMessage(), false, "", "", e.toString(), e.getStackTrace());
       _reset();
       _jmc.testSuiteEnded(errors);
       //new ScrollableDialog(null, "Slave JVM: testSuite ended with errors", "", Arrays.toString(errors)).show();

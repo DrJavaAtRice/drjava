@@ -463,16 +463,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   public Option<List<String>> findTestClasses(List<String> classNames, 
     List<File> files, CoverageMetadata coverageMetadata) {
     InterpreterJVMRemoteI remote = _state.value().interpreter(false);
-    if (remote == null) { 
-        return Option.none(); 
-    }
-
-    try { 
-        return Option.some(remote.findTestClasses(classNames, files, coverageMetadata)); 
-    } catch (RemoteException e) { 
-      _handleRemoteException(e); 
-      return Option.none(); 
-    }
+    if (remote == null) { return Option.none(); }
+    try { return Option.some(remote.findTestClasses(classNames, files, coverageMetadata)); } 
+    catch (RemoteException e) { _handleRemoteException(e); return Option.none(); }
   }
   
   /**
