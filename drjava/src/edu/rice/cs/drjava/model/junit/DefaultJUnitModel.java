@@ -157,7 +157,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   public JUnitResultTuple getLastResult() { 
     return new JUnitResultTuple(false, null);
     // @rebecca TODO: why does this result in not finding any test classes?
-    // return this._jvm.getLastJUnitResult(); 
+    //return this._jvm.getLastJUnitResult(); 
   }
 
   public boolean getCoverage() { 
@@ -331,7 +331,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
 
     File buildDir = _model.getBuildDirectory();
 
-    //Utilities.show("Running JUnit tests. Build directory is " + buildDir);
+//    Utilities.show("Running JUnit tests. Build directory is " + buildDir);
     
     /** Open java source files */
     HashSet<String> openDocFiles = new HashSet<String>();
@@ -347,7 +347,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     for (OpenDefinitionsDocument doc: lod) /* for all nonEmpty documents in lod */ {
       if (doc.isSourceFile())  { // excludes Untitled documents and open non-source files
         try {
-          //System.err.println("Processing " + doc);
+//          System.err.println("Processing " + doc);
           File sourceRoot = doc.getSourceRoot(); // may throw an InvalidPackageException
           
           // doc has valid package name; add it to list of open java source doc files
@@ -367,15 +367,15 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
           
           if (! classDirsAndRoots.containsKey(classFileDir)) {
             classDirsAndRoots.put(classFileDir, sourceDir);
-            //System.err.println("Adding " + classFileDir + " with source root " + sourceRoot + 
-            //" to list of class directories");
+//            System.err.println("Adding " + classFileDir + " with source root " + sourceRoot + 
+//            " to list of class directories");
           }
         }
         catch (InvalidPackageException e) { /* Skip the file, since it doesn't have a valid package */ }
       }
     }
 
-    //System.err.println("classDirs = " + classDirsAndRoots.keySet());
+//    System.err.println("classDirs = " + classDirsAndRoots.keySet());
     
     /** set of dirs potentially containing test classes */
     Set<File> classDirs = classDirsAndRoots.keySet();
@@ -393,11 +393,11 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     
     try {
       for (File dir: classDirs) { // foreach class file directory
-        //System.err.println("Examining directory " + dir);
+//        System.err.println("Examining directory " + dir);
         
         File[] listing = dir.listFiles();
         
-        //System.err.println("Directory contains the files: " + Arrays.asList(listing));
+//        System.err.println("Directory contains the files: " + Arrays.asList(listing));
         
         if (listing != null) { // listFiles may return null if there's an IO error
           for (File entry : listing) { /* for each class file in the build directory */        
@@ -414,7 +414,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
               noExtName = name.substring(0, name.length() - 6);  // remove ".class" from name
               int indexOfLastDot = noExtName.lastIndexOf('.');
               String simpleClassName = noExtName.substring(indexOfLastDot + 1);
-              //System.err.println("Simple class name is " + simpleClassName);  
+//              System.err.println("Simple class name is " + simpleClassName);  
               if (/*isProject &&*/ ! simpleClassName.endsWith("Test")) continue;
             }
                        
@@ -448,17 +448,17 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
               /** The canonical pathname for the file (including the file name) */
               String javaSourceFileName = getCanonicalPath(rootDir) + File.separator + sourceName.value();
  
-              //System.err.println("Full java source fileName = " + javaSourceFileName);
+//              System.err.println("Full java source fileName = " + javaSourceFileName);
               
               /* The index in fileName of the dot preceding the extension ".java", ".dj", ".dj0*, ".dj1", or ".dj2" */
               int indexOfExtDot = javaSourceFileName.lastIndexOf('.');
-              //System.err.println("indexOfExtDot = " + indexOfExtDot);
+//              System.err.println("indexOfExtDot = " + indexOfExtDot);
               if (indexOfExtDot == -1) continue;  // RMI stub class files return source file names without extensions
-              //System.err.println("File found in openDocFiles = "  + openDocFiles.contains(sourceFileName));
+//              System.err.println("File found in openDocFiles = "  + openDocFiles.contains(sourceFileName));
               
               /* Determine if this java source file was generated from a language levels file. */
               String strippedName = javaSourceFileName.substring(0, indexOfExtDot);
-              //System.err.println("Stripped name = " + strippedName);
+//              System.err.println("Stripped name = " + strippedName);
               
               String sourceFileName;
               
@@ -486,7 +486,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     }
 
     catch(Exception e) {
-      //new ScrollableDialog(null, "UnexceptedExceptionThrown", e.toString(), "").show();
+//      new ScrollableDialog(null, "UnexceptedExceptionThrown", e.toString(), "").show();
       throw new UnexpectedException(e); // triggers _junitInterrupted which runs hourglassOff
     }
     
@@ -524,8 +524,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
               throw new RemoteException("No unit test classes were passed to the slave JVM");
           }
         }
-        catch (RemoteException e) { 
-          // Unit testing aborted; cleanup; hourglassOff already called in junitStarted
+        catch (RemoteException e) { // Unit testing aborted; cleanup; hourglassOff already called in junitStarted
           _notifyJUnitEnded();  // balances junitStarted()
           _testInProgress = false;
         }

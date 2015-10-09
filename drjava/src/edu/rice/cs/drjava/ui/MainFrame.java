@@ -5840,20 +5840,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   /** Tests all open documents. */
-  // @rebecca TODO: keep this private
   public void _junitAll() {
-
     updateStatusField("Running All Open Unit Tests");
     hourglassOn();  // turned off in junitStarted/nonTestCase/_junitInterrupted
     _guiAvailabilityNotifier.junitStarted(); // JUNIT and COMPILER
-
-    try { 
-        _model.getJUnitModel().junitAll(); 
-    } catch(UnexpectedException e) { 
-        _junitInterrupted(e); 
-    } catch(Exception e) { 
-        _junitInterrupted(new UnexpectedException(e)); 
-    }
+    try { _model.getJUnitModel().junitAll(); } 
+    catch(UnexpectedException e) { _junitInterrupted(e); }
+    catch(Exception e) { _junitInterrupted(new UnexpectedException(e)); }
   }
   
 //  /**

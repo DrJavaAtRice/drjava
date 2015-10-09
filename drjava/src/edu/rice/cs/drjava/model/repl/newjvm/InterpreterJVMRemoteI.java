@@ -54,7 +54,9 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
     List<File> files, CoverageMetadata coverageMetadata) throws RemoteException;
   
   public boolean runTestSuite() throws RemoteException;
-  
+
+  public JUnitResultTuple getLastJUnitResult();
+
   /** Check that all access of class members is permitted by accessibility controls. */
   public void setEnforceAllAccess(boolean enforce) throws RemoteException;
   

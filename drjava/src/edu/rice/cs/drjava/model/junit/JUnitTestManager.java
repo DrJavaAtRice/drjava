@@ -231,10 +231,10 @@ public class JUnitTestManager {
     Map<String, List<String>> lineColors = null;
     this.lastResult = new JUnitResultTuple(true, null);
 
-    //Utilities.show("runTestSuite() in SlaveJVM called");
+//    Utilities.show("runTestSuite() in SlaveJVM called");
     
     try {
-      //System.err.println("Calling _testRunner.runSuite(...)");
+//      System.err.println("Calling _testRunner.runSuite(...)");
       TestResult result = _testRunner.runSuite(_suite);
       
       JUnitError[] errors = new JUnitError[result.errorCount() + result.failureCount()];
@@ -313,7 +313,7 @@ public class JUnitTestManager {
       errors[0] = new JUnitError(null, -1, -1, e.getMessage(), false, "", "", e.toString(), e.getStackTrace());
       _reset();
       _jmc.testSuiteEnded(errors);
-      //new ScrollableDialog(null, "Slave JVM: testSuite ended with errors", "", Arrays.toString(errors)).show();
+//      new ScrollableDialog(null, "Slave JVM: testSuite ended with errors", "", Arrays.toString(errors)).show();
     }
 
     _log.log("Exiting runTestSuite()");

@@ -142,7 +142,12 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     _startupClassPath = ReflectUtil.SYSTEM_CLASS_PATH;
   }
   
-  
+  public JUnitResultTuple getLastJUnitResult() {
+    InterpreterJVMRemoteI remote = _state.value().interpreter(false);
+    if (remote == null) { return new JUnitResultTuple(false, null); }
+    return remote.getLastJUnitResult(); 
+  }
+
   /*
    * === Startup and shutdown methods ===
    */
@@ -388,17 +393,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    */
   public boolean addBuildDirectoryClassPath(File f) {
     InterpreterJVMRemoteI remote = _state.value().interpreter(false);
-    if (remote == null) { 
-        return false; 
-    }
-    try { 
-        remote.addBuildDirectoryClassPath(f); 
-        return true; 
-    }
-    catch (RemoteException e) { 
-        _handleRemoteException(e); 
-        return false; 
-    }
+    if (remote == null) { return false; }
+    try { remote.addBuildDirectoryClassPath(f); return true; }
+    catch (RemoteException e) { _handleRemoteException(e); return false; }
   }
   
   /**
@@ -474,16 +471,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    */
   public boolean runTestSuite() { 
     InterpreterJVMRemoteI remote = _state.value().interpreter(true);
-    if (remote == null) { 
-        return false; 
-    }
-    try {
-        return remote.runTestSuite();
-    }
-    catch (RemoteException e) { 
-        _handleRemoteException(e); 
-        return false;
-    }
+    if (remote == null) { return false; }
+    try { return remote.runTestSuite(); }
+    catch (RemoteException e) { _handleRemoteException(e); return false; }
   }
   
 //  /** Updates the security manager in slave JVM */
