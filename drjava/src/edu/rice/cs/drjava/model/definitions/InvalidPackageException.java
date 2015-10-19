@@ -57,7 +57,7 @@ public class InvalidPackageException extends Exception {
     _location = location;
   }
   
-  /** Returns the location of the problem. */
+  /** @return the location of the problem. */
   public int getLocation() {
     return _location;
   }

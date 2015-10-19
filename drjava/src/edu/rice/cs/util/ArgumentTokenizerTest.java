@@ -49,7 +49,9 @@ import java.util.List;
  */
 public class ArgumentTokenizerTest extends DrJavaTestCase {
 
-  /** Creates a new ArgumentTokenizer to be used in every test.
+  /** 
+   * Creates a new ArgumentTokenizer to be used in every test.
+   * @param name test name
    */
   public ArgumentTokenizerTest(String name) {
     super(name);

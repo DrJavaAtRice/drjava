@@ -131,7 +131,10 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
   
   //--------- METHODS -----------
   
-  /** Create a null default action for Cntl/Alt/Meta chars in the keymap for p. */
+  /** 
+   * Create a null default action for Cntl/Alt/Meta chars in the keymap for p. 
+   * @param p the component to update
+   */
   public static void disableAltCntlMetaChars(JTextComponent p) {
     // caused bug 3280955: Reoccurrence of French keyboard problem
     // calls to this method have been commented out
@@ -177,7 +180,11 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
     }
   }
   
-  /** A length checked version of setCaretPosition(int pos) that ensures pos is within the DJDocument. */
+  /** 
+   * A length checked version of setCaretPosition(int pos) that ensures pos 
+   * is within the DJDocument. 
+   * @param pos the position to be set
+   */
   public void setCaretPos(int pos) {
 //    System.err.println("setCaretPos(" + pos + ") called");
     DJDocument doc = getDJDocument();
@@ -247,19 +254,23 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
     */
   protected abstract void indentLines(int selStart, int selEnd, Indenter.IndentReason reason, ProgressMonitor pm);
      
-  /** Returns true if the indent is to be performed.
-    * @param selStart - the selection start
-    * @param selEnd - the selection end
-    */
+  /**
+   * @param selStart - the selection start
+   * @param selEnd - the selection end
+   * @return true if the indent is to be performed.
+   */
   protected abstract boolean shouldIndent(int selStart, int selEnd);
   
-  /** Returns the DJDocument held by the pane. */
+  /** @return the DJDocument held by the pane. */
   public abstract DJDocument getDJDocument();
   
   /** Drag and drop target. */
   volatile DropTarget dropTarget = new DropTarget(this, this);  
 
-  /** User dragged something into the component. */
+  /** 
+   * User dragged something into the component. 
+   * @param dropTargetDragEvent the drag event
+   */
   public void dragEnter(DropTargetDragEvent dropTargetDragEvent) {
     DrJavaRoot.dragEnter(dropTargetDragEvent);
   }

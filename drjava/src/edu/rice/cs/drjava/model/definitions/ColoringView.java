@@ -179,7 +179,7 @@ public class ColoringView extends PlainView implements OptionConstants {
     * @param start  The beginning position in the model
     * @param end  The end position in the model
     * @return  The location of the end of the image (range)
-    * @throws BadLocationException
+    * @throws BadLocationException if attempts to reference an invalid location
     */
   protected int drawSelectedText(Graphics g, int x, int y, int start, int end) throws BadLocationException {
 

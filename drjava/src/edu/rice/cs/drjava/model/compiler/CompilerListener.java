@@ -47,10 +47,17 @@ public interface CompilerListener {
   /** Called after a compile is started by the GlobalModel. */
   public void compileStarted();
 
-  /** Called when a compile has finished running. */
+  /** 
+   * Called when a compile has finished running. 
+   * @param workDir the working directory
+   * @param excludedFiles the files that were excluded
+   */
   public void compileEnded(File workDir, List<? extends File> excludedFiles);
   
-  /** Called if a compilation is aborted. */
+  /** 
+   * Called if a compilation is aborted. 
+   * @param e the exception with which the compilation terminated
+   */
   public void compileAborted(Exception e);
   
   /** Called to demand that all open source files be saved before compiling. */

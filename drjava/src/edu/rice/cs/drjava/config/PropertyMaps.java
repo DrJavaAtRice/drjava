@@ -98,7 +98,12 @@ public final class PropertyMaps implements Cloneable {
     }
   }
   
-  /** Add a property. */
+  /** 
+   * Add a property. 
+   * @param category the category of properties to which to add p
+   * @param p the property to add
+   * @return the property that was added
+   */
   public DrJavaProperty setProperty(String category, DrJavaProperty p) {
     Map<String,DrJavaProperty> m = _props.get(category);
     if (m == null) { m = new HashMap<String,DrJavaProperty>(); _props.put(category,m); }
@@ -106,16 +111,22 @@ public final class PropertyMaps implements Cloneable {
     return p;
   }
   
-  /** Clear the specified category. */
+  /** 
+   * Clear the specified category. 
+   * @param category to category to be cleared
+   */
   public void clearCategory(String category) {
     _props.remove(category);
   }
   
-  /** Return the set of categories. */
+  /** @return the set of categories. */
   public Set<String> getCategories() { return _props.keySet(); }
 
-  /** Return the properties in a category.
-    * @throws IllegalArgumentException if category is not known. */
+  /** 
+   * @param category the category of properties to get
+   * @return the properties in a category
+   * @throws IllegalArgumentException if category is not known. 
+   */
   public Map<String, DrJavaProperty> getProperties(String category) {
     Map<String,DrJavaProperty> m = _props.get(category);
     if (m == null) { throw new IllegalArgumentException("DrJavaProperty category unknown."); }

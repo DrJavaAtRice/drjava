@@ -50,6 +50,7 @@ public final class QuestionStartingNewStmtTest extends IndentRulesTestCase {
    * This is done by testing if the previous character is one of
    * the following: docstart, ';', '{', '}'
    * These characters are here-on refered to as 'end-characters'.
+   * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testStartOfStmtCheckForEndCharacters() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionStartingNewStmt(null, null);
@@ -82,6 +83,7 @@ public final class QuestionStartingNewStmtTest extends IndentRulesTestCase {
   /** Ensures that the current line is the first line of a statement.
    * Tests that whitespace, single-line and multi-line comments
    * are ignored when searching for the end-characters.
+   * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testStartOfStmtIgnoreWhiteSpaceAndCommentsInBetween() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionStartingNewStmt(null, null);
@@ -129,6 +131,7 @@ public final class QuestionStartingNewStmtTest extends IndentRulesTestCase {
   /** Ensures that the current line is the first line of a statement.
    * Tests that end characters in single-line comments, multi-line
    * comments or quotes are ignored.
+   * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testNotStartOfStmtDueToEndCharactersInCommentsOrQuotes() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionStartingNewStmt(null, null);

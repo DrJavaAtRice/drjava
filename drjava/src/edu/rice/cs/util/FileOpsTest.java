@@ -111,9 +111,11 @@ public class FileOpsTest extends DrJavaTestCase {
   }
   
   
-  /** This method checks that backups are made correctly, that when a save fails,
+  /** 
+   * This method checks that backups are made correctly, that when a save fails,
    * no data is lost, and that when a save is attempted on a write-protected file,
    * the save fails (bug #782963).
+   * @throws IOException if an IO operation fails
    */
   public void testSaveFile() throws IOException {
     File writeTo = File.createTempFile("fileops", ".test").getCanonicalFile();
@@ -222,6 +224,7 @@ public class FileOpsTest extends DrJavaTestCase {
   
   /** This tests that packageExplore correctly runs through and returns
    * non-empty packages
+   * @throws IOException if an IO operation fails
    */
   public void testPackageExplore() throws IOException {
     File rootDir = FileOps.createTempDirectory("fileOpsTest");
@@ -255,7 +258,10 @@ public class FileOpsTest extends DrJavaTestCase {
     assertTrue("deleting temp directory", FileOps.deleteDirectory(rootDir));
   }
   
-  /** Tests that non-empty directories can be deleted on exit. */
+  /** Tests that non-empty directories can be deleted on exit.
+   * @throws IOException if an IO operation fails
+   * @throws InterruptedException if execution is interrupted unexpectedly
+   */
   public void testDeleteDirectoryOnExit() throws IOException, InterruptedException {
     
     File tempDir = FileOps.createTempDirectory("DrJavaTestTempDir");
@@ -372,7 +378,9 @@ public class FileOpsTest extends DrJavaTestCase {
                  "', expected = '" + expected + "', actual = '" + actual + "'", expected, actual);
   }
   
-  /** Tests getFilesInDir. */
+  /** Tests getFilesInDir.
+   * @throws IOException if an IO operation fails
+   */
   public void testGetFiles() throws IOException {
     File dir1 = FileOps.createTempDirectory("DrJavaTestTempDir");
     assertTrue("dir1 exists", dir1.exists());
@@ -413,7 +421,9 @@ public class FileOpsTest extends DrJavaTestCase {
   }
   
   /** Tests for getShortFile. This test creates a file and writes to it using a long file name, then
-    * checks if the short file name is the same (canonical) file and that it contains teh same data. */
+   * checks if the short file name is the same (canonical) file and that it contains the same data.
+   * @throws IOException if an IO operation fails
+   */
   public void testGetShortFile() throws IOException {
     File dir1 = FileOps.createTempDirectory("DrJavaTestTempDir");
     File dir2 = new File(dir1, "Documents and Settings" + File.separator + "User Name" + File.separator + "My Documents");

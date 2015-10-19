@@ -68,7 +68,14 @@ public class MovingDocumentRegion extends DocumentRegion {
     catch (BadLocationException ble) { throw new UnexpectedException(ble); }  // should never happen
   }
     
-  /** Create a new moving document region. */
+  /** 
+   * Create a new moving document region. 
+   * @param doc the document within which to create the new region
+   * @param start the start offset
+   * @param end the end offset
+   * @param lineStart the line start
+   * @param lineEnd the line end
+   */
   public MovingDocumentRegion(final OpenDefinitionsDocument doc, int start, int end, int lineStart, int lineEnd) {
 
     super(doc, start, end);
@@ -159,7 +166,11 @@ public class MovingDocumentRegion extends DocumentRegion {
   /** @return the string it was assigned */
   public String getString() { return _stringSuspension.value(); }
   
-  /** @return true if objects a and b are equal; null values are handled correctly. */
+  /** 
+   * @param a first object to compare
+   * @param b second object to compare
+   * @return true if objects a and b are equal; null values are handled correctly. 
+   */
   public static boolean equals(Object a, Object b) {
     if (a == null) return (b == null);
     return a.equals(b);

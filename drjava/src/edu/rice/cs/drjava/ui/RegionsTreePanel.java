@@ -174,7 +174,10 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
     _setColors(_regTree);
   }
   
-  /** Quick helper for setting up color listeners. */
+  /** 
+   * Quick helper for setting up color listeners. 
+   * @param c the component for which to set up listeners
+   */
   private static void _setColors(Component c) {
     new ForegroundColorListener(c);
     new BackgroundColorListener(c);
@@ -253,7 +256,10 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
     repaint();
   }
   
-  /** Forces the panel to be updated and requests focus in this panel. */
+  /** 
+   * Forces the panel to be updated and requests focus in this panel. 
+   * @return result 
+   */
   protected boolean _requestFocusInWindow() {
     updatePanel();
     updateButtons();
@@ -451,7 +457,10 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
       return /* renderer */ this;
     }
     
-    /** Alternative version of setToolTipText that accepts a thunk. */
+    /** 
+     * Alternative version of setToolTipText that accepts a thunk. 
+     * @param text value to set as tooltip text
+     */
     public void setToolTipText(Thunk<String> text) {
       Object oldText = getClientProperty(TOOL_TIP_TEXT_KEY);
       putClientProperty(TOOL_TIP_TEXT_KEY, text);
@@ -481,7 +490,10 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
   /** Action performed when the Enter key is pressed. Should be overridden. */
   protected void performDefaultAction() { }
   
-  /** Creates the buttons for controlling the regions. Should be overridden. */
+  /** 
+   * Creates the buttons for controlling the regions. Should be overridden. 
+   * @return the newly-created buttons
+   */
   protected JComponent[] makeButtons() {  return new JComponent[0];  }
   
   /** Creates the buttons for controlling the regions. */
@@ -535,7 +547,10 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
     _buttonPanel.add(closeButtonPanel, BorderLayout.EAST);
   }
   
-  /** Makes the popup menu actions. Should be overridden. */
+  /** 
+   * Makes the popup menu actions. Should be overridden. 
+   * @return the popup menu actions
+   */
   protected AbstractAction[] makePopupMenuActions() { return null; }
   
   /** Initializes the pop-up menu. */
@@ -550,10 +565,16 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
     }
   }
   
-  /** Gets the tree node for the given document. */
+  /** 
+   * @param doc the document for which to get the tree node
+   * @return the tree node for the given document. 
+   */
   DefaultMutableTreeNode getNode(OpenDefinitionsDocument doc) { return _docToTreeNode.get(doc); }
   
-    /** Gets the tree node for the given region. */
+  /** 
+   * @param region the region for which to get the tree node 
+   * @return the tree node for the given region. 
+   */
   DefaultMutableTreeNode getNode(R region) { return _regionToTreeNode.get(region); }
   
   /** Gets the currently selected regions in the region tree, or an empty array if no regions are selected.
@@ -639,7 +660,10 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
     }
   }
   
-  /** Return the region preceding r in the tree, or null if there isn't one. */
+  /** 
+   * @param r the region for which to find the previous
+   * @return the region preceding r in the tree, or null if there isn't one. 
+   */
   protected R getPrevRegionInTree(R r) {
     DefaultMutableTreeNode regionNode = _regionToTreeNode.get(r);
     if (regionNode != null) {
@@ -708,7 +732,10 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
     }
   }
   
-  /** Return the region following r in the tree, or null if there isn't one. */
+  /**
+   * @param r the region for which to find the previous
+   * @return the region following r in the tree, or null if there isn't one. 
+   */
   protected R getNextRegionInTree(R r) {
     DefaultMutableTreeNode regionNode = _regionToTreeNode.get(r);
     if (regionNode != null) {
@@ -966,8 +993,12 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
     }
   }
   
-  /** Factory method to create user objects put in the tree.
-    * If subclasses extend RegionTreeUserObj, they need to override this method. */
+  /** 
+   * Factory method to create user objects put in the tree.
+   * If subclasses extend RegionTreeUserObj, they need to override this method. 
+   * @param r value to put in the tree
+   * @return a new user object to put in the tree
+   */
   protected RegionTreeUserObj<R> makeRegionTreeUserObj(R r) { return new RegionTreeUserObj<R>(r); }
   
   protected class RegionTree extends JTree {

@@ -144,12 +144,14 @@ public interface ProjectFileIR {
    * that the custom manifest is in USE.
    * That depends on other JAR creation settings.
    * 
+   * @return custom manifest for the project
    * @see #getCreateJarFlags()
    */
   public String getCustomManifest();
   
   /**
    * Mutator for custom manifest.
+   * @param manifest custom manifest to be set for the project
    */
   public void setCustomManifest(String manifest);
 }

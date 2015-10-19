@@ -57,6 +57,9 @@ public class JUnitError extends DJError implements Serializable {
    * @param message  the error message
    * @param isWarning true if the error is a warning
    * @param test the name of the test that failed
+   * @param className the name of the class to which the failed test belonged
+   * @param exception the exception itself
+   * @param stackTrace array of stack trace elements
    */
   public JUnitError(File file, int lineNumber, int startColumn, String message, boolean isWarning, String test, 
                     String className, String exception, StackTraceElement[] stackTrace) {
@@ -93,10 +96,13 @@ public class JUnitError extends DJError implements Serializable {
     */
   public String exception() { return _exception; }
   
-  /** Return the array of stack trace elements. */
+  /** @return the array of stack trace elements. */
   public StackTraceElement[] stackTrace() { return _stackTrace; }
   
-  /** Set the array of stack trace elements. */
+  /** 
+   * Set the array of stack trace elements. 
+   * @param stes the stack trace elements
+   */
   public void setStackTrace(StackTraceElement[] stes) { _stackTrace = stes; }
   
   public String toString() {

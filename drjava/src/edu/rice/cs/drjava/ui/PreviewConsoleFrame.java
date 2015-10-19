@@ -49,9 +49,14 @@ public class PreviewConsoleFrame extends PreviewFrame {
   
   private volatile EditDocumentInterface _document;
   
-  /** Contructs a new PreviewConsoleFrame using a parent model and a MainFrame. The boolean determines whether
-    * the document to be printed is an interactions document.  Should be called in event thread.
-    */
+  /** 
+   * Contructs a new PreviewConsoleFrame using a parent model and a MainFrame. 
+   * The boolean determines whether the document to be printed is an 
+   * interactions document.  Should be called in event thread.
+   * @param model the parent model
+   * @param mainFrame the main frame
+   * @param interactions whether the document to be printed is an interactions document
+   */
   public PreviewConsoleFrame(SingleDisplayModel model, MainFrame mainFrame, boolean interactions)
     throws IllegalStateException {
     super(model, mainFrame, interactions);

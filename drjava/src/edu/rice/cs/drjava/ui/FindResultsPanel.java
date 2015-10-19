@@ -90,16 +90,23 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   private final LinkedList<Pair<Option<Color>, OptionListener<Color>>> _colorOptionListeners = 
     new LinkedList<Pair<Option<Color>, OptionListener<Color>>>();
   
-  /** Constructs a new find results panel. This is swing class which should only be accessed from the event thread.
-    * @param frame the MainFrame
-    * @param regionManager the region manager associated with this panel
-    * @param title for the panel
-    * @param searchString string that was searched for
-    * @param searchAll whether all files were searched
-    * @param searchSelectionOnly whether the selection within the document was searched
-    * @param doc weak reference to the document in which the search occurred (or started, if all documents were searched)
-    * @param findReplace the FindReplacePanel that created this FindResultsPanel
-    */
+  /** 
+   * Constructs a new find results panel. This is swing class which should 
+   * only be accessed from the event thread.
+   * @param frame the MainFrame
+   * @param regionManager the region manager associated with this panel
+   * @param region the region associated with this panel
+   * @param title for the panel
+   * @param searchString string that was searched for
+   * @param searchAll whether all files were searched
+   * @param searchSelectionOnly whether the selection within the document was searched
+   * @param matchCase whether the search was case-sensitive
+   * @param wholeWord whether the search was looking for a match on the whole word
+   * @param noComments whether the search ignored comments
+   * @param noTestCases whether the search ignored test cases
+   * @param doc weak reference to the document in which the search occurred (or started, if all documents were searched)
+   * @param findReplace the FindReplacePanel that created this FindResultsPanel
+   */
   public FindResultsPanel(MainFrame frame, RegionManager<MovingDocumentRegion> regionManager, MovingDocumentRegion region, String title, 
                           String searchString, boolean searchAll, boolean searchSelectionOnly, boolean matchCase, boolean wholeWord, 
                           boolean noComments, boolean noTestCases, WeakReference<OpenDefinitionsDocument> doc, 
@@ -370,10 +377,10 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     }
   }
 
-  /** Return true if all documents were searched. */
+  /** @return true if all documents were searched. */
   public boolean isSearchAll() { return _searchAll; }
   
-  /** Return the document which was searched (or where the search started, if _searchAll is true).
+  /** @return the document which was searched (or where the search started, if _searchAll is true).
     * May return null if the weak reference to the document was severed. */
   public OpenDefinitionsDocument getDocument() { return _doc.get(); }
 

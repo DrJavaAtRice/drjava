@@ -52,7 +52,12 @@ import edu.rice.cs.util.text.EditDocumentException;
 public final class GlobalModelCompileTest extends GlobalModelTestCase {
   protected static final Log _log  = new Log("GlobalModelCompileTest.txt", false);
   
-  /** Tests calling compileAll with no source files works. Does not reset interactions. */
+  /** 
+   * Tests calling compileAll with no source files works. Does not reset interactions. 
+   * @throws BadLocationException if attempts to reference an invalid location
+   * @throws IOException if an IO operation fails
+   * @throws InterruptedException if execution is interrupted unexpectedly
+   */
   public void testCompileAllWithNoFiles() throws BadLocationException, IOException, InterruptedException {
     // Open one empty doc
     _model.newFile();
@@ -75,7 +80,13 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     _log.log("testCompileAllWithNoFiles complete");
   }
   
-  /** Tests that the interactions pane is reset after a successful compile. */
+  /** 
+   * Tests that the interactions pane is reset after a successful compile. 
+   * @throws BadLocationException if attempts to reference an invalid location
+   * @throws IOException if an IO operation fails
+   * @throws InterruptedException if execution is interrupted unexpectedly
+   * @throws EditDocumentException if an exception occurs while editing
+   */
   public void testCompileResetsInteractions() throws BadLocationException, IOException, InterruptedException,
     EditDocumentException {
     
@@ -115,9 +126,11 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     _log.log("testCompileResetsInteractions complete");
   }
   
-  /** If we try to compile an unsaved file, and if we don't save when asked to saveAllBeforeProceeding, it should
-    * not do the compile or any other actions.
-    */
+  /** 
+   * If we try to compile an unsaved file, and if we don't save when asked to saveAllBeforeProceeding, it should
+   * not do the compile or any other actions.
+   * @throws Exception if something goes wrong
+   */
   public void testCompileAbortsIfUnsaved() throws Exception {
     final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     
@@ -139,9 +152,11 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     _log.log("testCompileAbortsIfUnsaved complete");
   }
   
-  /** If we try to compile while any files are unsaved, and if we don't save when asked to saveAllBeforeProceeding,
-    * it should not do the compile or any other actions.
-    */
+  /** 
+   * If we try to compile while any files are unsaved, and if we don't save when asked to saveAllBeforeProceeding,
+   * it should not do the compile or any other actions.
+   * @throws Exception if something goes wrong
+   */
   public void testCompileAbortsIfAnyUnsaved() throws Exception {
     final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
@@ -167,8 +182,11 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
   }
   
   /** If we try to compile while any files (including the active file) are unsaved but we do save it from within saveAllBeforeProceeding, the
-    * compile should occur happily.  Doesn't reset interactions because no interpretations are performed.
-    */
+   * compile should occur happily.  Doesn't reset interactions because no interpretations are performed.
+   * @throws BadLocationException if attempts to reference an invalid location
+   * @throws IOException if an IO operation fails
+   * @throws InterruptedException if execution is interrupted unexpectedly
+   */
   public void testCompileAnyUnsavedButSaveWhenAsked() throws BadLocationException, IOException, InterruptedException {
     final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
@@ -230,9 +248,13 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     _log.log("testCompileAnyUnsavedButSaveWhenAsked complete");
   }
   
-  /** If we try to compile while any files (but not the active file) are unsaved but we do save it from within 
-    * saveAllBeforeProceeding, the compile should occur happily.  Does not reset interactions.
-    */
+  /** 
+   * If we try to compile while any files (but not the active file) are unsaved but we do save it from within 
+   * saveAllBeforeProceeding, the compile should occur happily.  Does not reset interactions.
+   * @throws BadLocationException if attempts to reference an invalid location
+   * @throws IOException if an IO operation fails
+   * @throws InterruptedException if execution is interrupted unexpectedly
+   */
   public void testCompileActiveSavedAnyUnsavedButSaveWhenAsked() throws BadLocationException, IOException, 
     InterruptedException {
     

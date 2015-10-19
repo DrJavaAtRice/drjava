@@ -49,7 +49,7 @@ import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 public interface CompilerModel {
   //----------------------------Locking--------------------------------------//
   
-  /** Returns the lock used to prevent simultaneous compilation and JUnit testing */
+  /** @return the lock used to prevent simultaneous compilation and JUnit testing */
   public Object getCompilerLock();
   
   //-------------------------- Listener Management --------------------------//
@@ -94,10 +94,10 @@ public interface CompilerModel {
   
   //----------------------------- Error Results -----------------------------//
   
-  /** Gets the CompilerErrorModel representing the last compile. */
+  /** @return the CompilerErrorModel representing the last compile. */
   public CompilerErrorModel getCompilerErrorModel();
   
-  /** Gets the total number of current errors. */
+  /** @return the total number of current errors. */
   public int getNumErrors();
   
   /** Resets the compiler error state to have no errors. */
@@ -105,13 +105,14 @@ public interface CompilerModel {
   
   //-------------------------- Compiler Management --------------------------//
   
-  /** Returns all registered compilers that are actually available.  If there are none,
+  /** 
+   * @return all registered compilers that are actually available.  If there are none,
    * the result is {@link NoCompilerAvailable#ONLY}.
    */
   public Iterable<CompilerInterface> getAvailableCompilers();
   
-  /** Gets the compiler that is the "active" compiler.
-   *
+  /** 
+   * @return the compiler that is the "active" compiler.
    * @see #setActiveCompiler
    */
   public CompilerInterface getActiveCompiler(); 
@@ -129,6 +130,6 @@ public interface CompilerModel {
 //  /** Add a compiler to the active list */
 //  public void addCompiler(CompilerInterface compiler);
   
-  /** Gets the LanguageLevelStackTraceMapper from the model */
+  /** @return the LanguageLevelStackTraceMapper from the model */
   public LanguageLevelStackTraceMapper getLLSTM();
 }

@@ -100,6 +100,7 @@ class DefaultPlatform implements PlatformSupport {
    *  version of tools.jar.
    *
    * @param main Class object for com.sun.tools.javadoc.Main
+   * @return true if the given class object has an execute(String[]) method; false otherwise
    */
   @SuppressWarnings({"unchecked","rawtypes"})
   private boolean _javadocMainHasExecuteMethod(Class<?> main) {

@@ -135,10 +135,12 @@ public abstract class JavacCompiler implements CompilerInterface {
     return _transformCommand(s,"edu.rice.cs.plt.swing.SwingUtil.showApplet(new {0}({1}), 400, 300);");
   }
   
-  /** This method performs the "smart run". Unfortunately, we don't get the right static error messages.
-    * @param s full command line, i.e. "run MyClass 1 2 3"
-    * @param c class to be run, i.e. MyClass.class
-    */
+  /** 
+   * This method performs the "smart run". Unfortunately, we don't get the right static error messages.
+   * @param s full command line, i.e. "run MyClass 1 2 3"
+   * @param c class to be run, i.e. MyClass.class
+   * @throws Throwable if something goes wrong
+   */
   public static void runCommand(String s, Class<?> c) throws Throwable {
     if (s.endsWith(";"))  s = _deleteSemiColon(s);
     List<String> tokens = ArgumentTokenizer.tokenize(s, true);
@@ -282,15 +284,19 @@ public abstract class JavacCompiler implements CompilerInterface {
     }
   }
   
-  /** This is a method that automatically detects if
-    * a) the class is an ACM Java Task Force program (subclass of acm.program.Program)
-    * b) an applet
-    * c) a class with a static main method
-    
-    If a), then DrJava inserts "code=MyClass" as argument 0.
-    If b), then DrJava performs the same as "applet MyClass" (see above).
-    If c), then DrJava executes MyClass.main (traditional java behavior).
-    */
+  /** 
+   * This is a method that automatically detects if
+   * a) the class is an ACM Java Task Force program (subclass of acm.program.Program)
+   * b) an applet
+   * c) a class with a static main method
+   * 
+   * If a), then DrJava inserts "code=MyClass" as argument 0.
+   * If b), then DrJava performs the same as "applet MyClass" (see above).
+   * If c), then DrJava executes MyClass.main (traditional java behavior).
+   *
+   * @param s the command to be transformed
+   * @return the transformed command
+   */
   public String transformRunCommand(String s) {    
     if (s.endsWith(";"))  s = _deleteSemiColon(s);
     List<String> args = ArgumentTokenizer.tokenize(s, true);
@@ -304,17 +310,19 @@ public abstract class JavacCompiler implements CompilerInterface {
     return ret;
   }
 
-  /** Assumes a trimmed String. Returns a string of the call that the interpreter can use.
-    * The arguments get formatted as comma-separated list of strings enclosed in quotes.
-    * Example: _transformCommand("java MyClass arg1 arg2 arg3", "{0}.main(new String[]'{'{1}'}');")
-    * returns "MyClass.main(new String[]{\"arg1\",\"arg2\",\"arg3\"});"
-    * NOTE: the command to run is constructed using {@link java.text.MessageFormat}. That means that certain characters,
-    * single quotes and curly braces, for example, are special. To write single quotes, you need to double them.
-    * To write curly braces, you need to enclose them in single quotes. Example:
-    * MessageFormat.format("Abc {0} ''foo'' '{'something'}'", "def") returns "Abc def 'foo' {something}".
-    * @param s the command line, either "java MyApp arg1 arg2 arg3" or "applet MyApplet arg1 arg2 arg3"
-    * @param command the command to execute, with {0} marking the place for the class name and {1} the place for the arguments
-    */
+  /** 
+   * Assumes a trimmed String. Returns a string of the call that the interpreter can use.
+   * The arguments get formatted as comma-separated list of strings enclosed in quotes.
+   * Example: _transformCommand("java MyClass arg1 arg2 arg3", "{0}.main(new String[]'{'{1}'}');")
+   * returns "MyClass.main(new String[]{\"arg1\",\"arg2\",\"arg3\"});"
+   * NOTE: the command to run is constructed using {@link java.text.MessageFormat}. That means that certain characters,
+   * single quotes and curly braces, for example, are special. To write single quotes, you need to double them.
+   * To write curly braces, you need to enclose them in single quotes. Example:
+   * MessageFormat.format("Abc {0} ''foo'' '{'something'}'", "def") returns "Abc def 'foo' {something}".
+   * @param s the command line, either "java MyApp arg1 arg2 arg3" or "applet MyApplet arg1 arg2 arg3"
+   * @param command the command to execute, with {0} marking the place for the class name and {1} the place for the arguments
+   * @return the transformed command
+   */
   protected static String _transformCommand(String s, String command) {
     if (s.endsWith(";"))  s = _deleteSemiColon(s);
     List<String> args = ArgumentTokenizer.tokenize(s, true);
@@ -337,11 +345,11 @@ public abstract class JavacCompiler implements CompilerInterface {
     */
   protected static String _deleteSemiColon(String s) { return  s.substring(0, s.length() - 1); }
 
-  /** .java --> true
-    * .dj   --> true
-    * .dj0  --> true
-    * .dj1  --> true
-    * .dj2  --> true
+  /** .java {@literal -->} true
+    * .dj   {@literal -->} true
+    * .dj0  {@literal -->} true
+    * .dj1  {@literal -->} true
+    * .dj2  {@literal -->} true
     * otherwise false 
     * @return true if the specified file is a source file for this compiler. */
   public boolean isSourceFileForThisCompiler(File f) {

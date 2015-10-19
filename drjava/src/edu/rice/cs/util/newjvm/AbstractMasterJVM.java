@@ -123,6 +123,7 @@ public abstract class AbstractMasterJVM implements MasterRemote {
   /**
    * Callback for when the slave JVM has connected, and the bidirectional communications link has been 
    * established.  Provides access to the newly-created slave JVM.
+   * @param newSlave link to the slave JVM
    */
   protected abstract void handleSlaveConnected(SlaveRemote newSlave);
   
@@ -210,7 +211,10 @@ public abstract class AbstractMasterJVM implements MasterRemote {
     //debug.log("Entered state " + State.FRESH);
   }
     
-  /** Make a best attempt to invoke {@code slave.quit()}.  Log an error if it fails. */
+  /** 
+   * Make a best attempt to invoke {@code slave.quit()}.  Log an error if it fails.
+   * @param slave link to the slave JVM
+   */
   private static void attemptQuit(SlaveRemote slave) {
     try { slave.quit(); }
     catch (RemoteException e) { error.log("Unable to complete slave.quit()", e); }
@@ -233,6 +237,8 @@ public abstract class AbstractMasterJVM implements MasterRemote {
     * thread is successful in performing the transition (only one thread can do so at a time).  Throws
     * an IllegalStateException if the DISPOSED state is reached first, since there is never a transition
     * out of the disposed state (the alternative is to block permanently). 
+    * @param from state to transition out of
+    * @param to state to transition into
     */
   private void transition(State from, State to) {
     State s = _monitor.value();

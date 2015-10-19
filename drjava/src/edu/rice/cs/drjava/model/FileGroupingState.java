@@ -53,14 +53,18 @@ public interface FileGroupingState {
   /** @return true if the model is in project mode, false otherwi */
   public boolean isProjectActive();
   
-  /** @return true if the document is part of the active project (in the project path), or false
-    * if it is not (or the model is not in project mode)
-    */
+  /** 
+   * @param doc the document to check
+   * @return true if the document is part of the active project (in the project path), or false
+   * if it is not (or the model is not in project mode)
+   */
   public boolean inProjectPath(OpenDefinitionsDocument doc);
   
-  /** @return true if the file is part of the active project (in the project path), or false
-    * if it is not (or the model is not in project mode)
-    */
+  /** 
+   * @param f the file to check
+   * @return true if the file is part of the active project (in the project path), or false
+   * if it is not (or the model is not in project mode)
+   */
   public boolean inProjectPath(File f);
   
 //  /** junits all files that the state considers "all" (ie, all files in project directory in project mode). */
@@ -76,17 +80,28 @@ public interface FileGroupingState {
     */
   public File getProjectRoot();
   
-  /** Sets project file to specifed value; used in "Save Project As ..." command in MainFrame. */
+  /** 
+   * Sets project file to specifed value; used in "Save Project As ..." command in MainFrame. 
+   * @param f the file to be set
+   */
   public void setProjectFile(File f);
   
-  /** Sets the current project root. */
+  /** 
+   * Sets the current project root. 
+   * @param f the file to be set as the root
+   */
   public void setProjectRoot(File f);
   
-  /** Adds file to list of auxiliary files in project */
+  /** 
+   * Adds file to list of auxiliary files in project 
+   * @param f the file to be added
+   */
   public void addAuxFile(File f);
   
-  /** Removes file to list of auxiliary files in project.  Throws an UnexpectedException if auxFiles does not contain 
-    * exactly one instance of f.*/
+  /** 
+   * Removes file to list of auxiliary files in project.  
+   * @param f the file to be removed
+   */
   public void remAuxFile(File f);
   
   /** Returns the directory in which to put the class files after compilation
@@ -94,13 +109,19 @@ public interface FileGroupingState {
     */
   public File getBuildDirectory();
   
-  /** Sets the current build directory. */
+  /** 
+   * Sets the current build directory. 
+   * @param f the new build directory to be set
+   */
   public void setBuildDirectory(File f);
   
-  /** Returns the working directory for the slave (interactions pane) JVM. */
+  /** @return the working directory for the slave (interactions pane) JVM. */
   public File getWorkingDirectory();
   
-  /** Sets the current working directory for the interactions pane. */
+  /** 
+   * Sets the current working directory for the interactions pane. 
+   * @param f the new working directory to be set
+   */
   public void setWorkingDirectory(File f);
   
   /** Returns the name of the class that has the main method of the project
@@ -108,36 +129,53 @@ public interface FileGroupingState {
     */
   public String getMainClass();
   
-  /** Sets the name of the class that has the main method of the project
-    * (Note: should point to the sourcefile of the document, not the class file)
-    */
+  /**
+   * Sets the name of the class that has the main method of the project
+   * (Note: should point to the sourcefile of the document, not the class file)
+   * @param f the file containing the new main class to be set
+   */
   public void setMainClass(String f);
   
-  /** Sets the create jar file of the project. */
+  /** 
+   * Sets the create jar file of the project. 
+   * @param f the new create jar file to be set 
+   */
   public void setCreateJarFile(File f);
   
-  /** Return the create jar file for the project. If not in project mode, returns 0. */
+  /** @return the create jar file for the project. If not in project mode, returns 0. */
   public File getCreateJarFile();
   
-  /** Sets the create jar flags of the project. */
+  /** 
+   * Sets the create jar flags of the project. 
+   * @param f the flags to be set
+   */
   public void setCreateJarFlags(int f);
   
-  /** Return the create jar flags for the project. If not in project mode, returns null. */
+  /** @return the create jar flags for the project. If not in project mode, returns null. */
   public int getCreateJarFlags();
   
-  /** Return all files saved as source files in the project file. If not in project mode, returns null. */
+  /** @return all files saved as source files in the project file. If not in project mode, returns null. */
   public File[] getProjectFiles();
   
-  /** Returns true the given file is in the current project file. */
+  /** 
+   * @param f the file to be searched for within the current project
+   * @return true the given file is in the current project file. 
+   */
   public boolean inProject(File f);
   
-  /** @return true if the file is a project auxiliary file */
+  /** 
+   * @param f the file to be checked
+   * @return true if the file is a project auxiliary file 
+   */
   public boolean isAuxiliaryFile(File f);
   
-  /** Returns true if in project mode and the current project file has changed. */
+  /** @return true if in project mode and the current project file has changed. */
   public boolean isProjectChanged();
   
-  /** Sets that the project state is no longer a snapshot of the open project. */
+  /** 
+   * Sets that the project state is no longer a snapshot of the open project. 
+   * @param changed true if the project has changed; false otherwise
+   */
   public void setProjectChanged(boolean changed); 
   
   /** Cleans the build directory. */
@@ -151,22 +189,37 @@ public interface FileGroupingState {
     */
   public Iterable<AbsRelFile> getExtraClassPath();
   
-  /** Sets the list of project-specific classpath entries. */
+  /** 
+   * Sets the list of project-specific classpath entries. 
+   * @param cp the class path to be set
+   */
   public void setExtraClassPath(Iterable<AbsRelFile> cp);
   
-  /** Excludes file from the project. */
+  /** 
+   * Excludes file from the project. 
+   * @param f the file to be excluded
+   */
   public void addExcludedFile(File f);
   
-  /** Returns true if the file is excluded from the current project */
+  /** 
+   * @param f the file to be checked
+   * @return true if the file is excluded from the current project 
+   */
   public boolean isExcludedFile(File f);
   
-  /** Return an array of the files excluded from the current project */
+  /** @return an array of the files excluded from the current project */
   public File[] getExclFiles();
   
-  /** Remove the specified file from the files excluded from the current project */
+  /** 
+   * Remove the specified file from the files excluded from the current project 
+   * @param f the file to be removed from the list of exclusions
+   */
   public void removeExcludedFile(File f);
   
-  /** Sets the array of files excluded from the current project */
+  /** 
+   * Sets the array of files excluded from the current project
+   * @param fs the list of excluded files to be set
+   */
   public void setExcludedFiles(File[] fs);
 
   public boolean getAutoRefreshStatus();
@@ -178,9 +231,12 @@ public interface FileGroupingState {
 
   public void setPreferencesStoredInProject(Map<OptionParser<?>,String> sp);
 
-  /** Sets the custom manifest on the project */
+  /** 
+   * Sets the custom manifest on the project 
+   * @param manifest the manifest to be set
+   */
   public void setCustomManifest(String manifest);
   
-  /** Gets the custom manifest on the project */
+  /** @return the custom manifest on the project */
   public String getCustomManifest();
 }

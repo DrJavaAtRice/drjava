@@ -44,7 +44,10 @@ import edu.rice.cs.util.FileOps;
   */
 public class FileOption extends Option<File> {
   
-  /** @param key The name of this option. */
+  /** 
+   * @param key the name of this option 
+   * @param def the definition of this option
+   */
   public FileOption(String key, File def) { super(key,def); }
   
   /** @param s The String to be parsed, must represent a legal file path for the File to be created.

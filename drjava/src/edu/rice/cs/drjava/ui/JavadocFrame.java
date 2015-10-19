@@ -85,6 +85,8 @@ public class JavadocFrame extends HTMLFrame {
    * file (if it's not a pointer), or the file used for "No frames" (if
    * it is a pointer).
    * @param packages Full path to the packages.html file
+   * @param destDir destination directory
+   * @return packages
    */
   private static File _parsePackagesFile(File packages, File destDir) {
     try {
@@ -138,6 +140,7 @@ public class JavadocFrame extends HTMLFrame {
    * @param destDir Directory holding the Javadoc
    * @param curClass Name of the class to try to show by default
    * @param allDocs Whether Javadoc was run for all open documents
+   * @throws MalformedURLException if the URL is not in the correct format
    */
   public JavadocFrame(File destDir, String curClass, boolean allDocs)
     throws MalformedURLException

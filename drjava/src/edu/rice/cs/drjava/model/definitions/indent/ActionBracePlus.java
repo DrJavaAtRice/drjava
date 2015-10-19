@@ -54,7 +54,6 @@ public class ActionBracePlus extends IndentRuleAction {
     * the line with the appropriate spacing or characters.<p>
     * Preconditions: must be inside a brace.
     * @param doc AbstractDJDocument containing the line to be indented.
-    * @return true if the caller should update the current location, false if the indenter has already done this.
     */
   public void indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
     super.indentLine(doc, reason);

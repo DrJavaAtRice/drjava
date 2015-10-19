@@ -60,10 +60,12 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
   protected JButton _removeAllButton;
   protected final Debugger _debugger;
   
-  /** Constructs a new breakpoints panel.
-    *  This is swing view class and hence should only be accessed from the event-handling thread.
-    *  @param frame the MainFrame
-    */
+  /** 
+   * Constructs a new breakpoints panel.
+   * This is swing view class and hence should only be accessed from the event-handling thread.
+   * @param frame the MainFrame
+   * @param breakpointManager the breakpoint manager
+   */
   public BreakpointsPanel(MainFrame frame, RegionManager<Breakpoint> breakpointManager) {
     super(frame, "Breakpoints", breakpointManager);
     // TODO: consolidate the following listener with the MainFrame Breakpoint listener

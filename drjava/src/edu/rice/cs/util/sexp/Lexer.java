@@ -71,15 +71,21 @@ class Lexer extends StreamTokenizer {
     buffer = null;  // buffer initially empty
   }
   
-  /** Skips through the input stream until an EOL is encountered */
+  /** 
+   * Skips through the input stream until an EOL is encountered 
+   * @throws IOException if an IO operation fails
+   */
   public void flush() throws IOException {
     eolIsSignificant(true);
     while (nextToken() != TT_EOL) ; // eat tokens until EOL
     eolIsSignificant(false);
   }
   
-  /** Performs a nextToken() operation from StreamTokenizer except for throwing an unchecked LexingException instead of
-    * a checked IOException */
+  /** 
+   * Performs a nextToken() operation from StreamTokenizer except for throwing 
+   * an unchecked LexingException instead of a checked IOException 
+   * @return the token type
+   */
   private int getToken() {
     try {
       int tokenType = nextToken();
@@ -89,7 +95,7 @@ class Lexer extends StreamTokenizer {
     }
   }
   
-  /** Returns the next Tokens.SExpToken without consuming it */
+  /** @return the next Tokens.SExpToken without consuming it */
   public Tokens.SExpToken peek() {
     if (buffer == null) buffer = readToken();
     return buffer;

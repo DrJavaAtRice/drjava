@@ -223,12 +223,12 @@ class Brace extends ReducedToken implements ReducedModelStates {
   public boolean isStar() { return _type == STAR_TYPE; }
 
   /** Braces can't grow.
-    * @throws RuntimeException
+    * @throws RuntimeException if something goes wrong
     */
   public void grow(int delta) { throw new BraceException("Braces can't grow."); }
 
   /** Braces can't shrink.
-    * @throws RuntimeException
+    * @throws RuntimeException if something goes wrong
     */
   public void shrink(int delta) { throw new BraceException("Braces can't shrink."); }
 }

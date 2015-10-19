@@ -71,7 +71,7 @@ public interface OptionConstants {
   /** A String used to launch a user's preferred browser. It is tokenized and appended to the file path. */
   public static final StringOption BROWSER_STRING = new StringOption("browser.string", "");
   
-  /** A Vector<String> storing the classes to automatically import. */
+  /** A {@code Vector<String>} storing the classes to automatically import. */
   public static final VectorOption<String> INTERACTIONS_AUTO_IMPORT_CLASSES =
     new VectorOption<String>("interactions.auto.import.classes", new StringOption("",""), new Vector<String>());
   
@@ -305,7 +305,7 @@ public interface OptionConstants {
     
     private static boolean _registered = false;
     
-    /** Return the look-and-feel class name to use by default */
+    /** @return the look-and-feel class name to use by default */
     public static String getDefaultLookAndFeel() {
       if (PlatformFactory.ONLY.isMacPlatform())
         return UIManager.getSystemLookAndFeelClassName(); // Mac: Let the system decide.
@@ -1381,7 +1381,7 @@ public interface OptionConstants {
   /** Whether to warn that a restart is necessary before the default compiler preference will change. */
   public static final BooleanOption WARN_CHANGE_DCP = new BooleanOption("warn.change.dcp", Boolean.TRUE);
 
-  /** Whether to prompt to change the language level extensions (.dj0/.dj1->.dj, .dj2->.java). */
+  /** Whether to prompt to change the language level extensions {@literal (.dj0/.dj1->.dj, .dj2->.java)}. */
   public static final BooleanOption PROMPT_RENAME_LL_FILES = new BooleanOption("prompt.rename.ll.files", Boolean.TRUE);
   
   /* ---------- MISC OPTIONS ---------- */

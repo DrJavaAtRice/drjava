@@ -39,7 +39,7 @@ package edu.rice.cs.drjava.config;
 import java.util.HashMap;
 
 /** The association of an OptionName with the ability to parse something to type T; the intended type 
-  * parameterization is covariant: if U extends T, then OptionParser<U> extends OptionParser<T>.
+  * parameterization is covariant: if U extends T, then {@code OptionParser<U>} extends {@code OptionParser<T>}.
   */
 public abstract class OptionParser<T> implements ParseStrategy<T> {
   
@@ -87,17 +87,36 @@ public abstract class OptionParser<T> implements ParseStrategy<T> {
   
   abstract String getString(DefaultOptionMap om);
   
-  /** Uses parse() and setOption() so that any changes in parsing will automatically be applied to setString(). */
+  /** 
+   * Uses parse() and setOption() so that any changes in parsing will 
+   * automatically be applied to setString(). 
+   * @param om the option map
+   * @param val the value to set
+   * @return the previous value associated with the key, or null if there was no mapping
+   */
   T setString(DefaultOptionMap om, String val) { return setOption(om,parse(val)); }
   
-  /** The accessor for the magic-typed hashtable stunt. */
+  /** 
+   * The accessor for the magic-typed hashtable stunt. 
+   * @param om the option map
+   * @return the value associated with om
+   */
   T getOption(DefaultOptionMap om) { return map.get(om); }
   
-  /** The mutator for the magic-typed hashtable stunt.
-    * @return the previous value associated with key, or null if there was no mapping for key.
-    * (A null return can also indicate that the map previously associated null with key.) */
+  /** 
+   * The mutator for the magic-typed hashtable stunt.
+   * @param om the option map
+   * @param val the value to set
+   * @return the previous value associated with key, or null if there was no mapping for key.
+   * (A null return can also indicate that the map previously associated null with key.) 
+   */
   T setOption(DefaultOptionMap om, T val) { return map.put(om,val); }
   
-  /** The destructor for a mapping in the magic-typed hashtable. */
+  /** 
+   * The destructor for a mapping in the magic-typed hashtable. 
+   * @param om the option map
+   * @return the previous value associated with key, or null if there was no mapping for key.
+   * (A null return can also indicate that the map previously associated null with key.)
+   */
   T remove(DefaultOptionMap om) { return map.remove(om); }
 }

@@ -51,18 +51,24 @@ import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
   */
 public interface DCacheAdapter {
   
-  /** Retrieves the document for its corresponding ODD
-    * @return the definitions document for the corresponding ODD
-    */
+  /** 
+   * Retrieves the document for its corresponding ODD
+   * @return the definitions document for the corresponding ODD
+   * @throws IOException if an IO operation fails
+   * @throws FileMovedException if the file has moved
+   */
   public DefinitionsDocument getDocument() throws IOException, FileMovedException;
   
   public int getLength();
   
-  /* Gets the entire text of this document. */
+  /** @return the entire text of this document. */
   public String getText();
   
-  /* Gets the specified substring of this document.
-   * @throws an IndexOutOfBounds exception if the specification is ill-formed. 
+  /** 
+   * @return the specified substring of this document.
+   * @param offset the offset at which to get the text
+   * @param length the length of the text to get
+   * @throws BadLocationException if attempts to reference an invalid location
    */
   public String getText(int offset, int length) throws BadLocationException;
   
@@ -75,16 +81,19 @@ public interface DCacheAdapter {
   /** Closes the corresponding document for this adapter. */
   public void close();
   
-  /** Adds a DocumentListener to the reconstructor. */
+  /** 
+   * Adds a DocumentListener to the reconstructor. 
+   * @param l the listener to be added
+   */
   public void addDocumentListener(DocumentListener l);
   
-  /* Method for notifying the DCacheAdapter that this document has been saved to a file. */
+  /** Method for notifying the DCacheAdapter that this document has been saved to a file. */
   public void documentSaved();
   
-  /* Method for notifying the DCacheAdapter that this document has been modified. */
+  /** Method for notifying the DCacheAdapter that this document has been modified. */
   public void documentModified();
   
-  /* Method for notifying the DCacheAdapter that this document has been reset via undo commands. */
+  /** Method for notifying the DCacheAdapter that this document has been reset via undo commands. */
   public void documentReset();
   
   /** Set the specified keywords as keywords for syntax highlighting.

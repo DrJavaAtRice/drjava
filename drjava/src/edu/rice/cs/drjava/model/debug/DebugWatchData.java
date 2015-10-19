@@ -72,14 +72,13 @@ public class DebugWatchData {
     _changed = false;
   }
 
-  /** Returns the name of this field or variable. */
+  /** @return the name of this field or variable. */
   public String getName() { return _name; }
 
-  /** Returns the most recently determined value for this field or variable. */
+  /** @return the most recently determined value for this field or variable. */
   public String getValue() { return (_showValue) ? _value : ""; }
 
-  /** Returns the type of this field or variable in the current context.
-   */
+  /** @return the type of this field or variable in the current context. */
   public String getType() {
     return (_showType) ? _type : "";
   }
@@ -136,9 +135,9 @@ public class DebugWatchData {
     _type = NOT_LOADED;
   }
 
-  /** Returns whether this value has changed since the last call to setValue. */
+  /** @return whether this value has changed since the last call to setValue. */
   public boolean isChanged() { return _changed; }
 
-  /** Returns a legible representation of the type, name, and value. */
+  /** @return a legible representation of the type, name, and value. */
   public String toString() { return _type + " " + _name + ": " + _value; }
 }

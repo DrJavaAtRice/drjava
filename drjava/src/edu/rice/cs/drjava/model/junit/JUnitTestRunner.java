@@ -62,7 +62,11 @@ public class JUnitTestRunner extends BaseTestRunner {
   /** The current number of failures in the result. */
   private int _failureCount;
 
-  /** Standard constructor. */
+  /** 
+   * Standard constructor. 
+   * @param jmc a JUnitModelCallback
+   * @param loader class loader to use during testing
+   */
   public JUnitTestRunner(JUnitModelCallback jmc, ClassLoader loader) {
     super();
     _jmc = jmc;

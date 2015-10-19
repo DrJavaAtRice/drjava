@@ -105,7 +105,10 @@ public abstract class RegionsListPanel<R extends IDocumentRegion> extends Tabbed
     _list.addMouseListener(new RegionMouseAdapter());
   }
   
-  /** Quick helper for setting up color listeners. */
+  /** 
+   * Quick helper for setting up color listeners. 
+   * @param c the component for which to set up the listeners
+   */
   private static void _setColors(Component c) {
     new ForegroundColorListener(c);
     new BackgroundColorListener(c);
@@ -182,7 +185,10 @@ public abstract class RegionsListPanel<R extends IDocumentRegion> extends Tabbed
   protected void performDefaultAction() {
   }
   
-  /** Creates the buttons for controlling the regions. Should be overridden. */
+  /** 
+   * Creates the buttons for controlling the regions. Should be overridden. 
+   * @return the newly-created button
+   */
   protected JComponent[] makeButtons() {        
     return new JComponent[0];    
   }
@@ -246,7 +252,10 @@ public abstract class RegionsListPanel<R extends IDocumentRegion> extends Tabbed
     }
   }
   
-  /** @return the usser object in the list associated with the region, or null if not found */
+  /** 
+   * @param r the region for which to get the object
+   * @return the usser object in the list associated with the region, or null if not found 
+   */
   protected RegionListUserObj<R> getUserObjForRegion(R r) {
     for(int i = 0; i < _listModel.size(); ++i) {
       RegionListUserObj<R> userObj = _listModel.get(i);
@@ -337,8 +346,12 @@ public abstract class RegionsListPanel<R extends IDocumentRegion> extends Tabbed
 //    Utilities.invokeLater(doCommand);
 //  }
   
-  /** Factory method to create user objects put in the list.
-    * If subclasses extend RegionListUserObj, they need to override this method. */
+  /** 
+   * Factory method to create user objects put in the list.
+   * If subclasses extend RegionListUserObj, they need to override this method. 
+   * @param r object to put in the RegionListUserObj
+   * @return a RegionListUserObj
+   */
   protected RegionListUserObj<R> makeRegionListUserObj(R r) {
     return new RegionListUserObj<R>(r);
   }

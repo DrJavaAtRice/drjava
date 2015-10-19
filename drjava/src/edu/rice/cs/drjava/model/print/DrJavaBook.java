@@ -63,7 +63,12 @@ public class DrJavaBook implements Pageable {
   
   private static FontRenderContext DEFAULT_FRC = new FontRenderContext(null, false, true);
   
-  /** Constructs a DrJavaBook which a given content text, filename, and pageformat. */
+  /** 
+   * Constructs a DrJavaBook which a given content text, filename, and pageformat. 
+   * @param text text
+   * @param fileName file name
+   * @param format page format
+   */
   public DrJavaBook(String text, String fileName, PageFormat format) {
     _pagePrinters = new ArrayList<PagePrinter>();
     _format = format;

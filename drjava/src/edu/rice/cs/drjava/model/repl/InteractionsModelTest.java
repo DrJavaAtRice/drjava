@@ -81,11 +81,14 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     super.tearDown();
   }
   
-  /** Asserts that the given string typed by the user is processed to become the given expected string for an
-    * interpretation.
-    * @param typed A string typed by the user
-    * @param expected What the processor should return
-    */
+  /** 
+   * Asserts that the given string typed by the user is processed to become 
+   * the given expected string for an
+   * interpretation.
+   * @param typed A string typed by the user
+   * @param expected What the processor should return
+   * @throws Exception if something goes wrong
+   */
   protected void _assertProcessedContents(final String typed, final String expected) throws Exception {
     assertTrue(_model instanceof TestInteractionsModel);
     final TestInteractionsModel model = (TestInteractionsModel)_model;
@@ -127,7 +130,9 @@ public final class InteractionsModelTest extends DrJavaTestCase {
                  edu.rice.cs.drjava.model.compiler.JavacCompiler.transformAppletCommand(typed));
   }
   
-  /** Tests that the correct text is returned when interpreting. */
+  /** Tests that the correct text is returned when interpreting.
+   * @throws Exception if something goes wrong
+   */
   public void testInterpretCurrentInteraction() throws Exception {
     _log.log("testInterpretCurrentInteraction started");
     assertTrue(_model instanceof TestInteractionsModel);
@@ -179,7 +184,12 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     _log.log("testInterpretCurrentInteractionWithIncompleteInput ended");
   }
   
-  /** Not a test method,  Assumes that _model is an IncompleteInputInteractionsModel. */
+  /** 
+   * Not a test method. Assumes that _model is an IncompleteInputInteractionsModel. 
+   * @param code code
+   * @throws EditDocumentException if something goes wrong during editing
+   * @throws InterruptedException if execution is interrupted unexpectedly 
+   */
   protected void assertReplThrewContinuationException(final String code) throws EditDocumentException, InterruptedException {
     assertTrue(_model instanceof IncompleteInputInteractionsModel);
     final IncompleteInputInteractionsModel model = (IncompleteInputInteractionsModel) _model;
@@ -204,7 +214,12 @@ public final class InteractionsModelTest extends DrJavaTestCase {
                (model.isContinuationException() == true) && (model.isSyntaxException() == false));
   }
   
-  /** Not a test method,  Assumes that _model is an IncompleteInputInteractionsModel. */
+  /** 
+   * Not a test method,  Assumes that _model is an IncompleteInputInteractionsModel. 
+   * @param code code
+   * @throws EditDocumentException if an error occurs during editing
+   * @throws InterruptedException if execution is interrupted unexpectedly
+   */
   protected void assertReplThrewSyntaxException(final String code) throws EditDocumentException, InterruptedException {
     assertTrue(_model instanceof IncompleteInputInteractionsModel);
     final IncompleteInputInteractionsModel model = (IncompleteInputInteractionsModel)_model;
@@ -422,7 +437,10 @@ public final class InteractionsModelTest extends DrJavaTestCase {
   // TO DO: test that the correct history is returned (careful of last newline)
   
   
-  /** Tests that a debug port can be generated. */
+  /** 
+   * Tests that a debug port can be generated. 
+   * @throws IOException if an IO operation fails
+   */
   public void testDebugPort() throws IOException {
      _log.log("testDebugPort started");
     int port = _model.getDebugPort();
@@ -444,7 +462,10 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     _log.log("testDebugPort ended");
   }
   
-  /** Tests that an interactions history can be loaded in as a script. */
+  /** 
+   * Tests that an interactions history can be loaded in as a script. 
+   * @throws Exception if something goes wrong
+   */
   public void testScriptLoading() throws Exception {
     _log.log("testScriptLoading started");
     assertTrue(_model instanceof TestInteractionsModel);
@@ -623,7 +644,9 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     _log.log("testSetChangeInputListener ended");
   }
   
-  /** Tests that the interactions history is stored correctly. See bug # 992455 */
+  /** Tests that the interactions history is stored correctly. See bug # 992455
+   * @throws Exception if something goes wrong
+   */
   public void testInteractionsHistoryStoredCorrectly() throws Exception {
     _log.log("testInteractionsHistoryStoredCorrectly started");
     final String code = "public class A {\n";
@@ -688,7 +711,10 @@ public final class InteractionsModelTest extends DrJavaTestCase {
         while (! _interactionDone) _interactionLock.wait(); }
     }
     
-    /** Constructs a new InteractionsModel. */
+    /** 
+     * Constructs a new InteractionsModel. 
+     * @param adapter adapter
+     */
     public TestInteractionsModel(InteractionsDJDocument adapter) {
       // Adapter, history size, write delay
       super(adapter, new File(System.getProperty("user.dir")), 1000, 25);
@@ -767,9 +793,11 @@ public final class InteractionsModelTest extends DrJavaTestCase {
   }
 
   
-  /** This test model includes a slave JVM, just like a DefaultGlobalModel.  It must be disposed before it is
-    * deallocated to kill the slave JVM.   TODO: the mutation in this class is disgusting -- Corky  2 June 06.
-    */
+  /** 
+   * This test model includes a slave JVM, just like a DefaultGlobalModel.  
+   * It must be disposed before it is deallocated to kill the slave JVM.   
+   * TODO: the mutation in this class is disgusting -- Corky  2 June 06.
+   */
   public static class IncompleteInputInteractionsModel extends RMIInteractionsModel {
     boolean continuationException;  // This appears to be the negation of syntaxException making it redundant!
     boolean syntaxException;
@@ -784,7 +812,11 @@ public final class InteractionsModelTest extends DrJavaTestCase {
         while (! _interactionDone) _interactionLock.wait(); }
     }
     
-    /** Constructs a new IncompleteInputInteractionsModel. */
+    /** 
+     * Constructs a new IncompleteInputInteractionsModel. 
+     * @param adapter adapter
+     * @throws RemoteException if an exception occurs during communication with the remote JVM
+     */
     public IncompleteInputInteractionsModel(InteractionsDJDocument adapter) throws RemoteException {
       // MainJVM, Adapter, history size, write delay
       super(new MainJVM(null), adapter, new File(System.getProperty("user.dir")), 1000, 25);

@@ -52,9 +52,13 @@ import java.util.Iterator;
 public class ForcedChoiceOptionComponent extends OptionComponent<String,JComboBox<String>> {
   private volatile JComboBox<String> _comboBox;
 
-  /** Main constructor builds a panel containing a set of radio buttons for the
-    * legal values of the ForcedChoiceOption.
-    */
+  /** 
+   * Main constructor builds a panel containing a set of radio buttons for the
+   * legal values of the ForcedChoiceOption.
+   * @param option the option
+   * @param labelText text for descriptive label of this option
+   * @param parent the parent frame
+   */
   public ForcedChoiceOptionComponent(ForcedChoiceOption option, String labelText, SwingFrame parent) {
     super(option, labelText, parent);
 
@@ -75,7 +79,13 @@ public class ForcedChoiceOptionComponent extends OptionComponent<String,JComboBo
     setComponent(_comboBox);
   }
 
-  /** Constructor that allows for a tooltip description. */
+  /** 
+   * Constructor that allows for a tooltip description. 
+   * @param option the option
+   * @param labelText text for descriptive label of this option
+   * @param parent the parent frame
+   * @param description tooltip text
+   */
   public ForcedChoiceOptionComponent(ForcedChoiceOption option, String labelText, SwingFrame parent, String description) {
     this(option, labelText, parent);
     setDescription(description);
@@ -89,7 +99,10 @@ public class ForcedChoiceOptionComponent extends OptionComponent<String,JComboBo
     _label.setToolTipText(description);
   }
 
-  /** Selects the radio button corresponding to the current config options. */
+  /** 
+   * Selects the radio button corresponding to the current config options. 
+   * @param current current config options
+   */
   public void resetToCurrent(String current) {
 //    _comboBox.setEnabled(DrJava.getConfig().isOptionEditable(_option));
     _comboBox.setSelectedItem(current);

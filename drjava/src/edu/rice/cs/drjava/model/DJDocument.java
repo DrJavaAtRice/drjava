@@ -61,7 +61,12 @@ public interface DJDocument extends SwingDocumentInterface {
     */
   public void setIndent(int indent);
   
-  /** Returns highlight status info for text between start and end, coalescing adjoining blocks with the same status. */
+  /** 
+   * @param start the start pos
+   * @param end the end pos
+   * @return highlight status info for text between start and end, coalescing 
+   *         adjoining blocks with the same status. 
+   */
   public ArrayList<HighlightStatus> getHighlightStatus(int start, int end);
   
   /** Gets the current location of the cursor the document. Unlike the Swing document model, which is stateless, we must
@@ -104,34 +109,38 @@ public interface DJDocument extends SwingDocumentInterface {
   
 //  public void resetReducedModelLocation();
   
-  /** Searching backwards, finds the position of the enclosing brace. NB: ignores comments.
-    * @param pos Position to start from
-    * @param opening opening brace character
-    * @param closing closing brace character
-    * @return position of enclosing curly brace, or ERROR_INDEX (-1) if beginning
-    * of document is reached.
-    */
+  /** 
+   * Searching backwards, finds the position of the enclosing brace. NB: ignores comments.
+   * @param pos Position to start from
+   * @param opening opening brace character
+   * @param closing closing brace character
+   * @return position of enclosing curly brace, or ERROR_INDEX (-1) if beginning
+   * of document is reached.
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public int findPrevEnclosingBrace(int pos, char opening, char closing) throws BadLocationException;
   
   /** Searching forwards, finds the position of the enclosing brace.
-    * NB: ignores comments.
-    * @param pos Position to start from
-    * @param opening opening brace character
-    * @param closing closing brace character
-    * @return position of enclosing curly brace, or ERROR_INDEX (-1) if beginning
-    * of document is reached.
-    */
+   * NB: ignores comments.
+   * @param pos Position to start from
+   * @param opening opening brace character
+   * @param closing closing brace character
+   * @return position of enclosing curly brace, or ERROR_INDEX (-1) if beginning
+   * @throws BadLocationException if attempts to reference an invalid location
+   * of document is reached.
+   */
   public int findNextEnclosingBrace(int pos, char opening, char closing) throws BadLocationException;
   
   /** Searching backwards, finds the position of the first character that is one
-    * of the given delimiters.  Does not look for delimiters inside paren phrases.
-    * (eg. skips semicolons used inside for statements.)
-    * NB: ignores comments.
-    * @param pos Position to start from
-    * @param delims array of characters to search for
-    * @return position of first matching delimiter, or ERROR_INDEX (-1) if beginning
-    * of document is reached.
-    */
+   * of the given delimiters.  Does not look for delimiters inside paren phrases.
+   * (eg. skips semicolons used inside for statements.)
+   * NB: ignores comments.
+   * @param pos Position to start from
+   * @param delims array of characters to search for
+   * @return position of first matching delimiter, or ERROR_INDEX (-1) if beginning
+   * of document is reached.
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public int findPrevDelimiter(int pos, char[] delims) throws BadLocationException;
   
   /** Searching backwards, finds the position of the first character that is one
@@ -144,6 +153,7 @@ public interface DJDocument extends SwingDocumentInterface {
    * (eg. semicolons in a for statement)
    * @return position of first matching delimiter, or ERROR_INDEX (-1) if beginning
    * of document is reached.
+   * @throws BadLocationException if attempts to reference an invalid location
    */
   public int findPrevDelimiter(int pos, char[] delims, boolean skipParenPhrases) throws BadLocationException;
   
@@ -162,51 +172,71 @@ public interface DJDocument extends SwingDocumentInterface {
 //   */
 //  public int findPrevCharPos(int pos, char[] whitespace) throws BadLocationException;
   
-  /** Default indentation - uses OTHER flag and no progress indicator.
-    * @param selStart the offset of the initial character of the region to indent
-    * @param selEnd the offset of the last character of the region to indent
-    */
+  /** 
+   * Default indentation - uses OTHER flag and no progress indicator.
+   * @param selStart the offset of the initial character of the region to indent
+   * @param selEnd the offset of the last character of the region to indent
+   */
   public void indentLines(int selStart, int selEnd);
   
-  /** Parameterized indentation for special-case handling.
-    * @param selStart the offset of the initial character of the region to indent
-    * @param selEnd the offset of the last character of the region to indent
-    * @param reason a flag from {@link edu.rice.cs.drjava.model.definitions.indent.Indenter Indenter}
-    *        to indicate the reason for the indent (indent logic may vary slightly based on the trigger action)
-    * @param pm used to display progress, null if no reporting is desired
-    */
+  /** 
+   * Parameterized indentation for special-case handling.
+   * @param selStart the offset of the initial character of the region to indent
+   * @param selEnd the offset of the last character of the region to indent
+   * @param reason a flag from {@link edu.rice.cs.drjava.model.definitions.indent.Indenter Indenter}
+   *        to indicate the reason for the indent (indent logic may vary 
+   *        slightly based on the trigger action)
+   * @param pm used to display progress, null if no reporting is desired
+   * @throws OperationCanceledException if the operation was canceled
+   */
   public void indentLines(int selStart, int selEnd, Indenter.IndentReason reason, ProgressMonitor pm)
     throws OperationCanceledException;
   
-  /** Returns the "intelligent" beginning of line.  If currPos is to the right of the first non-whitespace character,
-    * the position of the first non-whitespace character is returned.  If currPos is at or to the left of the first 
-    * non-whitespace character, the beginning of the line is returned.
-    * @param currPos A position on the current line
-    */
+  /** 
+   * Returns the "intelligent" beginning of line. If currPos is to the right 
+   * of the first non-whitespace character, the position of the first non-
+   * whitespace character is returned. If currPos is at or to the left of the
+   * first non-whitespace character, the beginning of the line is returned.
+   * @param currPos A position on the current line
+   * @return the intelligent beginning of the line
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public int getIntelligentBeginLinePos(int currPos) throws BadLocationException;;
   
-  /** Returns the indent level of the start of the statement that the cursor is on.  Uses a default set of delimiters.
-    * (';', '{', '}') and a default set of whitespace characters (' ', '\t', n', ',').
-    * @param pos Cursor position
-    */
+  /** 
+   * Returns the indent level of the start of the statement that the cursor is 
+   * on. Uses a default set of delimiters (';', '{', '}') and a default set of 
+   * whitespace characters (' ', '\t', n', ',').
+   * @param pos Cursor position
+   * @return the indent level of the start of the statement that the cursor is on
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public int _getIndentOfCurrStmt(int pos) throws BadLocationException;
   
-  /** Returns the indent level of the start of the statement that the cursor is on.  Uses a default set of whitespace
-    * characters (' ', '\t', '\n', ',').
-    * @param pos Cursor position
-    */
+  /** 
+   * Returns the indent level of the start of the statement that the cursor is 
+   * on.  Uses a default set of whitespace characters (' ', '\t', '\n', ',').
+   * @param pos Cursor position
+   * @param delims delimeters
+   * @return the indent level of the start of the statement that the cursor is on
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public int _getIndentOfCurrStmt(int pos, char[] delims) throws BadLocationException;
   
-  /** Returns the indent level of the start of the statement
+  /** 
+   * Returns the indent level of the start of the statement
    * that the cursor is on.
    * @param pos Cursor position
    * @param delims Delimiter characters denoting end of statement
    * @param whitespace characters to skip when looking for beginning of next statement
+   * @return the indent level of the start of the statement that the cursor is on
+   * @throws BadLocationException if attempts to reference an invalid location
    */
   public int _getIndentOfCurrStmt(int pos, char[] delims, char[] whitespace)
     throws BadLocationException;
   
-  /** Determines if the given character exists on the line where
+  /** 
+   * Determines if the given character exists on the line where
    * the given cursor position is. Does not search in quotes or comments.
    * <p>
    * <b>Does not work if character being searched for is a '/' or a '*'</b>
@@ -216,7 +246,8 @@ public interface DJDocument extends SwingDocumentInterface {
    */
   public int findCharOnLine(int pos, char findChar);
   
-  /** Returns the absolute position of the beginning of the
+  /** 
+   * Returns the absolute position of the beginning of the
    * current line.  (Just after most recent newline, or 0)
    * Doesn't ignore comments.
    * @param pos Any position on the current line
@@ -224,19 +255,22 @@ public interface DJDocument extends SwingDocumentInterface {
    */
   public int _getLineStartPos(int pos);
   
-  /** Returns the absolute position of the end of the current
+  /** 
+   * Returns the absolute position of the end of the current
    * line.  (At the next newline, or the end of the document.)
    * @param pos Any position on the current line
    * @return position of the end of this line
    */
   public int _getLineEndPos(int pos);
   
-  /** Returns the absolute position of the first non-whitespace character
+  /** 
+   * Returns the absolute position of the first non-whitespace character
    * on the current line.
    * NB: Doesn't ignore comments.
    * @param pos position on the line
    * @return position of first non-whitespace character on this line, or the end
-   * of the line if no non-whitespace character is found.
+   *         of the line if no non-whitespace character is found.
+   * @throws BadLocationException if attempts to reference an invalid location
    */
   public int _getLineFirstCharPos(int pos) throws BadLocationException;
   
@@ -244,7 +278,8 @@ public interface DJDocument extends SwingDocumentInterface {
    * NB: Skips comments and all whitespace, including newlines
    * @param pos Position to start from
    * @return position of first non-whitespace character after pos,
-   * or ERROR_INDEX (-1) if end of document is reached
+   *         or ERROR_INDEX (-1) if end of document is reached
+   * @throws BadLocationException if attempts to reference an invalid location
    */
   public int getFirstNonWSCharPos(int pos) throws BadLocationException;
   
@@ -252,7 +287,8 @@ public interface DJDocument extends SwingDocumentInterface {
    * @param pos Position to start from
    * @param acceptComments if true, find non-whitespace chars in comments
    * @return position of first non-whitespace character after pos,
-   * or ERROR_INDEX (-1) if end of document is reached
+   *         or ERROR_INDEX (-1) if end of document is reached
+   * @throws BadLocationException if attempts to reference an invalid location
    */
   public int getFirstNonWSCharPos(int pos, boolean acceptComments) 
     throws BadLocationException;
@@ -263,7 +299,8 @@ public interface DJDocument extends SwingDocumentInterface {
    * @param whitespace array of whitespace chars to ignore
    * @param acceptComments if true, find non-whitespace chars in comments
    * @return position of first non-whitespace character after pos,
-   * or ERROR_INDEX (-1) if end of document is reached
+   *         or ERROR_INDEX (-1) if end of document is reached
+   * @throws BadLocationException if attempts to reference an invalid location
    */
   public int getFirstNonWSCharPos (int pos, char[] whitespace, boolean acceptComments)
     throws BadLocationException;

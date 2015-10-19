@@ -93,15 +93,22 @@ public class DocumentCacheTest extends DrJavaTestCase {
   /** Instantiates the GlobalModel to be used in the test cases. */
   protected void createModel() { _model = new TestGlobalModel(); }
   
-  /** Create a new temporary file in _tempDir. */
+  /** 
+   * @return a new temporary file in _tempDir. 
+   * @throws IOException if an IO operation fails 
+   */
   protected File tempFile() throws IOException {
     return File.createTempFile("DrJava-test", ".java", _tempDir).getCanonicalFile();
   }
   
-  /** Create a new temporary file in _tempDir.  Calls with the same
-    * int will return the same filename, while calls with different
-    * ints will return different filenames.
-    */
+  /** 
+   * Create a new temporary file in _tempDir.  Calls with the same
+   * int will return the same filename, while calls with different
+   * ints will return different filenames.
+   * @param i the index to append to the new file
+   * @return a new temporary file in _tempDir
+   * @throws IOException if an IO operation fails
+   */
   protected File tempFile(int i) throws IOException {
     return File.createTempFile("DrJava-test" + i, ".java", _tempDir).getCanonicalFile();
   }
@@ -479,6 +486,8 @@ public class DocumentCacheTest extends DrJavaTestCase {
    * problem but actually worsened it).  
    * <p>Adam and Jonathan went through great pains to remove 
    * these references, so <b>don't break our work!!!</b></p>
+   * @throws InterruptedException if execution was interrupted unexpectedly
+   * @throws IOException if an IO opeartion fails
    */
   public void testMemoryLeak() throws InterruptedException, IOException {
     _memLeakCounter=0;

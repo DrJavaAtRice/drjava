@@ -70,7 +70,7 @@ public abstract class ReducedToken implements ReducedModelStates {
     */
   public abstract boolean isMatch(Brace other);
   
-  /** Return true iff this ReducedToken is a matchable, i.e. is one of "{", "}", "(", ")", "[", "]" */
+  /** @return true iff this ReducedToken is a matchable, i.e. is one of "{", "}", "(", ")", "[", "]" */
   public abstract boolean isMatchable();
   
   /** Get the shadowing state of the token.
@@ -78,9 +78,12 @@ public abstract class ReducedToken implements ReducedModelStates {
     */
   public ReducedModelState getState() { return  _state; }
   
-  /** Returns whether the current char is highlighted. / / beginning a comment would be highlighted but free, so its not
-    * the same as getState.
-    */
+  /** 
+   * Returns whether the current char is highlighted. 
+   * / / beginning a comment would be highlighted but free, so its not
+   * the same as getState.
+   * @return true iff the current char is highlighted
+   */
   public int getHighlightState() {
     String type = getType();
     if (type.equals("//") || (_state == INSIDE_LINE_COMMENT) || type.equals("/*")
@@ -97,17 +100,17 @@ public abstract class ReducedToken implements ReducedModelStates {
   }
   
   /** Set the shadowing state of the token.
-    * @param state
+    * @param state the state to set
     */
   public void setState(ReducedModelState state) { _state = state; }
   
   /** Increases the size of the gap.
-    * @param delta
+    * @param delta the change in the size of the gap
     */
   public abstract void grow(int delta);
   
   /** Decreases the size of the gap.
-    * @param delta
+    * @param delta the change in the size of the gap
     */
   public abstract void shrink(int delta);
   
@@ -227,7 +230,7 @@ public abstract class ReducedToken implements ReducedModelStates {
     */
   public abstract boolean isClosedBrace();
   
-  /** Determine whether this token is a comment start "brace" ("//" or "/*') */
+  /** @return true iff this token is a comment start "brace" ("//" or "/*') */
   public boolean isCommentStart() { return isBlockCommentStart() || isLineComment(); }
 }
 

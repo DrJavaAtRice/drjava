@@ -91,6 +91,7 @@ public class ReducedModelComment extends AbstractReducedModel {
     *   </ol>
     *  <li>otherwise, check previous and insert
     * </OL>
+    * @param special the character to be inserted
     */
   private void insertSpecial(String special) {
     // Check if empty.
@@ -139,10 +140,12 @@ public class ReducedModelComment extends AbstractReducedModel {
     else _checkPreviousInsertSpecial(special);
   }
   
-  /** Checks before point of insertion to make sure we don't need to combine.
-    * Delegates work to _checkPreviousInsertBackSlash and _checkPreviousInsertCommentChar,
-    * depending on what's being inserted into the document.
-    */
+  /** 
+   * Checks before point of insertion to make sure we don't need to combine.
+   * Delegates work to _checkPreviousInsertBackSlash and _checkPreviousInsertCommentChar,
+   * depending on what's being inserted into the document.
+   * @param special the character to be inserted
+   */
   private void _checkPreviousInsertSpecial(String special) {
     if (special.equals("\\")) {
       _checkPreviousInsertBackSlash();
@@ -155,7 +158,6 @@ public class ReducedModelComment extends AbstractReducedModel {
   /** Checks before point of insertion to make sure we don't need to combine backslash with another backslash (yes, they
     * too can be escaped).
     */
-  
   private void _checkPreviousInsertBackSlash() {
     if (!_cursor.atStart()  && !_cursor.atFirstItem()) {
       if (_cursor.prevItem().getType().equals("\\")) {
@@ -172,9 +174,12 @@ public class ReducedModelComment extends AbstractReducedModel {
     else _cursor.next();
   }
   
-  /** Checks before the place of insert to make sure there are no preceding slashes with which the inserted slash must 
-    * combine.  It then performs the insert of either (/), (/ /), (/ *) or (* /).
-    */
+  /** 
+   * Checks before the place of insert to make sure there are no preceding 
+   * slashes with which the inserted slash must combine.  It then performs 
+   * the insert of either (/), (/ /), (/ *) or (* /).
+   * @param special the character to be inserted
+   */
   private void _checkPreviousInsertCommentChar(String special) {
     if (!_cursor.atStart()  && !_cursor.atFirstItem()) {
       if ((_cursor.prevItem().getType().equals("/")) && (_cursor.prevItem().getState() == FREE)) {
@@ -330,7 +335,7 @@ public class ReducedModelComment extends AbstractReducedModel {
     _cursor.setBlockOffset(0);
   }
   
-  /** Returns the state of the _cursor iterator.  */
+  /** @return the state of the _cursor iterator.  */
   public ReducedModelState getStateAtCurrent() { return _cursor.getStateAtCurrent(); }
   
   public int walkerOffset() { return absOffset(_walker); }
@@ -479,15 +484,21 @@ public class ReducedModelComment extends AbstractReducedModel {
 //    return;
 //  }
   
-  /** Gets distance to the previous newline character (not including newline char).  Returns -1 if no newline exists,
-    * so it fails find start of first line. */
+  /** 
+   * @return the distance to the previous newline character (not including 
+   *         newline char); returns -1 if no newline exists, so it fails 
+   *         find start of first line. 
+   */
   public int getDistToStart() { 
 //    System.err.println("getDistToStart() called on " + simpleString());
 //    System.err.println("with cursor on " + _cursor.current());
     return _getDistToStart(_cursor.copy()); 
   }
   
-  /** Returns distance to previous newline (not including the newline itself). */
+  /** 
+   * @param copyCursor copy of the cursor
+   * @return distance to previous newline (not including the newline itself). 
+   */
   private int _getDistToStart(TokenList.Iterator copyCursor) {
 //    System.err.println("_getDistToStart called on " + simpleString() + " with cursor " + copyCursor);
     
@@ -514,9 +525,13 @@ public class ReducedModelComment extends AbstractReducedModel {
     return walkcount;
   }
   
-  /** Computes the distance to the beginning of the line (except first) containing the brace enclosing
-    * the current location given the distnace to this brace.
-    */
+  /** 
+   * Computes the distance to the beginning of the line (except first) containing the brace enclosing
+   * the current location given the distnace to this brace.
+   * @param distToEnclosingBrace distance to the brace enclosing the current location
+   * @return the distance to the beginning of the line containing the brace 
+   *         enclosing the current location
+   */
   int getDistToEnclosingBraceStart(int distToEnclosingBrace) {
     
     TokenList.Iterator copyCursor = _cursor.copy();
@@ -530,7 +545,10 @@ public class ReducedModelComment extends AbstractReducedModel {
     else return walkcount + distToEnclosingBrace;
   }
   
-  /** Returns distance to previous newline where relLoc is the distance back from the cursor to start searching. */
+  /** 
+   * @param relLoc the distance back from the cursor to start searching
+   * @return distance to previous newline 
+   */
   public int getDistToStart(int relLoc) {
     TokenList.Iterator copyCursor = _cursor.copy();
     copyCursor.move(-relLoc);
@@ -540,7 +558,7 @@ public class ReducedModelComment extends AbstractReducedModel {
     return dist + relLoc;
   }
   
-  /** Returns the distance to the gap before the next newline (end of document if no newline) */
+  /** @return distance to the gap before the next newline (end of doc if no newline) */ 
   public int getDistToNextNewline() {
     TokenList.Iterator copyCursor = _cursor.copy();
     if (copyCursor.atStart()) {

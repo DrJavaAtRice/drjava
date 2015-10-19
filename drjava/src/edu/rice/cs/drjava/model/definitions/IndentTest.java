@@ -65,7 +65,10 @@ public final class IndentTest extends DrJavaTestCase {
   private Integer indentLevel = Integer.valueOf(2);
   private GlobalEventNotifier _notifier;
   
-  /** Standard constructor for IdentTest */
+  /** 
+   * Standard constructor for IdentTest 
+   * @param name test name
+   */
   public IndentTest(String name) { super(name); }
   
   /** Sets up the member bindings common to all tests. */
@@ -82,12 +85,19 @@ public final class IndentTest extends DrJavaTestCase {
     */
   public static Test suite() { return  new TestSuite(IndentTest.class); }
   
-  /** Convenience method that performs _doc._indentLine in the event thread. */
+  /** 
+   * Convenience method that performs _doc._indentLine in the event thread. 
+   * @param reason the reason for indenting
+   */
   private void safeIndentLine(final Indenter.IndentReason reason) {
     Utilities.invokeAndWait(new Runnable() { public void run() { _doc._indentLine(reason); } });
   }
  
-  /** Convenience method that performs _doc._indentLines in the event thread. */
+  /** 
+   * Convenience method that performs _doc._indentLines in the event thread. 
+   * @param startSel start of the selected region
+   * @param endSel end of the selected region
+   */
   private void safeIndentLines(final int startSel, final int endSel) {
     Utilities.invokeAndWait(new Runnable() { 
       public void run() {
@@ -96,7 +106,10 @@ public final class IndentTest extends DrJavaTestCase {
     });
   }
   
-  /** Regression test for comment portion of indent tree. */
+  /** 
+   * Regression test for comment portion of indent tree. 
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testIndentComments() throws BadLocationException {
     String text =
       "  foo();\n" +
@@ -130,7 +143,10 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents(indented, _doc);
   }
   
-  /** Test case for SourceForge bug# 681203. */
+  /** 
+   * Test case for SourceForge bug# 681203. 
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testMultiLineStarInsertFirstLine() throws BadLocationException {
     String text =
       "/**\n" +
@@ -158,7 +174,10 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents(starAdded, _doc);
   }
   
-  /** Test case for SourceForge bug# 681203. */
+  /** 
+   * Test case for SourceForge bug# 681203. 
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testMultiLineStarInsertLaterLine() throws BadLocationException {
     
     String text =
@@ -190,7 +209,10 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents(starAdded, _doc);
   }
   
-  /** Regression test for paren phrases. */
+  /** 
+   * Regression test for paren phrases. 
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testIndentParenPhrases() throws BadLocationException {
     String text =
       "foo(i,\n" +
@@ -226,7 +248,10 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents(indented, _doc);
   }
   
-  /** Regression test for braces. */
+  /** 
+   * Regression test for braces. 
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testIndentBraces() throws BadLocationException {
     String text =
       "{\n" +
@@ -269,7 +294,10 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents(indented, _doc);
   }
   
-  /** Regression test for arrays. */
+  /** 
+   * Regression test for arrays. 
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testIndentArray() throws BadLocationException {
     String text =
       "int[2][] a ={\n" +
@@ -299,7 +327,10 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents(indented, _doc);
   }
   
-  /** Regression test for common cases. */
+  /** 
+   * Regression test for common cases. 
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testIndentCommonCases() throws BadLocationException {
     String text =
       "int x;\n" +
@@ -323,7 +354,9 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents(indented, _doc);
   }
   
-  /** Regression test for switch statements.
+  /** 
+   * Regression test for switch statements.
+   * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testIndentSwitch() throws BadLocationException {
     String text =
@@ -355,7 +388,10 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents(indented, _doc);
   }
   
-  /** Regression test for ternary operators. */
+  /** 
+   * Regression test for ternary operators. 
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testIndentTernary() throws BadLocationException {
     String text =
       "test1 = x ? y : z;\n" +
@@ -392,9 +428,10 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents(indented, _doc);
   }
   
-  /** Tests getLineEnclosingBrace, getEnclosingBrace
-    * @exception BadLocationException
-    */
+  /** 
+   * Tests getLineEnclosingBrace, getEnclosingBrace
+   * @throws BadLocationException if attempts to reference an invalid position
+   */
   public void testIndentInfoCurly() throws BadLocationException {
     //empty document
     _assertLineBraceInfo(-1, NONE);
@@ -424,9 +461,7 @@ public final class IndentTest extends DrJavaTestCase {
     _assertBraceInfo(3, OPEN_CURLY);
   }
   
-  /** put your documentation comment here
-    * @exception BadLocationException
-    */
+  /** @throws BadLocationException if attempts to reference an invalid position */ 
   public void testIndentInfoParen() throws BadLocationException {
     // just paren
     _doc.insertString(0, "\n(\n", null);
@@ -449,9 +484,7 @@ public final class IndentTest extends DrJavaTestCase {
     _assertBraceInfo(2, OPEN_PAREN);
   }
   
-  /** put your documentation comment here
-    * @exception BadLocationException
-    */
+  /** @throws BadLocationException if attempts to reference an invalid position */ 
   public void testIndentInfoBracket() throws BadLocationException {
     // just bracket
     _doc.insertString(0, "\n[\n", null);
@@ -474,9 +507,7 @@ public final class IndentTest extends DrJavaTestCase {
     _assertBraceInfo(2, OPEN_BRACKET);
   }
   
-  /** Put your documentation comment here
-    * @exception BadLocationException
-    */
+  /** @throws BadLocationException if attempts to reference an invalid position */ 
   public void testIndentInfoPrevNewline () throws BadLocationException {
 //    System.err.println("***** reduced before insert = " + _doc.getReduced().simpleString());
     _doc.insertString(0, "{\n  {\nhello", null);
@@ -488,45 +519,41 @@ public final class IndentTest extends DrJavaTestCase {
     _assertBraceInfo(7, OPEN_CURLY);
   }
   
-  /** Tests block comment indenting.
-    * @exception BadLocationException
-    */
+  /** 
+   * Tests block comment indenting.
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testEndOfBlockComment () throws BadLocationException {
     _doc.insertString(0, "\n{\n  hello;\n /*\n hello\n */", null);
     safeIndentLines(_doc.getCurrentLocation(), _doc.getCurrentLocation());
     _assertContents("\n{\n  hello;\n /*\n hello\n */", _doc);
   }
   
-  /** Tests block comment indenting.
-    * @exception BadLocationException
-    */
+  /** 
+   * Tests block comment indenting.
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testAfterBlockComment () throws BadLocationException {
     _doc.insertString(0, "\n{\n  hello;\n  /*\n  hello\n  */\nhello", null);
     safeIndentLines(_doc.getCurrentLocation(), _doc.getCurrentLocation());
     _assertContents("\n{\n  hello;\n  /*\n  hello\n  */\n  hello", _doc);
   }
   
-  /** put your documentation comment here
-    * @exception BadLocationException
-    */
+  /** @throws BadLocationException if attempts to reference an invalid position */ 
   public void testAfterBlockComment3 () throws BadLocationException {
     _doc.insertString(0, "\n{\n  hello;\n  /*\n  hello\n  grr*/\nhello", null);
     safeIndentLines(_doc.getCurrentLocation(), _doc.getCurrentLocation());
     _assertContents("\n{\n  hello;\n  /*\n  hello\n  grr*/\n  hello", _doc);
   }
   
-  /** put your documentation comment here
-    * @exception BadLocationException
-    */
+  /** @throws BadLocationException if attempts to reference an invalid position */ 
   public void testAfterBlockComment4 () throws BadLocationException {
     _doc.insertString(0, "\n{\n  hello;\n /*\n  hello\n */ hello", null);
     safeIndentLines(_doc.getCurrentLocation(), _doc.getCurrentLocation());
     _assertContents("\n{\n  hello;\n /*\n  hello\n  */ hello", _doc);
   }
   
-  /** put your documentation comment here
-    * @exception BadLocationException
-    */
+  /** @throws BadLocationException if attempts to reference an invalid position */ 
   public void testAfterBlockComment2 () throws BadLocationException {
     _doc.insertString(0, "\n{\n  hello;\n  /*\n  hello\n  */ (\nhello", null);
     safeIndentLines(_doc.getCurrentLocation(), _doc.getCurrentLocation());
@@ -624,9 +651,7 @@ public final class IndentTest extends DrJavaTestCase {
 //    _assertIndentInfo(info, NONE, -1, -1, -1);
 //  }
   
-  /** put your documentation comment here
-    * @exception BadLocationException
-    */
+  /** @throws BadLocationException if attempts to reference an invalid position */ 
   public void testStartSimple () throws BadLocationException {
     // just paren
     _doc.insertString(0, "abcde", null);
@@ -634,9 +659,7 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents("abcde", _doc);
   }
   
-  /** put your documentation comment here
-    * @exception BadLocationException
-    */
+  /** @throws BadLocationException if attempts to reference an invalid position */ 
   public void testStartSpaceIndent () throws BadLocationException {
     // just paren
     _doc.insertString(0, "  abcde", null);
@@ -644,9 +667,7 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents("abcde", _doc);
   }
   
-  /** put your documentation comment here
-    * @exception BadLocationException
-    */
+  /** @throws BadLocationException if attempts to reference an invalid position */ 
   public void testStartBrace () throws BadLocationException {
     // just paren
     _doc.insertString(0, "public class temp \n {", null);
@@ -654,9 +675,7 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents("public class temp \n{", _doc);
   }
   
-  /** put your documentation comment here
-    * @exception BadLocationException
-    */
+  /** @throws BadLocationException if attempts to reference an invalid position */ 
   public void testEndBrace () throws BadLocationException {
     // just paren
     _doc.insertString(0, "public class temp \n{ \n  }", null);
@@ -664,9 +683,7 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents("public class temp \n{ \n}", _doc);
   }
   
-  /** put your documentation comment here
-    * @exception BadLocationException
-    */
+  /** @throws BadLocationException if attempts to reference an invalid position */ 
   public void testInsideClass () throws BadLocationException {
     // just paren
     _doc.insertString(0, "public class temp \n{ \ntext here", null);
@@ -674,9 +691,7 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents("public class temp \n{ \n  text here", _doc);
   }
   
-  /** put your documentation comment here
-    * @exception BadLocationException
-    */
+  /** @throws BadLocationException if attempts to reference an invalid position */ 
   public void testInsideClassWithBraceSets () throws BadLocationException {
     // just paren
     _doc.insertString(0, "public class temp \n{  ()\ntext here", null);
@@ -684,9 +699,7 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents("public class temp \n{  ()\n  text here", _doc);
   }
   
-  /** put your documentation comment here
-    * @exception BadLocationException
-    */
+  /** @throws BadLocationException if attempts to reference an invalid position */ 
   public void testIgnoreBraceOnSameLine () throws BadLocationException {
     // just paren
     _doc.insertString(0, "public class temp \n{  ()\n{text here", null);
@@ -703,9 +716,7 @@ public final class IndentTest extends DrJavaTestCase {
 //    _assertContents("public class temp \n  {  ()\n    { text here", doc);
 //  }
   
-  /** put your documentation comment here
-    * @exception BadLocationException
-    */
+  /** @throws BadLocationException if attempts to reference an invalid position */ 
   public void testWeird () throws BadLocationException {
     // just paren
     _doc.insertString(0, "hello\n", null);
@@ -713,9 +724,7 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents("hello\n  ", _doc);
   }
   
-  /** put your documentation comment here
-    * @exception BadLocationException
-    */
+  /** @throws BadLocationException if attempts to reference an invalid position */ 
   public void testWierd2 () throws BadLocationException {
     // just paren
     _doc.insertString(0, "hello", null);
@@ -723,9 +732,7 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents("hello", _doc);
   }
   
-  /** put your documentation comment here
-    * @exception BadLocationException
-    */
+  /** @throws BadLocationException if attempts to reference an invalid position */ 
   public void testMotion () throws BadLocationException {
     // just paren
     _doc.insertString(0, "hes{\n{abcde", null);
@@ -738,9 +745,7 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents("hes{\n  {abcde\n{", _doc);
   }
   
-  /** put your documentation comment here
-    * @exception BadLocationException
-    */
+  /** @throws BadLocationException if attempts to reference an invalid position */ 
   public void testNextCharIsNewline () throws BadLocationException {
     // just paren
     _doc.insertString(0, "hes{\n{abcde", null);
@@ -753,9 +758,7 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents("hes{\n  {abcde\n{", _doc);
   }
   
-  /** put your documentation comment here
-    * @exception BadLocationException
-    */
+  /** @throws BadLocationException if attempts to reference an invalid position */ 
   public void testFor () throws BadLocationException {
     // just paren
     _doc.insertString(0, "for(;;)\n", null);
@@ -763,9 +766,7 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents("for(;;)\n  ", _doc);
   }
   
-  /** put your documentation comment here
-    * @exception BadLocationException
-    */
+  /** @throws BadLocationException if attempts to reference an invalid position */ 
   public void testFor2 () throws BadLocationException {
     // just paren
     _doc.insertString(0, "{\n  for(;;)\n", null);
@@ -773,9 +774,7 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents("{\n  for(;;)\n    ", _doc);
   }
   
-  /** put your documentation comment here
-    * @exception BadLocationException
-    */
+  /** @throws BadLocationException if attempts to reference an invalid position */ 
   public void testOpenParen () throws BadLocationException {
     // just paren
     _doc.insertString(0, "hello(\n", null);
@@ -783,9 +782,7 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents("hello(\n      ", _doc);
   }
   
-  /** put your documentation comment here
-    * @exception BadLocationException
-    */
+  /** @throws BadLocationException if attempts to reference an invalid position */ 
   public void testPrintString () throws BadLocationException {
     // just paren
     _doc.insertString(0, "Sys.out(\"hello\"\n", null);
@@ -793,29 +790,23 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents("Sys.out(\"hello\"\n          ", _doc);
   }
   
-  /** put your documentation comment here
-    * @exception BadLocationException
-    */
+  /** @throws BadLocationException if attempts to reference an invalid position */ 
   public void testOpenBracket () throws BadLocationException {
     // just paren
     _doc.insertString(0, "hello[\n", null);
     safeIndentLines(_doc.getCurrentLocation(), _doc.getCurrentLocation());
     _assertContents("hello[\n      ", _doc);
   }
-  
-  /** put your documentation comment here
-    * @exception BadLocationException
-    */
+
+  /** @throws BadLocationException if attempts to reference an invalid position */ 
   public void testCurlyAlignment () throws BadLocationException {
     // just paren
     _doc.insertString(0, "{\n  }", null);
     safeIndentLines(_doc.getCurrentLocation(), _doc.getCurrentLocation());
     _assertContents("{\n}", _doc);
   }
-  
-  /** put your documentation comment here
-    * @exception BadLocationException
-    */
+
+  /** @throws BadLocationException if attempts to reference an invalid position */ 
   public void testSpaceBrace () throws BadLocationException {
     // just paren
     _doc.insertString(0, "   {\n", null);
@@ -842,50 +833,40 @@ public final class IndentTest extends DrJavaTestCase {
    doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
    _assertContents("{\n  if\n    if\n      if\n      {", doc);
    }*/
-  
-  /** put your documentation comment here
-    * @exception BadLocationException
-    */
+
+  /** @throws BadLocationException if attempts to reference an invalid position */ 
   public void testEnter () throws BadLocationException {
     // just paren
     _doc.insertString(0, "\n\n", null);
     safeIndentLines(_doc.getCurrentLocation(), _doc.getCurrentLocation());
     _assertContents("\n\n", _doc);
   }
-  
-  /** put your documentation comment here
-    * @exception BadLocationException
-    */
+
+  /** @throws BadLocationException if attempts to reference an invalid position */ 
   public void testEnter2 () throws BadLocationException {
     // just paren
     _doc.insertString(0, "\n", null);
     safeIndentLines(_doc.getCurrentLocation(), _doc.getCurrentLocation());
     _assertContents("\n", _doc);
   }
-  
-  /** put your documentation comment here
-    * @exception BadLocationException
-    */
+
+  /** @throws BadLocationException if attempts to reference an invalid position */ 
   public void testNotRecognizeComments () throws BadLocationException {
     // just paren
     _doc.insertString(0, "\nhello //bal;\n", null);
     safeIndentLines(_doc.getCurrentLocation(), _doc.getCurrentLocation());
     _assertContents("\nhello //bal;\n  ", _doc);
   }
-  
-  /** put your documentation comment here
-    * @exception BadLocationException
-    */
+
+  /** @throws BadLocationException if attempts to reference an invalid position */ 
   public void testNotRecognizeComments2 () throws BadLocationException {
     // just paren
     _doc.insertString(0, "\nhello; /*bal*/\n ", null);
     safeIndentLines(_doc.getCurrentLocation(), _doc.getCurrentLocation());
     _assertContents("\nhello; /*bal*/\n", _doc);
   }
-  
-  /** put your documentation comment here
-    * @exception BadLocationException
-    */
+
+  /** @throws BadLocationException if attempts to reference an invalid position */ 
   public void testBlockIndent () throws BadLocationException {
     // just paren
     _doc.insertString(0, "hello\n{\n{\n  {", null);
@@ -893,49 +874,42 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents("hello\n{\n  {\n    {", _doc);
   }
   
-  /** Regression test for bug in drjava-20010802-1020:
+  /** 
+   * Regression test for bug in drjava-20010802-1020:
    * Indent block on a file containing just "  x;\n  y;\n" would throw an
    * exception.
-   * @exception BadLocationException
+   * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testBlockIndent2 () throws BadLocationException {
     _doc.insertString(0, "  x;\n  y;\n", null);
     safeIndentLines(0, _doc.getLength());
     _assertContents("x;\ny;\n", _doc);
   }
-  
-  /** put your documentation comment here
-    * @exception BadLocationException
-    */
+
+  /** @throws BadLocationException if attempts to reference an invalid position */ 
   public void testIndentInsideCommentBlock () throws BadLocationException {
     _doc.insertString(0, "hello\n{\n/*{\n{\n*/\nhehe", null);
     safeIndentLines(0, 21);
     _assertContents("hello\n{\n  /*{\n   {\n   */\n  hehe", _doc);
   }
-  
-  /** put your documentation comment here
-    * @exception BadLocationException
-    */
+
+  /** @throws BadLocationException if attempts to reference an invalid position */ 
   public void testSecondLineProblem () throws BadLocationException {
     // just paren
     _doc.insertString(0, "\n", null);
     safeIndentLines(_doc.getCurrentLocation(), _doc.getCurrentLocation());
     _assertContents("\n", _doc);
   }
-  
-  /** put your documentation comment here
-    * @exception BadLocationException
-    */
+
+  /** @throws BadLocationException if attempts to reference an invalid position */ 
   public void testSecondLineProblem2 () throws BadLocationException {
     // just paren
     _doc.insertString(0, "a\n", null);
     safeIndentLines(_doc.getCurrentLocation(), _doc.getCurrentLocation());
     _assertContents("a\n  ", _doc);
   }
-  
-  /** put your documentation comment here
-    * @exception BadLocationException
-    */
+
+  /** @throws BadLocationException if attempts to reference an invalid position */ 
   public void testSmallFileProblem () throws BadLocationException {
     // just paren
     _doc.insertString(0, "\n\n", null);
@@ -943,7 +917,9 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents("\n\n", _doc);
   }
   
-  /** Regression test for arrays.
+  /** 
+   * Regression test for arrays.
+   * @throws BadLocationException if attempts to reference an invalid position 
    */
   public void testAnonymousInnerClass() throws BadLocationException {
     String text =
@@ -1144,8 +1120,9 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents(indentedAfter, _doc);
   }
   
-  /** tests that an if statment nested in a switch will be indented properly
-   * @throws BadLocationException
+  /** 
+   * tests that an if statment nested in a switch will be indented properly
+   * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testNestedIfInSwitch() throws BadLocationException {
     String text =
@@ -1251,9 +1228,10 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents(test2Correct, _doc);
   }
   
-  /** Tests that annotations do not change the indent level of the lines following.
-    * @throws BadLocationException
-    */
+  /** 
+   * Tests that annotations do not change the indent level of the lines following.
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testAnnotationsAfterOpenCurly() throws BadLocationException {
     String textToIndent =
       "@Annotation\n" +
@@ -1302,9 +1280,10 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents(textIndented, _doc);
   }
   
-  /** Tests that annotations do not change the indent level of the lines following.
-    * @throws BadLocationException
-    */
+  /** 
+   * Tests that annotations do not change the indent level of the lines following.
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testAnnotationsAfterDefinition() throws BadLocationException {
     String textToIndent =
       "@Annotation\n" +

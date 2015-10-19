@@ -48,9 +48,13 @@ import edu.rice.cs.plt.reflect.JavaVersion;
   */
 public interface CompilerInterface {
   
-  /** Indicates whether this compiler is actually available. As in: Is it installed and located? This method 
-    * should load the compiler class, which should hopefully prove whether the class can load.  If this 
-    * method returns true, the {@link #compile} method should not fail due to class not being found.
+  /** 
+   * Indicates whether this compiler is actually available. As in: Is it 
+   * installed and located? This method should load the compiler class, 
+   * which should hopefully prove whether the class can load.  If this 
+   * method returns true, the {@link #compile} method should not fail due to 
+   * class not being found.
+   * @return true if the compiler is available; false otherwise
     */
   boolean isAvailable();
   
@@ -74,20 +78,23 @@ public interface CompilerInterface {
                                         List<? extends File> sourcePath, File destination, 
                                         List<? extends File> bootClassPath, String sourceVersion, boolean showWarnings);
   
-  /** The latest version of Java supported by the compiler */
+  /** @return the latest version of Java supported by the compiler */
   JavaVersion version();
   
-  /** Returns the name of this compiler, appropriate to show to the user. */
+  /** @return the name of this compiler, appropriate to show to the user. */
   String getName();
   
-  /** Returns a one-line description of the compiler (such as the name and file location) */
+  /** @return a one-line description of the compiler (such as the name and file location) */
   String getDescription();
   
-  /** String to display in a combo box (generally {@code getName()}) */
+  /** @return string to display in a combo box (generally {@code getName()}) */
   String toString();
   
-  /** A compiler can instruct DrJava to include additional elements for the boot
-    * class path of the Interactions JVM. */
+  /** 
+   * A compiler can instruct DrJava to include additional elements for the boot
+   * class path of the Interactions JVM. 
+   * @return list of files on the class path
+   */
   List<File> additionalBootClassPathForInteractions();
   
   /** Transform the command line to be interpreted into something the Interactions JVM can use.

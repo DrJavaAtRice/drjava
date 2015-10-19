@@ -42,13 +42,15 @@ package edu.rice.cs.util.text;
   */
 public class DocumentEditCondition {
   
-  /** Returns whether to actually insert, given these inputs.
-    * @param offs Offset into the document
-    */
+  /** 
+   * @param offs Offset into the document
+   * @return whether to actually insert, given these inputs.
+   */
   public boolean canInsertText(int offs) { return true; }
   
-  /** Returns whether to actually remove, given these inputs.
-    * @param offs Offset to start deleting from
-    */
+  /** 
+   * @param offs Offset to start deleting from
+   * @return whether to actually remove, given these inputs.
+   */
   public boolean canRemoveText(int offs) { return true; }
 }

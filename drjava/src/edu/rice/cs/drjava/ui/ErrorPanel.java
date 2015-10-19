@@ -250,7 +250,10 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     });
   }
   
-  /** Changes the font of the error list. */
+  /** 
+   * Changes the font of the error list. 
+   * @param f new font to be set
+   */
   public void setListFont(Font f) {
     SimpleAttributeSet set = new SimpleAttributeSet();
     StyleConstants.setFontFamily(set, f.getFamily());
@@ -279,7 +282,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
   
   protected SingleDisplayModel getModel() { return _model; }
   
-  /** This function returns the correct error model  */
+  /** @return the correct error model  */
   abstract protected CompilerErrorModel getErrorModel();
   
   /** Pane to show compiler errors. Similar to a listbox (clicking selects an item) but items can each wrap, etc. */
@@ -423,12 +426,17 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       });
     }
     
-    /** Gets the ErrorDocument associated with this ErrorListPane.  The inherited getDocument method must be preserved
-      * because the ErrorListPane constructor uses it fetch a Document that is NOT an ErrorDocument.  ErrorListPane 
-      * immediately sets the Document corresponding to this JEditorPane to an ErrorDocument and strictly maintains it as 
-      * an ErrorDocument, but the JEditorPane constructor binds its document to a PlainDocument and uses getDocument 
-      * before ErrorListPane can set this field to an ErrorDocument.
-      */
+    /** 
+     * Gets the ErrorDocument associated with this ErrorListPane.
+     * The inherited getDocument method must be preserved because the 
+     * ErrorListPane constructor uses it fetch a Document that is NOT an 
+     * ErrorDocument.  ErrorListPane immediately sets the Document 
+     * corresponding to this JEditorPane to an ErrorDocument and strictly 
+     * maintains it as  an ErrorDocument, but the JEditorPane constructor 
+     * binds its document to a PlainDocument and uses getDocument 
+     * before ErrorListPane can set this field to an ErrorDocument.
+     * @return the error document associated with this 
+     */
     public ErrorDocument getErrorDocument() { return (ErrorDocument) getDocument(); }
     
     /** Assigns the given keystroke to the given action in this pane.
@@ -460,10 +468,13 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
      */
     public boolean shouldShowHighlightsInSource() { return _showHighlightsCheckBox.isSelected(); }
     
-    /** Get the index of the current error in the error array.  */
+    /** @return the index of the current error in the error array.  */
     public int getSelectedIndex() { return _selectedIndex; }
     
-    /** Returns DJError associated with the given visual coordinates. Returns null if none. */
+    /** 
+     * @param p the point at which to find the error
+     * @return DJError associated with the given visual coordinates. Returns null if none. 
+     */
     protected DJError _errorAtPoint(Point p) {
       int modelPos = viewToModel(p);
       
@@ -480,7 +491,10 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       return null;
     }
     
-    /** Returns the index into _errorListPositions corresponding to the given DJError. */
+    /**
+     * @param error the error for which to find the index
+     * @return the index into _errorListPositions corresponding to the given DJError. 
+     */
     private int _getIndexForError(DJError error) {
       
       if (error == null) throw new IllegalArgumentException("Couldn't find index for null error");
@@ -493,10 +507,13 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       throw new IllegalArgumentException("Couldn't find index for error " + error);
     }
     
-    /** Returns true if the text selection interval is empty. */
+    /** @return true if the text selection interval is empty. */
     protected boolean _isEmptySelection() { return getSelectionStart() == getSelectionEnd(); }
     
-    /** Update the pane which holds the list of errors for the viewer. */
+    /** 
+     * Update the pane which holds the list of errors for the viewer. 
+     * @param done boolean
+     */
     protected void updateListPane(boolean done) {
       try {
         _errorListPositions = new Position[_numErrors];
@@ -515,7 +532,11 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     
     abstract protected void _updateWithErrors() throws BadLocationException;
     
-    /** Gets the message indicating the number of errors and warnings.*/
+    /** 
+     * @param failureName the name of the failure 
+     * @param failureMeaning the meaning of the failure
+     * @return the message indicating the number of errors and warnings.
+     */
     protected String _getNumErrorsMessage(String failureName, String failureMeaning) {
       StringBuilder numErrMsg;
       
@@ -538,7 +559,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       return numErrMsg.toString();
     }
     
-    /** Gets the message to title the block containing only errors. */
+    /** @return the message to title the block containing only errors. */
     protected String _getErrorTitle() {
       CompilerErrorModel cem = getErrorModel();
       if (cem.getNumCompilerErrors() > 1) return "--------------\n*** Errors ***\n--------------\n";
@@ -546,7 +567,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       return "";
     }
       
-    /** Gets the message to title the block containing only warnings. */
+    /** @return the message to title the block containing only warnings. */
     protected String _getWarningTitle() {
       CompilerErrorModel cem = getErrorModel();
       if (cem.getNumWarnings() > 1) return "--------------\n** Warnings **\n--------------\n";
@@ -554,7 +575,13 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       return "";
     }
         
-    /** Used to show that the last compile was unsuccessful.*/
+    /** 
+     * Used to show that the last compile was unsuccessful.
+     * @param failureName the name of the failure
+     * @param failureMeaning the meaning of the failure
+     * @param doc the error document
+     * @throws BadLocationException if attempts to reference an invalid location
+     */
     protected void _updateWithErrors(String failureName, String failureMeaning, ErrorDocument doc)
       throws BadLocationException {
       // Print how many errors
@@ -569,10 +596,10 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
         getErrorListPane().switchToError(0);
     }
     
-    /** Returns true if there is an error after the selected error. */
+    /** @return true if there is an error after the selected error. */
     public boolean hasNextError() { return this.getSelectedIndex() + 1 < _numErrors; }
     
-    /** Returns true if there is an error before the selected error. */
+    /** @return true if there is an error before the selected error. */
     public boolean hasPrevError() { return this.getSelectedIndex() > 0; }
     
     /** Switches to the next error. */
@@ -594,8 +621,10 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       }
     }
     
-    /** Inserts all of the errors into the given document.
-     *  @param doc the document into which to insert the errors
+    /** 
+     * Inserts all of the errors into the given document.
+     * @param doc the document into which to insert the errors
+     * @throws BadLocationException if attempts to reference an invalid location
      */
     protected void _insertErrors(ErrorDocument doc) throws BadLocationException {
       CompilerErrorModel cem = getErrorModel();
@@ -640,9 +669,11 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       }      
     }
     
-    /** Prints a message for the given error
-     *  @param error the error to print
-     *  @param doc the document in the error pane
+    /** 
+     * Prints a message for the given error
+     * @param error the error to print
+     * @param doc the document in the error pane
+     * @throws BadLocationException if attempts to reference an invalid location
      */
     protected void _insertErrorText(DJError error, ErrorDocument doc) throws BadLocationException {
       // Show file and line number
@@ -657,10 +688,10 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       doc.append("\n", NORMAL_ATTRIBUTES);
     }
     
-    /** Returns the string to identify a warning. */
+    /** @return the string to identify a warning. */
     protected String _getWarningText() { return "Warning: "; }
     
-    /** Returns the string to identify an error. */
+    /** @return the string to identify an error. */
     protected String _getErrorText() { return "Error: "; }
     
     /** When the selection of the current error changes, remove the highlight in the error pane. */
@@ -682,7 +713,10 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       _frame.getCurrentDefPane().removeErrorHighlight();
     }
     
-    /** Selects the given error inside the error list pane. */
+    /** 
+     * Selects the given error inside the error list pane. 
+     * @param error the error to be selected
+     */
     public void selectItem(DJError error) {
 //      Utilities.showDebug("selectItem(" + error + ") called");
       try {

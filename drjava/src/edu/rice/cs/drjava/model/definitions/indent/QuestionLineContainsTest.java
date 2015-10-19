@@ -50,6 +50,7 @@ public final class QuestionLineContainsTest extends IndentRulesTestCase {
 
   /** Ensures that a line containing a colon is detected.
    * Tests that a line of text containing a colon is detected.
+   * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testLineContainsColon() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionLineContains(':', null, null);
@@ -70,6 +71,7 @@ public final class QuestionLineContainsTest extends IndentRulesTestCase {
   
   /** Ensures that a line containing a colon is detected.
    * Tests that a line does not contain a colon.
+   * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testLineDoesNotContainColon() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionLineContains(':', null, null);
@@ -85,6 +87,7 @@ public final class QuestionLineContainsTest extends IndentRulesTestCase {
   /** Ensures that a line containing a colon is detected.
    * Tests that a line containing a commented out colon is identified as a
    * line that does not contain a colon.
+   * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testLineDoesNotContainColonDueToComments() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionLineContains(':', null, null);
@@ -107,6 +110,7 @@ public final class QuestionLineContainsTest extends IndentRulesTestCase {
   /** Ensures that a line containing a colon is detected.
    * Tests that a line containing a colon in quotes is identified as a
    * line that does not contain a colon.
+   * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testLineDoesNotContainColonDueToQuotes() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionLineContains(':', null, null);

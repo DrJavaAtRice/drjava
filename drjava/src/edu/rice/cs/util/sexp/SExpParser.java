@@ -90,6 +90,7 @@ public class SExpParser {
     /**
      * Parse a forest of top-level s-expressions from {@link #parseTopLevelExp()}.
      * @see #parseTopLevelExp()
+     * @return the parsed expression
      */
     public List<SEList> parseMultiple() {
       ArrayList<SEList> l = new ArrayList<SEList>();

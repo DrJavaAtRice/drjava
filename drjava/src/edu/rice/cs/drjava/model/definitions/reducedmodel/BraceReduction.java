@@ -45,8 +45,8 @@ import java.util.ArrayList;
   */
 
 public interface BraceReduction {
-  /** Get the absolute character offset of the document represented by BraceReduction.
-    */
+
+  /** @return the absolute character offset of the document represented by BraceReduction. */
   public int absOffset();
 
   /** Get the current token in the BraceReduction.
@@ -98,27 +98,38 @@ public interface BraceReduction {
 //  /** Gets the distance to the enclosing brace. */
 //  public IndentInfo getIndentInformation();
 
-  /** Gets distance to enclosing new line */
+  /** 
+   * @param relativeLoc the location to find the distance to
+   * @return distance to enclosing new line 
+   */
   public int getDistToStart(int relativeLoc);
 
-  /** Gets distance to next new line. */
+  /** @return distance to next new line. */
   public int getDistToNextNewline();
 
-  /** A simplified toString() method. */
+  /** 
+   * A simplified toString() method. 
+   * @return a string representation of this
+   */
   public String simpleString();
 
-  /** Return all highlight status info for text between the current location and current location + end. This should 
-    * collapse adjoining blocks with the same status into one.
-    * @param start  The start location of the area being inspected. The reduced model cursor is already located at this 
-    *               position, but the parameter is needed to determine the absolute positions needed in the 
-    *               HighlightStatus objects we return.
-    * @param length  The length of the text area being inspected.
-    */
+  /** Return all highlight status info for text between the current location 
+   * and current location + length. This should collapse adjoining blocks with 
+   * the same status into one.
+   * @param start  The start location of the area being inspected. The reduced 
+   *               model cursor is already located at this position, but the 
+   *               parameter is needed to determine the absolute positions 
+   *               needed in the HighlightStatus objects we return.
+   * @param length  The length of the text area being inspected.
+   * @return all highlight status info for the text between the current 
+   *         location and current location + length
+   */
   public ArrayList<HighlightStatus> getHighlightStatus(int start, int length);
 
-  /** Returns the state at the relLocation, where relLocation is the location relative to the walker
-    * @param relLocation distance from walker to get state at.
-    */
+  /** 
+   * @param relLocation distance from walker to get state at.
+   * @return the state at the relLocation, where relLocation is the location relative to the walker
+   */
   public ReducedModelState moveWalkerGetState(int relLocation);
 
   /** Resets the location of the walker in the comment list to where the current cursor is. */

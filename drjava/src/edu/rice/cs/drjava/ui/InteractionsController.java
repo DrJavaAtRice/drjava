@@ -264,10 +264,12 @@ public class InteractionsController extends AbstractConsoleController {
     public void interactionIncomplete() { }
   };
   
-  /** Glue together the given model and a new view.
-    * @param model An InteractionsModel
-    * @param adapter InteractionsDJDocument being used by the model's doc
-    */
+  /** 
+   * Glue together the given model and a new view.
+   * @param model An InteractionsModel
+   * @param adapter InteractionsDJDocument being used by the model's doc
+   * @param disableCloseSystemInMenuItemCommand command
+   */
   public InteractionsController(final InteractionsModel model,
                                 InteractionsDJDocument adapter,
                                 Runnable disableCloseSystemInMenuItemCommand) {
@@ -278,11 +280,13 @@ public class InteractionsController extends AbstractConsoleController {
     _redoAction.setDelegatee(_pane.getRedoAction());
   }
   
-  /** Glue together the given model and view.
-    * @param model An InteractionsModel
-    * @param adapter InteractionsDJDocument being used by the model's doc
-    * @param pane An InteractionsPane
-    */
+  /** 
+   * Glue together the given model and view.
+   * @param model An InteractionsModel
+   * @param adapter InteractionsDJDocument being used by the model's doc
+   * @param pane An InteractionsPane
+   * @param disableCloseSystemInMenuItemCommand command
+   */
   public InteractionsController(InteractionsModel model,
                                 InteractionsDJDocument adapter,
                                 InteractionsPane pane,
@@ -342,7 +346,10 @@ public class InteractionsController extends AbstractConsoleController {
     for(ConsoleStateListener listener : _consoleStateListeners) { listener.consoleInputCompleted(text, this); }
   }
   
-  /** Sets the end of stream flag. */
+  /** 
+   * Sets the end of stream flag. 
+   * @param tf value of flag to be set
+   */
   public void setEndOfStream(boolean tf) {
     _endOfStream = tf;
     if (_box != null) { _box.setEndOfStream(tf); }
@@ -355,7 +362,7 @@ public class InteractionsController extends AbstractConsoleController {
     */
   public InputListener getInputListener() { return _inputListener; }
   
-  /** Forces console input to complete without the user hitting <Enter>.  Called by MainFrame when reset is called so 
+  /** Forces console input to complete without the user hitting {@literal <Enter>}.  Called by MainFrame when reset is called so 
     * that this lock is released.  This method is thread safe.
     * @throws UnsupportedOperationException If the interactions pane is not receiving console input
     */
@@ -377,7 +384,7 @@ public class InteractionsController extends AbstractConsoleController {
     */
   public ConsoleDocument getConsoleDoc() { return _doc; }
   
-  /** Accessor method for the InteractionsDocument. */
+  /** @return the InteractionsDocument. */
   public InteractionsDocument getDocument() { return _doc; }
   
   /** Adds AttributeSets as named styles to the document adapter. */
@@ -469,7 +476,12 @@ public class InteractionsController extends AbstractConsoleController {
     });
   }
   
-  /** Sets the commands used to manipulate the console input process.  Only runs in the event thread. */
+  /** 
+   * Sets the commands used to manipulate the console input process.  
+   * Only runs in the event thread. 
+   * @param inputCompletionCommand input completion command to be set
+   * @param insertTextCommand insert text command to be set
+   */
   private void _setConsoleInputCommands(Runnable inputCompletionCommand, Lambda<String,String> insertTextCommand) {
     _insertTextCommand = insertTextCommand;
     _inputCompletionCommand = inputCompletionCommand;
@@ -559,10 +571,14 @@ public class InteractionsController extends AbstractConsoleController {
     }
   };
   
-  /** Tests whether or not to move into the history.  Should be executed in the event thread to ensure
-    * that caret and prompt positions are in consistent states.
-    * @return true iff there are no "\n" characters between the start and the end
-    */  
+  /** 
+   * Tests whether or not to move into the history.  
+   * Should be executed in the event thread to ensure
+   * that caret and prompt positions are in consistent states.
+   * @param start lower bound (index) on the text
+   * @param end upper bound (index) on the text
+   * @return true iff there are no "\n" characters between the start and the end
+   */  
   private boolean _shouldGoIntoHistory(int start, int end) {
     if (_isCursorAfterPrompt() && end >= start) {
       String text = "";
@@ -664,7 +680,10 @@ public class InteractionsController extends AbstractConsoleController {
   private final DelegatingAction _redoAction = new DelegatingAction();
   private final ArrayList<FocusListener> _undoRedoInteractionFocusListeners = new ArrayList<FocusListener>();
   
-  /** Add a focus listener to the Interactions Pane and the Input Box. */
+  /** 
+   * Add a focus listener to the Interactions Pane and the Input Box. 
+   * @param listener listener to be added
+   */
   public void addFocusListener(FocusListener listener) {
     _pane.addFocusListener(listener);
     // we need to store the focus listeners, because they need to be added to future
@@ -815,13 +834,16 @@ public class InteractionsController extends AbstractConsoleController {
       for(KeyStroke ks: DrJava.getConfig().getSetting(OptionConstants.KEY_REDO)) { im.put(ks, REDO_NAME); }
     }
     
-    /** Returns true if this stream has been closed. */
+    /** @return true if this stream has been closed. */
     public boolean isEndOfStream() { return _endOfStream; }
 
-    /** Setter for end of stream flag. */
+    /** 
+     * Setter for end of stream flag. 
+     * @param tf value of the flag to be set
+     */
     public void setEndOfStream(boolean tf) { _endOfStream = tf; }
     
-    /** Was Enter pressed? */
+    /** @return true if ernter was pressed; false otherwise */
     public boolean wasClosedWithEnter() { return _closedWithEnter; }
     
     private Border _createBorder() {
@@ -832,7 +854,10 @@ public class InteractionsController extends AbstractConsoleController {
       return BorderFactory.createCompoundBorder(outerouter, temp);
     }
     
-    /** Enable anti-aliased text by overriding paintComponent. */
+    /** 
+     * Enable anti-aliased text by overriding paintComponent. 
+     * @param g Graphics object to be used
+     */
     protected void paintComponent(Graphics g) {
       if (_antiAliasText && g instanceof Graphics2D) {
         Graphics2D g2d = (Graphics2D) g;
@@ -841,7 +866,10 @@ public class InteractionsController extends AbstractConsoleController {
       super.paintComponent(g);
     }
     
-    /** Specifies what to do when the <Enter> or <Ctrl+D> keys are hit. */
+    /** 
+     * Specifies what to do when the {@literal <Enter> or <Ctrl+D>} keys are hit. 
+     * @param command command to be set
+     */
     void setInputCompletionCommand(final Runnable command) {
       final InputMap im = getInputMap(WHEN_FOCUSED);
       im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,0), INPUT_ENTERED_NAME);
@@ -906,15 +934,19 @@ public class InteractionsController extends AbstractConsoleController {
     */
   public interface ConsoleStateListener extends EventListener {
     
-    /** Called when the input console is started in the interactions pane. <p>
-      * This method is called from the thread that initiated the console input,
-      */
+    /** 
+     * Called when the input console is started in the interactions pane. <p>
+     * This method is called from the thread that initiated the console input,
+     * @param c reference to the controller
+     */
     public void consoleInputStarted(InteractionsController c);
     
-    /** Called when the console input is complete. <p>
-      * This method is called from the thread that initiated the console input.
-      * @param result The text that was inputted to the console
-      */
+    /** 
+     * Called when the console input is complete. <p>
+     * This method is called from the thread that initiated the console input.
+     * @param result The text that was inputted to the console
+     * @param c reference to the controller
+     */
     public void consoleInputCompleted(String result, InteractionsController c);
     
   }

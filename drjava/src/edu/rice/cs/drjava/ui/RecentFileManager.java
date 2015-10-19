@@ -79,10 +79,13 @@ public class RecentFileManager implements OptionConstants {
   /** An action that will be invoked when the file is clicked. */
   protected RecentFileAction _recentFileAction;
   
-  /** Creates a new RecentFileManager.
-    * @param pos  Position in the file menu
-    * @param fileMenu  File menu to add the entry to
-    */
+  /** 
+   * Creates a new RecentFileManager.
+   * @param pos  Position in the file menu
+   * @param fileMenu  File menu to add the entry to
+   * @param action action to be invoked when the file is clicked
+   * @param settingConfigConstant configuration info
+   */
   public RecentFileManager(int pos, JMenu fileMenu, RecentFileAction action, VectorOption<File> settingConfigConstant) {
     _initPos = _pos = pos;
     _fileMenu = fileMenu;
@@ -135,7 +138,7 @@ public class RecentFileManager implements OptionConstants {
     _mirroredMenus.remove(mirroredMenu);
   }
   
-  /** Returns the list of recently used files, in order. */
+  /** @return the list of recently used files, in order. */
   public Vector<File> getFileVector() { return _recentFiles; }
   
   /** Changes the maximum number of files to display in the list.
@@ -148,7 +151,10 @@ public class RecentFileManager implements OptionConstants {
     DrJava.getConfig().setSetting(_settingConfigConstant, _recentFiles);
   }
   
-  /** Updates the list after the given file has been opened. */
+  /** 
+   * Updates the list after the given file has been opened. 
+   * @param file the file being opened
+   */
   public void updateOpenFiles(final File file) {
     
     if (_recentFiles.size() == 0) {
@@ -183,10 +189,12 @@ public class RecentFileManager implements OptionConstants {
     numberItems();
   }
   
-  /** Removes the given file from the list if it is already there.
-    * Only removes the first occurrence of the file, since each
-    * entry should be unique (based on canonical path).
-    */
+  /** 
+   * Removes the given file from the list if it is already there.
+   * Only removes the first occurrence of the file, since each
+   * entry should be unique (based on canonical path).
+   * @param file the file to remove
+   */
   public void removeIfInList(File file) {
     // Use canonical path if possible
     File canonical = null;

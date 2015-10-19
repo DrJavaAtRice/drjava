@@ -55,7 +55,7 @@ public interface ILoadDocuments {
    *  open, the fileOpened() event is fired.
    *  @param com a command pattern command that selects what file to open
    *  @return The open document, or null if unsuccessful
-   *  @exception IOException
+   *  @exception IOException if an IO operation fails
    *  @exception OperationCanceledException if the open was canceled
    *  @exception AlreadyOpenException if the file is already open
    */

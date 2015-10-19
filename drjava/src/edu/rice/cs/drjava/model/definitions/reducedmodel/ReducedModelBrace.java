@@ -115,29 +115,40 @@ public class ReducedModelBrace extends AbstractReducedModel {
     */
   public void move(int count) { _cursor.move(count); }
   
-  /** Updates ReducedModelBrace to reflect text deletion. Negative values mean text left of the cursor, positive 
-    * values mean text to the right.  All functionality has been refactored into TokenList.  Assumes that count is 
-    * with range.
-    */
+  /** 
+   * Updates ReducedModelBrace to reflect text deletion. Negative values mean 
+   * text left of the cursor, positive values mean text to the right.  All 
+   * functionality has been refactored into TokenList.  Assumes that count is 
+   * with range.
+   * @param count amount of text to delete
+   */
   public void delete(int count) {
     if (count == 0) return;
     _cursor.delete(count);
     return;
   }
   
-  /** If the current brace is a /, a *, a // or a \n, it's not matchable. This means it is ignored on balancing and
-    * on next/prev brace finding.  All other braces are matchable.
-    */
+  /** 
+   * If the current brace is a /, a *, a // or a \n, it's not matchable. 
+   * This means it is ignored on balancing and on next/prev brace finding. 
+   * All other braces are matchable.
+   * @return true if the current brace is matchable; false otherwise
+   */
   private boolean _isCurrentBraceMatchable() { return _cursor.current().isMatchable(); }
   
   public boolean isShadowed() { return _parent.isShadowed(); }
   
-  /** Returns distance from current location of cursor to the location of the previous significant brace including 
-    * opening comment braces (but not closing ones since they are not "FREE").  For example,
-    * given "(...|)" where | signifies the cursor, previousBrace returns 4 because it goes to the position preceding the (.
-    * Given "* /|*", it returns 1 (the distance to the position of this brace) since you're in the middle of it and going 
-    * backward finds it.
-    */
+  /** 
+   * Returns distance from current location of cursor to the location of the 
+   * previous significant brace including opening comment braces (but not 
+   * closing ones since they are not "FREE").  For example, given "(...|)" 
+   * where | signifies the cursor, previousBrace returns 4 because it goes to 
+   * the position preceding the (.
+   * Given "* /|*", it returns 1 (the distance to the position of this brace) 
+   * since you're in the middle of it and going backward finds it.
+   * @return the distance from the current location to the location of the
+   *         previous significant brace
+   */
   public int previousBrace() {
     int relDistance;
     int dist = 0;
@@ -174,10 +185,14 @@ public class ReducedModelBrace extends AbstractReducedModel {
     return -1;
   }
   
-  /** Determines the distance to the location before the next open brace. For example, |...( where | is the cursor,
-    * returns 3 since it is 3 moves to the position preceding the (.  NOTE: /|* returns the next brace. It does not 
-    * return this brace because you are past it.
-    */
+  /** 
+   * Determines the distance to the location before the next open brace. For 
+   * example, |...( where | is the cursor, returns 3 since it is 3 moves to 
+   * the position preceding the (.  NOTE: /|* returns the next brace. It does 
+   * not return this brace because you are past it.
+   * @return the distance from the current location to the location of the
+   *         next open brace
+   */
   public int nextBrace() {
     int relDistance = 0;
     int dist = 0;
@@ -209,14 +224,21 @@ public class ReducedModelBrace extends AbstractReducedModel {
     return -1;
   }
   
-  /** If the current ReducedToken is an open significant brace and the offset is 0 (i.e., if we're immediately left of 
-    * said brace), push the current Brace onto a Stack and iterate forwards, keeping track of the distance covered.
-    * - For every closed significant Brace, if it matches the top of the Stack, pop the Stack.  Increase the distance 
-    *   by the size of the Brace. If the Stack is Empty, we have a balance.  Return distance.  If the closed Brace does 
-    *   not match the top of the Stack, return -1; We have an unmatched open Brace at the top of the Stack.
-    * - For every open significant Brace, push onto the Stack.  Increase distance by size of the Brace, continue.
-    * - Anything else, increase distance by size of the ReducedToken, continue.
-    */
+  /** 
+   * If the current ReducedToken is an open significant brace and the offset 
+   * is 0 (i.e., if we're immediately left of said brace), push the current 
+   * Brace onto a Stack and iterate forwards, keeping track of the distance 
+   * covered.
+   * - For every closed significant Brace, if it matches the top of the Stack, 
+   * pop the Stack.  Increase the distance by the size of the Brace. If the 
+   * Stack is Empty, we have a balance.  Return distance.  If the closed Brace 
+   * does not match the top of the Stack, return -1; We have an unmatched open 
+   * Brace at the top of the Stack.
+   * - For every open significant Brace, push onto the Stack.  Increase 
+   *   distance by size of the Brace, continue.
+   * - Anything else, increase distance by size of the ReducedToken, continue.
+   * @return the distance covered, or -1 on failure
+   */
   public int balanceForward() {
 //    System.err.println("-------------------------------------------");
     resetWalkerLocationToCursor();
@@ -445,11 +467,16 @@ public class ReducedModelBrace extends AbstractReducedModel {
   
   protected void resetWalkerLocationToCursor() { _parent.resetLocation(); }
   
-  /** Determines the brace (type and distance) enclosing the beginning of the current line (except the first line). The
-    * matching brace obviously must appear on the preceding line or before.  To find the enclosing brace one must first 
-    * move past this newline. If there is not a line enclosing brace, returns BraceInfo.NULL.  Usually called when 
-    * distToStart() = 0.
-    */
+  /** 
+   * Determines the brace (type and distance) enclosing the beginning of the 
+   * current line (except the first line). The matching brace obviously must 
+   * appear on the preceding line or before.  To find the enclosing brace one 
+   * must first move past this newline. If there is not a line enclosing 
+   * brace, returns BraceInfo.NULL.  Usually called when distToStart() = 0.
+   * 
+   * @return info about the brace enclosing the beginning of the current line;
+   *         if there is not a line enclosing brace, returns BraceInfo.NULL
+   */
   public BraceInfo _getLineEnclosingBrace() {
     Stack<Brace> braceStack = new Stack<Brace>();
     TokenList.Iterator iter = _cursor.copy();
@@ -529,7 +556,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
     return BraceInfo.NULL;
   }
   
-  /** Determines the brace enclosing the current location. */
+  /** @return info about the brace enclosing the current location. */
   protected BraceInfo _getEnclosingBrace() {
     Stack<Brace> braceStack = new Stack<Brace>();
     TokenList.Iterator iter = _cursor.copy();

@@ -47,7 +47,10 @@ public class ConfigProperty extends EagerProperty {
   /** True if this is a list of values. This allows the sep="..." attribute. */
   protected boolean _isList = false;
   
-  /** Create a configuration property. */
+  /** 
+   * Create a configuration property. 
+   * @param name the name of the property
+   */
   public ConfigProperty(String name) {
     super(name, "Help not available.");
     resetAttributes();

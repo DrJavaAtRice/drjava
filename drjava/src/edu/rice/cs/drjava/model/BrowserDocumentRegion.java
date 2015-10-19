@@ -56,7 +56,6 @@ public class BrowserDocumentRegion implements IDocumentRegion, Comparable<Browse
   
   /** Create a new simple document region with a bona fide document.
     * @param doc document that contains this region
-    * @param file file that contains the region
     * @param sp start position of the region 
     * @param ep end position of the region
     */

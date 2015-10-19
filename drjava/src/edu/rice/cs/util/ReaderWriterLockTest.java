@@ -73,8 +73,11 @@ public class ReaderWriterLockTest extends DrJavaTestCase {
     }
   }
 
-  /** Tests that multiple readers can run without causing deadlock. We can't really impose any ordering on their output.
-    */
+  /** 
+   * Tests that multiple readers can run without causing deadlock. We can't 
+   * really impose any ordering on their output.
+   * @throws InterruptedException if execution is interrupted unexpectedly
+   */
   public void testMultipleReaders() throws InterruptedException {
     final StringBuffer buf = new StringBuffer();  // StringBuffer is designed for concurrent access
 
@@ -100,7 +103,9 @@ public class ReaderWriterLockTest extends DrJavaTestCase {
     r3.join();
   }
 
-  /** Tests that multiple writers run in mutually exclusive intervals without causing deadlock. */
+  /** Tests that multiple writers run in mutually exclusive intervals without causing deadlock.
+   * @throws InterruptedException if execution is interrupted unexpectedly
+   */
   public void testMultipleWriters() throws InterruptedException {
     final StringBuffer buf = new StringBuffer();  // StringBuffer is designed for concurrent access
 
@@ -132,7 +137,9 @@ public class ReaderWriterLockTest extends DrJavaTestCase {
     w3.join();
   }
 
-  /** Ensure that a single thread can perform multiple reads. */
+  /** Ensure that a single thread can perform multiple reads.
+   * @throws InterruptedException if execution is interrupted unexpectedly
+   */
   public void testReaderMultipleReads() throws InterruptedException {
     // Simulate a reader that performs multiple reads in one thread
     _lock.startRead();
@@ -224,6 +231,7 @@ public class ReaderWriterLockTest extends DrJavaTestCase {
    *
    * So, instead, we'll just set up these threads, let them run, and
    * enforce that no one interferes with output from a writer.
+   * @throws InterruptedException if execution is interrupted unexpectedly
    */
   public void testMultipleReadersAndWriters() throws InterruptedException {
     final StringBuffer buf = new StringBuffer();  // StringBuffer is designed for concurrent access
@@ -311,15 +319,24 @@ public class ReaderWriterLockTest extends DrJavaTestCase {
 
   /** Command pattern class to print to a buffer. */
   public class PrintCommand {
+
     /** Number of times to print */
     volatile int _numIterations = 3;
+
     /** Number of milliseconds to wait between iterations */
     volatile int _waitMillis = 5;
+
     /** Buffer to print to */
     final StringBuffer _buf;  // StringBuffer is designed for concurrent access
+
     /** Message to print */
     final String _msg;
-    /** Creates a new command to print to a buffer during a read or write. */
+
+    /** 
+     * Creates a new command to print to a buffer during a read or write. 
+     * @param msg message to print
+     * @param buf buffer to print to
+     */
     public PrintCommand(String msg, StringBuffer buf) {
       _msg = msg;
       _buf = buf;

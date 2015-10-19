@@ -64,7 +64,13 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
   /** Note that _position, which records the breakpoint position, is inherited from DocumentDebugAction. */
   private volatile OpenDefinitionsDocument _doc;
   
-  /** @throws DebugException if the document does not have a file */
+  /** 
+   * @param doc the document within which to create the breakpoint
+   * @param offset offset within the document at which to set the breakpoint
+   * @param isEnabled true if the breakpoint is enabled; false for disabled
+   * @param manager manager
+   * @throws DebugException if the document does not have a file 
+   */
   public JPDABreakpoint(OpenDefinitionsDocument doc, int offset, boolean isEnabled, JPDADebugger manager)
     throws DebugException {
     

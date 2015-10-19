@@ -40,12 +40,22 @@ package edu.rice.cs.drjava.config;
  *  @version $Id$
  */
 public abstract class EagerProperty extends DrJavaProperty {
-  /** Create a property. */
+
+  /** 
+   * Create a property. 
+   * @param name the name of the property
+   * @param help the help page for this property
+   */
   public EagerProperty(String name, String help) {
     super(name, help);
   }
 
-  /** Create a property. */
+  /** 
+   * Create a property. 
+   * @param name the name of the property
+   * @param value the value of the property
+   * @param help the help page for this property
+   */
   public EagerProperty(String name, String value, String help) {
     super(name, value, help);
   }

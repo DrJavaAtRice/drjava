@@ -48,8 +48,11 @@ public abstract class OrGUIAvailabilityListener implements GUIAvailabilityListen
   protected final GUIAvailabilityNotifier _notifier;
   protected volatile boolean _lastValue = false;
   
-  /** Create a listener that responds to changes in availability of several GUI components.
-    * @param components components that must be available */
+  /** 
+   * Create a listener that responds to changes in availability of several GUI components.
+   * @param notifier a GUIAvailabilityNotifier
+   * @param components components that must be available 
+   */
   public OrGUIAvailabilityListener(GUIAvailabilityNotifier notifier, ComponentType... components) {
     _notifier = notifier;
     for(ComponentType c: components) {

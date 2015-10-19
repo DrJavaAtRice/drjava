@@ -60,7 +60,9 @@ public class SavableConfigurationTest extends DrJavaTestCase {
     outputBytes = new ByteArrayOutputStream();
   }
   
-  /** Tests the saveConfiguration method with no configuration data
+  /**
+   * Tests the saveConfiguration method with no configuration data
+   * @throws IOException if an IO operation fails
    */
   public void testEmptyConfiguration() throws IOException {  
     SavableConfiguration emptyConfig = new SavableConfiguration(new DefaultOptionMap());
@@ -85,7 +87,9 @@ public class SavableConfigurationTest extends DrJavaTestCase {
     }
   }
   
-  /** Tests the saveConfiguration method with some configuration data.
+  /** 
+   * Tests the saveConfiguration method with some configuration data.
+   * @throws IOException if an IO operation fails
    */
   public void testNonEmptyConfiguration() throws IOException {
     DefaultOptionMap optionsMap = new DefaultOptionMap();

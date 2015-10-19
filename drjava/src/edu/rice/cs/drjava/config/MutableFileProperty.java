@@ -45,7 +45,13 @@ import java.io.*;
   */
 public class MutableFileProperty extends FileProperty {
   protected File _fileValue = null;
-  /** Create an eager file property. */
+
+  /** 
+   * Create an eager file property. 
+   * @param name the name of the property
+   * @param initialFile the initial file
+   * @param help the help page for this property
+   */
   public MutableFileProperty(String name, File initialFile, String help) {
     super(name,new Thunk<File>() { public File value() { return null; } }, help);
     // cannot access _fileValue before super constructor has been called, so assign it again after the call

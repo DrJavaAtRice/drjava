@@ -78,23 +78,38 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
   @SuppressWarnings("unchecked")
   private <T> T emptySet() { return (T) EMPTY_SET; }
   
-  /** Convinces the type checker to accept a DocumentRegion as an R.  This works when you need an R object only for use 
-    * with compareTo because all implementations of OrderedDocumentRegion inherit from DocumentRegion and compareTo is 
-    * defined in DocumentRegion. 
-    */
+  /** 
+   * Convinces the type checker to accept a DocumentRegion as an R. 
+   * This works when you need an R object only for use with compareTo 
+   * because all implementations of OrderedDocumentRegion inherit from 
+   * DocumentRegion and compareTo is defined in DocumentRegion. 
+   * @param <T> the type of document region to create
+   * @param odd the document within which to create the region
+   * @param start the start offset
+   * @param end the end offset
+   * @return the newly-created document region
+   */
   @SuppressWarnings("unchecked")
   private <T> T newDocumentRegion(OpenDefinitionsDocument odd, int start, int end) { 
     return (T) new DocumentRegion(odd, start, end);
   }
   
-  /** Gets the sorted set of regions less than r. */
+  /**
+   * Gets the sorted set of regions less than r. 
+   * @param r the upper bound on the regions
+   * @return the sorted set of regions less than r
+   */
   public SortedSet<R> getHeadSet(R r) {
     SortedSet<R> oddRegions = _regions.get(r.getDocument());
     if (oddRegions == null || oddRegions.isEmpty()) return emptySet();
     return oddRegions.headSet(r);
   }
   
-  /** Gets the sorted set of regions greater than or equal to r. */
+  /** 
+   * Gets the sorted set of regions greater than or equal to r. 
+   * @param r the lower bound on the regions
+   * @return the sorted set of regions greater than or equal to r
+   */
   public SortedSet<R> getTailSet(R r) {
     SortedSet<R> oddRegions = _regions.get(r.getDocument());
     if (oddRegions == null || oddRegions.isEmpty()) return emptySet();
@@ -259,7 +274,7 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
     * @param odd the document
     * @param startOffset  the left end of the specified interval
     * @param endOffset  the right end of the specified interval
-    * @return the Collection<DocumentRegion> of regions overlapping the interval.
+    * @return the {@code Collection<DocumentRegion>} of regions overlapping the interval.
     */
   public Collection<R> getRegionsOverlapping(OpenDefinitionsDocument odd, int startOffset, int endOffset) {
     
@@ -361,7 +376,7 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
     }
   }
   
-  /** @return a Vector<R> containing the DocumentRegion objects for document odd in this mangager. */
+  /** @return a {@code Vector<R>} containing the DocumentRegion objects for document odd in this mangager. */
   public SortedSet<R> getRegions(OpenDefinitionsDocument odd) { return _regions.get(odd); }
   
   public int getRegionCount() {

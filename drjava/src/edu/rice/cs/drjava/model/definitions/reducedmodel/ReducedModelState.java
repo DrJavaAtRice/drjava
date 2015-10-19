@@ -48,12 +48,13 @@ public abstract class ReducedModelState {
   abstract ReducedModelState update(TokenList.Iterator copyCursor);
 
   /** Combines the current and next braces if they match the given types. If we have braces of first and second in
-    * immediate succession, and if second's gap is 0, combine them into first+second.  The cursor remains on the same
-    * block after this method is called.
-    * @param first the first half of a multiple char brace
-    * @param second the second half of a multiple char brace
-    * @return true if we combined two braces or false if not
-    */
+   * immediate succession, and if second's gap is 0, combine them into first+second.  The cursor remains on the same
+   * block after this method is called.
+   * @param first the first half of a multiple char brace
+   * @param second the second half of a multiple char brace
+   * @param copyCursor a copy of the cursor
+   * @return true if we combined two braces or false if not
+   */
   boolean _combineCurrentAndNextIfFind(String first, String second, TokenList.Iterator copyCursor) {
     if (copyCursor.atStart() || copyCursor.atEnd() || copyCursor.atLastItem() ||
         !copyCursor.current().getType().equals(first))

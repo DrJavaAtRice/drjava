@@ -93,7 +93,6 @@ class ActionStartPrevLinePlusMultiline extends IndentRuleAction {
     * location.  If on the first line, indent is set to 0.  Only runs in event thread.
     * @param doc AbstractDJDocument containing the line to be indented.
     * @param reason The reason that the indentation is taking place
-    * @return this is always false, since we are updating the cursor location
     */
   public void indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
     super.indentLine(doc, reason);

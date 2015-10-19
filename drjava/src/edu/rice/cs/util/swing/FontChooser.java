@@ -46,7 +46,7 @@ import java.awt.event.*;
 
 /**
  * FontChooser, adapted from NwFontChooserS by Noah Wairauch.
- * (see http:///forum.java.sun.com/thread.jsp?forum=57&thread=195067)
+ * {@literal (see http:///forum.java.sun.com/thread.jsp?forum=57&thread=195067)}
  *
  * @version $Id$
  */
@@ -76,8 +76,11 @@ public class FontChooser extends JDialog {
 
   private boolean _clickedOK = false;
 
-  /** Constructs a new modal FontChooser for the given frame,
+  /** 
+   * Constructs a new modal FontChooser for the given frame,
    * using the specified font.
+   * @param parent The parent frame.
+   * @param font   The previously chosen font.
    */
   private FontChooser(Frame parent, Font font) {
     super(parent, true);
@@ -112,7 +115,11 @@ public class FontChooser extends JDialog {
     return (chosenFont);
   }
 
-  /** Shows the font chooser with a standard title ("Font Chooser").
+  /** 
+   * Shows the font chooser with a standard title ("Font Chooser").
+   * @param parent The parent frame.
+   * @param font   The previously chosen font.
+   * @return the newly chosen font.
    */
   public static Font showDialog(Frame parent, Font font) {
     return showDialog(parent, "Font Chooser", font);
@@ -241,10 +248,10 @@ public class FontChooser extends JDialog {
     _sampleText.setVerticalAlignment(SwingConstants.TOP);
   }
 
-  /** Returns whether the user clicked OK when the dialog was closed. (If false, the user clicked cancel.) */
+  /** @return whether the user clicked OK when the dialog was closed. (If false, the user clicked cancel.) */
   public boolean clickedOK() { return _clickedOK; }
 
-  /** Returns the currently selected Font. */
+  /** @return the currently selected Font. */
   public Font getFont() { return _sampleText.getFont(); }
 
   /** Private inner class for a list which displays a list of options in addition to a label indicating the currently

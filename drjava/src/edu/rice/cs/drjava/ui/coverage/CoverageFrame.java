@@ -163,6 +163,7 @@ public class CoverageFrame extends SwingFrame {
 
     /**
      * Displays the report in the browser, if requested by the user. 
+     * @param result data from which to generate report
      */
     public void displayReport(JUnitResultTuple result) {
 
@@ -416,7 +417,7 @@ public class CoverageFrame extends SwingFrame {
     }
 
     /** 
-     * Returns the default null dir. 
+     * @return the default null dir. 
      */
     private File _getDefaultNullDir() {
         return FileOps.NULL_FILE;
@@ -510,7 +511,7 @@ public class CoverageFrame extends SwingFrame {
 
     /**
      * Creates and returns a panel from which to select a file.
-     *
+     * @param title the title of the panel
      * @return the panel
      */
     private DirectorySelectorComponent _createDirectoryPanel(String title) {

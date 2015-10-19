@@ -96,13 +96,17 @@ public class ClassPathManager implements Lambda<ClassLoader, ClassLoader> {
   };
   
   /** Adds the entry to the front of the project classpath
-    * (this is the classpath specified in project properties)
-    */
+   * (this is the classpath specified in project properties)
+   * @param f the file to be added to the classpath
+   */
   public synchronized void addProjectCP(File f) { _projectCP.addFirst(f); updateProperty(); }
   
   public synchronized Iterable<File> getProjectCP() { return IterUtil.snapshot(_projectCP); }
   
-  /** Adds the entry to the front of the build classpath. */
+  /** 
+   * Adds the entry to the front of the build classpath. 
+   * @param f the file to be added to the classpath
+   */
   public synchronized void addBuildDirectoryCP(File f) {
     _buildCP.remove(f); // eliminate duplicates
     _buildCP.addFirst(f);
@@ -111,7 +115,11 @@ public class ClassPathManager implements Lambda<ClassLoader, ClassLoader> {
   
   public synchronized Iterable<File> getBuildDirectoryCP() { return IterUtil.snapshot(_buildCP); }
   
-  /** Adds the entry to the front of the project files classpath (this is the classpath for all open project files). */
+  /** 
+   * Adds the entry to the front of the project files classpath (this is the 
+   * classpath for all open project files). 
+   * @param f the file to be added to the classpath
+   */
   public synchronized void addProjectFilesCP(File f) {
     _projectFilesCP.remove(f); // eliminate duplicates
     _projectFilesCP.addFirst(f);
@@ -120,7 +128,10 @@ public class ClassPathManager implements Lambda<ClassLoader, ClassLoader> {
   
   public synchronized Iterable<File> getProjectFilesCP() { return IterUtil.snapshot(_projectFilesCP); }
   
-  /** Adds new entry containing f to the front of the external classpath. */
+  /** 
+   * Adds new entry containing f to the front of the external classpath. 
+   * @param f the file to be added to the classpath
+   */
   public synchronized void addExternalFilesCP(File f) {
     _externalFilesCP.remove(f); // eliminate duplicates
     _externalFilesCP.addFirst(f);
@@ -129,7 +140,10 @@ public class ClassPathManager implements Lambda<ClassLoader, ClassLoader> {
   
   public synchronized Iterable<File> getExternalFilesCP() { return IterUtil.snapshot(_externalFilesCP); }
   
-  /** Adds the entry to the front of the extra classpath. */
+  /** 
+   * Adds the entry to the front of the extra classpath. 
+   * @param f the file to be added to the classpath
+   */
   public synchronized void addExtraCP(File f) {
     _extraCP.remove(f); // eliminate duplicates
     _extraCP.addFirst(f);
@@ -144,6 +158,7 @@ public class ClassPathManager implements Lambda<ClassLoader, ClassLoader> {
     * by a common parent.
     * @param parent  The parent class loader.  May be {@code null}, signifying the bootstrap
     *                class loader.
+    * @return the newly-created class loader
     */
   public synchronized ClassLoader makeClassLoader(ClassLoader parent) {
     updateProperty();
@@ -153,6 +168,6 @@ public class ClassPathManager implements Lambda<ClassLoader, ClassLoader> {
   /** Lambda value method */
   public ClassLoader value(ClassLoader parent) { return makeClassLoader(parent); }
   
-  /** Get a dynamic view of the full class path. */
+  /** @return a dynamic view of the full class path. */
   public synchronized Iterable<File> getClassPath() { updateProperty(); return _fullPath; }
 }

@@ -54,24 +54,31 @@ public class FileConfiguration extends SavableConfiguration {
     file = f.getAbsoluteFile();
   }
   
-  /** Returns the file that this configuration is backed by. */
+  /** @return the file that this configuration is backed by. */
   public File getFile() { return file; }
   
-  /** Calls SavableConfiguration.loadConfiguration, which loads all values from the file, based on the defaults in
-    * OptionConstants.
-    */
+  /** 
+   * Calls SavableConfiguration.loadConfiguration, which loads all values 
+   * from the file, based on the defaults in OptionConstants.
+   * @throws IOException if an IO operation fails
+   */
   public void loadConfiguration() throws IOException {
     loadConfiguration(new BufferedInputStream(new FileInputStream(file)));
   }
   
-  /** Saves the current settings to the stored properties file. */
+  /** 
+   * Saves the current settings to the stored properties file. 
+   * @throws IOException if an IO operation fails
+   */
   public void saveConfiguration() throws IOException {
     saveConfiguration("DrJava configuration file");
   }
   
-  /** Saves the current settings to the stored properties file.
-    * @param header Description of the properties list
-    */
+  /** 
+   * Saves the current settings to the stored properties file.
+   * @param header Description of the properties list
+   * @throws IOException if an IO operation fails
+   */
   public void saveConfiguration(final String header) throws IOException {
     FileOps.saveFile(new FileOps.DefaultFileSaver(file) {
       public void saveTo(OutputStream os) throws IOException { saveConfiguration(os,header); }

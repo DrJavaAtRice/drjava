@@ -53,7 +53,15 @@ import edu.rice.cs.util.swing.AsyncTask;
  */
 public interface GlobalModelListener extends InteractionsListener, JavadocListener, CompilerListener, JUnitListener {
   
-  /** Called when an asynchronous task must be run in the model */
+  /** 
+   * Called when an asynchronous task must be run in the model 
+   * @param <P> the parameter type for the task
+   * @param <R> the result type for the task
+   * @param task the task to execute
+   * @param param the parameter for the task
+   * @param showProgress true if progress should be shown; false otherwise
+   * @param lockUI true if the UI should be locked during execution; false otherwise
+   */
   public <P,R> void executeAsyncTask(AsyncTask<P,R> task, P param, boolean showProgress, boolean lockUI);
   
   /** Performs any UI related steps to handle the case in which a file is being opened that
@@ -63,7 +71,10 @@ public interface GlobalModelListener extends InteractionsListener, JavadocListen
    */
   public void handleAlreadyOpenDocument(OpenDefinitionsDocument doc);
   
-  /** Called when trying to open one or more files that do not exist. */
+  /** 
+   * Called when trying to open one or more files that do not exist. 
+   * @param f files that were not found
+   */
   public void filesNotFound(File... f);
 
   /** Called when trying to write one or more files that are read-only.
@@ -71,32 +82,62 @@ public interface GlobalModelListener extends InteractionsListener, JavadocListen
     * @return the files that should be attempted to be rewritten */
   public File[] filesReadOnly(File... f);
 
-  /** Called after a new document is created. */
+  /** 
+   * Called after a new document is created. 
+   * @param doc the newly-created document
+   */
   public void newFileCreated(OpenDefinitionsDocument doc);
   
-  /** Called after the current document is saved. */
+  /** 
+   * Called after the current document is saved. 
+   * @param doc the document that was saved
+   */
   public void fileSaved(OpenDefinitionsDocument doc);
   
-  /** Called after a file is opened and read into the current document. */
+  /** 
+   * Called after a file is opened and read into the current document. 
+   * @param doc the document that was opened
+   */
   public void fileOpened(OpenDefinitionsDocument doc);
   
-  /** Called after a document is closed. */
+  /** 
+   * Called after a document is closed. 
+   * @param doc the document that was closed
+   */
   public void fileClosed(OpenDefinitionsDocument doc);
   
-  /** Called after a document is reverted. */
+  /** 
+   * Called after a document is reverted. 
+   * @param doc the document that was reverted
+   */
   public void fileReverted(OpenDefinitionsDocument doc);
   
-  /** Called to ask the listener if it is OK to abandon the current document. */
+  /** 
+   * Called to ask the listener if it is OK to abandon the current document. 
+   * @param doc the document to be checked
+   * @return true if can abandon the file; false otherwise
+   */
   public boolean canAbandonFile(OpenDefinitionsDocument doc);
   
-  /** Called to ask the listener if this document should be saved before quitting.
-    * @return true if quitting should continue, false if the user cancelled */
+  /** 
+   * Called to ask the listener if this document should be saved before quitting.
+   * @param doc the document to check
+   * @return true if quitting should continue, false if the user cancelled 
+   */
   public boolean quitFile(OpenDefinitionsDocument doc);
   
-  /** Called to ask the listener if it is OK to revert the current document to the version saved on disk. */
+  /** 
+   * Called to ask the listener if it is OK to revert the current document to 
+   * the version saved on disk. 
+   * @param doc the document to check
+   * @return true if should revert the file; false otherwise
+   */
   public boolean shouldRevertFile(OpenDefinitionsDocument doc);
   
-  /** Called when a file's main method is about to be run. */
+  /** 
+   * Called when a file's main method is about to be run. 
+   * @param doc the document to prepare to run
+   */
   public void prepareForRun(OpenDefinitionsDocument doc);
   
   /** Called when the console window is reset. */
@@ -108,10 +149,16 @@ public interface GlobalModelListener extends InteractionsListener, JavadocListen
   /** Called when saving a file whose path contains a '#' symbol. */
   public void filePathContainsPound();
   
-  /** Called when a new active document is selected */
+  /** 
+   * Called when a new active document is selected 
+   * @param active the new active document
+   */
   public void activeDocumentChanged(OpenDefinitionsDocument active);
   
-  /** Called when the active document is refreshed */
+  /**
+   * Called when the active document is refreshed 
+   * @param active the newly-refreshed document
+   */
   public void activeDocumentRefreshed(OpenDefinitionsDocument active);
   
   /** Called when the focus must be changed to the active document in the definitions pane */
@@ -120,7 +167,11 @@ public interface GlobalModelListener extends InteractionsListener, JavadocListen
   /** Restores the focus in the main frame to the last focus owner. */
   public void focusOnLastFocusOwner();
   
-  /** Called when the selection in the navigator changes the current directory without changing the active document. */
+  /** 
+   * Called when the selection in the navigator changes the current directory 
+   * without changing the active document. 
+   * @param dir the new directory
+   */
   public void currentDirectoryChanged(File dir);
   
   /** Called when the build directory is modified in the model. */
@@ -147,8 +198,12 @@ public interface GlobalModelListener extends InteractionsListener, JavadocListen
   /** Called when the project runnability changed (ie, when the main file is set/unset). */
   public void projectRunnableChanged();
   
-  /** Called when the a document, already opened, is brought back into the cache, and it no longer exists on disk
-    * or cannot be accessed. */
+  /** 
+   * Called when the a document, already opened, is brought back into the cache, and it no longer exists on disk
+   * or cannot be accessed. 
+   * @param d the document that couldn't be found
+   * @param f the file that couldn't be found
+   */
   public void documentNotFound(OpenDefinitionsDocument d, File f);
   
   /** Called when the a region is added to the browswing history. */

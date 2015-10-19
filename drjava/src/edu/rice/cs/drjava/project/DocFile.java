@@ -49,13 +49,26 @@ public class DocFile extends AbsRelFile {
   private String _package;
   private long _mod;
   
-  /** Creates a docfile that has the same path as the given file, with default values for everything else. */
+  /** 
+   * Creates a docfile that has the same path as the given file, with default 
+   * values for everything else. 
+   * @param f file for which to create docfile
+   */
   public DocFile(File f) { this(f, null, null, false, null); }
   
-  /** Creates a docfile from the given pathname with default values for everything else. */
+  /** 
+   * Creates a docfile from the given pathname with default values for 
+   * everything else. 
+   * @param pathname path for which to create docfile
+   */
   public DocFile(String pathname) { this(pathname, null, null, false, null); }
   
-  /** Creates a docfile from the given parent and child with default values for everything else. */
+  /** 
+   * Creates a docfile from the given parent and child with default values 
+   * for everything else. 
+   * @param parent parent 
+   * @param child child
+   */
   public DocFile(String parent, String child) { this(parent, child, null, null, false, null); }
   
   public DocFile(String pathname, Pair<Integer,Integer> selection, Pair<Integer,Integer> scroll, boolean active, String srcRoot) {

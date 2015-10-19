@@ -106,8 +106,8 @@ public class ReverseHighlighter extends DefaultHighlighter {
   //static edu.rice.cs.util.Log _log = new edu.rice.cs.util.Log("highlighter.txt",true);
   
   /** Adds a highlight to the view.  Returns a tag that can be used to refer to the highlight.
-    * @param p0   the start offset of the range to highlight >= 0
-    * @param p1   the end offset of the range to highlight >= p0
+    * @param p0   the start offset of the range to highlight {@literal >=} 0
+    * @param p1   the end offset of the range to highlight {@literal >=} p0
     * @param p    the painter to use to actually render the highlight
     * @return     an object that can be used as a tag to refer to the highlight
     * @exception BadLocationException if the specified location is invalid
@@ -238,8 +238,8 @@ public class ReverseHighlighter extends DefaultHighlighter {
   /** Changes a highlight.
    *
    * @param tag the highlight tag
-   * @param p0 the beginning of the range >= 0
-   * @param p1 the end of the range >= p0
+   * @param p0 the beginning of the range {@literal >=} 0
+   * @param p1 the end of the range {@literal >=} p0
    * @exception BadLocationException if the specified location is invalid
    */
   public void changeHighlight(Object tag, int p0, int p1) throws BadLocationException {
@@ -321,12 +321,23 @@ public class ReverseHighlighter extends DefaultHighlighter {
     }
   }
   
-  /** Queues damageRange() call into event dispatch thread to be sure that views are in consistent state. */
+  /** 
+   * Queues damageRange() call into event dispatch thread to be sure that 
+   * views are in consistent state. 
+   * @param p0 first position
+   * @param p1 second position
+   */
   private void safeDamageRange(final Position p0, final Position p1) {
     safeDamager.damageRange(p0, p1);
   }
   
-  /** Queues damageRange() call into event dispatch thread to be sure that views are in consistent state. */
+  /** 
+   * Queues damageRange() call into event dispatch thread to be sure that 
+   * views are in consistent state. 
+   * @param a0 integer representation of first position
+   * @param a1 integer representation of second position
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   private void safeDamageRange(int a0, int a1) throws BadLocationException {
     Document doc = component.getDocument();
     
@@ -389,8 +400,8 @@ public class ReverseHighlighter extends DefaultHighlighter {
     
     /** Paints a highlight.
       * @param g the graphics context
-      * @param offs0 the starting model offset >= 0
-      * @param offs1 the ending model offset >= offs1
+      * @param offs0 the starting model offset {@literal >=} 0
+      * @param offs1 the ending model offset {@literal >=} offs1
       * @param bounds the bounding box for the highlight
       * @param c the editor
       */
@@ -426,8 +437,8 @@ public class ReverseHighlighter extends DefaultHighlighter {
     // --- LayerPainter methods ----------------------------
     /** Paints a portion of a highlight.
       * @param g the graphics context
-      * @param offs0 the starting model offset >= 0
-      * @param offs1 the ending model offset >= offs1
+      * @param offs0 the starting model offset {@literal >=} 0
+      * @param offs1 the ending model offset {@literal >=} offs1
       * @param bounds the bounding box of the view, which is not necessarily the region to paint.
       * @param c the editor
       * @param view View painting for
@@ -470,7 +481,7 @@ public class ReverseHighlighter extends DefaultHighlighter {
   /** Simple highlight painter that underlines text. */
   public static class DefaultUnderlineHighlightPainter extends LayeredHighlighter.LayerPainter {
     
-    /** Constructs a new highlight painter. If c< is null, the JTextComponent will be queried for its selection color.
+    /** Constructs a new highlight painter. If c is null, the JTextComponent will be queried for its selection color.
       * @param c the color for the highlight
       * @param t the thickness in pixels
       */
@@ -493,8 +504,8 @@ public class ReverseHighlighter extends DefaultHighlighter {
     
     /** Paints a highlight.
       * @param g the graphics context
-      * @param offs0 the starting model offset >= 0
-      * @param offs1 the ending model offset >= offs1
+      * @param offs0 the starting model offset {@literal >=} 0
+      * @param offs1 the ending model offset {@literal >=} offs1
       * @param bounds the bounding box for the highlight
       * @param c the editor
       */
@@ -531,8 +542,8 @@ public class ReverseHighlighter extends DefaultHighlighter {
     // --- LayerPainter methods ----------------------------
     /** Paints a portion of a highlight.
       * @param g the graphics context
-      * @param offs0 the starting model offset >= 0
-      * @param offs1 the ending model offset >= offs1
+      * @param offs0 the starting model offset {@literal >=} 0
+      * @param offs1 the ending model offset {@literal >=} offs1
       * @param bounds the bounding box of the view, which is not necessarily the region to paint.
       * @param c the editor
       * @param view View painting for
@@ -623,7 +634,16 @@ public class ReverseHighlighter extends DefaultHighlighter {
       }
     }
     
-    /** Restricts the region based on the receivers offsets and messages the painter to paint the region.*/
+    /** 
+     * Restricts the region based on the receivers offsets and messages the 
+     * painter to paint the region.
+     * @param g the Graphics objet to use to paint
+     * @param p0 lower bound on region
+     * @param p1 upper bound on region
+     * @param viewBounds bounds on view
+     * @param editor a JTextComponent
+     * @param view view in which to paint
+     */
     void paintLayeredHighlights(Graphics g, int p0, int p1, Shape viewBounds, JTextComponent editor, View view) {
       int start = getStartOffset();
       int end = getEndOffset();
@@ -669,10 +689,15 @@ public class ReverseHighlighter extends DefaultHighlighter {
       lastDoc = null;
     }
     
-    /** Adds range to be damaged to the range queue. If the range queue is empty (the first call or run() was already
-      * invoked) then adds this class instance into EventDispatch queue. The method also tracks if the current document
-      * changed or component is null. In this case it removes all ranges added before from range queue.
-      */
+    /** 
+     * Adds range to be damaged to the range queue. If the range queue is 
+     * empty (the first call or run() was already invoked) then adds this 
+     * class instance into EventDispatch queue. The method also tracks if the 
+     * current document changed or component is null. In this case it removes 
+     * all ranges added before from range queue.
+     * @param pos0 lower bound on range
+     * @param pos1 upper bound on range
+     */
     public synchronized void damageRange(Position pos0, Position pos1) {
       if (component == null) {
         p0.clear();

@@ -49,13 +49,13 @@ import java.io.*;
 import java.util.*;
 
 /** XML configuration management.
-  * <p/>
+  * 
   * This class uses DOM paths of a specific form to refer to nodes in the XML document.
   * Consider this XML structure:
-  * <foo a="foo.a">
+  * {@code <foo a="foo.a">
   *   <bar>abc</bar>
   *   <fum fee="xyz">def</fum>
-  * </foo>
+  * </foo>}
   * The path "foo/bar" refers to the value "abc".
   * The path "foo/fum" refers to the value "def".
   * If this form is used, there may be only #text or #comment nodes in the node. All #text nodes will be
@@ -280,7 +280,7 @@ public class XMLConfig {
   /** Returns the value as specified by the DOM path.
    * @param path DOM path
    * @return value.
-   * @throws IllegalArgumentException
+   * @throws IllegalArgumentException if the path is invalid
    */
   public int getInt(String path) {
     List<String> r = getMultiple(path);
@@ -295,7 +295,7 @@ public class XMLConfig {
    * @param path DOM path
    * @param root node where the search should start
    * @return value.
-   * @throws IllegalArgumentException
+   * @throws IllegalArgumentException if the path is invalid
    */
   public int getInt(String path, Node root) {
     List<String> r = getMultiple(path, root);
@@ -310,7 +310,7 @@ public class XMLConfig {
    * @param path DOM path
    * @param defaultVal default value in case value is not in DOM
    * @return value.
-   * @throws IllegalArgumentException
+   * @throws IllegalArgumentException if the path is invalid
    */
   public int getInt(String path, int defaultVal) {
     try {
@@ -326,7 +326,7 @@ public class XMLConfig {
    * @param root node where the search should start
    * @param defaultVal default value in case value is not in DOM
    * @return value.
-   * @throws IllegalArgumentException
+   * @throws IllegalArgumentException if the path is invalid
    */
   public int getInt(String path, Node root, int defaultVal) {
     try {
@@ -342,7 +342,7 @@ public class XMLConfig {
   /** Returns the value as specified by the DOM path.
    * @param path DOM path
    * @return value.
-   * @throws IllegalArgumentException
+   * @throws IllegalArgumentException if the path is invalid
    */
   public boolean getBool(String path) {
     List<String> r = getMultiple(path);
@@ -361,7 +361,7 @@ public class XMLConfig {
    * @param path DOM path
    * @param root node where the search should start
    * @return value.
-   * @throws IllegalArgumentException
+   * @throws IllegalArgumentException if the path is invalid
    */
   public boolean getBool(String path, Node root) {
     List<String> r = getMultiple(path, root);
@@ -381,7 +381,7 @@ public class XMLConfig {
    * @param path DOM path
    * @param defaultVal default value in case value is not in DOM
    * @return value.
-   * @throws IllegalArgumentException
+   * @throws IllegalArgumentException if the path is invalid
    */
   public boolean getBool(String path, boolean defaultVal) {
     try {
@@ -397,7 +397,7 @@ public class XMLConfig {
    * @param root node where the search should start
    * @param defaultVal default value in case value is not in DOM
    * @return value.
-   * @throws IllegalArgumentException
+   * @throws IllegalArgumentException if the path is invalid
    */
   public boolean getBool(String path, Node root, boolean defaultVal) {
     try {

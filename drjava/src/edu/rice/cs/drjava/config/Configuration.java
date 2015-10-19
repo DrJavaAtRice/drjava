@@ -64,6 +64,8 @@ public class Configuration {
   /** Sets the given option to the given value and notifies all listeners of that option of the change.
     * @param op Option to set
     * @param value New value for the option
+    * @param <T> type of the option
+    * @return the old value for the option
     */
   public <T> T setSetting(final Option<T> op, final T value) {
     T ret = map.setOption(op, value);
@@ -72,36 +74,55 @@ public class Configuration {
     return ret;
   }
   
-  /** Gets the current value of the given Option. */
+  /** 
+   * Gets the current value of the given Option. 
+   * @param <T> type of the option
+   * @param op option to get
+   * @return the value for the option
+   */
   public <T> T getSetting(Option<T> op) { return map.getOption(op); }
   
-  /** By default, all options are editable. */
+  /** 
+   * By default, all options are editable. 
+   * @param <T> type of the option
+   * @param op option to check editability of
+   * @return true if op is editable, false otherwise
+   */
   public <T> boolean isEditable(Option<T> op) { return true; }
   
-  /** Adds an OptionListener to the given Option, to be notified each time the option changes.
-    * @param op Option to listen for changes on
-    * @param l OptionListener wishing to listen
-    */
+  /** 
+   * Adds an OptionListener to the given Option, to be notified each time the option changes.
+   * @param <T> type of the option
+   * @param op Option to listen for changes on
+   * @param l OptionListener wishing to listen
+   */
   public <T> void addOptionListener(Option<T> op, OptionListener<T> l) { op.addListener(this,l); }
   
-  /** Removes an OptionListener from an Option to which it was listening. */
+  /** 
+   * Removes an OptionListener from an Option to which it was listening. 
+   * @param <T> type of the option
+   * @param op option to remove listener from
+   * @param l listener to remove
+   */
   public <T> void removeOptionListener(Option<T> op, OptionListener<T> l) { op.removeListener(this,l); }
   
   /** Resets to the default values, overwriting any existing values. */
   public void resetToDefaults() { OptionMapLoader.DEFAULT.loadInto(map); }
   
-  /** Returns whether there were any exceptions when starting. */
+  /** @return whether there were any exceptions when starting. */
   public boolean hadStartupException() { return _startupException != null; }
   
-  /** Returns the exception caught during startUp, or null if none were caught. */
+  /** @return the exception caught during startUp, or null if none were caught. */
   public Exception getStartupException() { return _startupException; }
   
-  /** Stores exception caught during creation of this Configuration object, so it can be displayed later by the UI.
-    * @param e Exception caught during startUp
-    */
+  /** 
+   * Stores exception caught during creation of this Configuration object, so 
+   * it can be displayed later by the UI.
+   * @param e Exception caught during startUp
+   */
   public void storeStartupException(Exception e) { _startupException = e; }
   
-  /** Returns a string representation of the contents of the OptionMap. */
+  /** @return a string representation of the contents of the OptionMap. */
   public String toString() {
     StringWriter sw = new StringWriter();
     PrintWriter w = new PrintWriter(sw);
@@ -122,6 +143,6 @@ public class Configuration {
     return sw.toString();
   }
   
-  /** Return OptionMap. */
+  /** @return OptionMap */
   public OptionMap getOptionMap() { return map; }
 }

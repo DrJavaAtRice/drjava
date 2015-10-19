@@ -519,7 +519,10 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
     }
   }
   
-  /** Update the properties. */
+  /** 
+   * Update the properties. 
+   * @param selectedIndex the selected index
+   */
   public void updateList(int selectedIndex) {
     final Vector<String> names = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
     _list.setListData(names);

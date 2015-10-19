@@ -80,21 +80,34 @@ public final class RecentFileManagerTest extends DrJavaTestCase {
     super.tearDown();
   }
   
-  /** Create a new temporary file in _tempDir.  Calls with the same int will return the same filename, while calls with
-    * different ints will return different filenames.
-    */
+  /** 
+   * Create a new temporary file in _tempDir.  Calls with the same int will 
+   * return the same filename, while calls with different ints will return 
+   * different filenames.
+   * @return the newly-created file
+   * @throws IOException if an IO operation fails
+   */
   protected File tempFile() throws IOException {
     return File.createTempFile("DrJava-test", ".java", _tempDir).getCanonicalFile();
   }
   
-  /** Creates a new temporary file and writes the given text to it. The File object for the new file is returned. */
+  /** 
+   * Creates a new temporary file and writes the given text to it. The File 
+   * object for the new file is returned. 
+   * @param text the text to be written to a new temp file
+   * @return the newly-created file
+   * @throws IOException if an IO operation fails
+   */
   protected File writeToNewTempFile(String text) throws IOException {
     File temp = tempFile();
     IOUtil.writeStringToFile(temp, text);
     return temp;
   }
   
-  /** Tests that the size of the recent files list doesn't get bigger than the maximum size. */
+  /** 
+   * Tests that the size of the recent files list doesn't get bigger than the maximum size. 
+   * @throws IOException if an IO operation fails
+   */
   public void testAddMoreThanMaxSize() throws IOException {
     
     final File tempFile = writeToNewTempFile(BAR_TEXT);
@@ -107,7 +120,10 @@ public final class RecentFileManagerTest extends DrJavaTestCase {
     assertEquals("text of recent file", FOO_TEXT, IOUtil.toString(vector.get(0)));
   }
   
-  /** Tests that the size of the recent files list is reduced in response to a decrease in max size. */
+  /** 
+   * Tests that the size of the recent files list is reduced in response to a decrease in max size.
+   * @throws IOException if an IO operation fails
+   */
   public void testShrinksToMaxSize() throws IOException {
     
     final File tempFile = writeToNewTempFile(BAR_TEXT);
@@ -127,7 +143,10 @@ public final class RecentFileManagerTest extends DrJavaTestCase {
     assertEquals("text of recent file", FOO_TEXT, IOUtil.toString(vector.get(0)));
   }
   
-  /** Tests that files are removed correctly from the list. */
+  /**
+   * Tests that files are removed correctly from the list. 
+   * @throws Exception if something goes wrong
+   */
   public void testRemoveFile() throws Exception {
     // Open two files
     final File tempFile = writeToNewTempFile(BAR_TEXT);
@@ -153,7 +172,11 @@ public final class RecentFileManagerTest extends DrJavaTestCase {
     assertEquals("number of recent files", 0, vector.size());
   }
   
-  /** Tests that the list is re-ordered correctly after a file is re-opened, even if it has a different path. */
+  /** 
+   * Tests that the list is re-ordered correctly after a file is re-opened, 
+   * even if it has a different path. 
+   * @throws Exception if something goes wrong
+   */
   public void testReopenFiles() throws Exception {
     final File tempFile = writeToNewTempFile(BAR_TEXT);
     final File tempFile2 = writeToNewTempFile(FOO_TEXT);

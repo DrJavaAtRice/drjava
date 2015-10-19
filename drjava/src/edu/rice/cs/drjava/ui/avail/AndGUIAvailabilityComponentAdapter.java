@@ -46,8 +46,12 @@ import java.awt.Component;
 public class AndGUIAvailabilityComponentAdapter extends AndGUIAvailabilityListener {
   protected final Component _adaptee;
   
-  /** Create a listener that responds to changes in availability of several GUI components.
-    * @param components components that must be available */
+  /** 
+   * Create a listener that responds to changes in availability of several GUI components.
+   * @param adaptee an Action
+   * @param notifier a GUIAvailabilityNotifier
+   * @param components components that must be available 
+   */
   public AndGUIAvailabilityComponentAdapter(Component adaptee,
                                             GUIAvailabilityNotifier notifier, ComponentType... components) {
     super(notifier, components);

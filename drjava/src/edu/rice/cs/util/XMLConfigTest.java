@@ -858,6 +858,9 @@ public class XMLConfigTest extends TestCase {
   
   /**
    * Expectes "concutest" to be the root node of passed XMLConfig.
+   * @param pathToTest the path to test
+   * @param xc an XMLConfig object
+   * @throws Exception if something goes wrong
    */
   private void subTestGet(String pathToTest, XMLConfig xc) throws Exception{
     String ret = xc.get(pathToTest, xc.getNodes("concutest").get(0), "arbitraryDefaultValue");
@@ -943,6 +946,7 @@ public class XMLConfigTest extends TestCase {
   
   /**
    * Tests for exceptions thrown when getNodes() is passed malformed paths
+   * @throws Exception if something goes wrong
    */
   public void testGetNodesExceptions() throws Exception{
     XMLConfig xc = 
@@ -1026,6 +1030,7 @@ public class XMLConfigTest extends TestCase {
   
   /**
    * Test getNodePath(Node n)
+   * @throws Exception if something goes wrong
    */
   public void testGetNodePath() throws Exception{
     XMLConfig xc = 
@@ -1053,6 +1058,7 @@ public class XMLConfigTest extends TestCase {
   /**
    * Test that construction of XMLConfigException's will succeed
    * Kind of pointless really.
+   * @throws Exception if something goes wrong
    */
   public void testXMLConfigException() throws Exception{
     new XMLConfig.XMLConfigException();
@@ -1062,6 +1068,7 @@ public class XMLConfigTest extends TestCase {
   
   /**
    * Test save(File f)
+   * @throws Exception if something goes wrong
    */
   public void testSaveAndLoadConstructors() throws Exception{
     XMLConfig xc = 
@@ -1103,6 +1110,7 @@ public class XMLConfigTest extends TestCase {
   
   /**
    * Tests is XMLConfig constructor rejects null as parameters
+   * @throws Exception if something goes wrong
    */
   public void testNullParamsinConstructor() throws Exception{
     XMLConfig xc = 
@@ -1133,6 +1141,7 @@ public class XMLConfigTest extends TestCase {
   
   /**
    * Tests XMLConfig(String filename)
+   * @throws Exception if something goes wrong
    */
   public void testConstructorWithFileName() throws Exception{
     

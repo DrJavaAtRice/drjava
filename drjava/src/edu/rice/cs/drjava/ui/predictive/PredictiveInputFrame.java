@@ -193,15 +193,16 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
   private volatile PredictiveInputModel.MatchingStrategy<T> _currentStrategy;
 
   /** Create a new predictive string input frame.
-   *  @param owner owner frame
-   *  @param force true if the user is forced to select one of the items
-   *  @param ignoreCase true if case should be ignored
-   *  @param info information supplier to use for additional information display
-   *  @param strategies array of matching strategies
-   *  @param actions actions to be performed when the user closes the frame, e.g. "OK" and "Cancel"; "Cancel" has to be last
-   *  @param items list of items
+   * @param owner owner frame
+   * @param title frame title
+   * @param force true if the user is forced to select one of the items
+   * @param ignoreCase true if case should be ignored
+   * @param info information supplier to use for additional information display
+   * @param strategies array of matching strategies
+   * @param actions actions to be performed when the user closes the frame, e.g. "OK" and "Cancel"; "Cancel" has to be last
+   * @param cancelIndex cancel index
+   * @param items list of items
    */
-
   public PredictiveInputFrame(SwingFrame owner, String title, boolean force, boolean ignoreCase, InfoSupplier<? super T> info, 
                               java.util.List<PredictiveInputModel.MatchingStrategy<T>> strategies,
                               java.util.List<CloseAction<T>> actions, int cancelIndex, Collection<T> items) {
@@ -227,13 +228,17 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     initDone(); // call mandated by SwingFrame contract
   }
   
-  /** Create a new predictive string input frame.
-   *  @param owner owner frame
-   *  @param force true if the user is forced to select one of the items
-   *  @param info information supplier to use for additional information display
-   *  @param strategies array of matching strategies
-   *  @param actions actions to be performed when the user closes the frame, e.g. "OK" and "Cancel"; "Cancel" has to be last
-   *  @param items varargs/array of items
+  /** 
+   * Create a new predictive string input frame.
+   * @param owner owner frame
+   * @param title frame title
+   * @param force true if the user is forced to select one of the items
+   * @param ignoreCase whether or not to ignore case
+   * @param info information supplier to use for additional information display
+   * @param strategies array of matching strategies
+   * @param actions actions to be performed when the user closes the frame, e.g. "OK" and "Cancel"; "Cancel" has to be last
+   * @param cancelIndex cancel index
+   * @param items varargs/array of items
    */
   @SafeVarargs
   public PredictiveInputFrame(SwingFrame owner, String title, boolean force, boolean ignoreCase, InfoSupplier<? super T> info, 
@@ -648,12 +653,18 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     updateList();
   }
   
-  /** Creates the optional components. Should be overridden. */
+  /** 
+   * Creates the optional components. Should be overridden. 
+   * @return the optional components
+   */
   protected JComponent[] makeOptions() {        
     return new JComponent[0];    
   }
   
-  /** Creates the panel with the optional components. */
+  /** 
+   * Creates the panel with the optional components. 
+   * @param components the optional components
+   */
   private void _setupOptionsPanel(JComponent[] components) {
     JPanel mainButtons = new JPanel();
     JPanel emptyPanel = new JPanel();
@@ -772,7 +783,10 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     buttonPressed(_actions.get(_cancelIndex));
   }
   
-  /** Handle button pressed. */
+  /** 
+   * Handle button pressed. 
+   * @param a the button press action being handled
+   */
   private void buttonPressed(CloseAction<T> a) {
     _buttonPressed = a.getName();
     _lastState = new FrameState(PredictiveInputFrame.this);

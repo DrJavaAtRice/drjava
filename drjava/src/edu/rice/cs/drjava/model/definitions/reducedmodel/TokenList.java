@@ -41,7 +41,7 @@ package edu.rice.cs.drjava.model.definitions.reducedmodel;
   */
 public class TokenList extends ModelList<ReducedToken> implements /*imports*/ ReducedModelStates {
   
-  /** Gets a TokenList.Iterator for this list.  Overrides the weaker method in ModelList<ReducedToken>.Iterator. */
+  /** Gets a TokenList.Iterator for this list.  Overrides the weaker method in {@code ModelList<ReducedToken>.Iterator}. */
   public Iterator getIterator() { return new Iterator(); }
   
   public class Iterator extends ModelIterator {
@@ -58,9 +58,9 @@ public class TokenList extends ModelList<ReducedToken> implements /*imports*/ Re
       _offset = that.getBlockOffset();
     }
     
-    /** Makes a fresh copy of this TokenList.Iterator.  copy() returns a ModelList<ReducedToken>.Iterator copy which is
+    /** Makes a fresh copy of this TokenList.Iterator.  copy() returns a {@code ModelList<ReducedToken>.Iterator} copy which is
       * more restrictive than TokenList.Iterator.  An underscore differentiates the two methods.  This differentiation 
-      * was easiest since it allowed us to keep TokenList.Iterator extending ModelList<ReducedToken>.Iterator.
+      * was easiest since it allowed us to keep TokenList.Iterator extending {@code ModelList<ReducedToken>.Iterator}.
       */
     public Iterator copy() { return new Iterator(this); }
     
@@ -92,9 +92,12 @@ public class TokenList extends ModelList<ReducedToken> implements /*imports*/ Re
     }
     
     
-    /** Handles the details of the case where a brace is inserted into a gap. Assumes the current token is a gap!  
-      * Assumes that read lock and reduced locks are already held. 
-      */
+    /** 
+     * Handles the details of the case where a brace is inserted into a gap. 
+     * Assumes the current token is a gap! Assumes that read lock and reduced 
+     * locks are already held. 
+     * @param text text
+     */
     void insertBraceToGap(String text) {
       current().shrink(getBlockOffset());
       insert(Brace.MakeBrace(text, getStateAtCurrent()));
@@ -108,21 +111,30 @@ public class TokenList extends ModelList<ReducedToken> implements /*imports*/ Re
       setBlockOffset(0);
     }
     
-    /** Helper function to _insertBrace. Handles the details of the case where brace is inserted between two
-      * reduced tokens.  No destructive action is taken.  Assume that read lock and reduced lock are already held.
-      */
+    /** 
+     * Helper function to _insertBrace. Handles the details of the case where 
+     * brace is inserted between two reduced tokens.  No destructive action is 
+     * taken.  Assume that read lock and reduced lock are already held.
+     * @param text text
+     */
     void insertNewBrace(String text) {
       insert(Brace.MakeBrace(text, getStateAtCurrent()));
       next();
       setBlockOffset(0);
     }
     
-    /** Splits the current brace if it is a multiple character brace and fulfills certain conditions.  If the current 
-      * brace is a // or /*, split it into two braces.  Do the same for star-slash (end comment block) if the parameter
-      * splitClose is true.  Do the same for \\ and \" if splitEscape is true.  If a split was performed, the first of
-      * the two Braces will be the current one when we're done.  The offset is not changed.  The two new Braces will 
-      * have the same quoted/commented status as the one they were split from.
-      */
+    /** 
+     * Splits the current brace if it is a multiple character brace and 
+     * fulfills certain conditions.  If the current brace is a // or /*, 
+     * split it into two braces.  Do the same for star-slash (end comment 
+     * block) if the parameter splitClose is true.  Do the same for \\ and 
+     * \" if splitEscape is true.  If a split was performed, the first of
+     * the two Braces will be the current one when we're done.  The offset is 
+     * not changed.  The two new Braces will have the same quoted/commented 
+     * status as the one they were split from.
+     * @param splitClose true if splitting on star-slash is desired
+     * @param splitEscape true if spliting on escaped characters is desired
+     */
     void _splitCurrentIfCommentBlock(boolean splitClose, boolean splitEscape) {
       String type = current().getType();
       if (type.equals("//") || type.equals("/*") ||
@@ -180,18 +192,23 @@ public class TokenList extends ModelList<ReducedToken> implements /*imports*/ Re
       return it._moveLeft(- count, currentOffset);  // count < 0
     }
     
-    /** Helper function that moves cursor ([iterator pos, count]) forward by count chars.  Assumes that count > 0 and
-      * is in range.  Returns the new count.
-      * <ol>
-      * <li> at head && count > 0:  next
-      * <li> LOOP:<BR>
-      * if atEnd and count == 0, stop<BR>
-      * if atEnd and count > 0, throw boundary exception<BR>
-      * if count < size of current token, offset = count, stop<BR>
-      * otherwise, reduce count by size of current token and go to
-      * the next token, continuing the loop.
-      * </ol>
-      */
+    /** 
+     * Helper function that moves cursor ([iterator pos, count]) forward by 
+     * count chars.  Assumes that count {@literal >} 0 and
+     * is in range.  Returns the new count.
+     * <ol>
+     * <li> at head {@literal &&} count {@literal >} 0:  next
+     * <li> LOOP:<BR>
+     * if atEnd and count == 0, stop<BR>
+     * if atEnd and count {@literal >} 0, throw boundary exception<BR>
+     * if count {@literal <} size of current token, offset = count, stop<BR>
+     * otherwise, reduce count by size of current token and go to
+     * the next token, continuing the loop.
+     * </ol>
+     * @param count number of characters by which to move the cursor
+     * @param currentOffset current offset
+     * @return new offset
+     */
     private int _moveRight(int count, int currentOffset) {
       // Standardize initial position
       if (atStart()) {
@@ -217,18 +234,23 @@ public class TokenList extends ModelList<ReducedToken> implements /*imports*/ Re
       return count; // returns the offset in the current token
     }
     
-    /** Helper function that moves cursor ([iterator pos, count]) backward by count chars.  Assumes that count > 0 and
-      * is in range.  Returns the new count.
-      * <ol>
-      * <li> atEnd && count > 0:  prev
-      * <li> LOOP:<BR>
-      * if atStart and count == 0, stop<BR>
-      * if atStart and count > 0, throw boundary exception<BR>
-      * if count < size of current token, offset = size - count, stop<BR>
-      * otherwise, reduce count by size of current token and go to
-      * the previous token, continuing the loop.
-      * </ol>
-      */
+    /** 
+     * Helper function that moves cursor ([iterator pos, count]) backward by 
+     * count chars.  Assumes that count {@literal >} 0 and
+     * is in range.  Returns the new count.
+     * <ol>
+     * <li> atEnd {@literal && count >} 0:  prev
+     * <li> LOOP:<BR>
+     * if atStart and count == 0, stop<BR>
+     * if atStart and count {@literal >} 0, throw boundary exception<BR>
+     * if count {@literal <} size of current token, offset = size - count, stop<BR>
+     * otherwise, reduce count by size of current token and go to
+     * the previous token, continuing the loop.
+     * </ol>
+     * @param count number of characters by which to move the cursor
+     * @param currentOffset current offset
+     * @return new offset
+     */
     private int _moveLeft(int count, int currentOffset) {
       
       // Standardize initial position, eliminating 0 offset
@@ -321,7 +343,12 @@ public class TokenList extends ModelList<ReducedToken> implements /*imports*/ Re
       else throw new IllegalArgumentException("Cannot clip left.");
     }
     
-    /** Deletes from offset in this to endOffset in delTo. Uses ModelList.collapse to perform quick deletion. */
+    /** 
+     * Deletes from offset in this to endOffset in delTo. 
+     * Uses ModelList.collapse to perform quick deletion. 
+     * @param delTo iterator whose endpoint is the last character to delete
+     * @return new offset
+     */
     int deleteRight(Iterator delTo) {
       collapse(delTo);
       
@@ -374,10 +401,18 @@ public class TokenList extends ModelList<ReducedToken> implements /*imports*/ Re
     }
     
     
-    /** By comparing the delTo token after the walk to what it was before the walk we can see how it has changed and 
-      * where the offset should go.<p/>
-      * Prev is the item previous to the current cursor. Curr is the current token. delTo is where current is pointing
-      * at this moment in time.
+    /** 
+     * By comparing the delTo token after the walk to what it was before the 
+     * walk we can see how it has changed and where the offset should go.
+     * Prev is the item previous to the current cursor. Curr is the current 
+     * token. delTo is where current is pointing at this moment in time.
+     * 
+     * @param delToSizePrev delToSize for the prev token
+     * @param delToTypePrev delToType for the prev token
+     * @param delToSizeCurr delToSize for the current token
+     * @param delToTypeCurr delToType for the current token
+     * @param delTo where current is pointing at this moment in time
+     * @return calculated offset
       */
     private int _calculateOffset(int delToSizePrev, String delToTypePrev, int delToSizeCurr, String delToTypeCurr,
                                  Iterator delTo) {

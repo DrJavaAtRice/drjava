@@ -173,6 +173,7 @@ public class JarCreationTest extends DrJavaTestCase {
   }
 
   /** Test the manual creation of jar files
+   * @throws IOException if an IO operation fails
    */
   public void testCreateJar() throws IOException {
     File f = edu.rice.cs.plt.io.IOUtil.createAndMarkTempFile("test", ".jar");

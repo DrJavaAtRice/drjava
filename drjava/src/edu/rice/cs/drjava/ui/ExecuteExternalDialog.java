@@ -691,9 +691,15 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     return panel;
   }
   
-  /** Color properties as variables.
-    * @param pane the pane that contains the text
-    * @param props the properties to color */
+  /** 
+   * Color properties as variables.
+   * @param pane the pane that contains the text
+   * @param props the properties to color 
+   * @param dl a DocumentListener
+   * @param normal the nrmal attributes
+   * @param variable the attributes for variables
+   * @param error the attributes for errors
+   */
   protected void colorVariables(final JTextPane pane,
                                 final PropertyMaps props,
                                 final DocumentListener dl,
@@ -977,7 +983,10 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     xc.save(f);
   }
   
-  /** Save the settings for this dialog. */
+  /** 
+   * Save the settings for this dialog. 
+   * @return true always
+   */
   private boolean _saveSettings() {
     _lastState = new FrameState(this);
     return true;
@@ -1045,7 +1054,10 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     super.setVisible(vis);
   }
   
-  /** Opens the file chooser to select a directory, putting the result in the file field. */
+  /** 
+   * Opens the file chooser to select a directory, putting the result in the file field. 
+   * @param pane a JTextPane
+   */
   protected void chooseDir(JTextPane pane) {
     // Get the file from the chooser
     File wd = new File(StringOps.replaceVariables(pane.getText().trim(), _props, PropertyMaps.GET_CURRENT));
@@ -1065,7 +1077,10 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     }
   }
   
-  /** Opens the file chooser to select a file, putting the result in the file field. */
+  /** 
+   * Opens the file chooser to select a file, putting the result in the file field.
+   * @param pane a JTextPane
+   */
   protected void chooseFile(JTextPane pane) {
     // Get the file from the chooser
     File wd = new File(StringOps.replaceVariables(pane.getText().trim(), _props, PropertyMaps.GET_CURRENT));

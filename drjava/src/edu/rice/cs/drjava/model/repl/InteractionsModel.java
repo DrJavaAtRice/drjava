@@ -159,7 +159,11 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     });
   }
   
-  /** Sets the _pane field and initializes the caret position in the pane.  Called in the InteractionsController. */
+  /** 
+   * Sets the _pane field and initializes the caret position in the pane.  
+   * Called in the InteractionsController. 
+   * @param pane the pane to set up
+   */
   public void setUpPane(InteractionsPane pane) { 
     _pane = pane;
     _pane.setCaretPosition(_document.getLength());
@@ -180,7 +184,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   /** Removes all InteractionsListeners from this model. */
   public void removeAllInteractionListeners() { _notifier.removeAllListeners(); }
   
-  /** Returns the InteractionsDocument stored by this model. */
+  /** @return the InteractionsDocument stored by this model. */
   public InteractionsDocument getDocument() { return _document; }
   
   public void interactionContinues() {
@@ -189,9 +193,12 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     _notifyInteractionIncomplete();
   }
   
-  /** Sets this model's notion of whether it is waiting for the first interpreter to connect.  The interactionsReady
-    * event is not fired for the first interpreter.
-    */
+  /** 
+   * Sets this model's notion of whether it is waiting for the first 
+   * interpreter to connect.  The interactionsReady event is not fired for 
+   * the first interpreter.
+   * @param waiting true if waiting for the first interpreter to connect; false otherwise
+   */
   public void setWaitingForFirstInterpreter(boolean waiting) { _waitingForFirstInterpreter = waiting; }
   
   /** Interprets the current given text at the prompt in the interactions doc. May be executed outside of the event
@@ -275,8 +282,12 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     }
   }
   
-  /** Performs pre-interpretation preparation of the interactions document and notifies the view.  Must run in the
-    * event thread for newline to be inserted at proper time.  Assumes that Write Lock is already held. */
+  /** 
+   * Performs pre-interpretation preparation of the interactions document and 
+   * notifies the view.  Must run in the event thread for newline to be 
+   * inserted at proper time.  Assumes that Write Lock is already held. 
+   * @param text text to be added to history
+   */
   private void _prepareToInterpret(String text) {
     _addNewline();
     _notifyInteractionStarted();
@@ -309,17 +320,26 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     */
   public abstract Pair<String,String> getVariableToString(String var);
   
-  /** Resets the Java interpreter with working directory wd. */
+  /** 
+   * Resets the Java interpreter with working directory wd. 
+   * @param wd the working directory to be set
+   * @param force true if reset is to be forced
+   */
   public final void resetInterpreter(File wd, boolean force) {
     _workingDirectory = wd;
     _autoImportSet.clear(); // clear list when interpreter is reset
     _resetInterpreter(wd, force);
   }
   
-  /** Resets the Java interpreter.  This should only be called from resetInterpreter, never directly. */
+  /** 
+   * Resets the Java interpreter.  This should only be called from 
+   * resetInterpreter, never directly. 
+   * @param wd the working directory to be set
+   * @param force true if reset is to be forced
+   */
   protected abstract void _resetInterpreter(File wd, boolean force);
   
-  /** Returns the working directory for the current interpreter. */
+  /** @return the working directory for the current interpreter. */
   public File getWorkingDirectory() { return _workingDirectory; }
   
   /** These add the given path to the classpaths used in the interpreter.
@@ -354,10 +374,15 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   protected abstract void _notifySyntaxErrorOccurred(int offset, int length);
   
  
-  /** Interprets the files selected in the FileOpenSelector. Assumes all strings have no trailing whitespace.
-    * Interprets the array all at once so if there are any errors, none of the statements after the first 
-    * erroneous one are processed.  Only runs in the event thread.
-    */
+  /** 
+   * Interprets the files selected in the FileOpenSelector. Assumes all 
+   * strings have no trailing whitespace.
+   * Interprets the array all at once so if there are any errors, none of the 
+   * statements after the first erroneous one are processed.  Only runs in 
+   * the event thread.
+   * @param selector a FileOpenSelector
+   * @throws IOException if an IO operation fails
+   */
   public void loadHistory(final FileOpenSelector selector) throws IOException {
     ArrayList<String> histories;
     try { histories = _getHistoryText(selector); }
@@ -385,11 +410,14 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     
   }
   
-   /** Opens the files chosen in the given file selector, and returns an ArrayList with one history string 
-    * for each selected file.
-    * @param selector A file selector supporting multiple file selection
-    * @return a list of histories (one for each selected file)
-    */
+   /** 
+   * Opens the files chosen in the given file selector, and returns an 
+   * ArrayList with one history string for each selected file.
+   * @param selector A file selector supporting multiple file selection
+   * @return a list of histories (one for each selected file)
+   * @throws IOException if an IO operation fails
+   * @throws OperationCanceledException if the operation is canceled unexpectedly
+   */
   protected static ArrayList<String> _getHistoryText(FileOpenSelector selector)
     throws IOException, OperationCanceledException {
     File[] files = selector.getFiles();
@@ -862,7 +890,10 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     }
   }
   
-  /** Notifies listeners that the interpreter is ready. (Subclasses must maintain listeners.) */
+  /** 
+   * Notifies listeners that the interpreter is ready. (Subclasses must maintain listeners.) 
+   * @param wd working directory
+   */
   public abstract void _notifyInterpreterReady(File wd);
   
   /** Singleton InputListener which should never be asked for input. */
@@ -873,15 +904,15 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     public String getConsoleInput() { throw new IllegalStateException("No input listener installed!"); }
   }
   
-  /** Gets the console tab document for this interactions model */
+  /** @return the console tab document for this interactions model */
   public abstract ConsoleDocument getConsoleDocument();
   
-  /** Return the last error, or null if successful. */
+  /** @return the last error, or null if successful. */
   public String getLastError() {
     return _lastError;
   }
   
-  /** Return the second to last error, or null if successful. */
+  /** @return the second to last error, or null if successful. */
   public String getSecondToLastError() {
     return _secondToLastError;
   }
@@ -891,7 +922,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     _lastError = _secondToLastError = null;
   }
   
-  /** Returns the last history item and then removes it, or returns null if the history is empty. */
+  /** @return the last history item and then removes it, or returns null if the history is empty. */
   public String removeLastFromHistory() {
     return _document.removeLastFromHistory();
   }

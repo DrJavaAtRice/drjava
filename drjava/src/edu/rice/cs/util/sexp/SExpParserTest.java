@@ -68,6 +68,8 @@ public class SExpParserTest extends DrJavaTestCase {
   /** There are three ways to input the data to a parse.
    * this tests to make sure they all three return the same
    * thing.
+   * @throws SExpParseException if an error occurs during parsing
+   * @throws IOException if an IO operation fails
    */
   public void testDifferentInputs() throws SExpParseException, IOException{
     String text = "()";
@@ -89,6 +91,7 @@ public class SExpParserTest extends DrJavaTestCase {
   
   /** Tests to make sure that multiple top-level s-exps 
    * are parsed separately and in tact
+   * @throws SExpParseException if an error occurs during parsing
    */
   public void testParseMultiple() throws SExpParseException{
     String text = "(abcdefg)(hijklmnop)";

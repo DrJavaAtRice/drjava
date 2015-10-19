@@ -46,9 +46,10 @@ import java.util.List;
   */
 public interface InteractionsModelCallback {
   
-  /** Returns an available port number to use for debugging a remote interpreter.
-    * @throws IOException if unable to get a valid port number.
-    */
+  /** 
+   * @return an available port number to use for debugging a remote interpreter.
+   * @throws IOException if unable to get a valid port number.
+   */
   public int getDebugPort() throws IOException;
   
   /** Called when the repl prints to System.out.
@@ -93,6 +94,7 @@ public interface InteractionsModelCallback {
     *               by the interpretation. We must return the String form
     *               because returning the Object directly would require the
     *               data type to be serializable.
+    * @param style  style
     */
   public void replReturnedResult(String result, String style);
   
@@ -101,18 +103,21 @@ public interface InteractionsModelCallback {
     */
   public void replThrewException(String message);
   
-  /** Signifies that the most recent interpretation was ended due to an exception being thrown.
-    * @param message The exception's message
-    */
+  /** 
+   * Signifies that the most recent interpretation was ended due to an exception being thrown.
+   * @param message The exception's message
+   * @param stackTrace the exception's stack trace
+   */
   public void replThrewException(String message, StackTraceElement[] stackTrace);
   
   /** Signifies that the most recent interpretation was preempted by a syntax error.
-    * @param errorMessage The syntax error message
-    * @param startRow The starting row of the error
-    * @param startCol The starting column of the error
-    * @param endRow The end row of the error
-    * @param endCol The end column of the error
-    */
+   * @param errorMessage The syntax error message
+   * @param interaction The interaction text
+   * @param startRow The starting row of the error
+   * @param startCol The starting column of the error
+   * @param endRow The end row of the error
+   * @param endCol The end column of the error
+   */
   public void replReturnedSyntaxError(String errorMessage, String interaction, int startRow, int startCol,
                                       int endRow, int endCol);
   
@@ -127,20 +132,28 @@ public interface InteractionsModelCallback {
     */
   public void interpreterResetFailed(Throwable th);
   
-  /** Called when the slave JVM fails to startup */
+  /** 
+   * Called when the slave JVM fails to startup 
+   * @param e the exception that occurred on startup
+   */
   public void interpreterWontStart(Exception e);
 
   /** Called when the interpreter starts to reset. */
   public void interpreterResetting();
   
-  /** Called to assert that a fresh Java interpreter is ready for use either after a start or a restart.
-    * Is sometimes preceded by a call to {@code interpreterResetting()}, but not when the interpreter is
-    * first starting or is already fresh.
-    */
+  /** 
+   * Called to assert that a fresh Java interpreter is ready for use either after a start or a restart.
+   * Is sometimes preceded by a call to {@code interpreterResetting()}, but not when the interpreter is
+   * first starting or is already fresh.
+   * @param wd the working directory
+   */
   public void interpreterReady(File wd);
   
-  /** A compiler can instruct DrJava to include additional elements for the boot
-    * class path of the Interactions JVM. */
+  /** 
+   * A compiler can instruct DrJava to include additional elements for the boot
+   * class path of the Interactions JVM. 
+   * @return the compiler boot classpath
+   */
   public List<File> getCompilerBootClassPath();
   
   /** Transform the command line to be interpreted into something the Interactions JVM can use.

@@ -74,7 +74,10 @@ public class DrJavaSurveyPopup extends JDialog {
   /** don't ask user again */
   private JCheckBox _neverAskAgain;
   
-  /** Creates a window to display whether a new version of DrJava is available. */
+  /** 
+   * Creates a window to display whether a new version of DrJava is available. 
+   * @param parent the parent frame
+   */
   public DrJavaSurveyPopup(MainFrame parent) {
     super(parent, "Send System Information to DrJava Developers");
     setResizable(false);
@@ -153,7 +156,7 @@ public class DrJavaSurveyPopup extends JDialog {
 
   public static final edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("survey.txt",false);
 
-  /** Return the URL that would be used to answer the DrJava survey. */
+  /** @return the URL that would be used to answer the DrJava survey. */
   public static String getSurveyURL() {
     final String DRJAVA_SURVEY_PAGE = "http://www.drjava.org/submit-usage.php?";
     StringBuilder sb = new StringBuilder();
@@ -170,8 +173,10 @@ public class DrJavaSurveyPopup extends JDialog {
     return sb.toString().replaceAll(" ","%20");
   }
   
-  /** Returns true if the user may participate in the survey, i.e. either the configuration
-    * string has changed from the last time, or enough days have passed since the last test (3 months) */
+  /** 
+   * @return true if the user may participate in the survey, i.e. either the configuration
+   * string has changed from the last time, or enough days have passed since the last test (3 months) 
+   */
   public static boolean maySubmitSurvey() {
     // check how many days have passed since the last survey
     int days = DrJava.getConfig().getSetting(OptionConstants.DRJAVA_SURVEY_DAYS);

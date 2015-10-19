@@ -50,15 +50,22 @@ public interface DirectorySelector {
     */
   public File getDirectory(File start) throws OperationCanceledException;
   
-  /** Asks the user a yes/no question.
-    * @return true if the user responded affirmatively, false if negatively
-    */
+  /** 
+   * Asks the user a yes/no question.
+   * @param message message to be displayed
+   * @param title title 
+   * @return true if the user responded affirmatively, false if negatively
+   */
   public boolean askUser(String message, String title);
   
-  /** Warns the user about an error condition. */
+  /** 
+   * Warns the user about an error condition. 
+   * @param message message to be displayed
+   * @param title title 
+   */
   public void warnUser(String message, String title);
   
-  /** Returns true if the user wants the directory to include all subdirectories. */
+  /** @return true if the user wants the directory to include all subdirectories. */
   public boolean isRecursive();
   
 }

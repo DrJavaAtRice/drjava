@@ -71,10 +71,10 @@ import edu.rice.cs.drjava.config.OptionParser;
   * @version $Id$
   */
 public class DummyGlobalModel implements GlobalModel {
-  /** Since this is not supposed to be used, we need to throw an exception OTHER than the ones it officially supports.
-    * @throws UnsupportedOperationException
-    */
-  
+  /** 
+   * Since this is not supposed to be used, we need to throw an exception 
+   * OTHER than the ones it officially supports.
+   */
   public void addListener(GlobalModelListener listener) {
     throw new UnsupportedOperationException("Tried to call addListener on a Dummy");
   }

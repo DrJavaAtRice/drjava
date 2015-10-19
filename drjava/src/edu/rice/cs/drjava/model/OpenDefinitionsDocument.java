@@ -58,12 +58,19 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
   
   //----- Forwarding Methods -----/
 
-  /** The following methods are forwarding methods required by the rest of the program in order for the 
-   *  OpenDefinitionsDocument to handle DefinitionsDocuments */
+  /** 
+   * The following methods are forwarding methods required by the rest of the 
+   * program in order for the OpenDefinitionsDocument to handle 
+   * DefinitionsDocuments 
+   * @param selStart the document offset for the start of the selection (inclusive)
+   * @param selEnd the document offset for the end of the selection (inclusive)
+   * @return delta (num characters)
+   */
 //  public int id();
   public int commentLines(int selStart, int selEnd);
   public int uncommentLines(int selStart, int selEnd);
-  /** Gets the associated DefinitionsDocument which may force materializing it. */
+
+  /** @return the associated DefinitionsDocument which may force materializing it. */
   public DefinitionsDocument getDocument();
   public boolean getClassFileInSync();
   public void setClassFileInSync(boolean val);
@@ -84,7 +91,7 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
   
   //----- Getters and Setters -----/
   
-  /** Returns the file for this document; does not check whether the file exists. */
+  /** @return the file for this document; does not check whether the file exists. */
   public File getRawFile();
   
   /** Returns the file for this document. 
@@ -98,16 +105,16 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
    */
   public void setFile(File file);
   
-  /** Returns the name of this file, or "(Untitled)" if no file. */
+  /** @return the name of this file, or "(Untitled)" if no file. */
   public String getFileName();
   
-  /** Returns canonical path for well-formed file, "(Untitled)" if no file exists, and absolute path if ill-formed. */
+  /** @return canonical path for well-formed file, "(Untitled)" if no file exists, and absolute path if ill-formed. */
   public String getCanonicalPath(); 
 
-  /** Returns canonical path (as defined above) followed by " *" if modified. */
+  /** @return canonical path (as defined above) followed by " *" if modified. */
   public String getCompletePath(); 
 
-  /** Returns the parent directory of this file, null if it has none. */
+  /** @return the parent directory of this file, null if it has none. */
   public File getParentDirectory();
 
   public Pageable getPageable() throws IllegalStateException;
@@ -120,13 +127,16 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
   /** @return whether the undo manager can perform any redos. */
   public boolean undoManagerCanRedo();
   
-  /** Determines if this document in the file system tree below the active project root. */
+  /** @return true if this document in the file system tree below the active project root. */
   public boolean inProjectPath();
   
-  /** Determines if this document in the file system tree below the specified root. */
+  /** 
+   * @param root the root below which to search for this document 
+   * @return true if this document in the file system tree below the specified root. 
+   */
   public boolean inNewProjectPath(File root);
   
-  /** Determines if the document is empty. */
+  /** @return true if the document is empty. */
   public boolean isEmpty();
   
   /** @return true if the document's file is a project auxiliary file. */
@@ -138,7 +148,7 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
   /** @return true if the documents file is saved in the current project file. */
   public boolean inProject();
   
-  /** Returns whether this document is resident in memory. */ 
+  /** @return true if this document is resident in memory. */ 
   public boolean isReady();
   
   /** Returns whether this document is currently untitled (indicating whether it has a file yet or not).
@@ -146,7 +156,7 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
    */
   public boolean isUntitled();
  
-  /** Returns true if the file exists on disk, or if the user has located it on disk. Returns false if the 
+  /** @return true if the file exists on disk, or if the user has located it on disk; false if the 
    *  file has been moved or deleted
    */
   public boolean fileExists();
@@ -159,51 +169,66 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
   /** Resets the document to be unmodified. */
   public void resetModification();
   
-  /** Returns the date that this document was last modified. */
+  /** @return the date that this document was last modified. */
   public long getTimestamp();
   
   
   //----- Major Operations -----//
   
-  /** Adds region r to the browserRegions collection for this */
+  /** 
+   * Adds region r to the browserRegions collection for this 
+   * @param r the region to be added
+   */
   public void addBrowserRegion(BrowserDocumentRegion r);
   
-  /** Removes region r from the browserRegions collection */
+  /** 
+   * Removes region r from the browserRegions collection 
+   * @param r the region to be removed
+   */
   public void removeBrowserRegion(BrowserDocumentRegion r);
   
-  /** Returns the name of the top level class, if any.
-    * @throws ClassNameNotFoundException if no top level class name found.
-    */
+  /** 
+   * @return the name of the top level class, if any.
+   * @throws ClassNameNotFoundException if no top level class name found.
+   */
   public String getFirstTopLevelClassName() throws ClassNameNotFoundException;
   
-  /** If the file exists, returns true. If it does not exist, prompts the user to look it up.  If the user
-    * chooses a file, returns true, false otherwise. */
+  /** 
+   * If the file exists, returns true. If it does not exist, prompts the user 
+   * to look it up. If the user chooses a file, returns true, false otherwise. 
+   * @return true if the file exists or was selected by the user; false otherwise
+   */
   public boolean verifyExists();  
   
-  /** Saves the document with a FileWriter.  If the file name is already set, the method will use that name 
-    * instead of whatever selector is passed in.
-    * @param com a selector that picks the file name
-    * @exception IOException
-    * @return true if the file was saved, false if the operation was canceled
-    */
+  /** 
+   * Saves the document with a FileWriter.  If the file name is already set, the method will use that name 
+   * instead of whatever selector is passed in.
+   * @param com a selector that picks the file name
+   * @return true if the file was saved, false if the operation was canceled
+   * @throws IOException if an IO operation fails
+   */
   public boolean saveFile(FileSaveSelector com) throws IOException;
 
-  /** Revert the document to the version saved on disk. */
+  /** 
+   * Revert the document to the version saved on disk. 
+   * @throws IOException if an IO operation fails
+   */
   public void revertFile() throws IOException;
 
-  /** Saves the document with a FileWriter.  The FileSaveSelector will either provide a file name or prompt 
-   *  the user for one.  It is up to the caller to decide what needs to be done to choose a file to save to.  
-   *  Once the file has been saved succssfully, this method fires fileSave(File).  If the save fails for any
-   *  reason, the event is not fired.
-   *  @param com a selector that picks the file name.
-   *  @exception IOException
-   *  @return true if the file was saved, false if the operation was canceled
+  /** 
+   * Saves the document with a FileWriter.  The FileSaveSelector will either provide a file name or prompt 
+   * the user for one.  It is up to the caller to decide what needs to be done to choose a file to save to.  
+   * Once the file has been saved succssfully, this method fires fileSave(File).  If the save fails for any
+   * reason, the event is not fired.
+   * @param com a selector that picks the file name.
+   * @throws IOException if an IO operation fails
+   * @return true if the file was saved, false if the operation was canceled
    */
   public boolean saveFileAs(FileSaveSelector com) throws IOException;
 
   /** Starts compiling the source.  Demands that the definitions be saved before proceeding with the compile.  
    *  Fires the appropriate events as the compiliation proceeds and finishes.  Only executes in the event thread.
-   *  @exception IOException if a file with errors cannot be opened
+   *  @throws IOException if a file with errors cannot be opened
    */
   public void startCompile() throws IOException;
 
@@ -211,8 +236,8 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
    *  and compiled before proceeding. Fires an event to signal when execution is about to begin.
    * 
    *  @param qualifiedClassName - the fully qualified name of the class contained in this document to run the main(String[]) method of
-   *  @exception ClassNameNotFoundException propagated from getFirstTopLevelClass()
-   *  @exception IOException propagated from GlobalModel.compileAll()
+   *  @throws ClassNameNotFoundException propagated from getFirstTopLevelClass()
+   *  @throws IOException propagated from GlobalModel.compileAll()
    */
   public void runMain(String qualifiedClassName) throws ClassNameNotFoundException, IOException;
 
@@ -221,59 +246,69 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
    *  The class that will be run must have a default (zero-argument) constructor.
    * 
    *  @param qualifiedClassName - the fully qualified name of the class contained in this document that will be run as applet
-   *  @exception ClassNameNotFoundException propagated from getFirstTopLevelClass()
-   *  @exception IOException propagated from GlobalModel.compileAll()
+   *  @throws ClassNameNotFoundException propagated from getFirstTopLevelClass()
+   *  @throws IOException propagated from GlobalModel.compileAll()
    */
   public void runApplet(String qualifiedClassName) throws ClassNameNotFoundException, IOException;
 
-  /** Runs this document, and tries to be smart about it. It detects if the class is a regular Java class with a
-    * main method, if it is an applet, or if it is an ACM Java Task Force program. It runs the program appropriately
-    * in the interactions pane after resetting interactions with the source root for this document as the
-    * working directory.  Warns the use if the class files for the doucment are not up to date.
-    * Fires an event to signal when execution is about to begin.
-    * NOTE: this code normally runs in the event thread; it cannot block waiting for an event that is triggered by
-    * event thread execution!
-    * 
-    * @param qualifiedClassName  the qualified name of the class (in this document) to run.  If NULL, it is the name
-    *                            of the top level class.
-    * 
-    * @exception ClassNameNotFoundException propagated from getFirstTopLevelClass()
-    * @exception IOException propagated from GlobalModel.compileAll()
-    */
+  /** 
+   * Runs this document, and tries to be smart about it. It detects if the class is a regular Java class with a
+   * main method, if it is an applet, or if it is an ACM Java Task Force program. It runs the program appropriately
+   * in the interactions pane after resetting interactions with the source root for this document as the
+   * working directory.  Warns the use if the class files for the doucment are not up to date.
+   * Fires an event to signal when execution is about to begin.
+   * NOTE: this code normally runs in the event thread; it cannot block waiting for an event that is triggered by
+   * event thread execution!
+   * 
+   * @param qualifiedClassName  the qualified name of the class (in this document) to run.  If NULL, it is the name
+   *                            of the top level class.
+   * 
+   * @throws ClassNameNotFoundException propagated from getFirstTopLevelClass()
+   * @throws IOException propagated from GlobalModel.compileAll()
+   */
   public void runSmart(String qualifiedClassName) throws ClassNameNotFoundException, IOException;
 
-  /** Starts testing the source using JUnit.  Demands that the definitions be saved and compiled before proceeding
-   *  with testing.  Fires the appropriate events as the testing proceeds and finishes.
-   *  TODO: this method is redundant and should be deprecated
-   *  @exception IOException if a file with errors cannot be opened
-   *  @exception ClassNotFoundException when the class is compiled to a location not on the classpath.
+  /** 
+   * Starts testing the source using JUnit.  Demands that the definitions be saved and compiled before proceeding
+   * with testing.  Fires the appropriate events as the testing proceeds and finishes.
+   * TODO: this method is redundant and should be deprecated
+   * @throws IOException if a file with errors cannot be opened
+   * @throws ClassNotFoundException when the class is compiled to a location not on the classpath.
    */
   public void startJUnit() throws ClassNotFoundException, IOException;
 
-  /** Generates Javadoc for this document, saving the output to a temporary directory.  The location is provided
-   *  to the javadocEnded event on the given listener.
-   *  @param saver FileSaveSelector for saving the file if it needs to be saved
+  /** 
+   * Generates Javadoc for this document, saving the output to a temporary directory.  The location is provided
+   * to the javadocEnded event on the given listener.
+   * @param saver FileSaveSelector for saving the file if it needs to be saved
+   * @throws IOException if an IO operation fails
    */
   public void generateJavadoc(FileSaveSelector saver) throws IOException;
 
-  /** Determines if this definitions document has changed since the last save.
-   *  @return true if the document has been modified
+  /** 
+   * Determines if this definitions document has changed since the last save.
+   * @return true if the document has been modified
    */
   public boolean isModifiedSinceSave();
 
-  /** Asks the GlobalModel if it can revert current definitions to version on disk. If ok, it reverts the file 
-   *  to the version on disk.
-   *  @return true if the document has been reverted
+  /** 
+   * Asks the GlobalModel if it can revert current definitions to version on disk. If ok, it reverts the file 
+   * to the version on disk.
+   * @return true if the document has been reverted
+   * @throws IOException if an IO operation fails
    */
   public boolean revertIfModifiedOnDisk() throws IOException;
 
-  /** Returns whether the GlobalModel can abandon this document, asking listeners if isModifiedSinceSave() is true.
-   *  @return true if this document can be abandoned
+  /** 
+   * Returns whether the GlobalModel can abandon this document, asking listeners if isModifiedSinceSave() is true.
+   * @return true if this document can be abandoned
    */
   public boolean canAbandonFile();
   
-  /** Saves file at user's discretion before quitting.
-   *  @return true if quitting should continue, false if the user cancelled */
+  /** 
+   * Saves file at user's discretion before quitting.
+   * @return true if quitting should continue, false if the user cancelled 
+   */
   public boolean quitFile();
 
   /** Moves the definitions document to the given line, and returns the resulting character position.
@@ -296,14 +331,20 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
   /**  @return the name of the package at the time of the most recent save or load operation. */
   public String getPackageName();
   
-  /** Sets the cached package name returned by getPackageName(); */
+  /** 
+   * Sets the cached package name returned by getPackageName(); 
+   * @param s the name to be set
+   */
   public void setPackage(String s);
   
-  /** Searching backwards finds the name of the enclosing named class or interface. NB: ignores comments.
-   *  WARNING: In long source files and when contained in anonymous inner classes, this function might take a LONG time.
-   *  @param pos Position to start from
-   *  @param qual true to find the fully qualified class name
-   *  @return name of the enclosing named class or interface
+  /** 
+   * Searching backwards finds the name of the enclosing named class or interface. NB: ignores comments.
+   * WARNING: In long source files and when contained in anonymous inner classes, this function might take a LONG time.
+   * @param pos Position to start from
+   * @param qual true to find the fully qualified class name
+   * @return name of the enclosing named class or interface
+   * @throws BadLocationException if attempts to reference an invalid location
+   * @throws ClassNameNotFoundException if the class name could not be found
    */
   public String getEnclosingClassName(int pos, boolean qual) throws BadLocationException, ClassNameNotFoundException;
 
@@ -374,27 +415,38 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
   public int getNumberOfLines();
   
   /** Translates an offset into the components text to a line number.
-   *  @param offset the offset >= 0
-   *  @return the line number >= 0 */
+   *  @param offset the offset {@literal >=} 0
+   *  @return the line number {@literal >=} 0 */
   public int getLineOfOffset(int offset);
   
   /** Translates a line number into an offset.
-    * @param line number >= 0
-    * @return offset >= 0 
+    * @param line number {@literal >=} 0
+    * @return offset {@literal >=} 0 
     */
   public int getOffsetOfLine(int line);
   
   /** @return the caret position as set by the view. */
   public int getCaretPosition();
   
-  /** Creates a WrappedPosition in the document. */
+  /** 
+   * Creates a Position in the document
+   * @param offs the offset for which to create an unwrapped position.
+   * @return the newly-created position
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public Position createUnwrappedPosition(int offs) throws BadLocationException;
   
-  /** Determines if pos in document is inside a comment or a string. */
+  /** 
+   * Determines if pos in document is inside a comment or a string. 
+   * @param pos the position to check
+   * @return true if pos is shadowed; false otherwise
+   */
   public boolean isShadowed(int pos);
 
-  /** Returns true if one of the words 'class', 'interface' or 'enum' is found
-    * in non-comment text. */
+  /** 
+   * @return true if one of the words 'class', 'interface' or 'enum' is found in non-comment text.
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public boolean containsClassOrInterfaceOrEnum() throws BadLocationException;
   
   /** Update the syntax highlighting for the file type. */

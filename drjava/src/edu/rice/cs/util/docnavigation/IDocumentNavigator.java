@@ -41,31 +41,31 @@ import java.util.*;
 import java.awt.Container;
 import java.awt.event.FocusListener;
 
-/** <code>IDocumentNavigator</code> provides a framework through which individual <code>IDocuments</code> can be 
+/** {@code IDocumentNavigator} provides a framework through which individual {@code IDocument}s can be 
   * navigated. */ 
 public interface IDocumentNavigator<ItemT extends INavigatorItem> extends IAWTContainerNavigatorActor {
   /** @return an AWT component which interacts with this document navigator */
   public Container asContainer();
   
-  /** Adds an <code>IDocuemnt</code> to this navigator.
+  /** Adds an {@code IDocuemnt} to this navigator.
     * @param doc the document to be added into this navigator.
     */
   public void addDocument(ItemT doc);
   
-  /** Adds an <code>INavigatorItem</code> into this navigator in a position relative to a given path.
+  /** Adds an {@code INavigatorItem} into this navigator in a position relative to a given path.
     * @param doc the document to be added into this navigator.
     * @param path the relative path to insert this INavigatorItem at.
     */
   public void addDocument(ItemT doc, String path);
   
-  /** Returns the currently selected navigator item, or null if no navigator item is selected. */
+  /** @return the currently selected navigator item, or null if no navigator item is selected. */
   public ItemT getCurrent();
   
-  /** Returns the model lock for this navigator.  Only used for locking in code external to the implementing class. */
+  /** @return the model lock for this navigator.  Only used for locking in code external to the implementing class. */
   public Object getModelLock();
   
-  /** Removes a given <code>INavigatorItem<code> from this navigator. Removes all <code>INavigatorItem</code>s 
-    * from this navigator that are "equal" (<code>.equals(...)</code>) to the passed argument. Any of the 
+  /** Removes a given {@code INavigatorItem>} from this navigator. Removes all {@code INavigatorItem}s 
+    * from this navigator that are "equal" ({@code .equals(...)}) to the passed argument. Any of the 
     * removed documents may be returned by this method.
     * @param doc the docment to be removed
     * @return doc a document removed from this navigator as a result of invoking this method.
@@ -73,9 +73,10 @@ public interface IDocumentNavigator<ItemT extends INavigatorItem> extends IAWTCo
     */
   public ItemT removeDocument(ItemT doc);
   
-  /** Resets a given <code>INavigatorItem<code> in the tree.  This may affect the placement of the item or its 
+  /** Resets a given {@code INavigatorItem} in the tree.  This may affect the placement of the item or its 
     * display to reflect any changes made in the model.
     * @param doc the docment to be refreshed
+    * @param path path to the document
     * @throws IllegalArgumentException if this navigator contains no document that is equal to the passed document.
     */
   public void refreshDocument(ItemT doc, String path);
@@ -105,57 +106,63 @@ public interface IDocumentNavigator<ItemT extends INavigatorItem> extends IAWTCo
     */
   public ItemT getLast();
   
-  /** Returns all the <code>IDocuments</code> in the collection in enumeration order.
-    * @return an <code>INavigatorItem<code> enumeration of this navigator's contents.
+  /** Returns all the {@code IDocuments} in the collection in enumeration order.
+    * @return an {@code INavigatorItem} enumeration of this navigator's contents.
     */
   public ArrayList<ItemT> getDocuments();
   
-  /** Returns all the <code>IDocuments</code> contained in the specified bin.
+  /** Returns all the {@code IDocuments} contained in the specified bin.
     * @param binName name of bin
-    * @return an <code>INavigatorItem<code> enumeration of this navigator's contents.
+    * @return an {@code INavigatorItem} enumeration of this navigator's contents.
     */
   public ArrayList<ItemT> getDocumentsInBin(String binName);
   
   /** Tests to see if a given document is contained in this navigator.
     * @param doc the document to test for containment.
-    * @return <code>true</code> if this contains a document "equal" (<code>.equals(...)</code> method)
-    *         to the passed document, else <code>false</code>.
+    * @return {@code true} if this contains a document "equal" ({@code .equals(...)} method)
+    *         to the passed document, else {@code false}.
     */
   public boolean contains(ItemT doc);
   
-  /** Returns the number of <code>INavigatorItem</code>s contained by this <code>IDocumentNavigator</code>
+  /** Returns the number of {@code INavigatorItem}s contained by this {@code IDocumentNavigator}
     * @return the number of documents within this navigator.
     */
   public int getDocumentCount();
   
-  /** Returns whether this <code>IDocumentNavigator</code> contains any <code>INavigatorItem</code>s.
-    * @return <code>true</code> if this navigator contains one or more documents, else <code>false</code>.
+  /** Returns whether this {@code IDocumentNavigator} contains any {@code INavigatorItem}s.
+    * @return {@code true} if this navigator contains one or more documents, else {@code false}.
     */
   public boolean isEmpty();
   
-  /** Removes all <code>INavigatorItem</code>s from this <code>IDocumentNavigator</code>. */
+  /** Removes all {@code INavigatorItem}s from this {@code IDocumentNavigator}. */
   public void clear();
   
-  /** Adds an <code>INavigationListener</code> to this navigator. After invoking this method, the passed listener
+  /** Adds an {@code INavigationListener} to this navigator. After invoking this method, the passed listener
     * will observe events generated this navigator.  If the provided listener is already observing this navigator
-    * (<code>==</code>), no action is taken.
+    * ({@code ==}), no action is taken.
     * @param listener the listener to be added to this navigator.
     */
   public void addNavigationListener(INavigationListener<? super ItemT> listener);
   
   /** Removes the given listener from observing this navigator. After invoking this method, all observers watching
-    * this navigator "equal" (<code>==</code>) will no longer receive observable dispatches.
+    * this navigator "equal" ({@code ==}) will no longer receive observable dispatches.
     * @param listener the listener to be removed from this navigator
     */
   public void removeNavigationListener(INavigationListener<? super ItemT> listener);
   
-  /** Add FocusListener to navigator. */
+  /** 
+   * Add FocusListener to navigator. 
+   * @param e the listener to be added
+   */
   public void addFocusListener(FocusListener e);
   
-  /** Remove FocusListener from navigator. */
+  /** 
+   * Remove FocusListener from navigator. 
+   * @param e the listener to be removed
+   */
   public void removeFocusListener(FocusListener e);
   
-  /** Gets the FocustListeners. */
+  /** @return the FocustListeners. */
   public FocusListener[] getFocusListeners();
   
   /** Returns a collection of all listeners registered with this navigator.
@@ -163,10 +170,12 @@ public interface IDocumentNavigator<ItemT extends INavigatorItem> extends IAWTCo
     */
   public Collection<INavigationListener<? super ItemT>> getNavigatorListeners();
   
-  /** Selects the document at the x,y coordinates of the navigator pane and makes it the active document.
-    * @param x the x coordinate of the navigator pane
-    * @param y the y coordinate of the navigator pane
-    */
+  /** 
+   * Selects the document at the x,y coordinates of the navigator pane and makes it the active document.
+   * @param x the x coordinate of the navigator pane
+   * @param y the y coordinate of the navigator pane
+   * @return boolean status
+   */
   public boolean selectDocumentAt(int x, int y);
   
   /** Returns true if the item at the x,y coordinate of the navigator pane is currently selected.
@@ -177,8 +186,11 @@ public interface IDocumentNavigator<ItemT extends INavigatorItem> extends IAWTCo
   public boolean isSelectedAt(int x, int y);
   
   /** Visitor pattern hook method.
+    * @param <InType> the input type
+    * @param <ReturnType> the return type
     * @param algo the algorithm to run on this navigator
     * @param input the input to the algorithm
+    * @return result
     */
   public <InType, ReturnType> ReturnType execute(IDocumentNavigatorAlgo<ItemT, InType, ReturnType> algo, InType input);
   
@@ -203,21 +215,28 @@ public interface IDocumentNavigator<ItemT extends INavigatorItem> extends IAWTCo
   /** @return the documents currently selected. */
   public java.util.List<ItemT> getSelectedDocuments();
   
-  /** Returns true if the root is selected. Only runs in event thread. */
+  /** @return true if the root is selected. Only runs in event thread. */
   public boolean isRootSelected();
   
-  /** @return true if the INavigatorItem is in a selected group, if
-    * at least one group is selected. */
+  /** 
+   * @param i item to check
+   * @return true if the INavigatorItem is in a selected group, if
+   * at least one group is selected. 
+   */
   public boolean isSelectedInGroup(ItemT i);
   
-  /** Adds the top level group with the specified name and filter. */
+  /** 
+   * Adds the top level group with the specified name and filter. 
+   * @param name name
+   * @param f filter 
+   */
   public void addTopLevelGroup(String name, INavigatorItemFilter<? super ItemT> f);
   
-  /** Returns true if at least one top level group is selected, false otherwise. */
+  /** @return true if at least one top level group is selected, false otherwise. */
   public boolean isTopLevelGroupSelected();
   
-  /** Returns the names of the top level groups that the selected items descend from.
-    * Throws a GroupNotSelectedException if no top level group is selected
+  /** @return the names of the top level groups that the selected items descend from.
+    * @throws GroupNotSelectedException if no top level group is selected
     */
   public java.util.Set<String> getNamesOfSelectedTopLevelGroup() throws GroupNotSelectedException;
   
@@ -233,7 +252,10 @@ public interface IDocumentNavigator<ItemT extends INavigatorItem> extends IAWTCo
   /** The standard swing repaint() method. */
   public void repaint();
   
-  /** Marks the next selection change as model-initiated (true) or user-initiated (false; default). */
+  /** 
+   * Marks the next selection change as model-initiated (true) or user-initiated (false; default). 
+   * @param b value to set
+   */
   public void setNextChangeModelInitiated(boolean b);
   
   /** @return whether the next selection change is model-initiated (true) or user-initiated (false). */

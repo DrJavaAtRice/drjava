@@ -113,10 +113,13 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
   }
   
   /** Tests calling compileAll with different source roots works if the files have errors in them.  (Each file
-    * has 1 error.)
-    * Note that this testcase will fail if several compilers can be found through the .drjava file.
-    * As the test is then run one time per compiler it can find. 
-    */
+   * has 1 error.)
+   * Note that this testcase will fail if several compilers can be found through the .drjava file.
+   * As the test is then run one time per compiler it can find. 
+   * @throws BadLocationException if attempts to reference an invalid location
+   * @throws IOException if an IO operation fails
+   * @throws InterruptedException if execution is interrupted unexpectedly
+   */
   public void testCompileAllFailsDifferentSourceRoots() throws BadLocationException, IOException, InterruptedException {
     debug.logStart();
     
@@ -156,9 +159,13 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     debug.logEnd();
   }
   
-  /** Creates a source file with "package" as a field name and ensures that compile starts but fails due to 
-    * the invalid field name.
-    */
+  /** 
+   * Creates a source file with "package" as a field name and ensures that 
+   * compile starts but fails due to the invalid field name.
+   * @throws BadLocationException if attempts to reference an invalid location
+   * @throws IOException if an IO operation fails
+   * @throws InterruptedException if execution is interrupted unexpectedly
+   */
   public void testCompilePackageAsField() throws BadLocationException, IOException, InterruptedException {
     debug.logStart();
     
@@ -184,9 +191,13 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     debug.logEnd();
   }
   
-  /** Creates a source file with "package" as a field name and ensures that compile starts but fails due to the
-    * invalid field name. This is different from {@link #testCompilePackageAsField} as it initializes the field. 
-    */
+  /** 
+   * Creates a source file with "package" as a field name and ensures that compile starts but fails due to the
+   * invalid field name. This is different from {@link #testCompilePackageAsField} as it initializes the field. 
+   * @throws BadLocationException if attempts to reference an invalid location
+   * @throws IOException if an IO operation fails
+   * @throws InterruptedException if execution is interrupted unexpectedly
+   */
   public void testCompilePackageAsField2() throws BadLocationException, IOException, InterruptedException {
     debug.logStart();
     
@@ -212,7 +223,12 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     debug.logEnd();
   }
   
-  /** Tests compiling an invalid file and checks to make sure the class file was not created.  */
+  /** 
+   * Tests compiling an invalid file and checks to make sure the class file was not created. 
+   * @throws BadLocationException if attempts to reference an invalid location
+   * @throws IOException if an IO operation fails
+   * @throws InterruptedException if execution is interrupted unexpectedly
+   */
   public void testCompileMissingCloseCurly() throws BadLocationException, IOException, InterruptedException {
     debug.logStart();
     
@@ -236,7 +252,12 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     debug.logEnd();
   }
   
-  /** Puts an otherwise valid package statement inside a class declaration. This better not work! */
+  /** 
+   * Puts an otherwise valid package statement inside a class declaration. This better not work! 
+   * @throws BadLocationException if attempts to reference an invalid location
+   * @throws IOException if an IO operation fails
+   * @throws InterruptedException if execution is interrupted unexpectedly
+   */
   public void testCompileWithPackageStatementInsideClass() throws BadLocationException, IOException, 
     InterruptedException {
     debug.logStart();
@@ -276,9 +297,13 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
   
   
   
-  /** Tests the compiler errors have the correct line numbers.
-    * TODO: rewrite this test for the new error model interface
-    */
+  /** 
+   * Tests the compiler errors have the correct line numbers.
+   * TODO: rewrite this test for the new error model interface
+   * @throws BadLocationException if attempts to reference an invalid location
+   * @throws IOException if an IO operation fails
+   * @throws InterruptedException if execution is interrupted unexpectedly
+   */
   public void testCompileFailsCorrectLineNumbers() throws BadLocationException, IOException, InterruptedException {
     debug.logStart();
     
@@ -325,7 +350,12 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     debug.logEnd();
   }
   
-  /** Tests compiling an invalid file and checks to make sure the class file was not created.  */
+  /** 
+   * Tests compiling an invalid file and checks to make sure the class file was not created.  
+   * @throws BadLocationException if attempts to reference an invalid location
+   * @throws IOException if an IO operation fails
+   * @throws InterruptedException if execution is interrupted unexpectedly
+   */
   public void testCompileEndWhileParsing() throws BadLocationException, IOException, InterruptedException {
     debug.logStart();
     

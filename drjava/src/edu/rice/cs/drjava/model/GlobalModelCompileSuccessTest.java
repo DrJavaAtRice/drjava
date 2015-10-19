@@ -48,7 +48,12 @@ import javax.swing.text.BadLocationException;
   */
 public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSuccessTestCase {
 
-  /** Tests calling compileAll with different source roots works. */
+  /** 
+   * Tests calling compileAll with different source roots works. 
+   * @throws BadLocationException if attempts to reference an invalid location
+   * @throws IOException if an IO operation fails
+   * @throws InterruptedException if execution is interrupted unexpectedly
+   */
   public void testCompileAllDifferentSourceRoots() throws BadLocationException, IOException, InterruptedException {
 //    System.out.println("testCompileAllDifferentSourceRoots()");
     File aDir = new File(_tempDir, "a");
@@ -89,6 +94,9 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
    * DrJavaTestFoo). This shows that the compiler successfully found
    * DrJavaTestFoo2 when compiling DrJavaTestFoo.
    * Doesn't reset interactions because no interpretations are performed.
+   * @throws BadLocationException if attempts to reference an invalid location
+   * @throws IOException if an IO operation fails
+   * @throws InterruptedException if execution is interrupted unexpectedly
    */
   public void testCompileClassPathOKDefaultPackage()
     throws BadLocationException, IOException, InterruptedException
@@ -135,6 +143,10 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
    * DrJavaTestFoo). This shows that the compiler successfully found
    * DrJavaTestFoo2 when compiling DrJavaTestFoo.
    * Doesn't reset interactions because no interpretations are performed.
+   * @throws BadLocationException if attempts to reference an invalid location
+   * @throws IOException if an IO operation fails
+   * @throws InterruptedException if execution is interrupted unexpectedly
+   * @throws InvalidPackageException if the package is invalid
    */
   public void testCompileClassPathOKDifferentPackages() throws BadLocationException, IOException, InterruptedException,
     InvalidPackageException {

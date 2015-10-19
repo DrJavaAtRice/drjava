@@ -70,12 +70,18 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
     */
   void setBlockOffset(int offset) { _cursor.setBlockOffset(offset); }
   
-  /** Absolute offset for testing purposes. We don't keep track of absolute offset as it causes too much confusion
-    * and trouble.
-    */
+  /** 
+   * Absolute offset for testing purposes. We don't keep track of absolute 
+   * offset as it causes too much confusion and trouble.
+   * @return the absolute offset of the cursor
+   */
   public int absOffset() { return absOffset(_cursor); }
   
-  /** Absolute offset of the specified iterator.  Inefficient so only used for testing purposes. */
+  /** 
+   * Absolute offset of the specified iterator.  Inefficient so only used for testing purposes. 
+   * @param cursor the cursor for which to get the offset
+   * @return the absolute offset of the cursor
+   */
   public int absOffset(TokenList.Iterator cursor) {
     int off = cursor.getBlockOffset();
     TokenList.Iterator it = cursor.copy();
@@ -102,10 +108,13 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
     return len;
   }
   
-  /* @return the shadowing state of _cursor; only makes sense for ReducedModelComment. */
+  /** @return the shadowing state of _cursor; only makes sense for ReducedModelComment. */
   public ReducedModelState getState() { return _cursor.getStateAtCurrent(); }
   
-  /** A toString() replacement for testing - easier to read. */
+  /** 
+   * A toString() replacement for testing - easier to read. 
+   * @return string representation of this
+   */
   public String simpleString() {
     final StringBuilder val = new StringBuilder();
     ReducedToken tmp;
@@ -133,12 +142,16 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
     return val.toString();
   }
   
-  /** Inserts a character into the reduced model. A method to be implemented in each specific reduced sub-model. */
+  /** 
+   * Inserts a character into the reduced model. A method to be implemented in 
+   * each specific reduced sub-model. 
+   * @param ch character to be inserted
+   */
   public abstract void insertChar(char ch);
   
   /** Inserts a block of text into the reduced model which has no
     * special consideration in the reduced model.
-    * <OL>
+    * <ol>
     *  <li> atStart: if gap to right, augment first gap, else insert
     *  <li> atEnd: if gap to left, augment left gap, else insert
     *  <li> inside a gap: grow current gap, move offset by length
@@ -150,6 +163,7 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
     *  <li> gap to left: grow that gap and set offset to zero
     *  <li> gap to right: this case handled by inside gap (offset invariant)
     *  <li> between two braces: insert new gap
+    * </ol>
     * @param length the length of the inserted text
     */
   public void _insertGap( int length ) {
@@ -191,19 +205,20 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
    * identical code and place it here, we created this function to do
    * something meaningful in ReducedModelComment and to throw an exception
    * in ReducedModelBrace.
+   * @param length the length of the gap to insert
    */
   protected abstract void insertGapBetweenMultiCharBrace(int length);
   
-  /** Make a copy of the token list's iterator. */
+  /** @return a copy of the token list's iterator. */
   public TokenList.Iterator makeCopyCursor() { return _cursor.copy(); }
   
-  /** Determines if there is a Gap immediately to the right of the cursor. */
+  /** @return true iff there is a Gap immediately to the right of the cursor. */
   protected boolean _gapToRight() {
     // Before using, make sure not at last, or tail.
     return (! _tokens.isEmpty() && ! _cursor.atEnd() && ! _cursor.atLastItem() && _cursor.nextItem().isGap());
   }
   
-  /** Determines if there is a gap immediately to the left of the cursor. */
+  /** @return true iff there is a gap immediately to the left of the cursor. */
   protected boolean _gapToLeft() {
     // Before using, make sure not at first or head.
     return (! _tokens.isEmpty() && ! _cursor.atStart() && ! _cursor.atFirstItem() && _cursor.prevItem().isGap());
@@ -231,9 +246,10 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
     _cursor.setBlockOffset(0);
   }
   
-  /** Returns the state at the relLocation, where relLocation is the location relative to the walker.
-    * @param relLocation distance from walker to get state at.
-    */
+  /** 
+   * @param relLocation distance from walker to get state at.
+   * @return the state at the relLocation, where relLocation is the location relative to the walker.
+   */
   protected abstract ReducedModelState moveWalkerGetState(int relLocation);
   
   /** Resets the walker to the current position in document. */

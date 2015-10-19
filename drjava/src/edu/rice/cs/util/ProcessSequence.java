@@ -300,7 +300,10 @@ public class ProcessSequence extends Process {
     _stdErrRedirector.setStopFlag();
   }
   
-  /** Connect the streams of the specified process. */
+  /** 
+   * Connect the streams of the specified process. 
+   * @param p process for which to connect streams
+   */
   protected void connectProcess(Process p) {
     // redirect all stdout from all the processes into a combined output stream
     // that pipes all the data into a combined input stream that serves as this

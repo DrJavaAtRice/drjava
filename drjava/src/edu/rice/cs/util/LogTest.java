@@ -78,23 +78,32 @@ public class LogTest extends MultiThreadedTestCase {
 
   
   
-  /** Returns the string after the date; returns null if there is no date. */
+  /** 
+   * @param s base date 
+   * @return the string after the date; returns null if there is no date. 
+   */
   private static String getStringAfterDate(String s) {
     int pos = s.indexOf("GMT: ");
     if (pos==-1) { return null; }
     return s.substring(pos + 5);
   }
   
-  /** Returns true if time0 is less than 5000 ms earlier than 'earlier',
-    * and now is less than 5000 ms earlier than time0.
-    * This is necessary because when we parse dates back, the millisecond part gets
-    * dropped, so a date later during the same second interval might appear earlier. */
+  /** 
+   * This is necessary because when we parse dates back, the millisecond part gets
+   * dropped, so a date later during the same second interval might appear earlier.
+   * @param earlier (lower bound + 5000)
+   * @param time0 time to check
+   * @param now current time (upper bound - 5000)
+   * @return true if time0 is less than 5000 ms earlier than 'earlier',
+   *         and now is less than 5000 ms earlier than time0.
+   */
   private static boolean withinTolerance(Date earlier, Date time0, Date now) {
     return (time0.getTime() - earlier.getTime() < TOL) && (now.getTime() - time0.getTime() < TOL);
   }
   
   /** Adds a couple of generic messages to a log, and then tests to make sure they are all correct, in the correct order,
     * and their timestamps are within the past few seconds.
+    * @throws IOException if an IO operation fails
     */
   public void testLog() throws IOException {
 //    System.err.println("LogTest.testLog started");
@@ -143,6 +152,7 @@ public class LogTest extends MultiThreadedTestCase {
 
   /** Tests the Exception printing methods in the Log file by throwing two exceptions and using the two types of log 
     * methods (one with the Throwable itself and the other with the the StackTraceElement[])
+    * @throws IOException if an IO operation fails
     */
   public void testExceptionPrinting() throws IOException {
 //    System.err.println("LogTest.testExceptionPrinting started");
@@ -216,6 +226,8 @@ public class LogTest extends MultiThreadedTestCase {
     * (see above)that wait a random number between 0 and DELAY milliseconds and then log a message.  The function tests
     * to make sure that the messages and dates are all intact (if the Log was not handling concurrent requests properly,
     * the entries in the log may be corrupted).
+    * @throws IOException if an IO operation fails
+    * @throws InterruptedException if execution is interrupted unexpectedly
     */
   public void testConcurrentWrites() throws IOException, InterruptedException {
 //    System.err.println("LogTest.testConucrrentWrites started");

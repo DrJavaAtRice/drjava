@@ -114,7 +114,10 @@ public abstract class TabbedPanel extends JPanel implements DropTargetListener {
   /** @return the display name of this tab. */
   public String getName() { return _name; }
 
-  /** Sets whether the tab is displayed.  Doesn't actually show or hide the tab. */
+  /** 
+   * Sets whether the tab is displayed.  Doesn't actually show or hide the tab. 
+   * @param displayed the value to be set
+   */
   public void setDisplayed(boolean displayed) { _displayed = displayed; }
 
   JPanel getMainPanel() { return _mainPanel; }

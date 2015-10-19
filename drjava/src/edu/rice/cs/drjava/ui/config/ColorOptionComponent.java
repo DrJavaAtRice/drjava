@@ -65,8 +65,14 @@ public class ColorOptionComponent extends OptionComponent<Color,JPanel> {
     this(opt, text, parent, false);
   }
   
-  /** An alternate constructor, allowing the caller to specify whether this color is a background color.  If so, 
-   *  the button will display the color as its background.
+  /** 
+   * An alternate constructor, allowing the caller to specify whether this 
+   * color is a background color.  If so, the button will display the color 
+   * as its background.
+   * @param opt the ColorOption to display
+   * @param text the text to display in the label of the component
+   * @param parent the Frame displaying this component
+   * @param isBackgroundColor true if this color is a background color; false otherwise
    */
   public ColorOptionComponent(ColorOption opt, String text, SwingFrame parent, boolean isBackgroundColor) {
     this(opt, text, parent, isBackgroundColor, false);
@@ -117,19 +123,42 @@ public class ColorOptionComponent extends OptionComponent<Color,JPanel> {
     setComponent(_panel);
   }
   
-  /** Constructor that allows for a tooltip description. */
+  /** 
+   * Constructor that allows for a tooltip description. 
+   * @param opt the ColorOption to display
+   * @param text the text to display in the label of the component
+   * @param parent the Frame displaying this component
+   * @param description tooltip text
+   */
   public ColorOptionComponent(ColorOption opt, String text, SwingFrame parent, String description) {
     this(opt, text, parent, description, false);
   }
 
-  /** Constructor that allows for a tooltip description as well as whether or not this is a background color. */
+  /** 
+   * Constructor that allows for a tooltip description as well as whether or 
+   * not this is a background color. 
+   * @param opt the ColorOption to display
+   * @param text the text to display in the label of the component
+   * @param parent the Frame displaying this component
+   * @param description tooltip text
+   * @param isBackgroundColor true if this color is a background color; false otherwise
+   */
   public ColorOptionComponent(ColorOption opt, String text, SwingFrame parent, String description, boolean isBackgroundColor)
   {
     this(opt, text, parent, isBackgroundColor);
     setDescription(description);
   }
 
-  /** Constructor that allows for a tooltip description as well as whether or not this is a background color.*/
+  /** 
+   * Constructor that allows for a tooltip description as well as whether or
+   * not this is a background color and whether or not the text should be bold.
+   * @param opt the ColorOption to display
+   * @param text the text to display in the label of the component
+   * @param parent the Frame displaying this component
+   * @param description tooltip text
+   * @param isBackgroundColor true if this color is a background color; false otherwise
+   * @param isBoldText true if the text should be bold; false otherwise
+   */
   public ColorOptionComponent(ColorOption opt, String text, SwingFrame parent, String description, boolean isBackgroundColor, 
                               boolean isBoldText) {
     this(opt, text, parent, isBackgroundColor, isBoldText);
@@ -161,7 +190,10 @@ public class ColorOptionComponent extends OptionComponent<Color,JPanel> {
     _updateField(value);
   }
   
-  /** Updates the component's field to display the given color. */
+  /** 
+   * Updates the component's field to display the given color. 
+   * @param c color to display
+   */
   private void _updateField(Color c) {
     if (_isBackgroundColor) _colorField.setBackground(c);
     else _colorField.setForeground(c);

@@ -88,7 +88,11 @@ public abstract class Option<T> extends OptionParser<T> implements FormatStrateg
   /** Uses format() and getOption() so that any changes in format will automatically be applied to getString(). */
   String getString(DefaultOptionMap om) { return format(getOption(om)); }
   
-  /** Sends an OptionEvent to all OptionListeners who have registered on this Option. */
+  /** 
+   * Sends an OptionEvent to all OptionListeners who have registered on this Option. 
+   * @param config configuration information about the option
+   * @param val the type of option
+   */
   synchronized void notifyListeners(Configuration config, T val) {
     final Vector<OptionListener<T>> v = listeners.get(config);
 //    System.err.println("Notifying " + v + " with value " + val);
@@ -102,7 +106,11 @@ public abstract class Option<T> extends OptionParser<T> implements FormatStrateg
     });
   }
   
-  /** Magic listener-bag adder */
+  /** 
+   * Magic listener-bag adder 
+   * @param c configuration information about the option to listen on
+   * @param l the new listener on c to add
+   */
   synchronized void addListener(Configuration c, OptionListener<T> l) {
     Vector<OptionListener<T>> v = listeners.get(c);
     if (v == null) {
@@ -112,7 +120,11 @@ public abstract class Option<T> extends OptionParser<T> implements FormatStrateg
     v.add(l);
   }
   
-  /** Magic listener-bag remover */
+  /** 
+   * Magic listener-bag remover 
+   * @param c configuration information about the option being listened on
+   * @param l the listener to remove
+   */
   synchronized void removeListener(Configuration c, OptionListener<T> l) {
     Vector<OptionListener<T>> v = listeners.get(c);
     if (v != null && v.remove(l) && v.size() == 0) listeners.remove(c);  // v.remove(l) has a side effect!

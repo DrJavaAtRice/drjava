@@ -100,15 +100,18 @@ public interface EditDocumentInterface {
     */
   public void forceRemoveText(int offs, int len);
   
-  /** Returns the length of the document. */
+  /** @return the length of the document. */
   public int getLength();
   
-  /** Returns a portion of the document.  Differs from getText in AbstractDocumentInterface by throwing
-    * EditDocumentException instead of BadLocationException.  (Why bother? It avoids referencing a Swing class.)
-    * @param offs First offset of the desired text
-    * @param len Number of characters to return
-    * @throws EditDocumentException if the offset or length are illegal
-    */
+  /** 
+   * Returns a portion of the document. Differs from getText in 
+   * AbstractDocumentInterface by throwing EditDocumentException instead of 
+   * BadLocationException.  (Why bother? It avoids referencing a Swing class.)
+   * @param offs First offset of the desired text
+   * @param len Number of characters to return
+   * @return a portion of the document
+   * @throws EditDocumentException if the offset or length are illegal
+   */
   public String getDocText(int offs, int len);
   
   /** Appends a string to this in the given named style, if the edit condition allows it.
@@ -118,7 +121,7 @@ public interface EditDocumentInterface {
     */
   public void append(String str, String style);
   
-  /** Gets the String identifying the default style for this document if one exists; null otherwise. */
+  /** @return the String identifying the default style for this document if one exists; null otherwise. */
   public String getDefaultStyle();
   
   /** Returns the Pageable object for printing.
@@ -126,6 +129,9 @@ public interface EditDocumentInterface {
     */
   public Pageable getPageable() throws IllegalStateException;
   
-  /** Prints the given console document */
+  /** 
+   * Prints the given console document 
+   * @throws PrinterException if printing fails
+   */
   public void print() throws PrinterException;
 }

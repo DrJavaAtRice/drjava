@@ -70,9 +70,11 @@ public class RemoteControlClient {
     */
   public static String getServerUser() { return _serverUser; }
   
-  /** Tell the existing DrJava instance to open a file.
+  /** 
+   * Tell the existing DrJava instance to open a file.
    * @param f file, or null to just test if a server is running.
    * @return true if file could be opened
+   * @throws IOException if an IO operation fails
    */
   public static synchronized boolean openFile(File f) throws IOException {
     try {
@@ -116,7 +118,9 @@ public class RemoteControlClient {
     }
   }
   
-  /** Main method for test purposes.
+  /** 
+   * Main method for test purposes.
+   * @param args command-line args
    */
   public static void main(String[] args) {
     for (int i = 0; i < args.length; ++i) {

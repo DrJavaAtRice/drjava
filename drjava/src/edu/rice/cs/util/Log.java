@@ -101,7 +101,7 @@ public class Log {
     */
   public void setEnabled(boolean isEnabled) { _isEnabled = isEnabled; }
   
-  /** Returns whether this log is currently enabled. */
+  /** @return  whether this log is currently enabled. */
   public boolean isEnabled() { return (_isEnabled || ENABLE_ALL); }
   
   /** Prints a message to the log, if enabled.
@@ -117,7 +117,11 @@ public class Log {
     }
   }
   
-  /** Converts a stack trace (StackTraceElement[]) to string form */
+  /** 
+   * Converts a stack trace (StackTraceElement[]) to string form 
+   * @param trace trace to be converted
+   * @return string representation of trace
+   */
   public static String traceToString(StackTraceElement[] trace) {
     final StringBuilder traceImage = new StringBuilder();
     for (StackTraceElement e: trace) traceImage.append("\n\tat " + e.toString());
@@ -151,7 +155,12 @@ public class Log {
     _writer = null;
   }
   
-  /** Parses a date printed by Date.toString(); returns null if there is a parse error or if there is no date. */
+  /** 
+   * Parses a date printed by Date.toString(); returns null if there is a 
+   * parse error or if there is no date. 
+   * @param s date to be parsed
+   * @return Date representation of s
+   */
   public synchronized Date parse(String s) {
     int pos = s.indexOf("GMT: ");
     if (pos == -1) { return null; }

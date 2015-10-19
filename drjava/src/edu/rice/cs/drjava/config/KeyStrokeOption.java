@@ -51,9 +51,12 @@ public class KeyStrokeOption extends Option<KeyStroke> {
   /** Storage for keystrokes.*/
   static HashMap<Integer, String> keys = new HashMap<Integer, String>();
   public static final KeyStroke NULL_KEYSTROKE = KeyStroke.getKeyStroke(0, 0);
-  /** Standard constructor
-    * @param key The name of this option.
-    */
+
+  /** 
+   * Standard constructor
+   * @param key The name of this option.
+   * @param def The definition of this option.
+   */
   public KeyStrokeOption(String key, KeyStroke def) { super(key,def); }
   
   // This sets up the hashtable that has key-value pairs consisting of

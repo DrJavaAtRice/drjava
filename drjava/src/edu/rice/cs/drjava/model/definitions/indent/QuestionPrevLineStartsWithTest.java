@@ -45,7 +45,9 @@ import javax.swing.text.BadLocationException;
  */
 public final class QuestionPrevLineStartsWithTest extends IndentRulesTestCase {
 
-  /** Tests not having the prefix in the text. */
+  /** Tests not having the prefix in the text.
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testNoPrefix() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionPrevLineStartsWith("{", null, null);
     
@@ -62,7 +64,9 @@ public final class QuestionPrevLineStartsWithTest extends IndentRulesTestCase {
     
   }
   
-  /** Tests hitting start of document. */
+  /** Tests hitting start of document.
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testStartOfDocument() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionPrevLineStartsWith("{", null, null);
     
@@ -72,7 +76,9 @@ public final class QuestionPrevLineStartsWithTest extends IndentRulesTestCase {
     assertTrue("second line", !rule.testApplyRule(_doc, 2, Indenter.IndentReason.OTHER));
   }
   
-  /** Tests prefix on current line. */
+  /** Tests prefix on current line.
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testPrefixOnCurrLine() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionPrevLineStartsWith("}", null, null);
     
@@ -87,7 +93,9 @@ public final class QuestionPrevLineStartsWithTest extends IndentRulesTestCase {
     assertTrue("after brace", !rule.testApplyRule(_doc, 18, Indenter.IndentReason.OTHER));
   }
   
-  /** Tests having prev line start with prefix, with text following */
+  /** Tests having prev line start with prefix, with text following
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testStartsWithPrefixWithText() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionPrevLineStartsWith("}", null, null);
         
@@ -105,7 +113,9 @@ public final class QuestionPrevLineStartsWithTest extends IndentRulesTestCase {
     assertTrue("line after star (with space)", rule.testApplyRule(_doc, 16, Indenter.IndentReason.OTHER));
   }
   
-  /** Tests having prev line start with prefix, with no text following */
+  /** Tests having prev line start with prefix, with no text following
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testStartsWithPrefixNoText() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionPrevLineStartsWith("*", null, null);
     
@@ -122,7 +132,9 @@ public final class QuestionPrevLineStartsWithTest extends IndentRulesTestCase {
     assertTrue("line after star (with space)", rule.testApplyRule(_doc, 13, Indenter.IndentReason.OTHER));
   }
   
-  /** Tests having a multiple character prefix. */
+  /** Tests having a multiple character prefix.
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testMultipleCharPrefix() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionPrevLineStartsWith("* ", null, null);
     
@@ -134,7 +146,9 @@ public final class QuestionPrevLineStartsWithTest extends IndentRulesTestCase {
     assertTrue("space star space text", rule.testApplyRule(_doc, 16, Indenter.IndentReason.OTHER));
   }
   
-  /** Tests having a commented prefix. */
+  /** Tests having a commented prefix.
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testCommentedPrefix() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionPrevLineStartsWith("*", null, null);
     
@@ -146,7 +160,9 @@ public final class QuestionPrevLineStartsWithTest extends IndentRulesTestCase {
     assertTrue("line after star", !rule.testApplyRule(_doc, 15, Indenter.IndentReason.OTHER));
   }
   
-  /** Tests a prefix that begins a comment. */
+  /** Tests a prefix that begins a comment.
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testCommentPrefix() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionPrevLineStartsWith("/**", null, null);
     
@@ -158,7 +174,9 @@ public final class QuestionPrevLineStartsWithTest extends IndentRulesTestCase {
     assertTrue("line after star", !rule.testApplyRule(_doc, 15, Indenter.IndentReason.OTHER));
   }
   
-  /** Tests having text on a line before the prefix. */
+  /** Tests having text on a line before the prefix.
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testDoesNotStartWithPrefix() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionPrevLineStartsWith("*", null, null);
     

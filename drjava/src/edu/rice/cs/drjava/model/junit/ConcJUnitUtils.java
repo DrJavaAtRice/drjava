@@ -149,6 +149,8 @@ public class ConcJUnitUtils {
   
   /** Ask the user if the rt.concjunit.jar file should be regenerated.
     * @param parentFrame parent frame
+    * @param yesRunnable runnable to run if the user selects yes
+    * @param noRunnable runnable to run if the user selects no
     * @return true if the user chose to regenerate
     */
   public static boolean showIncompatibleWantToRegenerateDialog(final Frame parentFrame,

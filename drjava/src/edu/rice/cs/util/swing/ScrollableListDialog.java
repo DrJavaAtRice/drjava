@@ -357,10 +357,10 @@ public class ScrollableListDialog<T> extends JDialog {
     setVisible(false);
   }
   
-  /** Return the number of the button that was pressed to close the dialog. */
+  /** @return the number of the button that was pressed to close the dialog. */
   public int getButtonPressed() { return _buttonPressed; }
   
-  /** Return a list of the selected items. */
+  /** @return a list of the selected items. */
   public List<T> getSelectedItems() {
     ArrayList<T> l = new ArrayList<T>();
     for (int i: list.getSelectedIndices())  l.add(listItems.get(i));

@@ -49,7 +49,7 @@ package edu.rice.cs.drjava.model;
   * (except for possible coalescing of formerly distinct Positions) regardless of how the associated document is 
   * modified.  Mutation of the document backing an OrderedDocumentRegion can coarsen the compareTo ordering, equating
   * DocumentRegions that were previously unequal. but it never alters the weak inequality ordering among regions.  
-  * If a1 <= a2 <= .. .<= an, this property remains invariant regardless of what mutation occurs.  Similarly, if a1 = 
+  * If {@literal a1 <= a2 <= .. .<= an}, this property remains invariant regardless of what mutation occurs.  Similarly, if a1 = 
   * a2 = ... = an, this property remains invariant.  As a result, searches in SortedSets of OrderedDocumentRegions
   * work regardless of what document mutation occurs.  (Note the complements of the preceding two relations are NOT
   * invariant as a document is modified.)

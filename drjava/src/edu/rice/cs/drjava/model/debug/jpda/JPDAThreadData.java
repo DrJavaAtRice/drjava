@@ -93,7 +93,11 @@ public class JPDAThreadData extends DebugThreadData {
    */
   public boolean isSuspended() { return safeIsSuspended(_thread); }
   
-  /** Invoke {@code t.isSuspended()} under the protection of a try-catch block */
+  /** 
+   * Invoke {@code t.isSuspended()} under the protection of a try-catch block 
+   * @param t the thread to check
+   * @return true if t is suspended; false otherwise
+   */
   private static boolean safeIsSuspended(ThreadReference t) {
     try { return t.isSuspended(); }
     catch (ObjectCollectedException e) { return false; }

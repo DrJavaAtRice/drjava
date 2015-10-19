@@ -69,19 +69,21 @@ public abstract class DebugAction<T extends EventRequest> {
     _requests = new Vector<T>();
   }
 
-  /** Returns the EventRequest corresponding to this DebugAction, if it has been created, null otherwise. */
+  /** @return the EventRequest corresponding to this DebugAction, if it has been created, null otherwise. */
   public Vector<T> getRequests() { return _requests; }
 
-  /** Returns the line number this DebugAction occurs on */
+  /** @return the line number this DebugAction occurs on */
   public int getLineNumber() { return _lineNumber; }
 
-  /** Creates an EventRequest corresponding to this DebugAction, using the given ReferenceType.  This is called either
-    * from the DebugAction constructor or the PendingRequestManager, depending on when the ReferenceType becomes 
-    * available. This DebugAction must be an instance of DocumentDebugAction since a ReferenceType is being used.
-    * @return true if the EventRequest is successfully created
-    */
-  //public abstract boolean createRequests(ReferenceType rt) throws DebugException;
-
+  /** 
+   * Creates an EventRequest corresponding to this DebugAction, using the 
+   * given ReferenceType.  This is called either from the DebugAction 
+   * constructor or the PendingRequestManager, depending on when the 
+   * ReferenceType becomes available. This DebugAction must be an instance of 
+   * DocumentDebugAction since a ReferenceType is being used.
+   * @return true if the EventRequest is successfully created
+   * @throws DebugException if something goes wrong
+   */
   public boolean createRequests() throws DebugException {
     _createRequests();
     if (_requests.size() > 0) {
@@ -91,9 +93,12 @@ public abstract class DebugAction<T extends EventRequest> {
     else return false;
   }
 
-  /** This should always be called from the constructor of the subclass. Tries to create all applicable EventRequests
-    * for this DebugAction.
-    */
+  /** 
+   * This should always be called from the constructor of the subclass. 
+   * Tries to create all applicable EventRequests
+   * for this DebugAction.
+   * @throws DebugException if something goes wrong
+   */
   protected void _initializeRequests() throws DebugException {
     createRequests();
     if (_requests.size() == 0) {
@@ -136,6 +141,9 @@ public abstract class DebugAction<T extends EventRequest> {
   public boolean isEnabled() { return _isEnabled; }
   
   
-  /** Enable/disable the breakpoint. */
+  /** 
+   * Enable/disable the breakpoint. 
+   * @param isEnabled true if the breakpoint is to be set enabled; false for disabled
+   */
   public void setEnabled(boolean isEnabled) { _isEnabled = isEnabled; }
 }

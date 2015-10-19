@@ -223,7 +223,8 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   /** Interprets the given string of source code with the given interpreter. The result is returned to
     * MainJVM via the interpretResult method.
     * @param s Source code to interpret.
-    * @param interpreterName Name of the interpreter to use
+    * @param name Name of the interpreter to use
+    * @return the result of interpretation
     * @throws IllegalArgumentException if the named interpreter does not exist
     */
   public InterpretResult interpret(String s, String name) {
@@ -296,11 +297,14 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   //  return this._junitTestManager.getLastResult();
   //}
 
-  /** Gets the value and type string of the variable with the given name in the current interpreter.
-    * Invoked reflectively by the debugger.  To simplify the inter-process exchange,
-    * an array here is used as the return type rather than an {@code Option<Object>} --
-    * an empty array corresponds to "none," and a singleton array corresponds to a "some."
-    */
+  /** 
+   * Gets the value and type string of the variable with the given name in the current interpreter.
+   * Invoked reflectively by the debugger.  To simplify the inter-process exchange,
+   * an array here is used as the return type rather than an {@code Option<Object>} --
+   * an empty array corresponds to "none," and a singleton array corresponds to a "some."
+   * @param var the variable to look up
+   * @return the value and type string of var
+   */
   @SuppressWarnings({"unchecked","rawtypes"})
   public Pair<Object,String>[] getVariable(String var) {
     synchronized(_stateLock) {
@@ -344,8 +348,11 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     }
   }
 
-  /** @return the name of the class, with the right number of array suffixes "[]" and while being ambiguous
-    * about boxed and primitive types. */
+  /** 
+   * @param c the class to get the name of
+   * @return the name of the class, with the right number of array suffixes 
+   *         "[]" and while being ambiguous about boxed and primitive types. 
+   */
   public static String getClassName(Class<?> c) {
     StringBuilder sb = new StringBuilder();
     boolean isArray = c.isArray();

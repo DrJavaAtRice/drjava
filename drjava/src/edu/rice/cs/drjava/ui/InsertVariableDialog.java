@@ -92,9 +92,11 @@ public class InsertVariableDialog extends SwingFrame implements OptionConstants 
   /** Completion monitor to tell the calling dialog that we're done. */
   private CompletionMonitor _cm;
   
-  /** Create a dialog.
-    * @param mf the instance of mainframe to query into the project
-    */
+  /** 
+   * Create a dialog.
+   * @param mf the instance of mainframe to query into the project
+   * @param cm a CompletionMonitor
+   */
   public InsertVariableDialog(MainFrame mf, CompletionMonitor cm) {
     super("Insert Variable");
     _mainFrame = mf;
@@ -196,9 +198,12 @@ public class InsertVariableDialog extends SwingFrame implements OptionConstants 
     super.setResizable(false);
   }
   
-  /** Create a scroll pane for the specified category with the properties provided in the map.
-    * @param category category name
-    * @param props map from property names to actual properties in this category */
+  /** 
+   * Create a scroll pane for the specified category with the properties provided in the map.
+   * @param category category name
+   * @param props map from property names to actual properties in this category 
+   * @return newly-created scroll pane
+   */
   protected JScrollPane createPane(final String category, final Map<String, DrJavaProperty> props) {
     _varTableModel.put(category,new DefaultTableModel(0,1) {
       public String getColumnName(int column) {
@@ -323,7 +328,7 @@ public class InsertVariableDialog extends SwingFrame implements OptionConstants 
     }
   }
 
-  /** Return a pair consisting of the name of the property and the property itself. */
+  /** @return a pair consisting of the name of the property and the property itself. */
   public Pair<String,DrJavaProperty> getSelected() { return _selected; }
   
   /** Runnable1 that calls _cancel. */

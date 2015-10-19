@@ -189,6 +189,8 @@ public abstract class ArgumentTokenizer {
   /** Inserts backslashes before any occurrences of a backslash or
    * quote in the given string.  Also converts any special characters
    * appropriately.
+   * @param s string to escape
+   * @return escaped string
    */
   protected static String _escapeQuotesAndBackslashes(String s) {
     final StringBuilder buf = new StringBuilder(s);

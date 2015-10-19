@@ -42,7 +42,13 @@ import java.util.HashSet;
   * @version $Id$
   */
 public class ConstantProperty extends EagerProperty {
-  /** Create a constant property. */
+
+  /** 
+   * Create a constant property. 
+   * @param name name of the property
+   * @param value value of the property
+   * @param help help text for the property
+   */
   public ConstantProperty(String name, String value, String help) {
     super(name, help);
     if (value == null) { throw new IllegalArgumentException("DrJavaProperty value is null"); }

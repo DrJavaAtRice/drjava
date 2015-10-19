@@ -105,10 +105,13 @@ public interface SingleDisplayModel extends GlobalModel {
 
   public boolean closeAllFilesOnQuit();
   
-  /** Return an array of the files excluded from the current project */
+  /** @return an array of the files excluded from the current project */
   public File[] getExclFiles();
   
-  /** Sets the array of files excluded from the current project */
+  /** 
+   * Sets the array of files excluded from the current project 
+   * @param fs array of files to be excluded
+   */
   public void setExcludedFiles(File[] fs);
 
 // Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.

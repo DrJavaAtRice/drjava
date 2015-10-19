@@ -158,9 +158,11 @@ public class RecentDocFrame extends JWindow {
     _scroller.setBorder(new EmptyBorder(0,0,0,0));
     _panel.setBorder(new LineBorder(fontColor, 1));
   }
-  /** Moves the document d to the beginning of the list if it's already in the list, or it adds it to the
-    * beginning if its not already in the list.
-    */
+  /** 
+   * Moves the document d to the beginning of the list if it's already in the 
+   * list, or it adds it to the beginning if its not already in the list.
+   * @param d the document to poke
+   */
   public void pokeDocument(OpenDefinitionsDocument d) {
     if (_docs.contains(d)) {
       _current = _docs.indexOf(d);
@@ -169,7 +171,10 @@ public class RecentDocFrame extends JWindow {
     else _docs.addFirst(d);
   }
   
-  /** Removes the document from the list. */
+  /** 
+   * Removes the document from the list.
+   * @param d the document to remove
+   */
   public void closeDocument(OpenDefinitionsDocument d) { _docs.remove(d); }
   
   private void show(int _current) {
@@ -288,7 +293,7 @@ public class RecentDocFrame extends JWindow {
     if (_current < _docs.size()) _docs.addFirst(_docs.remove(_current));
   }
   
-  /** Returns null if the list is empty, or the currently prefered OpenDefinitionsDocument. */
+  /** @return null if the list is empty, or the currently prefered OpenDefinitionsDocument. */
   public OpenDefinitionsDocument getDocument() {
     if (_docs.size() > 0) return _docs.getFirst();
     return null;

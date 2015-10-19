@@ -67,7 +67,10 @@ public interface LightWeightParsingControl {
    *  @param l listener to add */
   public void addListener(LightWeightParsingListener l);
   
-  /** Remove the listener from this controller. */
+  /** 
+   * Remove the listener from this controller. 
+   * @param l the listener to be removed
+   */
   public void removeListener(LightWeightParsingListener l);
   
   /** Remove all listeners from this controller. */

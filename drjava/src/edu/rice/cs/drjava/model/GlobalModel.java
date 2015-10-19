@@ -94,22 +94,22 @@ public interface GlobalModel extends ILoadDocuments {
   
   //------------------------ Feature Model Accessors ------------------------//
   
-  /** Returns the interactions model. */
+  /** @return the interactions model. */
   public DefaultInteractionsModel getInteractionsModel();
   
-  /** Gets the CompilerModel, which provides all methods relating to compilers. */
+  /** @return the CompilerModel, which provides all methods relating to compilers. */
   public CompilerModel getCompilerModel();
   
-  /** Gets the JUnitModel, which provides all methods relating to JUnit testing. */
+  /** @return the JUnitModel, which provides all methods relating to JUnit testing. */
   public JUnitModel getJUnitModel();
   
-  /** Gets the JavadocModel, which provides all methods relating to Javadoc. */
+  /** @return the JavadocModel, which provides all methods relating to Javadoc. */
   public JavadocModel getJavadocModel();
   
-  /** Gets the Debugger, which interfaces with the integrated debugger. */
+  /** @return the Debugger, which interfaces with the integrated debugger. */
   public Debugger getDebugger();
   
-  /** Gets the DocumentNavigator, which controls the document view. */
+  /** @return the DocumentNavigator, which controls the document view. */
   public IDocumentNavigator<OpenDefinitionsDocument> getDocumentNavigator();
   
   public void setDocumentNavigator(IDocumentNavigator<OpenDefinitionsDocument> newnav);
@@ -126,7 +126,10 @@ public interface GlobalModel extends ILoadDocuments {
   /** @return new manager for find result regions. */
   public RegionManager<MovingDocumentRegion> createFindResultsManager();
   
-  /** Dispose a manager for find result regions. */
+  /** 
+   * Dispose a manager for find result regions. 
+   * @param rm the manager to be dispose of
+   */
   public void removeFindResultsManager(RegionManager<MovingDocumentRegion> rm);
   
   /** @return manager for browser history regions. */
@@ -165,21 +168,26 @@ public interface GlobalModel extends ILoadDocuments {
    */
   public OpenDefinitionsDocument newTestCase(String name, boolean makeSetUp, boolean makeTearDown);
   
-  /** Closes an open definitions document, prompting to save if
+  /** 
+   * Closes an open definitions document, prompting to save if
    * the document has been changed.  Returns whether the file
    * was successfully closed.
+   * @param doc the document to be closed
    * @return true if the document was closed
    */
   public boolean closeFile(OpenDefinitionsDocument doc);
   
-  /** Closes an open definitions document, without prompting to save if
+  /** 
+   * Closes an open definitions document, without prompting to save if
    * the document has been changed.  Returns whether the file
    * was successfully closed.
+   * @param doc the document to be closed
    * @return true if the document was closed
    */
   public boolean closeFileWithoutPrompt(OpenDefinitionsDocument doc);
   
-  /** Attempts to close all open documents.
+  /** 
+   * Attempts to close all open documents.
    * @return true if all documents were closed
    */
   public boolean closeAllFiles();
@@ -200,11 +208,24 @@ public interface GlobalModel extends ILoadDocuments {
     */
   public boolean closeFiles(List<OpenDefinitionsDocument> docs);
 
-  /* Opens all files in specified folder.  If rec is true, open all files in the tree rooted at dir. */
+  /**
+   * Opens all files in specified folder. If rec is true, open all files in 
+   * the tree rooted at dir. 
+   * @param dir the folder in which to open files
+   * @param rec true if the open should be recursive; false otherwise
+   * @param ext extension
+   * @throws IOException if an IO operation fails
+   * @throws OperationCanceledException if the operation was canceled
+   * @throws AlreadyOpenException if the folder was already open
+   */
   public void openFolder(File dir, boolean rec, String ext)
     throws IOException, OperationCanceledException, AlreadyOpenException;
   
-  /** Saves all open documents, prompting when necessary. */
+  /** 
+   * Saves all open documents, prompting when necessary. 
+   * @param com a FileSaveSelector
+   * @throws IOException if an IO operation fails
+   */
   public void saveAllFiles(FileSaveSelector com) throws IOException;
   
   /**Creates a new project with specified project file and default values for other properties.
@@ -212,21 +233,34 @@ public interface GlobalModel extends ILoadDocuments {
     */
   public void createNewProject(File projFile);
   
-  /**Configures a new project (created by createNewProject) and saves it to disk. */
+  /**
+   * Configures a new project (created by createNewProject) and saves it to disk. 
+   * @throws IOException if an IO operation fails
+   */
   public void configNewProject() throws IOException;
   
-  /**Writes the project file to disk
-    * @param f where to save the project
-    * @param info Extra view-related information that should be included in the project file
-    */
+  /**
+   * Writes the project file to disk
+   * @param f where to save the project
+   * @param info Extra view-related information that should be included in the project file
+   * @throws IOException if an IO operation fails
+   */
   public void saveProject(File f, HashMap<OpenDefinitionsDocument,DocumentInfoGetter> info) throws IOException;
   
-  /**Reloads a project without writing to disk.
-    * @param f project file; does not actually get touched
-    */
+  /**
+   * Reloads a project without writing to disk.
+   * @param f project file; does not actually get touched
+   * @param info Extra view-related information that should be included in the project file
+   * @throws IOException if an IO operation fails
+   */
   public void reloadProject(File f, HashMap<OpenDefinitionsDocument,DocumentInfoGetter> info) throws IOException;
   
-  /** Formats a string pathname for use in the document navigator. */
+  /** 
+   * Formats a string pathname for use in the document navigator. 
+   * @param path the path to be fixed
+   * @return the re-formatted path
+   * @throws IOException if an IO operation fails
+   */
   public String fixPathForNavigator(String path) throws IOException;
   
   /** Gives the title of the source bin for the navigator
@@ -244,22 +278,34 @@ public interface GlobalModel extends ILoadDocuments {
     */
   public String getAuxiliaryBinTitle();
   
-  /** Adds a document to the list of auxiliary files. */
+  /** 
+   * Adds a document to the list of auxiliary files. 
+   * @param doc document to be added
+   */
   public void addAuxiliaryFile(OpenDefinitionsDocument doc);
   
-  /** Removes a document from the list of auxiliary files. */
+  /** 
+   * Removes a document from the list of auxiliary files. 
+   * @param doc document to be removed
+   */
   public void removeAuxiliaryFile(OpenDefinitionsDocument doc);
   
-  /** Parses out the given project file, sets up the state and other configurations
-    * such as the Navigator and the classpath, and returns an array of files to open.
-    * @param file The project file to parse
-    */
+  /** 
+   * Parses out the given project file, sets up the state and other configurations
+   * such as the Navigator and the classpath, and returns an array of files to open.
+   * @param file The project file to parse
+   * @throws IOException if an IO operation fails
+   * @throws MalformedProjectFileException if one of the project files is malformed
+   */
   public void openProject(File file) throws IOException, MalformedProjectFileException;
   
-  /** Performs any needed operations on the model before closing the project and its files.  This is not responsible
-    * for actually closing the files since that is handled in MainFrame._closeProject()
-    */
-  public void closeProject(boolean qutting);
+  /** 
+   * Performs any needed operations on the model before closing the project 
+   * and its files.  This is not responsible for actually closing the files 
+   * since that is handled in MainFrame._closeProject()
+   * @param quitting true if we're quitting; false otherwise
+   */
+  public void closeProject(boolean quitting);
   
   /** Searches for a file with the given name on the current source roots and the augmented classpath.
     * @param fileName Name of the source file to look for
@@ -267,13 +313,16 @@ public interface GlobalModel extends ILoadDocuments {
     */
   public File getSourceFile(String fileName);
   
-  /** Searches for a file with the given name on the provided paths. Returns null if the file is not found.
-    * @param fileName Name of the source file to look for
-    * @param paths An array of directories to search
-    */
+  /** 
+   * Searches for a file with the given name on the provided paths. 
+   * Returns null if the file is not found.
+   * @param fileName Name of the source file to look for
+   * @param paths An array of directories to search
+   * @return the file with the given name; null if it's not found
+   */
   public File findFileInPaths(String fileName, Iterable<File> paths);
   
-  /** Gets a list of all sourceRoots for the open definitions documents, without duplicates. */
+  /** @return a list of all sourceRoots for the open definitions documents, without duplicates. */
   public Iterable<File> getSourceRootSet();
   
 //  /** Return the absolute path of the file with the given index, or "(untitled)" if no file exists. */
@@ -281,12 +330,13 @@ public interface GlobalModel extends ILoadDocuments {
   
   /*------------------------------ Definitions ------------------------------*/
   
-  /** Fetches the {@link javax.swing.text.EditorKit} implementation for use in the definitions pane. */
+  /** @return the {@link javax.swing.text.EditorKit} implementation for use in the definitions pane. */
   public DefinitionsEditorKit getEditorKit();
   
-  /** Gets a DocumentIterator to allow navigating through open swing Documents.
-    * TODO: remove ugly swing dependency.
-    */
+  /** 
+   * @return a DocumentIterator to allow navigating through open swing Documents.
+   * TODO: remove ugly swing dependency.
+   */
   public DocumentIterator getDocumentIterator();
   
   /** Re-runs the global listeners on the active document. */
@@ -294,7 +344,7 @@ public interface GlobalModel extends ILoadDocuments {
   
   /*---------------------------------- I/O ----------------------------------*/
   
-  /** Gets the console document. */
+  /** @return the console document. */
   public ConsoleDocument getConsoleDocument();
   
   /** TODO: remove this swing dependency.
@@ -305,20 +355,30 @@ public interface GlobalModel extends ILoadDocuments {
   /** Resets the console. Fires consoleReset() event. */
   public void resetConsole();
   
-  /** Prints System.out to the DrJava console.  This method may be safely called from outside the event thread. */
+  /** 
+   * Prints System.out to the DrJava console. This method may be safely 
+   * called from outside the event thread. 
+   * @param s string to be printed
+   */
   public void systemOutPrint(String s);
   
-  /** Prints System.err to the DrJava console.  This method may be safely called from outside the event thread. */
+  /** 
+   * Prints System.err to the DrJava console. This method may be safely
+   * called from outside the event thread.
+   * @param s string to be printed
+   */
   public void systemErrPrint(String s);
   
-  /** Prints the given string to the DrJava console as an echo of System.in.  This method may be safely called from
-    * outside the event thread.  
-    */
+  /** 
+   * Prints the given string to the DrJava console as an echo of System.in.  
+   * This method may be safely called from outside the event thread.  
+   * @param s string to be printed
+   */
   public void systemInEcho(String s);
   
   //----------------------------- Interactions -----------------------------//
   
-  /** Gets the (toolkit-independent) interactions document. */
+  /** @return the (toolkit-independent) interactions document. */
   public InteractionsDocument getInteractionsDocument();
   
   /** TODO: remove this swing dependency.
@@ -326,79 +386,121 @@ public interface GlobalModel extends ILoadDocuments {
     */
   public InteractionsDJDocument getSwingInteractionsDocument();
   
-  /** Clears and resets the interactions pane in the specified working directory. Convenience form of the following
-    * method. */
+  /** 
+   * Clears and resets the interactions pane in the specified working 
+   * directory. Convenience form of the following method. 
+   * @param wd the working directory 
+   */
   public void resetInteractions(File wd);
   
-  /** Clears and resets the interactions pane in the specified working directory. Usually called by preceding method. 
-    * Invoked by "Reset interactions" command (in MainFrame) and as part of other actions such as the run, project 
-    * loading, compilation and unit testing commands.*/
+  /** 
+   * Clears and resets the interactions pane in the specified working 
+   * directory. Usually called by preceding method. 
+   * Invoked by "Reset interactions" command (in MainFrame) and as part of 
+   * other actions such as the run, project loading, compilation and unit 
+   * testing commands.
+   * @param wd the working directory
+   * @param forceReset true if the reset should be forced (regardless of
+   *        the state of things), false otherwise
+   */
   public void resetInteractions(File wd, boolean forceReset);
   
   /** Interprets the current given text at the prompt in the interactions pane. */
   public void interpretCurrentInteraction();
   
-  /** Returns the current classpath in use by the Interpreter JVM. This includes the original jvm classpath, the global
-    * drjava extra classpaths, and the project extra classpaths.
-    */
+  /** 
+   * Returns the current classpath in use by the Interpreter JVM. This 
+   * includes the original jvm classpath, the global
+   * drjava extra classpaths, and the project extra classpaths.
+   * @return the current classpath in use by the Interpreter JVM
+   */
   public Iterable<File> getInteractionsClassPath();
   
   // TODO: Move history methods to a more appropriate home.
   
-  /** Interprets file selected in the FileOpenSelector. Assumes all strings have no trailing whitespace. Interprets 
-    * the list of interactions as a single transaction so the first error aborts all processing.
-    */
+  /** 
+   * Interprets file selected in the FileOpenSelector. Assumes all strings 
+   * have no trailing whitespace. Interprets the list of interactions as a 
+   * single transaction so the first error aborts all processing.
+   * @param selector a FileOpenSelector
+   * @throws IOException if an IO operation fails
+   */
   public void loadHistory(FileOpenSelector selector) throws IOException;
   
-  /** Loads the history/histories from the given selector. */
+  /** 
+   * Loads the history/histories from the given selector. 
+   * @param selector a FileOpenSelector
+   * @return the history in the form of an InteractionsScriptModel
+   * @throws IOException if an IO operation fails
+   * @throws OperationCanceledException if the operation was canceled
+   */
   public InteractionsScriptModel loadHistoryAsScript(FileOpenSelector selector)
     throws IOException, OperationCanceledException;
   
   /** Clears the interactions history. */
   public void clearHistory();
 
-  /** Save copy of Console or Interactions Pane to text file. */
+  /** 
+   * Save copy of Console or Interactions Pane to text file. 
+   * @param doc the document to which to save the console
+   * @param selector a FileSaveSelector
+   * @throws IOException if an IO operation fails
+   */
   public void saveConsoleCopy(ConsoleDocument doc, FileSaveSelector selector) throws IOException;
   
-  /** Saves the unedited version of the current history to a file
-    * @param selector File to save to
-    */
+  /** 
+   * Saves the unedited version of the current history to a file
+   * @param selector File to save to
+   * @throws IOException if an IO operation fails
+   */
   public void saveHistory(FileSaveSelector selector) throws IOException;
   
-  /** Saves the edited version of the current history to a file
-    * @param selector File to save to
-    * @param editedVersion Edited verison of the history which will be saved to file instead of the lines saved in the 
-    * history. The saved file will still include any tags needed to recognize it as a saved interactions file.
-    */
+  /** 
+   * Saves the edited version of the current history to a file
+   * @param selector File to save to
+   * @param editedVersion Edited verison of the history which will be saved 
+   *        to file instead of the lines saved in the history. The saved file 
+   *        will still include any tags needed to recognize it as a saved 
+   *        interactions file.
+   * @throws IOException if an IO operation fails
+   */
   public void saveHistory(FileSaveSelector selector, String editedVersion) throws IOException;
   
-  /** Returns the entire history as a String with semicolons as needed. */
+  /** @return the entire history as a String with semicolons as needed. */
   public String getHistoryAsStringWithSemicolons();
   
-  /** Returns the entire history as a String. */
+  /** @return the entire history as a String. */
   public String getHistoryAsString();
   
   //------------------------------- Debugger -------------------------------//
   
-  /** Called when the debugger wants to print a message. */
+  /** 
+   * Called when the debugger wants to print a message. 
+   * @param s message to print
+   */
   public void printDebugMessage(String s);
   
-  /** Returns an available port number to use for debugging the interactions JVM.
-    * @throws IOException if unable to get a valid port number.
-    */
+  /** 
+   * @return an available port number to use for debugging the interactions JVM.
+   * @throws IOException if unable to get a valid port number.
+   */
   public int getDebugPort() throws IOException;
   
   //--------------------------------- Misc ---------------------------------//
   
-  /** Get the class path to be used in all class-related operations.
-    * TODO: Insure that this is used wherever appropriate.
-    */
+  /** 
+   * @return the class path to be used in all class-related operations.
+   * TODO: Insure that this is used wherever appropriate.
+   */
   public Iterable<File> getClassPath();
-  
-  // TODO: comment
+
+  /** @return the page format */
   public PageFormat getPageFormat();
   
-  // TODO: comment
+  /**
+   * Sets the page format to the specified format.
+   * @param format format to set
+   */
   public void setPageFormat(PageFormat format);
   
   /** Exits the program.  Only quits if all documents are successfully closed. */
@@ -407,27 +509,37 @@ public interface GlobalModel extends ILoadDocuments {
   /** Halts the program immediately. */
   public void forceQuit();
   
-  /** Returns the document count */
+  /** @return the document count */
   public int getDocumentCount();
   
-  /** Returns the number of compiler errors produced by the last compilation. */
+  /** @return the number of compiler errors produced by the last compilation. */
   public int getNumCompilerErrors();
   
-  /** Sets the number of compiler errors produced by the last compilation. */
+  /** 
+   * Sets the number of compiler errors produced by the last compilation. 
+   * @param num the number of compiler errors
+   */
   public void setNumCompilerErrors(int num); 
   
-  /** Returnt an OOD given an AbstractDocumentInterface */
-  /**CHECK IF NEEDED! */
+  /** 
+   * @param doc the document for which to get the ODD
+   * @return an OOD given an AbstractDocumentInterface
+   * CHECK IF NEEDED! 
+   */
   public OpenDefinitionsDocument getODDForDocument(AbstractDocumentInterface doc);
   
-  /** Returns a list of OpenDefinitionsDocuments that do not belong to the currently active project.<br>
-    * If no project is active, all documents are returned.
-    */
+  /** 
+   * Returns a list of OpenDefinitionsDocuments that do not belong to the currently active project.<br>
+   * If no project is active, all documents are returned.
+   * @return list of all ODDs that do not belong to the current active project
+   */
   public List<OpenDefinitionsDocument> getNonProjectDocuments();
   
-  /** Teturns a list of OpenDefinitionsDocuments that do belong to the currently active project.<br>
-    * If no project is active, no documents are returned.
-    */
+  /** 
+   * Returns a list of OpenDefinitionsDocuments that do belong to the currently active project.<br>
+   * If no project is active, no documents are returned.
+   * @return list of all ODDs that belong to the current active project
+   */
   public List<OpenDefinitionsDocument> getProjectDocuments();
   
 //  /** Compiles all open files (all files in project (??) in project mode) */
@@ -448,28 +560,44 @@ public interface GlobalModel extends ILoadDocuments {
   /** @return the source root for the project. */
   public File getProjectRoot();
   
-  /** Sets project file to specifed value; used in "Save Project As ..." command in MainFrame. */
+  /** 
+   * Sets project file to specifed value; used in "Save Project As ..." 
+   * command in MainFrame. 
+   * @param f the file to set as the project file
+   */
   public void setProjectFile(File f);
   
-  /** Sets the source root for the project. */
+  /** 
+   * Sets the source root for the project. 
+   * @param f the file to set as the source root
+   */
   public void setProjectRoot(File f);
   
   /** @return the directory that the class files should be stored after compilation. */
   public File getBuildDirectory();
   
-  /** Sets the current build directory. */
+  /** 
+   * Sets the current build directory. 
+   * @param f the file to set as the source root
+   */
   public void setBuildDirectory(File f);
   
-  /** Gets autorefresh status of the project */
+  /** @return autorefresh status of the project */
   public boolean getAutoRefreshStatus();
   
-  /** Sets autorefresh status of the project */
+  /** 
+   * Sets autorefresh status of the project 
+   * @param b the autorefresh status to be set
+   */
   public void setAutoRefreshStatus(boolean b);
   
   /** @return the stored preferences. */
   public Map<OptionParser<?>,String> getPreferencesStoredInProject();
   
-  /** Set the preferences stored in the project. */
+  /** 
+   * Set the preferences stored in the project. 
+   * @param sp the preferences to be set
+   */
   public void setPreferencesStoredInProject(Map<OptionParser<?>,String> sp);
   
   /** @return the working directory for the Master JVM. */
@@ -478,16 +606,22 @@ public interface GlobalModel extends ILoadDocuments {
   /** @return the working directory for the Slave JVM (only applied to project mode). */
   public File getWorkingDirectory();
   
-  /** Sets the working directory for the Slave JVM (only applies to project mode). */
+  /** 
+   * Sets the working directory for the Slave JVM (only applies to project mode). 
+   * @param f the working directory to be set
+   */
   public void setWorkingDirectory(File f);
   
-  /** Sets the main file of the project. */
+  /** 
+   * Sets the main file of the project. 
+   * @param f the main class file to be set
+   */
   public void setMainClass(String f);
   
-  /** Return the main file for the project If not in project mode, returns null. */
+  /** @return the main file for the project If not in project mode, returns null. */
   public String getMainClass();
   
-  /** Return the File that contains the Main-Class. */
+  /** @return the File that contains the Main-Class. */
   public File getMainClassContainingFile();
   
   /** Returns only the project's extra classpaths.
@@ -495,47 +629,71 @@ public interface GlobalModel extends ILoadDocuments {
     */
   public Iterable<AbsRelFile> getExtraClassPath();
   
-  /** Sets the set of classpath entries to use as the projects set of classpath entries.  This is normally used by the
-    * project preferences.
-    */
+  /** 
+   * Sets the set of classpath entries to use as the projects set of classpath 
+   * entries.  This is normally used by the project preferences.
+   * @param cp the extra class path to be set
+   */
   public void setExtraClassPath(Iterable<AbsRelFile> cp);
   
-  /** Sets the create jar file of the project. */
+  /** 
+   * Sets the create jar file of the project. 
+   * @param f the jar file to be set
+   */
   public void setCreateJarFile(File f);
   
-  /** Return the create jar file for the project. If not in project mode, returns null. */
+  /** @return the create jar file for the project. If not in project mode, returns null. */
   public File getCreateJarFile();
   
-  /** Sets the create jar flags of the project. */
+  /** 
+   * Sets the create jar flags of the project.
+   * @param f the jar flags to be set
+   */
   public void setCreateJarFlags(int f);
   
-  /** Return the create jar file for the project. If not in project mode, returns 0. */
+  /** @return the create jar file for the project. If not in project mode, returns 0. */
   public int getCreateJarFlags();
   
-  /** Returns true the given file is in the current project file. */
+  /** 
+   * @param f the file to be searched for
+   * @return true the given file is in the current project file. 
+   */
   public boolean inProject(File f);
   
-  /** A file is in the project if the source root is the same as the project root. This means that project files must
-    * be saved in the source root. (we query the model through the model's state)
-    */
+  /** 
+   * A file is in the project if the source root is the same as the project 
+   * root. This means that project files must be saved in the source root. 
+   * (we query the model through the model's state)
+   * @param doc the doc to search for in the project path
+   * @return true if doc is in the project path; false otherwise
+   */
   public boolean inProjectPath(OpenDefinitionsDocument doc);
   
-  /** Notifies the project state that the project has been changed. */
+  /** 
+   * Notifies the project state that the project has been changed. 
+   * @param changed true if the project has been changed; false otherwise 
+   */
   public void setProjectChanged(boolean changed);
   
-  /** Returns true if the project state has been changed */
+  /** @return true if the project state has been changed */
   public boolean isProjectChanged();
   
   /** @return true iff no open document is out of sync with its primary class file. */
   public boolean hasOutOfSyncDocuments();
   
-  /** @return true iff no document in given list is out of sync with its primary class file. */
+  /**
+   * @param lod the list of open documents to check 
+   * @return true iff no document in given list is out of sync with its primary class file. 
+   */
   public boolean hasOutOfSyncDocuments(List<OpenDefinitionsDocument> lod);
   
   /** @return list of open documents that are out of sync with their primary class files. */
   public List<OpenDefinitionsDocument> getOutOfSyncDocuments();
   
-  /** @return list of open documents in given list that are out of sync with their primary class files. */
+  /**
+   * @param lod the list of open documents from which to get those that are out of sync
+   * @return list of open documents in given list that are out of sync with their primary class files. 
+   */
   public List<OpenDefinitionsDocument> getOutOfSyncDocuments(List<OpenDefinitionsDocument> lod);
   
   /** Cleans the build directory. */
@@ -550,18 +708,24 @@ public interface GlobalModel extends ILoadDocuments {
     * @return a List of the open definitions documents.
     */
   public List<OpenDefinitionsDocument> getOpenDefinitionsDocuments();
-  /** Returns a collection of language level documents. */
+
+  /** @return a collection of language level documents. */
   public List<OpenDefinitionsDocument> getLLOpenDefinitionsDocuments();
+
+  /** @return a collection of auxiliary documents. */
   public List<OpenDefinitionsDocument> getAuxiliaryDocuments();  
 
-  /** Checks if any open definitions documents have been modified since last being saved.
-    * @return whether any documents have been modified
-    */
+  /** 
+   * Checks if any open definitions documents have been modified since last being saved.
+   * @return whether any documents have been modified
+   */
   public boolean hasModifiedDocuments();
   
-  /** Checks if any of the given documents have been modified since last being saved.
-    * @return whether any documents have been modified
-    */
+  /** 
+   * Checks if any of the given documents have been modified since last being saved.
+   * @param lod the list of documents to check for modifications
+   * @return whether any documents have been modified
+   */
   public boolean hasModifiedDocuments(List<OpenDefinitionsDocument> lod);
   
   /** Checks if any open definitions documents are untitled.
@@ -569,18 +733,24 @@ public interface GlobalModel extends ILoadDocuments {
     */
   public boolean hasUntitledDocuments();
   
-  /** Returns the OpenDefinitionsDocument for the specified File, opening a new copy if one is not already open.
-    * @param file File contained by the document to be returned
-    * @return OpenDefinitionsDocument containing file
-    */
+  /** 
+   * Returns the OpenDefinitionsDocument for the specified File, opening a new 
+   * copy if one is not already open.
+   * @param file File contained by the document to be returned
+   * @return OpenDefinitionsDocument containing file
+   * @throws IOException if an IO operation fails
+   */
   public OpenDefinitionsDocument getDocumentForFile(File file) throws IOException;
   
-  /* Returns the GlobalEventModifier attached to global model. */
+  /** @return the GlobalEventModifier attached to global model. */
   public GlobalEventNotifier getNotifier();
   
-  /* Returns the text of the custom manifest supplied for this project. */
+  /** @return the text of the custom manifest supplied for this project. */
   public String getCustomManifest();
   
-  /* Sets the text of the custom manifest supplied for this project. */
+  /** 
+   * Sets the text of the custom manifest supplied for this project. 
+   * @param manifest the text of the manifest to be set
+   */
   public void setCustomManifest(String manifest);
 }

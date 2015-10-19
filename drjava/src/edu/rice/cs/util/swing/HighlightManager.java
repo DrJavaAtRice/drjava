@@ -53,9 +53,9 @@ public class HighlightManager {
   
   //private Hashtable<HighlightPosition, Stack<HighlightInfo>> _highlights;
   
-  /** An unsorted Vector of Stack<HighlightInfo>, each of which corresponds to a unique
+  /** An unsorted {@code Vector} of {@code Stack<HighlightInfo>}, each of which corresponds to a unique
     * region in the document. All HighlightInfo objects within a given stack must correspond
-    * to the same region but must have unique Highlighter.HighlightPainters.
+    * to the same region but must have unique {@code Highlighter.HighlightPainters}.
     * Each stack is ordered so the most recent highlight is at the top.
     */
   private Vector<Stack<HighlightInfo>> _highlights;
@@ -77,8 +77,7 @@ public class HighlightManager {
   
   public String toString() { return "HighLightManager(" + _highlights + ")"; }
   
-  /** Size of highlight stack; used only for unit testing */
-  
+  /** @return size of highlight stack; used only for unit testing */ 
   public int size() { return _highlights.size(); }
   
   /** Adds a highlight using the supplied painter to the vector element(Stack) that exactly corresponds to the 
@@ -278,7 +277,10 @@ public class HighlightManager {
       return (getStartOffset() == h.getStartOffset() && getEndOffset() == h.getEndOffset());
     }
     
-    /** Refreshes this HighlightInfo object, obtaining a new Highlighter. */
+    /** 
+     * Refreshes this HighlightInfo object, obtaining a new Highlighter. 
+     * @param p the painter to use
+     */
     public void refresh(Highlighter.HighlightPainter p ) {
       
       this.remove();

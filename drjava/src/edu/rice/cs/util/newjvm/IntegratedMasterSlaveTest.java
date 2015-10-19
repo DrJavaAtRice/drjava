@@ -92,10 +92,13 @@ public class IntegratedMasterSlaveTest extends DrJavaTestCase {
     
     public TestMasterJVM() { super(CounterSlave.class.getName()); }
     
-    /** In util-20020414-0647, if quitSlave were called between the time the slave was invoked and the time it 
-      * registered, an IllegalStateException was thrown. The correct behavior, which we test for here, is for the
-      * slave to quit as soon as it is started up.
-      */
+    /** 
+     * In util-20020414-0647, if quitSlave were called between the time the 
+     * slave was invoked and the time it registered, an IllegalStateException 
+     * was thrown. The correct behavior, which we test for here, is for the
+     * slave to quit as soon as it is started up.
+     * @throws Exception if something goes wrong
+     */
     public void runImmediateQuitTest() throws Exception {
       _currentTest = "runImmediateQuitTest";
       _justQuit.reset(); 

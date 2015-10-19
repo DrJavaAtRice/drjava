@@ -175,7 +175,10 @@ public class JUnitPanel extends ErrorPanel {
     repaint();
   }
   
-  /** Resets the progress bar to start counting the given number of tests. */
+  /** 
+   * Resets the progress bar to start counting the given number of tests. 
+   * @param numTests number of tests to be counted
+   */
   public void progressReset(int numTests) {
     _progressBar.reset();
     _progressBar.start(numTests);
@@ -248,7 +251,10 @@ public class JUnitPanel extends ErrorPanel {
       else throw new IllegalArgumentException("Name does not contain any parens: " + name);
     }
     
-    /** Provides the ability to display the name of the test being run. */
+    /** 
+     * Provides the ability to display the name of the test being run. 
+     * @param name the name of the test being run
+     */
     public void testStarted(String name) {
       if (name.indexOf('(') < 0) return;
       
@@ -280,7 +286,12 @@ public class JUnitPanel extends ErrorPanel {
       }
     }
     
-    /** Displays the results of a test that has finished. */
+    /** 
+     * Displays the results of a test that has finished. 
+     * @param name the name of the test
+     * @param wasSuccessful whether the test was successful
+     * @param causedError whether the test caused an error
+     */
     public void testEnded(String name, boolean wasSuccessful, boolean causedError) {
       if (name.indexOf('(')<0) return;
 
@@ -360,9 +371,11 @@ public class JUnitPanel extends ErrorPanel {
       switchToError(0);
     }
     
-    /** Replaces the "Testing in progress..." text with the given message.  Only runs in event thread.
-      * @param msg the text to insert
-      */
+    /** 
+     * Replaces the "Testing in progress..." text with the given message.  Only runs in event thread.
+     * @param msg the text to insert
+     * @throws BadLocationException if attempts to reference an invalid location
+     */
     public void _replaceInProgressText(String msg) throws BadLocationException {
       assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();
       int start = 0;

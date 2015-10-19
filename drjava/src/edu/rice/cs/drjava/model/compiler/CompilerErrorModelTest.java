@@ -294,7 +294,11 @@ public final class CompilerErrorModelTest extends DrJavaTestCase {
     assertEquals("Incorrect error Position.", 38, pos.getOffset());
   }
   
-  /** Tests CompilerErrorModel.getErrorAtOffset(int). */
+  /** 
+   * Tests CompilerErrorModel.getErrorAtOffset(int). 
+   * @throws IOException if an IO operation fails
+   * @throws OperationCanceledException if an operation is canceled unexpectedly
+   */
   public void testGetErrorAtOffset() throws IOException, OperationCanceledException {
     fullSetup();
     
@@ -306,7 +310,11 @@ public final class CompilerErrorModelTest extends DrJavaTestCase {
                  model.getErrorAtOffset(doc, 38));
   }
   
-  /** Tests CompilerErrorModel.hasErrorsWithPositions(OpenDefinitionsDocument). */
+  /** 
+   * Tests CompilerErrorModel.hasErrorsWithPositions(OpenDefinitionsDocument). 
+   * @throws IOException if an IO operation fails
+   * @throws OperationCanceledException if an operation is canceled unexpectedly
+   */
   public void testHasErrorsWithPositions() throws IOException, OperationCanceledException {
     fullSetup();
     

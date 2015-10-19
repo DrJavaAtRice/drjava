@@ -50,7 +50,10 @@ public class ClipboardHistoryModel {
   /** Singleton instance. */
   private static ClipboardHistoryModel ONLY = null;
   
-  /** Singleton accessor. */
+  /** 
+   * Singleton accessor. 
+   * @return singleton
+   */
   public static synchronized ClipboardHistoryModel singleton() {
     if (ONLY == null) ONLY = new ClipboardHistoryModel(10);
     return ONLY;
@@ -62,26 +65,32 @@ public class ClipboardHistoryModel {
     _maxSize = maxSize;
   }
   
-  /** Sets the maximum size. May kick old strings out. */
+  /** 
+   * Sets the maximum size. May kick old strings out. 
+   * @param maxSize the new value for the maximum size
+   */
   public void resize(int maxSize) {
     _maxSize = maxSize;
     while (_history.size()>_maxSize) { _history.removeFirst(); }
   }
   
-  /** Add a string to the history. If it is already in the history, it will get
-    * moved to the end, making it the most recent string. */
+  /** 
+   * Add a string to the history. If it is already in the history, it will get
+   * moved to the end, making it the most recent string. 
+   * @param s the string to be added to the history
+   */
   public synchronized void put(String s) {
     _history.remove(s);
     _history.add(s);
     while (_history.size()>_maxSize) { _history.removeFirst(); }
   }
   
-  /** Return a copy of the history of strings. */
+  /** @return a copy of the history of strings. */
   public synchronized List<String> getStrings() {
     return new LinkedList<String>(_history);
   }
   
-  /** Return the most recent string, or null if nothing is in the history. */
+  /** @return the most recent string, or null if nothing is in the history. */
   public synchronized String getMostRecent() {
     if (_history.size() == 0) { return null; }
     else { return _history.getLast(); }

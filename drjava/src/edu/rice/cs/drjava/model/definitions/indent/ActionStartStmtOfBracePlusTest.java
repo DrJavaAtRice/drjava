@@ -46,7 +46,10 @@ import javax.swing.text.BadLocationException;
 public final class ActionStartStmtOfBracePlusTest extends IndentRulesTestCase {
 
 
-  /** Tests indenting with a single line contract. */
+  /** 
+   * Tests indenting with a single line contract.
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testSingleLineContract() throws BadLocationException {
     IndentRuleAction rule1 = new ActionStartStmtOfBracePlus(0);
     IndentRuleAction rule2 = new ActionStartStmtOfBracePlus(3); // 3 spaces
@@ -68,7 +71,10 @@ public final class ActionStartStmtOfBracePlusTest extends IndentRulesTestCase {
     assertEquals("single line contract, no indent, with suffix", aligned2, _doc.getText());
   }
   
-  /** Tests indenting with an indented single line contract. */
+  /** 
+   * Tests indenting with an indented single line contract.
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testIndentedSingleLineContract() throws BadLocationException {
     IndentRuleAction rule1 = new ActionStartStmtOfBracePlus(0);
     IndentRuleAction rule2 = new ActionStartStmtOfBracePlus(3); // 3 spaces
@@ -92,7 +98,10 @@ public final class ActionStartStmtOfBracePlusTest extends IndentRulesTestCase {
                  aligned2, _doc.getText());
   }
   
-  /** Tests indenting with a multiple line contract. */
+  /** 
+   * Tests indenting with a multiple line contract.
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testMultiLineContract() throws BadLocationException {
     IndentRuleAction rule1 = new ActionStartStmtOfBracePlus(0);
     IndentRuleAction rule2 = new ActionStartStmtOfBracePlus(2); // 2 spaces
@@ -123,7 +132,10 @@ public final class ActionStartStmtOfBracePlusTest extends IndentRulesTestCase {
     assertEquals("multi line contract, with indent, with suffix", aligned2, _doc.getText());
   }
   
-  /** Tests indenting a for statement (odd semicolons) */
+  /** 
+   * Tests indenting a for statement (odd semicolons)
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testForStatement() throws BadLocationException {
     IndentRuleAction rule1 = new ActionStartStmtOfBracePlus(0);
     IndentRuleAction rule2 = new ActionStartStmtOfBracePlus(3); // 3 spaces
@@ -147,7 +159,10 @@ public final class ActionStartStmtOfBracePlusTest extends IndentRulesTestCase {
                  aligned2, _doc.getText());
   }
   
-  /** Tests indenting a multiple line for statement (odd semicolons) */
+  /** 
+   * Tests indenting a multiple line for statement (odd semicolons)
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testMultiLineForStatement() throws BadLocationException {
     IndentRuleAction rule1 = new ActionStartStmtOfBracePlus(0);
     IndentRuleAction rule2 = new ActionStartStmtOfBracePlus(2); // 2 spaces
@@ -213,7 +228,10 @@ public final class ActionStartStmtOfBracePlusTest extends IndentRulesTestCase {
                  aligned2, _doc.getText());
    }*/
   
-  /** Tests indenting with commented delimiters. */
+  /** 
+   * Tests indenting with commented delimiters.
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testCommentedBrace() throws BadLocationException {
     IndentRuleAction rule1 = new ActionStartStmtOfBracePlus(0);
     IndentRuleAction rule2 = new ActionStartStmtOfBracePlus(2); // 2 spaces
@@ -276,7 +294,10 @@ public final class ActionStartStmtOfBracePlusTest extends IndentRulesTestCase {
                  aligned2, _doc.getText());
    }*/
   
-  /** Tests indenting without an enclosing brace. */
+  /** 
+   * Tests indenting without an enclosing brace.
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testNoBrace() throws BadLocationException {
     IndentRuleAction rule1 = new ActionStartStmtOfBracePlus(0);
     IndentRuleAction rule2 = new ActionStartStmtOfBracePlus(2); // 2 spaces

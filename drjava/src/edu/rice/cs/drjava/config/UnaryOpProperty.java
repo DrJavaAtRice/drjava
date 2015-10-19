@@ -53,7 +53,17 @@ public class UnaryOpProperty<P,R> extends EagerProperty {
   /** Lambda to format the result. */
   protected Lambda<R,String> _format;
   
-  /** Create an eager property. */
+  /** 
+   * Create an eager property. 
+   *
+   * @param name the name of the property
+   * @param help the help page for this property
+   * @param op the operation
+   * @param op1Name operator 1 name
+   * @param op1Default operator 1 default
+   * @param parse lambda to turn a string into the first (only) operand
+   * @param format lambda for formatting the result
+   */
   public UnaryOpProperty(String name,
                          String help,
                          Lambda<P,R> op,
@@ -70,7 +80,15 @@ public class UnaryOpProperty<P,R> extends EagerProperty {
     resetAttributes();
   }
 
-  /** Create an eager property. */
+  /** 
+   * Create an eager property. 
+   *
+   * @param name the name of the property
+   * @param help the help page for this property
+   * @param op the operation
+   * @param parse lambda to turn a string into the first (only) operand
+   * @param format lambda for formatting the result
+   */
   public UnaryOpProperty(String name,
                          String help,
                          Lambda<P,R> op,

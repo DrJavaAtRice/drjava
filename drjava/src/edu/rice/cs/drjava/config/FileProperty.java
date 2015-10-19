@@ -47,15 +47,23 @@ import java.io.*;
   */
 public class FileProperty extends DrJavaProperty {
   protected Thunk<File> _getFile;
-  /** Create an eager file property. */
+
+  /** 
+   * Create an eager file property. 
+   * @param name the name of this property
+   * @param getFile lambda for accessing the file
+   * @param help the help page for this property
+   */
   public FileProperty(String name, Thunk<File> getFile, String help) {
     super(name,help);
     _getFile = getFile;
     resetAttributes();
   }
   
-  /** Return the value of the property. If it is not current, update first.
-    * @param pm PropertyMaps used for substitution when replacing variables */
+  /** 
+   * @param pm PropertyMaps used for substitution when replacing variables 
+   * @return the value of the property. If it is not current, update first.
+   */
   public String getCurrent(PropertyMaps pm) {
     update(pm);
     if (_value == null) { throw new IllegalArgumentException("DrJavaProperty value is null"); }
@@ -63,10 +71,10 @@ public class FileProperty extends DrJavaProperty {
     return _value;
   }
 
-  /** Return the value. */
+  /** @return the value. */
   public String toString() { return _value; }
   
-  /** Return true if the value is current. */
+  /** @return true if the value is current. */
   public boolean isCurrent() { return true; }
   
   /** Mark the value as stale. */
@@ -75,8 +83,10 @@ public class FileProperty extends DrJavaProperty {
     invalidateOthers(new HashSet<DrJavaProperty>());
   }
   
-  /** Update the value of the property.
-    * @param pm PropertyMaps used for substitution */
+  /** 
+   * Update the value of the property.
+   * @param pm PropertyMaps used for substitution 
+   */
   public void update(PropertyMaps pm) {
     String quot = "";
     String q = _attributes.get("squote");

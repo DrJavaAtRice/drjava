@@ -84,7 +84,10 @@ public class DocumentRegionTest extends DrJavaTestCase {
     "        }\n" +
     "}";
 
-  /** Tests RegionManager. */
+  /** 
+   * Tests RegionManager. 
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testRegionManager() throws BadLocationException {
     _doc.insertString(0, DOCUMENT_TEXT, null);
     RegionManager<DocumentRegion> rm = new ConcreteRegionManager<DocumentRegion>();

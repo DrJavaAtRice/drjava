@@ -57,8 +57,6 @@ public class ActionStartCurrStmtPlus extends IndentRuleAction {
     * of the line with the appropriate spacing or characters.
     * @param doc AbstractDJDocument containing the line to be indented.
     * @param reason The reason that the indentition is taking place
-    * @return true if the caller should update the current location itself,
-    * false if the indenter has already handled this
     */
   public void indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
     super.indentLine(doc, reason);

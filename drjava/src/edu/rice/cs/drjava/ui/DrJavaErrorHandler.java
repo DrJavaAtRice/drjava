@@ -69,16 +69,22 @@ public class DrJavaErrorHandler implements Thread.UncaughtExceptionHandler {
   /** the button to show */
   private static volatile JButton _errorsButton;
   
-  /** Sets the button to show. */
+  /** 
+   * Sets the button to show. 
+   * @param b the button to be set
+   */
   public static void setButton(JButton b) { _errorsButton = b; }  
   
-  /** Gets the button to show. */
+  /** @return the button to show. */
   public static JButton getButton() { return _errorsButton; }  
   
-  /** Returns the size of the error list. */
+  /** @return the size of the error list. */
   public static int getErrorCount() { return _errors.size(); }
   
-  /** Returns the error with the given index. */
+  /** 
+   * @param index the index of the error 
+   * @return the error with the given index. 
+   */
   public static Throwable getError(int index) {
     
     if (index >= 0 && index < _errors.size()) return _errors.get(index);
@@ -88,7 +94,10 @@ public class DrJavaErrorHandler implements Thread.UncaughtExceptionHandler {
   /** Clears the list of errors. */
   public static void clearErrors() { _errors.clear(); }
 
-  /** Record the throwable in the errors list. */
+  /**
+   * Record the throwable in the errors list. 
+   * @param thrown the throwable to be recorded
+   */
   public static void record(final Throwable thrown) {
     Utilities.invokeLater(new Runnable() {
       public void run() {
@@ -130,9 +139,12 @@ public class DrJavaErrorHandler implements Thread.UncaughtExceptionHandler {
     });
   }
 
-  /** Return true if this is an exception thrown because of the Swing bug:
-    * https://sourceforge.net/tracker/?func=detail&atid=438935&aid=2831821&group_id=44253
-    * @return true if this is the Swing bug */
+  /** 
+   * Return true if this is an exception thrown because of the Swing bug:
+   * {@literal https://sourceforge.net/tracker/?func=detail&atid=438935&aid=2831821&group_id=44253}
+   * @param thrown the throwable to check
+   * @return true if this is the Swing bug 
+   */
   public static boolean isSwingBugArrayIndexOufOfBoundsExceptionInCharWidth(Throwable thrown) {
     // only ignore on Sun/Oracle JVMs
     if (! edu.rice.cs.plt.reflect.JavaVersion.CURRENT_FULL.vendor().
@@ -207,7 +219,10 @@ public class DrJavaErrorHandler implements Thread.UncaughtExceptionHandler {
     throw t;     
   }
 
-  /** Log an unexpected situation. */
+  /** 
+   * Log an unexpected situation. 
+   * @param message the message to be logged
+   */
   public static void log(String message) { record(new LoggedCondition(message)); }
   
   /** The throwable used for logging unexpected situations. */

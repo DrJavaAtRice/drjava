@@ -47,9 +47,13 @@ import javax.swing.text.BadLocationException;
 public class QuestionHasCharPrecedingOpenBrace extends IndentRuleQuestion {
   private char[] _prefix;
 
-  /** @param yesRule The decision subtree for the case that this rule applies in the current context.
-    * @param noRule  The decision subtree for the case that this rule does not apply in the current context.
-    */
+  /** 
+   * @param prefix the String to be matched
+   * @param yesRule The decision subtree for the case that this rule applies 
+   *                in the current context.
+   * @param noRule  The decision subtree for the case that this rule does not 
+   *                apply in the current context.
+   */
   public QuestionHasCharPrecedingOpenBrace(char[] prefix, IndentRule yesRule, IndentRule noRule) {
     super(yesRule, noRule);
     _prefix = prefix;

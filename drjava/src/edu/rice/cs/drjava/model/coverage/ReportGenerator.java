@@ -74,6 +74,7 @@ public class ReportGenerator {
      * @param sessionInfos session data
      * @param sourceDirectory the directory containing the project for which
      *                        the report is being gnenerated
+     * @throws IOException if an IO operation fails
      */
     public void createReport(final IBundleCoverage bundleCoverage, 
         ExecutionDataStore executionData, SessionInfoStore sessionInfos, 
@@ -129,7 +130,7 @@ public class ReportGenerator {
      * Helper function which takes coverage data for a particular class and 
      * 
      * 
-     * @param className the class (/file) for which to get line colors
+     * @param cc the IClassCoverage object from which to get line colors
      * @return a list of colors, where the i-th element in the list 
      *         corresponds to the i-th line of code
      */
@@ -183,8 +184,6 @@ public class ReportGenerator {
      * Given a list of classes, determines the color of each line in each
      * class (based on coverage results).
      *
-     * @param classNames all of the class names for which to get the line
-     *                   colors; these will be the keys in the mapping
      * @return a mapping of class names to the line colors for that class
      */
     public Map<String, List<String>> getAllLineColors() {

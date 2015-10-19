@@ -60,7 +60,19 @@ public class BinaryOpProperty<P,Q,R> extends EagerProperty {
   /** Lambda to format the result. */
   protected Lambda<R, String> _format;
   
-  /** Create an eager property. */
+  /** 
+   * Create an eager property. 
+   * @param name name of the property
+   * @param help help page for this property
+   * @param op operation to perform
+   * @param op1Name operator 1 name
+   * @param op1Default operator 1 default
+   * @param parse1 lambda to turn a string into the first operand
+   * @param op2Name operator 2 name
+   * @param op2Default operator 2 default
+   * @param parse2 lambda to turn a string into the second operand
+   * @param format lambda to format the result
+   */
   public BinaryOpProperty(String name,
                           String help,
                           Lambda2<P,Q,R> op,
@@ -83,7 +95,15 @@ public class BinaryOpProperty<P,Q,R> extends EagerProperty {
     resetAttributes();
   }
   
-  /** Create an eager property. */
+  /** 
+   * Create an eager property. 
+   * @param name name of the property
+   * @param help help page for this property
+   * @param op operation
+   * @param parse1 lambda to turn a string into the first operand
+   * @param parse2 lambda to turn a string into the second operand
+   * @param format lambda to format the result
+   */
   public BinaryOpProperty(String name,
                           String help,
                           Lambda2<P,Q,R> op,

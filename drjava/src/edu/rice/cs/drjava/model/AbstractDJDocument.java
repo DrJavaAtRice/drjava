@@ -147,13 +147,20 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     this(new Indenter(DrJava.getConfig().getSetting(INDENT_INC).intValue()));
   }
   
-  /** Constructor used from anonymous test classes. */
+  /** 
+   * Constructor used from anonymous test classes. 
+   * @param indentLevel the indentation level
+   */
   protected AbstractDJDocument(int indentLevel) { 
     this(new Indenter(indentLevel));
   }
   
-  /** Constructor used to build a new document with an existing indenter.  Used in tests and super calls from 
-    * DefinitionsDocument and interactions documents. */
+  /** 
+   * Constructor used to build a new document with an existing indenter.  
+   * Used in tests and super calls from DefinitionsDocument and 
+   * interactions documents. 
+   * @param indenter the indenter to use for this document
+   */
   protected AbstractDJDocument(Indenter indenter) { 
     _indenter = indenter;
     _queryCache = null;
@@ -357,9 +364,12 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     return index - 1;
   }
   
-  /** Checks to see if the current string is a number
-    * @return true if x is a parseable number, i.e. either parsable as a double or as a long after chopping off a possible trailing 'L' or 'l'
-    */
+  /** 
+   * Checks to see if the current string is a number
+   * @param x the string to check
+   * @return true if x is a parseable number, i.e. either parsable as a double 
+   *         or as a long after chopping off a possible trailing 'L' or 'l'
+   */
   static boolean _isNum(String x) {
     try {
       Double.parseDouble(x);
@@ -404,9 +414,12 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     }
   }
   
-  /** Checks to see if the current string is a type. A type is assumed to be a primitive type OR
-    * anything else that begins with a capitalized character
-    */
+  /** 
+   * Checks to see if the current string is a type. A type is assumed to be 
+   * a primitive type OR anything else that begins with a capitalized character
+   * @param x the string to check
+   * @return true if x is a type; false otherwise
+   */
   private boolean _isType(String x) {
     if (_primTypes.contains(x)) return true;
     
@@ -414,7 +427,11 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     catch (IndexOutOfBoundsException e) { return false; }
   }
   
-  /** Returns whether the given text only has spaces. */
+  /** 
+   * Returns whether the given text only has spaces. 
+   * @param text the text to check
+   * @return true if text only has spaces; false otherwise
+   */
   public static boolean hasOnlySpaces(String text) { return (text.trim().length() == 0); }
   
   /** Fire event that styles changed from current location to the end.
@@ -518,7 +535,11 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     */
   public ReducedModelControl getReduced() { return _reduced; } 
   
-  /** Assumes that read lock and reduced lock are already held. */
+  /** 
+   * Assumes that read lock and reduced lock are already held. 
+   * @param dist the relative distance
+   * @return the state at dist
+   */
   public ReducedModelState stateAtRelLocation(int dist) { return _reduced.moveWalkerGetState(dist); }
   
   /** Assumes that read lock and reduced lock are already held. */
@@ -597,7 +618,10 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   /** @return true iff _currentLocation is inside comment pr string. */
   public boolean isShadowed() { return _reduced.isShadowed(); }
   
-  /** @return true iff specified pos is inside comment pr string. */
+  /**
+   * @param pos the position to check 
+   * @return true iff specified pos is inside comment pr string. 
+   */
   public boolean isShadowed(int pos) {
     int origPos = _currentLocation;
     setCurrentLocation(pos);
@@ -771,9 +795,15 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     return false;
   }
   
-  /** This function finds the given character in the same statement as the given position, and before the given
-    * position.  It is used by QuestionExistsCharInStmt and QuestionExistsCharInPrevStmt
-    */
+  /** 
+   * This function finds the given character in the same statement as the 
+   * given position, and before the given position.  
+   * It is used by QuestionExistsCharInStmt and QuestionExistsCharInPrevStmt.
+   *
+   * @param findChar the character to find
+   * @param position the position at which to stop searching
+   * @return true if found; false otherwise
+   */
   public boolean findCharInStmtBeforePos(char findChar, int position) {
     
     /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
@@ -814,12 +844,15 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
 //    return _findPrevCharPos(pos, whitespace); }
 //  }
   
-  /** Finds the position of the first non-whitespace, non-comment character before pos.  Skips comments and all 
-    * whitespace, including newlines.
-    * @param pos Position to start from
-    * @param whitespace chars considered as white space
-    * @return position of first non-whitespace character before pos OR ERROR_INDEX (-1) if no such char
-    */
+  /** 
+   * Finds the position of the first non-whitespace, non-comment character 
+   * before pos.  Skips comments and all whitespace, including newlines.
+   * 
+   * @param pos Position to start from
+   * @param whitespace chars considered as white space
+   * @return position of first non-whitespace character before pos OR ERROR_INDEX (-1) if no such char
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public int _findPrevCharPos(final int pos, final char[] whitespace) throws BadLocationException {
     
     /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
@@ -880,30 +913,40 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     return result;
   }
   
-  /** Checks the query cache for a stored value.  Returns the value if it has been cached, or null 
-    * otherwise. Calling convention for keys: methodName:arg1:arg2.
-    * @param key Name of the method and arguments
-    */
+  /** 
+   * Checks the query cache for a stored value.  
+   * Returns the value if it has been cached, or null otherwise. Calling 
+   * convention for keys: methodName:arg1:arg2.
+   *
+   * @param key Name of the method and arguments
+   * @return the object in the cache associated with key; null if not in the cache.
+   */
   protected Object _checkCache(final Query key) {
     if (_queryCache == null) return null;
     return _queryCache.get(key); 
   }
   
-  /** Stores the given result in the helper method cache. Query classes define equality structurally.
-    * @param query  A canonical description of the query
-    * @param answer  The answer returned for the query
-    * @param offset  The offset bounding the right edge of the text on which the query depends; if (0:offset) in
-    *                the document is unchanged, the query should return the same answer.
-    */
+  /** 
+   * Stores the given result in the helper method cache. 
+   * Query classes define equality structurally.
+   *
+   * @param query  A canonical description of the query
+   * @param answer  The answer returned for the query
+   * @param offset  The offset bounding the right edge of the text on which 
+   *                the query depends; if (0:offset) in the document is 
+   *                unchanged, the query should return the same answer.
+   */
   protected void _storeInCache(final Query query, final Object answer, final int offset) {
     if (_queryCache == null) return;
     _queryCache.put(query, answer);
     _addToOffsetsToQueries(query, offset);
   }
   
-  /** Clears the memozing cache of queries with offset >= than specified value.  Should be called every time the 
-    * document is modified. 
-    */
+  /** 
+   * Clears the memozing cache of queries with offset {@literal >=} than 
+   * specified value.  Should be called every time the document is modified. 
+   * @param offset the offset beyond which to clear
+   */
   protected void _clearCache(int offset) {
     if (_queryCache == null) return;
     
@@ -920,7 +963,12 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     }
   }
   
-  /** Add <query,offset> pair to _offsetToQueries map. Assumes lock on _queryCache is already held. */
+  /** 
+   * Add {@literal <query,offset>} pair to _offsetToQueries map. 
+   * Assumes lock on _queryCache is already held.
+   * @param query the query
+   * @param offset the offset
+   */
   private void _addToOffsetsToQueries(final Query query, final int offset) {
     List<Query> selectedQueries = _offsetToQueries.get(offset);
     if (selectedQueries == null) {
@@ -983,13 +1031,18 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     endLastCompoundEdit();
   }
   
-  /** Indents the lines between and including the lines containing points start and end.  Only runs in event thread.
-    * @param start Position in document to start indenting from
-    * @param end Position in document to end indenting at
-    * @param reason a flag from {@link Indenter} to indicate the reason for the indent
-    *        (indent logic may vary slightly based on the trigger action)
-    * @param pm used to display progress, null if no reporting is desired
-    */
+  /** 
+   * Indents the lines between and including the lines containing points 
+   * start and end.  Only runs in event thread.
+   *
+   * @param start Position in document to start indenting from
+   * @param end Position in document to end indenting at
+   * @param reason a flag from {@link Indenter} to indicate the reason for the indent
+   *        (indent logic may vary slightly based on the trigger action)
+   * @param pm used to display progress, null if no reporting is desired
+   * @throws OperationCanceledException if the operation was canceled
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   private void _indentBlock(final int start, final int end, Indenter.IndentReason reason, ProgressMonitor pm)
     throws OperationCanceledException, BadLocationException {
     
@@ -1030,7 +1083,10 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     _offsetToQueries = null;
   }
   
-  /** Indents a line using the Indenter.  Public ONLY for testing purposes. */
+  /** 
+   * Indents a line using the Indenter.  Public ONLY for testing purposes. 
+   * @param reason the reason to indent
+   */
   public void _indentLine(Indenter.IndentReason reason) { getIndenter().indent(this, reason); }
   
   /** Returns the "intelligent" beginning of line.  If currPos is to the right of the first 
@@ -1306,13 +1362,17 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     return getFirstNonWSCharPos(pos, whitespace, acceptComments);
   }
   
-  /** Finds the position of the first non-whitespace character after pos. NB: Skips comments and all whitespace, 
-    * including newlines.
-    * @param pos Position to start from
-    * @param whitespace array of whitespace chars to ignore
-    * @param acceptComments if true, find non-whitespace chars in comments
-    * @return position of first non-whitespace character after pos, or ERROR_INDEX (-1) if end of document is reached
-    */
+  /** 
+   * Finds the position of the first non-whitespace character after pos. 
+   * NB: Skips comments and all whitespace, including newlines.
+   *
+   * @param pos Position to start from
+   * @param whitespace array of whitespace chars to ignore
+   * @param acceptComments if true, find non-whitespace chars in comments
+   * @return position of first non-whitespace character after pos, or 
+   *         ERROR_INDEX (-1) if end of document is reached
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public int getFirstNonWSCharPos(final int pos, final char[] whitespace, final boolean acceptComments) throws 
     BadLocationException {
     
@@ -1384,9 +1444,14 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     return _findPrevCharPos(pos, whitespace);
   }
   
-  /** Helper method for getFirstNonWSCharPos Determines whether the current character is the start of a comment: 
-    * "/*" or "//"
-    */
+  /** 
+   * Helper method for getFirstNonWSCharPos Determines whether the current 
+   * character is the start of a comment: "/*" or "//"
+   *
+   * @param text the text to check
+   * @param pos the position within text to check
+   * @return true if the current character is the start of a comment; false otherwise
+   */
   protected static boolean _isStartOfComment(String text, int pos) {
     char currChar = text.charAt(pos);
     if (currChar == '/') {
@@ -1443,7 +1508,11 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     return _inParenPhrase;
   }
   
-  /** Cached version of _reduced.getLineEnclosingBrace().  Assumes that read lock and reduced lock are already held. */
+  /** 
+   * Cached version of _reduced.getLineEnclosingBrace().  Assumes that read 
+   * lock and reduced lock are already held. 
+   * @return info about the brace
+   */
   public BraceInfo _getLineEnclosingBrace() {
     
     /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
@@ -1464,7 +1533,11 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     return b;
   }
   
-  /** Cached version of _reduced.getEnclosingBrace().  Assumes that read lock and reduced lock are already held. */
+  /** 
+   * Cached version of _reduced.getEnclosingBrace().  Assumes that read lock 
+   * and reduced lock are already held. 
+   * @return info about the brace
+   */
   public BraceInfo _getEnclosingBrace() {
     int pos = _currentLocation;
     // Check cache
@@ -1519,9 +1592,13 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
 //    return result;
 //  }    
   
-  /** Determines if pos lies within a block comment using the reduced model (ignoring the cache).  Assumes that read
-    * lock and reduced lock are already held. 
-    */
+  /** 
+   * Determines if pos lies within a block comment using the reduced model 
+   * (ignoring the cache).  Assumes that read lock and reduced lock are 
+   * already held. 
+   * @param pos the position to check
+   * @return true if pos lies within a block comment; false otherwise
+   */
   public boolean _inBlockComment(final int pos) {
     final int here = _currentLocation;
     final int distToStart = here - _getLineStartPos(here);
@@ -1569,11 +1646,16 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     return notInParenPhrase;
   }
   
-  /** Returns true if the current line has only blanks before the current location. Serves as a check so that
-    * indentation will only move the caret when it is at or before the "smart" beginning of a line (i.e. the first
-    * non-blank character). Only runs in the event thread.
-    * @return true if there are only blank characters before the current location on the current line.
-    */
+  /** 
+   * Returns true if the current line has only blanks before the current 
+   * location. Serves as a check so that indentation will only move the caret 
+   * when it is at or before the "smart" beginning of a line (i.e. the first
+   * non-blank character). Only runs in the event thread.
+   *
+   * @return true if there are only blank characters before the current 
+   *         location on the current line.
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   private boolean onlySpacesBeforeCurrent() throws BadLocationException{
     
     assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
@@ -1591,11 +1673,14 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     return (pos < 0);
   }
   
-  /** Gets the number of blank characters between the current location and the first non-blank character or the end of
-    * the document, whichever comes first.  TODO: cache it.
-    * (The method is misnamed.)
-    * @return the number of whitespace characters
-    */
+  /** 
+   * Gets the number of blank characters between the current location and the 
+   * first non-blank character or the end of the document, whichever comes 
+   * first.  TODO: cache it. (The method is misnamed.)
+   *
+   * @return the number of whitespace characters
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   private int _getWhiteSpace() throws BadLocationException {
     
     /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
@@ -1608,11 +1693,16 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     return i;
   }
   
-  /** Returns the size of the white space prefix before the current location. If the prefix contains any
-    * non white space chars, returns 0.  Use definition of white space in String.trim()
-    * Assumes that the read lock is already held.
-    * @return true if there are only blank characters before the current location on the current line.
-    */
+  /** 
+   * Returns the size of the white space prefix before the current location. 
+   * If the prefix contains any non white space chars, returns 0.  Use 
+   * definition of white space in String.trim().
+   * Assumes that the read lock is already held.
+   * 
+   * @return true if there are only blank characters before the current 
+   *         location on the current line.
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   private int _getWhiteSpacePrefix() throws BadLocationException {
     
 //    System.err.println("lockState = " + _lockState);
@@ -1632,11 +1722,16 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     return (pos < 0) ? prefixSize : 0;
   }
   
-  /** Inserts the number of blanks specified as the whitespace prefix for the line identified by pos.  The prefix 
-    * replaces the prefix is already there.  Assumes that the prefix consists of blanks.  ASSUMES write lock is
-    * already held.g1
-    * @param tab  The string to be placed between previous newline and first non-whitespace character
-    */
+  /** 
+   * Inserts the number of blanks specified as the whitespace prefix for the 
+   * line identified by pos.  The prefix replaces the prefix is already there. 
+   * Assumes that the prefix consists of blanks.  ASSUMES write lock is
+   * already held.
+   *
+   * @param tab the string to be placed between previous newline and first 
+   *            non-whitespace character
+   * @param pos the position of the line
+   */
   public void setTab(int tab, int pos) {
     
     /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
@@ -1661,10 +1756,14 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     }
   }
   
-  /** Inserts the string specified by tab at the beginning of the line identified by pos.  ASSUMES write lock is
-    * already held.
-    * @param tab  The string to be placed between previous newline and first non-whitespace character
-    */
+  /** 
+   * Inserts the string specified by tab at the beginning of the line 
+   * identified by pos.  ASSUMES write lock is already held.
+   * 
+   * @param tab the string to be placed between previous newline and first 
+   *            non-whitespace character
+   * @param pos the position of the line
+   */
   public void setTab(String tab, int pos) {
     
     /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
@@ -1684,15 +1783,21 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     }
   }
   
-  /** Updates document structure as a result of text insertion. This happens after the text has actually been inserted.
-    * Here we update the reduced model (using an {@link AbstractDJDocument.InsertCommand InsertCommand}) and store 
-    * information for how to undo/redo the reduced model changes inside the {@link 
-    * javax.swing.text.AbstractDocument.DefaultDocumentEvent DefaultDocumentEvent}.
-    * NOTE: an exclusive read lock on the document is already held when this code runs.
-    * @see edu.rice.cs.drjava.model.AbstractDJDocument.InsertCommand
-    * @see javax.swing.text.AbstractDocument.DefaultDocumentEvent
-    * @see edu.rice.cs.drjava.model.definitions.DefinitionsDocument.CommandUndoableEdit
-    */
+  /** 
+   * Updates document structure as a result of text insertion. This happens 
+   * after the text has actually been inserted.
+   * Here we update the reduced model (using an 
+   * {@link AbstractDJDocument.InsertCommand InsertCommand}) and store 
+   * information for how to undo/redo the reduced model changes inside the {@link 
+   * javax.swing.text.AbstractDocument.DefaultDocumentEvent DefaultDocumentEvent}.
+   * NOTE: an exclusive read lock on the document is already held when this code runs.
+   * @see edu.rice.cs.drjava.model.AbstractDJDocument.InsertCommand
+   * @see javax.swing.text.AbstractDocument.DefaultDocumentEvent
+   * @see edu.rice.cs.drjava.model.definitions.DefinitionsDocument
+   *
+   * @param chng the update event
+   * @param attr the attributes 
+   */
   protected void insertUpdate(AbstractDocument.DefaultDocumentEvent chng, AttributeSet attr) {
     
     assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
@@ -1719,14 +1824,18 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     catch (BadLocationException ble) { throw new UnexpectedException(ble); }
   }
   
-  /** Updates document structure as a result of text removal. This happens within the swing remove operation before
-    * the text has actually been removed. Updates the reduced model (using a {@link AbstractDJDocument.RemoveCommand
-    * RemoveCommand}) and store information for how to undo/redo the reduced model changes inside the 
-    * {@link javax.swing.text.AbstractDocument.DefaultDocumentEvent DefaultDocumentEvent}.
-    * NOTE: an exclusive read lock on the document is already held when this code runs.
-    * @see AbstractDJDocument.RemoveCommand
-    * @see javax.swing.text.AbstractDocument.DefaultDocumentEvent
-    */
+  /** 
+   * Updates document structure as a result of text removal. This happens 
+   * within the swing remove operation before the text has actually been 
+   * removed. Updates the reduced model (using a 
+   * {@link AbstractDJDocument.RemoveCommand RemoveCommand}) and store 
+   * information for how to undo/redo the reduced model changes inside the 
+   * {@link javax.swing.text.AbstractDocument.DefaultDocumentEvent DefaultDocumentEvent}.
+   * NOTE: an exclusive read lock on the document is already held when this code runs.
+   * @see AbstractDJDocument.RemoveCommand
+   * @see javax.swing.text.AbstractDocument.DefaultDocumentEvent
+   * @param chng the update event
+   */
   protected void removeUpdate(AbstractDocument.DefaultDocumentEvent chng) {
     
     assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
@@ -1751,7 +1860,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     catch (BadLocationException e) { throw new UnexpectedException(e); }
   }
   
-  /** Returns the byte image (as written to a file) of this document. */
+  /** @return the byte image (as written to a file) of this document. */
   public byte[] getBytes() { return getText().getBytes(); }
   
   public void clear() {
@@ -1759,7 +1868,12 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     catch(BadLocationException e) { throw new UnexpectedException(e); }
   }
   
-  /** @return true if pos is the position of one of the chars in an occurrence of "//" or "/*" in text. */
+  /** 
+   * @param text the text to check
+   * @param pos the position within the text to check
+   * @return true if pos is the position of one of the chars in an occurrence 
+   *         of "//" or "/*" in text. 
+   */
   private static boolean isCommentOpen(String text, int pos) {
     int len = text.length();
     if (len < 2) return false;
@@ -1768,7 +1882,12 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     return isCommentStart(text, pos - 1) || isCommentStart(text, pos);
   }
   
-  /** @return true if pos is index of string "//" or "/*" in text.  Assumes pos < text.length() - 1 */
+  /** 
+   * @param text the text to check
+   * @param pos the position within the text to check
+   * @return true if pos is index of string "//" or "/*" in text.  
+   *         Assumes pos {@literal <} text.length() - 1 
+   */
   private static boolean isCommentStart(String text, int pos) {
     char ch1 = text.charAt(pos);
     char ch2 = text.charAt(pos + 1);
@@ -1793,7 +1912,11 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   
   //--- Private methods that only support these inner classes
   
-  /** Updates _numLinesChanged given that a newline was inserted or removed at the specified offset. */
+  /** 
+   * Updates _numLinesChanged given that a newline was inserted or removed at 
+   * the specified offset. 
+   * @param offset the offset to check
+   */
   private void _numLinesChanged(int offset) {
     if (_numLinesChangedAfter < 0) {
       _numLinesChangedAfter =  offset;
@@ -1802,7 +1925,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     _numLinesChangedAfter = Math.min(_numLinesChangedAfter, offset);
   }
   
-  /** Gets the value of _numLinesChangedAfter field and reset it -1. */
+  /** @return the value of _numLinesChangedAfter field and reset it -1. */
   public int getAndResetNumLinesChangedAfter() {
     int result = _numLinesChangedAfter;
     _numLinesChangedAfter = -1;

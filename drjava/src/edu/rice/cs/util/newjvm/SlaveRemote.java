@@ -49,9 +49,12 @@ public interface SlaveRemote extends Remote {
    * This method is called when the slave JVM is initialized.
    * @param master  The remote link to the master JVM. Note that the implementation of the slave class will have to 
    *                downcast this reference to the correct master remote interface.
+   * @throws RemoteException if communication over RMI fails
    */
   public void start(MasterRemote master) throws RemoteException;
 
-  /** Quits the slave JVM. */
+  /** Quits the slave JVM. 
+   * @throws RemoteException if communication over RMI fails
+   */
   public void quit() throws RemoteException;
 }

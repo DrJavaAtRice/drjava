@@ -84,7 +84,6 @@ public abstract class IndentRuleQuestion extends IndentRuleWithTrace {
   /** Determines if the given rule holds in this context and calls the same method on one of its child nodes.
     * @param doc AbstractDJDocument containing the line to be indented.
     * @param reason The reason that indentation was initiated, specified in Indenter
-    * @return true if the caller should update the current location itself, false if the indenter has already handled this
     */
   public void indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
     if (applyRule(doc, reason)) {
@@ -97,15 +96,30 @@ public abstract class IndentRuleQuestion extends IndentRuleWithTrace {
     }
   }
   
-  /** Convenience method that wraps calls on applyRule in a read lock. Only used in testing. */
+  /** 
+   * Convenience method that wraps calls on applyRule in a read lock. Only used in testing. 
+   * @param doc AbstractDJDocument containing the line to be indented.
+   * @param reason The reason that indentation was initiated, specified in Indenter
+   * @return true if this node's rule holds.
+   */
   boolean testApplyRule(AbstractDJDocument doc, Indenter.IndentReason reason) { return applyRule(doc, reason); }
   
-  /** Convenience method that wraps calls on applyRule in a read lock. Only used in testing. */
+  /** 
+   * Convenience method that wraps calls on applyRule in a read lock. Only used in testing.
+   * @param doc  The AbstractDJDocument containing the line to be indented.
+   * @param pos  The Position within line to be indented.
+   * @param reason  The reason that indentation was initiated, specified in Indenter
+   * @return true if this node's rule holds.
+   */
   boolean testApplyRule(AbstractDJDocument doc, int pos, Indenter.IndentReason reason) {
     return applyRule(doc, pos, reason); 
   }
   
-  /** Convenience method that wraps calls on indentLine in a write lock. Only used in testing. */
+  /** 
+   * Convenience method that wraps calls on indentLine in a write lock. Only used in testing. 
+   * @param doc AbstractDJDocument containing the line to be indented.
+   * @param reason The reason that indentation was initiated, specified in Indenter
+   */
   public void testIndentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
     indentLine(doc, reason); 
   }

@@ -43,6 +43,9 @@ import java.rmi.RemoteException;
   * @version $Id$
   */
 public interface MasterRemote extends Remote {
-  /** No-op to prove that the master is still alive. */
+  /** 
+   * No-op to prove that the master is still alive.
+   * @throws RemoteException if remote communication fails
+   */
   public void checkStillAlive() throws RemoteException;
 }

@@ -40,7 +40,11 @@ package edu.rice.cs.drjava.config;
   * @version $Id$
   */
 public class JavaSystemProperty extends EagerProperty {
-  /** Create a Java system property. */
+
+  /** 
+   * Create a Java system property. 
+   * @param name the name of the property
+   */
   public JavaSystemProperty(String name) {
     super(name, "Help not available.");
     resetAttributes();

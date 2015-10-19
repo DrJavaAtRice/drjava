@@ -61,7 +61,7 @@ import edu.rice.cs.drjava.model.debug.DebugBreakpointData;
  *  store the new info.  <li> The interface for the DocumentInfoGetter should be expanded to allow for the new
  *  data to be retrieved.  <li> Add a new clause to the else-if ladder in the FilePropertyVisitor.  <li> 
  *  Add the new information to the DocFile form the DocumentInfoGetter in the ProjectFileBuilder's 
- *  addSourceDocument method.</p>
+ *  addSourceDocument method.</menu>
  * 
  *  <p> If the change is at the top level, you must modify the evaluateExpression method in this parser and add the 
  *  corresponding methods to the ProjectFileIR, ProjectFileIRImpl, and ProjectFileBuilder</p>
@@ -105,11 +105,15 @@ public class ProjectFileParser extends ProjectFileParserFacade {
     return pfir;
   }
   
-  /** Given a top-level s-expression, this method checks the name of the node and configures the given pfir 
-    * appropriately.  If the expression is empty, it is ignored.
-    * @param e the top-level s-expression to check
-    * @param pfir the ProjectFileIR to update
-    */
+  /** 
+   * Given a top-level s-expression, this method checks the name of the node 
+   * and configures the given pfir 
+   * appropriately.  If the expression is empty, it is ignored.
+   * @param e the top-level s-expression to check
+   * @param pfir the ProjectFileIR to update
+   * @param flv visitor
+   * @throws IOException if an IO operation fails
+   */
   private void evaluateExpression(SEList e, ProjectFileIR pfir, DocFileListVisitor flv) throws IOException {
     if (e == Empty.ONLY) return;
     Cons exp = (Cons) e; // If it's not empty, it's a cons
@@ -203,9 +207,12 @@ public class ProjectFileParser extends ProjectFileParserFacade {
     }
   } 
   
-  /** Parses out the labeled node (a non-empty list) into a DocFile. The node must have the "file" label on it.
-   *  @param s the non-empty list expression
-   *  @return the DocFile described by this s-expression
+  /** 
+   * Parses out the labeled node (a non-empty list) into a DocFile. The node 
+   * must have the "file" label on it.
+   * @param s the non-empty list expression
+   * @param pathRoot root of the path to the file being parsed
+   * @return the DocFile described by this s-expression
    */
   DocFile parseFile(SExp s, String pathRoot) {
     String name = s.accept(NameVisitor.ONLY);
@@ -282,7 +289,11 @@ public class ProjectFileParser extends ProjectFileParserFacade {
     else throw new PrivateProjectException("expected a list of 2 ints for select, found list of size " + li.size());
   }
 
-    /** Takes input of form "(str str)" and returns the second string. */
+    /** 
+     * Takes input of form "(str str)" and returns the second string. 
+     * @param n an expression of the form "(str str)"
+     * @return the second string in n
+     */
     private String parseStringNode(SExp n) {
       if (n instanceof Cons) 
         return ((Cons)n).getRest().accept(NameVisitor.ONLY);
@@ -447,9 +458,12 @@ public class ProjectFileParser extends ProjectFileParserFacade {
     }
   };
     
-  /** Parses out the labeled node (a non-empty list) into a breakpoint. The node must have the "breakpoint" label on it.
-   *  @param s the non-empty list expression
-   *  @return the breakpoint described by this s-expression
+  /** 
+   * Parses out the labeled node (a non-empty list) into a breakpoint. 
+   * The node must have the "breakpoint" label on it.
+   * @param s the non-empty list expression
+   * @param pathRoot the root path to the file being parsed
+   * @return the breakpoint described by this s-expression
    */
   DebugBreakpointData parseBreakpoint(SExp s, String pathRoot) {
     String name = s.accept(NameVisitor.ONLY);
@@ -521,9 +535,12 @@ public class ProjectFileParser extends ProjectFileParserFacade {
     }
   };
     
-  /** Parses out the labeled node (a non-empty list) into a bookmark. The node must have the "bookmark" label on it.
-   *  @param s the non-empty list expression
-   *  @return the bookmark described by this s-expression
+  /** 
+   * Parses out the labeled node (a non-empty list) into a bookmark. 
+   * The node must have the "bookmark" label on it.
+   * @param s the non-empty list expression
+   * @param pathRoot the root path to the file being parsed
+   * @return the bookmark described by this s-expression
    */
   FileRegion parseBookmark(SExp s, String pathRoot) {
     String name = s.accept(NameVisitor.ONLY);

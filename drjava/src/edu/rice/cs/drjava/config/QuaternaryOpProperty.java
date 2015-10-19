@@ -72,7 +72,26 @@ public class QuaternaryOpProperty<N,O,P,Q,R> extends EagerProperty {
   /** Lambda to format the result. */
   protected Lambda<R,String> _format;
   
-  /** Create an eager property. */
+  /** 
+   * Create an eager property. 
+   * 
+   * @param name the name of the property
+   * @param help the help page for this property
+   * @param op the operation
+   * @param op1Name operator 1 name
+   * @param op1Default opertor 1 default
+   * @param parse1 lambda to turn a string into the first operand
+   * @param op2Name operator 2 name
+   * @param op2Default operator 2 default
+   * @param parse2 lambda to turn a string into the second operand
+   * @param op3Name operator 3 name
+   * @param op3Default operator 3 default
+   * @param parse3 lambda to turn a string into the third operand
+   * @param op4Name operator 4 name
+   * @param op4Default operator 4 default
+   * @param parse4 lambda to turn a string into the fourth operand
+   * @param format lambda for formatting the result
+   */
   public QuaternaryOpProperty(String name,
                               String help,
                               Lambda4<N,O,P,Q,R> op,
@@ -107,7 +126,18 @@ public class QuaternaryOpProperty<N,O,P,Q,R> extends EagerProperty {
     resetAttributes();
   }
 
-  /** Create an eager property. */
+  /** 
+   * Create an eager property. 
+   * 
+   * @param name the name of the property
+   * @param help the help page for this property
+   * @param op the operation
+   * @param parse1 lambda to turn a string into the first operand
+   * @param parse2 lambda to turn a string into the second operand
+   * @param parse3 lambda to turn a string into the third operand
+   * @param parse4 lambda to turn a string into the fourth operand
+   * @param format lambda for formatting the result
+   */
   public QuaternaryOpProperty(String name,
                               String help,
                               Lambda4<N,O,P,Q,R> op,

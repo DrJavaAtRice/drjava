@@ -71,7 +71,7 @@ import static edu.rice.cs.util.XMLConfig.XMLConfigException;
  *  store the new info.  <li> The interface for the DocumentInfoGetter should be expanded to allow for the new
  *  data to be retrieved.  <li> Add a new clause to the else-if ladder in the FilePropertyVisitor.  <li> 
  *  Add the new information to the DocFile form the DocumentInfoGetter in the ProjectFileBuilder's 
- *  addSourceDocument method.</p>
+ *  addSourceDocument method.</menu>
  * 
  *  <p> If the change is at the top level, you must modify the evaluateExpression method in this parser and add the 
  *  corresponding methods to the ProjectFileIR, ProjectFileIRImpl, and ProjectFileBuilder</p>

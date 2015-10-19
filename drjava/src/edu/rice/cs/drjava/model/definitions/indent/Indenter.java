@@ -69,9 +69,11 @@ public class Indenter {
   
   public int getIndentLevel() { return _indentLevel; }
   
-  /** Builds the decision tree for indentation.
-    * For now, this method needs to be called every time the size of one indent level is being changed!
-    */
+  /** 
+   * Builds the decision tree for indentation.
+   * For now, this method needs to be called every time the size of one indent level is being changed!
+   * @param indentLevel number of spaces to indent
+   */
   public void buildTree(int indentLevel) {
     char[] indent = new char[indentLevel];
     java.util.Arrays.fill(indent,' ');
@@ -152,10 +154,11 @@ public class Indenter {
     _topRule = rule01;
   }
   
-  /** Indents the current line based on a decision tree which determines the indent based on context.
-    * @param doc document containing line to be indented  Assumes that reduced lock is already held.
-    * @return true if the condition tested by the top rule holds, false otherwise
-    */
+  /** 
+   * Indents the current line based on a decision tree which determines the indent based on context.
+   * @param doc document containing line to be indented  Assumes that reduced lock is already held.
+   * @param reason reason for indentation
+   */
   public void indent(AbstractDJDocument doc, Indenter.IndentReason reason) {
 //    Utilities.showDebug("Indenter.indent called on doc "  + doc);
     _topRule.indentLine(doc, reason);

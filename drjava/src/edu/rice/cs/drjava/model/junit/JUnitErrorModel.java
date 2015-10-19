@@ -55,6 +55,6 @@ public class JUnitErrorModel extends CompilerErrorModel {
     _testsHaveRun = testsHaveRun;
   }
   
-  /** Returns whether tests have been run before. */
+  /** @return whether tests have been run before. */
   public boolean haveTestsRun() { return _testsHaveRun; }
 }

@@ -53,9 +53,11 @@ public class BookmarksPanel extends RegionsTreePanel<MovingDocumentRegion> {
   protected JButton _removeButton;
   protected JButton _removeAllButton;
   
-  /** Constructs a new bookmarks panel.
-   *  This is swing view class and hence should only be accessed from the event-handling thread.
-   *  @param frame the MainFrame
+  /** 
+   * Constructs a new bookmarks panel.
+   * This is swing view class and hence should only be accessed from the event-handling thread.
+   * @param frame the MainFrame
+   * @param bookmarkManager the bookmark manager
    */
   public BookmarksPanel(MainFrame frame, RegionManager<MovingDocumentRegion> bookmarkManager) {
     super(frame, "Bookmarks", bookmarkManager);

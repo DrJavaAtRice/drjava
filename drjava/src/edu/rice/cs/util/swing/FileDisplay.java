@@ -81,12 +81,14 @@ public class FileDisplay {
   
   public File getFile() { return _file; }
   
-  /** If the representation of the file is different from the underlying
+  /** 
+   * If the representation of the file is different from the underlying
    * child string of the path, then the node represented by this file display
    * cannot be edited. If the user edited the text by giving a new representation,
    * there is no way to determine what the new child string of the path should be.
    * However, if the user is creating a new node in the tree, they will be able 
    * to edit it.
+   * @return whether this is editable
    */
   public boolean isEditable() { return (_isNew || (_file.canWrite() && _rep.equals(_file.getName()))); }
   

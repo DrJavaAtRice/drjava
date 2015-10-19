@@ -58,20 +58,31 @@ public abstract class AsyncTaskLauncher {
     */
   protected abstract void setParentContainerEnabled(boolean enabled);
   
-  /** Creates a progress monitor that can be used to provide feedback to the user during the asynchronous task. This
-    * progress monitor can also be used to allow the user to request the task to be canceled. <p>
-    * <i>This method only executes in the event-handling thread.</i> 
-    * @return The progress monitor used to provide feedback.
-    */
+  /** 
+   * Creates a progress monitor that can be used to provide feedback to the 
+   * user during the asynchronous task. This progress monitor can also be used 
+   * to allow the user to request the task to be canceled. <p>
+   * <i>This method only executes in the event-handling thread.</i> 
+   * @param description description
+   * @param min the min val on the progress bar
+   * @param max the max val on the progress bar
+   * @return The progress monitor used to provide feedback.
+   */
   protected abstract IAsyncProgress createProgressMonitor(String description, int min, int max);
   
-  /** Executes the AsyncTask in its own thread after performing any needed steps to prepare the UI for its execution.
+  /** 
+   * Executes the AsyncTask in its own thread after performing any needed 
+   * steps to prepare the UI for its execution.
    * 
+   * @param <P> The type of parameter to pass to the task
    * @param <R>  The type of result to pass from <code>runAsync</code> to <code>complete</code>
    * @param task  The task to execute on its own worker thread
-   * @param showProgress  Whether the progress monitor should be displayed to the user. If it is false, the user will 
+   * @param param The parameter to be passed to the task
+   * @param showProgress  Whether the progress monitor should be displayed to 
+   *                      the user. If it is false, the user will 
    *                      not be able to make any cancelation requests to the task.
-   * @param lockUI  Whether the user should be able to interact with the rest of the UI while the task is in progress.
+   * @param lockUI  Whether the user should be able to interact with the rest 
+   *                of the UI while the task is in progress.
    */
   public <P, R> void executeTask(final AsyncTask<P, R> task, final P param, final boolean showProgress,
                                  final boolean lockUI) {

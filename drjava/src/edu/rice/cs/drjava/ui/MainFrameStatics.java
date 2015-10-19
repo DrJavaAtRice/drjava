@@ -63,6 +63,7 @@ public class MainFrameStatics {
     * @param changeButton text for the "yes, change it!" button
     * @param keepButton text for the "no, leave it!" button
     * @param newExt new extension if changed
+    * @return the new file
     */
   public static File proposeToChangeExtension(Component parent, File input,
                                               String title,
@@ -87,10 +88,12 @@ public class MainFrameStatics {
     return input;
   }
 
-  /** Confirms with the user that the file should be overwritten.
-    * @param f file to overwrite
-    * @return <code>true</code> iff the user accepts overwriting.
-    */
+  /** 
+   * Confirms with the user that the file should be overwritten.
+   * @param parent the parent component
+   * @param f file to overwrite
+   * @return <code>true</code> iff the user accepts overwriting.
+   */
   public static boolean verifyOverwrite(Component parent, File f) {
     Object[] options = {"Yes","No"};
     int n = JOptionPane.showOptionDialog(parent,
@@ -167,11 +170,14 @@ public class MainFrameStatics {
   }
   
   public static abstract class AutoCompletePopupEntry implements Comparable<AutoCompletePopupEntry> {
-    /** Return the simple class name, e.g. "Integer". */
+
+    /** @return the simple class name, e.g. "Integer". */
     public abstract String getClassName();
-    /** Return the full package including the last period, e.g. "java.lang.". */
+
+    /** @return the full package including the last period, e.g. "java.lang.". */
     public abstract String getFullPackage();
-    /** Return the OpenDefinitionsDocument associated with this entry, or null if none. */
+
+    /** @return the OpenDefinitionsDocument associated with this entry, or null if none. */
     public abstract OpenDefinitionsDocument getOpenDefinitionsDocument();
     
     public int compareTo(AutoCompletePopupEntry other) {

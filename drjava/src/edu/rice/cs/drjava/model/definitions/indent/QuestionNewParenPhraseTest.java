@@ -47,6 +47,7 @@ import javax.swing.text.BadLocationException;
 public final class QuestionNewParenPhraseTest extends IndentRulesTestCase {
 
   /** Tests hitting start of document.
+   * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testStartOfDocument() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionNewParenPhrase(null, null);
@@ -58,6 +59,7 @@ public final class QuestionNewParenPhraseTest extends IndentRulesTestCase {
   }
   
   /** Tests having no paren phrase delimiters on prev line.
+   * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testNoParenDelims() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionNewParenPhrase(null, null);
@@ -68,7 +70,9 @@ public final class QuestionNewParenPhraseTest extends IndentRulesTestCase {
     assertTrue("third line", !rule.testApplyRule(_doc, 9, Indenter.IndentReason.OTHER));
   }
   
-  /** Tests having delimiter on prev line, with text preceding. */
+  /** Tests having delimiter on prev line, with text preceding.
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testParenDelimsWithText() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionNewParenPhrase(null, null);
     
@@ -81,7 +85,9 @@ public final class QuestionNewParenPhraseTest extends IndentRulesTestCase {
     assertTrue("line after close paren", !rule.testApplyRule(_doc, 24, Indenter.IndentReason.OTHER));
   }
   
-  /** Tests having delimiter on prev line, with no text preceding. */
+  /** Tests having delimiter on prev line, with no text preceding.
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testParenDelimsNoText() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionNewParenPhrase(null, null);
     
@@ -95,6 +101,7 @@ public final class QuestionNewParenPhraseTest extends IndentRulesTestCase {
   }
   
   /** Tests having a comment after the delimiter
+   * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testParenDelimsWithComment() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionNewParenPhrase(null, null);
@@ -107,6 +114,7 @@ public final class QuestionNewParenPhraseTest extends IndentRulesTestCase {
   
   /** Tests having a paren delimiter several lines back, with only
    * whitespace inbetween.
+   * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testMultipleBlankLinesBack() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionNewParenPhrase(null, null);
@@ -121,6 +129,7 @@ public final class QuestionNewParenPhraseTest extends IndentRulesTestCase {
   
   /** Tests having a paren delimiter several lines back, with only
    * blank space and comments inbetween.
+   * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testMultipleCommentLinesBack() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionNewParenPhrase(null, null);
@@ -134,6 +143,7 @@ public final class QuestionNewParenPhraseTest extends IndentRulesTestCase {
   }
   
   /** Tests having text on a line after the delimiter.
+   * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testDoesNotEndWithParenDelim() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionNewParenPhrase(null, null);
@@ -145,6 +155,7 @@ public final class QuestionNewParenPhraseTest extends IndentRulesTestCase {
   }
   
   /** Tests having an operator as a delimiter.
+   * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testOperatorDelim() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionNewParenPhrase(null, null);
@@ -156,6 +167,7 @@ public final class QuestionNewParenPhraseTest extends IndentRulesTestCase {
   }
   
   /** Tests ignoring delims on line.
+   * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testIgnoreDelimsOnLine() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionNewParenPhrase(null, null);

@@ -108,17 +108,26 @@ public final class KeyStrokeOptionTest extends DrJavaTestCase {
     assertEquals(ks, io.parse(io.format(ks)));
   }
   
-  /** Tests that key strokes are output in a parseable format even in foreign locales.  The test must be run in a 
-    * separate JVM, because once the locale is changed, it cannot be restored.  (If someone can figure out how
-    * to effectively set it back, feel free to remove this hack!)
-    */
+  /** 
+   * Tests that key strokes are output in a parseable format even in foreign 
+   * locales.  The test must be run in a separate JVM, because once the locale 
+   * is changed, it cannot be restored.  (If someone can figure out how
+   * to effectively set it back, feel free to remove this hack!)
+   * 
+   * @throws IOException if an IO operation fails
+   * @throws InterruptedException if the remote JVM is interrupted
+   */
   public void testLocaleSpecificFormat() throws IOException, InterruptedException {
     Process process = JVMBuilder.DEFAULT.start(KeyStrokeOptionTest.class.getName()); 
     int status = process.waitFor();
     assertEquals("Local specific keystroke test failed!", 0, status);
   }
   
-  /** Main method called by testLocalSpecificFormat.  Runs in new JVM to avoid corrupting the locale of other tests. */
+  /** 
+   * Main method called by testLocalSpecificFormat.  Runs in new JVM to avoid 
+   * corrupting the locale of other tests. 
+   * @param args command-line args
+   */
   public static void main(String[] args) {
     // Set to German, which has different words for ctrl and shift
     Locale.setDefault(Locale.GERMAN);

@@ -110,7 +110,11 @@ public class JUnitTestManager {
   private List<File> files = null;
   private JUnitResultTuple lastResult = new JUnitResultTuple(false, null);
 
-  /** Standard constructor */
+  /** 
+   * Standard constructor 
+   * @param jmc a JUnitModelCallback
+   * @param loaderFactory factory to create class loaders
+   */
   public JUnitTestManager(JUnitModelCallback jmc, Lambda<ClassLoader, ClassLoader> loaderFactory) {
     _jmc = jmc;
     _loaderFactory = loaderFactory;
@@ -121,11 +125,14 @@ public class JUnitTestManager {
     return this.lastResult;
   }
 
-  /** Find the test classes among the given classNames and accumulate them in
-    * TestSuite for junit.  Returns null if a test suite is already pending.
-    * @param classNames the class names that are test class candidates
-    * @param files the files corresponding to classNames
-    */
+  /** 
+   * Find the test classes among the given classNames and accumulate them in
+   * TestSuite for junit.  Returns null if a test suite is already pending.
+   * @param classNames the class names that are test class candidates
+   * @param files the files corresponding to classNames
+   * @param coverageMetadata metadata to be used to generate the coverage report
+   * @return list of test class names
+   */
   public List<String> findTestClasses(final List<String> classNames, 
     final List<File> files, CoverageMetadata coverageMetadata) {
 
@@ -479,7 +486,12 @@ public class JUnitTestManager {
     return new JUnitError(file, lineNum, 0, message, !isFailure, testName, className, exception, stackTrace);
   }
   
-  /** Parses the line number out of the stack trace in the given class name. */
+  /** 
+   * Parses the line number out of the stack trace in the given class name. 
+   * @param sw stack trace
+   * @param classname class in which stack trace was generated
+   * @return the line number
+   */
   private int _lineNumber(String sw, String classname) {
     // TODO: use stack trace elements to find line number
     int lineNum;
@@ -501,7 +513,10 @@ public class JUnitTestManager {
     return lineNum;
   }
   
-  /** Make a fresh JUnitTestRunner with its own class loader instance. */
+  /** 
+   * @param current template for the runner's class loader
+   * @return a fresh JUnitTestRunner with its own class loader instance. 
+   */
   private JUnitTestRunner makeRunner(ClassLoader current) {
     return new JUnitTestRunner(_jmc, _loaderFactory.value(current));
   }

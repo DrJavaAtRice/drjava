@@ -77,7 +77,11 @@ public class GeneralProcessCreator extends ProcessCreator {
     _props = pm;
   }
   
-  /** Reconstructs the command line for a simple process. */
+  /** 
+   * Reconstructs the command line for a simple process. 
+   * @param cmds commands to be reconstructed
+   * @return newly-constructed command line
+   */
   protected static String getProcessCmdLine(List<String> cmds) {
     StringBuilder sb = new StringBuilder();
     for (int i = 0; i < cmds.size(); ++i) {
@@ -91,7 +95,11 @@ public class GeneralProcessCreator extends ProcessCreator {
     return s;
   }
   
-  /** Reconstructs the command line for a process chain. */
+  /** 
+   * Reconstructs the command line for a process chain. 
+   * @param pipe pipe from which to reconstruct the command line
+   * @return newly-constructed command line
+   */
   protected static String getProcessChainCmdLine(List<List<String>> pipe) {
     StringBuilder sb = new StringBuilder();
     final String sep = " " + ProcessChain.PIPE_SEPARATOR + " ";
@@ -106,7 +114,11 @@ public class GeneralProcessCreator extends ProcessCreator {
     return s;
   }
   
-  /** Reconstructs the command line for a process sequence. */
+  /** 
+   * Reconstructs the command line for a process sequence. 
+   * @param seqs sequences from which to reconstruct the command line
+   * @return newly-constructed command line
+   */
   protected static String getProcessSequenceCmdLine(List<List<List<String>>> seqs) {
     StringBuilder sb = new StringBuilder();
     final String sep = " " + ProcessChain.PROCESS_SEPARATOR + " ";

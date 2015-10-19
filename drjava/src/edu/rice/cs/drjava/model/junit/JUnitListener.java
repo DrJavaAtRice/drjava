@@ -85,8 +85,12 @@ public interface JUnitListener {
   /** Called after JUnit is finished running tests. */
   public void junitEnded();
   
-  /** Demands that all source files be in sync before running JUnit tests. The caller of this method must check if the 
-    * documents are in sync with their class files using OpenDefinitionsDocument.checkIfClassFileInSync().
-    */
+  /** 
+   * Demands that all source files be in sync before running JUnit tests. 
+   * The caller of this method must check if the documents are in sync with 
+   * their class files using OpenDefinitionsDocument.checkIfClassFileInSync().
+   * @param l the listener
+   * @param outOfSync documents that are out of sync
+   */
   public void compileBeforeJUnit(final CompilerListener l, List<OpenDefinitionsDocument> outOfSync);
 }

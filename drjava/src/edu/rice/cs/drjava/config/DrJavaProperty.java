@@ -63,8 +63,12 @@ public abstract class DrJavaProperty implements Cloneable {
   /** Set of other properties that are listening to this property, i.e.
     * when this property is invalidated, the other properties are too. */
   protected Set<DrJavaProperty> _listening = new HashSet<DrJavaProperty>();
-  
-  /** Create a property. */
+
+  /** 
+   * Create a property. 
+   * @param name the name of the property
+   * @param help the help page for this property
+   */ 
   public DrJavaProperty(String name, String help) {
     if (name == null) { throw new IllegalArgumentException("DrJavaProperty name is null"); }
     _name = name;
@@ -72,7 +76,12 @@ public abstract class DrJavaProperty implements Cloneable {
     resetAttributes();
   }
 
-  /** Create a property. */
+  /** 
+   * Create a property. 
+   * @param name the name of the property
+   * @param value the value of the property
+   * @param help the help page for this property
+   */
   public DrJavaProperty(String name, String value, String help) {
     this(name, help);
     if (value == null) { throw new IllegalArgumentException("DrJavaProperty value is null"); }
@@ -81,11 +90,13 @@ public abstract class DrJavaProperty implements Cloneable {
     _isCurrent = true;
   }
   
-  /** Return the name of the property. */
+  /** @return the name of the property. */
   public String getName() { return _name; }
   
-  /** Return the value of the property. If it is not current, update first.
-    * @param pm PropertyMaps used for substitution when replacing variables */
+  /** 
+   * @param pm PropertyMaps used for substitution when replacing variables
+   * @return the value of the property. If it is not current, update first.
+   */
   public String getCurrent(PropertyMaps pm) {
     if (!isCurrent()) {
       update(pm);
@@ -95,8 +106,10 @@ public abstract class DrJavaProperty implements Cloneable {
     return _value;
   }
 
-  /** Return the value of the property lazily. The value may be stale.
-    * @param pm PropertyMaps used for substitution when replacing variables */
+  /**
+   * @param pm PropertyMaps used for substitution when replacing variables
+   * @return the value of the property lazily. The value may be stale.
+   */
   public String getLazy(PropertyMaps pm) {
     if (_value == null) { throw new IllegalArgumentException("DrJavaProperty value is null"); }
     return _value;
@@ -132,10 +145,11 @@ public abstract class DrJavaProperty implements Cloneable {
     }
   }
   
-  /** Return an attribute's value.
-    * @param key name of the attribute
-    * @throws IllegalArgumentException if attribute with specified key does not already exist in table
-    */
+  /** 
+   * @param key name of the attribute
+   * @return the specified attribute's value
+   * @throws IllegalArgumentException if attribute with specified key does not already exist in table
+   */
   public String getAttribute(String key) {
     if (!_attributes.containsKey(key)) {
       throw new IllegalArgumentException("Attribute " + key + " not known to property " + _name);
@@ -143,13 +157,13 @@ public abstract class DrJavaProperty implements Cloneable {
     return _attributes.get(key);
   }
   
-  /** Return the value, which might be stale or null. */
+  /** @return the value, which might be stale or null. */
   public String toString() { return _value; }
   
-  /** Return the value, which might be stale. */
+  /** @return the value, which might be stale. */
   public String getHelp() { return _help; }
 
-  /** Return true if the value is current. */
+  /** @return true if the value is current. */
   public boolean isCurrent() { return _isCurrent; }
     
   /** Mark the value as stale and invalidate other properties that are listening. */

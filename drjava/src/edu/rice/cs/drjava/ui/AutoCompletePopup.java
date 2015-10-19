@@ -106,7 +106,7 @@ public class AutoCompletePopup {
     * @param initial initial text
     * @param loc caret location in the initial text
     * @param canceledAction action to take if canceled
-    * @param acceptedAction action to take if accepted <simple name, full name, from, to>
+    * @param acceptedAction action to take if accepted {@literal <simple name, full name, from, to>}
     */
   public void show(final Component parent,
                    final String title,
@@ -127,7 +127,7 @@ public class AutoCompletePopup {
     * @param loc caret location in the initial text
     * @param actionNames names for the actions
     * @param canceledAction action to take if canceled
-    * @param acceptedActions actions to take if accepted <simple name, full name, from, to>
+    * @param acceptedActions actions to take if accepted {@literal <simple name, full name, from, to>}
     */
   public void show(final Component parent,
                    final String title,
@@ -154,7 +154,7 @@ public class AutoCompletePopup {
     * @param actionKeyStrokes keystrokes for the actions
     * @param oneMatchActionIndex the action to take when there's just one match, or -1
     * @param canceledAction action to take if canceled
-    * @param acceptedActions actions to take if accepted <simple name, full name, from, to>
+    * @param acceptedActions actions to take if accepted {@literal <simple name, full name, from, to>}
     */
   public void show(final Component parent,
                    final String title,

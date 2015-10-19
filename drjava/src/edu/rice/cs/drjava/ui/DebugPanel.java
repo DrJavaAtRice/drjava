@@ -95,8 +95,11 @@ public class DebugPanel extends JPanel implements OptionConstants {
   /* The following field is commented out because it was never written (and hence always null). */
 //  private DefaultTreeCellRenderer dtcr;
 
-  /** Constructs a new panel to display debugging information when the Debugger is active.  This is swing view class and hence should only
-   *  be accessed from the event-handling thread.
+  /** 
+   * Constructs a new panel to display debugging information when the Debugger 
+   * is active.  This is swing view class and hence should only
+   * be accessed from the event-handling thread.
+   * @param frame reference to the main frame
    */
   public DebugPanel(MainFrame frame) {
 
@@ -140,7 +143,10 @@ public class DebugPanel extends JPanel implements OptionConstants {
     _setColors(_threadTable);
   }
 
-  /** Quick helper for setting up color listeners. */
+  /** 
+   * Quick helper for setting up color listeners. 
+   * @param c component for which to set up listeners
+   */
   private static void _setColors(Component c) {
     new ForegroundColorListener(c);
     new BackgroundColorListener(c);

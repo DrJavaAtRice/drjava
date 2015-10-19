@@ -255,11 +255,15 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     super.tearDown();
   }
   
-  /** Ensures that the given object will wait for n notifications. Callers must call o.wait() AFTER this is 
-    * called.  Use _notifyLock instead of o.notify() when using this method. Only one object (o) can use this 
-    * synchronization protocol at a time, since it uses a field to store the number of pending notifications.
-    * @param n The number of times to be "notified" through _notifyLock
-    */
+  /** 
+   * Ensures that the given object will wait for n notifications. Callers must 
+   * call o.wait() AFTER this is called.  Use _notifyLock instead of 
+   * o.notify() when using this method. Only one object (o) can use this 
+   * synchronization protocol at a time, since it uses a field to store the 
+   * number of pending notifications.
+   * @param n The number of times to be "notified" through _notifyLock
+   * @throws InterruptedException if execution is interrupted unexpectedly
+   */
   protected void _setPendingNotifies(int n) throws InterruptedException {
     synchronized(_notifierLock) {
       _log.log("Waiting for " + n + " notifications ...");
@@ -280,24 +284,28 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     }
   }
   
-  /** Cleanly starts the debugger with a newly compiled file saved in a temporary directory.  Assumes that the file will
-    * compile successfully.
-    * @param fileName Name of the file to save in a temp directory
-    * @param classText String containing the code for the class to compile
-    * @return OpenDefinitionsDocument containing the compiled source file
-    */
+  /** 
+   * Cleanly starts the debugger with a newly compiled file saved in a 
+   * temporary directory.  Assumes that the file will compile successfully.
+   * @param fileName Name of the file to save in a temp directory
+   * @param classText String containing the code for the class to compile
+   * @return OpenDefinitionsDocument containing the compiled source file
+   * @throws Exception if something goes wrong
+   */
   protected OpenDefinitionsDocument _startupDebugger(String fileName, String classText) throws Exception {
     // Create a file in the temporary directory
     File file = IOUtil.attemptCanonicalFile(new File(_tempDir, fileName));
     return _startupDebugger(file, classText);
   }
   
-  /** Cleanly starts the debugger with a newly compiled file saved in a temporary directory.  Assumes that the 
-    * file will compile successfully.
-    * @param file File to save the class in
-    * @param classText String containing the code for the class to compile
-    * @return OpenDefinitionsDocument containing the compiled source file
-    */
+  /** 
+   * Cleanly starts the debugger with a newly compiled file saved in a 
+   * temporary directory.  Assumes that the file will compile successfully.
+   * @param file File to save the class in
+   * @param classText String containing the code for the class to compile
+   * @return OpenDefinitionsDocument containing the compiled source file
+   * @throws Exception if something goes wrong
+   */
   protected OpenDefinitionsDocument _startupDebugger(File file, String classText) throws Exception {
     // Compile the file
     _log.log("Compiling " + file);
@@ -313,7 +321,11 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     return doc;
   }
   
-  /** Cleanly shuts down the debugger, without having to wait for a suspended interaction to complete. */
+  /** 
+   * Cleanly shuts down the debugger, without having to wait for a suspended 
+   * interaction to complete.
+   * @throws Exception if something goes wrong
+   */
   protected void _shutdownWithoutSuspendedInteraction() throws Exception {
     _log.log("Shutting down debugger in " + this + " without waiting");
     _model.getBreakpointManager().clearRegions();
@@ -329,7 +341,11 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     _log.log("Completed debugger shutdown for " + this);
   }
   
-  /** Cleanly shuts down the debugger, waiting for a suspended interaction to complete. */
+  /** 
+   * Cleanly shuts down the debugger, waiting for a suspended interaction 
+   * to complete.
+   * @throws Exception if something goes wrong
+   */
   protected void _shutdownAndWaitForInteractionEnded() throws Exception {
     _log.log("Shutting down debugger in " + this + " with waiting");
     _model.getBreakpointManager().clearRegions();
@@ -356,7 +372,11 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     _log.log("Completed debugger shutdown for " + this);
   }
   
-  /** Sets the current debugger thread to the specified thread t.*/
+  /** 
+   * Sets the current debugger thread to the specified thread t.
+   * @param t the thread to set
+   * @throws DebugException if something goes wrong
+   */
   protected void _doSetCurrentThread(final DebugThreadData t) throws DebugException {
     Utilities.invokeLater(new Runnable() { 
       public void run() { 
@@ -366,7 +386,11 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     });
   }
   
-  /** Resumes the debugger asynchronously so as to avoid getting notified before we start waiting for notifies. */
+  /** 
+   * Resumes the debugger asynchronously so as to avoid getting notified 
+   * before we start waiting for notifies. 
+   * @param type the type of step to take
+   */
   protected void _asyncStep(final Debugger.StepType type) {
     new Thread("asyncStep Thread") {
       public void run() {
@@ -379,7 +403,8 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     }.start();
   }
   
-  /** Resumes the debugger asynchronously so as to aovid
+  /** 
+   * Resumes the debugger asynchronously so as to aovid
    * getting notified before we start waiting for notifies
    */
   protected void _asyncResume() {
@@ -394,7 +419,11 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     }.start();
   }
   
-  /** Sets the current thread in a new thread to avoid being notified of events before we start waiting for them. */
+  /** 
+   * Sets the current thread in a new thread to avoid being notified of events 
+   * before we start waiting for them. 
+   * @param th data about the thread to be set
+   */
   protected void _asyncDoSetCurrentThread(final DebugThreadData th) {
     new Thread("asyncDoSetCurrentThread Thread") {
       public void run() {

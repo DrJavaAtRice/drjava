@@ -49,9 +49,13 @@ public class ProjectFileParserFacade {
   protected File _projectFile;
   protected boolean _xmlProjectFile;
   
-  /** @param projFile the file to parse
-    *  @return the project file IR
-    */
+  /** 
+   * @param projFile the file to parse
+   * @return the project file IR
+   * @throws IOException if an IO operation fails
+   * @throws FileNotFoundException if the file cannot be found
+   * @throws MalformedProjectFileException if the file is not in the expected format
+   */
   public ProjectFileIR parse(File projFile) throws IOException, FileNotFoundException, MalformedProjectFileException {
     FileReader fr = new FileReader(projFile);
     int read = fr.read();
@@ -90,6 +94,7 @@ public class ProjectFileParserFacade {
    * All DrJava revisions before 4782 need to be fixed up.  We also fixup all projects that have "unknown" versions.
    * 
    * @param pfir - the ProjectProfile to fixup, if needed.
+   * @return a "fixed up" version if pfir
    */
   protected ProjectFileIR fixup(ProjectFileIR pfir){
     boolean doFixup = false;

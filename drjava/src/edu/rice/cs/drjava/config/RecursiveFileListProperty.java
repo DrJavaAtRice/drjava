@@ -47,9 +47,18 @@ import edu.rice.cs.plt.text.TextUtil;
   * @version $Id$
   */
 public class RecursiveFileListProperty extends FileListProperty {
+
   /** Start directory. */
   protected String _start;
-  /** Create an recursive file list property. */
+
+  /** 
+   * Create an recursive file list property. 
+   * @param name the name of the property
+   * @param sep the separating string
+   * @param dir the relative directory
+   * @param start the start directory
+   * @param help the help page for this property
+   */
   public RecursiveFileListProperty(String name, String sep, String dir, String start, String help) {
     super(name, sep, dir, help);
     _start = start;

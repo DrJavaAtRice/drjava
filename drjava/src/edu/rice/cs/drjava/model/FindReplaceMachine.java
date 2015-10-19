@@ -78,10 +78,15 @@ public class FindReplaceMachine {
   private volatile SingleDisplayModel _model;
   private volatile Component _frame;  
   
-  /** Standard Constructor.
-    * Creates new machine to perform find/replace operations on a particular document starting from a given position.
-    * @param docIterator an object that allows navigation through open Swing documents (it is DefaultGlobalModel)
-    */
+  /** 
+   * Standard Constructor.
+   * Creates new machine to perform find/replace operations on a particular 
+   * document starting from a given position.
+   * @param model the model
+   * @param docIterator an object that allows navigation through open Swing 
+   *        documents (it is DefaultGlobalModel)
+   * @param frame the frame
+   */
   public FindReplaceMachine(SingleDisplayModel model, DocumentIterator docIterator, Component frame) {    
     _skipText = false;
 //    _checkAllDocsWrapped = false;
@@ -158,7 +163,7 @@ public class FindReplaceMachine {
   
   public void setPosition(int pos) { _current = pos; }
   
-  /** Gets the character offset to which this machine is currently pointing. */
+  /** @return the character offset to which this machine is currently pointing. */
   public int getCurrentOffset() { //return _current.getOffset(); 
     return _current;
   }
@@ -224,7 +229,11 @@ public class FindReplaceMachine {
     return matchSpace.equals(findWord);
   }
   
-  /** If we're on a match for the find word, replace it with the replace word.  Only executes in event thread. */
+  /** 
+   * If we're on a match for the find word, replace it with the replace word. 
+   * Only executes in event thread. 
+   * @return true if we're on a match; false otherwise
+   */
   public boolean replaceCurrent() {
     
     assert EventQueue.isDispatchThread();
@@ -264,10 +273,14 @@ public class FindReplaceMachine {
     */
   public int replaceAll() { return replaceAll(_searchAllDocuments, _searchSelectionOnly); }
   
-  /** Replaces all occurences of the find word with the replace word in the current document of in all documents or 
-    * in the current selection of the current document depending the value of the flag searchAll
-    * @return the number of replacements
-    */
+  /** 
+   * Replaces all occurences of the find word with the replace word in the 
+   * current document of in all documents or in the current selection of the 
+   * current document depending the value of the flag searchAll
+   * @param searchAll true if we should search for occurrences in all documents
+   * @param searchSelectionOnly true if we should only search in the current selection of documents
+   * @return the number of replacements
+   */
   private int replaceAll(boolean searchAll, boolean searchSelectionOnly) {
     if (searchAll) {
       int count = 0;           // the number of replacements done so far
@@ -295,16 +308,17 @@ public class FindReplaceMachine {
   }
   
   /** Replaces all occurences of _findWord with _replaceWord in _doc. Never searches in other documents.  Starts at
-    * the beginning or the end of the document (depending on find direction).  This convention ensures that matches 
-    * created by string replacement will not be replaced as in the following example:<p>
-    *   findString:    "hello"<br>
-    *   replaceString: "e"<br>
-    *   document text: "hhellollo"<p>
-    * Depending on the cursor position, clicking replace all could either make the document text read "hello" 
-    * (which is correct) or "e".  This is because of the behavior of findNext(), and it would be incorrect
-    * to change that behavior.  Only executes in event thread.
-    * @return the number of replacements
-    */
+   * the beginning or the end of the document (depending on find direction).  This convention ensures that matches 
+   * created by string replacement will not be replaced as in the following example:<p>
+   *   findString:    "hello"<br>
+   *   replaceString: "e"<br>
+   *   document text: "hhellollo"<p>
+   * Depending on the cursor position, clicking replace all could either make the document text read "hello" 
+   * (which is correct) or "e".  This is because of the behavior of findNext(), and it would be incorrect
+   * to change that behavior.  Only executes in event thread.
+   * @param searchSelectionOnly true if we should only search in the current selection of documents
+   * @return the number of replacements
+   */
   private int _replaceAllInCurrentDoc(boolean searchSelectionOnly) {
     
     assert EventQueue.isDispatchThread();
@@ -332,22 +346,29 @@ public class FindReplaceMachine {
     return count;
   }
   
-  /** Processes all occurences of the find word with the replace word in the current document or in all documents
-    * depending the value of the machine register _searchAllDocuments.
-    * @param findAction action to perform on the occurrences; input is the FindResult, output is ignored
-    * @return the number of processed occurrences
-    */
+  /** 
+   * Processes all occurences of the find word with the replace word in the 
+   * current document or in all documents depending the value of the machine 
+   * register _searchAllDocuments.
+   * @param findAction action to perform on the occurrences; input is the FindResult, output is ignored
+   * @param region the selection region
+   * @return the number of processed occurrences
+   */
   public int processAll(Runnable1<FindResult> findAction, MovingDocumentRegion region) { 
     _selectionRegion = region;
     return processAll(findAction, _searchAllDocuments, _searchSelectionOnly); 
   }
   
-  /** Processes all occurences of the find word with the replace word in the current document or in all documents
-    * depending the value of the flag searchAll.  Assumes that findAction does not modify the document it processes.
-    * Only executes in event thread.
-    * @param findAction action to perform on the occurrences; input is the FindResult, output is ignored
-    * @return the number of replacements
-    */
+  /** 
+   * Processes all occurences of the find word with the replace word in the 
+   * current document or in all documents depending the value of the flag 
+   * searchAll.  Assumes that findAction does not modify the document it 
+   * processes. Only executes in event thread.
+   * @param findAction action to perform on the occurrences; input is the FindResult, output is ignored
+   * @param searchAll true if we should search for occurrences in all documents
+   * @param searchSelectionOnly true if we should only search in the current selection of documents
+   * @return the number of replacements
+   */
   private int processAll(Runnable1<FindResult> findAction, boolean searchAll, boolean searchSelectionOnly) {
     
     assert EventQueue.isDispatchThread();
@@ -376,17 +397,19 @@ public class FindReplaceMachine {
     else return _processAllInCurrentDoc(findAction, false);
   }
   
-  /** Processes all occurences of _findWord in _doc. Never processes other documents.  Starts at the beginning or the
-    * end of the document (depending on find direction).  This convention ensures that matches created by string 
-    * replacement will not be replaced as in the following example:<p>
-    *  findString:    "hello"<br>
-    *  replaceString: "e"<br>
-    *  document text: "hhellollo"<p>
-    * Assumes this has mutually exclusive access to _doc (e.g., by hourglassOn) and findAction does not modify _doc.
-    * Only executes in event thread.
-    * @param findAction action to perform on the occurrences; input is the FindResult, output is ignored
-    * @return the number of replacements
-    */
+  /** 
+   * Processes all occurences of _findWord in _doc. Never processes other documents.  Starts at the beginning or the
+   * end of the document (depending on find direction).  This convention ensures that matches created by string 
+   * replacement will not be replaced as in the following example:<p>
+   *  findString:    "hello"<br>
+   *  replaceString: "e"<br>
+   *  document text: "hhellollo"<p>
+   * Assumes this has mutually exclusive access to _doc (e.g., by hourglassOn) and findAction does not modify _doc.
+   * Only executes in event thread.
+   * @param findAction action to perform on the occurrences; input is the FindResult, output is ignored
+   * @param searchSelectionOnly true if we should only search in the current selection of documents
+   * @return the number of replacements
+   */
   private int _processAllInCurrentDoc(Runnable1<FindResult> findAction, boolean searchSelectionOnly) {
     if(!searchSelectionOnly) {
       _selectionRegion = new MovingDocumentRegion(_doc, 0, _doc.getLength(), _doc._getLineStartPos(0),
@@ -457,10 +480,18 @@ public class FindReplaceMachine {
   }
   
   
-  /** Finds next match in specified doc only.  If searching forward, len must be doc.getLength().  If searching backward,
-    * start must be 0.  If searchAll, suppress executing in-document wrapped search, because it must be deferred.  Only
-    * runs in the event thread.  Note than this method does a wrapped search if specified search fails.
-    */
+  /** 
+   * Finds next match in specified doc only.  If searching forward, len must 
+   * be doc.getLength().  If searching backward, start must be 0.  If 
+   * searchAll, suppress executing in-document wrapped search, because it 
+   * must be deferred.  Only runs in the event thread.  Note than this method 
+   * does a wrapped search if specified search fails.
+   * @param doc the document to search in
+   * @param start the start offset for searching
+   * @param len the length to search
+   * @param searchAll flao
+   * @return the next match in the specified document
+   */
   private FindResult _findNextInDoc(OpenDefinitionsDocument doc, int start, int len, boolean searchAll) {
     // search from current position to "end" of document ("end" is start if searching backward)
 //    Utilities.show("_findNextInDoc([" + doc.getText() + "], " + start + ", " + len + ", " + searchAll + ")");
@@ -473,7 +504,7 @@ public class FindReplaceMachine {
   
   /** Helper method for findNext that looks for a match after searching has wrapped off the "end" (start if searching
     * backward) of the document.  Only runs in event thread.  
-    * INVARIANT (! _isForward => start = 0) && (_isForward => start + len = doc.getLength()).
+    * INVARIANT {@code (! _isForward => start = 0) && (_isForward => start + len = doc.getLength())}.
     * @param doc  the document in which search wrapped
     * @param start the location of preceding text segment where search FAILED.  
     * @param len  the length of text segment previously searched
@@ -515,7 +546,13 @@ public class FindReplaceMachine {
     return _findNextInDocSegment(doc, newStart, newLen, true, allWrapped);
   } 
   
-  /** Find first valid match withing specified segment of doc. */  
+  /** 
+   * Find first valid match withing specified segment of doc. 
+   * @param doc the document to search within
+   * @param start the start offset
+   * @param len the length to search
+   * @return the first valid match within the specified segment of doc
+   */  
   private FindResult _findNextInDocSegment(OpenDefinitionsDocument doc, int start, int len) {
     return _findNextInDocSegment(doc, start, len, false, false);
   }

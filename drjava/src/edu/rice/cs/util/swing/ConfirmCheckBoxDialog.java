@@ -86,7 +86,11 @@ public class ConfirmCheckBoxDialog {
     _dialog = _optionPane.createDialog(parent, title);
   }
   
-  /** Initializes the JCheckBox to have the given text. */
+  /** 
+   * Initializes the JCheckBox to have the given text. 
+   * @param text text to display
+   * @return the newly-created JCheckBox
+   */
   private JCheckBox _initCheckBox(String text) {
     _checkBox = new JCheckBox(text);
     return _checkBox;

@@ -56,20 +56,27 @@ public class BraceInfo {
     * brace so that (anchor - distance) gives offset of brace. */
   private int _distance; 
 
-  /** Creates an IndentInfo with default values. */
+  /** 
+   * Creates an IndentInfo with default values. 
+   * @param braceType the type of brace
+   * @param distance the distance to the open brace preceding the anchor point
+   */
   public BraceInfo(String braceType, int distance) {
     _braceType = braceType;
     _distance = distance;
   }
 
-  /** Gets the _braceType. */
+  /** @return the _braceType. */
   public String braceType() { return _braceType; }
   
-  /** Gets the _distance. */
+  /** @return the _distance. */
   public int distance() { return _distance; }
   
-  /** @return a new BraceInfo equivalent to this except that this.distance is shifted by dist. NONE is treated 
-    * as a special case. */
+  /**
+   * @param dist the distance by which to shift 
+   * @return a new BraceInfo equivalent to this except that this.distance is 
+   *         shifted by dist. NONE is treated  as a special case. 
+   */
   public BraceInfo shift(int dist) { 
     if (this == NULL) return NULL;
     return new BraceInfo(_braceType, _distance + dist); 

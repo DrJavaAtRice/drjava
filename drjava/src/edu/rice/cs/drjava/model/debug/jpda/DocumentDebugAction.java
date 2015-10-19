@@ -63,13 +63,16 @@ public abstract class DocumentDebugAction<T extends EventRequest> extends DebugA
   public final int SHORT_DOC_MAX_LENGTH = 20000;
   
   
-  /** Creates a new DocumentDebugAction.  Automatically tries to create the EventRequest if a ReferenceType can be 
-    * found, or else adds this object to the PendingRequestManager. Any subclass should automatically call
-    * _initializeRequest in its constructor.
-    * @param manager JPDADebugger in charge
-    * @param doc Document this action corresponds to
-    * @param offset Offset into the document that the action affects
-    */
+  /** 
+   * Creates a new DocumentDebugAction.  Automatically tries to create the 
+   * EventRequest if a ReferenceType can be found, or else adds this object to 
+   * the PendingRequestManager. Any subclass should automatically call
+   * _initializeRequest in its constructor.
+   * @param manager JPDADebugger in charge
+   * @param doc Document this action corresponds to
+   * @param offset Offset into the document that the action affects
+   * @throws DebugException if something goes wrong
+   */
   public DocumentDebugAction (JPDADebugger manager, OpenDefinitionsDocument doc, int offset) throws DebugException {
     super(manager);
     _exactClassName = null;
@@ -106,13 +109,13 @@ public abstract class DocumentDebugAction<T extends EventRequest> extends DebugA
     _offset = offset;
   }
   
-  /** Returns the class name this DebugAction occurs in. */
+  /** @return the class name this DebugAction occurs in. */
   public String getClassName() { return _className; }
   
-  /** Returns the file this DebugAction occurs in. */
+  /** @return the file this DebugAction occurs in. */
   public File getFile() { return _file; }
   
-  /** Returns the document this DebugAction occurs in. */
+  /** @return the document this DebugAction occurs in. */
   public OpenDefinitionsDocument getDocument() { return _doc; }
   
   /** @return offset of this debug action. */
@@ -121,11 +124,16 @@ public abstract class DocumentDebugAction<T extends EventRequest> extends DebugA
   /** @return exact class name, or null if not available. */
   public String getExactClassName() { return _exactClassName; }
   
-  /** Creates EventRequests corresponding to this DebugAction, using the given ReferenceTypes.  This is called either 
-    * from the DebugAction constructor or the PendingRequestManager, depending on when the ReferenceTypes become 
-    * available.  (There may be multiple reference types for the same class if a custom class loader is used.)
-    * @return true if the EventRequest is successfully created
-    */
+  /** 
+   * Creates EventRequests corresponding to this DebugAction, using the given 
+   * ReferenceTypes.  This is called either from the DebugAction constructor 
+   * or the PendingRequestManager, depending on when the ReferenceTypes become 
+   * available.  (There may be multiple reference types for the same class if 
+   * a custom class loader is used.)
+   * @param refTypes reference types
+   * @return true if the EventRequest is successfully created
+   * @throws DebugException if something goes wrong
+   */
   public boolean createRequests(Vector<ReferenceType> refTypes) throws DebugException {
     _createRequests(refTypes);
     if (_requests.size() > 0) {
@@ -135,10 +143,14 @@ public abstract class DocumentDebugAction<T extends EventRequest> extends DebugA
     else return false;
   }
   
-  /** This should always be called from the constructor of the subclass.  Attempts to create EventRequests on the 
-    * given ReferenceTypes, and also adds this action to the pending request manager (so identical classes loaded
-    * in the future will also have this action).
-    */
+  /** 
+   * This should always be called from the constructor of the subclass.  
+   * Attempts to create EventRequests on the given ReferenceTypes, and also 
+   * adds this action to the pending request manager (so identical classes 
+   * loaded in the future will also have this action).
+   * @param refTypes reference types
+   * @throws DebugException if something goes wrong
+   */
   protected void _initializeRequests(Vector<ReferenceType> refTypes) throws DebugException {
     if (refTypes.size() > 0) createRequests(refTypes);
     else {

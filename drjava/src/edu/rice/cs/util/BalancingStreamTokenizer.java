@@ -82,7 +82,10 @@ public class BalancingStreamTokenizer {
     /** Default constructor. */
     public State() { }
     
-    /** Copy constructor. */
+    /** 
+     * Copy constructor. 
+     * @param o state to be copied
+     */
     public State(State o) {
       quotePairs = new HashMap<String,String>(o.quotePairs);
       keywords = new TreeSet<String>(o.keywords);
@@ -191,6 +194,7 @@ public class BalancingStreamTokenizer {
   
   /** Return the next token from the reader, or from the stack if it isn't empty.
    * @return next token or -1 when end of stream
+   * @throws IOException if an IO operation fails
    */
   protected int nextToken() throws IOException {
     if (_pushed.empty()) {
@@ -224,7 +228,7 @@ public class BalancingStreamTokenizer {
   /** Pops the top of the state stack and makes it the current state. */
   protected void popState() { setState(_stateStack.pop()); }
 
-  /** Returns the type of the current token. */
+  /** @return the type of the current token. */
   public Token token() { return _token; }
   
   /** Specify a range characters as word characters.
@@ -458,6 +462,7 @@ public class BalancingStreamTokenizer {
   
   /** Return the next token, or null if the end of the stream has been reached.
    * @return next token, or null if end of stream has been reached.
+   * @throws IOException if an IO operation fails
    */
   public String getNextToken() throws IOException {
     StringBuilder buf = new StringBuilder();

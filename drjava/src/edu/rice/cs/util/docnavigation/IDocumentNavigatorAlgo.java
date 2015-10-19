@@ -45,12 +45,14 @@ public interface IDocumentNavigatorAlgo<ItemT extends INavigatorItem, InType, Re
   /** the List case for the visitor
    * @param navigator the navigator that is executing the visitor
    * @param input the input to the algorithm
+   * @return result
    */
   public ReturnType forList(IDocumentNavigator<ItemT> navigator, InType input);
 
   /** the Tree case for the visitor
    * @param navigator the navigator that is executing the visitor
    * @param input the input to the algorithm
+   * @return result
    */
   public ReturnType forTree(IDocumentNavigator<ItemT> navigator, InType input);
 }

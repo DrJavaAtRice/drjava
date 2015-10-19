@@ -110,10 +110,14 @@ public class SimpleInteractionsWindow extends SwingFrame {
     */
   protected void close() { System.exit(0); }
   
-  /** Accessor for the controller. */
+  /** @return the controller. */
   public InteractionsController getController() { return _controller; }
   
-  /** Main method to create a SimpleInteractionsWindow from the console. Doesn't take any command line arguments. */
+  /** 
+   * Main method to create a SimpleInteractionsWindow from the console. 
+   * Doesn't take any command line arguments. 
+   * @param args should be empty
+   */
   public static void main(String[] args) {
     SimpleInteractionsWindow w = new SimpleInteractionsWindow();
     if (args.length > 0 && args[0].equals("-debug")) {

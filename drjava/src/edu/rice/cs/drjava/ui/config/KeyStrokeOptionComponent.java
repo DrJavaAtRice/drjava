@@ -89,7 +89,13 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke,JPanel>
     setComponent(_panel);
   }
 
-  /** Constructor that allows for a tooltip description. */
+  /** 
+   * Constructor that allows for a tooltip description. 
+   * @param opt the option
+   * @param text text for descriptive label of this option
+   * @param parent the parent frame
+   * @param description tooltip text
+   */
   public KeyStrokeOptionComponent(KeyStrokeOption opt, String text,
                                   SwingFrame parent, String description) {
     this(opt, text, parent);
@@ -105,7 +111,7 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke,JPanel>
     _label.setToolTipText(description);
   }
 
-  /** Returns a custom string representation of this option component. */
+  /** @return a custom string representation of this option component. */
   public String toString() {
     return "<KSOC>label:" + getLabelText() + "ks: " +
       getKeyStroke() + "jb: " + _button.getText() + "</KSOC>\n";
@@ -136,14 +142,12 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke,JPanel>
     return this.getLabelText().compareTo(other.getLabelText());
   }
 
-  /** Returns the currently selected KeyStroke.
-   */
+  /** @return the currently selected KeyStroke. */
   public KeyStroke getKeyStroke() {
     return _key;
   }
 
-  /** Returns the KeyStroke current set in the Config settings.
-   */
+  /** @return the KeyStroke current set in the Config settings. */
   public KeyStroke getConfigKeyStroke() {
     return DrJava.getConfig().getSetting(_option);
   }

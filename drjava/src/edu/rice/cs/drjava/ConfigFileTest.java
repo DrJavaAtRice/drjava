@@ -56,10 +56,17 @@ public final class ConfigFileTest extends DrJavaTestCase {
     "definitions.keyword.color = #0000ff\n";
   
   
-  /** Constructor. */
+  /** 
+   * Constructor. 
+   * @param name name of the test case
+   */
   public ConfigFileTest(String name) { super(name); }
   
-  /** Creates a custom properties file, tells DrJava to use it, and checks that it is being used. */
+  /** 
+   * Creates a custom properties file, tells DrJava to use it, and checks 
+   * that it is being used. 
+   * @throws IOException if an IO operation fails
+   */
   public void testCustomConfigFile() throws IOException {
     final File propsFile = IOUtil.createAndMarkTempFile("DrJavaProps", ".txt");
     IOUtil.writeStringToFile(propsFile, CUSTOM_PROPS);

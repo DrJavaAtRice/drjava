@@ -44,8 +44,8 @@ import java.io.IOException;
 /**
  * Abstract class defining behavior shared by all
  * configuration options with values of type
- * Vector<T>.
- * VectorOption<String> now allows empty strings, i.e. "[,]" is a vector of two empty strings.
+ * {@code Vector<T>}.
+ * {@code VectorOption<String>} now allows empty strings, i.e. "[,]" is a vector of two empty strings.
  * "[]" will be interpreted as a vector of one empty string, and "" is an empty vector.
  * @version $Id$
  */
@@ -57,9 +57,14 @@ public class VectorOption<T> extends Option<Vector<T>> {
   public final char delim;
   public final String footer;
 
-  /** @param key The name of this option.
+  /** 
+   * @param key The name of this option.
    * @param parser the parsing strategy for an element in this option
    * @param formatter the formatting strategy for an element in this option
+   * @param header the header for this option
+   * @param delim the delimiting character for this option
+   * @param footer the footer for this option
+   * @param def The definition of this option.
    */
   private VectorOption(String key, ParseStrategy<T> parser, FormatStrategy<T> formatter,
                        String header, char delim, String footer, Vector<T> def) {
@@ -76,20 +81,22 @@ public class VectorOption<T> extends Option<Vector<T>> {
     this(key, strategy, strategy, header, delim, footer,def);
   }
 
-  /** Defaults the "header", "footer", and "delim" fields
+  /** 
+   * Defaults the "header", "footer", and "delim" fields
    * to open bracket, close bracket, and comma, repsectively.
    * @param key The name of this option.
    * @param option The object that knows how to parse and format
    * an element of type T.
+   * @param def The definition of this option.
    */
   public VectorOption(String key, Option<T> option, Vector<T> def) {
     this(key,option,option,"[",',',"]",def);
   }
 
   /** @param s The String to be parsed.
-   * @return An instance of Vector<T> represented by "s".
+   * @return An instance of {@code Vector<T>} represented by "s".
    * @exception IllegalArgumentException if "s" is not formatted
-   * according to the method Vector<T>.toString().
+   * according to the method {@code Vector<T>.toString()}.
    */
   public Vector<T> parse(String s) {
     s= s.trim();
@@ -176,7 +183,7 @@ public class VectorOption<T> extends Option<Vector<T>> {
     return res;
   }
 
-  /** Formats the Vector v.  The overall String format is determined by the method Vector<T>.tString(), but each 
+  /** Formats the Vector v.  The overall String format is determined by the method {@code Vector<T>.tString()}, but each 
     * element of the vector is formatted by calling formatElement().
     * @param v The Vector to be formatted.
     * @return A String representing "v". 

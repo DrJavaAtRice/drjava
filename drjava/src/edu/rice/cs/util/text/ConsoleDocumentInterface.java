@@ -44,6 +44,9 @@ public interface ConsoleDocumentInterface extends EditDocumentInterface {
   /** @return true iff this document has a prompt and is ready to accept input. */
   public boolean hasPrompt();
 
-  /** Setter for the _hasPrompt property. */
+  /** 
+   * Setter for the _hasPrompt property. 
+   * @param val value to be set
+   */
   public void setHasPrompt(boolean val);
 }

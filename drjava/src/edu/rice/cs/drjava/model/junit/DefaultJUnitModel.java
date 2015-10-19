@@ -248,8 +248,13 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     debug.logEnd("junit(doc)");
   }
   
-  /** Ensures that all documents have been compiled since their last modification and then delegates the actual testing
-    * to _rawJUnitOpenTestDocs. */
+  /** 
+   * Ensures that all documents have been compiled since their last 
+   * modification and then delegates the actual testing to 
+   * _rawJUnitOpenTestDocs. 
+   * @param lod list of open documents
+   * @param allTests true if all tests are to be run
+   */
   private void junitOpenDefDocs(final List<OpenDefinitionsDocument> lod, final boolean allTests) {
     // If a test is running, don't start another one.
 
@@ -311,10 +316,15 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     else _rawJUnitOpenDefDocs(lod, allTests);
   }
   
-  /** Runs all TestCases in the document list lod; assumes all documents have been compiled. It finds the TestCase 
-    * classes by searching the build directories for the documents.  Note: caller must respond to thrown exceptions 
-    * by invoking _junitUnitInterrupted (to run hourglassOff() and reset the unit testing UI).
-    */
+  /** 
+   * Runs all TestCases in the document list lod; assumes all documents have 
+   * been compiled. It finds the TestCase classes by searching the build 
+   * directories for the documents.  Note: caller must respond to thrown 
+   * exceptions by invoking _junitUnitInterrupted (to run hourglassOff() and 
+   * reset the unit testing UI).
+   * @param lod list of open documents
+   * @param allTests true if all tests are to be run
+   */
   private void _rawJUnitOpenDefDocs(List<OpenDefinitionsDocument> lod, final boolean allTests) {
 
     File buildDir = _model.getBuildDirectory();
@@ -531,7 +541,12 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     EventQueue.invokeLater(new Runnable() { public void run() { _notifier.junitEnded(); } });
   }
   
-  /** Helper method to notify JUnitModel listeners that all open files must be compiled before JUnit is run. */
+  /** 
+   * Helper method to notify JUnitModel listeners that all open files must be 
+   * compiled before JUnit is run. 
+   * @param testAfterCompile a CompilerListener
+   * @param outOfSync list of out-of-sync documents
+   */
   private void _notifyCompileBeforeJUnit(final CompilerListener testAfterCompile, 
                                          final List<OpenDefinitionsDocument> outOfSync) { 
     Utilities.invokeLater(new Runnable() { 
@@ -539,7 +554,12 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     });
   }
   
-  /** Helper method to notify JUnitModel listeners that JUnit aborted before any tests could be run. */
+  /** 
+   * Helper method to notify JUnitModel listeners that JUnit aborted before 
+   * any tests could be run.
+   * @param testAll true if all tests are to be run
+   * @param didCompileFail true if compilation failed
+   */
   private void _notifyNonTestCase(final boolean testAll, final boolean didCompileFail) { 
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.nonTestCase(testAll, didCompileFail); } });
   }

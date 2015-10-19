@@ -54,8 +54,9 @@ public interface JavadocListener {
   public void saveBeforeJavadoc();
 
   /** Called before attempting Javadoc, to give the user a chance to compile. Do not continue with Javadoc if the
-    * user doesn't comoile!
-    */
+   * user doesn't comoile!
+   * @param afterCompile the listener to alert
+   */
   public void compileBeforeJavadoc(final CompilerListener afterCompile);
   
   /** Called after Javadoc is started by the GlobalModel. */

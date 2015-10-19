@@ -55,7 +55,6 @@ class ActionStartPrevLinePlus extends IndentRuleAction {
     * to 0.  Only runs in event thread.
     * @param doc AbstractDJDocument containing the line to be indented.
     * @param reason The reason that the indentation is taking place
-    * @return true if the caller should update the current location, false if the indenter has already done it
     */
   public void indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
     super.indentLine(doc, reason);

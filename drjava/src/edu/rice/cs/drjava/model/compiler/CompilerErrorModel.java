@@ -89,9 +89,9 @@ public class CompilerErrorModel {
   
   /** Cached result of hasOnlyWarnings.
     * Three-state enum:
-    *  -1 => result has not been computed
-    *   0 => false
-    *   1 => true
+    *  -1 {@literal =>} result has not been computed
+    *   0 {@literal =>} false
+    *   1 {@literal =>} true
     */
   private volatile int _onlyWarnings = -1;
   
@@ -188,26 +188,29 @@ public class CompilerErrorModel {
     * @param idx the index of the error to retrieve
     * @return the error at index idx
     * @throws NullPointerException if this object was improperly initialized
-    * @throws ArrayIndexOutOfBoundsException if !(0 <= idx < this.getNumErrors())
+    * @throws ArrayIndexOutOfBoundsException if {@code !(0 <= idx < this.getNumErrors())}
     */
   public DJError getError(int idx) { return _errors[idx]; }
   
-  /** Returns the position of the given error in the document representing its file. */
+  /** 
+   * @param error the error whose position is to be found
+   * @return the position of the given error in the document representing its file. 
+   */
   public Position getPosition(DJError error) {
     int spot = Arrays.binarySearch(_errors, error);
     return _positions[spot];
   }
   
-  /** Returns the number of CompilerErrors. */
+  /** @return the number of CompilerErrors. */
   public int getNumErrors() { return _numErrors; }
   
-  /** Returns the number of CompilerErrors that are compiler errors */
+  /** @return the number of CompilerErrors that are compiler errors */
   public int getNumCompilerErrors() { return _numCompilerErrors; }
   
-  /** Returns the number of CompilerErrors that are warnings */
+  /** @return the number of CompilerErrors that are warnings */
   public int getNumWarnings() { return _numWarnings; }
   
-  /** Prints out this model's errors. */
+  /** @return a string of this model's errors. */
   public String toString() {
     final StringBuilder buf = new StringBuilder();
     buf.append(this.getClass().toString() + ":\n  ");
@@ -288,7 +291,11 @@ public class CompilerErrorModel {
     return _errors[shouldSelect];
   }
   
-  /** This function tells if there are errors with source locations associated with the given file. */
+  /** 
+   * This function tells if there are errors with source locations associated with the given file. 
+   * @param odd the document to check
+   * @return true if there are errors with source locations; false otherwise
+   */
   public boolean hasErrorsWithPositions(OpenDefinitionsDocument odd) {
     File file = FileOps.NULL_FILE;
     try { 

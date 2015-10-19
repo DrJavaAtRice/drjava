@@ -57,6 +57,9 @@ public class PagePrinter implements Printable {
 
   /** Constructs a PagePrinter for a given page number (which is ignored!), a
    * given filename, and parent.
+   * @param page page number (ignored)
+   * @param fileName file name
+   * @param parent a DrJavaBook
    */
   public PagePrinter(int page, String fileName, DrJavaBook parent) {
     // _page = page;

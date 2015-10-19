@@ -51,6 +51,7 @@ class JListSortNavigator<ItemT extends INavigatorItem> extends JListNavigator<It
  
   /** Inserts the document into its sorted position. Should only be executed in the event thread.
     * @param doc the document to add
+    * @return the index at which the document was inserted
     */
   private int insertDoc(ItemT doc) {
     int i;
@@ -78,7 +79,10 @@ class JListSortNavigator<ItemT extends INavigatorItem> extends JListNavigator<It
   public void dragOver(DropTargetDragEvent dropTargetDragEvent) { }
   public void dropActionChanged(DropTargetDragEvent dropTargetDragEvent){ }
   
-  /** User dropped something on the component. Only runs in event thread. */
+  /** 
+   * User dropped something on the component. Only runs in event thread. 
+   * @param dropTargetDropEvent the event indicating what was dropped
+   */
   public /* synchronized */ void drop(DropTargetDropEvent dropTargetDropEvent) {
     DrJavaRoot.drop(dropTargetDropEvent);
   }

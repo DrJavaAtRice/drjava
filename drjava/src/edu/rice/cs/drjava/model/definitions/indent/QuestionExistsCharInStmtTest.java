@@ -53,6 +53,7 @@ public final class QuestionExistsCharInStmtTest extends IndentRulesTestCase {
   
   /** Ensures that a colon that is part of a ternary operator is detected.
    * Tests that this rule works for one line statements.
+   * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testColonInTernaryOpOneLineStmts() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionExistsCharInStmt('?', ':', null, null);
@@ -77,6 +78,7 @@ public final class QuestionExistsCharInStmtTest extends IndentRulesTestCase {
    * Tests that this rule works when there are two statements on the same line.
    * Essentially, that it uses the first colon that it finds on the line
    * as the endChar.
+   * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testColonInTernaryOpTwoStmtsOnOneLine() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionExistsCharInStmt('?', ':', null, null);
@@ -96,6 +98,7 @@ public final class QuestionExistsCharInStmtTest extends IndentRulesTestCase {
 
   /** Ensures that a colon that is part of a ternary operator is detected.
    * Tests that a colon in a multi-line ternary op statement is detected.
+   * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testColonInTernaryOpMultiLineStmts() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionExistsCharInStmt('?', ':', null, null);
@@ -110,6 +113,7 @@ public final class QuestionExistsCharInStmtTest extends IndentRulesTestCase {
   /** Ensures that a colon that is part of a ternary operator is detected.
    * Tests that whitespace, single-line comments and multi-line comments
    * in between the ':' character and the '?' character are ignored.
+   * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testColonInTernaryOpIgnoreWhitespaceAndComments() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionExistsCharInStmt('?', ':', null, null);
@@ -137,6 +141,7 @@ public final class QuestionExistsCharInStmtTest extends IndentRulesTestCase {
    * Tests that a '?' in quotes or single-line comments or multi-line
    * comments is not detected - and hence that a colon is not party of
    * a ternary op.
+   * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testColonNotInTernaryOpDueToQuestionMarkInCommentsOrQuotes() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionExistsCharInStmt('?', ':', null, null);
@@ -164,6 +169,7 @@ public final class QuestionExistsCharInStmtTest extends IndentRulesTestCase {
   /** Ensures that a colon that is part of a ternary operator is detected.
    * Tests that a colon that is part of a multi-line statement is 
    * not falsely identified as belonging to a ternary op.
+   * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testColonNotInTernaryOpMultiLineStmts() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionExistsCharInStmt('?', ':', null, null);

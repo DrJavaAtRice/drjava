@@ -95,19 +95,27 @@ public class DefinitionsEditorKit extends StyledEditorKit {
     }
   };
   
-  /** Creates a new DefinitionsDocument.  Formerly named createDefaultDocument() because the view (DefinitionsPane)
-    * would create a DefinitionsDocument by default when it was constructed.  However, this default document was  
-    * immediately discarded because a DefinitionsDocument for the constructed DefinitionsPane already existed. 
-    * Unfortunately, JEditorPane does not have a constructor that takes a Document as input.  We conceivably could
-    * design this EditorKit to return the pre-existing document when the JEditorPane requests a new one, but the 
-    * EditorKit is specified by a static field of DefinitionsPane so there is no clean way to install the proper
-    * EditorKit before the JEditorPane constructor asks for the Document.
-    *
-    * As an easier alternative, we just let the DefaultEditorKit return a PlainDocument (much lighter weight),
-    * which is thrown away when the true DefinitionsDocument is assigned
-    *
-    * Improvements to this approach are welcome...  :)
-    */
+  /** 
+   * Creates a new DefinitionsDocument.  Formerly named createDefaultDocument() 
+   * because the view (DefinitionsPane) would create a DefinitionsDocument by 
+   * default when it was constructed.  However, this default document was  
+   * immediately discarded because a DefinitionsDocument for the constructed 
+   * DefinitionsPane already existed. 
+   *
+   * Unfortunately, JEditorPane does not have a constructor that takes a 
+   * Document as input.  We conceivably could design this EditorKit to return 
+   * the pre-existing document when the JEditorPane requests a new one, but the 
+   * EditorKit is specified by a static field of DefinitionsPane so there is 
+   * no clean way to install the proper EditorKit before the JEditorPane 
+   * constructor asks for the Document.
+   *
+   * As an easier alternative, we just let the DefaultEditorKit return a 
+   * PlainDocument (much lighter weight), which is thrown away when the true 
+   * DefinitionsDocument is assigned
+   *
+   * Improvements to this approach are welcome...  :)
+   * @return the newly-created document
+   */
   public DefinitionsDocument createNewDocument() { return  _createDefaultTypedDocument(); }
   
   /** Creates a new DefinitionsDocument.

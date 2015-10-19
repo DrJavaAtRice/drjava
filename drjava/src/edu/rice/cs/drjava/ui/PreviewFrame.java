@@ -147,9 +147,13 @@ public abstract class PreviewFrame extends SwingFrame {
     public void windowClosing(WindowEvent ev) { _close(); }
   };
   
-  /** Contructs a new PreviewFrame using a parent model and a Pageable object print to show. Should only be called in 
-    * event thread. 
-    */
+  /** 
+   * Contructs a new PreviewFrame using a parent model and a Pageable object 
+   * print to show. Should only be called in event thread. 
+   * @param model the parent model
+   * @param mainFrame the main frame
+   * @param interactions true if the document being previewed is an interactions document
+   */
   public PreviewFrame(SingleDisplayModel model, MainFrame mainFrame, boolean interactions) 
     throws IllegalStateException {
     super("Print Preview");
@@ -347,7 +351,11 @@ public abstract class PreviewFrame extends SwingFrame {
     return m.invoke(rec,args);
   }
   
-  /** Mirrored from MainFrame, will later use the same Icon access code. */
+  /** 
+   * Mirrored from MainFrame, will later use the same Icon access code. 
+   * @param name the name for which to get the icon
+   * @return the icon corresponding to name
+   */
   private ImageIcon _getIcon(String name) {
     URL url = PreviewFrame.class.getResource(ICON_PATH + name);
     if (url != null) return new ImageIcon(url);
@@ -449,7 +457,11 @@ public abstract class PreviewFrame extends SwingFrame {
     protected volatile Image _source;
     protected volatile Image _image;
     
-    /** Constructs a PagePreview object with given width and height. */
+    /** 
+     * Constructs a PagePreview object with given width and height. 
+     * @param width the width
+     * @param height the height
+     */
     public PagePreview(int width, int height) {
       super();
       _width = width;

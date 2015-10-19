@@ -91,7 +91,7 @@ public class ReducedModelControl implements BraceReduction {
   }
   
   /** Updates the BraceReduction to reflect cursor movement. Negative values move left; positive values move right.
-    * ASSUMES that count is within range, i.e. that 0 <= absOffset() + count <= getLength 
+    * ASSUMES that count is within range, i.e. that {@code 0 <= absOffset() + count <= getLength}
     * NOTE: this method does NOT move the _walker in ReduceModelComment.
     * @param count indicates the direction and magnitude of cursor movement
     */
@@ -115,21 +115,21 @@ public class ReducedModelControl implements BraceReduction {
     _rmc.delete(count);
   }
   
-  /** Determines if cursor position is shadowed by comment or string (does not include opening comment or quotation "brace"). */
+  /** @return true if cursor position is shadowed by comment or string (does not include opening comment or quotation "brace"). */
   public boolean isShadowed() { return _rmc.isShadowed(); }
   
-  /** Determines if current token is either shadowed or an opening comment brace ("//" or "/*"). */
+  /** @return true if current token is either shadowed or an opening comment brace ("//" or "/*"). */
   public boolean isWeaklyShadowed() { return _rmc.isWeaklyShadowed(); }
   
   /** Finds the closing brace that matches the next significant brace iff that brace is an open brace. Fails when 
-    * brace is shadowed. </P>
+    * brace is shadowed.
     * @return the distance until the matching closing brace.  On failure, returns -1.
     * @see #balanceBackward()
     */
   public int balanceForward() { return _rmb.balanceForward(); }
   
   /** Finds the open brace that matches the previous significant brace iff that brace is an closing brace. Fails when
-    * brace is shadowed. </P>
+    * brace is shadowed.
     * @return the distance until the matching open brace.  On failure, returns -1.
     * @see #balanceForward()
     */
@@ -283,7 +283,7 @@ public class ReducedModelControl implements BraceReduction {
     }
   }
   
-  /** Get the previous token. */
+  /** @return the previous token. */
   public ReducedToken prevItem() {
     int rmbOffset = _rmb.getBlockOffset();
     int rmcOffset = _rmc.getBlockOffset();
@@ -297,7 +297,7 @@ public class ReducedModelControl implements BraceReduction {
     return temp;
   }
   
-  /** Get the next token. */
+  /** @return the next token. */
   public ReducedToken nextItem() {
     int rmbOffset = _rmb.getBlockOffset();
     int rmcOffset = _rmc.getBlockOffset();
@@ -309,19 +309,19 @@ public class ReducedModelControl implements BraceReduction {
     return temp;
   }
   
-  /** Determines if the cursor is at the end of the reduced model. */
+  /** @return true if the cursor is at the end of the reduced model. */
   boolean atEnd() { return (_rmb._cursor.atEnd() || _rmc._cursor.atEnd()); }
   
-  /** Determines if the cursor is at the start of the reduced model. */
+  /** @return true if the cursor is at the start of the reduced model. */
   boolean atStart() { return (_rmb._cursor.atStart() || _rmc._cursor.atStart()); }
   
-  /** Gets the offset within the current token. */
+  /** @return the offset within the current token. */
   int getBlockOffset() {
     if (_rmb.getBlockOffset() < _rmc.getBlockOffset()) return _rmb.getBlockOffset();
     return _rmc.getBlockOffset();
   }
   
-  /** Gets the absolute character offset into the document represented by the reduced model. */
+  /** @return the absolute character offset into the document represented by the reduced model. */
   public int absOffset() {
     int offset = _rmc.absOffset();
     assert offset == _rmb.absOffset();
@@ -363,14 +363,16 @@ public class ReducedModelControl implements BraceReduction {
   public int getDistToIdentNewline() { return -1; }
   public int getDistToEnclosingBraceStart() { return -1; }
   
-  /** Gets info about the brace enclosing the beginning of this line. */
+  /** @return info about the brace enclosing the beginning of this line. */
   public BraceInfo _getLineEnclosingBrace() { return _rmb._getLineEnclosingBrace(); }
   
-  /** Gets info about the brace enclosing this location. */
+  /** @return info about the brace enclosing this location. */
   public BraceInfo _getEnclosingBrace() { return _rmb._getEnclosingBrace(); }
-  /** Gets distance to the new newline character (not including the newline). */
+
+  /** @return distance to the new newline character (not including the newline). */
   public int getDistToStart() { return _rmc.getDistToStart(); }
-  /** Gets distance to previous newline character (not including the newline). */
+
+  /** @return distance to previous newline character (not including the newline). */
   public int getDistToStart(int relLoc) { return _rmc.getDistToStart(relLoc); }
   
   public int getDistToNextNewline() { return _rmc.getDistToNextNewline(); }

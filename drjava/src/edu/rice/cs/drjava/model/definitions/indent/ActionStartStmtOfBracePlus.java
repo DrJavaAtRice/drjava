@@ -58,7 +58,6 @@ public class ActionStartStmtOfBracePlus extends IndentRuleAction {
     * line with the appropriate spacing or characters.   Assumes read lock is already held.
     * @param doc AbstractDJDocument containing the line to be indented.
     * @param reason The reason that the indentation is taking place
-    * @return true if the caller should update the current location itself, false if the indenter has already handled it
     */
   public void indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
 
