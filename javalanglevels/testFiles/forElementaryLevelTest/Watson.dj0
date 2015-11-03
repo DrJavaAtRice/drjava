@@ -1,3 +1,6 @@
+abstract class AFriend extends Object {
+  abstract String getName();
+}
 class Watson extends AFriend {
   String getName() {
     return "Watson";
