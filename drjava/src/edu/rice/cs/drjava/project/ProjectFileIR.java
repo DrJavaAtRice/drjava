@@ -41,7 +41,7 @@ import java.util.List;
 import java.util.Map;
 
 import edu.rice.cs.drjava.config.OptionParser;
-import edu.rice.cs.drjava.model.FileRegion;
+import edu.rice.cs.drjava.model.IRegion;
 import edu.rice.cs.drjava.model.debug.DebugBreakpointData;
 import edu.rice.cs.drjava.model.debug.DebugWatchData;
 import edu.rice.cs.util.AbsRelFile;
@@ -94,7 +94,7 @@ public interface ProjectFileIR {
   public int getCreateJarFlags();
   
   /** @return the array of bookmarks. */
-  public FileRegion[] getBookmarks();
+  public IRegion[] getBookmarks();
   
   /** @return the array of breakpoints. */
   public DebugBreakpointData[] getBreakpoints();
@@ -118,7 +118,7 @@ public interface ProjectFileIR {
   public void setProjectRoot(File root);
   public void setCreateJarFile(File createJarFile);
   public void setCreateJarFlags(int createJarFlags);
-  public void setBookmarks(List<? extends FileRegion> bms);
+  public void setBookmarks(List<? extends IRegion> bms);
   public void setBreakpoints(List<? extends DebugBreakpointData> bps);
   public void setWatches(List<? extends DebugWatchData> ws);
   public void setAutoRefreshStatus(boolean b);

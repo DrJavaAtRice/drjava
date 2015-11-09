@@ -36,6 +36,9 @@
 
 package edu.rice.cs.drjava.model;
 
+import java.util.List;
+import java.util.ArrayList;
+
 import javax.swing.text.Position;
 import javax.swing.text.BadLocationException;
 
@@ -55,17 +58,41 @@ public class MovingDocumentRegion extends DocumentRegion {
   protected final Position _endPos;
   protected volatile Position _lineStartPos;
   protected volatile Position _lineEndPos;
-    
+
   /** Suspension that generates the JTree label excerpt for this region. */
   protected final Thunk<String> _stringSuspension;
   
   /** Update _lineStartPos and _lineEndPos after line has been edited. */
   public void update() {
+    /* 
+     * Make a copy, since removing this from the RegionSet will result in 
+     * removing the RegionSet from this._regionSets. Also, this will allow us 
+     * to avoid mutating the list we're iterating over. 
+     */
+    @SuppressWarnings("unchecked")
+    List<RegionSet<IDocumentRegion>> regionSetsCopy = (List<RegionSet<IDocumentRegion>>)this._regionSets.clone();
+
+    /* Remove this from the RegionSets, since mutation may un-balance the tree */
+    for (RegionSet<IDocumentRegion> rs : regionSetsCopy) {
+      rs.remove(this);
+    }
+
     try {  // _doc is inherited from DocumentRegion
       _lineStartPos = _doc.createPosition(_doc._getLineStartPos(getStartOffset()));
       _lineEndPos = _doc.createPosition(_doc._getLineEndPos(getEndOffset()));
+    } 
+
+    catch (BadLocationException ble) { 
+      throw new UnexpectedException(ble); 
+    }  // should never happen
+
+    finally {
+      /* Add this back to the RegionSets, to re-balance the tree */
+      for (RegionSet<IDocumentRegion> rs : regionSetsCopy) {
+        rs.add(this);
+      }
     }
-    catch (BadLocationException ble) { throw new UnexpectedException(ble); }  // should never happen
+
   }
     
   /** 
@@ -81,6 +108,8 @@ public class MovingDocumentRegion extends DocumentRegion {
     super(doc, start, end);
 
     assert doc != null;
+
+    _regionSets = new ArrayList<RegionSet<IDocumentRegion>>();
     
     try {
       _startPos = doc.createPosition(start);
@@ -174,5 +203,19 @@ public class MovingDocumentRegion extends DocumentRegion {
   public static boolean equals(Object a, Object b) {
     if (a == null) return (b == null);
     return a.equals(b);
+  }
+
+  /** @param rs set to add */
+  public void addSet(RegionSet<IDocumentRegion> rs) {
+    if (!_regionSets.contains(rs)) {
+      _regionSets.add(rs);
+    }
+  }
+
+  /** @param rs set to remove */
+  public void removeSet(RegionSet<IDocumentRegion> rs) {
+    if (_regionSets.contains(rs)) {
+      _regionSets.remove(rs);
+    }
   }
 }

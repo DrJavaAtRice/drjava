@@ -47,7 +47,7 @@ import java.text.SimpleDateFormat;
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.sexp.*;
-import edu.rice.cs.drjava.model.FileRegion;
+import edu.rice.cs.drjava.model.IRegion;
 import edu.rice.cs.drjava.model.DummyDocumentRegion;
 import edu.rice.cs.drjava.model.debug.DebugWatchData;
 import edu.rice.cs.drjava.model.debug.DebugBreakpointData;
@@ -202,7 +202,7 @@ public class ProjectFileParser extends ProjectFileParserFacade {
       pfir.setWatches(sList);
     }
     else if (name.compareToIgnoreCase("bookmarks") == 0) {
-       List<FileRegion> bmList = exp.getRest().accept(bookmarkListVisitor);
+       List<IRegion> bmList = exp.getRest().accept(bookmarkListVisitor);
        pfir.setBookmarks(bmList);
     }
   } 
@@ -525,11 +525,11 @@ public class ProjectFileParser extends ProjectFileParserFacade {
   // === bookmarks ===
   
   /** Parses out a list of bookmark nodes. */
-  private class BookmarkListVisitor implements SEListVisitor<List<FileRegion>> {
-    public List<FileRegion> forEmpty(Empty e) { return new ArrayList<FileRegion>(); }
-    public List<FileRegion> forCons(Cons c) {
-      List<FileRegion> list = c.getRest().accept(this);
-      FileRegion tmp = ProjectFileParser.ONLY.parseBookmark(c.getFirst(), _srcFileBase);
+  private class BookmarkListVisitor implements SEListVisitor<List<IRegion>> {
+    public List<IRegion> forEmpty(Empty e) { return new ArrayList<IRegion>(); }
+    public List<IRegion> forCons(Cons c) {
+      List<IRegion> list = c.getRest().accept(this);
+      IRegion tmp = ProjectFileParser.ONLY.parseBookmark(c.getFirst(), _srcFileBase);
       list.add(0, tmp); // add to the end
       return list;
     }
@@ -542,7 +542,7 @@ public class ProjectFileParser extends ProjectFileParserFacade {
    * @param pathRoot the root path to the file being parsed
    * @return the bookmark described by this s-expression
    */
-  FileRegion parseBookmark(SExp s, String pathRoot) {
+  IRegion parseBookmark(SExp s, String pathRoot) {
     String name = s.accept(NameVisitor.ONLY);
     if (name.compareToIgnoreCase("bookmark") != 0)
       throw new PrivateProjectException("Expected a bookmark tag, found: " + name);
@@ -557,7 +557,7 @@ public class ProjectFileParser extends ProjectFileParserFacade {
   
   /** Traverses the list of expressions found after "bookmark" tag and returns the DocumentRegion
    *  described by those properties. */
-  private static class BookmarkPropertyVisitor implements SEListVisitor<FileRegion> {
+  private static class BookmarkPropertyVisitor implements SEListVisitor<IRegion> {
     private String fname = null;
     private Integer startOffset = null;
     private Integer endOffset = null;
@@ -565,7 +565,7 @@ public class ProjectFileParser extends ProjectFileParserFacade {
     private String pathRoot;
     public BookmarkPropertyVisitor(String pr) { pathRoot = pr; }
     
-    public FileRegion forCons(Cons c) {
+    public IRegion forCons(Cons c) {
       String name = c.getFirst().accept(NameVisitor.ONLY); 
       if (name.compareToIgnoreCase("name") == 0) { fname = ProjectFileParser.ONLY.parseFileName(c.getFirst()); }
       else if (name.compareToIgnoreCase("start") == 0) { startOffset = ProjectFileParser.ONLY.parseInt(c.getFirst()); }
@@ -574,7 +574,7 @@ public class ProjectFileParser extends ProjectFileParserFacade {
       return c.getRest().accept(this);
     }
     
-    public FileRegion forEmpty(Empty c) {
+    public IRegion forEmpty(Empty c) {
       if ((fname == null) || (startOffset == null) || (endOffset == null)) {
         throw new PrivateProjectException("Bookmark information incomplete, need name, start offset and end offset");
       }

@@ -36,24 +36,35 @@
 
 package edu.rice.cs.drjava.model;
 
-/** Interface supported by all document regions used in search results, bookmarks, and breakpoints (e.g., region 
-  * classes other than DummyDocumentRegion and BrowserDocumentRegion).  OrderedDocumentRegions are presumed to
-  * contain three fields: an OpenDefinitionsDocument, a start Postion, and an end Position, where Positions 
-  * refers to javax.swing.text.Position.  They are presumed to be ordered by first by document (using some form
-  * of lexicographic ordering on the name), then by start Position and then by end Position.
-  * 
-  * All implementations of this interface should be immutable (at the level of the field bindings in those classes), 
-  * but a given document Position can "move" when the associated document is modified.  As a result, hashing on 
-  * OrderedDocumentRegions will produce upredictable results (WiLL NOT WORK) unless hashing on Positions works 
-  * (which this design does NOT presume).  On the other hand, the relative ordering of Positions is invariant 
-  * (except for possible coalescing of formerly distinct Positions) regardless of how the associated document is 
-  * modified.  Mutation of the document backing an OrderedDocumentRegion can coarsen the compareTo ordering, equating
-  * DocumentRegions that were previously unequal. but it never alters the weak inequality ordering among regions.  
-  * If {@literal a1 <= a2 <= .. .<= an}, this property remains invariant regardless of what mutation occurs.  Similarly, if a1 = 
-  * a2 = ... = an, this property remains invariant.  As a result, searches in SortedSets of OrderedDocumentRegions
-  * work regardless of what document mutation occurs.  (Note the complements of the preceding two relations are NOT
-  * invariant as a document is modified.)
-  */
+/** 
+ * Interface supported by all document regions used in search results, 
+ * bookmarks, and breakpoints (e.g., region classes other than 
+ * DummyDocumentRegion and BrowserDocumentRegion).  OrderedDocumentRegions 
+ * are presumed to contain three fields: an OpenDefinitionsDocument, a start 
+ * Postion, and an end Position, where Positions refers to 
+ * javax.swing.text.Position.  They are presumed to be ordered by first by 
+ * document (using some form of lexicographic ordering on the name), then by 
+ * start Position and then by end Position.
+ * 
+ * All implementations of this interface should be immutable (at the level of 
+ * the field bindings in those classes), but a given document Position can 
+ * "move" when the associated document is modified.  As a result, hashing on 
+ * OrderedDocumentRegions will produce upredictable results (WiLL NOT WORK) 
+ * unless hashing on Positions works (which this design does NOT presume).  
+ * On the other hand, the relative ordering of Positions is invariant 
+ * (except for possible coalescing of formerly distinct Positions) regardless 
+ * of how the associated document is modified.  Mutation of the document 
+ * backing an OrderedDocumentRegion can coarsen the compareTo ordering, 
+ * equating DocumentRegions that were previously unequal. but it never alters 
+ * the weak inequality ordering among regions.  
+ *
+ * If {@literal a1 <= a2 <= .. .<= an}, this property remains invariant 
+ * regardless of what mutation occurs.  Similarly, if a1 = a2 = ... = an, 
+ * this property remains invariant.  As a result, searches in SortedSets of 
+ * OrderedDocumentRegions work regardless of what document mutation occurs.  
+ * (Note the complements of the preceding two relations are NOT invariant as 
+ * a document is modified.)
+ */
 public interface OrderedDocumentRegion extends IDocumentRegion, Comparable<OrderedDocumentRegion> {
   public int getLineStartOffset();
   public int getLineEndOffset();

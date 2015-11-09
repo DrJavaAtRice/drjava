@@ -166,11 +166,12 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
     });
   }
   
-  /** @return a {@code SortedSet<BrowserDocumentRegion>} containing the DocumentRegion objects in this mangager. */
-  public SortedSet<BrowserDocumentRegion> getRegions() {
-    TreeSet<BrowserDocumentRegion> ts = new TreeSet<BrowserDocumentRegion>(_pastRegions);
-    ts.addAll(_futureRegions);
-    return ts;
+  /** @return a {@code RegionSet>} containing the DocumentRegion objects in this mangager. */
+  public RegionSet<BrowserDocumentRegion> getRegions() {
+    RegionSet<BrowserDocumentRegion> rs = new RegionSet<BrowserDocumentRegion>();
+    rs.addAll(_pastRegions);
+    rs.addAll(_futureRegions);
+    return rs;
   }
   
   /** Tells the manager to remove all regions. */

@@ -321,7 +321,7 @@ public abstract class FileOps {
     * @deprecated Use {@link edu.rice.cs.plt.io.IOUtil#attemptListFilesAsIterable} or
     *             {@link edu.rice.cs.plt.io.IOUtil#listFilesRecursively(File, FileFilter, FileFilter)} instead.
     */
-  private static void getFilesInDir(File d, List<File> acc, boolean recur, FileFilter filter) {
+  @Deprecated private static void getFilesInDir(File d, List<File> acc, boolean recur, FileFilter filter) {
     if (d.isDirectory()) {
       File[] files = d.listFiles(filter);
       if (files != null) { // listFiles may return null if there's an IO error

@@ -36,6 +36,9 @@
 
 package edu.rice.cs.drjava.model;
 
+import java.util.List;
+import java.util.ArrayList;
+
 import javax.swing.text.Position;
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.io.File;
@@ -46,6 +49,7 @@ import java.io.File;
   * @version $Id$
   */
 public class BrowserDocumentRegion implements IDocumentRegion, Comparable<BrowserDocumentRegion> {
+
   private static volatile int _indexCounter = 0;   // sequence number counter for browser regions
   private final int _index;                        // unique sequence number for this region
   protected final OpenDefinitionsDocument _doc;    // document for this region
@@ -53,6 +57,7 @@ public class BrowserDocumentRegion implements IDocumentRegion, Comparable<Browse
   protected Position _startPosition;               // start position for this region
   protected Position _endPosition;                 // final position for this region
   protected volatile DefaultMutableTreeNode _treeNode;
+  private ArrayList<RegionSet<IDocumentRegion>> _regionSets;
   
   /** Create a new simple document region with a bona fide document.
     * @param doc document that contains this region
@@ -67,6 +72,7 @@ public class BrowserDocumentRegion implements IDocumentRegion, Comparable<Browse
     _startPosition = sp;
     _endPosition = ep;
     _treeNode = null;
+    _regionSets = new ArrayList<RegionSet<IDocumentRegion>>();
   }
   
   /* Relying on default equals operation. */
@@ -104,12 +110,46 @@ public class BrowserDocumentRegion implements IDocumentRegion, Comparable<Browse
 //  public Position getEndPosition() { return _endPosition; }
 
   public void update(BrowserDocumentRegion other) {
-    if (other.getDocument() != _doc) throw new IllegalArgumentException("Regions must have the same document.");
+    if (other.getDocument() != _doc) {
+      throw new IllegalArgumentException("Regions must have the same document.");
+    }
+
+    /* 
+     * Make a copy, since removing this from the RegionSet will result in 
+     * removing the RegionSet from this._regionSets. Also, this will allow us 
+     * to avoid mutating the list we're iterating over. 
+     */
+    @SuppressWarnings("unchecked")
+    List<RegionSet<IDocumentRegion>> regionSetsCopy = (ArrayList<RegionSet<IDocumentRegion>>)this._regionSets.clone();
+
+    /* Remove this from the RegionSets, since mutation may un-balance the tree */
+    for (RegionSet<IDocumentRegion> rs : regionSetsCopy) {
+      rs.remove(this);
+    }
+
     _startPosition = other._startPosition;
     _endPosition = other._endPosition;
+
+    /* Add this back to the RegionSets, to re-balance the tree */
+    for (RegionSet<IDocumentRegion> rs : regionSetsCopy) {
+      rs.add(this);
+    }
   }
   
   public String toString() {
     return _doc.toString() + "[" + getStartOffset() + "]";
   }
+
+  public void addSet(RegionSet<IDocumentRegion> rs) {
+    if (!_regionSets.contains(rs)) {
+      _regionSets.add(rs);
+    }
+  }
+
+  public void removeSet(RegionSet<IDocumentRegion> rs) {
+    if (_regionSets.contains(rs)) {
+      _regionSets.remove(rs);
+    }
+  }
+
 }
