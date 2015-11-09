@@ -113,7 +113,7 @@ public interface RegionManager<R extends IDocumentRegion> {
    * @return a {@code Vector<R>} containing the DocumentRegion objects for 
    *         document odd in this manager. 
    */
-  public SortedSet<R> getRegions(OpenDefinitionsDocument odd);
+  public RegionSet<R> getRegions(OpenDefinitionsDocument odd);
   
   /** @return a {@code Vector<R>} containing all the DocumentRegion objects in this mangager. */
   public ArrayList<R> getRegions();

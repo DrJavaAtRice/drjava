@@ -48,7 +48,7 @@ import org.w3c.dom.Node;
 import edu.rice.cs.util.AbsRelFile;
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.drjava.model.DummyDocumentRegion;
-import edu.rice.cs.drjava.model.FileRegion;
+import edu.rice.cs.drjava.model.IRegion;
 import edu.rice.cs.drjava.model.debug.DebugWatchData;
 import edu.rice.cs.drjava.model.debug.DebugBreakpointData;
 import edu.rice.cs.util.XMLConfig;
@@ -362,8 +362,8 @@ public class XMLProjectFileParser extends ProjectFileParserFacade {
     return wList;
   }
     
-  protected List<FileRegion> readBookmarks() {
-    List<FileRegion> rList = new ArrayList<FileRegion>();
+  protected List<IRegion> readBookmarks() {
+    List<IRegion> rList = new ArrayList<IRegion>();
     List<Node> defs = _xc.getNodes("bookmarks/bookmark");
     for(Node n: defs) {
       // now all path names are relative to node n...

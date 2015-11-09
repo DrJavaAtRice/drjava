@@ -38,33 +38,22 @@ package edu.rice.cs.drjava.model;
 
 import java.io.File;
 
-/** The concrete class for "dummy document" regions produced by ProjectFileParser.  These degenerate regions, which do
-  * not include a document, are only used transiently during project file input processing.
-  * @version $Id$
-  */
-public class DummyDocumentRegion implements IRegion {
-
-  protected final File _file;
-  protected volatile int _startOffset;
-  protected volatile int _endOffset;
+/** 
+ * The minimal interface for all region classes.  Excludes a document field 
+ * because DummyDocumentRegions are created before their corresponding document.
+ * @version $Id$
+ */
+public interface IRegion extends Region {
   
-  /** Create a new dummy document region (dummy because no document yet exists)
-    * @param file file that contains the region
-    * @param so start offset of the region; if doc is non-null, then a Position will be created that moves within the document
-    * @param eo end offset of the region; if doc is non-null, then a Position will be created that moves within the document
-    */
-  public DummyDocumentRegion(File file, int so, int eo) {
-    _file = file;
-    _startOffset = so;
-    _endOffset = eo;
-  }
-
+  /** *Copied from Region*.
+    * @return the start offset */
+  public int getStartOffset();
+  
+  /** *Copied from Region*.
+    * @return the end offset */
+  public int getEndOffset();
+  
   /** @return the file */
-  public File getFile() { return _file; }
-
-  /** @return the start offset */
-  public int getStartOffset() { return _startOffset; }
-
-  /** @return the end offset */
-  public int getEndOffset() { return _endOffset; }
+  public File getFile();
 }
+  

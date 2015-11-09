@@ -36,8 +36,9 @@
 
 package edu.rice.cs.drjava.model.debug.jpda;
 
-import edu.rice.cs.drjava.model.OrderedDocumentRegion;
 import edu.rice.cs.drjava.model.IDocumentRegion;
+import edu.rice.cs.drjava.model.OrderedDocumentRegion;
+import edu.rice.cs.drjava.model.RegionSet;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.debug.Breakpoint;
 import edu.rice.cs.drjava.model.debug.DebugException;
@@ -45,6 +46,7 @@ import edu.rice.cs.util.UnexpectedException;
 
 import java.awt.EventQueue;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Vector;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Position;
@@ -60,7 +62,8 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
   private volatile Position _position;
   private volatile Position _startPos;
   private volatile Position _endPos;
-  
+  private ArrayList<RegionSet<IDocumentRegion>> _regionSets;
+
   /** Note that _position, which records the breakpoint position, is inherited from DocumentDebugAction. */
   private volatile OpenDefinitionsDocument _doc;
   
@@ -75,6 +78,7 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
     throws DebugException {
     
     super(manager, doc, offset);
+    _regionSets = new ArrayList<RegionSet<IDocumentRegion>>();
     
     assert EventQueue.isDispatchThread();
     _doc = doc;
@@ -269,6 +273,20 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
     else {
       return "Breakpoint[class: " + cn +
         ", lineNumber: " + getLineNumber() + "]";
+    }
+  }
+
+  /** @param rs set to add */
+  public void addSet(RegionSet<IDocumentRegion> rs) {
+    if (!_regionSets.contains(rs)) {
+      _regionSets.add(rs);
+    }
+  }
+
+  /** @param rs set to remove */
+  public void removeSet(RegionSet<IDocumentRegion> rs) {
+    if (_regionSets.contains(rs)) {
+      _regionSets.remove(rs);
     }
   }
 }
