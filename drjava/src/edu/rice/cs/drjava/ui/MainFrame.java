@@ -50,6 +50,7 @@ import java.beans.*;
 import java.io.*;
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1562,7 +1563,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Goes to the file specified by the word the cursor is on. */
   void _gotoFileUnderCursor() {
-//    Utilities.show("Calling gotoFileUnderCursor()");
+//    _log.log("Calling gotoFileUnderCursor()");
     OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
     String mask = "";
     int loc = getCurrentDefPane().getCaretPosition();
@@ -1606,7 +1607,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       new PredictiveInputModel<GoToFileListEntry>(true, new PrefixStrategy<GoToFileListEntry>(), list);
     pim.setMask(mask);
     
-//    Utilities.show("Matching items are: " + pim.getMatchingItems());
+//    _log.log("Matching items are: " + pim.getMatchingItems());
     
     if (pim.getMatchingItems().size() == 1) {
       // exactly one match, go to file
@@ -1756,12 +1757,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     return _generateJavaAPISet(url);
   }
   
-  /** 
-   * Generate Java API class list. 
-   * @param url the URL from which to generate the class list
-   * @return the Java API class list
+  /** Generate Java API class list. 
+    * @param url the URL from which to generate the class list
+    * @return the Java API class list
    */
   public static Set<JavaAPIListEntry> _generateJavaAPISet(URL url) {
+//    _log.log("URL for Java API = '" + url + "'");
     Set<JavaAPIListEntry> s = new HashSet<JavaAPIListEntry>();
     if (url == null) return s;
     try {
@@ -1772,20 +1773,28 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         is = new InputStreamReader(urls);
         br = new BufferedReader(is);
         String line = br.readLine();
+        final String aText = "<a href=\"";  
+        final int aTextLength = aText.length();
+        final String classNamePrefix = "/docs/api/";
+        final int prefixLength = classNamePrefix.length();
+        final String hText = ".html\" ";
+        final int hTextLength = hText.length();
         while (line != null) {
-          final String aText = "<a href=\"";
-          int aPos = line.toLowerCase().indexOf(aText);
-          int aEndPos = line.toLowerCase().indexOf(".html\" ",aPos);
-          if ((aPos >= 0) && (aEndPos >= 0)) {
-            String link = line.substring(aPos + aText.length(), aEndPos);
-            String fullClassName = link.replace('/', '.');
+//          _log.log("Line read from Java API = '" + line + "'");
+          int aPos = line.toLowerCase().indexOf(aText); // returns -1 for lines that are not class links
+          final int classNameStartPos = (aPos < 0) ? 0 : line.indexOf(classNamePrefix) + prefixLength;
+          final int classNameEndPos = line.toLowerCase().indexOf(hText, classNameStartPos);
+          if ((classNameStartPos > 0) && (classNameEndPos > 0)) {  // class link found
+            String link = line.substring(aPos + aTextLength, classNameEndPos + hTextLength);
+            String classNamePath = line.substring(classNameStartPos, classNameEndPos);
+            String fullClassName = classNamePath.replace('/', '.');
             String simpleClassName = fullClassName;
-            System.err.println("link = '" + link + "'; simpleClassName = '" + simpleClassName + "'");
             int lastDot = fullClassName.lastIndexOf('.');
             if (lastDot >= 0) { simpleClassName = fullClassName.substring(lastDot + 1); }
             try {
-              URL pageURL = new URL(link + ".html");
-              System.err.println("URL is: " + pageURL);
+              URL pageURL = new URL(link);
+//              _log.log("URL is: " + pageURL);
+//              _log.log("new JavaAPIListEntry(" + simpleClassName + ", " + fullClassName + ", " + pageURL + ")");
               s.add(new JavaAPIListEntry(simpleClassName, fullClassName, pageURL));
             }
             catch(MalformedURLException mue) { 
@@ -1829,7 +1838,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     if (_javaAPISet.size() == 0) {
       final ProcessingDialog pd =
         new ProcessingDialog(this, "Java API Classes", "Loading, please wait.", false);
-      if (!EventQueue.isDispatchThread()) { pd.setVisible(true); }
+      if (! EventQueue.isDispatchThread()) { pd.setVisible(true); }
       // generate list
       String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
       
@@ -1847,7 +1856,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         if (ver == JavaVersion.JAVA_6) linkVersion = JAVADOC_1_6_TEXT;
         else if (ver == JavaVersion.JAVA_7) linkVersion = JAVADOC_1_7_TEXT;
         else if (ver == JavaVersion.JAVA_8) linkVersion = JAVADOC_1_8_TEXT;
-        else linkVersion = JAVADOC_1_7_TEXT;   // default
+        else linkVersion = JAVADOC_1_8_TEXT;   // default
       }
       if (linkVersion.equals(JAVADOC_1_6_TEXT)) {
         // at one point, the links in the 1.6 Javadoc were absolute, and this is how we dealt with that
@@ -1870,7 +1879,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
 //        stripPrefix = ""; // nothing needs to be stripped, links in 1.8 Javadoc are relative
         suffix = "/allclasses-1.8.html";
       }
-      if (!suffix.equals("")) {
+      if (! suffix.equals("")) {
         _javaAPISet.addAll(_generateJavaAPISet(suffix));
       }
       else {
@@ -1934,7 +1943,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         // run this in a thread other than the main thread
         final Set<JavaAPIListEntry> apiSet = getJavaAPISet();
         if (apiSet == null) {
-//        Utilities.show("Cannot load Java API class list. No network connectivity?");
+//        _log.log("Cannot load Java API class list. No network connectivity?");
           hourglassOff();
           return;
         }
@@ -1967,7 +1976,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
               pim.setMask(mask);
             }
             
-//    Utilities.show("Matching items are: " + pim.getMatchingItems());
+//            _log.log("Matching items are: " + pim.getMatchingItems());
             
             if (pim.getMatchingItems().size() == 1) {
               // exactly one match, go to file
@@ -2706,7 +2715,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Toggle a bookmark. */
   public void toggleBookmark() {
-//    Utilities.show("MainFrame.toggleBookmark called");
+//    _log.log("MainFrame.toggleBookmark called");
     assert EventQueue.isDispatchThread();
     addToBrowserHistory();
     _model._toggleBookmark(_currentDefPane.getSelectionStart(), _currentDefPane.getSelectionEnd()); 
@@ -2765,9 +2774,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         regionAdded(r);
       }
       public void regionRemoved(MovingDocumentRegion r) {
-//        Utilities.show("Removing highlight for region " + r);
+//        _log.log("Removing highlight for region " + r);
         HighlightManager.HighlightInfo highlight = highlights.get(r);
-//        Utilities.show("The retrieved highlight is " + highlight);
+//        _log.log("The retrieved highlight is " + highlight);
         if (highlight != null) highlight.remove();
         highlights.remove(r);
         // close the panel and dispose of its MainFrame resources when all regions have been removed.
@@ -3331,7 +3340,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
 //                                             DrJava.getConfig().
 //                                               getSetting(LIGHTWEIGHT_PARSING_ENABLED).booleanValue()));
 //    
-//    Utilities.show("Global Model started");
+//      _log.log("Global Model started");
       
       _model.getDocumentNavigator().asContainer().addKeyListener(_historyListener);
       _model.getDocumentNavigator().asContainer().addFocusListener(_focusListenerForRecentDocs);
@@ -5739,6 +5748,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Scan the build directory for class files and update the auto-completion list. */
   private void _scanClassFiles() {
+    
+    String trace = Arrays.toString(Thread.currentThread().getStackTrace());
+    Utilities.show("#### _scanClassFiles() called with trace:\n" + trace);
     Thread t = new Thread(new Runnable() {
       public void run() {
         File buildDir = _model.getBuildDirectory();
@@ -6858,9 +6870,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _addMenuItem(toolsMenu, _resetInteractionsAction, KEY_RESET_INTERACTIONS, updateKeyboardManager);
     toolsMenu.addSeparator();
 
-	// Code Coverage
-	_addMenuItem(toolsMenu, _coverageAction, KEY_CODE_COVERAGE, updateKeyboardManager);
-	toolsMenu.addSeparator();
+ // Code Coverage
+ _addMenuItem(toolsMenu, _coverageAction, KEY_CODE_COVERAGE, updateKeyboardManager);
+ toolsMenu.addSeparator();
     
     // Javadoc
     final JMenu javadocMenu = new JMenu("Javadoc");
@@ -8086,13 +8098,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   private void nextRecentDoc() {
-//    Utilities.show("BACK_QUOTE typed");
+//    _log.log("BACK_QUOTE typed");
     if (_recentDocFrame.isVisible()) _recentDocFrame.next();
     else _recentDocFrame.setVisible(true);
   }
   
   private void prevRecentDoc() {
-//    Utilities.show("BACK_QUOTE typed");
+//    _log.log("BACK_QUOTE typed");
     if (_recentDocFrame.isVisible()) _recentDocFrame.prev();
     else _recentDocFrame.setVisible(true);
   }
@@ -9284,7 +9296,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     public void activeDocumentChanged(final OpenDefinitionsDocument active) {
       assert EventQueue.isDispatchThread();
-//      Utilities.show("MainFrame Listener: ActiveDocument changed to " + active);
+//      _log.log("MainFrame Listener: ActiveDocument changed to " + active);
       // code that accesses the GUI must run in the event-dispatching thread. 
       _recentDocFrame.pokeDocument(active);
       _switchDefScrollPane();  // Updates _currentDefPane
@@ -9355,17 +9367,19 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       final InteractionsModel im = _model.getInteractionsModel();
       final String lastError = im.getLastError();
       final FileConfiguration config = DrJava.getConfig();
+      /* check for auto-import */
       if (config != null && config.getSetting(OptionConstants.DIALOG_AUTOIMPORT_ENABLED)) {
         if (lastError != null) {
           // the interaction ended and there was an error
           // check that this error is different than the last one (second to last may be null):
           final String secondToLastError = im.getSecondToLastError();
           if (secondToLastError != null || ! lastError.equals(secondToLastError)) {
-            // this aborts the auto-importing if the same class comes up twice in a row
+            // the preceding test aborts auto-importing if the same class comes up twice in a row
             if (lastError.startsWith("Static Error: Undefined class '") && lastError.endsWith("'")) {
               // it was an "undefined class" exception
               // show auto-import dialog
               String undefinedClassName = lastError.substring(lastError.indexOf('\'') + 1, lastError.lastIndexOf('\''));
+//              _log.log("**** Showing Import Dialog for " + undefinedClassName);
               _showAutoImportDialog(undefinedClassName);
             }
             else if (lastError.startsWith("Static Error: Undefined name '") && lastError.endsWith("'")) {
@@ -9378,6 +9392,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                 // the undefined name starts with a capital letter and contains a dot
                 // show auto-import dialog
                 String undefinedClassName = undefinedName.substring(0, undefinedName.indexOf('.'));
+//                 _log.log("***** Showing Import Dialog for " + undefinedClassName);
                 _showAutoImportDialog(undefinedClassName);
               }
             }
@@ -9470,13 +9485,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public void junitStarted() {
       assert EventQueue.isDispatchThread();
       /* Note: hourglassOn() is done by various junit commands (other than junitClasses); hourglass must be off 
-       * for actual testing; the balancing simpleHourglassOff() is located here and in nonTestCase */
+       * for actual testing; the balancing hourglassOff() is located here and in nonTestCase */
       
       try { showTab(_junitPanel, true);
         _junitPanel.setJUnitInProgress();
       }
       finally { 
-//        Utilities.show("Turning hourglassOff");
+//        _log.log("Turning hourglassOff for JUnit");
         hourglassOff();
       }  
     }
@@ -10623,27 +10638,28 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   PredictiveInputFrame<JavaAPIListEntry> _autoImportDialog = null;
   JCheckBox _autoImportPackageCheckbox;
   
-  /** 
-   * Imports a class. 
-   * @param s the string to show
-   */
+  /** Auto-imports a class selected by the user using this dialog 
+    * @param s the string to show
+    */
   private void _showAutoImportDialog(final String s) {
     hourglassOn();
     new Thread() {
       public void run() {
         // run this in a thread other than the main thread        
         final Set<JavaAPIListEntry> apiSet = getJavaAPISet();
+//        _log.log("**** Initial API Set for Auto-import Dialog is: " + apiSet);
         if (apiSet == null) {
           hourglassOff();
           return;
         }
-    
+//        _log.log("***** apiSet has length " + apiSet.size());
         Utilities.invokeLater(new Runnable() {
           public void run() {
             // but now run this in the event thread again
             List<JavaAPIListEntry> autoImportList = new ArrayList<JavaAPIListEntry>(apiSet);
             if (DrJava.getConfig().getSetting(DIALOG_COMPLETE_SCAN_CLASS_FILES).booleanValue() &&
                 _autoImportClassSet.size() > 0) {
+//              _log.log("Auto-import class set = " + _autoImportClassSet);
               autoImportList.addAll(_autoImportClassSet);
             }
             else {
@@ -10666,6 +10682,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                     String simple = full;
                     if (simple.lastIndexOf('.') >= 0) simple = simple.substring(simple.lastIndexOf('.') + 1);
                     
+//                    _log.log("**** Creating new JavaAPIEntry with simple name = " + simple + " and full name = " + full);
                     JavaAPIListEntry entry = new JavaAPIListEntry(simple, full, null);
                     if (! autoImportList.contains(entry)) { autoImportList.add(entry); }
                   }
@@ -10678,6 +10695,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
               new PredictiveInputModel<JavaAPIListEntry>(true, new PrefixStrategy<JavaAPIListEntry>(), autoImportList);
             pim.setMask(s);
             _initAutoImportDialog();
+//            int size = (autoImportList == null) ? -1 : autoImportList.size();
+//            _log.log("***** Adding an autoImportList list of size: " + size);
             _autoImportDialog.setModel(true, pim); // ignore case
             _autoImportPackageCheckbox.setSelected(false);
             _autoImportDialog.setVisible(true);

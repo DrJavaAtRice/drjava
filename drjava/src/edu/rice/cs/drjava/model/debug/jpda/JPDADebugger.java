@@ -2099,103 +2099,103 @@ public class JPDADebugger implements Debugger {
    * @return the value of the field
    * @throws DebugException if something goes wrong
    */
-	  private static Value _getStaticField(ReferenceType location, String name) throws DebugException {
-	    try {
-	      Field f = location.fieldByName(name);
-	      if (f == null) { throw new DebugException("Cannot find field '" + name + "'"); }
-	      return location.getValue(f);
-	    }
-	    catch (ClassNotPreparedException e) { throw new DebugException(e); }
-	  }
-	  
-	  /** A thread-safe stack from which you can remove any element, not just the top of the stack.  All synchronization is 
-	    * performed on the wrapped vector.
-	    * TODO: make a generic Collection extending/replacing Stack.
-	    */
-	  private static class RandomAccessStack extends Stack<ThreadReference> {
-	    
-	    public ThreadReference peekAt(int i) { return get(i); }
-	    
-	    public ThreadReference remove(long id) throws NoSuchElementException {
-	      synchronized(this) {
-		for (int i = 0; i < size(); i++) {
-		  if (get(i).uniqueID() == id) {
-		    ThreadReference t = get(i);
-		    remove(i);
-		    return t;
-		  }
-		}
-	      }
-	      
-	      throw new NoSuchElementException("Thread " + id + " not found in debugger suspended threads stack!");
-	    }
-	    
-	    public boolean contains(long id) {
-	      synchronized(this) {
-		for (int i = 0; i < size(); i++) {
-		  if (get(i).uniqueID() == id) return true;
-		}
-		return false;
-	      }
-	    }
-	    
-	    public boolean isEmpty() { return empty(); }
-	  }
-	  
-	  
-	  /** Gets the LanguageLevelStackTraceMapper
-	    * @return the LanguageLevelStackTraceMapper used by JPDADebugger in the compiler model
-	    */
-	  public LanguageLevelStackTraceMapper getLLSTM() { return _model.getCompilerModel().getLLSTM(); }
-	  
-	  /** A Location that delegates to another location in all cases except for line number,
-	    * source path and source name. */
-	  protected static class DelegatingLocation implements Location {
-	    protected Location _delegee;
-	    protected String _sourceName;
-	    protected String _sourcePath;
-	    protected int _lineNumber;
-	    public DelegatingLocation(String sourceName, int lineNumber, Location delegee) {
-	      _sourceName = sourceName;
-	      try {
-		_sourcePath = delegee.sourcePath();
-		int pos = _sourcePath.lastIndexOf(File.separator);
-		if (pos >= 0)
-		  _sourcePath = _sourcePath.substring(0, pos) + File.separator +_sourceName;
-		else
-		  _sourcePath = _sourceName;
-	      }
-	      catch(AbsentInformationException e) {
-		_sourcePath = null;
-	      }
-	      _lineNumber = lineNumber;
-	      _delegee = delegee;
-	    }
-	    public long codeIndex() { return _delegee.codeIndex(); }
-	    public ReferenceType declaringType() { return _delegee.declaringType(); }
-	    public boolean equals(Object obj) {
-	      if (!(obj instanceof DelegatingLocation)) return false;
-	      DelegatingLocation other = (DelegatingLocation)obj;
-	      return _sourceName.equals(other._sourceName)
-		&& (_lineNumber==other._lineNumber)
-		&& _delegee.equals(other._delegee); 
-	    }
-	    public int hashCode() { return _delegee.hashCode(); }
-	    public int lineNumber() { return _lineNumber; }
-	    public int lineNumber(String stratum) { return _lineNumber; /* Is this right? */ }
-	    public Method method() { return _delegee.method(); }
-	    public String sourceName() { return _sourceName; }
-	    public String sourceName(String stratum) { return _sourceName; /* Is this right? */ }
-	    public String sourcePath() throws AbsentInformationException {
-	      if (_sourcePath != null) return _sourcePath;
-	      else return _delegee.sourcePath();
-	    }
-	    public String sourcePath(String stratum) throws AbsentInformationException {
-	      if (_sourcePath != null) return _sourcePath;
-	      else return _delegee.sourcePath(); /* Is this right? */
-	    }
-	    public String toString() { return _delegee.toString(); }
-	    public VirtualMachine virtualMachine() { return _delegee.virtualMachine(); } 
-	    public int compareTo(Location o) { return _delegee.compareTo(o); }
-	  }
+   private static Value _getStaticField(ReferenceType location, String name) throws DebugException {
+     try {
+       Field f = location.fieldByName(name);
+       if (f == null) { throw new DebugException("Cannot find field '" + name + "'"); }
+       return location.getValue(f);
+     }
+     catch (ClassNotPreparedException e) { throw new DebugException(e); }
+   }
+   
+   /** A thread-safe stack from which you can remove any element, not just the top of the stack.  All synchronization is 
+     * performed on the wrapped vector.
+     * TODO: make a generic Collection extending/replacing Stack.
+     */
+   private static class RandomAccessStack extends Stack<ThreadReference> {
+     
+     public ThreadReference peekAt(int i) { return get(i); }
+     
+     public ThreadReference remove(long id) throws NoSuchElementException {
+       synchronized(this) {
+  for (int i = 0; i < size(); i++) {
+    if (get(i).uniqueID() == id) {
+      ThreadReference t = get(i);
+      remove(i);
+      return t;
+    }
+  }
+       }
+       
+       throw new NoSuchElementException("Thread " + id + " not found in debugger suspended threads stack!");
+     }
+     
+     public boolean contains(long id) {
+       synchronized(this) {
+  for (int i = 0; i < size(); i++) {
+    if (get(i).uniqueID() == id) return true;
+  }
+  return false;
+       }
+     }
+     
+     public boolean isEmpty() { return empty(); }
+   }
+   
+   
+   /** Gets the LanguageLevelStackTraceMapper
+     * @return the LanguageLevelStackTraceMapper used by JPDADebugger in the compiler model
+     */
+   public LanguageLevelStackTraceMapper getLLSTM() { return _model.getCompilerModel().getLLSTM(); }
+   
+   /** A Location that delegates to another location in all cases except for line number,
+     * source path and source name. */
+   protected static class DelegatingLocation implements Location {
+     protected Location _delegee;
+     protected String _sourceName;
+     protected String _sourcePath;
+     protected int _lineNumber;
+     public DelegatingLocation(String sourceName, int lineNumber, Location delegee) {
+       _sourceName = sourceName;
+       try {
+  _sourcePath = delegee.sourcePath();
+  int pos = _sourcePath.lastIndexOf(File.separator);
+  if (pos >= 0)
+    _sourcePath = _sourcePath.substring(0, pos) + File.separator +_sourceName;
+  else
+    _sourcePath = _sourceName;
+       }
+       catch(AbsentInformationException e) {
+  _sourcePath = null;
+       }
+       _lineNumber = lineNumber;
+       _delegee = delegee;
+     }
+     public long codeIndex() { return _delegee.codeIndex(); }
+     public ReferenceType declaringType() { return _delegee.declaringType(); }
+     public boolean equals(Object obj) {
+       if (!(obj instanceof DelegatingLocation)) return false;
+       DelegatingLocation other = (DelegatingLocation)obj;
+       return _sourceName.equals(other._sourceName)
+         && (_lineNumber==other._lineNumber)
+         && _delegee.equals(other._delegee); 
+     }
+     public int hashCode() { return _delegee.hashCode(); }
+     public int lineNumber() { return _lineNumber; }
+     public int lineNumber(String stratum) { return _lineNumber; /* Is this right? */ }
+     public Method method() { return _delegee.method(); }
+     public String sourceName() { return _sourceName; }
+     public String sourceName(String stratum) { return _sourceName; /* Is this right? */ }
+     public String sourcePath() throws AbsentInformationException {
+       if (_sourcePath != null) return _sourcePath;
+       else return _delegee.sourcePath();
+     }
+     public String sourcePath(String stratum) throws AbsentInformationException {
+       if (_sourcePath != null) return _sourcePath;
+       else return _delegee.sourcePath(); /* Is this right? */
+     }
+     public String toString() { return _delegee.toString(); }
+     public VirtualMachine virtualMachine() { return _delegee.virtualMachine(); } 
+     public int compareTo(Location o) { return _delegee.compareTo(o); }
+   }
 }
