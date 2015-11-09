@@ -37,22 +37,26 @@
 package edu.rice.cs.drjava.model;
 
 import java.io.File;
+import javax.swing.text.Position;
 
-/** The minimal interface for all region classes.  Excludes a document field because DummyDocumentRegions are created before
-  * their corresponding document.  TODO: rename as IRegion.
-  * @version $Id$
-  */
-public interface FileRegion extends Region {
+public class DocumentFileRegion implements IRegion {
+
+  protected final File _file;
+  protected volatile Position _start;
+  protected volatile Position _end;
   
-  /** *Copied from Region*.
-    * @return the start offset */
-  public int getStartOffset();
-  
-  /** *Copied from Region*.
-    * @return the end offset */
-  public int getEndOffset();
-  
+  public DocumentFileRegion(File file, Position sp, Position ep) {
+    _file = file;
+    _start = sp;
+    _end = ep;
+  }
+
   /** @return the file */
-  public File getFile();
+  public File getFile() { return _file; }
+
+  /** @return the start offset */
+  public int getStartOffset() { return _start.getOffset(); }
+
+  /** @return the end offset */
+  public int getEndOffset() { return _end.getOffset(); }
 }
-  

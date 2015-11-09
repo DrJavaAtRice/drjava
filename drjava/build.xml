@@ -736,13 +736,13 @@
     <javadoc sourcepath="src" packagenames="*" destdir="docs/javadoc" maxmemory="512M"
              access="private" Use="yes" Version="yes" Author="yes" Windowtitle="${readable-project-name} API (${version-tag})" linksource="${link-source}">
       <classpath>
-        <pathelement location="${java6-tools}" />
+        <pathelement location="${java8-tools}" />
         <fileset refid="libs" />
         <pathelement location="lib/buildlib/junit.jar" />
         <pathelement location="lib/buildlib/netbeans-memory-leak-utils.jar" />
       </classpath>
       <link href="http://docs.oracle.com/javase/6/docs/api/"/>
-      <link href="http://junit.org/junit/javadoc/3.8.1" />
+      <link href="http://junit.org/javadoc/latest" />
       <link href="http://drjava.org/javadoc/plt" />
       <link href="http://drjava.org/javadoc/javalanglevels" />
       <link href="http://drjava.org/javadoc/dynamicjava" />

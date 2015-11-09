@@ -1997,7 +1997,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
     
     // set bookmarks
-    for (FileRegion bm: ir.getBookmarks()) {
+    for (IRegion bm: ir.getBookmarks()) {
       File f = bm.getFile();
       if (! modifiedFiles.contains(f)) {
         OpenDefinitionsDocument odd = getDocumentForFile(f);
