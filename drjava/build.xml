@@ -33,19 +33,14 @@
   <property name="clean-can-fail" value="yes" /> 
   <property name="link-source" value="no" />
 
-  <property name="benchmark-count" value="5" />
-  <property name="benchmark-skip" value="1" />
-
   <property name="drjava.test.config" value="testFiles/drjava.basic.config" />
   
   <property environment="env" />
   <property name="java8-home" value="${env.JAVA8_HOME}" />
   <property name="java7-home" value="${env.JAVA7_HOME}" />
   <property name="java6-home" value="${env.JAVA6_HOME}" />
-  <property name="java5-home" value="${env.JAVA5_HOME}" />
   <echo message = "java.home = ${java.home}" />
   <property name="launch4j-home" value="${env.LAUNCH4J_HOME}" />
-  <property name="clover-jar" value="${env.CLOVER_JAR}" />
   <property name="findbugs-home" value="${env.FINDBUGS_HOME}" />
   
   <property name="is-development" value="yes" /> <!-- Development or stable release -->
@@ -56,10 +51,6 @@
   
   <!-- This property was added based on a tip found on the internet in response to many failing unit tests using Java 7 -->
   <property name="run.jvmargs.ide" value=""/>
-
-  <!-- Extension that defines the "extendclasspath" task.  This should be a standard feature of Ant, but
-       as long as it's not, we can use this extension from the Clover developers. -->
-  <taskdef resource="com/cenqua/ant/antlib.xml" classpath="lib/buildlib/cenquatasks.jar" />
 
   <!-- Extension containing various tools, including "for" and "if" -->
   <taskdef resource="net/sf/antcontrib/antlib.xml" classpath="lib/buildlib/ant-contrib.jar"/>
@@ -80,6 +71,7 @@
   <fileset id="jrelibs" dir="${java.home}/lib" includes="*.jar" /> 
   <echo message="jrelibs = ${jrelibs}" />
   <fileset id="extlibs" dir="${java.home}/lib/ext" includes="*.jar" /> 
+  <echo message="${extlibs}" />
   <!-- Use ConcJUnit if use-concjunit is not defined and we are not running Java 7. -->
   <!-- ConcJUnit is currently incompatible with Java 7. -->
   <if>
@@ -108,8 +100,6 @@
     <echo message="variables may need to be defined (depending on the target invoked):" />
     <echo message="PATH: The 'javac' command is used for compilation;" />
     <echo message="      the 'java' command is used by default in testing/running; " />
-    <echo message="JAVA5_HOME: Home folder of the Java 5 JRE or JDK (required for" />
-    <echo message="            compiling and '-5' targets)" />
     <echo message="JAVA6_HOME: Home folder of the Java 6 JRE or JDK (required for" />
     <echo message="            '-6' targets)" />
     <echo message="JAVA7_HOME: Home folder of the Java 7 JRE or JDK (required for" />
@@ -118,7 +108,6 @@
     <echo message="            '-8' targets)" />
     <echo message="LAUNCH4J_HOME: Location of the Launch4j installation (used to " />
     <echo message="               release a Windows application)" />
-    <echo message="CLOVER_JAR: Location of the Clover jar file" />
     <echo message="FINDBUGS_HOME: Location of the FindBugs installation" />
     <echo message="" />
     <echo message="For control over the version of Java used to run Ant, set JAVA_HOME." />
@@ -167,16 +156,10 @@
     <echo message="       'stderr', 'file', 'assert', 'popup', 'tree', or 'void'" />
     <echo message="       (equivalent to setting the property 'plt.error.log'; default: " />
     <echo message="       popup)" />
-    <echo message="benchmark-count: Number of revisions to test during benchmarking"/>
-    <echo message="                 (default: 5)" />
-    <echo message="benchmark-skip: Number of 'PREV' updates to perform between benchmark" />
-    <echo message="                runs (default: 1)" />
     <echo message="drjava.test.config: Location of the DrJava configuration file to use" />
     <echo message="                    in tests (default: testFiles/drjava.basic.config)" />
     <echo message="use-concjunit: Set to true to test ConcJUnit instead of JUnit." />
   </target>
-  
-  
   
   <!-- ************
        Build Target
@@ -184,13 +167,11 @@
   
   <target name="build" depends="clean, test, jar" description="Shortcut for 'clean', 'test', and 'jar'">
   </target>
-  
-
 
   <!-- *************************
        Source-generating Targets
        ************************* -->
-       
+
   <property name="code-status-source" value="${src-working-dir}/CodeStatus.orig" />
   <property name="code-status-target" value="${src-working-dir}/CodeStatus.java" />
   <property name="version-source" value="${src-working-dir}/Version.orig" />
@@ -223,7 +204,7 @@
        Compilation Targets
        ******************* -->
        
-  <!-- The following target assumes that javac resolves a Java 8 compiler -->
+  <!-- The following target assumes that javac resolves to a Java 8 compiler -->
   <target name="compile" depends="generate-source, do-compile, copy-resources, unjar-libs"
           description="Compile all source files (after generating the source)">
   </target>
@@ -239,8 +220,8 @@
     <move todir="classes/base">
       <fileset dir="classes/test" includes="**/*" />
     </move>
-    
-    <javac srcdir="src" destdir="classes/base" source="1.6" target="1.6"
+    <echo message="jrelibs=${jrelibs}" />    
+    <javac srcdir="src" destdir="classes/base" source="1.7" target="1.7"
            bootclasspath="${java8-runtime}" sourcepath="" includeAntRuntime="no"
            executable="${java8-home}/bin/javac" fork="yes" memoryMaximumSize="1024M"
            debug="on" optimize="off" deprecation="on" >
@@ -294,7 +275,7 @@
       <fileset dir="classes/test" includes="**/*" />
     </move>
     
-    <javac srcdir="src" destdir="classes/base" source="1.6" target="1.6"
+    <javac srcdir="src" destdir="classes/base" source="1.7" target="1.7"
            bootclasspath="${java6-runtime}" sourcepath="" includeAntRuntime="no"
            executable="javac" fork="yes" memoryMaximumSize="1024M"
            debug="on" optimize="off" deprecation="on"	>
@@ -346,7 +327,7 @@
       <fileset dir="classes/test" includes="**/*" />
     </move>
     
-    <javac srcdir="src" destdir="classes/base" source="1.6" target="1.6"
+    <javac srcdir="src" destdir="classes/base" source="1.7" target="1.7"
            bootclasspath="${java7-runtime}" sourcepath="" includeAntRuntime="no"
            executable="javac" fork="yes" memoryMaximumSize="1024M"
            debug="on" optimize="off" deprecation="on"	>
@@ -458,18 +439,10 @@
     </antcall>
   </target>
   
-  <target name="test-5" depends="compile, resolve-java5-exec, resolve-java5-tools" unless="skip-test"
-          description="Run all tests under Java 5 (after compiling); use -Dtest-spec=... to filter">
-    <antcall target="iterate-tests">
-      <param name="test-jvm" value="${java5-exec}" />
-      <param name="test-tools" value="${java5-tools}" />
-      <param name="test-force-disable-concjunit" value="false" />
-    </antcall>
-  </target>
-  
   
   <target name="iterate-tests" depends="resolve-test-formatter-class">
     <!-- Calls do-test, unless that is overridden by the caller -->
+    <echo message="Executing iterate-tests" />
     <property name="do-test-target" value="do-test" />
     <condition property="test-iteration-message">
       <not>
@@ -554,7 +527,7 @@
   
   <target name="do-test" depends="resolve-jvm-args, resolve-junit-jar">
     <echo message="Running all tests matching '${test-filter-string}' with command '${test-jvm}', using '${junit-jar}' and '${test-tools}'" />
-    <extendclasspath path="${junit-jar}" />
+<!--    <extendclasspath path="${junit-jar}" /> -->
     <jacoco:coverage xmlns:jacoco="antlib:org.jacoco.ant">
     <junit haltonfailure="${test-halt}" failureproperty="test-failed"
            fork="yes" forkmode="perTest" maxmemory="2G" jvm="${test-jvm}" dir="${basedir}">
@@ -563,7 +536,6 @@
         <pathelement location="${junit-jar}" />
         <pathelement location="lib/buildlib/plt-ant.jar" /> <!-- required for custom formatter -->
         <pathelement location="lib/buildlib/netbeans-memory-leak-utils.jar" />
-        <pathelement location="${clover-jar}" />
         <pathelement location="classes/test" />
         <pathelement location="classes/base" />
         <pathelement location="classes/lib" />
@@ -639,13 +611,6 @@
     </antcall>
   </target>
   
-  <target name="run-5" depends="compile, resolve-java5-exec"
-          description="Run the main class under Java 5 (after compiling)">
-    <antcall target="do-run">
-      <param name="run-jvm" value="${java5-exec}" />
-    </antcall>
-  </target>
-  
   <target name="do-run" depends="resolve-jvm-args">
     <echo message="Running ${main-class} with command '${run-jvm}'" />
     <java classname="${main-class}" jvm="${run-jvm}" fork="yes" spawn="yes">
@@ -689,13 +654,6 @@
           description="Run the jar file under Java 6 (after building it)">
     <antcall target="do-run-jar">
       <param name="run-jvm" value="${java6-exec}" />
-    </antcall>
-  </target>
-  
-  <target name="run-jar-5" depends="jar, resolve-java5-exec"
-          description="Run the jar file under Java 5 (after building it)">
-    <antcall target="do-run-jar">
-      <param name="run-jvm" value="${java5-exec}" />
     </antcall>
   </target>
   
@@ -792,45 +750,6 @@
     </javadoc>
   </target>
   
-  
-  <target name="clover" depends="clean, setup-clover, test, report-clover" 
-          description="Generate a Clover test coverage report" />
-  
-  <target name="clover-7" depends="clean, setup-clover, test-7, report-clover" 
-          description="Generate a Clover test coverage report under Java 7" />
-  
-  <target name="clover-6" depends="clean, setup-clover, test-6, report-clover" 
-          description="Generate a Clover test coverage report under Java 6" />
-  
-  <target name="clover-5" depends="clean, setup-clover, test-5, report-clover" 
-          description="Generate a Clover test coverage report under Java 5" />
-  
-  <target name="report-clover" depends="resolve-version-tag">
-    <echo message="Generating Clover report" />
-    <clover-report>
-      <current outfile="docs/clover" title="${readable-project-name} Test Coverage (${version-tag})">
-        <format type="html" />
-      </current>
-    </clover-report>
-    <antcall target="clean-intermediate"> <!-- Remove instrumented class files -->
-      <param name="clean-can-fail" value="no" />
-    </antcall>
-  </target>
-
-  <target name="setup-clover" depends="assert-clover-jar-exists">
-    <extendclasspath path="${clover-jar}" />
-    <taskdef resource="clovertasks" classpath="${clover-jar}" />
-    <mkdir dir="cloverdb" />
-    <clover-setup initString="cloverdb/clover.db">
-      <files>
-        <exclude name="**/*Test.java" />
-        <exclude name="**/*TestCase.java" />
-        <!-- Additional test sources should be listed here -->
-      </files>
-    </clover-setup>
-  </target>
-  
-  
   <target name="findbugs" depends="assert-findbugs-exists, compile, resolve-java6-tools"
 	      description="Generate a findbugs report (after compiling)">
     <taskdef name="findbugs" classpath="lib/buildlib/findbugs-ant.jar"
@@ -861,61 +780,6 @@
     <delete file="findbugs-excludes.xml" />
   </target>
 
-
-  <target name="benchmark" depends="benchmark-current, benchmark-report"
-          description="Generate a test performance report">
-  </target>
-  
-  <target name="benchmark-current">
-    <echo message="*****************************************" />
-    <echo message="Running benchmark tests on the local copy" />
-    <echo message="*****************************************" />
-    <mkdir dir="benchmarkResults/local" />
-    <trycatch>
-      <try>
-        <antcall target="compile" />
-        <antcall target="iterate-tests">
-          <param name="test-jvm" value="java" />
-          <param name="test-formatter" value="xml" />
-        </antcall>
-      </try>
-      <catch /> <!-- Continue despite any test failures -->
-    </trycatch>
-    <move todir="benchmarkResults/local" file="testResults" failonerror="no" />
-  </target>
-
-  
-  
-  <target name="do-test-previous">
-    <trycatch>
-      <try>
-        <ant dir="benchmarkSources">
-          <!-- compile in case it doesn't happen automatically -->
-          <target name="compile" />
-          <target name="test" />
-          <!-- Iteration is managed here, so don't do it there -->
-          <property name="test-spec" value="${test-filter-string}" />
-          <property name="test-repeat" value="1" />
-        </ant>
-      </try>
-      <finally>
-        <move todir="${basedir}">
-          <fileset dir="benchmarkSources">
-            <include name="TEST*" />
-            <include name="testResults/**/TEST*" />
-          </fileset>
-        </move>
-      </finally>
-    </trycatch>
-  </target>
-  
-  <target name="benchmark-report">
-    <mkdir dir="docs/benchmark" />
-    <!-- TODO - implement this.  Report should be generated in docs/benchmark. -->
-    <echo message="Report generation not yet implemented" />
-    <!-- <delete dir="benchmarkResults" /> -->
-  </target>
-
   
   <!-- *************
        Clean Targets
@@ -928,9 +792,6 @@
     <echo message="Deleting all intermediate build products" />
     
     <delete dir="classes" failonerror="${clean-can-fail}" />
-    <delete dir="cloverdb" failonerror="${clean-can-fail}" />
-    <delete dir="benchmarkSources" failonerror="${clean-can-fail}" />
-    <delete dir="benchmarkResults" failonerror="${clean-can-fail}" />  
 
     <delete includeemptydirs="true" failonerror="${clean-can-fail}">
       <fileset dir="testFiles">
@@ -1097,17 +958,6 @@
     </zip>
   </target>
   
-  <!-- We don't include this in the standard release process, because we don't want to
-       include instrumented files in the release, and because Clover must be run on a
-       licensed machine -->
-  <target name="clover-zip" depends="clover, resolve-version-tag">
-    <echo message="Creating ${version-tag}-clover.zip" />
-    <zip destfile="${version-tag}-clover.zip">
-      <zipfileset dir="docs/clover" prefix="${version-tag}/clover" />
-    </zip>
-  </target>
-
-
 
   <!-- ********************************
        Misc Occasionally-Useful Targets
@@ -1362,41 +1212,6 @@
     <fail message="Can't find the java executable in the Java 6 home: ${java6-home}" unless="java6-exec" />
   </target>
   
-  <target name="resolve-java5-runtime">
-    <!-- We rely on "location" to generate a platform-specific path; note that properties
-         are immutable and so java5-runtime will only be set the *first* time. -->
-
-    <property name="java5-runtime-1" location="${java5-home}/lib/rt.jar" />
-    <available property="java5-runtime" value="${java5-runtime-1}" file="${java5-runtime-1}" />
-
-    <property name="java5-runtime-2" location="${java5-home}/jre/lib/rt.jar" />
-    <available property="java5-runtime" value="${java5-runtime-2}" file="${java5-runtime-2}" />
-
-    <property name="java5-runtime-3" location="${java5-home}/../Classes/classes.jar" />
-    <available property="java5-runtime" value="${java5-runtime-3}" file="${java5-runtime-3}" />
-
-    <echo message="java5-runtime = ${java5-runtime}" />
-
-    <fail message="Can't find rt.jar in the Java 5 home: ${java5-home}" unless="java5-runtime" />
-  </target>
-  
-  <target name="resolve-java5-exec">
-    <!-- We rely on "location" to generate a platform-specific path -->
-
-    <property name="java5-exec-1" location="${java5-home}/bin/java.exe" />
-    <condition property="java5-exec" value="${java5-exec-1}">
-      <and>
-        <available file="${java5-exec-1}" />
-        <os family="windows" />
-      </and>
-    </condition>
-    
-    <property name="java5-exec-2" location="${java5-home}/bin/java" />
-    <available property="java5-exec" value="${java5-exec-2}" file="${java5-exec-2}" />
-
-    <fail message="Can't find the java executable in the Java 5 home: ${java5-home}" unless="java5-exec" />
-  </target>
-    
   <target name="resolve-java8-tools">
     <property name="java8-tools-1" location="${java8-home}/lib/tools.jar" />
     <available property="java8-tools" value="${java8-tools-1}" file="${java8-tools-1}" />
@@ -1436,19 +1251,6 @@
     <fail message="Can't find tools.jar in the Java 6 home: ${java6-home}" unless="java6-tools" />
   </target>
   
-  <target name="resolve-java5-tools">
-    <property name="java5-tools-1" location="${java5-home}/lib/tools.jar" />
-    <available property="java5-tools" value="${java5-tools-1}" file="${java5-tools-1}" />
-
-    <property name="java5-tools-2" location="${java5-home}/../lib/tools.jar" />
-    <available property="java5-tools" value="${java5-tools-2}" file="${java5-tools-2}" />
-
-    <property name="java5-tools-3" location="${java5-home}/../Classes/classes.jar" />
-    <available property="java5-tools" value="${java5-tools-3}" file="${java5-tools-3}" />
-
-    <fail message="Can't find tools.jar in the Java 5 home: ${java5-home}" unless="java5-tools" />
-  </target>
-  
   <target name="resolve-current-tools">
     <property name="current-tools-1" location="${java.home}/lib/tools.jar" />
     <available property="current-tools" value="${current-tools-1}" file="${current-tools-1}" />
@@ -1468,10 +1270,6 @@
     <fail message="Can't find ${ant.project.name}.jar" unless="jar-exists" />
   </target>
   
-  <target name="assert-clover-jar-exists">
-    <available property="clover-jar-exists" file="${clover-jar}" />
-    <fail message="${clover-jar} does not exist" unless="clover-jar-exists" />
-  </target>
   
   <target name="assert-launch4j-exists">
     <available property="launch4j-exists" file="${launch4j-home}/launch4j.jar" />
@@ -1629,3 +1427,4 @@
   </target>
 
 </project>
+
