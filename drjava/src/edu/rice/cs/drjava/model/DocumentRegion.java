@@ -62,7 +62,6 @@ public class DocumentRegion implements OrderedDocumentRegion {
   // The following two fields are ignored in subclasses of DocumentRegion
   protected volatile Position _start; 
   protected volatile Position _end;  // _end >= _start
-  protected ArrayList<RegionSet<IDocumentRegion>> _regionSets;
 
   /** Create a new simple document region using offsets.
     * @param doc document that contains this region, which cannot be null
@@ -87,7 +86,6 @@ public class DocumentRegion implements OrderedDocumentRegion {
       throw new UnexpectedException(e);
     }
 
-    _regionSets = new ArrayList<RegionSet<IDocumentRegion>>();
   }
   
   /** Defines the equality relation on DocumentRegions.  This equivalence relation is consistent with the equivalence
@@ -152,28 +150,9 @@ public class DocumentRegion implements OrderedDocumentRegion {
     throw new UnsupportedOperationException("DocumentRegion does not suppport getString()"); 
   }
   
-  /** Throws exception indicating that update() is not supported. */
-  public void update() { 
-    throw new UnsupportedOperationException("DocumentRegion does not suppport update()"); 
-  }
-  
   public boolean isEmpty() { return getStartOffset() == getEndOffset(); }
   
   public String toString() {
     return (/* _doc != null ? */ _doc.toString() /* : "null" */) + "[" + getStartOffset() + " .. " + getEndOffset() + "]";
-  }
-
-  /** @param rs set to add */
-  public void addSet(RegionSet<IDocumentRegion> rs) {
-    if (!_regionSets.contains(rs)) {
-      _regionSets.add(rs);
-    }
-  }
-
-  /** @param rs set to remove */
-  public void removeSet(RegionSet<IDocumentRegion> rs) {
-    if (_regionSets.contains(rs)) {
-      _regionSets.remove(rs);
-    }
   }
 }

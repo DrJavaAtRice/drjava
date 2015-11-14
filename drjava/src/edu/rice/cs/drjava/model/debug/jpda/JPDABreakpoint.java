@@ -162,6 +162,11 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
     */
   public int getEndOffset() { return _endPos.getOffset(); }
   
+  /** Accessor for the offset of this breakpoint's middle position
+    * @return the position offset
+    */
+  public int getPosOffset() { return _position.getOffset(); }
+
   /** Accessor for the offset of this breakpoint's start position
     * @return the start offset
     */
@@ -200,10 +205,10 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
     * not just equality of the current offsets of Positions. 
     */
   public final boolean equals(Object o) {
-    if (o == null || ! (o instanceof IDocumentRegion)) return false;
+    if (o == null || ! (o instanceof Breakpoint)) return false;
     update(); 
-    IDocumentRegion r = (IDocumentRegion) o;
-    return getDocument() == r.getDocument() && getStartOffset() == r.getStartOffset() && getEndOffset() == r.getEndOffset();
+    Breakpoint r = (Breakpoint) o;
+    return getDocument() == r.getDocument() && getStartOffset() == r.getStartOffset() && getEndOffset() == r.getEndOffset() && getPosOffset() == r.getPosOffset();
   }
   
   /** A trivial override of hashCode to satisfy javac, which complains if hashCode is not overridden.
@@ -213,15 +218,25 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
   @Override
   public final int hashCode() { return super.hashCode(); }
   
-  /** Totally orders regions lexicographically based on (_doc, endOffset, startOffset). This method is typically applied
-    * to regions within the same document. It is consistent with equals.
-    */
+  /** 
+   * Totally orders regions lexicographically based on (_doc, endOffset, 
+   * startOffset, _position). This method is typically applied to
+   * regions within the same document. It is consistent with equals.
+   */
   public int compareTo(OrderedDocumentRegion r) {
     int docRel = getDocument().compareTo(r.getDocument());
     if (docRel != 0) return docRel;
-    // At this point, we know that this and r have identical file paths, but they do not have to be the same allocation
+    /* 
+     * At this point, we know that this and r have identical file paths, but 
+     * they do not have to be the same allocation.
+     */
     
-    assert getDocument() == r.getDocument();  // DrJava never creates two ODD objects with the same path
+    /* DrJava never creates two ODD objects with the same path */
+    assert getDocument() == r.getDocument();  
+
+    /* We should only be comparing to other Breakpoints (not just any Regions). */
+    assert (r instanceof Breakpoint);
+
     int end1 = getEndOffset();
     int end2 = r.getEndOffset();
     int endDiff = end1 - end2;
@@ -229,7 +244,16 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
     
     int start1 = getStartOffset();
     int start2 = r.getStartOffset();
-    return start1 - start2;
+    int startDiff = start1 - start2;
+    if (startDiff != 0) return startDiff;
+
+    /* 
+     * If we use _position as a second tie-breaker, then it will be 
+     * impossible for the order to flip in the RegionSet.
+     */
+    int pos1 = getPosOffset();
+    int pos2 = ((Breakpoint)r).getPosOffset();
+    return pos1 - pos2;
   }
   
   /** Returns the line number this DebugAction occurs on */

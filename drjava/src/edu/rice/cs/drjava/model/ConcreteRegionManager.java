@@ -516,7 +516,6 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends
     List<R> toBeRemoved = new ArrayList<R>();  // nonsense to avoid concurrent modification exception
     for (R region: tail) {
       if (region.compareTo(lastRegion) > 0) break;
-      region.update();  // The bounds of this region must be recomputed.
       if (region.getStartOffset() == region.getEndOffset()) toBeRemoved.add(region); 
     }
     removeRegions(toBeRemoved);
