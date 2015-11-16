@@ -36,6 +36,7 @@
 
 package edu.rice.cs.drjava.ui;
 
+import java.util.List;
 import java.util.LinkedList;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -359,7 +360,21 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
       _frame.goToRegionAndHighlight(r.get(0));
     }
   }
-  
+
+  /** 
+   * Receives the set of documents that have been closed and removes all of 
+   * their regions; also updates the first document, in case it was one of 
+   * the closed files. 
+   * @param docs the documents that were closed 
+   */
+  public void updateOnClose(List<OpenDefinitionsDocument> docs) {
+    for (OpenDefinitionsDocument odd : docs) {
+      this.getRegionManager().removeRegions(odd);
+    }
+    this._findReplace.updateFirstDocInSearch();
+  }
+
+ 
   /** Destroys this panel and its contents. This is a more comprehensive command than _closePanel (which is the
     * _close operation inherited from RegionsTreePanel).  The latter merely removes the panel from the TabbedPane but 
     * does not affect its contents, so panels like Find/Replace can be regenerated with their contents preserved.

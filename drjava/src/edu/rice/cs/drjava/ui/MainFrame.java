@@ -655,8 +655,17 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     { _addGUIAvailabilityListener(this, GUIAvailabilityListener.ComponentType.PROJECT);
       putValue(Action.SHORT_DESCRIPTION, "Close DrJava project"); }
     public void actionPerformed(ActionEvent ae) { 
+      /* Get the documents to be closed */
+      List<OpenDefinitionsDocument> docs = _model.getProjectDocuments();
+
+      /* Close the documents */
       closeProject();
-      _findReplace.updateFirstDocInSearch();
+
+      /* Update the Find All results */
+      for (Pair<FindResultsPanel, Map<MovingDocumentRegion, 
+        HighlightManager.HighlightInfo>> pair : _findResults) {
+        pair.first().updateOnClose(docs);
+      }
     }
   };
   
@@ -664,26 +673,57 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Closes the current active document, prompting to save if necessary. */
   private final Action _closeAction = new AbstractAction("Close") {
     public void actionPerformed(ActionEvent ae) { 
+      /* Get the documents to be closed */
+      List<OpenDefinitionsDocument> docs = _model.getDocumentNavigator().getSelectedDocuments();    
+
       _close();
-      _findReplace.updateFirstDocInSearch();
+
+      /* Update the Find All results */
+      for (Pair<FindResultsPanel, Map<MovingDocumentRegion, 
+        HighlightManager.HighlightInfo>> pair : _findResults) {
+        pair.first().updateOnClose(docs);
+      }
     }
   };
   
   /** Closes all open documents, prompting to save if necessary. */
   private final Action _closeAllAction = new AbstractAction("Close All") {
     public void actionPerformed(ActionEvent ae) { 
+      /* Get the documents to be closed */
+      List<OpenDefinitionsDocument> docs = _model.getDocumentNavigator().getDocuments();
+
+      /* Close the documents */
       _closeAll();
-      _findReplace.updateFirstDocInSearch();
+
+      /* Update the Find All results */
+      for (Pair<FindResultsPanel, Map<MovingDocumentRegion, 
+        HighlightManager.HighlightInfo>> pair : _findResults) {
+        pair.first().updateOnClose(docs);
+      }
     }
   };
   
   /** Closes all open documents, prompting to save if necessary. */
   private final Action _closeFolderAction = new AbstractAction("Close Folder") {
     public void actionPerformed(ActionEvent ae) { 
+      /* Get the documents to be closed */
+      List<OpenDefinitionsDocument> docs = _getDocsInFolder();    
+
+      /* Close the documents */
       _closeFolder();
-      _findReplace.updateFirstDocInSearch();
-      // Set the document currently visible in the definitions pane as active document in the document navigator.
-      // This action makes sure that something is selected in the navigator after the folder was closed.
+
+      /* Update the Find All results */
+      for (Pair<FindResultsPanel, Map<MovingDocumentRegion, 
+        HighlightManager.HighlightInfo>> pair : _findResults) {
+        pair.first().updateOnClose(docs);
+      }
+
+      /* 
+       * Set the document currently visible in the definitions pane as active 
+       * document in the document navigator.
+       * This action makes sure that something is selected in the navigator 
+       * after the folder was closed.
+       */
       _model.getDocumentNavigator().selectDocument(_currentDefPane.getOpenDefDocument());
     }
   };
@@ -5117,18 +5157,26 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _model.closeFile(doc);
     }
   }
-  
-  private void _closeFolder() {
+
+  /** @return a list of all of the documents in the current folder */  
+  private List<OpenDefinitionsDocument> _getDocsInFolder() {
     ArrayList<OpenDefinitionsDocument> docs = _model.getDocumentNavigator().getDocuments();
     final LinkedList<OpenDefinitionsDocument> l = new LinkedList<OpenDefinitionsDocument>();
-    
+
     if (_model.getDocumentNavigator().isGroupSelected()) {
       for (OpenDefinitionsDocument doc: docs) {
         if (_model.getDocumentNavigator().isSelectedInGroup(doc)) { l.add(doc); }
       }
-      disableFindAgainOnClose(l); // disable "Find Again" for documents that are closed
-      _model.closeFiles(l);
-      if (! l.isEmpty()) _model.setProjectChanged(true);
+    }
+    return l;
+  }
+
+  private void _closeFolder() {
+    List<OpenDefinitionsDocument> docs = _getDocsInFolder();
+    if (! docs.isEmpty()) {
+      disableFindAgainOnClose(docs); // disable "Find Again" for documents that are closed
+      _model.closeFiles(docs);
+      _model.setProjectChanged(true);
     }
   }
   
@@ -9908,12 +9956,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         File file = doc.getFile();
         if (file == null) {
           fname = "Untitled file";
-          text = "Untitled file has been modified. Would you like to save it?";
         }
         else {
           fname = file.getName();
-          text = fname + " has been modified. Would you like to save it?";
         }
+        text = fname + " has been modified. Would you like to save it?";
       }
       catch (FileMovedException fme) {
         // File was deleted, but use the same name anyway
