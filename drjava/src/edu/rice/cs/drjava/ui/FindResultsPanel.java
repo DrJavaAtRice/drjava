@@ -107,10 +107,13 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
    * @param doc weak reference to the document in which the search occurred (or started, if all documents were searched)
    * @param findReplace the FindReplacePanel that created this FindResultsPanel
    */
-  public FindResultsPanel(MainFrame frame, RegionManager<MovingDocumentRegion> regionManager, MovingDocumentRegion region, String title, 
-                          String searchString, boolean searchAll, boolean searchSelectionOnly, boolean matchCase, boolean wholeWord, 
-                          boolean noComments, boolean noTestCases, WeakReference<OpenDefinitionsDocument> doc, 
-                          FindReplacePanel findReplace) {
+  public FindResultsPanel(MainFrame frame, 
+    RegionManager<MovingDocumentRegion> regionManager, 
+    MovingDocumentRegion region, String title, String searchString, 
+    boolean searchAll, boolean searchSelectionOnly, boolean matchCase, 
+    boolean wholeWord, boolean noComments, boolean noTestCases, 
+    WeakReference<OpenDefinitionsDocument> doc, FindReplacePanel findReplace) {
+
     super(frame, title, regionManager);
     
 //  _regionManager is inherited from RegionsTreePanel
@@ -140,12 +143,19 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     sb.append("</html>");
     _findAgainButton.setToolTipText(sb.toString());
 
+    final FindReplacePanel findReplaceRef = findReplace;
+    final String searchStringRef = searchString;
+
     // Similar (but NOT identical) code found in BookmarksPanel and BreakpointsPanel
     getRegionManager().addListener(new RegionManagerListener<MovingDocumentRegion>() {      
       public void regionAdded(MovingDocumentRegion r) { addRegion(r); }
       public void regionChanged(MovingDocumentRegion r) { 
         regionRemoved(r);
-        regionAdded(r);
+
+        /* Only re-add the region if it is still a match. */
+        if (findReplaceRef.isMatch(r, searchStringRef)) {
+          regionAdded(r);
+        }
       }
       public void regionRemoved(MovingDocumentRegion r) { removeRegion(r); }
     });

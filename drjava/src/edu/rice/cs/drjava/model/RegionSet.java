@@ -46,9 +46,20 @@ import edu.rice.cs.util.swing.Utilities;
 
 public class RegionSet<R extends IDocumentRegion> extends TreeSet<R> {
 
-    // TODO: currently this assumes that a given RegionSet will only have 
-    // regions from one document
+    /* Assumes that this RegionSet will only have regions from one document */
     private DocumentListener _docListener = null;
+
+    /* 
+     * Assumes that this RegionSet will belong to only one RegionManager.
+     * Also assumes the manager is Concrete; in reality, it need not be, but 
+     * we will only ever set the _manager field if it is (since this is only
+     * used for find/replace). 
+     */
+    private ConcreteRegionManager<OrderedDocumentRegion> _manager = null;
+
+    public void setManager(ConcreteRegionManager<OrderedDocumentRegion> manager) { 
+      this._manager = manager; 
+    }
 
     /** 
      * Set _docListener to listen on region.getDocument(), if not already set. 
@@ -68,7 +79,12 @@ public class RegionSet<R extends IDocumentRegion> extends TreeSet<R> {
 
         public void insertUpdate(DocumentEvent e) {
           /* Insertion can't cause positions to flip */
-          return;
+          /* But we should still notify the RegionManager, if requested. */
+          if (thisRef._manager != null) {
+            for (R region : thisRef) {
+              thisRef._manager.notifyChangedRegion((OrderedDocumentRegion)region);
+            }
+          }
         }
 
         public void removeUpdate(DocumentEvent e) {
@@ -96,6 +112,13 @@ public class RegionSet<R extends IDocumentRegion> extends TreeSet<R> {
                 RegionSet<R> thisCopy = (RegionSet<R>)thisRef.clone();
                 thisRef.clear();
                 thisRef.addAll(thisCopy);
+              }
+
+              /* Notify the RegionManager, if requested. */
+              if (thisRef._manager != null) {
+                for (R region : thisRef) {
+                  thisRef._manager.notifyChangedRegion((OrderedDocumentRegion)region);
+                }
               }
             }
            });

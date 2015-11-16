@@ -2745,34 +2745,44 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
    * @return new find results tab.
    */
   public FindResultsPanel createFindResultsPanel(final RegionManager<MovingDocumentRegion> rm,
-                                                 MovingDocumentRegion region, String title,
-                                                 String searchString, boolean searchAll, boolean searchSelectionOnly, 
-                                                 boolean matchCase, boolean wholeWord, boolean noComments, 
-                                                 boolean noTestCases, WeakReference<OpenDefinitionsDocument> doc,
-                                                 FindReplacePanel findReplace) {
+    MovingDocumentRegion region, String title, String searchString, 
+    boolean searchAll, boolean searchSelectionOnly, boolean matchCase, 
+    boolean wholeWord, boolean noComments, boolean noTestCases, 
+    WeakReference<OpenDefinitionsDocument> doc, FindReplacePanel findReplace) {
     
-    final FindResultsPanel panel = new FindResultsPanel(this, rm, region, title, searchString, searchAll, 
-                                                        searchSelectionOnly, matchCase, wholeWord, noComments, 
-                                                        noTestCases, doc, findReplace);
-    
+    final FindResultsPanel panel = new FindResultsPanel(this, rm, region, 
+      title, searchString, searchAll, searchSelectionOnly, matchCase, 
+      wholeWord, noComments, noTestCases, doc, findReplace);
+
     final AbstractMap<MovingDocumentRegion, HighlightManager.HighlightInfo> highlights =
       new IdentityHashMap<MovingDocumentRegion, HighlightManager.HighlightInfo>();
     final Pair<FindResultsPanel, Map<MovingDocumentRegion, HighlightManager.HighlightInfo>> pair =
       new Pair<FindResultsPanel, Map<MovingDocumentRegion, HighlightManager.HighlightInfo>>(panel, highlights);
     _findResults.add(pair);
     
+    final FindReplacePanel findReplaceRef = findReplace;
+    final String searchStringRef = searchString;
+
     // hook highlighting listener to find results manager
-    rm.addListener(new RegionManagerListener<MovingDocumentRegion>() {     
+    rm.addListener(new RegionManagerListener<MovingDocumentRegion>() { 
+
       public void regionAdded(MovingDocumentRegion r) {
         DefinitionsPane pane = getDefPaneGivenODD(r.getDocument());
 //        if (pane == null) System.err.println("ODD " + r.getDocument() + " produced a null DefinitionsPane!");
         highlights.put(r, pane.getHighlightManager().
-                         addHighlight(r.getStartOffset(), r.getEndOffset(), panel.getSelectedPainter()));
+          addHighlight(r.getStartOffset(), r.getEndOffset(), 
+          panel.getSelectedPainter()));
       }
+
       public void regionChanged(MovingDocumentRegion r) { 
         regionRemoved(r);
-        regionAdded(r);
+
+        /* Only re-add region if it is still a match. */
+        if (findReplaceRef.isMatch(r, searchStringRef)) {
+          regionAdded(r);
+        }
       }
+
       public void regionRemoved(MovingDocumentRegion r) {
 //        _log.log("Removing highlight for region " + r);
         HighlightManager.HighlightInfo highlight = highlights.get(r);
