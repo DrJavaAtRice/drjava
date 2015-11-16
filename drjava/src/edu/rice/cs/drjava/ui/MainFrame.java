@@ -4922,6 +4922,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _autoImportClassSet = new HashSet<JavaAPIListEntry>(); // reset auto-import list
     
     if (_checkProjectClose()) {
+
       List<OpenDefinitionsDocument> projDocs = _model.getProjectDocuments();
 //      System.err.println("projDocs = " + projDocs);
       _cleanUpDebugger();
@@ -4944,7 +4945,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _currentProjFile = FileOps.NULL_FILE;
       return true;
     }
-    else return false;  // Project closing cancelled in _checkProjectClose dialog
+    else {
+      return false;  // Project closing cancelled in _checkProjectClose dialog
+    }
   }
   
   private void _configureBrowsing() {
@@ -5539,19 +5542,20 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     // tried passing false here. seemed to help with bug
     // [ 1478796 ] DrJava Does Not Shut Down With Project Open
     // on HP tc1100 and Toshiba Portege tablet PCs, but did not help in all cases
+
     if (! _closeProject(true)) { return; /* if user pressed cancel, do not quit */ }
     
-    _updateSavedConfiguration();
+    if (!_updateSavedConfiguration()) { return; /* if user pressed cancel, do not quit */ }
     
     //DrJava.consoleOut().println("Quitting DrJava...");
     dispose();    // Free GUI elements of this frame
     _model.quit();
   }
   
-  void _updateSavedConfiguration() {
+  boolean _updateSavedConfiguration() {
     _recentFileManager.saveRecentFiles();
     _recentProjectManager.saveRecentFiles();
-    if (! _model.closeAllFilesOnQuit()) { return; /* if user pressed cancel, do not quit */ }
+    if (! _model.closeAllFilesOnQuit()) { return false; /* if user pressed cancel, do not quit */ }
     _storePositionInfo();
     
     // Save recent files, but only if there wasn't a problem at startUp
@@ -5560,6 +5564,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       try { DrJava.getConfig().saveConfiguration(); }
       catch (IOException ioe) { MainFrameStatics.showIOError(MainFrame.this, ioe); }
     }
+    return true;
   }
   
   private void _forceQuit() { _model.forceQuit(); }
