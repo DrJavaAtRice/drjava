@@ -8,7 +8,7 @@ import java.io.File;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Position;
 
-/** Trivial JUnit test case class for DocumentRegion. */
+/** Trivial JUnit test case class for StaticDocumentRegion. */
 public class DocumentRegionTest extends DrJavaTestCase {
   private volatile OpenDefinitionsDocument _doc;  // working document accessible across threads
   private static final AbstractGlobalModel _model = new AbstractGlobalModel();
@@ -49,9 +49,9 @@ public class DocumentRegionTest extends DrJavaTestCase {
     DummyOpenDefDoc doc2 = new DummyOpenDefDoc();
     doc1.append("This is a test");
     doc2.append("This is another test");
-    OrderedDocumentRegion r1 = new DocumentRegion(doc1, 5, 10);
-    OrderedDocumentRegion r2 = new DocumentRegion(doc1, 5, 10);
-    OrderedDocumentRegion r3 = new DocumentRegion(doc2, 5, 10);
+    OrderedDocumentRegion r1 = new StaticDocumentRegion(doc1, 5, 10);
+    OrderedDocumentRegion r2 = new StaticDocumentRegion(doc1, 5, 10);
+    OrderedDocumentRegion r3 = new StaticDocumentRegion(doc2, 5, 10);
     assertEquals("equality test 1", r1, r1);
     assertEquals("equality test 2", r1, r2);
     assertFalse("equality test 3", r2.equals(r3));
@@ -64,8 +64,8 @@ public class DocumentRegionTest extends DrJavaTestCase {
     doc1.append("This is a test");
     doc2.append("This is another test");
     IDocumentRegion r1 = new BrowserDocumentRegion(doc1, createPosition(doc1, 5), createPosition(doc1, 10));
-    IDocumentRegion r2 = new DocumentRegion(doc1, 5, 10);
-    IDocumentRegion r3 = new DocumentRegion(doc2, 5, 10);
+    IDocumentRegion r2 = new StaticDocumentRegion(doc1, 5, 10);
+    IDocumentRegion r3 = new StaticDocumentRegion(doc2, 5, 10);
     assertEquals("equality test 1", r1, r1);
     assertFalse("equality test 2", r1.equals(r2));
     assertFalse("equality test 3", r2.equals(r3));
@@ -90,7 +90,7 @@ public class DocumentRegionTest extends DrJavaTestCase {
    */
   public void testRegionManager() throws BadLocationException {
     _doc.insertString(0, DOCUMENT_TEXT, null);
-    RegionManager<DocumentRegion> rm = new ConcreteRegionManager<DocumentRegion>();
+    RegionManager<StaticDocumentRegion> rm = new ConcreteRegionManager<StaticDocumentRegion>();
     assertNull(rm.getRegionAt(_doc, 5));
     assertNull(rm.getRegionAt(_doc, 3));
     assertNull(rm.getRegionAt(_doc, 7));
@@ -104,7 +104,7 @@ public class DocumentRegionTest extends DrJavaTestCase {
     assertTrue("Empty overlapping regions", rm.getRegionsOverlapping(_doc, 2, 5).size() == 0);
     assertTrue("Empty overlapping regions", rm.getRegionsOverlapping(_doc, 5, 8).size() == 0);
     
-    DocumentRegion r1 = new DocumentRegion(_doc, 3, 7);
+    StaticDocumentRegion r1 = new StaticDocumentRegion(_doc, 3, 7);
     rm.addRegion(r1);
     assertTrue("Region found", r1 == rm.getRegionAt(_doc, 5));
     assertTrue("Region found", r1 == rm.getRegionAt(_doc, 3));
@@ -130,7 +130,7 @@ public class DocumentRegionTest extends DrJavaTestCase {
     assertNull(rm.getRegionAt(_doc, 18));
 
     
-    DocumentRegion r2 = new DocumentRegion(_doc, 13, 17);
+    StaticDocumentRegion r2 = new StaticDocumentRegion(_doc, 13, 17);
     rm.addRegion(r2);
     assertTrue(r2 == rm.getRegionAt(_doc, 15));
     assertTrue(r2 == rm.getRegionAt(_doc, 13));
@@ -152,7 +152,7 @@ public class DocumentRegionTest extends DrJavaTestCase {
     
 //// r2 and r3 are the same region, so the region will be reused
 //// and we get r2 back
-    DocumentRegion r3 = new DocumentRegion(_doc, 13, 17);
+    StaticDocumentRegion r3 = new StaticDocumentRegion(_doc, 13, 17);
 //    rm.addRegion(r3);
 //    assertTrue(r2==rm.getRegionAt(_doc, 15));
 //    assertTrue(r2==rm.getRegionAt(_doc, 13));

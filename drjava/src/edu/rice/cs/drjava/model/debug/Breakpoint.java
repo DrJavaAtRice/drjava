@@ -50,4 +50,10 @@ public interface Breakpoint extends DebugBreakpointData, OrderedDocumentRegion {
 
   /** Update positions and line nubmers from the position that moves with the document. */
   public void update();
+
+  /** 
+   * Second tie-breaker for comparison. 
+   * @return position offset
+   */
+  public int getPosOffset();
 }

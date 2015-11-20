@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.model;
 
-/** Any class which wants to listen to DocumentRegion events fired by a RegionManager should implement this interface
+/** Any class which wants to listen to StaticDocumentRegion events fired by a RegionManager should implement this interface
  *  and use RegionManager's addListener() method.
  *  @version $Id$
  */

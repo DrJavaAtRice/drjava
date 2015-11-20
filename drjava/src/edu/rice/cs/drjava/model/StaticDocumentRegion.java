@@ -54,20 +54,19 @@ import javax.swing.text.Position;
   * are mutable, a hashCode method consistent with equals WOULD NOT WORK anyway.
   * @version $Id$
   */
-public class DocumentRegion implements OrderedDocumentRegion {
+public class StaticDocumentRegion implements OrderedDocumentRegion {
   protected final OpenDefinitionsDocument _doc;
 
-  // The following two fields are ignored in subclasses of DocumentRegion
+  // The following two fields are ignored in subclasses of StaticDocumentRegion
   protected volatile Position _start; 
   protected volatile Position _end;  // _end >= _start
-  protected ArrayList<RegionSet<IDocumentRegion>> _regionSets;
  
   /** Create a new simple document region with a bona fide document and offsets
    * @param doc the document within which to create the region which cannot be null
    * @param start the start offset
    * @param end the end offset
    */
-  public DocumentRegion(OpenDefinitionsDocument doc, int start, int end) {
+  public StaticDocumentRegion(OpenDefinitionsDocument doc, int start, int end) {
     assert doc != null;
     assert end >= start; // split in two to help diagnose bug 2906538: AssertionError After Go To Find Result and Edit
     _doc = doc;
@@ -79,7 +78,6 @@ public class DocumentRegion implements OrderedDocumentRegion {
       throw new UnexpectedException(e);
     }
 
-    _regionSets = new ArrayList<RegionSet<IDocumentRegion>>();
   }
   
   /** Defines the equality relation on DocumentRegions.  This equivalence relation is consistent with the equivalence
@@ -131,41 +129,22 @@ public class DocumentRegion implements OrderedDocumentRegion {
   
   /** Throws exception indicating that getLineStart() is not supported. */
   public int getLineStartOffset() { 
-    throw new UnsupportedOperationException("DocumentRegion does not suppport getLineStart()"); 
+    throw new UnsupportedOperationException("StaticDocumentRegion does not suppport getLineStart()"); 
   }
   
   /** Throws exception indicating that getLineEnd() is not supported. */
   public int getLineEndOffset() { 
-    throw new UnsupportedOperationException("DocumentRegion does not suppport getLineEnd()"); 
+    throw new UnsupportedOperationException("StaticDocumentRegion does not suppport getLineEnd()"); 
   }
   
   /** Throws exception indicating that getString() is not supported. */
   public String getString() { 
-    throw new UnsupportedOperationException("DocumentRegion does not suppport getString()"); 
-  }
-  
-  /** Throws exception indicating that update() is not supported. */
-  public void update() { 
-    throw new UnsupportedOperationException("DocumentRegion does not suppport update()"); 
+    throw new UnsupportedOperationException("StaticDocumentRegion does not suppport getString()"); 
   }
   
   public boolean isEmpty() { return getStartOffset() == getEndOffset(); }
   
   public String toString() {
     return (/* _doc != null ? */ _doc.toString() /* : "null" */) + "[" + getStartOffset() + " .. " + getEndOffset() + "]";
-  }
-
-  /** @param rs set to add */
-  public void addSet(RegionSet<IDocumentRegion> rs) {
-    if (!_regionSets.contains(rs)) {
-      _regionSets.add(rs);
-    }
-  }
-
-  /** @param rs set to remove */
-  public void removeSet(RegionSet<IDocumentRegion> rs) {
-    if (_regionSets.contains(rs)) {
-      _regionSets.remove(rs);
-    }
   }
 }

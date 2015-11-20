@@ -42,13 +42,25 @@ import java.util.TreeSet;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import edu.rice.cs.util.swing.Utilities;
+
 public class RegionSet<R extends IDocumentRegion> extends TreeSet<R> {
 
-    // TODO: currently this assumes that a given RegionSet will only have 
-    // regions from one document
+    /* Assumes that this RegionSet will only have regions from one document */
     private DocumentListener _docListener = null;
-    
-    /** Set _docListener to listen on region.getDocument(), if not already set. 
+
+    /* Assumes that this RegionSet will belong to only one RegionManager.
+     * Also assumes the manager is Concrete; in reality, it need not be, but 
+     * we will only ever set the _manager field if it is (since this is only
+     * used for find/replace). 
+     */
+    private ConcreteRegionManager<OrderedDocumentRegion> _manager = null;
+
+    public void setManager(ConcreteRegionManager<OrderedDocumentRegion> manager) { 
+      this._manager = manager; 
+    }
+
+    /**  Set _docListener to listen on region.getDocument(), if not already set. 
       * @param region the region whose document should be listened on
       */
     private void _setDocListener(R region) {
@@ -63,30 +75,49 @@ public class RegionSet<R extends IDocumentRegion> extends TreeSet<R> {
 
         public void insertUpdate(DocumentEvent e) {
           /* Insertion can't cause positions to flip */
-          return;
+          /* But we should still notify the RegionManager, if requested. */
+          if (thisRef._manager != null) {
+            for (R region : thisRef) {
+              thisRef._manager.notifyChangedRegion((OrderedDocumentRegion)region);
+            }
+          }
         }
 
         public void removeUpdate(DocumentEvent e) {
 
-          /* 
-           * Removal can cause positions to flip, but only need to worry if 
-           * the removed portion is within the bounds of one or more regions. 
-           */
-          boolean requireRebalance = false;
-          for (R region : thisRef) {
-            if (region.getStartOffset() <= e.getOffset() &&
-              e.getOffset() <= region.getEndOffset()) {
-                 requireRebalance = true;
-                 break;
-            }
-          }
+          final DocumentEvent finalE = e;
+          Utilities.invokeLater(new Runnable() { 
 
-          if (requireRebalance) {
-            @SuppressWarnings("unchecked")
-            RegionSet<R> thisCopy = (RegionSet<R>)thisRef.clone();
-            thisRef.removeAll(thisCopy);
-            thisRef.addAll(thisCopy);
-          }
+            public void run() {
+
+              /* 
+               * Removal can cause positions to flip, but only need to worry if 
+               * the removed portion is within the bounds of one or more regions. 
+               */
+              boolean requireRebalance = false;
+              for (R region : thisRef) {
+                if (region.getStartOffset() <= finalE.getOffset() &&
+                  finalE.getOffset() <= region.getEndOffset()) {
+                     requireRebalance = true;
+                     break;
+                }
+              }
+
+              if (requireRebalance) {
+                @SuppressWarnings("unchecked")
+                RegionSet<R> thisCopy = (RegionSet<R>)thisRef.clone();
+                thisRef.clear();
+                thisRef.addAll(thisCopy);
+              }
+
+              /* Notify the RegionManager, if requested. */
+              if (thisRef._manager != null) {
+                for (R region : thisRef) {
+                  thisRef._manager.notifyChangedRegion((OrderedDocumentRegion)region);
+                }
+              }
+            }
+           });
         }
 
         public void changedUpdate(DocumentEvent e) {
@@ -104,10 +135,6 @@ public class RegionSet<R extends IDocumentRegion> extends TreeSet<R> {
      */
     public boolean add(R region) {
         this._setDocListener(region);
-
-        @SuppressWarnings("unchecked")
-        RegionSet<IDocumentRegion> thisGeneric = (RegionSet<IDocumentRegion>)this;
-        region.addSet(thisGeneric);
         return super.add(region);
     }
 
@@ -117,37 +144,10 @@ public class RegionSet<R extends IDocumentRegion> extends TreeSet<R> {
      * @return indication of success
      */
     public boolean addAll(Collection<? extends R> regions) {
-        @SuppressWarnings("unchecked")
-        RegionSet<IDocumentRegion> thisGeneric = (RegionSet<IDocumentRegion>)this;
         for (R region : regions) {
             this._setDocListener(region);
-            region.addSet(thisGeneric);
         }
         return super.addAll(regions);
-    }
-
-    /** 
-     * Removes all existing regions from the set.
-     */
-    public void clear() {
-        @SuppressWarnings("unchecked")
-        RegionSet<IDocumentRegion> thisGeneric = (RegionSet<IDocumentRegion>)this;
-        for (R region : this) {
-            region.removeSet(thisGeneric);
-        }
-        super.clear();
-    }
-
-    /** 
-     * Removes an input region from the set.
-     * @param region the region to add
-     * @return indication of success
-     */
-    public boolean remove(R region) {
-        @SuppressWarnings("unchecked")
-        RegionSet<IDocumentRegion> thisGeneric = (RegionSet<IDocumentRegion>)this;
-        region.removeSet(thisGeneric);
-        return super.remove(region);
     }
 }
   

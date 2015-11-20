@@ -249,7 +249,13 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   /** @return new manager for find result regions. */
   public RegionManager<MovingDocumentRegion> createFindResultsManager() {
-    ConcreteRegionManager<MovingDocumentRegion> rm = new ConcreteRegionManager<MovingDocumentRegion>();
+    ConcreteRegionManager<MovingDocumentRegion> rm = 
+      new ConcreteRegionManager<MovingDocumentRegion>();
+    /* 
+     * If the underlying document changes, notify the region manager so that 
+     * regions no longer matching the search string can be discarded. 
+     */
+    rm.requireNotification();
     _findResultsManagers.add(rm);
     
     return rm;
@@ -2832,8 +2838,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         _cacheAdapter = _cache.register(this, ddr);
       } catch(IllegalStateException e) { throw new UnexpectedException(e); }
       
-      /* The following table is not affected by the inconsistency between hashCode and equals in DocumentRegion, because
-       * BrowserDocumentRegion is NOT a subclass of DocumentRegion. */
+      /* The following table is not affected by the inconsistency between hashCode and equals in StaticDocumentRegion, because
+       * BrowserDocumentRegion is NOT a subclass of StaticDocumentRegion. */
       _browserRegions = new HashSet<BrowserDocumentRegion>();
     }
     

@@ -44,7 +44,7 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.SortedSet;
 
-/** Interface for a region manager.  Region ordering (as in DocumentRegion) is not required, but it facilitates 
+/** Interface for a region manager.  Region ordering (as in StaticDocumentRegion) is not required, but it facilitates 
   * efficient implementation.
   * @version $Id$
   */
@@ -54,7 +54,7 @@ public interface RegionManager<R extends IDocumentRegion> {
     * are disjoint.
     * @param odd the document
     * @param offset the offset in the document
-    * @return the unique DocumentRegion containing the given offset, or null if it does not exist.
+    * @return the unique StaticDocumentRegion containing the given offset, or null if it does not exist.
     */
   public R getRegionAt(OpenDefinitionsDocument odd, int offset);
   
@@ -62,7 +62,7 @@ public interface RegionManager<R extends IDocumentRegion> {
     * document regions are disjoint and that lineStart precedes the start offset by at most 119 characters.
     * @param odd the document
     * @param offset the offset in the document
-    * @return the unique DocumentRegion containing the given offset, or null if it does not exist.
+    * @return the unique StaticDocumentRegion containing the given offset, or null if it does not exist.
     */
   public Pair<R, R> getRegionInterval(OpenDefinitionsDocument odd, int offset);
   
@@ -71,7 +71,7 @@ public interface RegionManager<R extends IDocumentRegion> {
    * @param odd the document
    * @param startOffset the start offset
    * @param endOffset the end offset
-   * @return the rightmost DocumentRegion containing the given selection, or 
+   * @return the rightmost StaticDocumentRegion containing the given selection, or 
    *         null if it does not exist.
    */
   public Collection<R> getRegionsOverlapping(OpenDefinitionsDocument odd, int startOffset, int endOffset);
@@ -82,13 +82,13 @@ public interface RegionManager<R extends IDocumentRegion> {
     */
   public boolean contains(R r);
   
-  /** Add the supplied DocumentRegion to the manager.
-   *  @param region the DocumentRegion to be inserted into the manager
+  /** Add the supplied StaticDocumentRegion to the manager.
+   *  @param region the StaticDocumentRegion to be inserted into the manager
    */
   public void addRegion(R region);
 
-  /** Remove the given DocumentRegion from the manager.
-   *  @param region the DocumentRegion to be removed.
+  /** Remove the given StaticDocumentRegion from the manager.
+   *  @param region the StaticDocumentRegion to be removed.
    */
   public void removeRegion(R region);
   
@@ -110,12 +110,12 @@ public interface RegionManager<R extends IDocumentRegion> {
   
   /** 
    * @param odd the document for which to get regions
-   * @return a {@code Vector<R>} containing the DocumentRegion objects for 
+   * @return a {@code Vector<R>} containing the StaticDocumentRegion objects for 
    *         document odd in this manager. 
    */
   public RegionSet<R> getRegions(OpenDefinitionsDocument odd);
   
-  /** @return a {@code Vector<R>} containing all the DocumentRegion objects in this mangager. */
+  /** @return a {@code Vector<R>} containing all the StaticDocumentRegion objects in this mangager. */
   public ArrayList<R> getRegions();
 
   /** @return the number if regions contained in this manager. */

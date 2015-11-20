@@ -41,9 +41,5 @@ public interface IDocumentRegion extends Region {
   
   /** @return the document, or null if it hasn't been established yet */
   public OpenDefinitionsDocument getDocument();
-
-  public void addSet(RegionSet<IDocumentRegion> rs);
-  public void removeSet(RegionSet<IDocumentRegion> rs);
-
 }
 

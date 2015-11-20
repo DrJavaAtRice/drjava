@@ -555,7 +555,7 @@ public class ProjectFileParser extends ProjectFileParserFacade {
   }
   
   
-  /** Traverses the list of expressions found after "bookmark" tag and returns the DocumentRegion
+  /** Traverses the list of expressions found after "bookmark" tag and returns the StaticDocumentRegion
    *  described by those properties. */
   private static class BookmarkPropertyVisitor implements SEListVisitor<IRegion> {
     private String fname = null;

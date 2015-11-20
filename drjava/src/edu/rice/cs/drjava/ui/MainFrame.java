@@ -655,8 +655,17 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     { _addGUIAvailabilityListener(this, GUIAvailabilityListener.ComponentType.PROJECT);
       putValue(Action.SHORT_DESCRIPTION, "Close DrJava project"); }
     public void actionPerformed(ActionEvent ae) { 
+      /* Get the documents to be closed */
+      List<OpenDefinitionsDocument> docs = _model.getProjectDocuments();
+
+      /* Close the documents */
       closeProject();
-      _findReplace.updateFirstDocInSearch();
+
+      /* Update the Find All results */
+      for (Pair<FindResultsPanel, Map<MovingDocumentRegion, 
+        HighlightManager.HighlightInfo>> pair : _findResults) {
+        pair.first().updateOnClose(docs);
+      }
     }
   };
   
@@ -664,26 +673,57 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Closes the current active document, prompting to save if necessary. */
   private final Action _closeAction = new AbstractAction("Close") {
     public void actionPerformed(ActionEvent ae) { 
+      /* Get the documents to be closed */
+      List<OpenDefinitionsDocument> docs = _model.getDocumentNavigator().getSelectedDocuments();    
+
       _close();
-      _findReplace.updateFirstDocInSearch();
+
+      /* Update the Find All results */
+      for (Pair<FindResultsPanel, Map<MovingDocumentRegion, 
+        HighlightManager.HighlightInfo>> pair : _findResults) {
+        pair.first().updateOnClose(docs);
+      }
     }
   };
   
   /** Closes all open documents, prompting to save if necessary. */
   private final Action _closeAllAction = new AbstractAction("Close All") {
     public void actionPerformed(ActionEvent ae) { 
+      /* Get the documents to be closed */
+      List<OpenDefinitionsDocument> docs = _model.getDocumentNavigator().getDocuments();
+
+      /* Close the documents */
       _closeAll();
-      _findReplace.updateFirstDocInSearch();
+
+      /* Update the Find All results */
+      for (Pair<FindResultsPanel, Map<MovingDocumentRegion, 
+        HighlightManager.HighlightInfo>> pair : _findResults) {
+        pair.first().updateOnClose(docs);
+      }
     }
   };
   
   /** Closes all open documents, prompting to save if necessary. */
   private final Action _closeFolderAction = new AbstractAction("Close Folder") {
     public void actionPerformed(ActionEvent ae) { 
+      /* Get the documents to be closed */
+      List<OpenDefinitionsDocument> docs = _getDocsInFolder();    
+
+      /* Close the documents */
       _closeFolder();
-      _findReplace.updateFirstDocInSearch();
-      // Set the document currently visible in the definitions pane as active document in the document navigator.
-      // This action makes sure that something is selected in the navigator after the folder was closed.
+
+      /* Update the Find All results */
+      for (Pair<FindResultsPanel, Map<MovingDocumentRegion, 
+        HighlightManager.HighlightInfo>> pair : _findResults) {
+        pair.first().updateOnClose(docs);
+      }
+
+      /* 
+       * Set the document currently visible in the definitions pane as active 
+       * document in the document navigator.
+       * This action makes sure that something is selected in the navigator 
+       * after the folder was closed.
+       */
       _model.getDocumentNavigator().selectDocument(_currentDefPane.getOpenDefDocument());
     }
   };
@@ -2745,34 +2785,44 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
    * @return new find results tab.
    */
   public FindResultsPanel createFindResultsPanel(final RegionManager<MovingDocumentRegion> rm,
-                                                 MovingDocumentRegion region, String title,
-                                                 String searchString, boolean searchAll, boolean searchSelectionOnly, 
-                                                 boolean matchCase, boolean wholeWord, boolean noComments, 
-                                                 boolean noTestCases, WeakReference<OpenDefinitionsDocument> doc,
-                                                 FindReplacePanel findReplace) {
+    MovingDocumentRegion region, String title, String searchString, 
+    boolean searchAll, boolean searchSelectionOnly, boolean matchCase, 
+    boolean wholeWord, boolean noComments, boolean noTestCases, 
+    WeakReference<OpenDefinitionsDocument> doc, FindReplacePanel findReplace) {
     
-    final FindResultsPanel panel = new FindResultsPanel(this, rm, region, title, searchString, searchAll, 
-                                                        searchSelectionOnly, matchCase, wholeWord, noComments, 
-                                                        noTestCases, doc, findReplace);
-    
+    final FindResultsPanel panel = new FindResultsPanel(this, rm, region, 
+      title, searchString, searchAll, searchSelectionOnly, matchCase, 
+      wholeWord, noComments, noTestCases, doc, findReplace);
+
     final AbstractMap<MovingDocumentRegion, HighlightManager.HighlightInfo> highlights =
       new IdentityHashMap<MovingDocumentRegion, HighlightManager.HighlightInfo>();
     final Pair<FindResultsPanel, Map<MovingDocumentRegion, HighlightManager.HighlightInfo>> pair =
       new Pair<FindResultsPanel, Map<MovingDocumentRegion, HighlightManager.HighlightInfo>>(panel, highlights);
     _findResults.add(pair);
     
+    final FindReplacePanel findReplaceRef = findReplace;
+    final String searchStringRef = searchString;
+
     // hook highlighting listener to find results manager
-    rm.addListener(new RegionManagerListener<MovingDocumentRegion>() {     
+    rm.addListener(new RegionManagerListener<MovingDocumentRegion>() { 
+
       public void regionAdded(MovingDocumentRegion r) {
         DefinitionsPane pane = getDefPaneGivenODD(r.getDocument());
 //        if (pane == null) System.err.println("ODD " + r.getDocument() + " produced a null DefinitionsPane!");
         highlights.put(r, pane.getHighlightManager().
-                         addHighlight(r.getStartOffset(), r.getEndOffset(), panel.getSelectedPainter()));
+          addHighlight(r.getStartOffset(), r.getEndOffset(), 
+          panel.getSelectedPainter()));
       }
+
       public void regionChanged(MovingDocumentRegion r) { 
         regionRemoved(r);
-        regionAdded(r);
+
+        /* Only re-add region if it is still a match. */
+        if (findReplaceRef.isMatch(r, searchStringRef)) {
+          regionAdded(r);
+        }
       }
+
       public void regionRemoved(MovingDocumentRegion r) {
 //        _log.log("Removing highlight for region " + r);
         HighlightManager.HighlightInfo highlight = highlights.get(r);
@@ -4912,6 +4962,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _autoImportClassSet = new HashSet<JavaAPIListEntry>(); // reset auto-import list
     
     if (_checkProjectClose()) {
+
       List<OpenDefinitionsDocument> projDocs = _model.getProjectDocuments();
 //      System.err.println("projDocs = " + projDocs);
       _cleanUpDebugger();
@@ -4934,7 +4985,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _currentProjFile = FileOps.NULL_FILE;
       return true;
     }
-    else return false;  // Project closing cancelled in _checkProjectClose dialog
+    else {
+      return false;  // Project closing cancelled in _checkProjectClose dialog
+    }
   }
   
   private void _configureBrowsing() {
@@ -5104,18 +5157,26 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _model.closeFile(doc);
     }
   }
-  
-  private void _closeFolder() {
+
+  /** @return a list of all of the documents in the current folder */  
+  private List<OpenDefinitionsDocument> _getDocsInFolder() {
     ArrayList<OpenDefinitionsDocument> docs = _model.getDocumentNavigator().getDocuments();
     final LinkedList<OpenDefinitionsDocument> l = new LinkedList<OpenDefinitionsDocument>();
-    
+
     if (_model.getDocumentNavigator().isGroupSelected()) {
       for (OpenDefinitionsDocument doc: docs) {
         if (_model.getDocumentNavigator().isSelectedInGroup(doc)) { l.add(doc); }
       }
-      disableFindAgainOnClose(l); // disable "Find Again" for documents that are closed
-      _model.closeFiles(l);
-      if (! l.isEmpty()) _model.setProjectChanged(true);
+    }
+    return l;
+  }
+
+  private void _closeFolder() {
+    List<OpenDefinitionsDocument> docs = _getDocsInFolder();
+    if (! docs.isEmpty()) {
+      disableFindAgainOnClose(docs); // disable "Find Again" for documents that are closed
+      _model.closeFiles(docs);
+      _model.setProjectChanged(true);
     }
   }
   
@@ -5529,19 +5590,20 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     // tried passing false here. seemed to help with bug
     // [ 1478796 ] DrJava Does Not Shut Down With Project Open
     // on HP tc1100 and Toshiba Portege tablet PCs, but did not help in all cases
+
     if (! _closeProject(true)) { return; /* if user pressed cancel, do not quit */ }
     
-    _updateSavedConfiguration();
+    if (!_updateSavedConfiguration()) { return; /* if user pressed cancel, do not quit */ }
     
     //DrJava.consoleOut().println("Quitting DrJava...");
     dispose();    // Free GUI elements of this frame
     _model.quit();
   }
   
-  void _updateSavedConfiguration() {
+  boolean _updateSavedConfiguration() {
     _recentFileManager.saveRecentFiles();
     _recentProjectManager.saveRecentFiles();
-    if (! _model.closeAllFilesOnQuit()) { return; /* if user pressed cancel, do not quit */ }
+    if (! _model.closeAllFilesOnQuit()) { return false; /* if user pressed cancel, do not quit */ }
     _storePositionInfo();
     
     // Save recent files, but only if there wasn't a problem at startUp
@@ -5550,6 +5612,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       try { DrJava.getConfig().saveConfiguration(); }
       catch (IOException ioe) { MainFrameStatics.showIOError(MainFrame.this, ioe); }
     }
+    return true;
   }
   
   private void _forceQuit() { _model.forceQuit(); }
@@ -8202,15 +8265,15 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         if (numLinesChangedAfter >= 0)  {  // insertion/deletion included a newline
           // Update the bounds of the affected regions
           
-          // TODO: These casts are bad!  R is not always DocumentRegion (of course).
+          // TODO: These casts are bad!  R is not always StaticDocumentRegion (of course).
           // The code only works because the RegionManager implementations happen to not strictly
           // require values of type R.  Either the interface for RegionManager.updateLines()
           // and RegionManager.reload() needs to be generalized, or a means for creating
           // values that are truly of type R needs to be provided.
           @SuppressWarnings("unchecked") R start =
-          (R) new DocumentRegion(doc, numLinesChangedAfter, numLinesChangedAfter);
+          (R) new StaticDocumentRegion(doc, numLinesChangedAfter, numLinesChangedAfter);
           int len = doc.getLength();
-          @SuppressWarnings("unchecked") R end = (R) new DocumentRegion(doc, len, len);
+          @SuppressWarnings("unchecked") R end = (R) new StaticDocumentRegion(doc, len, len);
           lineNumInterval = Pair.make(start, end); 
         }
         
@@ -9893,12 +9956,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         File file = doc.getFile();
         if (file == null) {
           fname = "Untitled file";
-          text = "Untitled file has been modified. Would you like to save it?";
         }
         else {
           fname = file.getName();
-          text = fname + " has been modified. Would you like to save it?";
         }
+        text = fname + " has been modified. Would you like to save it?";
       }
       catch (FileMovedException fme) {
         // File was deleted, but use the same name anyway
