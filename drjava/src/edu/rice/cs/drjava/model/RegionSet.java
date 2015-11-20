@@ -44,6 +44,16 @@ import javax.swing.event.DocumentListener;
 
 import edu.rice.cs.util.swing.Utilities;
 
+/**
+ * A set designed to store IDocumentRegions; extends TreeSet by automatically
+ * re-balancing when the underlying document changes in such a way that the
+ * relative order of a pair of regions may flip.
+ * 
+ * Also optionally contains a reference to the ConcreteRegionManager that uses
+ * this region set, and notifies the manager on changes. Note that RegionSets 
+ * can be used broadly by all types of RegionManagers; however, notification 
+ * will only ever be requested by ConcreteRegionManagers.
+ */
 public class RegionSet<R extends IDocumentRegion> extends TreeSet<R> {
 
     /* Assumes that this RegionSet will only have regions from one document */
@@ -107,6 +117,11 @@ public class RegionSet<R extends IDocumentRegion> extends TreeSet<R> {
                 }
               }
 
+              /* 
+               * Brute-force re-balance; can be relatively expensive if there 
+               * are many regions, but in practice runs infrequently enough so
+               * as to be unnoticeable. 
+               */
               if (requireRebalance) {
                 @SuppressWarnings("unchecked")
                 RegionSet<R> thisCopy = (RegionSet<R>)thisRef.clone();
@@ -133,7 +148,10 @@ public class RegionSet<R extends IDocumentRegion> extends TreeSet<R> {
     }
 
     /** 
-     * Adds an input region to the set.
+     * Adds an input region to the set. Also sets up a listener on the
+     * document to which the region belongs, if this is the first time an add
+     * method is being called.
+     * 
      * @param region the region to add
      * @return indication of success
      */
@@ -143,7 +161,10 @@ public class RegionSet<R extends IDocumentRegion> extends TreeSet<R> {
     }
 
     /** 
-     * Adds all input regions to the set.
+     * Adds all input regions to the set. Also sets up a listener on the
+     * document to which the regions belong, if this is the first time an add
+     * method is being called.
+     * 
      * @param regions the regions to add
      * @return indication of success
      */
@@ -154,4 +175,4 @@ public class RegionSet<R extends IDocumentRegion> extends TreeSet<R> {
         return super.addAll(regions);
     }
 }
-  
+
