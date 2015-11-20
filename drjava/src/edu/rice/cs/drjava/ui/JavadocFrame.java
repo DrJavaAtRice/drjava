@@ -47,16 +47,15 @@ import java.io.IOException;
 
 import edu.rice.cs.util.UnexpectedException;
 
-/**
- * DrJava's Javadoc viewing frame
- * @version $Id$
- */
+/** DrJava's Javadoc viewing frame
+  * @version $Id$
+  */
 public class JavadocFrame extends HTMLFrame {
 
   private static final int MAX_READ_PACKAGES_LINES = 100;
   private static final int MAX_READ_FOR_LINK_LINES = 100;
   private static final String[] INTRO_PAGE= {
-    "overview-summary.html",
+    "overview-frame.html",
     "packages.html"
   };
   private static final String INDEX_PAGE= "allclasses-frame.html";

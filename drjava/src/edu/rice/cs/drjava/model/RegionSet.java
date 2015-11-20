@@ -47,16 +47,13 @@ public class RegionSet<R extends IDocumentRegion> extends TreeSet<R> {
     // TODO: currently this assumes that a given RegionSet will only have 
     // regions from one document
     private DocumentListener _docListener = null;
-
-    /** 
-     * Set _docListener to listen on region.getDocument(), if not already set. 
-     * @param region the region whose document should be listened on
-     */
+    
+    /** Set _docListener to listen on region.getDocument(), if not already set. 
+      * @param region the region whose document should be listened on
+      */
     private void _setDocListener(R region) {
 
-      if (this._docListener != null) {
-          return;
-      }
+      if (this._docListener != null) return;
 
       OpenDefinitionsDocument odd = region.getDocument();
 

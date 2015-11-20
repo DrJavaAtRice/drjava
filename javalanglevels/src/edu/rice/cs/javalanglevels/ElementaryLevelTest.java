@@ -131,7 +131,7 @@ public class ElementaryLevelTest extends TestCase {
   /** Tests that when some files have already been compiled, the .java files are not generated for those files,
     * and files that reference those files are augmented correctly.
     */
-  public void xtestSomeFilesCompiled() {
+  public void testSomeFilesCompiled() {
     LanguageLevelConverter._log.log("****Starting testSomeFilesCompiled*****");
     directory = new File(directory, "someCompiled");
     LanguageLevelConverter._log.log("   directory = " + directory);

@@ -91,7 +91,6 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
   /** the region that was last selected (may be null). */ 
   protected volatile R _lastSelectedRegion = null;
   
-  /* _ */
   
 //  /** Cached values from last region insertion. _cachedDoc is non-null iff the last added region occurred at the end of
 //    * the list of regions for its document. If _cachedDoc is null, the other cached values are invalid. */
@@ -174,10 +173,9 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
     _setColors(_regTree);
   }
   
-  /** 
-   * Quick helper for setting up color listeners. 
-   * @param c the component for which to set up listeners
-   */
+  /** Quick helper for setting up color listeners. 
+    * @param c the component for which to set up listeners
+    */
   private static void _setColors(Component c) {
     new ForegroundColorListener(c);
     new BackgroundColorListener(c);

@@ -288,18 +288,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     _browserHistoryManager = new BrowserHistoryManager();
     
     _breakpointManager = new ConcreteRegionManager<Breakpoint>();
-    /* The following method was included in an anonymous class definition of _breakpointManager, but it
-     was inacessible because no such method exists in the visible interface of ConcreteRegionManager. */
     
-//      public boolean changeRegionHelper(final Breakpoint oldBP, final Breakpoint newBP) {
-//        // override helper so the enabled flag is copied
-//        if (oldBP.isEnabled() != newBP.isEnabled()) {
-//          oldBP.setEnabled(newBP.isEnabled());
-//          return true;
-//        }
-//        return false;
-//      }
-//    };
     _registerOptionListeners();
     
     setFileGroupingState(makeFlatFileGroupingState());

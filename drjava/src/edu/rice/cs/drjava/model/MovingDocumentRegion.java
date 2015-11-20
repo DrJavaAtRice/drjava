@@ -47,7 +47,7 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.plt.lambda.Thunk;
 
 /** Class for a document region that moves with changes in the document; it also includes a lazy tool-tip and line
-  * boundaries.  TODO: convert _startPos and _endPos to _cachedStart and _cachedEnd which are updated by updateLines
+  * boundaries.
   * @version $Id$Regiong
   */
 public class MovingDocumentRegion extends DocumentRegion {
@@ -64,10 +64,8 @@ public class MovingDocumentRegion extends DocumentRegion {
   
   /** Update _lineStartPos and _lineEndPos after line has been edited. */
   public void update() {
-    /* 
-     * Make a copy, since removing this from the RegionSet will result in 
-     * removing the RegionSet from this._regionSets. Also, this will allow us 
-     * to avoid mutating the list we're iterating over. 
+    /* Make a copy, since removing this from the RegionSet will result in removing the RegionSet from this._regionSets.
+     * Also, this will allow us to avoid mutating the list we're iterating over. 
      */
     @SuppressWarnings("unchecked")
     List<RegionSet<IDocumentRegion>> regionSetsCopy = (List<RegionSet<IDocumentRegion>>)this._regionSets.clone();

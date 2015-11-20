@@ -63,13 +63,12 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
   /** Create a new ConcreteRegionManager without maximum size. */
   public BrowserHistoryManager() { this(0); }
   
-  /** 
-   * Add the supplied DocumentRegion r to the manager as current region.
-   * @param r the DocumentRegion to be inserted into the manager 
-   * @param notifier a GlobalEventNotifier
-   */
+  /** Add the supplied DocumentRegion r to the manager as current region.
+    * @param r the DocumentRegion to be inserted into the manager 
+    * @param notifier a GlobalEventNotifier
+    */
   public void addBrowserRegion(final BrowserDocumentRegion r, final GlobalEventNotifier notifier) { 
-    /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
 
     final BrowserDocumentRegion current = getCurrentRegion();
     if ((current != null) && (similarRegions(current, r))) {

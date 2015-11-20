@@ -114,8 +114,7 @@ public class BrowserDocumentRegion implements IDocumentRegion, Comparable<Browse
       throw new IllegalArgumentException("Regions must have the same document.");
     }
 
-    /* 
-     * Make a copy, since removing this from the RegionSet will result in 
+    /* Make a copy, since removing this from the RegionSet will result in 
      * removing the RegionSet from this._regionSets. Also, this will allow us 
      * to avoid mutating the list we're iterating over. 
      */

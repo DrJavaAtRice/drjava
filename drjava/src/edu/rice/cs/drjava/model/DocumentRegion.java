@@ -44,18 +44,16 @@ import java.util.ArrayList;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Position;
 
-/** 
- * Class for a simple document region that only records region offsets, not 
- * positions.  Instances of this class represent dummy regions used in 
- * searching SortSets of DocumentRegions.  Hence, getLineStart() and 
- * getLineEnd() should never be called.  
- * 
- * WARNING: this class overrides the equals method but does not override the 
- * hashCode method to maintain consistency.  Hence, instances can only be 
- * used as keys in identity based hash tables.  NOTE: since class instances
- * are mutable, a hashCode method consistent with equals WOULD NOT WORK anyway.
- * @version $Id$
- */
+/** Class for a simple document region that only records region offsets, not positions.  Instances of this class
+  * represent dummy regions used in searching SortSets of DocumentRegions.  Hence, getLineStart() and 
+  * getLineEnd() should never be called.  
+  * 
+  * WARNING: this class overrides the equals method but does not override the 
+  * hashCode method to maintain consistency.  Hence, instances can only be 
+  * used as keys in identity based hash tables.  NOTE: since class instances
+  * are mutable, a hashCode method consistent with equals WOULD NOT WORK anyway.
+  * @version $Id$
+  */
 public class DocumentRegion implements OrderedDocumentRegion {
   protected final OpenDefinitionsDocument _doc;
 
@@ -63,15 +61,9 @@ public class DocumentRegion implements OrderedDocumentRegion {
   protected volatile Position _start; 
   protected volatile Position _end;  // _end >= _start
   protected ArrayList<RegionSet<IDocumentRegion>> _regionSets;
-
-  /** Create a new simple document region using offsets.
-    * @param doc document that contains this region, which cannot be null
-    * @param file file that contains the region
-    */
  
-  /** 
-   * Create a new simple document region with a bona fide document 
-   * @param doc the document within which to create the region
+  /** Create a new simple document region with a bona fide document and offsets
+   * @param doc the document within which to create the region which cannot be null
    * @param start the start offset
    * @param end the end offset
    */
