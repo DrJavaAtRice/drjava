@@ -64,18 +64,6 @@ public class MovingDocumentRegion extends DocumentRegion {
   
   /** Update _lineStartPos and _lineEndPos after line has been edited. */
   public void update() {
-    /* 
-     * Make a copy, since removing this from the RegionSet will result in 
-     * removing the RegionSet from this._regionSets. Also, this will allow us 
-     * to avoid mutating the list we're iterating over. 
-     */
-    @SuppressWarnings("unchecked")
-    List<RegionSet<IDocumentRegion>> regionSetsCopy = (List<RegionSet<IDocumentRegion>>)this._regionSets.clone();
-
-    /* Remove this from the RegionSets, since mutation may un-balance the tree */
-    for (RegionSet<IDocumentRegion> rs : regionSetsCopy) {
-      rs.remove(this);
-    }
 
     try {  // _doc is inherited from DocumentRegion
       _lineStartPos = _doc.createPosition(_doc._getLineStartPos(getStartOffset()));
@@ -85,13 +73,6 @@ public class MovingDocumentRegion extends DocumentRegion {
     catch (BadLocationException ble) { 
       throw new UnexpectedException(ble); 
     }  // should never happen
-
-    finally {
-      /* Add this back to the RegionSets, to re-balance the tree */
-      for (RegionSet<IDocumentRegion> rs : regionSetsCopy) {
-        rs.add(this);
-      }
-    }
 
   }
     
@@ -109,8 +90,6 @@ public class MovingDocumentRegion extends DocumentRegion {
 
     assert doc != null;
 
-    _regionSets = new ArrayList<RegionSet<IDocumentRegion>>();
-    
     try {
       _startPos = doc.createPosition(start);
       _endPos = doc.createPosition(end);
@@ -203,19 +182,5 @@ public class MovingDocumentRegion extends DocumentRegion {
   public static boolean equals(Object a, Object b) {
     if (a == null) return (b == null);
     return a.equals(b);
-  }
-
-  /** @param rs set to add */
-  public void addSet(RegionSet<IDocumentRegion> rs) {
-    if (!_regionSets.contains(rs)) {
-      _regionSets.add(rs);
-    }
-  }
-
-  /** @param rs set to remove */
-  public void removeSet(RegionSet<IDocumentRegion> rs) {
-    if (_regionSets.contains(rs)) {
-      _regionSets.remove(rs);
-    }
   }
 }

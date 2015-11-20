@@ -60,7 +60,13 @@ import edu.rice.cs.util.UnexpectedException;
   */
 public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends 
   EventNotifier<RegionManagerListener<R>> implements RegionManager<R> {
-  
+
+  /** 
+   * Whether or not this manager should be notified if the underlying 
+   * RegionSet detects a change in the underlying document. 
+   */
+  private boolean _notifyOnSetChange = false;
+
   /** Mapping of documents to collections of regions.  Primitive operations are thread safe. */
   private volatile HashMap<OpenDefinitionsDocument, RegionSet<R>> _regions = 
     new HashMap<OpenDefinitionsDocument, RegionSet<R>>();
@@ -347,6 +353,18 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends
        */
       _documents.add(odd);
       docRegions = new RegionSet<R>(); 
+
+      /* 
+       * If this wants to be notified on changes, then the RegionSet needs a 
+       * reference to this so that it knows *who* to notify.
+       */
+      if (this._notifyOnSetChange) {
+        @SuppressWarnings("unchecked")
+        ConcreteRegionManager<OrderedDocumentRegion> thisRef = 
+          (ConcreteRegionManager<OrderedDocumentRegion>)this;
+        docRegions.setManager(thisRef);
+      }
+
       _regions.put(odd, docRegions);
     }
     
@@ -488,16 +506,24 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends
 //    * @param region new current region */
 //  public void setCurrentRegion(final R region) { throw new UnsupportedOperationException(); }
   
-  /** Apply the given command to the specified region to change it.
+  /** 
+   * Apply the given command to the specified region to change it.
    * @param region the region to find and change
    * @param cmd command that mutates the region. 
    */
   public void changeRegion(final R region, Lambda<R,Object> cmd) {
     cmd.value(region);
-    // notify
+    notifyChangedRegion(region);
+  }
+
+  /**
+   * Tell all listeners that the given region has changed.
+   * @param region the region that changed
+   */
+  public void notifyChangedRegion(final R region) {
     _lock.startRead();
     try { for (RegionManagerListener<R> l: _listeners) { l.regionChanged(region); } } 
-    finally { _lock.endRead(); }            
+    finally { _lock.endRead(); }
   }
   
   /** 
@@ -516,9 +542,17 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends
     List<R> toBeRemoved = new ArrayList<R>();  // nonsense to avoid concurrent modification exception
     for (R region: tail) {
       if (region.compareTo(lastRegion) > 0) break;
-      region.update();  // The bounds of this region must be recomputed.
       if (region.getStartOffset() == region.getEndOffset()) toBeRemoved.add(region); 
     }
     removeRegions(toBeRemoved);
   }
+
+  /** 
+   * Sets _notifyOnSetChange to true. 
+   * Should either be called before any RegionSets are created, or never. 
+   */
+  public void requireNotification() { 
+    this._notifyOnSetChange = true;
+  }
+
 } 

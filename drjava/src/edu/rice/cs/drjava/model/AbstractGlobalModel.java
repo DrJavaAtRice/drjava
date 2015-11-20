@@ -249,7 +249,13 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   /** @return new manager for find result regions. */
   public RegionManager<MovingDocumentRegion> createFindResultsManager() {
-    ConcreteRegionManager<MovingDocumentRegion> rm = new ConcreteRegionManager<MovingDocumentRegion>();
+    ConcreteRegionManager<MovingDocumentRegion> rm = 
+      new ConcreteRegionManager<MovingDocumentRegion>();
+    /* 
+     * If the underlying document changes, notify the region manager so that 
+     * regions no longer matching the search string can be discarded. 
+     */
+    rm.requireNotification();
     _findResultsManagers.add(rm);
     
     return rm;

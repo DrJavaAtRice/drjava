@@ -46,7 +46,7 @@ import edu.rice.cs.util.swing.Utilities;
 /** Browser history manager for the entire model.  Follows readers/writers locking protocol of EventNotifier. */
 public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<BrowserDocumentRegion>> {
   /** Two regions are similar if they are in the same document and not more than DIFF_THRESHOLD lines apart. */
-  public static final int DIFF_THRESHOLD = 5;
+  public static final int DIFF_THRESHOLD = 0;
 
   /** List of regions.  In Java 6, ArrayDeque is a better choice than Stack; should be changed once compatibility
     * with Java 5 is abandoned. */
@@ -72,11 +72,8 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
     /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
 
     final BrowserDocumentRegion current = getCurrentRegion();
-    if ((current != null) && (similarRegions(current, r))) {
-      // the region to be added is similar to the current region
-      // just update the current region
-//      edu.rice.cs.drjava.ui.MainFrame.MFLOG.log("Updating instead of adding: " + current + " --> " + r);
-      current.update(r);
+    if ((current != null) && (r.equals(current))) {
+      return;
     }
     else {
       _pastRegions.push(r);
@@ -106,11 +103,8 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
     /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
 
     final BrowserDocumentRegion current = getCurrentRegion();
-    if ((current != null) && (similarRegions(current, r))) {
-      // the region to be added is similar to the current region
-      // just update the current region
-//      edu.rice.cs.drjava.ui.MainFrame.MFLOG.log("Updating instead of adding: " + current + " --> " + r);
-      current.update(r);
+    if ((current != null) && (r.equals(current))) {
+      return;
     }
     else {
       if (_pastRegions.size() == 0) {
