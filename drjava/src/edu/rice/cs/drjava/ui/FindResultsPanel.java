@@ -361,10 +361,10 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   }
 
   /** Receives the set of documents that have been closed and removes all of 
-   * their regions; also updates the first document, in case it was one of 
-   * the closed files. 
-   * @param docs the documents that were closed 
-   */
+    * their regions; also updates the first document, in case it was one of 
+    * the closed files. 
+    * @param docs the documents that were closed 
+    */
   public void updateOnClose(List<OpenDefinitionsDocument> docs) {
     for (OpenDefinitionsDocument odd : docs) {
       this.getRegionManager().removeRegions(odd);

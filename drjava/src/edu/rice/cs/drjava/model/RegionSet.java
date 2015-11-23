@@ -60,6 +60,17 @@ public class RegionSet<R extends IDocumentRegion> extends TreeSet<R> {
       this._manager = manager; 
     }
 
+    /** 
+     * Set _docListener to listen on region.getDocument(), if not already set. 
+     * @param region the region whose document should be listened on
+>>>>>>> b079b7757a88409a8314ea7ad720c18094837874
+     */
+    private ConcreteRegionManager<OrderedDocumentRegion> _manager = null;
+
+    public void setManager(ConcreteRegionManager<OrderedDocumentRegion> manager) { 
+      this._manager = manager; 
+    }
+
     /**  Set _docListener to listen on region.getDocument(), if not already set. 
       * @param region the region whose document should be listened on
       */

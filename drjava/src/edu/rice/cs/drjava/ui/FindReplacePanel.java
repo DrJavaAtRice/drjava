@@ -1171,8 +1171,8 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
   };  
   
   /** Uses the FindReplaceMachine from the most recently run search to check if
-   * r is (still) a match for searchString.
-   */
+    * r is (still) a match for searchString.
+    */
   public boolean isMatch(MovingDocumentRegion r, String searchString) {
     OpenDefinitionsDocument doc = r.getDocument();
     int startPos = r.getStartOffset();

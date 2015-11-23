@@ -372,13 +372,13 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       Double.parseDouble(x);
       return true;
     }
-    
+
     catch (NumberFormatException e) {
       int radix = 10;
       int begin = 0;
       int end = x.length();
       int bits = 32;
-      
+
       if (end - begin > 1) {
         // string is not empty
         char ch = x.charAt(end-1);
@@ -406,13 +406,12 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
           }
         }
       }
-      
+
       try {
         // BigInteger can parse hex numbers representing negative longs; Long can't
         java.math.BigInteger val = new java.math.BigInteger(x.substring(begin, end), radix);
         return (val.bitLength() <= bits);
       }
-      
       catch (NumberFormatException e2) {
         // Remove any underscores and try again
         StringBuilder sb = new StringBuilder();
@@ -422,16 +421,13 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
             sb.append(ch);
           }
         }
-        
+
         try {
           // BigInteger can parse hex numbers representing negative longs; Long can't
           java.math.BigInteger val = new java.math.BigInteger(sb.toString(), radix);
           return (val.bitLength() <= bits);
         }
-        
-        catch (NumberFormatException e3) {
-          return false;
-        }
+        catch (NumberFormatException e3) { return false; }
       }
     }
   }

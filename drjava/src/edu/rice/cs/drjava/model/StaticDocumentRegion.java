@@ -62,10 +62,10 @@ public class StaticDocumentRegion implements OrderedDocumentRegion {
   protected volatile Position _end;  // _end >= _start
  
   /** Create a new simple document region with a bona fide document and offsets
-   * @param doc the document within which to create the region which cannot be null
-   * @param start the start offset
-   * @param end the end offset
-   */
+    * @param doc    the document within which to create the region; it cannot be null
+    * @param start  the start offset
+    * @param end    the end offset
+    */
   public StaticDocumentRegion(OpenDefinitionsDocument doc, int start, int end) {
     assert doc != null;
     assert end >= start; // split in two to help diagnose bug 2906538: AssertionError After Go To Find Result and Edit

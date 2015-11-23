@@ -51,7 +51,7 @@ public interface Breakpoint extends DebugBreakpointData, OrderedDocumentRegion {
   public void update();
 
   /** Second tie-breaker for comparison. 
-   * @return position offset
-   */
+    * @return position offset
+    */
   public int getPosOffset();
 }

@@ -218,9 +218,9 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
   public final int hashCode() { return super.hashCode(); }
   
   /** Totally orders regions lexicographically based on (_doc, endOffset, 
-   * startOffset, _position). This method is typically applied to
-   * regions within the same document. It is consistent with equals.
-   */
+    * startOffset, _position). This method is typically applied to
+    * regions within the same document. It is consistent with equals.
+    */
   public int compareTo(OrderedDocumentRegion r) {
     int docRel = getDocument().compareTo(r.getDocument());
     if (docRel != 0) return docRel;
