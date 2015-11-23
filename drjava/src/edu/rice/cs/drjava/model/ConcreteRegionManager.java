@@ -327,11 +327,7 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends
        */
       _documents.add(odd);
       docRegions = new RegionSet<R>(); 
-<<<<<<< HEAD
-      
-=======
 
->>>>>>> b079b7757a88409a8314ea7ad720c18094837874
       /* 
        * If this wants to be notified on changes, then the RegionSet needs a 
        * reference to this so that it knows *who* to notify.
@@ -342,11 +338,7 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends
           (ConcreteRegionManager<OrderedDocumentRegion>)this;
         docRegions.setManager(thisRef);
       }
-<<<<<<< HEAD
-      
-=======
 
->>>>>>> b079b7757a88409a8314ea7ad720c18094837874
       _regions.put(odd, docRegions);
     }
     
@@ -482,35 +474,19 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends
 //  /** Set the current region. 
 //    * @param region new current region */
 //  public void setCurrentRegion(final R region) { throw new UnsupportedOperationException(); }
-  
-<<<<<<< HEAD
+
   /** Apply the given command to the specified region to change it.
     * @param region the region to find and change
     * @param cmd command that mutates the region. 
     */
-=======
-  /** 
-   * Apply the given command to the specified region to change it.
-   * @param region the region to find and change
-   * @param cmd command that mutates the region. 
-   */
->>>>>>> b079b7757a88409a8314ea7ad720c18094837874
   public void changeRegion(final R region, Lambda<R,Object> cmd) {
     cmd.value(region);
     notifyChangedRegion(region);
   }
-<<<<<<< HEAD
   
   /** Tell all listeners that the given region has changed.
     * @param region the region that changed
     */
-=======
-
-  /**
-   * Tell all listeners that the given region has changed.
-   * @param region the region that changed
-   */
->>>>>>> b079b7757a88409a8314ea7ad720c18094837874
   public void notifyChangedRegion(final R region) {
     _lock.startRead();
     try { for (RegionManagerListener<R> l: _listeners) { l.regionChanged(region); } } 
@@ -536,22 +512,10 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends
     }
     removeRegions(toBeRemoved);
   }
-<<<<<<< HEAD
-  
-  /** Sets _notifyOnSetChange to true. 
-=======
 
-  /** 
-   * Sets _notifyOnSetChange to true. 
->>>>>>> b079b7757a88409a8314ea7ad720c18094837874
-   * Should either be called before any RegionSets are created, or never. 
-   */
+  
+  /** Sets _notifyOnSetChange to true. Should either be called before any RegionSets are created, or never.  */
   public void requireNotification() { 
     this._notifyOnSetChange = true;
   }
-<<<<<<< HEAD
-  
-=======
-
->>>>>>> b079b7757a88409a8314ea7ad720c18094837874
 } 
