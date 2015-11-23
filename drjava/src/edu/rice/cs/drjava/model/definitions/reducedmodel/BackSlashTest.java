@@ -38,8 +38,7 @@ package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
 import  junit.framework.*;
 
-/**
- * Test the interactions between double quotes and backslashes.
+/** * Test the interactions between double quotes and backslashes.
  * @version $Id$
  */
 public final class BackSlashTest extends BraceReductionTestCase

@@ -79,8 +79,7 @@ public class OptionMapLoader implements OptionConstants {
   /** Default OptionMapLoader. */
   public static final OptionMapLoader DEFAULT = new OptionMapLoader(DEFAULT_STRINGS);
   
-  /** 
-   * Creates an OptionMapLoader from a given input stream.  
+  /** Creates an OptionMapLoader from a given input stream.  
    * Does not maintain a reference to this input stream.
    * @param is the input stream to read.
    * @throws IOException if an IO operation fails

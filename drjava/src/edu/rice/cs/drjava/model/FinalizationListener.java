@@ -36,8 +36,7 @@
 
 package edu.rice.cs.drjava.model;
 
-/**
- * A listener that may be added to classes that
+/** * A listener that may be added to classes that
  * implement the <code>Finalizable</code> interface.
  * When the object is garbage collected, these 
  * listeners will be notified.

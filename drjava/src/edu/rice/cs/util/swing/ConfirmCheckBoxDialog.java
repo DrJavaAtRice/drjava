@@ -39,8 +39,7 @@ package edu.rice.cs.util.swing;
 import edu.rice.cs.util.swing.Utilities;
 import javax.swing.*;
 
-/**
- * Simple class wrapping JOptionPane to have a checkbox underneath the message.
+/** * Simple class wrapping JOptionPane to have a checkbox underneath the message.
  * @version $Id$
  */
 public class ConfirmCheckBoxDialog {
@@ -86,8 +85,7 @@ public class ConfirmCheckBoxDialog {
     _dialog = _optionPane.createDialog(parent, title);
   }
   
-  /** 
-   * Initializes the JCheckBox to have the given text. 
+  /** Initializes the JCheckBox to have the given text. 
    * @param text text to display
    * @return the newly-created JCheckBox
    */

@@ -46,8 +46,7 @@ import java.util.List;
   */
 public interface InteractionsModelCallback {
   
-  /** 
-   * @return an available port number to use for debugging a remote interpreter.
+  /** @return an available port number to use for debugging a remote interpreter.
    * @throws IOException if unable to get a valid port number.
    */
   public int getDebugPort() throws IOException;
@@ -103,8 +102,7 @@ public interface InteractionsModelCallback {
     */
   public void replThrewException(String message);
   
-  /** 
-   * Signifies that the most recent interpretation was ended due to an exception being thrown.
+  /** Signifies that the most recent interpretation was ended due to an exception being thrown.
    * @param message The exception's message
    * @param stackTrace the exception's stack trace
    */
@@ -132,8 +130,7 @@ public interface InteractionsModelCallback {
     */
   public void interpreterResetFailed(Throwable th);
   
-  /** 
-   * Called when the slave JVM fails to startup 
+  /** Called when the slave JVM fails to startup 
    * @param e the exception that occurred on startup
    */
   public void interpreterWontStart(Exception e);
@@ -141,16 +138,14 @@ public interface InteractionsModelCallback {
   /** Called when the interpreter starts to reset. */
   public void interpreterResetting();
   
-  /** 
-   * Called to assert that a fresh Java interpreter is ready for use either after a start or a restart.
+  /** Called to assert that a fresh Java interpreter is ready for use either after a start or a restart.
    * Is sometimes preceded by a call to {@code interpreterResetting()}, but not when the interpreter is
    * first starting or is already fresh.
    * @param wd the working directory
    */
   public void interpreterReady(File wd);
   
-  /** 
-   * A compiler can instruct DrJava to include additional elements for the boot
+  /** A compiler can instruct DrJava to include additional elements for the boot
    * class path of the Interactions JVM. 
    * @return the compiler boot classpath
    */

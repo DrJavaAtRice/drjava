@@ -53,8 +53,7 @@ public class UnaryOpProperty<P,R> extends EagerProperty {
   /** Lambda to format the result. */
   protected Lambda<R,String> _format;
   
-  /** 
-   * Create an eager property. 
+  /** Create an eager property. 
    *
    * @param name the name of the property
    * @param help the help page for this property
@@ -80,8 +79,7 @@ public class UnaryOpProperty<P,R> extends EagerProperty {
     resetAttributes();
   }
 
-  /** 
-   * Create an eager property. 
+  /** Create an eager property. 
    *
    * @param name the name of the property
    * @param help the help page for this property

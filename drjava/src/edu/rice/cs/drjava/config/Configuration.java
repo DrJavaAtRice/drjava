@@ -74,32 +74,28 @@ public class Configuration {
     return ret;
   }
   
-  /** 
-   * Gets the current value of the given Option. 
+  /** Gets the current value of the given Option. 
    * @param <T> type of the option
    * @param op option to get
    * @return the value for the option
    */
   public <T> T getSetting(Option<T> op) { return map.getOption(op); }
   
-  /** 
-   * By default, all options are editable. 
+  /** By default, all options are editable. 
    * @param <T> type of the option
    * @param op option to check editability of
    * @return true if op is editable, false otherwise
    */
   public <T> boolean isEditable(Option<T> op) { return true; }
   
-  /** 
-   * Adds an OptionListener to the given Option, to be notified each time the option changes.
+  /** Adds an OptionListener to the given Option, to be notified each time the option changes.
    * @param <T> type of the option
    * @param op Option to listen for changes on
    * @param l OptionListener wishing to listen
    */
   public <T> void addOptionListener(Option<T> op, OptionListener<T> l) { op.addListener(this,l); }
   
-  /** 
-   * Removes an OptionListener from an Option to which it was listening. 
+  /** Removes an OptionListener from an Option to which it was listening. 
    * @param <T> type of the option
    * @param op option to remove listener from
    * @param l listener to remove
@@ -115,8 +111,7 @@ public class Configuration {
   /** @return the exception caught during startUp, or null if none were caught. */
   public Exception getStartupException() { return _startupException; }
   
-  /** 
-   * Stores exception caught during creation of this Configuration object, so 
+  /** Stores exception caught during creation of this Configuration object, so 
    * it can be displayed later by the UI.
    * @param e Exception caught during startUp
    */

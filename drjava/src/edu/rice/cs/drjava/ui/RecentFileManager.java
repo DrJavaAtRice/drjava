@@ -49,8 +49,7 @@ import edu.rice.cs.plt.lambda.Runnable1;
 
 import edu.rice.cs.util.FileOpenSelector;
 
-/**
- * Manages a list of the most recently used files to be displayed
+/** * Manages a list of the most recently used files to be displayed
  * in the File menu.
  * @version $Id$
  */
@@ -79,8 +78,7 @@ public class RecentFileManager implements OptionConstants {
   /** An action that will be invoked when the file is clicked. */
   protected RecentFileAction _recentFileAction;
   
-  /** 
-   * Creates a new RecentFileManager.
+  /** Creates a new RecentFileManager.
    * @param pos  Position in the file menu
    * @param fileMenu  File menu to add the entry to
    * @param action action to be invoked when the file is clicked
@@ -151,8 +149,7 @@ public class RecentFileManager implements OptionConstants {
     DrJava.getConfig().setSetting(_settingConfigConstant, _recentFiles);
   }
   
-  /** 
-   * Updates the list after the given file has been opened. 
+  /** Updates the list after the given file has been opened. 
    * @param file the file being opened
    */
   public void updateOpenFiles(final File file) {
@@ -189,8 +186,7 @@ public class RecentFileManager implements OptionConstants {
     numberItems();
   }
   
-  /** 
-   * Removes the given file from the list if it is already there.
+  /** Removes the given file from the list if it is already there.
    * Only removes the first occurrence of the file, since each
    * entry should be unique (based on canonical path).
    * @param file the file to remove

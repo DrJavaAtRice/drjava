@@ -58,8 +58,7 @@ public interface InteractionsListener {
   /** Called when the interpreter has begun resetting. */
   public void interpreterResetting();
   
-  /** 
-   * Called when the interpreter is ready to use. 
+  /** Called when the interpreter is ready to use. 
    * @param wd the current working directory
    */
   public void interpreterReady(File wd);

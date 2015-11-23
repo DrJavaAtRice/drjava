@@ -38,15 +38,13 @@ package edu.rice.cs.drjava.model.definitions.indent;
 
 import javax.swing.text.BadLocationException;
 
-/**
- * Tests the indention rule which detects whether the current line
+/** * Tests the indention rule which detects whether the current line
  * starts with a particular string.
  * @version $Id$
  */
 public final class QuestionCurrLineStartsWithTest extends IndentRulesTestCase {
 
-  /** 
-   * Tests not having the prefix in the text.  
+  /** Tests not having the prefix in the text.  
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testNoPrefix() throws BadLocationException {
@@ -64,8 +62,7 @@ public final class QuestionCurrLineStartsWithTest extends IndentRulesTestCase {
     assertTrue("no close brace", !rule.testApplyRule(_doc, 0, Indenter.IndentReason.OTHER));
   }
   
-  /** 
-   * Tests having a line start with prefix, with text following
+  /** Tests having a line start with prefix, with text following
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testStartsWithPrefixWithText() throws BadLocationException {
@@ -87,8 +84,7 @@ public final class QuestionCurrLineStartsWithTest extends IndentRulesTestCase {
     assertTrue("line after star (with space)", !rule.testApplyRule(_doc, 15, Indenter.IndentReason.OTHER));
   }
   
-  /** 
-   * Tests having a line start with prefix, with no text following
+  /** Tests having a line start with prefix, with no text following
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testStartsWithPrefixNoText() throws BadLocationException {
@@ -109,8 +105,7 @@ public final class QuestionCurrLineStartsWithTest extends IndentRulesTestCase {
     assertTrue("line after brace (with space)", !rule.testApplyRule(_doc, 14, Indenter.IndentReason.OTHER));
   }
   
-  /** 
-   * Tests having a multiple character prefix.
+  /** Tests having a multiple character prefix.
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testMultipleCharPrefix() throws BadLocationException {
@@ -124,8 +119,7 @@ public final class QuestionCurrLineStartsWithTest extends IndentRulesTestCase {
     assertTrue("dot star dot text", rule.testApplyRule(_doc, 9, Indenter.IndentReason.OTHER));
   }
     
-  /** 
-   * Tests having a commented prefix without searching in comments.
+  /** Tests having a commented prefix without searching in comments.
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testCommentedPrefixDontSearchComment() throws BadLocationException {
@@ -138,8 +132,7 @@ public final class QuestionCurrLineStartsWithTest extends IndentRulesTestCase {
     assertTrue("line after brace", !rule.testApplyRule(_doc, 12, Indenter.IndentReason.OTHER));
   }
 
-  /** 
-   * Tests having a commented prefix with searching in comments.
+  /** Tests having a commented prefix with searching in comments.
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testCommentedPrefixSearchComment() throws BadLocationException {
@@ -153,8 +146,7 @@ public final class QuestionCurrLineStartsWithTest extends IndentRulesTestCase {
     assertTrue("line after star", !rule.testApplyRule(_doc, 7, Indenter.IndentReason.OTHER));
   }
   
-  /** 
-   * Tests having text on a line before the prefix.
+  /** Tests having text on a line before the prefix.
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testDoesNotStartWithPrefix() throws BadLocationException {
@@ -168,8 +160,7 @@ public final class QuestionCurrLineStartsWithTest extends IndentRulesTestCase {
     assertTrue("line after brace", !rule.testApplyRule(_doc, 10, Indenter.IndentReason.OTHER));
   }
 
-  /** 
-   * Prefix appears at the end of a document.
+  /** Prefix appears at the end of a document.
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testPrefixAtEnd() throws BadLocationException {
@@ -182,8 +173,7 @@ public final class QuestionCurrLineStartsWithTest extends IndentRulesTestCase {
     assertTrue("end of second line", rule.testApplyRule(_doc, 14, Indenter.IndentReason.OTHER));
   }
   
-  /** 
-   * Tests multiple-character prefix.
+  /** Tests multiple-character prefix.
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testMultCharPrefix() throws BadLocationException {

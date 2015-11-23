@@ -57,8 +57,7 @@ public class VectorFileOptionComponent extends VectorOptionComponent<File> imple
     this(opt, text, parent, null);
   }
   
-  /** 
-   * Constructor that allows for a tooltip description. 
+  /** Constructor that allows for a tooltip description. 
    * @param opt the option to display
    * @param text descriptive text to put in label
    * @param parent the parent frame
@@ -68,8 +67,7 @@ public class VectorFileOptionComponent extends VectorOptionComponent<File> imple
     this(opt, text, parent, description, false);
   }
 
-  /** 
-   * Constructor with flag for move buttons. 
+  /** Constructor with flag for move buttons. 
    * @param opt the option to display
    * @param text descriptive text to put in label
    * @param parent the parent frame
@@ -91,8 +89,7 @@ public class VectorFileOptionComponent extends VectorOptionComponent<File> imple
     _jfc.setFileFilter(ClassPathFilter.ONLY);
   }
 
-  /** 
-   * Sets the directory where the chooser will start if no file is selected.
+  /** Sets the directory where the chooser will start if no file is selected.
    * @param f directory to be set
    */
   public void setBaseDir(File f) {

@@ -39,8 +39,7 @@ import edu.rice.cs.drjava.DrJavaTestCase;
 import java.io.Reader;
 import java.io.StringReader;
 
-/**
- * ClassAndInterfaceFinderTest for unit testing ClassAndInterfaceFinder.  Uses
+/** * ClassAndInterfaceFinderTest for unit testing ClassAndInterfaceFinder.  Uses
  * junit for testing.
  *
  * @author <a href="mailto:jasonbs@rice.edu">Jason Schiller</a>

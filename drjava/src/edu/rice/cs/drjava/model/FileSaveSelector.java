@@ -45,8 +45,7 @@ import edu.rice.cs.util.OperationCanceledException;
   */
 public interface FileSaveSelector {
   
-  /** 
-   * @return the file to save.
+  /** @return the file to save.
    * @throws OperationCanceledException if the save request is cancelled
    */
   public File getFile() throws OperationCanceledException;
@@ -63,8 +62,7 @@ public interface FileSaveSelector {
     */
   public boolean verifyOverwrite(File f);
   
-  /** 
-   * Confirms whether a new file should be selected since the previously chosen file has been deleted or moved.
+  /** Confirms whether a new file should be selected since the previously chosen file has been deleted or moved.
    * @param doc the open document
    * @param oldFile The file that was moved or deleted.
    * @return true if should save; false otherwise

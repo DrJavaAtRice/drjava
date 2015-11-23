@@ -43,8 +43,7 @@ import javax.swing.event.HyperlinkEvent;
 import java.net.URL;
 import java.net.MalformedURLException;
 
-/**
- * The frame for displaying the HTML quick start files.
+/** * The frame for displaying the HTML quick start files.
  */
 public class QuickStartFrame extends HelpFrame {
   private static final String HELP_PATH = "/edu/rice/cs/drjava/docs/quickstart/";

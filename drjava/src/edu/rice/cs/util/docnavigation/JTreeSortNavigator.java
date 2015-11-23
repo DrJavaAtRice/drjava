@@ -128,15 +128,13 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     _displayManager = dm;
   }
   
-  /** 
-   * Sets the display manager that is used to select icons for the leaves of the tree.
+  /** Sets the display manager that is used to select icons for the leaves of the tree.
    * This does not apply to the inner nodes or the root.
    * @param manager the manager to set
    */
   public void setDisplayManager(DisplayManager<? super ItemT> manager) { _displayManager = manager; }
   
-  /** 
-   * Sets the icon to be displayed at the root of the tree 
+  /** Sets the icon to be displayed at the root of the tree 
    * @param ico icon to set
    */
   public void setRootIcon(Icon ico) { _rootIcon = ico; }
@@ -305,8 +303,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     }
   } 
   
-  /** 
-   * Assumes lock on _model is already held or that it is being run in the event thread. 
+  /** Assumes lock on _model is already held or that it is being run in the event thread. 
    * @param doc doc for which to get the node
    * @return node for doc
    */
@@ -316,8 +313,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
 //    }
   }
   
-  /** 
-   * Only takes in nodes that have an INavigatorItem as their object; assumes 
+  /** Only takes in nodes that have an INavigatorItem as their object; assumes 
    * _model lock is already held.
    * Only executes in event thread. 
    * @param node node to be removed
@@ -331,8 +327,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     return node.getData();
   }
   
-  /** 
-   * If the given node is an InnerNode with no children, it removes it from 
+  /** If the given node is an InnerNode with no children, it removes it from 
    * the tree.  If the given node is a leaf or the root, it does nothing to it.
    * Assumes that _model lock is already held.  Only executes in the event 
    * thread.
@@ -417,8 +412,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
 //    }
   }
   
-  /** 
-   * Returns a typed equivalent to {@code next.getUserObject()}.  Assumes the 
+  /** Returns a typed equivalent to {@code next.getUserObject()}.  Assumes the 
    * DefaultMutableTreeNode is a leaf node in _model and thus, if 
    * parameterized, would have type ItemT.  This is a workaround for the lack 
    * of a generic implementation of TreeModel and TreeNode.  If those classes 
@@ -490,8 +484,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     synchronized(_model) { return _doc2node.containsKey(doc); }  // locks out mutation
   }
   
-  /** 
-   * Tests to see if a given document is contained in this navigator.  
+  /** Tests to see if a given document is contained in this navigator.  
    * Only executes in event thread.
    * @param doc the document to search for
    * @return true if doc is contained in this navigator; false otherwise
@@ -627,8 +620,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
   /** The cell renderer for this tree. Only runs in event thread. */
   private class CustomTreeCellRenderer extends DefaultTreeCellRenderer {
     
-    /** 
-     * @param tree the JTree we're painting
+    /** @param tree the JTree we're painting
      * @param value the value
      * @param sel true if the specified cell was selected
      * @param isExpanded true if the specified cell is expanded
@@ -882,8 +874,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
   
   /******* Methods that handle expansion/collapsing of folders in tree **********/
   
-  /** 
-   * Called whenever an item in the tree has been collapsed. 
+  /** Called whenever an item in the tree has been collapsed. 
    * Only runs in event thread (except when testing). 
    * @param event the tree collapse event
    */
@@ -894,8 +885,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     if (o instanceof InnerNode<?,?>) ((InnerNode<?,?>)o).setCollapsed(true);
   }
   
-  /** 
-   * Called whenever an item in the tree has been expanded.  Only runs in event thread.
+  /** Called whenever an item in the tree has been expanded.  Only runs in event thread.
    * @param event the tree expansion event
    */
   public void treeExpanded(TreeExpansionEvent event) {
@@ -905,8 +895,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     if (o instanceof InnerNode<?,?>) ((InnerNode<?,?>)o).setCollapsed(false);
   }
   
-  /** 
-   * Collapses all the paths in the tree that match one of the path strings 
+  /** Collapses all the paths in the tree that match one of the path strings 
    * included in the given hash set.  Path strings must follow a specific 
    * format in order for them to work. See the documentation of 
    * {@code generatePathString} for information on the format of the path 
@@ -921,8 +910,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     collapsePaths(set);
   }
   
-  /** 
-   * Set variation of collapsePaths(String ...).  Private except for testing 
+  /** Set variation of collapsePaths(String ...).  Private except for testing 
    * code. Only runs in event thread except for testing code. 
    * @param paths A hash set of path strings.
    */

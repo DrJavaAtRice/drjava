@@ -297,8 +297,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   //  return this._junitTestManager.getLastResult();
   //}
 
-  /** 
-   * Gets the value and type string of the variable with the given name in the current interpreter.
+  /** Gets the value and type string of the variable with the given name in the current interpreter.
    * Invoked reflectively by the debugger.  To simplify the inter-process exchange,
    * an array here is used as the return type rather than an {@code Option<Object>} --
    * an empty array corresponds to "none," and a singleton array corresponds to a "some."
@@ -348,8 +347,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     }
   }
 
-  /** 
-   * @param c the class to get the name of
+  /** @param c the class to get the name of
    * @return the name of the class, with the right number of array suffixes 
    *         "[]" and while being ambiguous about boxed and primitive types. 
    */

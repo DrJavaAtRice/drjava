@@ -159,8 +159,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     debug.logEnd();
   }
   
-  /** 
-   * Creates a source file with "package" as a field name and ensures that 
+  /** Creates a source file with "package" as a field name and ensures that 
    * compile starts but fails due to the invalid field name.
    * @throws BadLocationException if attempts to reference an invalid location
    * @throws IOException if an IO operation fails
@@ -191,8 +190,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     debug.logEnd();
   }
   
-  /** 
-   * Creates a source file with "package" as a field name and ensures that compile starts but fails due to the
+  /** Creates a source file with "package" as a field name and ensures that compile starts but fails due to the
    * invalid field name. This is different from {@link #testCompilePackageAsField} as it initializes the field. 
    * @throws BadLocationException if attempts to reference an invalid location
    * @throws IOException if an IO operation fails
@@ -223,8 +221,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     debug.logEnd();
   }
   
-  /** 
-   * Tests compiling an invalid file and checks to make sure the class file was not created. 
+  /** Tests compiling an invalid file and checks to make sure the class file was not created. 
    * @throws BadLocationException if attempts to reference an invalid location
    * @throws IOException if an IO operation fails
    * @throws InterruptedException if execution is interrupted unexpectedly
@@ -252,8 +249,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     debug.logEnd();
   }
   
-  /** 
-   * Puts an otherwise valid package statement inside a class declaration. This better not work! 
+  /** Puts an otherwise valid package statement inside a class declaration. This better not work! 
    * @throws BadLocationException if attempts to reference an invalid location
    * @throws IOException if an IO operation fails
    * @throws InterruptedException if execution is interrupted unexpectedly
@@ -297,8 +293,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
   
   
   
-  /** 
-   * Tests the compiler errors have the correct line numbers.
+  /** Tests the compiler errors have the correct line numbers.
    * TODO: rewrite this test for the new error model interface
    * @throws BadLocationException if attempts to reference an invalid location
    * @throws IOException if an IO operation fails
@@ -350,8 +345,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     debug.logEnd();
   }
   
-  /** 
-   * Tests compiling an invalid file and checks to make sure the class file was not created.  
+  /** Tests compiling an invalid file and checks to make sure the class file was not created.  
    * @throws BadLocationException if attempts to reference an invalid location
    * @throws IOException if an IO operation fails
    * @throws InterruptedException if execution is interrupted unexpectedly

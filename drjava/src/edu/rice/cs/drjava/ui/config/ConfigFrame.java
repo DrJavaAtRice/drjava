@@ -103,8 +103,7 @@ public class ConfigFrame extends SwingFrame {
     }
   };
   
-  /** 
-   * Sets up the frame and displays it.  This a Swing view class!  With the 
+  /** Sets up the frame and displays it.  This a Swing view class!  With the 
    * exception of initialization, this code should only be executed in the 
    * event-handling thread. 
    * @param frame reference to the main frame
@@ -302,8 +301,7 @@ public class ConfigFrame extends SwingFrame {
     return workDir;
   }
 
-  /** 
-   * Call the update method to propagate down the tree, parsing input values 
+  /** Call the update method to propagate down the tree, parsing input values 
    * into their config options. 
    * @return true on success; false otherwise
    */
@@ -353,8 +351,7 @@ public class ConfigFrame extends SwingFrame {
     super.setVisible(vis);
   }
 
-  /** 
-   * Write the configured option values to disk. 
+  /** Write the configured option values to disk. 
    * @return true on success; false on failure
    * @throws IOException if an IO operation fails
    */
@@ -374,8 +371,7 @@ public class ConfigFrame extends SwingFrame {
     return successful;
   }
 
-  /** 
-   * Sets the given ConfigPanel as the visible panel. 
+  /** Sets the given ConfigPanel as the visible panel. 
    * @param cf panel to be displayed
    */
   private void _displayPanel(ConfigPanel cf) {
@@ -530,8 +526,7 @@ public class ConfigFrame extends SwingFrame {
     return new DirectoryOptionComponent(o, CONFIG_DESCRIPTIONS.get(o), this, CONFIG_LONG_DESCRIPTIONS.get(o), c);
   }
   
-  /** 
-   * Add all of the components for the Resource Locations panel of the preferences window. 
+  /** Add all of the components for the Resource Locations panel of the preferences window. 
    * @param panel ConfigPanel to be setup
    */
   private void _setupResourceLocPanel(ConfigPanel panel) {
@@ -558,8 +553,7 @@ public class ConfigFrame extends SwingFrame {
     
   }
 
-  /** 
-   * Add all of the components for the Display Options panel of the preferences window.
+  /** Add all of the components for the Display Options panel of the preferences window.
    * @param panel ConfigPanel to be setup
    */
   private void _setupDisplayPanel(ConfigPanel panel) {
@@ -624,8 +618,7 @@ public class ConfigFrame extends SwingFrame {
     panel.displayComponents();
   }
 
-  /** 
-   * Add all of the components for the Font panel of the preferences window.
+  /** Add all of the components for the Font panel of the preferences window.
    * @param panel ConfigPanel to be setup
    */
   private void _setupFontPanel(ConfigPanel panel) {
@@ -637,8 +630,7 @@ public class ConfigFrame extends SwingFrame {
     panel.displayComponents();
   }
 
-  /** 
-   * Adds all of the components for the Color panel of the preferences window.
+  /** Adds all of the components for the Color panel of the preferences window.
    * @param panel ConfigPanel to be setup
    */
   private void _setupColorPanel(ConfigPanel panel) {
@@ -677,8 +669,7 @@ public class ConfigFrame extends SwingFrame {
     panel.displayComponents();
   }
 
-  /** 
-   * Add all of the components for the Positions panel of the preferences window. 
+  /** Add all of the components for the Positions panel of the preferences window. 
    * @param panel ConfigPanel to be setup
    */
   private void _setupPositionsPanel(ConfigPanel panel) {
@@ -794,8 +785,7 @@ public class ConfigFrame extends SwingFrame {
     panel.displayComponents();
   }
   
-  /** 
-   * Adds all of the components for the Key Bindings panel of the preferences window.
+  /** Adds all of the components for the Key Bindings panel of the preferences window.
    * @param panel ConfigPanel to be setup
    */
   private void _setupKeyBindingsPanel(ConfigPanel panel) {
@@ -837,8 +827,7 @@ public class ConfigFrame extends SwingFrame {
     panel.displayComponents();
   }
 
-  /** 
-   * Add all of the components for the Debugger panel of the preferences window. 
+  /** Add all of the components for the Debugger panel of the preferences window. 
    * @param panel ConfigPanel to be setup
    */
   private void _setupDebugPanel(ConfigPanel panel) {
@@ -877,8 +866,7 @@ public class ConfigFrame extends SwingFrame {
     panel.displayComponents();
   }
 
-  /** 
-   * Add all of the components for the Javadoc panel of the preferences window. 
+  /** Add all of the components for the Javadoc panel of the preferences window. 
    * @param panel ConfigPanel to be setup
    */
   private void _setupJavadocPanel(ConfigPanel panel) {
@@ -950,8 +938,7 @@ public class ConfigFrame extends SwingFrame {
     panel.displayComponents();
   }
 
-  /** 
-   * Adds all of the components for the Prompts panel of the preferences window. 
+  /** Adds all of the components for the Prompts panel of the preferences window. 
    * @param panel ConfigPanel to be setup
    */
   private void _setupNotificationsPanel(ConfigPanel panel) {
@@ -1055,8 +1042,7 @@ public class ConfigFrame extends SwingFrame {
     panel.displayComponents();
   }
 
-  /** 
-   * Adds all of the components for the Miscellaneous panel of the preferences window. 
+  /** Adds all of the components for the Miscellaneous panel of the preferences window. 
    * @param panel ConfigPanel to be setup
    */
   private void _setupMiscPanel(ConfigPanel panel) {
@@ -1091,8 +1077,7 @@ public class ConfigFrame extends SwingFrame {
     panel.displayComponents();
   }  
 
-  /** 
-   * Adds all of the components for the JVMs panel of the preferences window. 
+  /** Adds all of the components for the JVMs panel of the preferences window. 
    * @param panel ConfigPanel to be setup
    */
   private void _setupJVMsPanel(ConfigPanel panel) {
@@ -1107,8 +1092,7 @@ public class ConfigFrame extends SwingFrame {
     panel.displayComponents();
   }
 
-  /** 
-   * Adds all of the components for the file types panel of the preferences window. 
+  /** Adds all of the components for the file types panel of the preferences window. 
    * @param panel ConfigPanel to be setup
    */
   private void _setupFileTypesPanel(ConfigPanel panel) {
@@ -1215,8 +1199,7 @@ public class ConfigFrame extends SwingFrame {
     panel.displayComponents();
   }
   
-  /** 
-   * Adds all of the components for the Compiler Options Panel of the preferences window
+  /** Adds all of the components for the Compiler Options Panel of the preferences window
    * @param panel ConfigPanel to be setup
    */
   private void _setupCompilerPanel(ConfigPanel panel) {
@@ -1352,8 +1335,7 @@ public class ConfigFrame extends SwingFrame {
     panel.displayComponents();
   }
 
-  /** 
-   * Add all of the components for the JUnit panel of the preferences window. 
+  /** Add all of the components for the JUnit panel of the preferences window. 
    * @param panel ConfigPanel to be setup
    */
   private void _setupJUnitPanel(ConfigPanel panel) {

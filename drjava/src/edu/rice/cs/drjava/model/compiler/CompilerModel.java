@@ -105,14 +105,12 @@ public interface CompilerModel {
   
   //-------------------------- Compiler Management --------------------------//
   
-  /** 
-   * @return all registered compilers that are actually available.  If there are none,
+  /** @return all registered compilers that are actually available.  If there are none,
    * the result is {@link NoCompilerAvailable#ONLY}.
    */
   public Iterable<CompilerInterface> getAvailableCompilers();
   
-  /** 
-   * @return the compiler that is the "active" compiler.
+  /** @return the compiler that is the "active" compiler.
    * @see #setActiveCompiler
    */
   public CompilerInterface getActiveCompiler(); 

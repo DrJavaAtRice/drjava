@@ -192,8 +192,7 @@ public class CompilerErrorModel {
     */
   public DJError getError(int idx) { return _errors[idx]; }
   
-  /** 
-   * @param error the error whose position is to be found
+  /** @param error the error whose position is to be found
    * @return the position of the given error in the document representing its file. 
    */
   public Position getPosition(DJError error) {
@@ -291,8 +290,7 @@ public class CompilerErrorModel {
     return _errors[shouldSelect];
   }
   
-  /** 
-   * This function tells if there are errors with source locations associated with the given file. 
+  /** This function tells if there are errors with source locations associated with the given file. 
    * @param odd the document to check
    * @return true if there are errors with source locations; false otherwise
    */

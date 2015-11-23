@@ -91,8 +91,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   private final LinkedList<Pair<Option<Color>, OptionListener<Color>>> _colorOptionListeners = 
     new LinkedList<Pair<Option<Color>, OptionListener<Color>>>();
   
-  /** 
-   * Constructs a new find results panel. This is swing class which should 
+  /** Constructs a new find results panel. This is swing class which should 
    * only be accessed from the event thread.
    * @param frame the MainFrame
    * @param regionManager the region manager associated with this panel
@@ -361,8 +360,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     }
   }
 
-  /** 
-   * Receives the set of documents that have been closed and removes all of 
+  /** Receives the set of documents that have been closed and removes all of 
    * their regions; also updates the first document, in case it was one of 
    * the closed files. 
    * @param docs the documents that were closed 

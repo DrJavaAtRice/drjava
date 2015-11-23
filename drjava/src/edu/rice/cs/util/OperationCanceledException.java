@@ -36,8 +36,7 @@
 
 package edu.rice.cs.util;
 
-/**
- * Indicates that a GUI operation has been canceled, e.g., choosing
+/** * Indicates that a GUI operation has been canceled, e.g., choosing
  * a file to save to from a file selection dialog.
  * @version $Id$
  */

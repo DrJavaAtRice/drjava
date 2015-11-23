@@ -112,15 +112,13 @@ public class ProjectProfile implements ProjectFileIR {
   
   private volatile static Log LOG = new Log("ProjectProfile.txt", false);
   
-  /** 
-   * Constructs a File for fileName and forwards this call to the main constructor. 
+  /** Constructs a File for fileName and forwards this call to the main constructor. 
    * @param fileName path to the project file
    * @throws IOException parent directory of project file does not exist.
    */
   public ProjectProfile(String fileName) throws IOException { this(new File(fileName)); }
   
-  /** 
-   * Creates new ProjectProfiles with specifed project file name and project 
+  /** Creates new ProjectProfiles with specifed project file name and project 
    * root that is parent folder of the project file.  The project file 
    * presumably may not exist yet, but its parent folder is assumed to exist.
    * Assumes that the File f is not a null reference.
@@ -267,8 +265,7 @@ public class ProjectProfile implements ProjectFileIR {
   public void setAuxiliaryFiles(List<DocFile> af) { _auxiliaryFiles = new LinkedList<DocFile>(af); }
   public void setExcludedFiles(List<DocFile> ef) { _excludedFiles = new ArrayList<DocFile>(ef); }
   
-  /** 
-   * Assumes that root.getParentFile != null 
+  /** Assumes that root.getParentFile != null 
    * @param root the new project root to be set
    */
   public void setProjectRoot(File root) { 
@@ -290,8 +287,7 @@ public class ProjectProfile implements ProjectFileIR {
     _storedPreferences.putAll(sp);
   }
   
-  /** 
-   * Write project file in XML format. 
+  /** Write project file in XML format. 
    * @throws IOException if an IO operation fails
    */
   public void write() throws IOException {
@@ -496,8 +492,7 @@ public class ProjectProfile implements ProjectFileIR {
     xc.save(os);
   }
   
-  /** 
-   * This method writes what information has been passed to this builder so 
+  /** This method writes what information has been passed to this builder so 
    * far to disk in s-expression format. 
    * @throws IOException if an IO operation fails
    */
@@ -661,8 +656,7 @@ public class ProjectProfile implements ProjectFileIR {
 
   /* Private Methods */
   
-  /** 
-   * @param g The getter that can get all the info needed to make the document file
+  /** @param g The getter that can get all the info needed to make the document file
    * @return the document that contains the information retrieved from the getter
    * @throws IOException if an IO operation fails
    */
@@ -671,8 +665,7 @@ public class ProjectProfile implements ProjectFileIR {
   }
   
   
-  /** 
-   * This encodes a normal file relative to File base.  None of the special tags are added.
+  /** This encodes a normal file relative to File base.  None of the special tags are added.
    * @param f the file to encode
    * @param prefix the indent level to place the s-expression at
    * @param base Directory to be made relative to
@@ -691,8 +684,7 @@ public class ProjectProfile implements ProjectFileIR {
 //    return encodeFileRelative(f, prefix, _projectRoot); 
 //  }
     
-  /** 
-   * This encodes a normal file with its canonical path.  None of the special tags are added.
+  /** This encodes a normal file with its canonical path.  None of the special tags are added.
    * @param f the file to encode
    * @param prefix the indent level to place the s-expression at
    * @return the s-expression syntax to describe the given file.
@@ -704,8 +696,7 @@ public class ProjectProfile implements ProjectFileIR {
     return prefix + "(file (name " + convertToLiteral(path) + "))";
   }
   
-  /** 
-   * This encodes a docfile, adding all the special tags that store document-specific information.
+  /** This encodes a docfile, adding all the special tags that store document-specific information.
    * @param df the doc file to encode
    * @param prefix the indent level to place the s-expression at
    * @param relative whether this file should be made relative to _projectRoot
@@ -751,8 +742,7 @@ public class ProjectProfile implements ProjectFileIR {
     
     return ret;
   }
-  /** 
-   * Encodes a doc file relative to _projectRoot.
+  /** Encodes a doc file relative to _projectRoot.
    * @param df the DocFile to encode
    * @param prefix the indent level
    * @return the encoded document
@@ -787,8 +777,7 @@ public class ProjectProfile implements ProjectFileIR {
     return ret;
   }
  
-  /** 
-   * This encodes a watch.
+  /** This encodes a watch.
    * @param w the watch to encode
    * @param prefix the indent level to place the s-expression at
    * @return the s-expression syntax to describe the given watch.
@@ -802,8 +791,7 @@ public class ProjectProfile implements ProjectFileIR {
     return ret;
   }
 
-  /**
-   * This encodes a bookmark relative to _projectRoot.
+  /** This encodes a bookmark relative to _projectRoot.
    * @param bm the bookmark to encode
    * @param prefix the indent level to place the s-expression at
    * @return the s-expression syntax to describe the given breakpoint.

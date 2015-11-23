@@ -694,7 +694,7 @@
       <fileset dir="classes/lib" excludes="about.html"/>
       <fileset dir="classes/base" />
       <!-- Include the specified version of JUnit and rename it to junit.jar -->
-      <zipfileset dir="." includes="${junit-jar-to-include}" fullpath="junit.jar" />
+<!--     <zipfileset dir="." includes="${junit-jar-to-include}" fullpath="junit.jar" /> -->
       <zipfileset dir="." includes="${md5-temp-name}"
 		  fullpath="${md5-properties-path}" />
     </jar>

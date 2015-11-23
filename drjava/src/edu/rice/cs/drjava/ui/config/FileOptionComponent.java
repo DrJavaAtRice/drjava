@@ -66,8 +66,7 @@ public class FileOptionComponent extends OptionComponent<File,FileSelectorCompon
     setComponent(_component);
   }
 
-  /**
-   * Constructor that allows for a tooltip description. 
+  /** Constructor that allows for a tooltip description. 
    * @param opt the option
    * @param text text for descriptive label of this option
    * @param parent the parent frame
@@ -79,8 +78,7 @@ public class FileOptionComponent extends OptionComponent<File,FileSelectorCompon
     setDescription(description);
   }
   
-  /** 
-   * Constructor that allows for a user-supplied FileSelectorComponent. 
+  /** Constructor that allows for a user-supplied FileSelectorComponent. 
    * @param opt the option
    * @param text text for descriptive label of this option
    * @param parent the parent frame
@@ -99,8 +97,7 @@ public class FileOptionComponent extends OptionComponent<File,FileSelectorCompon
     setComponent(_component);
   }
   
-  /** 
-   * Constructor that allows for a user-supplied FileSelectorComponent and a tooltip. 
+  /** Constructor that allows for a user-supplied FileSelectorComponent and a tooltip. 
    * @param opt the option
    * @param text text for descriptive label of this option
    * @param parent the parent frame
@@ -139,8 +136,7 @@ public class FileOptionComponent extends OptionComponent<File,FileSelectorCompon
     return true;
   }
 
-  /** 
-   * Displays the given value. Spawns an event queue task! 
+  /** Displays the given value. Spawns an event queue task! 
    * @param value to be displayed
    */
   public void setValue(File value) { _component.setFileField(value); }
@@ -148,8 +144,7 @@ public class FileOptionComponent extends OptionComponent<File,FileSelectorCompon
 //  /** Return's this OptionComponent's configurable component.  */
 //  public FileSelectorComponent getComponent() { return _component; }
   
-  /** 
-   * Set the file filter for this file option component 
+  /** Set the file filter for this file option component 
    * @param fileFilter filter to be set
    */
   public void setFileFilter(FileFilter fileFilter) { _component.setFileFilter(fileFilter); }

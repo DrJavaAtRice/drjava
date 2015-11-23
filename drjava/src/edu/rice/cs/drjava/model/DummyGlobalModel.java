@@ -71,10 +71,9 @@ import edu.rice.cs.drjava.config.OptionParser;
   * @version $Id$
   */
 public class DummyGlobalModel implements GlobalModel {
-  /** 
-   * Since this is not supposed to be used, we need to throw an exception 
-   * OTHER than the ones it officially supports.
-   */
+  /** Since this is not supposed to be used, we need to throw an exception 
+    * OTHER than the ones it officially supports.
+    */
   public void addListener(GlobalModelListener listener) {
     throw new UnsupportedOperationException("Tried to call addListener on a Dummy");
   }
@@ -146,7 +145,7 @@ public class DummyGlobalModel implements GlobalModel {
   public OpenDefinitionsDocument newFile() {
     throw new UnsupportedOperationException("Tried to call newFile on a Dummy");
   }
-
+  
   public OpenDefinitionsDocument newFile(String text) {
     throw new UnsupportedOperationException("Tried to call newFile on a Dummy");
   }
@@ -176,7 +175,7 @@ public class DummyGlobalModel implements GlobalModel {
   public boolean closeAllFiles() {
     throw new UnsupportedOperationException("Tried to call closeAllFiles on a Dummy");
   }
-
+  
   public boolean closeFiles(List<OpenDefinitionsDocument> docs) {
     throw new UnsupportedOperationException("Tried to call closeFiles on a Dummy");
   }
@@ -195,7 +194,7 @@ public class DummyGlobalModel implements GlobalModel {
   
   public Map<OptionParser<?>,String> getPreferencesStoredInProject() {
     throw new UnsupportedOperationException("Tried to call getPreferencesStoredInProject on a Dummy"); }
-
+  
   public void setPreferencesStoredInProject(Map<OptionParser<?>,String> sp) {
     throw new UnsupportedOperationException("Tried to call setPreferencesStoredInProject on a Dummy"); }
   
@@ -339,7 +338,7 @@ public class DummyGlobalModel implements GlobalModel {
   public void clearHistory() {
     throw new UnsupportedOperationException("Tried to call clearHistory on a Dummy");
   }
-
+  
   public void saveConsoleCopy(ConsoleDocument doc, FileSaveSelector selector) throws IOException {
     throw new UnsupportedOperationException("Tried to call saveConsoleCopy on a Dummy");
   }    
@@ -519,7 +518,7 @@ public class DummyGlobalModel implements GlobalModel {
   public boolean hasOutOfSyncDocuments(List<OpenDefinitionsDocument> lod) {
     throw new UnsupportedOperationException("Tried to call hasOutOfSyncDocuments on a Dummy");
   }
-
+  
   public List<OpenDefinitionsDocument> getOutOfSyncDocuments() {
     throw new UnsupportedOperationException("Tried to call getOutOfSyncDocuments on a Dummy");
   }
@@ -547,11 +546,11 @@ public class DummyGlobalModel implements GlobalModel {
   public List<OpenDefinitionsDocument> getOpenDefinitionsDocuments() {
     throw new UnsupportedOperationException("Tried to getOpenDefinitionsDocuments on a Dummy!");
   }
-
+  
   public List<OpenDefinitionsDocument> getLLOpenDefinitionsDocuments() {
     throw new UnsupportedOperationException("Tried to getOpenDefinitionsDocuments on a Dummy!");
   }
-
+  
   public List<OpenDefinitionsDocument> getAuxiliaryDocuments() {
     throw new UnsupportedOperationException("Tried to getAuxiliaryDocuments on a Dummy!");
   }

@@ -65,8 +65,7 @@ public class ColorOptionComponent extends OptionComponent<Color,JPanel> {
     this(opt, text, parent, false);
   }
   
-  /** 
-   * An alternate constructor, allowing the caller to specify whether this 
+  /** An alternate constructor, allowing the caller to specify whether this 
    * color is a background color.  If so, the button will display the color 
    * as its background.
    * @param opt the ColorOption to display
@@ -123,8 +122,7 @@ public class ColorOptionComponent extends OptionComponent<Color,JPanel> {
     setComponent(_panel);
   }
   
-  /** 
-   * Constructor that allows for a tooltip description. 
+  /** Constructor that allows for a tooltip description. 
    * @param opt the ColorOption to display
    * @param text the text to display in the label of the component
    * @param parent the Frame displaying this component
@@ -134,8 +132,7 @@ public class ColorOptionComponent extends OptionComponent<Color,JPanel> {
     this(opt, text, parent, description, false);
   }
 
-  /** 
-   * Constructor that allows for a tooltip description as well as whether or 
+  /** Constructor that allows for a tooltip description as well as whether or 
    * not this is a background color. 
    * @param opt the ColorOption to display
    * @param text the text to display in the label of the component
@@ -149,8 +146,7 @@ public class ColorOptionComponent extends OptionComponent<Color,JPanel> {
     setDescription(description);
   }
 
-  /** 
-   * Constructor that allows for a tooltip description as well as whether or
+  /** Constructor that allows for a tooltip description as well as whether or
    * not this is a background color and whether or not the text should be bold.
    * @param opt the ColorOption to display
    * @param text the text to display in the label of the component
@@ -190,8 +186,7 @@ public class ColorOptionComponent extends OptionComponent<Color,JPanel> {
     _updateField(value);
   }
   
-  /** 
-   * Updates the component's field to display the given color. 
+  /** Updates the component's field to display the given color. 
    * @param c color to display
    */
   private void _updateField(Color c) {

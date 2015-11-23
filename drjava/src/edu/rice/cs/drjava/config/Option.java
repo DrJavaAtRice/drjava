@@ -88,8 +88,7 @@ public abstract class Option<T> extends OptionParser<T> implements FormatStrateg
   /** Uses format() and getOption() so that any changes in format will automatically be applied to getString(). */
   String getString(DefaultOptionMap om) { return format(getOption(om)); }
   
-  /** 
-   * Sends an OptionEvent to all OptionListeners who have registered on this Option. 
+  /** Sends an OptionEvent to all OptionListeners who have registered on this Option. 
    * @param config configuration information about the option
    * @param val the type of option
    */
@@ -106,8 +105,7 @@ public abstract class Option<T> extends OptionParser<T> implements FormatStrateg
     });
   }
   
-  /** 
-   * Magic listener-bag adder 
+  /** Magic listener-bag adder 
    * @param c configuration information about the option to listen on
    * @param l the new listener on c to add
    */
@@ -120,8 +118,7 @@ public abstract class Option<T> extends OptionParser<T> implements FormatStrateg
     v.add(l);
   }
   
-  /** 
-   * Magic listener-bag remover 
+  /** Magic listener-bag remover 
    * @param c configuration information about the option being listened on
    * @param l the listener to remove
    */

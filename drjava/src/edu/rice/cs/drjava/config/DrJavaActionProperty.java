@@ -43,15 +43,13 @@ package edu.rice.cs.drjava.config;
  */
 public abstract class DrJavaActionProperty extends DrJavaProperty {  
 
-  /** 
-   * Create a property. 
+  /** Create a property. 
    * @param name name of the property
    * @param help help text for the property
    */
   public DrJavaActionProperty(String name, String help) { super(name,help); }
 
-  /** 
-   * Create a property.
+  /** Create a property.
    * @param name name of the property
    * @param value value of the property
    * @param help help text for the property

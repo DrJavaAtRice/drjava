@@ -48,8 +48,7 @@ import javax.swing.text.BadLocationException;
   */
 public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSuccessTestCase {
 
-  /** 
-   * Tests calling compileAll with different source roots works. 
+  /** Tests calling compileAll with different source roots works. 
    * @throws BadLocationException if attempts to reference an invalid location
    * @throws IOException if an IO operation fails
    * @throws InterruptedException if execution is interrupted unexpectedly

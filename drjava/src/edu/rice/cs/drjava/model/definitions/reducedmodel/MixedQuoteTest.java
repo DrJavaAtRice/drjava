@@ -38,8 +38,7 @@ package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
 import  junit.framework.*;
 
-/**
- * Tests the interaction between double and single quotes and comments
+/** * Tests the interaction between double and single quotes and comments
  * @version $Id$
  */
 public final class MixedQuoteTest extends BraceReductionTestCase

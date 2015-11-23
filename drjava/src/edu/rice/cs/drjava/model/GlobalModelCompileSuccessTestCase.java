@@ -38,8 +38,7 @@ package edu.rice.cs.drjava.model;
 
 import edu.rice.cs.plt.reflect.JavaVersion;
 
-/**
- * Tests to ensure that compilation succeeds when expected.
+/** * Tests to ensure that compilation succeeds when expected.
  * 
  * Every test in this class is run for *each* of the compilers that is available.
  *

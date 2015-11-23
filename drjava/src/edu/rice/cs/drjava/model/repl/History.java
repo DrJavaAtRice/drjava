@@ -113,8 +113,7 @@ public class History implements OptionConstants, Serializable {
     if (! entry.equals(getCurrent())) _editedEntries.put(Integer.valueOf(_cursor), entry);
   }
 
-  /** 
-   * Adds an item to the history and moves the cursor to point to the place after it.
+  /** Adds an item to the history and moves the cursor to point to the place after it.
    * Note: Items are not inserted if they are empty. (This is in accordance with
    * bug #522123, but in divergence from feature #522213 which originally excluded
    * sequential duplicate entries from ever being stored.)
@@ -189,8 +188,7 @@ public class History implements OptionConstants, Serializable {
   /** Clears the vector */
   public void clear() { _history.clear(); }
 
-  /** 
-   * Returns the history as a string by concatenating each string in the 
+  /** Returns the history as a string by concatenating each string in the 
    * vector separated by the delimiting character. A semicolon is added 
    * to the end of every statement that didn't already end with one.
    * @return the history as a string

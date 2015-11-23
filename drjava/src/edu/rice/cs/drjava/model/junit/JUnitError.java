@@ -99,8 +99,7 @@ public class JUnitError extends DJError implements Serializable {
   /** @return the array of stack trace elements. */
   public StackTraceElement[] stackTrace() { return _stackTrace; }
   
-  /** 
-   * Set the array of stack trace elements. 
+  /** Set the array of stack trace elements. 
    * @param stes the stack trace elements
    */
   public void setStackTrace(StackTraceElement[] stes) { _stackTrace = stes; }

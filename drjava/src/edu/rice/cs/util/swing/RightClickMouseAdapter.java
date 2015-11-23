@@ -38,8 +38,7 @@ package edu.rice.cs.util.swing;
 
 import java.awt.event.*;
 
-/**
- * Abstract mouse listener that supports showing a popup menu.
+/** * Abstract mouse listener that supports showing a popup menu.
  * If subclasses override mousePressed() or mouseReleased(), they should
  * first call the superclass method so that the popup will be shown correctly.
  * Because of platform differences, we must check for popup trigger both

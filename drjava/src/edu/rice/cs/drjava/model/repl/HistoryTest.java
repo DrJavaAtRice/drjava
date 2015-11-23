@@ -74,8 +74,7 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
     super.tearDown();
   }
 
-  /** 
-   * Tests that the history doesn't overwrite files without prompting.
+  /** Tests that the history doesn't overwrite files without prompting.
    * @throws IOException if an IO operation fails 
    */
   public void testSaveAsExistsForOverwrite() throws IOException {

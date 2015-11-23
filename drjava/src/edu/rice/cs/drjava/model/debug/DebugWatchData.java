@@ -36,8 +36,7 @@
 
 package edu.rice.cs.drjava.model.debug;
 
-/**
- * Class for keeping track of watched fields and variables.
+/** * Class for keeping track of watched fields and variables.
  * @version $Id$
  */
 public class DebugWatchData {

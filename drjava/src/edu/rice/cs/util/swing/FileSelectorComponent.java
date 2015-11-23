@@ -188,8 +188,7 @@ public class FileSelectorComponent extends JPanel {
     }
   }
   
-  /** 
-   * Sets the file filter to use. 
+  /** Sets the file filter to use. 
    * @param filter the filter to be set
    */
   public void setFileFilter(FileFilter filter) { _fileFilter = filter; }

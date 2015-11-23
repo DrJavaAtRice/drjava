@@ -79,8 +79,7 @@ class JListSortNavigator<ItemT extends INavigatorItem> extends JListNavigator<It
   public void dragOver(DropTargetDragEvent dropTargetDragEvent) { }
   public void dropActionChanged(DropTargetDragEvent dropTargetDragEvent){ }
   
-  /** 
-   * User dropped something on the component. Only runs in event thread. 
+  /** User dropped something on the component. Only runs in event thread. 
    * @param dropTargetDropEvent the event indicating what was dropped
    */
   public /* synchronized */ void drop(DropTargetDropEvent dropTargetDropEvent) {

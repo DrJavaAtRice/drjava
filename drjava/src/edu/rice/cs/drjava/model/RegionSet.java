@@ -128,8 +128,7 @@ public class RegionSet<R extends IDocumentRegion> extends TreeSet<R> {
       odd.addDocumentListener(_docListener);
     }
 
-    /** 
-     * Adds an input region to the set.
+    /** Adds an input region to the set.
      * @param region the region to add
      * @return indication of success
      */
@@ -138,8 +137,7 @@ public class RegionSet<R extends IDocumentRegion> extends TreeSet<R> {
         return super.add(region);
     }
 
-    /** 
-     * Adds all input regions to the set.
+    /** Adds all input regions to the set.
      * @param regions the regions to add
      * @return indication of success
      */

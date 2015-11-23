@@ -38,8 +38,7 @@ package edu.rice.cs.drjava.model.definitions.indent;
 
 import javax.swing.text.BadLocationException;
 
-/**
- * Tests the question rule which determines if the current line
+/** * Tests the question rule which determines if the current line
  * in the document contains the given character.
  * <p>
  * All tests check for the ':' character on the current line.

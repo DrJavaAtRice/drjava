@@ -44,8 +44,7 @@ import edu.rice.cs.util.FileOps;
   */
 public class FileOption extends Option<File> {
   
-  /** 
-   * @param key the name of this option 
+  /** @param key the name of this option 
    * @param def the definition of this option
    */
   public FileOption(String key, File def) { super(key,def); }

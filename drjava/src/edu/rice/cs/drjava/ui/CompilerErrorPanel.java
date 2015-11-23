@@ -149,8 +149,7 @@ public class CompilerErrorPanel extends ErrorPanel {
     reset();
   }
   
-  /** 
-   * Reset the errors to the current error information immediately following 
+  /** Reset the errors to the current error information immediately following 
    * compilation. 
    * @param excludedFiles files to set as excluded
    */

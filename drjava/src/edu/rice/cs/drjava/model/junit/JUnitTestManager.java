@@ -110,8 +110,7 @@ public class JUnitTestManager {
   private List<File> files = null;
   private JUnitResultTuple lastResult = new JUnitResultTuple(false, null);
 
-  /** 
-   * Standard constructor 
+  /** Standard constructor 
    * @param jmc a JUnitModelCallback
    * @param loaderFactory factory to create class loaders
    */
@@ -125,8 +124,7 @@ public class JUnitTestManager {
     return this.lastResult;
   }
 
-  /** 
-   * Find the test classes among the given classNames and accumulate them in
+  /** Find the test classes among the given classNames and accumulate them in
    * TestSuite for junit.  Returns null if a test suite is already pending.
    * @param classNames the class names that are test class candidates
    * @param files the files corresponding to classNames
@@ -270,8 +268,7 @@ public class JUnitTestManager {
         myData.collect(executionData, sessionInfos, false);
         this.runtime.shutdown();
 
-        /**
-         * Together with the original class definitions we can calculate 
+        /**         * Together with the original class definitions we can calculate 
          * coverage information
          */
         final CoverageBuilder coverageBuilder = new CoverageBuilder();
@@ -284,8 +281,7 @@ public class JUnitTestManager {
                     replace(".java", ".class")), this.classNames.get(j));
             }
 
-            /**
-             * Run the structure analyzer on a single class folder to build up
+            /**             * Run the structure analyzer on a single class folder to build up
              * the coverage model. The process would be similar if the classes
              * were in a jar file; typically you would create a bundle for each
              * class folder and each jar you want in your report. If you have
@@ -486,8 +482,7 @@ public class JUnitTestManager {
     return new JUnitError(file, lineNum, 0, message, !isFailure, testName, className, exception, stackTrace);
   }
   
-  /** 
-   * Parses the line number out of the stack trace in the given class name. 
+  /** Parses the line number out of the stack trace in the given class name. 
    * @param sw stack trace
    * @param classname class in which stack trace was generated
    * @return the line number
@@ -513,8 +508,7 @@ public class JUnitTestManager {
     return lineNum;
   }
   
-  /** 
-   * @param current template for the runner's class loader
+  /** @param current template for the runner's class loader
    * @return a fresh JUnitTestRunner with its own class loader instance. 
    */
   private JUnitTestRunner makeRunner(ClassLoader current) {

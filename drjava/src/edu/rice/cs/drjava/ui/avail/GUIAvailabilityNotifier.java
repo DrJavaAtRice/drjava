@@ -39,8 +39,7 @@ package edu.rice.cs.drjava.ui.avail;
 import edu.rice.cs.drjava.model.EventNotifier;
 import java.util.HashMap;
 
-/**
- * Keeps track of all listeners to GUI availability.
+/** * Keeps track of all listeners to GUI availability.
  * <p>
  *
  * All methods in this class must use the synchronization methods

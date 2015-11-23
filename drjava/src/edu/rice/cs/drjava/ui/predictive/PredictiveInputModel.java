@@ -102,8 +102,7 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
       */
     public String getExtendedSharedMask(List<X> items, PredictiveInputModel<X> pim);
   
-    /** 
-     * Force the mask to fit this entry. The matching strategies that accept line numbers
+    /** Force the mask to fit this entry. The matching strategies that accept line numbers
      * can combine the current item with the line number. Other strategies just return the
      * current item.
      * @param item item to fit
@@ -593,8 +592,7 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
     setItems(items);
   }
 
-  /** 
-   * Sets the strategy
+  /** Sets the strategy
    * @param strategy to be set
    */
   public void setStrategy(MatchingStrategy<T> strategy) {

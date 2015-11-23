@@ -117,8 +117,7 @@ public class Log {
     }
   }
   
-  /** 
-   * Converts a stack trace (StackTraceElement[]) to string form 
+  /** Converts a stack trace (StackTraceElement[]) to string form 
    * @param trace trace to be converted
    * @return string representation of trace
    */
@@ -155,8 +154,7 @@ public class Log {
     _writer = null;
   }
   
-  /** 
-   * Parses a date printed by Date.toString(); returns null if there is a 
+  /** Parses a date printed by Date.toString(); returns null if there is a 
    * parse error or if there is no date. 
    * @param s date to be parsed
    * @return Date representation of s

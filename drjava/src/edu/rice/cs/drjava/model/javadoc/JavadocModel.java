@@ -44,8 +44,7 @@ import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
 import edu.rice.cs.util.DirectorySelector;
 
-/**
- * Model interface for Javadoc integration features.
+/** * Model interface for Javadoc integration features.
  * Note: Implementors should have a constructor taking an IGetDocuments.
  * @version $Id$
  */

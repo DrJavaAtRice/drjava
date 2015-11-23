@@ -36,8 +36,7 @@
 
 package edu.rice.cs.drjava.model.debug;
 
-/**
- * Thrown when a breakpoint is set on a line that's not executable.
+/** * Thrown when a breakpoint is set on a line that's not executable.
  * 
  * @version $Id$
  */

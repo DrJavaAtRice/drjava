@@ -40,16 +40,14 @@ import javax.swing.text.*;
 import java.awt.print.*;
 import edu.rice.cs.drjava.model.*;
 
-/**
- * DrJava's print preview window for a definitions document
+/** * DrJava's print preview window for a definitions document
  * @version $Id$
  */
 public class PreviewDefDocFrame extends PreviewFrame {
   
   private OpenDefinitionsDocument _document;
   
-  /** 
-   * Contructs a new PreviewDefDocFrame using a parent model and a MainFrame 
+  /** Contructs a new PreviewDefDocFrame using a parent model and a MainFrame 
    * object. Should only be called in event thread. 
    * @param model the parent model
    * @param mainFrame the main frame

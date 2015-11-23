@@ -67,8 +67,7 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
   /** Note that _position, which records the breakpoint position, is inherited from DocumentDebugAction. */
   private volatile OpenDefinitionsDocument _doc;
   
-  /** 
-   * @param doc the document within which to create the breakpoint
+  /** @param doc the document within which to create the breakpoint
    * @param offset offset within the document at which to set the breakpoint
    * @param isEnabled true if the breakpoint is enabled; false for disabled
    * @param manager manager
@@ -218,8 +217,7 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
   @Override
   public final int hashCode() { return super.hashCode(); }
   
-  /** 
-   * Totally orders regions lexicographically based on (_doc, endOffset, 
+  /** Totally orders regions lexicographically based on (_doc, endOffset, 
    * startOffset, _position). This method is typically applied to
    * regions within the same document. It is consistent with equals.
    */

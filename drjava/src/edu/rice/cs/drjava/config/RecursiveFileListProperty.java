@@ -51,8 +51,7 @@ public class RecursiveFileListProperty extends FileListProperty {
   /** Start directory. */
   protected String _start;
 
-  /** 
-   * Create an recursive file list property. 
+  /** Create an recursive file list property. 
    * @param name the name of the property
    * @param sep the separating string
    * @param dir the relative directory

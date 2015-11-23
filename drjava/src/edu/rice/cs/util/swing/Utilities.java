@@ -54,8 +54,7 @@ public class Utilities {
   
   public static final String JGOODIES_PACKAGE = "com.jgoodies.looks";
   
-  /** 
-   * Runs the task synchronously if the current thread is the event thread; 
+  /** Runs the task synchronously if the current thread is the event thread; 
    * otherwise passes it to the event thread to be run asynchronously after 
    * all events already on the queue have been processed.
    * @param task task to run
@@ -117,8 +116,7 @@ public class Utilities {
     */
   public static void showDebug(String msg) { showMessageBox(msg, "Debug Message"); }
   
-  /** 
-   * Shows a modal message box with an OK button.
+  /** Shows a modal message box with an OK button.
    * @param msg string to display
    * @param title title to display
    */
@@ -145,8 +143,7 @@ public class Utilities {
     } } );
   }
   
-  /** 
-   * @param c Component from which to extract the clipboard selection
+  /** @param c Component from which to extract the clipboard selection
    * @return a string with the current clipboard selection, or null if not available. 
    */
   public static String getClipboardSelection(Component c) {
@@ -167,8 +164,7 @@ public class Utilities {
     return s;
   }
   
-  /** 
-   * @param newName the name of the new action
+  /** @param newName the name of the new action
    * @param delegate action to delegate to
    * @return an action with a new name that delegates to another action. 
    */
@@ -277,8 +273,7 @@ public class Utilities {
     return pcl;
   }
   
-  /** 
-   * Return the index of the component in the parent container, or -1 if no parent or not found.
+  /** Return the index of the component in the parent container, or -1 if no parent or not found.
    * @param component the component for which to find the index
    * @return index of the component in the parent container, or -1 if not found 
    */

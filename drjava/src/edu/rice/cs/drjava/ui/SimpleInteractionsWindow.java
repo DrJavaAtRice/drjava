@@ -113,8 +113,7 @@ public class SimpleInteractionsWindow extends SwingFrame {
   /** @return the controller. */
   public InteractionsController getController() { return _controller; }
   
-  /** 
-   * Main method to create a SimpleInteractionsWindow from the console. 
+  /** Main method to create a SimpleInteractionsWindow from the console. 
    * Doesn't take any command line arguments. 
    * @param args should be empty
    */

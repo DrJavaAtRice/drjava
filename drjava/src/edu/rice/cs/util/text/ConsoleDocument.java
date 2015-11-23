@@ -144,8 +144,7 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     */
   public void setBeep(Runnable beep) { _beep = beep; }
   
-  /** 
-   * Resets the document to a clean state. Only runs in the event thread. 
+  /** Resets the document to a clean state. Only runs in the event thread. 
    * @param banner the value to which to set the banner
    */
   public void reset(String banner) {
@@ -192,8 +191,7 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     catch (EditDocumentException e) { throw new UnexpectedException(e); }
   }
   
-  /** 
-   * Gets the position immediately before the prompt, or the doc length if 
+  /** Gets the position immediately before the prompt, or the doc length if 
    * there is no prompt.  Only runs in the event thread. 
    * @return the position immediately before the prompt, or the doc length if there is no prompt
    */
@@ -259,8 +257,7 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     _document.forceInsertText(offs, str, style);
   }
   
-  /** 
-   * Adds style specifier to _stylelists. Only runs in event thread. 
+  /** Adds style specifier to _stylelists. Only runs in event thread. 
    * @param offs offset
    * @param str string
    * @param style style
@@ -292,8 +289,7 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
   /** Returns the length of the document. */
   public int getLength() { return _document.getLength(); }
   
-  /** 
-   * Returns a portion of the document.
+  /** Returns a portion of the document.
    * @param offs First offset of the desired text
    * @param len Number of characters to return
    * @return a portion of the document 
@@ -303,8 +299,7 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     return _document.getDocText(offs, len);
   }
   
-  /** 
-   * Returns the entire text of the document.  Identical to getText() in AbstractDocumentInterface.
+  /** Returns the entire text of the document.  Identical to getText() in AbstractDocumentInterface.
    * @return the entire text of the document
    * @throws EditDocumentException if the offset or length are illegal
    */
@@ -366,8 +361,7 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     }
   }
   
-  /** 
-   * Saves the contents of the document to a file.
+  /** Saves the contents of the document to a file.
    * @param selector File to save to
    * @throws IOException if an IO operation fails
    */

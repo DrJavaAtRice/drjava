@@ -46,8 +46,7 @@ import java.awt.event.*;
 import java.util.HashMap;
 import javax.swing.*;
 
-/**
- * Graphical form of a KeyStrokeOption.
+/** * Graphical form of a KeyStrokeOption.
  * @version $Id$
  */
 public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke,JPanel>
@@ -89,8 +88,7 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke,JPanel>
     setComponent(_panel);
   }
 
-  /** 
-   * Constructor that allows for a tooltip description. 
+  /** Constructor that allows for a tooltip description. 
    * @param opt the option
    * @param text text for descriptive label of this option
    * @param parent the parent frame

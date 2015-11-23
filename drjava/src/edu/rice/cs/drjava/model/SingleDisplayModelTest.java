@@ -99,8 +99,7 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
     return doc;
   }
 
-  /** 
-   * Tests the invariant that at least one document is open at time of creation. 
+  /** Tests the invariant that at least one document is open at time of creation. 
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testNotEmptyOnStartup() throws BadLocationException {
@@ -112,8 +111,7 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
     _log.log("testNotEmptyOnStartup completed");
   }
 
-  /** 
-   * Tests the setNext and setPrevious functions, making sure that the 
+  /** Tests the setNext and setPrevious functions, making sure that the 
    * activeDocumentChanged event is called. 
    * @throws BadLocationException if attempts to reference an invalid location
    */
@@ -183,8 +181,7 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
     _log.log("testDocumentSwitching completed");
   }
 
-  /** 
-   * Ensures that an unmodified, empty document is closed after a file is 
+  /** Ensures that an unmodified, empty document is closed after a file is 
    * opened, while a modified document is left open.
    * @throws BadLocationException if attempts to reference an invalid location
    * @throws IOException if an IO operation fails
@@ -233,8 +230,7 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
     _log.log("testCloseUnmodifiedAutomatically completed");
   }
 
-  /** 
-   * Tests that active document is switched on close, and that a new file is 
+  /** Tests that active document is switched on close, and that a new file is 
    * created after the last one is closed. 
    * @throws BadLocationException if attempts to reference an invalid location
    */
@@ -315,8 +311,7 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
 //    _log.log("testCloseFiles completed");
   }
 
-  /** 
-   * Tests the getCompleteFileName method. 
+  /** Tests the getCompleteFileName method. 
    * @throws BadLocationException if attempts to reference an invalid location
    * @throws IOException if an IO operation fails
    * @throws OperationCanceledException if an operation is canceled unexpectedly

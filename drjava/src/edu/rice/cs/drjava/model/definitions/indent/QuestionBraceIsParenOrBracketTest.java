@@ -38,8 +38,7 @@ package edu.rice.cs.drjava.model.definitions.indent;
 
 import javax.swing.text.BadLocationException;
 
-/**
- * Test class according to the JUnit protocol. Tests the question
+/** * Test class according to the JUnit protocol. Tests the question
  * that determines whether or not the last block or expression list
  * opened previous to the start of the current line was opened
  * by one of the characters '(' or '['.

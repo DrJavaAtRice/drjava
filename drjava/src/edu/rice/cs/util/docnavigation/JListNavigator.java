@@ -136,8 +136,7 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList<ItemT> implemen
     */
   public void addDocument(ItemT doc, String path) { addDocument(doc); }
   
-  /** 
-   * A typesafe version of {@code _model.get(i)}.  This is a workaround for the
+  /** A typesafe version of {@code _model.get(i)}.  This is a workaround for the
    * non-generic implementation of DefaultListModel, and should be removed once that
    * is fixed.
    * @param i index at which to get item
@@ -401,8 +400,7 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList<ItemT> implemen
   /** The cell renderer for this list. */
   private static class CustomListCellRenderer extends DefaultListCellRenderer {
     
-    /** 
-     * @param list the JList we're painting
+    /** @param list the JList we're painting
      * @param value the value returned by list.getModel().getElemetAt(index)
      * @param index the cell's index
      * @param isSelected true if the specified cell was selected

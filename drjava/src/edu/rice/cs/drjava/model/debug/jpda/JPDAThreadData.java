@@ -39,8 +39,7 @@ package edu.rice.cs.drjava.model.debug.jpda;
 import com.sun.jdi.*;
 import edu.rice.cs.drjava.model.debug.DebugThreadData;
 
-/**
- * Class for keeping track of the currently running threads.
+/** * Class for keeping track of the currently running threads.
  * @version $Id$
  */
 public class JPDAThreadData extends DebugThreadData {
@@ -93,8 +92,7 @@ public class JPDAThreadData extends DebugThreadData {
    */
   public boolean isSuspended() { return safeIsSuspended(_thread); }
   
-  /** 
-   * Invoke {@code t.isSuspended()} under the protection of a try-catch block 
+  /** Invoke {@code t.isSuspended()} under the protection of a try-catch block 
    * @param t the thread to check
    * @return true if t is suspended; false otherwise
    */

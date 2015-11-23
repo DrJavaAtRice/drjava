@@ -40,8 +40,7 @@ import junit.framework.*;
 import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.BraceException;
 
-/**
- * Tests the Brace class.
+/** * Tests the Brace class.
  * @version $Id$
  */
 public final class BraceTest extends DrJavaTestCase implements ReducedModelStates {

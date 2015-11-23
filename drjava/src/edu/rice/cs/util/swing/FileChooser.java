@@ -57,8 +57,7 @@ public class FileChooser extends JFileChooser {
   
   /*---------- INITIALIZATION METHODS ----------*/
   
-  /** 
-   * Sets up the GUI components of the dialog 
+  /** Sets up the GUI components of the dialog 
    * @param root root directory
    */
   private void _init(final File root) {

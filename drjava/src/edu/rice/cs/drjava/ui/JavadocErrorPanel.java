@@ -41,8 +41,7 @@ import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
 
 import javax.swing.text.*;
 
-/**
- * The panel which displays all the Javadoc parsing errors.
+/** * The panel which displays all the Javadoc parsing errors.
  *
  * @version $Id$
  */

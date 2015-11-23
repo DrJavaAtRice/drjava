@@ -176,8 +176,7 @@ public final class ActionStartPrevStmtPlusTest extends IndentRulesTestCase {
                  _doc.getText());
   } 
 
-  /** 
-   * not currently supported 
+  /** not currently supported 
    * currently assuming single stmt per line
    */
   /*

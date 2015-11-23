@@ -38,8 +38,7 @@ package edu.rice.cs.drjava.ui.avail;
 
 import java.util.HashSet;
 
-/**
- * Listener responding to the availability of several GUI components.
+/** * Listener responding to the availability of several GUI components.
  *
  * @version $Id$
  */
@@ -48,8 +47,7 @@ public abstract class OrGUIAvailabilityListener implements GUIAvailabilityListen
   protected final GUIAvailabilityNotifier _notifier;
   protected volatile boolean _lastValue = false;
   
-  /** 
-   * Create a listener that responds to changes in availability of several GUI components.
+  /** Create a listener that responds to changes in availability of several GUI components.
    * @param notifier a GUIAvailabilityNotifier
    * @param components components that must be available 
    */

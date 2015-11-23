@@ -121,11 +121,10 @@ public class PendingRequestManager {
   }
   
   
-  /**
-   * Method to change Language Level line numbers into their java file counterparts
-   * @param dda the DocumentDebugAction whose line needs to be adjusted
-   * @return the correct line number for the .java file
-   */
+  /** Method to change Language Level line numbers into their java file counterparts
+    * @param dda the DocumentDebugAction whose line needs to be adjusted
+    * @return the correct line number for the .java file
+    */
   public int LLDDALineNum(DocumentDebugAction<?> dda){
     int line = dda.getLineNumber();
     File f = dda.getFile();
@@ -138,8 +137,7 @@ public class PendingRequestManager {
     return line;
   }
   
-  /** 
-   * Called by the EventHandler whenever a ClassPrepareEvent occurs.  
+  /** Called by the EventHandler whenever a ClassPrepareEvent occurs.  
    * This will take the event, get the class that was prepared, lookup the 
    * Vector of DebugAction that was waiting for this class's preparation, 
    * iterate through this  Vector, and attempt to create the Breakpoints that

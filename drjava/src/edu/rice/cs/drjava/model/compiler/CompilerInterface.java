@@ -48,8 +48,7 @@ import edu.rice.cs.plt.reflect.JavaVersion;
   */
 public interface CompilerInterface {
   
-  /** 
-   * Indicates whether this compiler is actually available. As in: Is it 
+  /** Indicates whether this compiler is actually available. As in: Is it 
    * installed and located? This method should load the compiler class, 
    * which should hopefully prove whether the class can load.  If this 
    * method returns true, the {@link #compile} method should not fail due to 
@@ -90,8 +89,7 @@ public interface CompilerInterface {
   /** @return string to display in a combo box (generally {@code getName()}) */
   String toString();
   
-  /** 
-   * A compiler can instruct DrJava to include additional elements for the boot
+  /** A compiler can instruct DrJava to include additional elements for the boot
    * class path of the Interactions JVM. 
    * @return list of files on the class path
    */

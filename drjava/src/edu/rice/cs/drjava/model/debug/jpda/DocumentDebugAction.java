@@ -63,8 +63,7 @@ public abstract class DocumentDebugAction<T extends EventRequest> extends DebugA
   public final int SHORT_DOC_MAX_LENGTH = 20000;
   
   
-  /** 
-   * Creates a new DocumentDebugAction.  Automatically tries to create the 
+  /** Creates a new DocumentDebugAction.  Automatically tries to create the 
    * EventRequest if a ReferenceType can be found, or else adds this object to 
    * the PendingRequestManager. Any subclass should automatically call
    * _initializeRequest in its constructor.
@@ -124,8 +123,7 @@ public abstract class DocumentDebugAction<T extends EventRequest> extends DebugA
   /** @return exact class name, or null if not available. */
   public String getExactClassName() { return _exactClassName; }
   
-  /** 
-   * Creates EventRequests corresponding to this DebugAction, using the given 
+  /** Creates EventRequests corresponding to this DebugAction, using the given 
    * ReferenceTypes.  This is called either from the DebugAction constructor 
    * or the PendingRequestManager, depending on when the ReferenceTypes become 
    * available.  (There may be multiple reference types for the same class if 
@@ -143,8 +141,7 @@ public abstract class DocumentDebugAction<T extends EventRequest> extends DebugA
     else return false;
   }
   
-  /** 
-   * This should always be called from the constructor of the subclass.  
+  /** This should always be called from the constructor of the subclass.  
    * Attempts to create EventRequests on the given ReferenceTypes, and also 
    * adds this action to the pending request manager (so identical classes 
    * loaded in the future will also have this action).

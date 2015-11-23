@@ -248,8 +248,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     debug.logEnd("junit(doc)");
   }
   
-  /** 
-   * Ensures that all documents have been compiled since their last 
+  /** Ensures that all documents have been compiled since their last 
    * modification and then delegates the actual testing to 
    * _rawJUnitOpenTestDocs. 
    * @param lod list of open documents
@@ -316,8 +315,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     else _rawJUnitOpenDefDocs(lod, allTests);
   }
   
-  /** 
-   * Runs all TestCases in the document list lod; assumes all documents have 
+  /** Runs all TestCases in the document list lod; assumes all documents have 
    * been compiled. It finds the TestCase classes by searching the build 
    * directories for the documents.  Note: caller must respond to thrown 
    * exceptions by invoking _junitUnitInterrupted (to run hourglassOff() and 
@@ -541,8 +539,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     EventQueue.invokeLater(new Runnable() { public void run() { _notifier.junitEnded(); } });
   }
   
-  /** 
-   * Helper method to notify JUnitModel listeners that all open files must be 
+  /** Helper method to notify JUnitModel listeners that all open files must be 
    * compiled before JUnit is run. 
    * @param testAfterCompile a CompilerListener
    * @param outOfSync list of out-of-sync documents
@@ -554,8 +551,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     });
   }
   
-  /** 
-   * Helper method to notify JUnitModel listeners that JUnit aborted before 
+  /** Helper method to notify JUnitModel listeners that JUnit aborted before 
    * any tests could be run.
    * @param testAll true if all tests are to be run
    * @param didCompileFail true if compilation failed

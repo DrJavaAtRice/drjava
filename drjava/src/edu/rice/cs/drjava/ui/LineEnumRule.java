@@ -42,8 +42,7 @@ import javax.swing.*;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 
-/**
- * The row header of the DefinitionsPane which displays the line numbers
+/** * The row header of the DefinitionsPane which displays the line numbers
  * @version $Id$
  */
 public class LineEnumRule extends JComponent {

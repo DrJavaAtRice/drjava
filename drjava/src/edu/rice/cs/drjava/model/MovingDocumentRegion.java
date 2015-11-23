@@ -76,8 +76,7 @@ public class MovingDocumentRegion extends StaticDocumentRegion {
 
   }
     
-  /** 
-   * Create a new moving document region. 
+  /** Create a new moving document region. 
    * @param doc the document within which to create the new region
    * @param start the start offset
    * @param end the end offset
@@ -174,11 +173,10 @@ public class MovingDocumentRegion extends StaticDocumentRegion {
   /** @return the string it was assigned */
   public String getString() { return _stringSuspension.value(); }
   
-  /** 
-   * @param a first object to compare
-   * @param b second object to compare
-   * @return true if objects a and b are equal; null values are handled correctly. 
-   */
+  /** @param a first object to compare
+    * @param b second object to compare
+    * @return true if objects a and b are equal; null values are handled correctly. 
+    */
   public static boolean equals(Object a, Object b) {
     if (a == null) return (b == null);
     return a.equals(b);

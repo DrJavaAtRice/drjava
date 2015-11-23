@@ -166,8 +166,7 @@ public class HTMLFrame extends SwingFrame {
     _mainDocPane.addHyperlinkListener(linkListener);
   }
   
-  /** 
-   * Sets up the frame and displays it. 
+  /** Sets up the frame and displays it. 
    * @param frameName name of the frame
    * @param introUrl intro URL
    * @param indexUrl index URL
@@ -177,8 +176,7 @@ public class HTMLFrame extends SwingFrame {
     this(frameName, introUrl, indexUrl, iconString, null);
   }
   
-  /** 
-   * Sets up the frame and displays it. 
+  /** Sets up the frame and displays it. 
    * @param frameName name of the frame
    * @param introUrl intro URL
    * @param indexUrl index URL
@@ -320,8 +318,7 @@ public class HTMLFrame extends SwingFrame {
     }
   }
   
-  /** 
-   * Prints an error indicating that the HTML file to load in the main pane could not be found. 
+  /** Prints an error indicating that the HTML file to load in the main pane could not be found. 
    * @param url URl that caused the error
    */
   private void _displayMainError(URL url) {
@@ -332,8 +329,7 @@ public class HTMLFrame extends SwingFrame {
     else _resetMainPane();
   }
   
-  /** 
-   * Prints an error indicating that the HTML file to load in the main pane could not be found
+  /** Prints an error indicating that the HTML file to load in the main pane could not be found
    * @param url URL that caused the error
    * @param ex exception that occurred
    */
@@ -345,8 +341,7 @@ public class HTMLFrame extends SwingFrame {
     else _resetMainPane();
   }
   
-  /** 
-   * Prints an error indicating that the HTML file to load in the contentes pane
+  /** Prints an error indicating that the HTML file to load in the contentes pane
    * could not be found
    * @param url URL that caused the error
    */
@@ -354,8 +349,7 @@ public class HTMLFrame extends SwingFrame {
     _contentsDocPane.setText(getErrorText(url));
   }
   
-  /** 
-   * Prints an error indicating that the HTML file to load in the contentes 
+  /** Prints an error indicating that the HTML file to load in the contentes 
    * pane could not be found.
    * @param url URL that caused the error
    * @param ex exception that occurred
@@ -364,8 +358,7 @@ public class HTMLFrame extends SwingFrame {
     _contentsDocPane.setText(getErrorText(url) + "\n" + ex);
   }
   
-  /** 
-   * This method returns the error text to display when something goes wrong.
+  /** This method returns the error text to display when something goes wrong.
    * @param url URL that caused the error
    * @return error text associated with the failure
    */

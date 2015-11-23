@@ -51,8 +51,7 @@ import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
   */
 public interface DCacheAdapter {
   
-  /** 
-   * Retrieves the document for its corresponding ODD
+  /** Retrieves the document for its corresponding ODD
    * @return the definitions document for the corresponding ODD
    * @throws IOException if an IO operation fails
    * @throws FileMovedException if the file has moved
@@ -64,8 +63,7 @@ public interface DCacheAdapter {
   /** @return the entire text of this document. */
   public String getText();
   
-  /** 
-   * @return the specified substring of this document.
+  /** @return the specified substring of this document.
    * @param offset the offset at which to get the text
    * @param length the length of the text to get
    * @throws BadLocationException if attempts to reference an invalid location
@@ -81,8 +79,7 @@ public interface DCacheAdapter {
   /** Closes the corresponding document for this adapter. */
   public void close();
   
-  /** 
-   * Adds a DocumentListener to the reconstructor. 
+  /** Adds a DocumentListener to the reconstructor. 
    * @param l the listener to be added
    */
   public void addDocumentListener(DocumentListener l);

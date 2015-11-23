@@ -36,8 +36,7 @@
 
 package edu.rice.cs.drjava.model.debug;
 
-/**
- * Class for keeping track of the currently running threads.
+/** * Class for keeping track of the currently running threads.
  * @version $Id$
  */
 public abstract class DebugThreadData {
@@ -65,8 +64,7 @@ public abstract class DebugThreadData {
     return _uniqueID;
   }
   
-  /** 
-   * Tells whether or not the thread is suspended.
+  /** Tells whether or not the thread is suspended.
    * @return true iff the thread is suspended
    */
   public abstract boolean isSuspended();

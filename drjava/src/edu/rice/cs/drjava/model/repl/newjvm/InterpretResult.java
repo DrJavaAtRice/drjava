@@ -42,8 +42,7 @@ import java.io.Serializable;
 import edu.rice.cs.dynamicjava.interpreter.InterpreterException;
 import edu.rice.cs.dynamicjava.interpreter.EvaluatorException;
 
-/**
- * Super class for any type of result that can occur from a call to interpret.
+/** * Super class for any type of result that can occur from a call to interpret.
  * 
  * @version $Id$
  */

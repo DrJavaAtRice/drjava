@@ -161,8 +161,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 //    System.err.println("Completed tear down of " + this);
   }
 
-  /** 
-   * Clear all old text and insert the given text. 
+  /** Clear all old text and insert the given text. 
    * @param s the new text to be set
    * @param doc the document in which to change the text
    */
@@ -181,8 +180,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     });
   }
 
-  /** 
-   * Create a new temporary file in _tempDir.
+  /** Create a new temporary file in _tempDir.
    * @return new temporary file in _tempDir. 
    * @throws IOException if an IO operation fails
    */
@@ -192,8 +190,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     return f;
   }
 
-  /** 
-   * Create a new temporary file in _tempDir.  Calls with the same int will 
+  /** Create a new temporary file in _tempDir.  Calls with the same int will 
    * return the same filename, while calls with different ints will return 
    * different filenames.
    * @param i index to be appended to the filename
@@ -204,8 +201,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     return File.createTempFile("DrJava-test" + i, ".java", _tempDir).getCanonicalFile();
   }
 
-  /** 
-   * Create a new temporary directory in _tempDir. 
+  /** Create a new temporary directory in _tempDir. 
    * @return new temporary file in _tempDir. 
    * @throws IOException if an IO operation fails
    */
@@ -215,8 +211,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 
   protected File createFile(String name) { return new File(_tempDir, name); }
 
-  /** 
-   * Given a .java file and a class file name, returns the corresponding 
+  /** Given a .java file and a class file name, returns the corresponding 
    * .class file. 
    * @param sourceFile .java file name
    * @param className class file name
@@ -228,8 +223,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     return new File(sourceFile.getParent(), cname);
   }
 
-  /** 
-   * Creates a new temporary file and writes the given text to it.
+  /** Creates a new temporary file and writes the given text to it.
    * The File object for the new file is returned.
    * @param text the text to be written to the file
    * @return the file object for the new file
@@ -241,8 +235,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     return temp;
   }
 
-  /** 
-   * Creates and returns a new document, makes sure newFile is fired, and then 
+  /** Creates and returns a new document, makes sure newFile is fired, and then 
    * adds some text.  When this method is done newCount is reset to 0.
    * @param text the text to be written to the file
    * @return the new modified document
@@ -288,8 +281,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     });
   }
                                 
-  /** 
-   * Invokes startCompile on the given document in the event thread. 
+  /** Invokes startCompile on the given document in the event thread. 
    * @param doc the document to be compiled
    */
   protected static void testStartCompile(final OpenDefinitionsDocument doc) {
@@ -300,8 +292,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       } 
     });
   }
-  /** 
-   * Compiles a new file with the given text. The compile is expected to 
+  /** Compiles a new file with the given text. The compile is expected to 
    * succeed and it is checked to make sure it worked reasonably.  This method 
    * does not return until the Interactions JVM has reset and is ready to use.
    * @param text Code for the class to be compiled
@@ -319,8 +310,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     return doc;
   }
 
-  /** 
-   * Saves to the given file, and then compiles the given document. The 
+  /** Saves to the given file, and then compiles the given document. The 
    * compile is expected to succeed and it is checked to make sure it worked 
    * reasonably.  This method does not return until the Interactions JVM has 
    * reset and is ready to use.
@@ -366,8 +356,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     return buf.toString();
   }
 
-  /** 
-   * Puts the given input into the interactions document and then interprets 
+  /** Puts the given input into the interactions document and then interprets 
    * it, returning the result that was put into the interactions document. 
    * This assumes the interactions document is in a state with no text after 
    * the prompt. To be sure this is the case, you can reset interactions 
@@ -420,8 +409,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     return interactionsDoc.getDocText(resultsStartLocation, resultsLen);
   }
 
-  /** 
-   * Appends the input string to the interactions pane and interprets it. 
+  /** Appends the input string to the interactions pane and interprets it. 
    * @param input string to be appended
    * @throws EditDocumentException if an error occurs while editing the document
    */
@@ -435,8 +423,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     }
   }
 
-  /** 
-   * Asserts that the given string exists in the Interactions Document. 
+  /** Asserts that the given string exists in the Interactions Document. 
    * @param text text to search for within the interactions document
    * @throws EditDocumentException if an error occurs while editing the document
    */
@@ -444,8 +431,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     _assertInteractionContainsHelper(text, true);
   }
 
-  /** 
-   * Asserts that the given string does not exist in the Interactions Document. 
+  /** Asserts that the given string does not exist in the Interactions Document. 
    * @param text text to search for within the interactions document
    * @throws EditDocumentException if an error occurs while editing the document
    */
@@ -466,8 +452,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
                (contains != -1) == shouldContain);
   }
 
-  /** 
-   * Asserts that the text in the Interactions Document matches the given regex. 
+  /** Asserts that the text in the Interactions Document matches the given regex. 
    * @param regex regex to search for a match against
    * @throws EditDocumentException if an error occurs while editing the document
    */
@@ -475,8 +460,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     _assertInteractionMatchesHelper(regex, true);
   }
 
-  /** 
-   * Asserts that the text in the Interactions Document does NOT match the given regex. 
+  /** Asserts that the text in the Interactions Document does NOT match the given regex. 
    * @param regex regex to search for a match against
    * @throws EditDocumentException if an error occurs while editing the document
    */
@@ -520,8 +504,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     assertEquals("document contents", s, doc.getText());
   }
   
-  /** 
-   * Invokes doc.saveFile from within the event thread. 
+  /** Invokes doc.saveFile from within the event thread. 
    * @param doc document to be saved
    * @param fss a FileSaveSelector
    */
@@ -533,8 +516,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       } });
   }
   
-  /** 
-   * Invokes doc.saveFileAs from within the event thread. 
+  /** Invokes doc.saveFileAs from within the event thread. 
    * @param doc document to be saved
    * @param fss a FileSaveSelector
    */
@@ -546,8 +528,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       } });
   }
   
-  /** 
-   * Invokes doc.saveFileCopy from within the event thread. 
+  /** Invokes doc.saveFileCopy from within the event thread. 
    * @param doc document to be saved
    * @param fss a FileSaveSelector
    */
@@ -745,8 +726,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     
     public void currentDirectoryChanged(File dir) { }
     
-    /** 
-     * Appends the stack trace from the listener's creation to the end of the given failure message. 
+    /** Appends the stack trace from the listener's creation to the end of the given failure message. 
      * @param message the failure message
      */
     public void listenerFail(String message) {
@@ -1275,8 +1255,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       _junitDone = false; 
     }
     
-    /** 
-     * Runs JUnit on doc to completion. 
+    /** Runs JUnit on doc to completion. 
      * @param doc the document on which to run JUnit
      * @throws IOException if an IO operation fails
      * @throws ClassNotFoundException if a class is not found

@@ -587,8 +587,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     EventQueue.invokeLater(new Runnable() { public void run() { panel.getRegTree().scrollRowToVisible(0); } });
   }
   
-  /** 
-   * Performs "find all" with the specified options. 
+  /** Performs "find all" with the specified options. 
    * @param searchStr string to search for
    * @param searchAll true if we should search all documents
    * @param searchSelectionOnly true if we should search only the current selection
@@ -828,8 +827,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     _replaceButton.requestFocusInWindow();
   }
   
-  /** 
-   * Called from MainFrame in response to opening this or changes in the active document. 
+  /** Called from MainFrame in response to opening this or changes in the active document. 
    * @param defPane a DefinitionsPane
    */
   void beginListeningTo(DefinitionsPane defPane) {
@@ -980,8 +978,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
   public void setSearchBackwards(boolean b) { _machine.setSearchBackwards(b); }
   public boolean isSearchBackwards() { return _machine.isSearchBackwards(); }
   
-  /** 
-   * Sets the font of the find and replace fields to f. 
+  /** Sets the font of the find and replace fields to f. 
    * @param f font to be set
    */
   public void setFieldFont(Font f) {
@@ -1056,8 +1053,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
 //     _findField.selectAll();
 //   }
   
-  /** 
-   * This method is used to select the item that has been inserted in a 
+  /** This method is used to select the item that has been inserted in a 
    * replacement.  Assumes the current offset identifies the found or 
    * replaced item.  In a forward search, this offset is the RIGHT edge of 
    * the found/replaced item; in a backwards search it is the LEFT edge. 
@@ -1091,8 +1087,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
 //    _selectFoundItem(from, to);
 //  }
   
-  /** 
-   * Will select the identified text (from, to).  Note that positions are 
+  /** Will select the identified text (from, to).  Note that positions are 
    * technically between characters, so there is no distinction between open 
    * and closed intervals.  Originally highlighted the text, but we ran into problems
    * with the document remove method changing the view to where the cursor was located, resulting in 
@@ -1175,8 +1170,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     }
   };  
   
-  /**
-   * Uses the FindReplaceMachine from the most recently run search to check if
+  /** Uses the FindReplaceMachine from the most recently run search to check if
    * r is (still) a match for searchString.
    */
   public boolean isMatch(MovingDocumentRegion r, String searchString) {

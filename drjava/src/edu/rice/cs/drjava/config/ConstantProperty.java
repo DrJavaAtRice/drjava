@@ -43,8 +43,7 @@ import java.util.HashSet;
   */
 public class ConstantProperty extends EagerProperty {
 
-  /** 
-   * Create a constant property. 
+  /** Create a constant property. 
    * @param name name of the property
    * @param value value of the property
    * @param help help text for the property

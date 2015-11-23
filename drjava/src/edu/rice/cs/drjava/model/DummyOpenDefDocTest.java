@@ -36,8 +36,7 @@
 package edu.rice.cs.drjava.model;
 import edu.rice.cs.drjava.DrJavaTestCase;
 
-/**
- * DummyOpenDefDocTest for unit testing DummyOpenDefDoc.  Uses
+/** * DummyOpenDefDocTest for unit testing DummyOpenDefDoc.  Uses
  * JUnit for testing.
  *
  * @author <a href="mailto:jasonbs@rice.edu">Jason Schiller</a>

@@ -240,12 +240,11 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   
   public ConsoleDocument getConsoleDocument() { return _model.getConsoleDocument(); }
   
-  /**
-   * overides method in InteractionModel.java and changes stackTrace for a
-   * throwable if LL files are present
-   * @param stackTrace the stack trace to change files name and line number in
-   * @return stack trace with replaced file name and line number (if throwable occured in a .dj* file)
-   */
+  /** overides method in InteractionModel.java and changes stackTrace for a
+    * throwable if LL files are present
+    * @param stackTrace the stack trace to change files name and line number in
+    * @return stack trace with replaced file name and line number (if throwable occured in a .dj* file)
+    */
   public StackTraceElement[] replaceLLException(StackTraceElement[] stackTrace) {
     // use LLSTM from compiler model.
     LanguageLevelStackTraceMapper LLSTM = _model.getCompilerModel().getLLSTM();

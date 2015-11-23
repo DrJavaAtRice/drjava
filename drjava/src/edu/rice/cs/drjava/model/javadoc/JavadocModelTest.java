@@ -49,8 +49,7 @@ import edu.rice.cs.util.FileOps;
 
 import java.io.File;
 
-/**
- * Tests the functionality provided by an implementation of JavadocModel.
+/** * Tests the functionality provided by an implementation of JavadocModel.
  * For now, this class is hard-coded to test DefaultJavadocModel, but it can be
  * extended to test any implementation of the interface.
  * @version $Id$

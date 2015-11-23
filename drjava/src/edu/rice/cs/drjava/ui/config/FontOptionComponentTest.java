@@ -44,8 +44,7 @@ import edu.rice.cs.util.swing.Utilities;
 
 import java.awt.*;
 
-/**
- * Tests functionality of this OptionComponent
+/** * Tests functionality of this OptionComponent
  */
 public final class FontOptionComponentTest extends DrJavaTestCase {
   private static FontOptionComponent _option;

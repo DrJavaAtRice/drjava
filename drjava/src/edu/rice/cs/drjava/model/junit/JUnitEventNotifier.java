@@ -42,8 +42,7 @@ import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import java.util.List;
 
-/**
- * Keeps track of all listeners to a JUnitModel, and has the ability
+/** * Keeps track of all listeners to a JUnitModel, and has the ability
  * to notify them of some event.
  * <p>
  *

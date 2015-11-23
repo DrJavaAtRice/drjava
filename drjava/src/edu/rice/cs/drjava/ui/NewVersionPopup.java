@@ -83,8 +83,7 @@ public class NewVersionPopup extends JDialog {
   private String _newestVersionString = "";
   /** indeterminate progress bar */
   
-  /** 
-   * Creates a window to display whether a new version of DrJava is available. 
+  /** Creates a window to display whether a new version of DrJava is available. 
    * @param parent reference to the main frame
    */
   public NewVersionPopup(MainFrame parent) {
@@ -485,8 +484,7 @@ public class NewVersionPopup extends JDialog {
     return DRJAVA_FILES_PAGE;
   }
   
-  /** 
-   * Opens the specified page. 
+  /** Opens the specified page. 
    * @param url page to open
    */
   private void _openFileDownloadPage(String url) {
@@ -612,8 +610,7 @@ public class NewVersionPopup extends JDialog {
     catch(MalformedURLException e) { return false; }
   }
   
-  /** 
-   * @param url the URL for which to get the build time 
+  /** @param url the URL for which to get the build time 
    * @return the build time for the URL, or null if it could not be read. 
    */
   public static Date getBuildTime(URL url) {

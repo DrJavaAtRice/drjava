@@ -40,8 +40,7 @@ import java.io.File;
 import edu.rice.cs.drjava.model.EventNotifier;
 import edu.rice.cs.drjava.model.compiler.CompilerListener;
 
-/**
- * Keeps track of all listeners to a JavadocModel, and has the ability
+/** * Keeps track of all listeners to a JavadocModel, and has the ability
  * to notify them of some event.
  * <p>
  *

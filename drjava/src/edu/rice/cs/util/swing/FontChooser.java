@@ -44,8 +44,7 @@ import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.*;
 
-/**
- * FontChooser, adapted from NwFontChooserS by Noah Wairauch.
+/** * FontChooser, adapted from NwFontChooserS by Noah Wairauch.
  * {@literal (see http:///forum.java.sun.com/thread.jsp?forum=57&thread=195067)}
  *
  * @version $Id$
@@ -76,8 +75,7 @@ public class FontChooser extends JDialog {
 
   private boolean _clickedOK = false;
 
-  /** 
-   * Constructs a new modal FontChooser for the given frame,
+  /** Constructs a new modal FontChooser for the given frame,
    * using the specified font.
    * @param parent The parent frame.
    * @param font   The previously chosen font.
@@ -115,8 +113,7 @@ public class FontChooser extends JDialog {
     return (chosenFont);
   }
 
-  /** 
-   * Shows the font chooser with a standard title ("Font Chooser").
+  /** Shows the font chooser with a standard title ("Font Chooser").
    * @param parent The parent frame.
    * @param font   The previously chosen font.
    * @return the newly chosen font.

@@ -102,8 +102,7 @@ public class DrJavaErrorWindow extends JDialog {
   /** true if parent changed since last singleton() call */
   private static volatile boolean _parentChanged = true;
   
-  /** 
-   * Sets the parent frame. 
+  /** Sets the parent frame. 
    * @param f the parent frame to be set 
    */
   public static void setFrame(JFrame f) { _parentFrame = f; _parentChanged = true; }
@@ -400,8 +399,7 @@ public class DrJavaErrorWindow extends JDialog {
     }
   };
   
-  /** 
-   * Replaces all occurrences of orig in text with repl. 
+  /** Replaces all occurrences of orig in text with repl. 
    * @param text the text in which to do the replacing
    * @param orig the substring to be replaced
    * @param repl the substring to replace orig with

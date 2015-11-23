@@ -51,8 +51,7 @@ import java.io.IOException;
 import javax.swing.text.html.*;
 import javax.swing.text.html.parser.*;
 
-/**
- * A class to provide some convenient String operations as static methods.
+/** * A class to provide some convenient String operations as static methods.
  * It's abstract to prevent (useless) instantiation, though it can be subclassed
  * to provide convenient namespace importation of its methods.
  * @version $Id$
@@ -84,8 +83,7 @@ public abstract class StringOps {
   private static final String blank15 = makeBlankString(15);
   private static final String blank16 = makeBlankString(16);
   
-  /** 
-   * Gets a string consisting of n blanks.  The values for n {@literal <=} 16 
+  /** Gets a string consisting of n blanks.  The values for n {@literal <=} 16 
    * are stored in a switch table.
    * @param n number of blanks
    * @return a string consisting of n blanks
@@ -114,8 +112,7 @@ public abstract class StringOps {
     }
   }
   
-  /** 
-   * Constructs a new string containng n blanks.  Intended for small values of n 
+  /** Constructs a new string containng n blanks.  Intended for small values of n 
    * (typically {@literal <} 50). 
    * @param n number of blanks
    * @return a string consisting of n blanks
@@ -126,8 +123,7 @@ public abstract class StringOps {
     return buf.toString();
   }
   
-  /** 
-   * Takes theString fullString and replaces all instances of toReplace with replacement. 
+  /** Takes theString fullString and replaces all instances of toReplace with replacement. 
    * TODO: deprecate and used corresponding String method added in Java 5.0. 
    * @param fullString text in which to do the replacing
    * @param toReplace text to be replaced
@@ -171,8 +167,7 @@ public abstract class StringOps {
     return "\"" + output + "\"";
   }
   
-  /** 
-   * Verifies that (startRow, startCol) occurs before (endRow, endCol).
+  /** Verifies that (startRow, startCol) occurs before (endRow, endCol).
    * @param startRow start row
    * @param startCol start column
    * @param endRow end row
@@ -590,8 +585,7 @@ public abstract class StringOps {
     return sb.toString();
   }
      
-  /** 
-   * Converts newline chars to SEPARATOR char (a solid black upright rectangle). 
+  /** Converts newline chars to SEPARATOR char (a solid black upright rectangle). 
    * @param s string to flatten
    * @return flattened version of s
    */

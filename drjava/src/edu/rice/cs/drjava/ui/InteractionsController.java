@@ -264,8 +264,7 @@ public class InteractionsController extends AbstractConsoleController {
     public void interactionIncomplete() { }
   };
   
-  /** 
-   * Glue together the given model and a new view.
+  /** Glue together the given model and a new view.
    * @param model An InteractionsModel
    * @param adapter InteractionsDJDocument being used by the model's doc
    * @param disableCloseSystemInMenuItemCommand command
@@ -280,8 +279,7 @@ public class InteractionsController extends AbstractConsoleController {
     _redoAction.setDelegatee(_pane.getRedoAction());
   }
   
-  /** 
-   * Glue together the given model and view.
+  /** Glue together the given model and view.
    * @param model An InteractionsModel
    * @param adapter InteractionsDJDocument being used by the model's doc
    * @param pane An InteractionsPane
@@ -346,8 +344,7 @@ public class InteractionsController extends AbstractConsoleController {
     for(ConsoleStateListener listener : _consoleStateListeners) { listener.consoleInputCompleted(text, this); }
   }
   
-  /** 
-   * Sets the end of stream flag. 
+  /** Sets the end of stream flag. 
    * @param tf value of flag to be set
    */
   public void setEndOfStream(boolean tf) {
@@ -476,8 +473,7 @@ public class InteractionsController extends AbstractConsoleController {
     });
   }
   
-  /** 
-   * Sets the commands used to manipulate the console input process.  
+  /** Sets the commands used to manipulate the console input process.  
    * Only runs in the event thread. 
    * @param inputCompletionCommand input completion command to be set
    * @param insertTextCommand insert text command to be set
@@ -571,8 +567,7 @@ public class InteractionsController extends AbstractConsoleController {
     }
   };
   
-  /** 
-   * Tests whether or not to move into the history.  
+  /** Tests whether or not to move into the history.  
    * Should be executed in the event thread to ensure
    * that caret and prompt positions are in consistent states.
    * @param start lower bound (index) on the text
@@ -680,8 +675,7 @@ public class InteractionsController extends AbstractConsoleController {
   private final DelegatingAction _redoAction = new DelegatingAction();
   private final ArrayList<FocusListener> _undoRedoInteractionFocusListeners = new ArrayList<FocusListener>();
   
-  /** 
-   * Add a focus listener to the Interactions Pane and the Input Box. 
+  /** Add a focus listener to the Interactions Pane and the Input Box. 
    * @param listener listener to be added
    */
   public void addFocusListener(FocusListener listener) {
@@ -837,8 +831,7 @@ public class InteractionsController extends AbstractConsoleController {
     /** @return true if this stream has been closed. */
     public boolean isEndOfStream() { return _endOfStream; }
 
-    /** 
-     * Setter for end of stream flag. 
+    /** Setter for end of stream flag. 
      * @param tf value of the flag to be set
      */
     public void setEndOfStream(boolean tf) { _endOfStream = tf; }
@@ -854,8 +847,7 @@ public class InteractionsController extends AbstractConsoleController {
       return BorderFactory.createCompoundBorder(outerouter, temp);
     }
     
-    /** 
-     * Enable anti-aliased text by overriding paintComponent. 
+    /** Enable anti-aliased text by overriding paintComponent. 
      * @param g Graphics object to be used
      */
     protected void paintComponent(Graphics g) {
@@ -866,8 +858,7 @@ public class InteractionsController extends AbstractConsoleController {
       super.paintComponent(g);
     }
     
-    /** 
-     * Specifies what to do when the {@literal <Enter> or <Ctrl+D>} keys are hit. 
+    /** Specifies what to do when the {@literal <Enter> or <Ctrl+D>} keys are hit. 
      * @param command command to be set
      */
     void setInputCompletionCommand(final Runnable command) {
@@ -934,15 +925,13 @@ public class InteractionsController extends AbstractConsoleController {
     */
   public interface ConsoleStateListener extends EventListener {
     
-    /** 
-     * Called when the input console is started in the interactions pane. <p>
+    /** Called when the input console is started in the interactions pane. <p>
      * This method is called from the thread that initiated the console input,
      * @param c reference to the controller
      */
     public void consoleInputStarted(InteractionsController c);
     
-    /** 
-     * Called when the console input is complete. <p>
+    /** Called when the console input is complete. <p>
      * This method is called from the thread that initiated the console input.
      * @param result The text that was inputted to the console
      * @param c reference to the controller

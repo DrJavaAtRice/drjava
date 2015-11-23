@@ -106,8 +106,7 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     super.tearDown();
   }
   
-  /** 
-   * Tests that shift backspace works the same as backspace. (Ease of use 
+  /** Tests that shift backspace works the same as backspace. (Ease of use 
    * issue 693253).  Ideally, this test should be lighter weight, and not 
    * require the creation of an entire MainFrame+GlobalModel.  Refactor?
    * NOTE: This test doesn't work yet, since we can't currently bind two 
@@ -158,8 +157,7 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
   }
 
   
-  /** 
-   * Tests that typing a brace in a string/comment does not cause an indent.
+  /** Tests that typing a brace in a string/comment does not cause an indent.
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testTypeBraceNotInCode() throws BadLocationException {
@@ -181,8 +179,7 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     _log.log("testTypeBraceNotInCode completed");
   }
   
-  /** 
-   * Tests that typing Enter in a string/comment does cause an indent.  
+  /** Tests that typing Enter in a string/comment does cause an indent.  
    * This behavior works in practice, but I can't get the test to work.  
    * If we use definitions.processKeyEvent, the caret position is not 
    * updated, so the " * " is not inserted.  If we try to dispatchEvent 
@@ -219,8 +216,7 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     });
   }
   
-  /** 
-   * Tests that a simulated key press with the meta modifier is correct.  Reveals bug 676586.
+  /** Tests that a simulated key press with the meta modifier is correct.  Reveals bug 676586.
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testMetaKeyPress() throws BadLocationException {
@@ -285,8 +281,7 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
   // Used to hold a document offset between successive Runnables moved to the event thread;
   private int _redoPos;
   
-  /** 
-   * Tests that undoing/redoing a multi-line comment/uncomment will restore the caret position
+  /** Tests that undoing/redoing a multi-line comment/uncomment will restore the caret position
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testMultilineCommentOrUncommentAfterScroll() throws BadLocationException {
@@ -584,8 +579,7 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     });
   }
       
-  /** 
-   * This testcase checks that we do no longer discard Alt keys that would be 
+  /** This testcase checks that we do no longer discard Alt keys that would be 
    * used to make the {,},[,] chars that the French keyboards has.  
    * Using the Locale did not work, and checking if the key was consumed by 
    * the document would only pass on the specific keyboards.  It was 

@@ -158,8 +158,7 @@ public class RecentDocFrame extends JWindow {
     _scroller.setBorder(new EmptyBorder(0,0,0,0));
     _panel.setBorder(new LineBorder(fontColor, 1));
   }
-  /** 
-   * Moves the document d to the beginning of the list if it's already in the 
+  /** Moves the document d to the beginning of the list if it's already in the 
    * list, or it adds it to the beginning if its not already in the list.
    * @param d the document to poke
    */
@@ -171,8 +170,7 @@ public class RecentDocFrame extends JWindow {
     else _docs.addFirst(d);
   }
   
-  /** 
-   * Removes the document from the list.
+  /** Removes the document from the list.
    * @param d the document to remove
    */
   public void closeDocument(OpenDefinitionsDocument d) { _docs.remove(d); }

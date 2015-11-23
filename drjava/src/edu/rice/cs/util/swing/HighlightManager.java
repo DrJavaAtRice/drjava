@@ -277,8 +277,7 @@ public class HighlightManager {
       return (getStartOffset() == h.getStartOffset() && getEndOffset() == h.getEndOffset());
     }
     
-    /** 
-     * Refreshes this HighlightInfo object, obtaining a new Highlighter. 
+    /** Refreshes this HighlightInfo object, obtaining a new Highlighter. 
      * @param p the painter to use
      */
     public void refresh(Highlighter.HighlightPainter p ) {

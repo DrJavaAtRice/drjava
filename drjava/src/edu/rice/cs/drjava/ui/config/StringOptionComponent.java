@@ -61,8 +61,7 @@ public class StringOptionComponent extends OptionComponent<String,JTextField> {
     setComponent(_jtf);
   }
 
-  /** 
-   * Constructor that allows for a tooltip description. 
+  /** Constructor that allows for a tooltip description. 
    * @param opt the option
    * @param text text for descriptive label of this option
    * @param parent the parent frame

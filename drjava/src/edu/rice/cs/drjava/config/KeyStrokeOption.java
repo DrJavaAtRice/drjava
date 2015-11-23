@@ -52,8 +52,7 @@ public class KeyStrokeOption extends Option<KeyStroke> {
   static HashMap<Integer, String> keys = new HashMap<Integer, String>();
   public static final KeyStroke NULL_KEYSTROKE = KeyStroke.getKeyStroke(0, 0);
 
-  /** 
-   * Standard constructor
+  /** Standard constructor
    * @param key The name of this option.
    * @param def The definition of this option.
    */

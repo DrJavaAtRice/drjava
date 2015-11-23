@@ -81,8 +81,7 @@ public abstract class AbstractConsoleController /* implements Serializable */ {
   /** Action to change focus to next pane. */
   volatile Action switchToNextPaneAction;
 
-  /** 
-   * Initializes the Swing console document and Swing interactions pane. 
+  /** Initializes the Swing console document and Swing interactions pane. 
    * Subclasses *must* call _init() at the end of their constructors.
    * @param doc the Swing console document
    * @param pane the interactions pane

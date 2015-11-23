@@ -68,8 +68,7 @@ public class DirectoryOptionComponent extends OptionComponent<File,DirectorySele
     setComponent(_component);
   }
 
-  /** 
-   * Constructor that allows for a tooltip description. 
+  /** Constructor that allows for a tooltip description. 
    * @param opt the option
    * @param text text for descriptive label of this option
    * @param parent the parent frame
@@ -81,14 +80,12 @@ public class DirectoryOptionComponent extends OptionComponent<File,DirectorySele
     setDescription(desc);
   }
 
-  /** 
-   * Sets the tooltip description text for this option.
+  /** Sets the tooltip description text for this option.
    * @param description the tooltip text
    */
   public void setDescription(String description) { _label.setToolTipText(description); }
 
-  /** 
-   * Updates the config object with the new setting.
+  /** Updates the config object with the new setting.
    * @return true if the new value is set successfully
    */
   public boolean updateConfig() {
@@ -105,8 +102,7 @@ public class DirectoryOptionComponent extends OptionComponent<File,DirectorySele
     return true;
   }
 
-  /** 
-   * Displays the given value. 
+  /** Displays the given value. 
    * @param value value to be displayed
    */
   public void setValue(File value) { _component.setFileField(value); }
@@ -114,8 +110,7 @@ public class DirectoryOptionComponent extends OptionComponent<File,DirectorySele
 //  /** Return's this OptionComponent's configurable component. */
 //  public DirectorySelectorComponent getComponent() { return _component; }
 
-  /** 
-   * Adds a filter to decide if a directory can be chosen. 
+  /** Adds a filter to decide if a directory can be chosen. 
    * @param filter filter to be added
    */
   public void addChoosableFileFilter(FileFilter filter) { _component.addChoosableFileFilter(filter); }

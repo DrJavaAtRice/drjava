@@ -40,8 +40,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
-/**
- * A splash screen window to be displayed as DrJava is first starting up.
+/** * A splash screen window to be displayed as DrJava is first starting up.
  * @version $Id$
  */
 public class SplashScreen extends JWindow {

@@ -41,8 +41,7 @@ package edu.rice.cs.drjava.model.definitions.indent;
   */
 public class ActionStartPrevLinePlusTest extends IndentRulesTestCase {
   
-  /** 
-   * This is a clever (IMHO) factory trick to reuse these methods in TestCases 
+  /** This is a clever (IMHO) factory trick to reuse these methods in TestCases 
    * for logically similar IndentActions.
    * @param suffix the text to be added by this rule after indent padding
    * @return a new ActionStartPrevLinePlus object

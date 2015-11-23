@@ -80,8 +80,7 @@ public class ProjectTest extends DrJavaTestCase {
     super.tearDown();
   }
   
-  /** 
-   * Test to make sure all elements of the project are read correctly into the IR 
+  /** Test to make sure all elements of the project are read correctly into the IR 
    * @throws IOException if an IO operation fails
    * @throws MalformedProjectFileException if the project file is not in the expected format
    * @throws java.text.ParseException if parsing fails
@@ -146,8 +145,7 @@ public class ProjectTest extends DrJavaTestCase {
                  pfir.getMainClass());
   }
 
-  /** 
-   * Test to make sure all elements of the project are read correctly into the IR
+  /** Test to make sure all elements of the project are read correctly into the IR
    * @throws IOException if an IO operation fails
    * @throws MalformedProjectFileException if the project file is not in the expected format
    * @throws java.text.ParseException if parsing fails
@@ -281,8 +279,7 @@ public class ProjectTest extends DrJavaTestCase {
   
   // ----- ProjectFileParser -----
   
-  /** 
-   * Test to make sure all elements of the project are read correctly into the IR
+  /** Test to make sure all elements of the project are read correctly into the IR
    * @throws IOException if an IO operation fails
    * @throws MalformedProjectFileException if the project file is not in the expected format
    * @throws java.text.ParseException if parsing fails
@@ -347,8 +344,7 @@ public class ProjectTest extends DrJavaTestCase {
                  pfir.getMainClass());
   }
 
-  /** 
-   * Test to make sure all elements of the project are read correctly into the IR
+  /** Test to make sure all elements of the project are read correctly into the IR
    * @throws IOException if an IO operation fails
    * @throws MalformedProjectFileException if the project file is not in the expected format
    * @throws java.text.ParseException if parsing fails

@@ -136,8 +136,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     return super.toString() + " at " + _location + ", boot classpath: " + bootClassPath();
   }
 
-  /** 
-   * Create a JarJDKToolsLibrary from a specific {@code "tools.jar"} or {@code "classes.jar"} file. 
+  /** Create a JarJDKToolsLibrary from a specific {@code "tools.jar"} or {@code "classes.jar"} file. 
    * NOTE: Why isn't this method in JDKToolsLibrary? 
    * @param f the .jar file from which to create the JDK tools library
    * @param model the global model
@@ -148,8 +147,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     return makeFromFile(f, model, desc, new ArrayList<File>());
   }
 
-  /** 
-   * Create a JarJDKToolsLibrary from a specific {@code "tools.jar"} or {@code "classes.jar"} file. 
+  /** Create a JarJDKToolsLibrary from a specific {@code "tools.jar"} or {@code "classes.jar"} file. 
    * @param f the .jar file from which to create the JDK tools library
    * @param model the global model
    * @param desc a JDKDescriptor
@@ -511,8 +509,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     }
   }
   
-  /** 
-   * Check which jars are valid JDKs, and determine if they are compound or 
+  /** Check which jars are valid JDKs, and determine if they are compound or 
    * full (non-compound) JDKs. 
    * @param model the global model
    * @param jars the jar files
@@ -550,8 +547,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     }
   }
   
-  /** 
-   * Get completed compound JDKs by going through the list of compound JDKs 
+  /** Get completed compound JDKs by going through the list of compound JDKs 
    * and finding full JDKs that complete them. 
    * @param model the global model
    * @param collapsed iterator over collapsed JDKs
@@ -620,8 +616,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     return completedResults;
   }
   
-  /** 
-   * Produce a list of tools libraries discovered on the file system.  
+  /** Produce a list of tools libraries discovered on the file system.  
    * A variety of locations are searched; only those files that can produce a
    * valid library (see {@link #isValid} are returned.  The result is sorted
    * by version.  Where one library of the same version might be preferred
@@ -688,8 +683,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     return result;
   }
   
-  /** 
-   * Add a canonicalized {@code f} to the given set if it is an existing directory or link 
+  /** Add a canonicalized {@code f} to the given set if it is an existing directory or link 
    * @param f file to be added
    * @param map map to which to add f
    */
@@ -697,8 +691,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     addIfDir(f, JDKDescriptor.NONE, map);
   }
   
-  /** 
-   * Add a canonicalized {@code f} to the given set if it is an existing directory or link 
+  /** Add a canonicalized {@code f} to the given set if it is an existing directory or link 
    * @param f file to be added
    * @param c a JDKDescriptor
    * @param map map to which to add f
@@ -717,8 +710,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     else { JDKToolsLibrary.msg("Dir does not exist: " + f); }
   }
   
-  /** 
-   * Add a canonicalized {@code f} to the given set if it is an existing file 
+  /** Add a canonicalized {@code f} to the given set if it is an existing file 
    * @param f file to be added
    * @param map map to which to add f
    */
@@ -726,8 +718,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     addIfFile(f, JDKDescriptor.NONE, map);
   }
   
-  /** 
-   * Add a canonicalized {@code f} to the given set if it is an existing file 
+  /** Add a canonicalized {@code f} to the given set if it is an existing file 
    * @param f file to be added
    * @param c a JDKDescriptor
    * @param map map to which to add f
@@ -736,8 +727,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     addIfFile(f, Collections.singleton(c), map);
   }
 
-  /** 
-   * Add a canonicalized {@code f} to the given set if it is an existing file 
+  /** Add a canonicalized {@code f} to the given set if it is an existing file 
    * @param f file to be added
    * @param cs set of JDKDescriptors
    * @param map map to which to add f
@@ -809,8 +799,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     return descriptors;
   }
   
-  /** 
-   * Attempt to load a JDK descriptor, append it to the list if succesful. 
+  /** Attempt to load a JDK descriptor, append it to the list if succesful. 
    * @param descriptors set of descriptors to which to add
    * @param name name of the class for which to load the descriptor
    * @return iterator over JDK descriptors

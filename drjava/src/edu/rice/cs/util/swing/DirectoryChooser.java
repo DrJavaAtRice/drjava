@@ -55,30 +55,26 @@ public class DirectoryChooser extends JFileChooser {
   /** Creates a DirectoryChooser rooted at file system root, allowing only a single selection. */
   public DirectoryChooser() { this(null, null, false, false); }
   
-  /** 
-   * Creates a DirectoryChooser rooted at the file system root, allowing only 
+  /** Creates a DirectoryChooser rooted at the file system root, allowing only 
    * single selection. 
    * @param owner the owner Component
    */
   public DirectoryChooser(Component owner) { this(owner, null, false, false); }
   
-  /** 
-   * Creates a DirectoryChooser rooted at the file system root, allowing 
+  /** Creates a DirectoryChooser rooted at the file system root, allowing 
    * multiple selection as specified.
    * @param owner the owner Component
    * @param allowMultiple whether to allow multiple selection
    */
   public DirectoryChooser(Component owner, boolean allowMultiple) { this(owner, null, allowMultiple, false); }
   
-  /** 
-   * Creates a DirectoryChooser with the given root, allowing only a single selection.
+  /** Creates a DirectoryChooser with the given root, allowing only a single selection.
    * @param owner the owner Component
    * @param root the root directory to display in the tree
    */
   public DirectoryChooser(Component owner, File root) { this(owner, root, false, false); }
   
-  /** 
-   * Creates a DirectoryChooser with the given root, allowing multiple selections as specified.
+  /** Creates a DirectoryChooser with the given root, allowing multiple selections as specified.
    * @param owner the owner Component
    * @param root the root directory to display in the tree. If null, then show entire file system
    * @param allowMultiple whether to allow multiple selection
@@ -93,8 +89,7 @@ public class DirectoryChooser extends JFileChooser {
   
   /*---------- INITIALIZATION METHODS ----------*/
   
-  /** 
-   * Sets up the GUI components of the dialog 
+  /** Sets up the GUI components of the dialog 
    * @param owner the owner Component
    * @param root the root directory
    * @param allowMultiple true if multiple selections are allowed
@@ -136,14 +131,12 @@ public class DirectoryChooser extends JFileChooser {
     return showDialog(_owner, null);  // null means leave the approve button text unchanged
   }
   
-  /** 
-   * Set the owner of this DirectoryChooser. 
+  /** Set the owner of this DirectoryChooser. 
    * @param owner the owner to set
    */
   public void setOwner(Component owner) { _owner = owner; }
   
-  /** 
-   * Shows the dialog with the same selection as the last time the dialog was 
+  /** Shows the dialog with the same selection as the last time the dialog was 
    * shown. If this is the first time it is shown, then the root is selected.
    * @return the return state of the file chooser
    */

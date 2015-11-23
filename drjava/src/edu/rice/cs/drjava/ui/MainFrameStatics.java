@@ -88,8 +88,7 @@ public class MainFrameStatics {
     return input;
   }
 
-  /** 
-   * Confirms with the user that the file should be overwritten.
+  /** Confirms with the user that the file should be overwritten.
    * @param parent the parent component
    * @param f file to overwrite
    * @return <code>true</code> iff the user accepts overwriting.

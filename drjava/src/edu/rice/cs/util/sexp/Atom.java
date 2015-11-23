@@ -36,8 +36,7 @@
 
 package edu.rice.cs.util.sexp;
 
-/**
- * There are different kinds of atoms: text, boolean, number.
+/** * There are different kinds of atoms: text, boolean, number.
  * Therefore they should have a visitor interface to support 
  * algorithms on them.
  */

@@ -69,8 +69,7 @@ public abstract class MultiThreadedTestCase extends DrJavaTestCase {
     super.tearDown();
   }
 
-  /** 
-   * This method prints the failure message to System.out and kills the JVM.
+  /** This method prints the failure message to System.out and kills the JVM.
    * Just calling fail() doesn't always cause the test to fail, because the 
    * listener is often called from another thread.
    * @param s the failure message
@@ -84,8 +83,7 @@ public abstract class MultiThreadedTestCase extends DrJavaTestCase {
     fail(s);
   }
 
-  /** 
-   * This method prints the failure message to System.out and kills the JVM.  
+  /** This method prints the failure message to System.out and kills the JVM.  
    * Just calling fail() doesn't always cause the test to fail, because the 
    * listener is often called from another thread.
    * @param t the exception whose trace should be printed
@@ -174,8 +172,7 @@ public abstract class MultiThreadedTestCase extends DrJavaTestCase {
     
     public java.lang.Thread getThread() { return _t; }
     
-    /** 
-     * Set the thread that spawns the other threads. 
+    /** Set the thread that spawns the other threads. 
      * @param mainThread the main thread to be set
      */
     public void setMainThread(java.lang.Thread mainThread) { _mainThread = mainThread; }

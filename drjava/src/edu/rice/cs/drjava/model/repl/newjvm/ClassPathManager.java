@@ -44,8 +44,7 @@ import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.plt.reflect.PathClassLoader;
 
-/**
- * Maintains a dynamic class path, allowing entries to be incrementally added in the appropriate
+/** * Maintains a dynamic class path, allowing entries to be incrementally added in the appropriate
  * place in the list.  This class is used in the interpreter JVM, and may be accessed concurrently.
  */
 public class ClassPathManager implements Lambda<ClassLoader, ClassLoader> {
@@ -103,8 +102,7 @@ public class ClassPathManager implements Lambda<ClassLoader, ClassLoader> {
   
   public synchronized Iterable<File> getProjectCP() { return IterUtil.snapshot(_projectCP); }
   
-  /** 
-   * Adds the entry to the front of the build classpath. 
+  /** Adds the entry to the front of the build classpath. 
    * @param f the file to be added to the classpath
    */
   public synchronized void addBuildDirectoryCP(File f) {
@@ -115,8 +113,7 @@ public class ClassPathManager implements Lambda<ClassLoader, ClassLoader> {
   
   public synchronized Iterable<File> getBuildDirectoryCP() { return IterUtil.snapshot(_buildCP); }
   
-  /** 
-   * Adds the entry to the front of the project files classpath (this is the 
+  /** Adds the entry to the front of the project files classpath (this is the 
    * classpath for all open project files). 
    * @param f the file to be added to the classpath
    */
@@ -128,8 +125,7 @@ public class ClassPathManager implements Lambda<ClassLoader, ClassLoader> {
   
   public synchronized Iterable<File> getProjectFilesCP() { return IterUtil.snapshot(_projectFilesCP); }
   
-  /** 
-   * Adds new entry containing f to the front of the external classpath. 
+  /** Adds new entry containing f to the front of the external classpath. 
    * @param f the file to be added to the classpath
    */
   public synchronized void addExternalFilesCP(File f) {
@@ -140,8 +136,7 @@ public class ClassPathManager implements Lambda<ClassLoader, ClassLoader> {
   
   public synchronized Iterable<File> getExternalFilesCP() { return IterUtil.snapshot(_externalFilesCP); }
   
-  /** 
-   * Adds the entry to the front of the extra classpath. 
+  /** Adds the entry to the front of the extra classpath. 
    * @param f the file to be added to the classpath
    */
   public synchronized void addExtraCP(File f) {

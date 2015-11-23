@@ -52,8 +52,7 @@ public class Step extends DebugAction<StepRequest> implements OptionConstants {
   // Java class patterns for which we may not want events
   private final String[] _javaExcludes = {"java.*", "javax.*", "sun.*", "com.sun.*", "com.apple.eawt.*", "com.apple.eio.*" };
 
-  /** 
-   * @param manager a JPDADebugger
+  /** @param manager a JPDADebugger
    * @param size the size of the step
    * @param depth the depth of the step
    * @throws IllegalStateException if the document does not have a file 

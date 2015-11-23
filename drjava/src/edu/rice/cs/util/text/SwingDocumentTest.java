@@ -81,8 +81,7 @@ public class SwingDocumentTest extends DrJavaTestCase {
     catch (EditDocumentException e) { /* Expected. Silently succeed. */ }
   }
   
-  /** 
-   * Tests that a SwingDocument can receive an object that determines whether 
+  /** Tests that a SwingDocument can receive an object that determines whether 
    * certain edits are legal. 
    * @throws EditDocumentException if an error occurs during editing
    * @throws BadLocationException if attempts to reference an invalid location

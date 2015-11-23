@@ -178,14 +178,12 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
     */
   protected abstract void _notifyInterpreterChanged(boolean inProgress);
 
-  /** 
-   * Sets whether or not the interpreter should enforce access to all members. 
+  /** Sets whether or not the interpreter should enforce access to all members. 
    * @param enforce true if the interpreter should enforce access to all members
    */
   public void setEnforceAllAccess(boolean enforce) { _jvm.setEnforceAllAccess(enforce); }
   
-  /** 
-   * Sets whether or not the interpreter should enforce access to private members. 
+  /** Sets whether or not the interpreter should enforce access to private members. 
    * @param enforce true if the interpreter should enforce access to private members
    */
   public void setEnforcePrivateAccess(boolean enforce) { _jvm.setEnforcePrivateAccess(enforce); }

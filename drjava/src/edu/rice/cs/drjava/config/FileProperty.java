@@ -48,8 +48,7 @@ import java.io.*;
 public class FileProperty extends DrJavaProperty {
   protected Thunk<File> _getFile;
 
-  /** 
-   * Create an eager file property. 
+  /** Create an eager file property. 
    * @param name the name of this property
    * @param getFile lambda for accessing the file
    * @param help the help page for this property
@@ -60,8 +59,7 @@ public class FileProperty extends DrJavaProperty {
     resetAttributes();
   }
   
-  /** 
-   * @param pm PropertyMaps used for substitution when replacing variables 
+  /** @param pm PropertyMaps used for substitution when replacing variables 
    * @return the value of the property. If it is not current, update first.
    */
   public String getCurrent(PropertyMaps pm) {
@@ -83,8 +81,7 @@ public class FileProperty extends DrJavaProperty {
     invalidateOthers(new HashSet<DrJavaProperty>());
   }
   
-  /** 
-   * Update the value of the property.
+  /** Update the value of the property.
    * @param pm PropertyMaps used for substitution 
    */
   public void update(PropertyMaps pm) {

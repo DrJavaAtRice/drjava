@@ -112,8 +112,7 @@ public class InteractionsDocument extends ConsoleDocument {
   /** @return whether an interaction is currently in progress. */
   public boolean inProgress() { return ! _document.hasPrompt(); }
   
-  /** 
-   * Sets the banner in an empty docuemnt. 
+  /** Sets the banner in an empty docuemnt. 
    * @param banner value to set banner to
    */
   public void setBanner(String banner) {
@@ -157,8 +156,7 @@ public class InteractionsDocument extends ConsoleDocument {
   /** @return the history of commands. */
   public OptionListener<Integer> getHistoryOptionListener() { return _history.getHistoryOptionListener(); }
   
-  /** 
-   * Adds the given text to the history of commands. 
+  /** Adds the given text to the history of commands. 
    * @param text text to add
    */
   public void addToHistory(String text) { _history.add(text); }
@@ -166,15 +164,13 @@ public class InteractionsDocument extends ConsoleDocument {
   /** @return the last history item and then removes it, or returns null if the history is empty. */
   public String removeLastFromHistory() { return _history.removeLast(); }
   
-  /** 
-   * Saves the unedited version of the current history to a file
+  /** Saves the unedited version of the current history to a file
    * @param selector File to save to
    * @throws IOException if an IO operation fails
    */
   public void saveHistory(FileSaveSelector selector) throws IOException { _history.writeToFile(selector); }
   
-  /** 
-   * Saves the edited version of the current history to a file
+  /** Saves the edited version of the current history to a file
    * @param selector File to save to
    * @param editedVersion Edited version of the history which will be
    * saved to file instead of the lines saved in the history. The saved
@@ -186,8 +182,7 @@ public class InteractionsDocument extends ConsoleDocument {
     History.writeToFile(selector, editedVersion); 
   }
   
-  /** 
-   * Returns the entire history as a single string.  Commands should be 
+  /** Returns the entire history as a single string.  Commands should be 
    * separated by semicolons. If an entire command does not end in a 
    * semicolon, one is added.
    * @return the entire history as a single string
@@ -222,8 +217,7 @@ public class InteractionsDocument extends ConsoleDocument {
     _replaceCurrentLineFromHistory();
   }
   
-  /** 
-   * Returns whether there is a previous command in the history.  Only runs in event thread. 
+  /** Returns whether there is a previous command in the history.  Only runs in event thread. 
    * @return true if there is a previous command in the history
    */
   private boolean hasHistoryPrevious() { return _history.hasPrevious(); }
@@ -249,8 +243,7 @@ public class InteractionsDocument extends ConsoleDocument {
     _replaceCurrentLineFromHistory();
   }
   
-  /** 
-   * Gets the previous interaction in the history and replaces whatever is 
+  /** Gets the previous interaction in the history and replaces whatever is 
    * on the current interactions input line with this interaction.  
    * Only runs in event thread.
    * @return true if there is a previous interaction in the history; false otherwise
@@ -264,8 +257,7 @@ public class InteractionsDocument extends ConsoleDocument {
     return false;
   }
   
-  /** 
-   * Gets the next interaction in the history and replaces whatever is on the 
+  /** Gets the next interaction in the history and replaces whatever is on the 
    * current interactions input line with this interaction.
    * @return true if there is a previous interaction in the history; false otherwise
    */

@@ -36,8 +36,7 @@
 
 package edu.rice.cs.drjava.model.javadoc;
 
-/**
- * Indicates that an error has occured while attempting to create javadoc.
+/** * Indicates that an error has occured while attempting to create javadoc.
  * @deprecated No longer needed.
  * @version $Id$
  */

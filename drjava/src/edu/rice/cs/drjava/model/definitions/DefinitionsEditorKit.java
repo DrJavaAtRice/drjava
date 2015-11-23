@@ -95,8 +95,7 @@ public class DefinitionsEditorKit extends StyledEditorKit {
     }
   };
   
-  /** 
-   * Creates a new DefinitionsDocument.  Formerly named createDefaultDocument() 
+  /** Creates a new DefinitionsDocument.  Formerly named createDefaultDocument() 
    * because the view (DefinitionsPane) would create a DefinitionsDocument by 
    * default when it was constructed.  However, this default document was  
    * immediately discarded because a DefinitionsDocument for the constructed 

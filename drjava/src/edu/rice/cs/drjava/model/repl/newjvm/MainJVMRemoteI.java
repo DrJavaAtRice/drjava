@@ -42,8 +42,7 @@ import edu.rice.cs.util.newjvm.*;
 import edu.rice.cs.drjava.model.junit.JUnitError;
 import edu.rice.cs.util.classloader.ClassFileError;
 
-/**
- * This interface specifies the methods that the Main JVM exposes
+/** * This interface specifies the methods that the Main JVM exposes
  * for the InterpreterJVM to call.
  *
  * @version $Id$

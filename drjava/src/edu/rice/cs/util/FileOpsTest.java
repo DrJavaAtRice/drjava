@@ -111,8 +111,7 @@ public class FileOpsTest extends DrJavaTestCase {
   }
   
   
-  /** 
-   * This method checks that backups are made correctly, that when a save fails,
+  /** This method checks that backups are made correctly, that when a save fails,
    * no data is lost, and that when a save is attempted on a write-protected file,
    * the save fails (bug #782963).
    * @throws IOException if an IO operation fails

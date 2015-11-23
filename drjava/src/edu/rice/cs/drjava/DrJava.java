@@ -165,8 +165,7 @@ public class DrJava {
   /** @return an array of the files that were passed on the command line. */
   public static synchronized String[] getFilesToOpen() { return _filesToOpen.toArray(new String[0]); }
   
-  /** 
-   * Add a file to the list of files to open. 
+  /** Add a file to the list of files to open. 
    * @param s name of the file to be added to the list of files to open
    */
   public static synchronized void addFileToOpen(String s) {
@@ -393,8 +392,7 @@ public class DrJava {
     }
   }
   
-  /** 
-   * Handles any command line arguments that have been specified.
+  /** Handles any command line arguments that have been specified.
    * @param args command-line arguments
    * @return true if DrJava should load, false if not
    */
@@ -498,8 +496,7 @@ public class DrJava {
     System.out.println("  -jll [ARGS]           invoke the Java Language Level converter, specify files in ARGS");
   }
   
-  /** 
-   * Switches the config object to use a custom config file. Ensures that Java 
+  /** Switches the config object to use a custom config file. Ensures that Java 
    * source files aren't accidentally used.
    * @param fileName path to the new properties file
    */
@@ -507,8 +504,7 @@ public class DrJava {
     if (!DrJavaFileUtils.isSourceFile(fileName))  _propertiesFile = new File(fileName);
   }
   
-  /** 
-   * Initializes the configuration object with the current notion of the properties file.
+  /** Initializes the configuration object with the current notion of the properties file.
    * @return the configuration object
    * @throws IllegalStateException if config has already been assigned
    */
@@ -600,8 +596,7 @@ public class DrJava {
     // Do not set _config or _propertiesFile to null because THEY ARE static
   }
 
-  /** 
-   * Warn if this system is Linux with Compiz. 
+  /** Warn if this system is Linux with Compiz. 
    * @return true if is Linux with Compiz; false otherwise
    */
   public static boolean warnIfLinuxWithCompiz() {

@@ -49,8 +49,7 @@ import javax.swing.text.BadLocationException;
   */
 public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
   
-  /** 
-   * After creating a new file, saving, and compiling it, this test checks that the new document is in sync after
+  /** After creating a new file, saving, and compiling it, this test checks that the new document is in sync after
    * compiling and is out of sync after modifying and even saving it.
    * Doesn't reset interactions because no interpretations are performed.
    * @throws BadLocationException if attempts to reference an invalid location
@@ -94,8 +93,7 @@ public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
     assertTrue(" Class file should exist after compile", compiled.exists());
   }
   
-  /** 
-   * Ensure that renaming a file makes it out of sync with its class file.
+  /** Ensure that renaming a file makes it out of sync with its class file.
    * Doesn't reset interactions because no interpretations are performed.
    * @throws BadLocationException if attempts to reference an invalid location
    * @throws IOException if an IO operation fails
@@ -134,8 +132,7 @@ public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
     assertTrue("should not be in sync after renaming", ! doc.checkIfClassFileInSync());
   }
   
-  /** 
-   * Tests a compile after a file has unexpectedly been moved or delete. 
+  /** Tests a compile after a file has unexpectedly been moved or delete. 
    * @throws BadLocationException if attempts to reference an invalid location
    * @throws IOException if an IO operation fails
    */

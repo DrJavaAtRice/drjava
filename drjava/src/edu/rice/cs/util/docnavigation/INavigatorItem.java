@@ -36,8 +36,7 @@
 
 package edu.rice.cs.util.docnavigation;
 
-/**
- * <code>INavigatorItem</code> models (very abstractly) some entity that is
+/** * <code>INavigatorItem</code> models (very abstractly) some entity that is
  * eligible for insertion and removal inside an
  * <code>IDocumentNavigator</code>. Conceptually, if an
  * <code>IDocumentNavigator</code> represented a file cabinet then each file in

@@ -45,14 +45,12 @@ public interface JUnitModel {
   
   //-------------------------- Field Setters --------------------------------//
   
-  /** 
-   * @param c true if a coverage report is desired; false otherwise
+  /** @param c true if a coverage report is desired; false otherwise
    * @param p value to set the outdir path to
    */
   public void setCoverage(boolean c, String p);
 
-  /** 
-   * Set the forceTestSuffix flag that forces class names in projects to end in "Test 
+  /** Set the forceTestSuffix flag that forces class names in projects to end in "Test 
    * @param b true if call names are to be forced to end in "Test", false otherwise
    */
   public void setForceTestSuffix(boolean b);
@@ -77,8 +75,7 @@ public interface JUnitModel {
   
   //-------------------------------- Triggers --------------------------------//
   
-  /** 
-   * This is used by test cases and perhaps other things.  We should kill it. 
+  /** This is used by test cases and perhaps other things.  We should kill it. 
    * @return the JUnit document
    */
   public SwingDocument getJUnitDocument();
@@ -102,13 +99,12 @@ public interface JUnitModel {
     */
   public void junitDocs(List<OpenDefinitionsDocument> lod);
   
-  /**
-   *  Runs JUnit over a single document.  Synchronized against the compiler model to prevent testing
-   * and compiling at the same time, which would create invalid results.
-   * @param doc the document to be run under JUnit
-   * @throws ClassNotFoundException if a class is not found
-   * @throws IOException if an IO operation fails
-   */
+  /** Runs JUnit over a single document.  Synchronized against the compiler model to prevent testing
+    * and compiling at the same time, which would create invalid results.
+    * @param doc the document to be run under JUnit
+    * @throws ClassNotFoundException if a class is not found
+    * @throws IOException if an IO operation fails
+    */
   public void junit(OpenDefinitionsDocument doc) throws ClassNotFoundException, IOException;
   
 //  /** Forwards the classnames and files to the test manager to test all of them.

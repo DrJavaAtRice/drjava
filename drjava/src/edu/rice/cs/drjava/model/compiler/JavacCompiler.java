@@ -135,8 +135,7 @@ public abstract class JavacCompiler implements CompilerInterface {
     return _transformCommand(s,"edu.rice.cs.plt.swing.SwingUtil.showApplet(new {0}({1}), 400, 300);");
   }
   
-  /** 
-   * This method performs the "smart run". Unfortunately, we don't get the right static error messages.
+  /** This method performs the "smart run". Unfortunately, we don't get the right static error messages.
    * @param s full command line, i.e. "run MyClass 1 2 3"
    * @param c class to be run, i.e. MyClass.class
    * @throws Throwable if something goes wrong
@@ -284,8 +283,7 @@ public abstract class JavacCompiler implements CompilerInterface {
     }
   }
   
-  /** 
-   * This is a method that automatically detects if
+  /** This is a method that automatically detects if
    * a) the class is an ACM Java Task Force program (subclass of acm.program.Program)
    * b) an applet
    * c) a class with a static main method
@@ -310,8 +308,7 @@ public abstract class JavacCompiler implements CompilerInterface {
     return ret;
   }
 
-  /** 
-   * Assumes a trimmed String. Returns a string of the call that the interpreter can use.
+  /** Assumes a trimmed String. Returns a string of the call that the interpreter can use.
    * The arguments get formatted as comma-separated list of strings enclosed in quotes.
    * Example: _transformCommand("java MyClass arg1 arg2 arg3", "{0}.main(new String[]'{'{1}'}');")
    * returns "MyClass.main(new String[]{\"arg1\",\"arg2\",\"arg3\"});"

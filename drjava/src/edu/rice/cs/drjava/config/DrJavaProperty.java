@@ -64,8 +64,7 @@ public abstract class DrJavaProperty implements Cloneable {
     * when this property is invalidated, the other properties are too. */
   protected Set<DrJavaProperty> _listening = new HashSet<DrJavaProperty>();
 
-  /** 
-   * Create a property. 
+  /** Create a property. 
    * @param name the name of the property
    * @param help the help page for this property
    */ 
@@ -76,8 +75,7 @@ public abstract class DrJavaProperty implements Cloneable {
     resetAttributes();
   }
 
-  /** 
-   * Create a property. 
+  /** Create a property. 
    * @param name the name of the property
    * @param value the value of the property
    * @param help the help page for this property
@@ -93,8 +91,7 @@ public abstract class DrJavaProperty implements Cloneable {
   /** @return the name of the property. */
   public String getName() { return _name; }
   
-  /** 
-   * @param pm PropertyMaps used for substitution when replacing variables
+  /** @param pm PropertyMaps used for substitution when replacing variables
    * @return the value of the property. If it is not current, update first.
    */
   public String getCurrent(PropertyMaps pm) {
@@ -106,10 +103,9 @@ public abstract class DrJavaProperty implements Cloneable {
     return _value;
   }
 
-  /**
-   * @param pm PropertyMaps used for substitution when replacing variables
-   * @return the value of the property lazily. The value may be stale.
-   */
+  /** @param pm PropertyMaps used for substitution when replacing variables
+    * @return the value of the property lazily. The value may be stale.
+    */
   public String getLazy(PropertyMaps pm) {
     if (_value == null) { throw new IllegalArgumentException("DrJavaProperty value is null"); }
     return _value;
@@ -145,8 +141,7 @@ public abstract class DrJavaProperty implements Cloneable {
     }
   }
   
-  /** 
-   * @param key name of the attribute
+  /** @param key name of the attribute
    * @return the specified attribute's value
    * @throws IllegalArgumentException if attribute with specified key does not already exist in table
    */

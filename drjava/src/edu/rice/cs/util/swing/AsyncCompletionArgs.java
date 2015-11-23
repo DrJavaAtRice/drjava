@@ -36,8 +36,7 @@
 
 package edu.rice.cs.util.swing;
 
-/**
- * @author jlugo
+/** * @author jlugo
  * 
  */
 public class AsyncCompletionArgs<R> {

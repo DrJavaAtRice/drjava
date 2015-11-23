@@ -41,8 +41,7 @@ import javax.swing.*;
 
 import edu.rice.cs.util.swing.SwingFrame;
 
-/**
- * Button component to perform some action. Nothing gets saved.
+/** * Button component to perform some action. Nothing gets saved.
  */
 public class ButtonComponent extends OptionComponent<Object,JButton> {
   protected JButton _jb;

@@ -36,8 +36,7 @@
 
 package edu.rice.cs.drjava.model.debug;
 
-/**
- * Thrown when something goes wrong in the integrated debugger.
+/** * Thrown when something goes wrong in the integrated debugger.
  * 
  * @version $Id$
  */

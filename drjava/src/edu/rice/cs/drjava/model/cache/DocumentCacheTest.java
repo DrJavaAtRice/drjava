@@ -93,16 +93,14 @@ public class DocumentCacheTest extends DrJavaTestCase {
   /** Instantiates the GlobalModel to be used in the test cases. */
   protected void createModel() { _model = new TestGlobalModel(); }
   
-  /** 
-   * @return a new temporary file in _tempDir. 
+  /** @return a new temporary file in _tempDir. 
    * @throws IOException if an IO operation fails 
    */
   protected File tempFile() throws IOException {
     return File.createTempFile("DrJava-test", ".java", _tempDir).getCanonicalFile();
   }
   
-  /** 
-   * Create a new temporary file in _tempDir.  Calls with the same
+  /** Create a new temporary file in _tempDir.  Calls with the same
    * int will return the same filename, while calls with different
    * ints will return different filenames.
    * @param i the index to append to the new file

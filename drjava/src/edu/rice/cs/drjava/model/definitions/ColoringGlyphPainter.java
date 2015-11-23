@@ -175,8 +175,7 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
     return _metrics.getDescent();
   }
   
-  /** 
-   * Only runs in event thread. 
+  /** Only runs in event thread. 
    * @param v the view
    * @param pos position
    * @param bias bias
@@ -258,8 +257,7 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
     return end;
   }
   
-  /** 
-   * Only runs in event thread. 
+  /** Only runs in event thread. 
    * @param v the view to sync
    */
   void sync(GlyphView v) {

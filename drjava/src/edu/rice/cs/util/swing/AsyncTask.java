@@ -36,8 +36,7 @@
 
 package edu.rice.cs.util.swing;
 
-/**
- * The AsyncTask base class is a framework that facilitates execution of
+/** * The AsyncTask base class is a framework that facilitates execution of
  * operations asynchronously in order to free up the event-handling thread. This
  * task is passed to an implementation of the AsyncTaskLauncher to be run.
  * <p>

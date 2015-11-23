@@ -77,8 +77,7 @@ public abstract class IndentRulesTestCase extends DrJavaTestCase {
     super.tearDown();
   }
   
-  /** 
-   * Clears the text of the _doc field and sets it to the given string. 
+  /** Clears the text of the _doc field and sets it to the given string. 
    * @param text the text to be set
    * @throws BadLocationException if attempts to reference an invalid position
    */
@@ -131,8 +130,7 @@ public abstract class IndentRulesTestCase extends DrJavaTestCase {
     return start.concat(indent).concat(end);
   }*/
   
-  /** 
-   * Asserts that the document contains the expected text.
+  /** Asserts that the document contains the expected text.
    * @param expected what text of document should be
    * @throws BadLocationException if attempts to reference an invalid position
    */

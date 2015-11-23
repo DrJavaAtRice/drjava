@@ -61,8 +61,7 @@ public class DJError implements Comparable<DJError>, Serializable {
   /** This boolean is true when the DJError does not have a location (lineNumber is -1). */
   private volatile boolean _noLocation;
   
-  /** 
-   * Constructor.
+  /** Constructor.
    * @param     file the file where the error occurred
    * @param     lineNumber the line number of the error
    * @param     startColumn the starting column of the error
@@ -82,16 +81,14 @@ public class DJError implements Comparable<DJError>, Serializable {
     if (lineNumber < 0) _noLocation = true;
   }
   
-  /** 
-   * Constructor for an DJError with an associated file but no location in the source 
+  /** Constructor for an DJError with an associated file but no location in the source 
    * @param     file the file where the error occurred
    * @param     message  the error message
    * @param     isWarning true if this is a warning; false if this is an error
    */
   public DJError(File file, String message, boolean isWarning) { this(file, -1, -1, message, isWarning); }
   
-  /** 
-   * Constructor for CompilerErrors without files.
+  /** Constructor for CompilerErrors without files.
    * @param message the error message
    * @param isWarning true if this is a warning; false if this is an error
    */
@@ -142,8 +139,7 @@ public class DJError implements Comparable<DJError>, Serializable {
     */
   public String message() { return  _message; }
   
-  /** 
-   * @return a message telling the file this error is from appropriate to 
+  /** @return a message telling the file this error is from appropriate to 
    *         display to a user, indicating if there is no file associated 
    *         with this error.
    */
@@ -152,8 +148,7 @@ public class DJError implements Comparable<DJError>, Serializable {
     return fileName();
   }
   
-  /** 
-   * This function returns a message telling the line this error is from 
+  /** This function returns a message telling the line this error is from 
    * appropriate to display to a user, indicating if there is no file 
    * associated with this error.  This is adjusted to show one-based numbers,
    * since internally we store a zero-based index.
@@ -193,8 +188,7 @@ public class DJError implements Comparable<DJError>, Serializable {
     return compareErrorWarning(other);
   }
   
-  /** 
-   * Compares this error's postion with other error's, based first on line 
+  /** Compares this error's postion with other error's, based first on line 
    * number, then by column. 
    * @param other the error to compare this to
    * @return the difference in lines (or columns, if lines are equal)
@@ -209,8 +203,7 @@ public class DJError implements Comparable<DJError>, Serializable {
     return compareErrorWarning(other);
   }
   
-  /** 
-   * Compare otherwise equal errors. 
+  /** Compare otherwise equal errors. 
    * @param other the error to compare this to
    * @return 0 if both are warnings or both are errors; 1 if this is a 
    *         warning other is an error; -1 if this is an error and other is a 

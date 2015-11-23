@@ -38,8 +38,7 @@ package edu.rice.cs.drjava.model.definitions.indent;
 
 import javax.swing.text.BadLocationException;
 
-/**
- * Tests the indention rule which detects whether the immediately previous line
+/** * Tests the indention rule which detects whether the immediately previous line
  * starts with a particular string.
  * @version $Id$
  */

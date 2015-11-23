@@ -78,8 +78,7 @@ public abstract class ReducedToken implements ReducedModelStates {
     */
   public ReducedModelState getState() { return  _state; }
   
-  /** 
-   * Returns whether the current char is highlighted. 
+  /** Returns whether the current char is highlighted. 
    * / / beginning a comment would be highlighted but free, so its not
    * the same as getState.
    * @return true iff the current char is highlighted

@@ -98,8 +98,7 @@ public final class PropertyMaps implements Cloneable {
     }
   }
   
-  /** 
-   * Add a property. 
+  /** Add a property. 
    * @param category the category of properties to which to add p
    * @param p the property to add
    * @return the property that was added
@@ -111,8 +110,7 @@ public final class PropertyMaps implements Cloneable {
     return p;
   }
   
-  /** 
-   * Clear the specified category. 
+  /** Clear the specified category. 
    * @param category to category to be cleared
    */
   public void clearCategory(String category) {
@@ -122,8 +120,7 @@ public final class PropertyMaps implements Cloneable {
   /** @return the set of categories. */
   public Set<String> getCategories() { return _props.keySet(); }
 
-  /** 
-   * @param category the category of properties to get
+  /** @param category the category of properties to get
    * @return the properties in a category
    * @throws IllegalArgumentException if category is not known. 
    */

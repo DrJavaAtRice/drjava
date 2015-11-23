@@ -147,8 +147,7 @@ public abstract class PreviewFrame extends SwingFrame {
     public void windowClosing(WindowEvent ev) { _close(); }
   };
   
-  /** 
-   * Contructs a new PreviewFrame using a parent model and a Pageable object 
+  /** Contructs a new PreviewFrame using a parent model and a Pageable object 
    * print to show. Should only be called in event thread. 
    * @param model the parent model
    * @param mainFrame the main frame
@@ -351,8 +350,7 @@ public abstract class PreviewFrame extends SwingFrame {
     return m.invoke(rec,args);
   }
   
-  /** 
-   * Mirrored from MainFrame, will later use the same Icon access code. 
+  /** Mirrored from MainFrame, will later use the same Icon access code. 
    * @param name the name for which to get the icon
    * @return the icon corresponding to name
    */
@@ -457,8 +455,7 @@ public abstract class PreviewFrame extends SwingFrame {
     protected volatile Image _source;
     protected volatile Image _image;
     
-    /** 
-     * Constructs a PagePreview object with given width and height. 
+    /** Constructs a PagePreview object with given width and height. 
      * @param width the width
      * @param height the height
      */

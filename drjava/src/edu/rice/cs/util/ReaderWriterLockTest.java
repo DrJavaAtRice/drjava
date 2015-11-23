@@ -73,8 +73,7 @@ public class ReaderWriterLockTest extends DrJavaTestCase {
     }
   }
 
-  /** 
-   * Tests that multiple readers can run without causing deadlock. We can't 
+  /** Tests that multiple readers can run without causing deadlock. We can't 
    * really impose any ordering on their output.
    * @throws InterruptedException if execution is interrupted unexpectedly
    */
@@ -332,8 +331,7 @@ public class ReaderWriterLockTest extends DrJavaTestCase {
     /** Message to print */
     final String _msg;
 
-    /** 
-     * Creates a new command to print to a buffer during a read or write. 
+    /** Creates a new command to print to a buffer during a read or write. 
      * @param msg message to print
      * @param buf buffer to print to
      */

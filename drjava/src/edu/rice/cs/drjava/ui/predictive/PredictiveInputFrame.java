@@ -657,16 +657,14 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     updateList();
   }
   
-  /** 
-   * Creates the optional components. Should be overridden. 
+  /** Creates the optional components. Should be overridden. 
    * @return the optional components
    */
   protected JComponent[] makeOptions() {        
     return new JComponent[0];    
   }
   
-  /** 
-   * Creates the panel with the optional components. 
+  /** Creates the panel with the optional components. 
    * @param components the optional components
    */
   private void _setupOptionsPanel(JComponent[] components) {
@@ -787,8 +785,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     buttonPressed(_actions.get(_cancelIndex));
   }
   
-  /** 
-   * Handle button pressed. 
+  /** Handle button pressed. 
    * @param a the button press action being handled
    */
   private void buttonPressed(CloseAction<T> a) {

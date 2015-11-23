@@ -105,8 +105,7 @@ public class ProjectFileParser extends ProjectFileParserFacade {
     return pfir;
   }
   
-  /** 
-   * Given a top-level s-expression, this method checks the name of the node 
+  /** Given a top-level s-expression, this method checks the name of the node 
    * and configures the given pfir 
    * appropriately.  If the expression is empty, it is ignored.
    * @param e the top-level s-expression to check
@@ -207,8 +206,7 @@ public class ProjectFileParser extends ProjectFileParserFacade {
     }
   } 
   
-  /** 
-   * Parses out the labeled node (a non-empty list) into a DocFile. The node 
+  /** Parses out the labeled node (a non-empty list) into a DocFile. The node 
    * must have the "file" label on it.
    * @param s the non-empty list expression
    * @param pathRoot root of the path to the file being parsed
@@ -289,8 +287,7 @@ public class ProjectFileParser extends ProjectFileParserFacade {
     else throw new PrivateProjectException("expected a list of 2 ints for select, found list of size " + li.size());
   }
 
-    /** 
-     * Takes input of form "(str str)" and returns the second string. 
+    /** Takes input of form "(str str)" and returns the second string. 
      * @param n an expression of the form "(str str)"
      * @return the second string in n
      */
@@ -458,8 +455,7 @@ public class ProjectFileParser extends ProjectFileParserFacade {
     }
   };
     
-  /** 
-   * Parses out the labeled node (a non-empty list) into a breakpoint. 
+  /** Parses out the labeled node (a non-empty list) into a breakpoint. 
    * The node must have the "breakpoint" label on it.
    * @param s the non-empty list expression
    * @param pathRoot the root path to the file being parsed
@@ -535,8 +531,7 @@ public class ProjectFileParser extends ProjectFileParserFacade {
     }
   };
     
-  /** 
-   * Parses out the labeled node (a non-empty list) into a bookmark. 
+  /** Parses out the labeled node (a non-empty list) into a bookmark. 
    * The node must have the "bookmark" label on it.
    * @param s the non-empty list expression
    * @param pathRoot the root path to the file being parsed

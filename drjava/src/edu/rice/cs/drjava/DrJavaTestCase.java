@@ -96,8 +96,7 @@ public class DrJavaTestCase extends TestCase {
     Utilities.invokeAndWait(new Runnable() { public void run() { DrJava.getConfig().setSetting(op, value); } });
   }
   
-  /** 
-   * Clears the text of the _doc field and sets it to the given string. 
+  /** Clears the text of the _doc field and sets it to the given string. 
    * @param doc the document whose text should be set to "text"
    * @param text the text to set
    */

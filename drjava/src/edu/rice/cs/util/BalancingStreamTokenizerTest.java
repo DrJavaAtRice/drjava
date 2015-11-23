@@ -41,8 +41,7 @@ import junit.framework.TestCase;
 import java.io.StringReader;
 import java.io.IOException;
 
-/**
- * Tests for a class to tokenize a stream while balancing quoting characters.
+/** * Tests for a class to tokenize a stream while balancing quoting characters.
  * @author Mathias Ricken
  * @version $Id$
  */

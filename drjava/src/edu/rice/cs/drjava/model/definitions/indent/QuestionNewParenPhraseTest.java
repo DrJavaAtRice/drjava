@@ -38,8 +38,7 @@ package edu.rice.cs.drjava.model.definitions.indent;
 
 import javax.swing.text.BadLocationException;
 
-/**
- * Tests the indention rule which detects whether the current line starts
+/** * Tests the indention rule which detects whether the current line starts
  * a new parenthesized phrase.  (ie. Previous line ends in comma, semicolon,
  * open paren, or open bracket.)
  * @version $Id$

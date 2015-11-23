@@ -75,8 +75,7 @@ public final class InteractionsDJDocumentTest extends DrJavaTestCase {
     catch(Throwable t) { t.printStackTrace(); }
   }
   
-  /** 
-   * Tests that the styles list is updated and reset properly 
+  /** Tests that the styles list is updated and reset properly 
    * @throws EditDocumentException if an error occurs during editing
    * @throws InterruptedException if execution is interrupted unexpectedly
    */

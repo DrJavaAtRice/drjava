@@ -68,8 +68,7 @@ public final class RemoteControlServer {
   /** Prefix of a legitimate response by this server, including the user name. */
   public static final String RESPONSE_PREFIX_WITH_USER = RESPONSE_PREFIX+System.getProperty("user.name") + "!";
   
-  /** 
-   * Create a new remote control server, running in its own daemon thread.
+  /** Create a new remote control server, running in its own daemon thread.
    * @param frame main frame
    * @throws IOException if an IO operation fails
    */
@@ -87,8 +86,7 @@ public final class RemoteControlServer {
     /** Socket used. */
     protected DatagramSocket socket = null;
     
-    /** 
-     * Create a new server thread.
+    /** Create a new server thread.
      * @param frame main frame
      * @throws IOException if an IO operation fails
      */
@@ -96,8 +94,7 @@ public final class RemoteControlServer {
       this("RCServerThread", frame);
     }
     
-    /**
-     * Create a new server thread with a specified name.
+    /** Create a new server thread with a specified name.
      * @param name thread name
      * @param frame main frame
      * @throws IOException if an IO operation fails
@@ -108,8 +105,7 @@ public final class RemoteControlServer {
       socket = new DatagramSocket(DrJava.getConfig().getSetting(OptionConstants.REMOTE_CONTROL_PORT));
     }
 
-    /**
-     * Main method of the thread. It loops indefinitely, waiting for queries.
+    /** Main method of the thread. It loops indefinitely, waiting for queries.
      * Since this is a daemon thread, it will get shut down at the end.
      */
     public void run() {
@@ -175,8 +171,7 @@ public final class RemoteControlServer {
     protected void finalize() { if (socket != null) socket.close(); }
   }
   
-  /** 
-   * Main method for test purposes. 
+  /** Main method for test purposes. 
    * @param args command-line args
    */
   public static void main(String[] args) {

@@ -66,8 +66,7 @@ public interface RegionManager<R extends IDocumentRegion> {
     */
   public Pair<R, R> getRegionInterval(OpenDefinitionsDocument odd, int offset);
   
-  /** 
-   * Returns the rightmost region starting on the same line containing the specified selection
+  /** Returns the rightmost region starting on the same line containing the specified selection
    * @param odd the document
    * @param startOffset the start offset
    * @param endOffset the end offset
@@ -97,8 +96,7 @@ public interface RegionManager<R extends IDocumentRegion> {
    */
   public void removeRegions(Iterable<? extends R> regions);
   
-  /** 
-   * Remove the given OpenDefinitionsDocument and all of its regions from the manager. 
+  /** Remove the given OpenDefinitionsDocument and all of its regions from the manager. 
    * @param odd the document for which to remove regions
    */
   public void removeRegions(OpenDefinitionsDocument odd);
@@ -108,8 +106,7 @@ public interface RegionManager<R extends IDocumentRegion> {
    *  @param cmd command that mutates the region. */
   public void changeRegion(R region, Lambda<R,Object> cmd);
   
-  /** 
-   * @param odd the document for which to get regions
+  /** @param odd the document for which to get regions
    * @return a {@code Vector<R>} containing the StaticDocumentRegion objects for 
    *         document odd in this manager. 
    */
@@ -121,14 +118,12 @@ public interface RegionManager<R extends IDocumentRegion> {
   /** @return the number if regions contained in this manager. */
   public int getRegionCount();
   
-  /** 
-   * @param r the upper bound on regions
+  /** @param r the upper bound on regions
    * @return the sorted set of regions less than r. 
    */
   public SortedSet<R> getHeadSet(R r);
   
-  /** 
-   * @param r the lower bound on regions
+  /** @param r the lower bound on regions
    * @return the sorted set of regions greater than or equal to r. 
    */
   public SortedSet<R> getTailSet(R r);
@@ -139,8 +134,7 @@ public interface RegionManager<R extends IDocumentRegion> {
   /** @return the set of documents containing regions. */
   public Set<OpenDefinitionsDocument> getDocuments();
   
-  /** 
-   * Updates _lineStartPos, _lineEndPos of regions in the interval 
+  /** Updates _lineStartPos, _lineEndPos of regions in the interval 
    * [firstRegion, lastRegion] using total ordering on regions.  
    * Removes empty regions.  firstRegion and lastRegion are not necessarily 
    * regions in this manager.  

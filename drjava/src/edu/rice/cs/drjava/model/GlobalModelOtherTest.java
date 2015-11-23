@@ -70,8 +70,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     "  }\n" +
     "}\n";
   
-  /** 
-   * Get the canonical name of a file.  If the operation fails, the test will fail. 
+  /** Get the canonical name of a file.  If the operation fails, the test will fail. 
    * @param f the file for which to find the canonical path
    * @return the canonical file path
    */
@@ -120,8 +119,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
   }
   
   
-  /** 
-   * Checks that System.exit is handled appropriately from interactions pane. 
+  /** Checks that System.exit is handled appropriately from interactions pane. 
    * @throws EditDocumentException if an error occurs during editing
    * @throws InterruptedException if execution is interrupted unexpectedly
    */
@@ -152,8 +150,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     debug.logEnd();
   }
   
-  /** 
-   * Creates a new class, compiles it and then checks that the REPL can see it.  
+  /** Creates a new class, compiles it and then checks that the REPL can see it.  
    * Then checks that a compiled class file in another directory can be both 
    * accessed and extended if it is on the "extra.classpath" config option.
    * @throws BadLocationException if attempts to reference an invalid location
@@ -202,8 +199,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     debug.logEnd();
   }
   
-  /** 
-   * Compiles a new class in the default package with a mixed case name, and 
+  /** Compiles a new class in the default package with a mixed case name, and 
    * ensures that it can be instantiated on a variable with an identical name 
    * (but a lowercase first letter).  Catches SF bug #689026 ("DynamicJava 
    * can't handle certain variable names")
@@ -227,8 +223,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     debug.logEnd();
   }
   
-  /** 
-   * Checks that updating a class and recompiling it is visible from the REPL. 
+  /** Checks that updating a class and recompiling it is visible from the REPL. 
    * @throws BadLocationException if attempts to reference an invalid location
    * @throws EditDocumentException if an error occurs during editing
    * @throws IOException if an IO operation fails
@@ -255,8 +250,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     debug.logEnd();
   }
   
-  /** 
-   * Checks that an anonymous inner class can be defined in the repl! 
+  /** Checks that an anonymous inner class can be defined in the repl! 
    * @throws BadLocationException if attempts to reference an invalid location
    * @throws EditDocumentException if an error occurs during editing
    * @throws IOException if an IO operation fails
@@ -347,8 +341,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     debug.logEnd();
   }
   
-  /** 
-   * Tests that getSourceRoot works with a relative path when a package name is present. 
+  /** Tests that getSourceRoot works with a relative path when a package name is present. 
    * @throws BadLocationException if attempts to reference an invalid location
    * @throws IOException if an IO operation fails
    */
@@ -487,8 +480,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     debug.logEnd();
   }
   
-  /** 
-   * Creates a new class, compiles it and then checks that the REPL can see it. 
+  /** Creates a new class, compiles it and then checks that the REPL can see it. 
    * @throws BadLocationException if attempts to reference an invalid location
    * @throws EditDocumentException if an error occurs during editing
    * @throws IOException if an IO operation fails

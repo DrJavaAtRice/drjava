@@ -100,8 +100,7 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
     _interpreter = new Interpreter(_interpreterOptions, _interpreterLoader);
   }
   
-  /** 
-   * Asserts that the results of interpreting the first of each
+  /** Asserts that the results of interpreting the first of each
    * Pair is equal to the second.
    * @param cases an array of Pairs
    * @throws InterpreterException if something goes wrong during interpretation
@@ -124,8 +123,7 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
     return "compiler=" + _model.getCompilerModel().getActiveCompiler().getName() + ": ";
   }
 
-  /** 
-   * Tests that we get the correct 'cannot access its superinterface' error for non-public classes. 
+  /** Tests that we get the correct 'cannot access its superinterface' error for non-public classes. 
    * @throws BadLocationException if attempts to reference an invalid location
    * @throws IOException if an IO operation fails
    * @throws InterruptedException if execution if interrupted unexpectedly

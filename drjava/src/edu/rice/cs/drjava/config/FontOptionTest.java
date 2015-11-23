@@ -39,8 +39,7 @@ package edu.rice.cs.drjava.config;
 import edu.rice.cs.drjava.DrJavaTestCase;
 import java.awt.Font;
 
-/**
- * Class according to the JUnit protocol. Tests
+/** * Class according to the JUnit protocol. Tests
  * the proper functionality of the class FontOption.
  * @version $Id$
  */

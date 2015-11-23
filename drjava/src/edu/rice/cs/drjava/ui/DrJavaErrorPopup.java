@@ -67,8 +67,7 @@ public class DrJavaErrorPopup extends JDialog {
 //  /** the parent frame */
 //  private JFrame _parentFrame = new JFrame();
   
-  /** 
-   * Creates a window to graphically display the current error that has 
+  /** Creates a window to graphically display the current error that has 
    * occurred in the code of DrJava. 
    * @param parent the parent frame
    * @param error the error to be displayed

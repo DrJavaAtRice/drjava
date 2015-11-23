@@ -53,8 +53,7 @@ public class ErrorCaretListener implements CaretListener {
   private final DefinitionsPane _definitionsPane;
   protected final MainFrame _frame;
 
-  /** 
-   * Constructs a new caret listener to highlight errors. 
+  /** Constructs a new caret listener to highlight errors. 
    * @param doc document
    * @param defPane reference to the definitions pane
    * @param frame reference to the main frame
@@ -68,8 +67,7 @@ public class ErrorCaretListener implements CaretListener {
   /** @return the OpenDefinitionsDocument corresponding to this listener. */
   public OpenDefinitionsDocument getOpenDefDoc() { return _openDoc; }
 
-  /** 
-   * After each update to the caret, determine if changes in highlighting 
+  /** After each update to the caret, determine if changes in highlighting 
    * need to be made.  Highlights the line if the compiler output tab is 
    * showing.  Only runs in the event thread.
    * @param evt the event to update based on
@@ -80,8 +78,7 @@ public class ErrorCaretListener implements CaretListener {
     updateHighlight(evt.getDot());
   }
   
-  /** 
-   * Update the highlight appropriately. 
+  /** Update the highlight appropriately. 
    * @param curPos the current position
    */
   public void updateHighlight(final int curPos) {

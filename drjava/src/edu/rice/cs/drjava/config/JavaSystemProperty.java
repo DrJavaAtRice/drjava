@@ -41,8 +41,7 @@ package edu.rice.cs.drjava.config;
   */
 public class JavaSystemProperty extends EagerProperty {
 
-  /** 
-   * Create a Java system property. 
+  /** Create a Java system property. 
    * @param name the name of the property
    */
   public JavaSystemProperty(String name) {

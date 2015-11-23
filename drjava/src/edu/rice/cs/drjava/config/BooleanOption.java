@@ -41,8 +41,7 @@ package edu.rice.cs.drjava.config;
  */
 public class BooleanOption extends Option<Boolean> {
   
-  /** 
-   * @param key the name of this option
+  /** @param key the name of this option
    * @param def the definition of this option
    */
   public BooleanOption(String key, Boolean def) { super(key,def); }

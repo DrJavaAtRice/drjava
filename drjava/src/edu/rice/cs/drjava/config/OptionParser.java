@@ -87,8 +87,7 @@ public abstract class OptionParser<T> implements ParseStrategy<T> {
   
   abstract String getString(DefaultOptionMap om);
   
-  /** 
-   * Uses parse() and setOption() so that any changes in parsing will 
+  /** Uses parse() and setOption() so that any changes in parsing will 
    * automatically be applied to setString(). 
    * @param om the option map
    * @param val the value to set
@@ -96,15 +95,13 @@ public abstract class OptionParser<T> implements ParseStrategy<T> {
    */
   T setString(DefaultOptionMap om, String val) { return setOption(om,parse(val)); }
   
-  /** 
-   * The accessor for the magic-typed hashtable stunt. 
+  /** The accessor for the magic-typed hashtable stunt. 
    * @param om the option map
    * @return the value associated with om
    */
   T getOption(DefaultOptionMap om) { return map.get(om); }
   
-  /** 
-   * The mutator for the magic-typed hashtable stunt.
+  /** The mutator for the magic-typed hashtable stunt.
    * @param om the option map
    * @param val the value to set
    * @return the previous value associated with key, or null if there was no mapping for key.
@@ -112,8 +109,7 @@ public abstract class OptionParser<T> implements ParseStrategy<T> {
    */
   T setOption(DefaultOptionMap om, T val) { return map.put(om,val); }
   
-  /** 
-   * The destructor for a mapping in the magic-typed hashtable. 
+  /** The destructor for a mapping in the magic-typed hashtable. 
    * @param om the option map
    * @return the previous value associated with key, or null if there was no mapping for key.
    * (A null return can also indicate that the map previously associated null with key.)

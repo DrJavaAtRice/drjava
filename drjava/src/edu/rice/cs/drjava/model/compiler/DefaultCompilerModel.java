@@ -232,8 +232,7 @@ public class DefaultCompilerModel implements CompilerModel {
     return ! _model.hasModifiedDocuments();
   }
   
-  /** 
-   * Compile the given documents. 
+  /** Compile the given documents. 
    * @param docs the documents to be compiled
    * @throws IOException if an IO operation fails
    */
@@ -293,8 +292,7 @@ public class DefaultCompilerModel implements CompilerModel {
   
   //-------------------------------- Helpers --------------------------------//
   
-  /** 
-   * Converts JExprParseExceptions thrown by the JExprParser in language levels to CompilerErrors. 
+  /** Converts JExprParseExceptions thrown by the JExprParser in language levels to CompilerErrors. 
    * @param pes list of exceptions to be converted
    * @return list of converted exceptions
    */
@@ -309,8 +307,7 @@ public class DefaultCompilerModel implements CompilerModel {
     return errors;
   }
   
-  /** 
-   * Converts errors thrown by the language level visitors to CompilerErrors. 
+  /** Converts errors thrown by the language level visitors to CompilerErrors. 
    * @param visitorErrors list of exceptions to be converted
    * @return list of converted exceptions
    */
@@ -332,8 +329,7 @@ public class DefaultCompilerModel implements CompilerModel {
     return errors;
   }
   
-  /** 
-   * Compile the given files and update the model with any errors that result. 
+  /** Compile the given files and update the model with any errors that result. 
    * Does not notify listeners.  
    * All public compile methods delegate to this one so this method is the 
    * only one that uses synchronization to prevent compiling and unit testing 
@@ -386,8 +382,7 @@ public class DefaultCompilerModel implements CompilerModel {
     }
   }
   
-  /** 
-   * Reorders files so that all file names containing "Test" are at the end.  
+  /** Reorders files so that all file names containing "Test" are at the end.  
    * @param files the files to be sorted
    * @return the sorted list of files
    */
@@ -590,8 +585,7 @@ public class DefaultCompilerModel implements CompilerModel {
     else { return null; }
   }
   
-  /** 
-   * Sorts the given array of CompilerErrors and divides it into groups based 
+  /** Sorts the given array of CompilerErrors and divides it into groups based 
    * on the file, giving each group to the appropriate OpenDefinitionsDocument, 
    * opening files if necessary.  Called immediately after compilations finishes.
    * @param errors the list of errors to be sorted

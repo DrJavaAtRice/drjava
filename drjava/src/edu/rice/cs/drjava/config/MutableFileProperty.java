@@ -46,8 +46,7 @@ import java.io.*;
 public class MutableFileProperty extends FileProperty {
   protected File _fileValue = null;
 
-  /** 
-   * Create an eager file property. 
+  /** Create an eager file property. 
    * @param name the name of the property
    * @param initialFile the initial file
    * @param help the help page for this property

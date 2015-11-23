@@ -144,8 +144,7 @@ public class JPDADebugger implements Debugger {
   /*Determines whether automatic trace has been enabled*/
   private volatile boolean _isAutomaticTraceEnabled = false;
       
-  /** 
-   * Builds a new JPDADebugger to debug code in the Interactions JVM, using 
+  /** Builds a new JPDADebugger to debug code in the Interactions JVM, using 
    * the JPDA/JDI interfaces.
    * Does not actually connect to the interpreterJVM until startUp().
    * @param model the global model
@@ -203,8 +202,7 @@ public class JPDADebugger implements Debugger {
   /** Returns whether the debugger is currently enabled. */
   public boolean isReady() { return _vm != null; }
   
-  /** 
-   * Attaches the debugger to the Interactions JVM to prepare for debugging.  
+  /** Attaches the debugger to the Interactions JVM to prepare for debugging.  
    * Only runs in event thread. 
    * @throws DebugException if something goes wrong
    */
@@ -290,8 +288,7 @@ public class JPDADebugger implements Debugger {
   }
   
   
-  /** 
-   * Sets the notion of current thread to the one contained in threadData. 
+  /** Sets the notion of current thread to the one contained in threadData. 
    * The thread must be suspended. (Note: the intention is for this method to 
    * suspend the thread if necessary, but this is not yet implemented.  The 
    * catch is that any manually suspended threads won't cooperate with the 
@@ -374,8 +371,7 @@ public class JPDADebugger implements Debugger {
     return _suspendedThreads.peek();
   }
   
-  /** 
-   * @return whether the debugger currently has any suspended threads. 
+  /** @return whether the debugger currently has any suspended threads. 
    * @throws DebugException if something goes wrong
    */
   public /* synchronized */ boolean hasSuspendedThreads() throws DebugException {
@@ -384,8 +380,7 @@ public class JPDADebugger implements Debugger {
     return _suspendedThreads.size() > 0;
   }
   
-  /** 
-   * @return whether the debugger's current thread is suspended.
+  /** @return whether the debugger's current thread is suspended.
    * @throws DebugException if something goes wrong
    */
   public /* synchronized */ boolean isCurrentThreadSuspended() throws DebugException {
@@ -394,8 +389,7 @@ public class JPDADebugger implements Debugger {
     return hasSuspendedThreads() && ! hasRunningThread();
   }
   
-  /** 
-   * @return whether the thread the debugger is tracking is now running.
+  /** @return whether the thread the debugger is tracking is now running.
    * @throws DebugException if something goes wrong
    */
   public /* synchronized */ boolean hasRunningThread() throws DebugException {
@@ -404,8 +398,7 @@ public class JPDADebugger implements Debugger {
     return _runningThread != null;
   }
   
-  /** 
-   * Resumes the thread currently being debugged, copying back all variables 
+  /** Resumes the thread currently being debugged, copying back all variables 
    * from the current debug interpreter.
    * @throws DebugException if something goes wrong
    */
@@ -427,8 +420,7 @@ public class JPDADebugger implements Debugger {
     return _isAutomaticTraceEnabled;
   }
   
-  /** 
-   * Resumes the given thread, copying back any variables from its associated debug interpreter.
+  /** Resumes the given thread, copying back any variables from its associated debug interpreter.
    * @param threadData Thread to resume
    * @throws DebugException if something goes wrong
    */
@@ -439,8 +431,7 @@ public class JPDADebugger implements Debugger {
     _resumeThread(thread, false);
   }
   
-  /** 
-   * Steps the execution of the currently loaded document.
+  /** Steps the execution of the currently loaded document.
    * @param type the type of step to take
    * @throws DebugException if something goes wrong
    */
@@ -497,10 +488,9 @@ public class JPDADebugger implements Debugger {
     return true;
   }
   
-  /**
-   * @param s the identifier to be checked 
-   * @return true if s is a valid Java identifier. 
-   */
+  /** @param s the identifier to be checked 
+    * @return true if s is a valid Java identifier. 
+    */
   public static boolean isJavaIdentifier(String s) {
     if (s.length() == 0 || !Character.isJavaIdentifierStart(s.charAt(0))) {
       return false;
@@ -513,8 +503,7 @@ public class JPDADebugger implements Debugger {
     return true;
   }
   
-  /** 
-   * Adds a watch on the given field or variable.
+  /** Adds a watch on the given field or variable.
    * @param field the name of the field we will watch
    * @throws DebugException if something goes wrong
    */
@@ -538,8 +527,7 @@ public class JPDADebugger implements Debugger {
 //    } });
   }
   
-  /** 
-   * Removes any watches on the given field or variable.
+  /** Removes any watches on the given field or variable.
    * Has no effect if the given field is not being watched.
    * @param field the name of the field we will watch
    * @throws DebugException if something goes wrong
@@ -558,8 +546,7 @@ public class JPDADebugger implements Debugger {
     }
   }
   
-  /** 
-   * Removes the watch at the given index.
+  /** Removes the watch at the given index.
    * @param index Index of the watch to remove
    * @throws DebugException if something goes wrong
    */
@@ -575,8 +562,7 @@ public class JPDADebugger implements Debugger {
     }
   }
   
-  /** 
-   * Removes all watches on existing fields and variables.
+  /** Removes all watches on existing fields and variables.
    * @throws DebugException if something goes wrong
    */
   public /* synchronized */ void removeAllWatches() throws DebugException {
@@ -600,8 +586,7 @@ public class JPDADebugger implements Debugger {
     });
   }
   
-  /** 
-   * Toggles whether a breakpoint is set at the given line in the given document.
+  /** Toggles whether a breakpoint is set at the given line in the given document.
    * @param doc  Document in which to set or remove the breakpoint
    * @param offset  Start offset on the line to set the breakpoint
    * @param isEnabled  {@code true} if this breakpoint should be enabled
@@ -641,8 +626,7 @@ public class JPDADebugger implements Debugger {
 
   
   
-  /** 
-   * Sets a breakpoint.
+  /** Sets a breakpoint.
    * @param breakpoint The new breakpoint to set
    * @throws DebugException if something goes wrong
    */
@@ -652,8 +636,7 @@ public class JPDADebugger implements Debugger {
     _model.getBreakpointManager().addRegion(breakpoint);
   }
   
-  /** 
-   * @param breakpoint the breakpoint for which to get the line number
+  /** @param breakpoint the breakpoint for which to get the line number
    * @return the line number of the breakpoint, possibly mapped from LL to Java
    *         if the breakpoint is set in a language level file. 
    */
@@ -696,8 +679,7 @@ public class JPDADebugger implements Debugger {
     return new DelegatingLocation(ste.getFileName(), ste.getLineNumber(), l);
   }
   
-  /** 
-   * Removes a breakpoint. Called from toggleBreakpoint -- even with BPs that are not active.
+  /** Removes a breakpoint. Called from toggleBreakpoint -- even with BPs that are not active.
    * @param bp The breakpoint to remove.
    * @throws DebugException if something goes wrong
    */
@@ -731,8 +713,7 @@ public class JPDADebugger implements Debugger {
     }
   }
   
-  /** 
-   * Returns all currently watched fields and variables. No synchronization 
+  /** Returns all currently watched fields and variables. No synchronization 
    * required because _watches is final.
    * @return all currently watched fields and variables
    * @throws DebugException if something goes wrong
@@ -742,8 +723,7 @@ public class JPDADebugger implements Debugger {
     return _watches;
   }
   
-  /** 
-   * @return a list of all threads being tracked by the debugger. Does not 
+  /** @return a list of all threads being tracked by the debugger. Does not 
    *         return any threads known to be dead.
    * @throws DebugException if something goes wrong
    */
@@ -808,8 +788,7 @@ public class JPDADebugger implements Debugger {
     }
   }
   
-  /** 
-   * Return the adjusted location (identical to input unless the matching 
+  /** Return the adjusted location (identical to input unless the matching 
    * document is a LL file) and document associated with this location 
    * generated by the JVM and hence associated with a conventional Java (not 
    * an LL) file.  A document is preloaded when a debugger step occurs.  
@@ -968,8 +947,7 @@ public class JPDADebugger implements Debugger {
   
   
   
-  /** 
-   * Accessor for the _vm field.  Called from DocumentDebugAction and this. 
+  /** Accessor for the _vm field.  Called from DocumentDebugAction and this. 
    * @return the _vm field
    */
   VirtualMachine getVM() { return _vm; }
@@ -980,10 +958,9 @@ public class JPDADebugger implements Debugger {
   /** @return the pending request manager used by the debugger. */
   PendingRequestManager getPendingRequestManager() { return _pendingRequestManager; }
   
-  /**
-   * @param i index into the stack of suspended threads
-   * @return the suspended thread at the current index of the stack.
-   */
+  /** @param i index into the stack of suspended threads
+    * @return the suspended thread at the current index of the stack.
+    */
   ThreadReference getThreadAt(int i) { return _suspendedThreads.peekAt(i); }
   
   /** @return the running thread currently tracked by the debugger. */
@@ -1015,8 +992,7 @@ public class JPDADebugger implements Debugger {
     _eventHandlerError = t;
   }
   
-  /** 
-   * Handles the details of attaching to the interpreterJVM. 
+  /** Handles the details of attaching to the interpreterJVM. 
    * Only runs in the event thread.
    * @throws DebugException if something goes wrong
    */
@@ -1047,8 +1023,7 @@ public class JPDADebugger implements Debugger {
 //    System.err.println("_interpreterm vm is " + _interpreterJVM);
   }
   
-  /** 
-   * @return an attaching connector to use for connecting to the interpreter JVM.
+  /** @return an attaching connector to use for connecting to the interpreter JVM.
    * @throws DebugException if something goes wrong
    */
   private AttachingConnector _getAttachingConnector() throws DebugException {
@@ -1062,8 +1037,7 @@ public class JPDADebugger implements Debugger {
     return connector;
   }
   
-  /** 
-   * Sets the debugger's currently active thread. This method assumes that the 
+  /** Sets the debugger's currently active thread. This method assumes that the 
    * given thread is already suspended. The return value fixes a bug that 
    * occurs if the user steps into a breakpoint.
    * 
@@ -1094,8 +1068,7 @@ public class JPDADebugger implements Debugger {
     }
   }
   
-  /** 
-   * Returns a Vector with the loaded ReferenceTypes for the given class name
+  /** Returns a Vector with the loaded ReferenceTypes for the given class name
    * (empty if the class could not be found).  Makes no attempt to load the
    * class if it is not already loaded.  If the lineNumber is not
    * DebugAction.ANY_LINE, this method ensures that the returned ReferenceTypes
@@ -1169,8 +1142,7 @@ public class JPDADebugger implements Debugger {
     return refTypes;
   }
   
-  /** 
-   * Assumes lock is already held.
+  /** Assumes lock is already held.
    * @param d info about the thread, used to search for it
    * @return The thread in the virtual machine with name d.uniqueID()
    * @throws NoSuchElementException if the thread could not be found
@@ -1225,16 +1197,14 @@ public class JPDADebugger implements Debugger {
    _runningThread = null;
    }*/
   
-  /** 
-   * Resumes the thread currently being debugged without removing the debug 
+  /** Resumes the thread currently being debugged without removing the debug 
    * interpreter or switching to the next suspended thread.  Assumes lock is 
    * already held.
    * @throws DebugException if something goes wrong
    */
   private void _resumeFromStep() throws DebugException { _resumeHelper(true); }
   
-  /** 
-   * Resumes execution of the currently suspended thread.  
+  /** Resumes execution of the currently suspended thread.  
    * Assumes lock is already held.
    * @param fromStep Whether to copy back the variables from the current 
    *        debug interpreter and switch to the next
@@ -1251,8 +1221,7 @@ public class JPDADebugger implements Debugger {
     catch (NoSuchElementException e) { throw new DebugException("No thread to resume."); }
   }
   
-  /** 
-   * Resumes the given thread, only copying variables from its debug 
+  /** Resumes the given thread, only copying variables from its debug 
    * interpreter if shouldCopyBack is true.  Assumes lock on this is 
    * already held.
    * @param thread Thread to resume
@@ -1292,8 +1261,7 @@ public class JPDADebugger implements Debugger {
     if (! fromStep && ! _suspendedThreads.isEmpty()) _switchToSuspendedThread();
   }
   
-  /** 
-   * Performs a step in the currently suspended thread, only generating a step 
+  /** Performs a step in the currently suspended thread, only generating a step 
    * event if shouldNotify if true.  Assumes that lock is already held.
    * @param type The type of step to perform
    * @param shouldNotify Whether to generate a step event
@@ -1378,16 +1346,14 @@ public class JPDADebugger implements Debugger {
 //    else  scrollToSource(location);
 //  }
   
-  /** 
-   * Scroll to the location specified by location  Assumes lock on this is already held 
+  /** Scroll to the location specified by location  Assumes lock on this is already held 
    * @param location the location to scroll to
    */
   private void scrollToSource(Location location) {
     scrollToSource(location, true);
   }
   
-  /** 
-   * Scroll to the location specified by location. 
+  /** Scroll to the location specified by location. 
    * @param location the location to scroll to
    * @param shouldHighlight true if highlighting is desired; false otherwise
    */
@@ -1403,8 +1369,7 @@ public class JPDADebugger implements Debugger {
     openAndScroll(doc, lll, shouldHighlight);
   }
   
-  /** 
-   * Opens a document and scrolls to the appropriate location.  
+  /** Opens a document and scrolls to the appropriate location.  
    * If doc is null, a message is printed indicating the 
    * source file could not be found.  Assumes lock on this is already held.
    * @param doc Document to open
@@ -1419,8 +1384,7 @@ public class JPDADebugger implements Debugger {
     openAndScroll(doc, location.lineNumber(), location.declaringType().name(), shouldHighlight);
   }
   
-  /** 
-   * Opens a document and scrolls to the appropriate location.  
+  /** Opens a document and scrolls to the appropriate location.  
    * If doc is null, a message is printed indicating the
    * source file could not be found.  Assumes lock on this is already held.
    * @param doc Document to open
@@ -1508,8 +1472,7 @@ public class JPDADebugger implements Debugger {
     }
   }
   
-  /** 
-   * Copy the current selected thread's visible variables (those in scope) into
+  /** Copy the current selected thread's visible variables (those in scope) into
    * an interpreter's environment and then switch the Interactions window's
    * interpreter to that interpreter.
    * @throws DebugException if something goes wrong
@@ -1574,8 +1537,7 @@ public class JPDADebugger implements Debugger {
     }
   }
   
-  /** 
-   * @param threadRef refence to the thread being debugged
+  /** @param threadRef refence to the thread being debugged
    * @return the prompt to display in the itneractions console
    * based upon the ThreadReference threadRef, which is being debugged.
    */
@@ -1583,8 +1545,7 @@ public class JPDADebugger implements Debugger {
     return "[" + threadRef.name() + "] > ";
   }
   
-  /** 
-   * Create a String in the VM and prevent it from being garbage collected.
+  /** Create a String in the VM and prevent it from being garbage collected.
    * @param s the string to be mirrored
    * @param toRelease a list of objects
    * @return reference to the newly-created string
@@ -1605,8 +1566,7 @@ public class JPDADebugger implements Debugger {
     throw new DebugException("Ran out of OBJECT_COLLECTED_TRIES");
   }
   
-  /** 
-   * Create an array of the given elements in the VM and prevent it from being garbage collected.
+  /** Create an array of the given elements in the VM and prevent it from being garbage collected.
    * @param elementClass the type of the objects in elts
    * @param elts a list of objects to mirror
    * @param thread a ThreadReference
@@ -1638,8 +1598,7 @@ public class JPDADebugger implements Debugger {
     throw new DebugException("Ran out of OBJECT_COLLECTED_TRIES");
   }
   
-  /** 
-   * Create a boxed object corresponding to the given primitive.
+  /** Create a boxed object corresponding to the given primitive.
    * @param val the value to be boxed
    * @param thread a ThreadReference
    * @param toRelease a list of boxed objects
@@ -1686,8 +1645,7 @@ public class JPDADebugger implements Debugger {
   }
   
   
-  /** 
-   * Create an unboxed primitive corresponding to the given object.
+  /** Create an unboxed primitive corresponding to the given object.
    * @param val the value to be unboxed
    * @param thread a ThreadReference
    * @return unboxed value corresponding to val
@@ -1713,8 +1671,7 @@ public class JPDADebugger implements Debugger {
   }
   
   
-  /** 
-   * Get a reference type corresponding to the class with the given name.
+  /** Get a reference type corresponding to the class with the given name.
    * Note there is not necessarily a one-to-one correspondence between classes
    * and names -- every class loader can define a class with a certain name --
    * so we just pick one.  Classes defined by the bootstrap class loader have
@@ -1763,15 +1720,13 @@ public class JPDADebugger implements Debugger {
     catch(DebugException de) { throw new UnexpectedException(de); }
   }
   
-  /** 
-   * Calls the real switchToSuspendedThread, telling it to updateWatches. 
+  /** Calls the real switchToSuspendedThread, telling it to updateWatches. 
    * This is what is usually called.
    * @throws DebugException if something goes wrong
    */
   private void _switchToSuspendedThread() throws DebugException { _switchToSuspendedThread(null, true); }
 
-  /** 
-   * Calls the real switchToSuspendedThread, telling it to updateWatches. 
+  /** Calls the real switchToSuspendedThread, telling it to updateWatches. 
    * @param request a BreakpointRequest
    * @throws DebugException if something goes wrong
    */
@@ -1779,8 +1734,7 @@ public class JPDADebugger implements Debugger {
     _switchToSuspendedThread(request, true); 
   }
   
-  /** 
-   * Performs the bookkeeping to switch to the suspened thread on the top of 
+  /** Performs the bookkeeping to switch to the suspened thread on the top of 
    * the _suspendedThreads stack.
    * @param request The BreakPointRequest reached by the debugger, or null if 
    *        not a breakpoint
@@ -1825,16 +1779,14 @@ public class JPDADebugger implements Debugger {
     }
   }
   
-  /** 
-   * @param thread the thread whose name is to be retrieved
+  /** @param thread the thread whose name is to be retrieved
    * @return a unique name for the given thread. 
    */
   private String _getUniqueThreadName(ThreadReference thread) {
     return Long.toString(thread.uniqueID());
   }
   
-  /** 
-   * Assumes lock is already held.
+  /** Assumes lock is already held.
    * @see edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM#getVariableValue
    * @see #GET_VARIABLE_VALUE_SIG
    * @throws DebugException if something goes wrong
@@ -1911,8 +1863,7 @@ public class JPDADebugger implements Debugger {
     interactionsModel.removeInterpreter(oldInterpreterName);
   }
   
-  /** 
-   * Notifies all listeners that the current thread has been resumed.  
+  /** Notifies all listeners that the current thread has been resumed.  
    * Unsynchronized because invokeLater runs asynchronously. Precondition: 
    * assumes that the current thread hasn't yet been resumed
    * @throws DebugException if something goes wrong
@@ -1922,8 +1873,7 @@ public class JPDADebugger implements Debugger {
     EventQueue.invokeLater(new Runnable() { public void run() { _notifier.currThreadResumed(); } });
   }
   
-  /** 
-   * Switches the current interpreter to the one corresponding to threadRef.  
+  /** Switches the current interpreter to the one corresponding to threadRef.  
    * Assumes lock on this is already held.
    * @param threadRef The ThreadRefernce corresponding to the interpreter to switch to
    */
@@ -1937,8 +1887,7 @@ public class JPDADebugger implements Debugger {
     EventQueue.invokeLater(new Runnable() { public void run() { _notifier.threadStarted(); } });
   }
   
-  /** 
-   * Notifies all listeners that the current thread has died.  updateThreads 
+  /** Notifies all listeners that the current thread has died.  updateThreads 
    * is set to true if the threads and stack
    * tables need to be updated, false if there are no suspended threads
    * @throws DebugException if something goes wrong
@@ -1990,8 +1939,7 @@ public class JPDADebugger implements Debugger {
     EventQueue.invokeLater(new Runnable() { public void run() { _notifier.stepRequested(); } });
   }
   
-  /** 
-   * Invoke the given method, and handle any errors that may arise.  Note that the result
+  /** Invoke the given method, and handle any errors that may arise.  Note that the result
    * does not have garbage collection disabled; if the result is a reference 
    * that will be needed later and that is not referenced elsewhere in the VM, garbage
    * collection for it should be immediately disabled (and there's still the possibility
@@ -2023,8 +1971,7 @@ public class JPDADebugger implements Debugger {
     catch (InvalidTypeException e) { throw new DebugException(e); }
   }
   
-  /** 
-   * Invoke the given static method, and handle any errors that may arise.  Note that
+  /** Invoke the given static method, and handle any errors that may arise.  Note that
    * the result does not have garbage collection disabled; if the result is a reference
    * that will be needed later and that is not referenced elsewhere in the VM, garbage
    * collection for it should be immediately disabled (and there's still the possibility
@@ -2055,8 +2002,7 @@ public class JPDADebugger implements Debugger {
     catch (InvalidTypeException e) { throw new DebugException(e); }
   }
   
-  /** 
-   * Invoke a constructor of the given class, and handle any errors that may arise.  Note 
+  /** Invoke a constructor of the given class, and handle any errors that may arise.  Note 
    * that the result does not have garbage collection disabled; if the result will be needed
    * later and is not referenced elsewhere in the VM (a likely event, since it was just
    * constructed), garbage collection for it should be immediately disabled (and there's
@@ -2086,8 +2032,7 @@ public class JPDADebugger implements Debugger {
     catch (InvalidTypeException e) { throw new DebugException(e); }
   }
   
-  /** 
-   * Get the value of the given static field, and handle any errors that may arise.  Note 
+  /** Get the value of the given static field, and handle any errors that may arise.  Note 
    * the result does not have garbage collection enabled; if the result is a reference
    * that will be needed later and that is not referenced elsewhere in the VM (this
    * would require that the value of the field subsequently changes), garbage

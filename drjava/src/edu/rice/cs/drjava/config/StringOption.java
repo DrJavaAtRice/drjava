@@ -41,8 +41,7 @@ package edu.rice.cs.drjava.config;
   */
 public class StringOption extends Option<String> {
 
-  /** 
-   * @param key The name of this Option. 
+  /** @param key The name of this Option. 
    * @param def The definition of this Option.
    */
   public StringOption(String key, String def) { super(key, def); }

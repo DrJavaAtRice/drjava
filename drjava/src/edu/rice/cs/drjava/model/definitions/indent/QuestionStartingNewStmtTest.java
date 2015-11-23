@@ -38,8 +38,7 @@ package edu.rice.cs.drjava.model.definitions.indent;
 
 import javax.swing.text.BadLocationException;
 
-/**
- * Tests the question rule which determines if the current line
+/** * Tests the question rule which determines if the current line
  * is starting a new statement.
  *
  * @version $Id$

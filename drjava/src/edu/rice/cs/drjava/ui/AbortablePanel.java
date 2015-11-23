@@ -94,8 +94,7 @@ public abstract class AbortablePanel extends TabbedPanel {
     //MainFrame.LOG.log("\tAbortablePanel ctor done");
   }
   
-  /** 
-   * Quick helper for setting up color listeners. 
+  /** Quick helper for setting up color listeners. 
    * @param c component to set up listeners for
    */
   protected static void _setColors(Component c) {
@@ -111,14 +110,12 @@ public abstract class AbortablePanel extends TabbedPanel {
     updateButtons();
   }
 
-  /** 
-   * Setup left panel. Must be overridden to return the component on the left side. 
+  /** Setup left panel. Must be overridden to return the component on the left side. 
    * @return newly-created left panel
    */
   protected abstract Component makeLeftPanel();
 
-  /** 
-   * Abort action was performed. Must be overridden to return the component on the left side. 
+  /** Abort action was performed. Must be overridden to return the component on the left side. 
    * @param e an ActionEvent
    */
   protected abstract void abortActionPerformed(ActionEvent e);
@@ -126,8 +123,7 @@ public abstract class AbortablePanel extends TabbedPanel {
   /** Update button state and text. Should be overridden if additional buttons are added besides "Go To", "Remove" and "Remove All". */
   protected void updateButtons() { }  
 
-  /** 
-   * Creates the buttons for controlling the regions. Should be overridden. 
+  /** Creates the buttons for controlling the regions. Should be overridden. 
    * @return the newly-created buttons
    */
   protected JComponent[] makeButtons() {

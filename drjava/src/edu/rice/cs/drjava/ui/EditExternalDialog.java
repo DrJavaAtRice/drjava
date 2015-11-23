@@ -519,8 +519,7 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
     }
   }
   
-  /** 
-   * Update the properties. 
+  /** Update the properties. 
    * @param selectedIndex the selected index
    */
   public void updateList(int selectedIndex) {

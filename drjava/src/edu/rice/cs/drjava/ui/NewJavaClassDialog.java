@@ -102,8 +102,7 @@ public class NewJavaClassDialog extends SwingFrame {
     }
   };
   
-  /** 
-   * Constructs New Java Class frame and displays it. 
+  /** Constructs New Java Class frame and displays it. 
    * @param mf reference to the main frame
    */
   public NewJavaClassDialog(MainFrame mf) {

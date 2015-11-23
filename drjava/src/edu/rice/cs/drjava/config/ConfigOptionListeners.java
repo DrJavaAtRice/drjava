@@ -239,8 +239,7 @@ public class ConfigOptionListeners implements OptionConstants {
     }
   }
   
-  /** 
-   * @param heapSizeMB the size of the heap, in MB
+  /** @param heapSizeMB the size of the heap, in MB
    * @return the next bigger heap size setting. 
    */
   static String getNextBiggerHeapSize(long heapSizeMB) {
@@ -429,10 +428,9 @@ public class ConfigOptionListeners implements OptionConstants {
     }
   }
   
-  /**
-   * @param heapSize the size of the heap (in MB)
-   * @return true if a JVM can be created with the specified heap size
-   */
+  /** @param heapSize the size of the heap (in MB)
+    * @return true if a JVM can be created with the specified heap size
+    */
   public static boolean checkHeapSize(long heapSize) {
     int exitValue = 1;
     try {

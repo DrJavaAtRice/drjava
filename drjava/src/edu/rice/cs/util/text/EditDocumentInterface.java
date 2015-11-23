@@ -103,8 +103,7 @@ public interface EditDocumentInterface {
   /** @return the length of the document. */
   public int getLength();
   
-  /** 
-   * Returns a portion of the document. Differs from getText in 
+  /** Returns a portion of the document. Differs from getText in 
    * AbstractDocumentInterface by throwing EditDocumentException instead of 
    * BadLocationException.  (Why bother? It avoids referencing a Swing class.)
    * @param offs First offset of the desired text
@@ -129,8 +128,7 @@ public interface EditDocumentInterface {
     */
   public Pageable getPageable() throws IllegalStateException;
   
-  /** 
-   * Prints the given console document 
+  /** Prints the given console document 
    * @throws PrinterException if printing fails
    */
   public void print() throws PrinterException;

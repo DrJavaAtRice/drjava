@@ -93,8 +93,7 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
     notifier.browserChanged();
   }
   
-  /** 
-   * Add the supplied StaticDocumentRegion r to the manager before the current region.
+  /** Add the supplied StaticDocumentRegion r to the manager before the current region.
    * @param r the StaticDocumentRegion to be inserted into the manager
    * @param notifier a GlobalEventNotifier
    */
@@ -186,8 +185,7 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
   /** @return true if the current region is the last in the list, i.e. nextCurrentRegion is without effect */
   public /* synchronized */ boolean isCurrentRegionLast() { return (_futureRegions.size()<1); }
   
-  /** 
-   * Make the region that is more recent the current region.
+  /** Make the region that is more recent the current region.
    * @param notifier a GlobalEventNotifier
    * @return new current region 
    */
@@ -198,8 +196,7 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
     return _pastRegions.peek();
   }
   
-  /** 
-   * Make the region that is less recent the current region.
+  /** Make the region that is less recent the current region.
    * @return new current region 
    * @param notifier a GlobalEventNotifier
    */
@@ -237,8 +234,7 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
     } });
   }
   
-  /** 
-   * @param r1 the first region to compare
+  /** @param r1 the first region to compare
    * @param r2 the second region to compare
    * @return true if the two regions are similar. 
    */

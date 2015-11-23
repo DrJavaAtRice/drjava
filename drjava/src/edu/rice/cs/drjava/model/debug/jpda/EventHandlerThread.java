@@ -131,8 +131,7 @@ public class EventHandlerThread extends Thread {
     _debugger.notifyDebuggerShutdown();
   }
   
-  /** 
-   * Processes a given event from JPDA. A visitor approach would be much 
+  /** Processes a given event from JPDA. A visitor approach would be much 
    * better for this, but Sun's Event class doesn't have an appropriate 
    * visit() method.
    * @param e the event to be handle
@@ -156,8 +155,7 @@ public class EventHandlerThread extends Thread {
       throw new DebugException("Unexpected event type: " + e);
   }
   
-  /** 
-   * @param thread the thread to check
+  /** @param thread the thread to check
    * @return whether the given thread is both suspended and has stack frames. 
    * @throws DebugException if something goes wrong
    */
@@ -288,22 +286,19 @@ public class EventHandlerThread extends Thread {
   }
                           
   
-  /** 
-   * Responds if the virtual machine being debugged dies.
+  /** Responds if the virtual machine being debugged dies.
    * @param e virtual machine death event from JPDA
    * @throws DebugException if something goes wrong
    */
   private void _handleVMDeathEvent(VMDeathEvent e) throws DebugException { _cleanUp(e); }
   
-  /** 
-   * Responds if the virtual machine being debugged disconnects.
+  /** Responds if the virtual machine being debugged disconnects.
    * @param e virtual machine disconnect event from JPDA
    * @throws DebugException if something goes wrong
    */
   private void _handleVMDisconnectEvent(VMDisconnectEvent e) throws DebugException { _cleanUp(e); }
   
-  /** 
-   * Cleans up the state after the virtual machine being debugged  dies or disconnects.
+  /** Cleans up the state after the virtual machine being debugged  dies or disconnects.
    * @param e JPDA event indicating the debugging session has ended
    * @throws DebugException if something goes wrong
    */
@@ -321,8 +316,7 @@ public class EventHandlerThread extends Thread {
     });
   }
   
-  /** 
-   * Responds when a VMDisconnectedException occurs while dealing with another 
+  /** Responds when a VMDisconnectedException occurs while dealing with another 
    * event.  We need to flush the event queue, dealing only with exit events 
    * (VMDeath, VMDisconnect) so that we terminate correctly.
    * @throws DebugException if something goes wrong

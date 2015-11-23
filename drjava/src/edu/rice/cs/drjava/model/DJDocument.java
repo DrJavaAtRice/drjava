@@ -61,8 +61,7 @@ public interface DJDocument extends SwingDocumentInterface {
     */
   public void setIndent(int indent);
   
-  /** 
-   * @param start the start pos
+  /**   * @param start the start pos
    * @param end the end pos
    * @return highlight status info for text between start and end, coalescing 
    *         adjoining blocks with the same status. 
@@ -109,8 +108,7 @@ public interface DJDocument extends SwingDocumentInterface {
   
 //  public void resetReducedModelLocation();
   
-  /** 
-   * Searching backwards, finds the position of the enclosing brace. NB: ignores comments.
+  /**   * Searching backwards, finds the position of the enclosing brace. NB: ignores comments.
    * @param pos Position to start from
    * @param opening opening brace character
    * @param closing closing brace character
@@ -172,15 +170,13 @@ public interface DJDocument extends SwingDocumentInterface {
 //   */
 //  public int findPrevCharPos(int pos, char[] whitespace) throws BadLocationException;
   
-  /** 
-   * Default indentation - uses OTHER flag and no progress indicator.
+  /**   * Default indentation - uses OTHER flag and no progress indicator.
    * @param selStart the offset of the initial character of the region to indent
    * @param selEnd the offset of the last character of the region to indent
    */
   public void indentLines(int selStart, int selEnd);
   
-  /** 
-   * Parameterized indentation for special-case handling.
+  /**   * Parameterized indentation for special-case handling.
    * @param selStart the offset of the initial character of the region to indent
    * @param selEnd the offset of the last character of the region to indent
    * @param reason a flag from {@link edu.rice.cs.drjava.model.definitions.indent.Indenter Indenter}
@@ -192,8 +188,7 @@ public interface DJDocument extends SwingDocumentInterface {
   public void indentLines(int selStart, int selEnd, Indenter.IndentReason reason, ProgressMonitor pm)
     throws OperationCanceledException;
   
-  /** 
-   * Returns the "intelligent" beginning of line. If currPos is to the right 
+  /**   * Returns the "intelligent" beginning of line. If currPos is to the right 
    * of the first non-whitespace character, the position of the first non-
    * whitespace character is returned. If currPos is at or to the left of the
    * first non-whitespace character, the beginning of the line is returned.
@@ -203,8 +198,7 @@ public interface DJDocument extends SwingDocumentInterface {
    */
   public int getIntelligentBeginLinePos(int currPos) throws BadLocationException;;
   
-  /** 
-   * Returns the indent level of the start of the statement that the cursor is 
+  /**   * Returns the indent level of the start of the statement that the cursor is 
    * on. Uses a default set of delimiters (';', '{', '}') and a default set of 
    * whitespace characters (' ', '\t', n', ',').
    * @param pos Cursor position
@@ -213,8 +207,7 @@ public interface DJDocument extends SwingDocumentInterface {
    */
   public int _getIndentOfCurrStmt(int pos) throws BadLocationException;
   
-  /** 
-   * Returns the indent level of the start of the statement that the cursor is 
+  /**   * Returns the indent level of the start of the statement that the cursor is 
    * on.  Uses a default set of whitespace characters (' ', '\t', '\n', ',').
    * @param pos Cursor position
    * @param delims delimeters
@@ -223,8 +216,7 @@ public interface DJDocument extends SwingDocumentInterface {
    */
   public int _getIndentOfCurrStmt(int pos, char[] delims) throws BadLocationException;
   
-  /** 
-   * Returns the indent level of the start of the statement
+  /**   * Returns the indent level of the start of the statement
    * that the cursor is on.
    * @param pos Cursor position
    * @param delims Delimiter characters denoting end of statement
@@ -235,8 +227,7 @@ public interface DJDocument extends SwingDocumentInterface {
   public int _getIndentOfCurrStmt(int pos, char[] delims, char[] whitespace)
     throws BadLocationException;
   
-  /** 
-   * Determines if the given character exists on the line where
+  /**   * Determines if the given character exists on the line where
    * the given cursor position is. Does not search in quotes or comments.
    * <p>
    * <b>Does not work if character being searched for is a '/' or a '*'</b>
@@ -246,8 +237,7 @@ public interface DJDocument extends SwingDocumentInterface {
    */
   public int findCharOnLine(int pos, char findChar);
   
-  /** 
-   * Returns the absolute position of the beginning of the
+  /**   * Returns the absolute position of the beginning of the
    * current line.  (Just after most recent newline, or 0)
    * Doesn't ignore comments.
    * @param pos Any position on the current line
@@ -255,16 +245,14 @@ public interface DJDocument extends SwingDocumentInterface {
    */
   public int _getLineStartPos(int pos);
   
-  /** 
-   * Returns the absolute position of the end of the current
+  /**   * Returns the absolute position of the end of the current
    * line.  (At the next newline, or the end of the document.)
    * @param pos Any position on the current line
    * @return position of the end of this line
    */
   public int _getLineEndPos(int pos);
   
-  /** 
-   * Returns the absolute position of the first non-whitespace character
+  /**   * Returns the absolute position of the first non-whitespace character
    * on the current line.
    * NB: Doesn't ignore comments.
    * @param pos position on the line

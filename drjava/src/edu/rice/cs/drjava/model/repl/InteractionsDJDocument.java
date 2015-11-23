@@ -192,8 +192,7 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
   //-------------end Undo/Redo Functionality---------------------// 
   
   
-  /** 
-   * @param indentLevel indentation level
+  /** @param indentLevel indentation level
    * @return a new indenter. Eventually to be used to return an interactions indenter 
    */
   protected Indenter makeNewIndenter(int indentLevel) { return new Indenter(indentLevel); }
@@ -223,8 +222,7 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
 //    }
   }
   
-  /** 
-   * Accessor method used to copy contents of _stylesList to an array.  Used in test cases. 
+  /** Accessor method used to copy contents of _stylesList to an array.  Used in test cases. 
    * @return a copy of the contents of _styleList
    */
   public Pair<Pair<Integer, Integer>, String>[] getStyles() { 
@@ -237,8 +235,7 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
     }
   }
   
-  /** 
-   * Attempts to set the coloring on the graphics based upon the content of the styles list
+  /** Attempts to set the coloring on the graphics based upon the content of the styles list
    * returns false if the point is not in the list.  Only runs in event thread.
    * @param point point
    * @param g Graphics object
@@ -300,8 +297,7 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
     }
   }
   
-  /** 
-   * Attempts to set the font on the graphics context based upon the styles 
+  /** Attempts to set the font on the graphics context based upon the styles 
    * held in the styles list. Only runs in event thread. 
    * @param point point
    * @param g Graphics object

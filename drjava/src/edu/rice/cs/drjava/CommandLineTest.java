@@ -50,8 +50,7 @@ import edu.rice.cs.util.Log;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.Utilities;
 
-/**
- * Tests opening/creating files specified as command line arguments.
+/** * Tests opening/creating files specified as command line arguments.
  * @version $Id$
  */
 public final class CommandLineTest extends DrJavaTestCase {
@@ -223,8 +222,7 @@ public final class CommandLineTest extends DrJavaTestCase {
     
   }
   
-  /** 
-   * Open one file on the command line.  Should (obviously) open that file. 
+  /** Open one file on the command line.  Should (obviously) open that file. 
    * @throws BadLocationException if an invalid location within the document model is referenced
    */
   public void testOpenOne() throws BadLocationException {
@@ -257,8 +255,7 @@ public final class CommandLineTest extends DrJavaTestCase {
     _log.log("testNE completed");
   }
   
-  /** 
-   * Many files on the command line. 
+  /** Many files on the command line. 
    * Should open all of them, displaying the last one. 
    * @throws BadLocationException if an invalid location within the document model is referenced
    */
@@ -287,8 +284,7 @@ public final class CommandLineTest extends DrJavaTestCase {
     _log.log("testOpenMany completed");
   }
   
-  /** 
-   * Supplying both valid and invalid filenames on the command line. 
+  /** Supplying both valid and invalid filenames on the command line. 
    * Should open only the valid ones. 
    * @throws BadLocationException if an invalid location within the document model is referenced
    */
@@ -320,8 +316,7 @@ public final class CommandLineTest extends DrJavaTestCase {
     _log.log("testMixed completed");
   }
   
-  /** 
-   * Test duplicate files.
+  /** Test duplicate files.
    * @throws BadLocationException if an invalid location within the document model is referenced
    */
   public void testDups() throws BadLocationException {
@@ -350,8 +345,7 @@ public final class CommandLineTest extends DrJavaTestCase {
 //    _log.log("testDups completed");
   }
   
-  /** 
-   * A regression test for bug #542747, which related to opening a file via the command line using a relative path.
+  /** A regression test for bug #542747, which related to opening a file via the command line using a relative path.
    * The problem was that getSourceRoot() would fail on the document, because the filename was not absolute. (The
    * fix will be to absolutize file paths when opening files.)
    * @throws IOException if an IO operation fails
@@ -370,8 +364,7 @@ public final class CommandLineTest extends DrJavaTestCase {
     _log.log("testRelativePath completed");
   }
   
-  /** 
-   * Tests paths with "." and ".." in them.  Windows will blow up if you use one in a JFileChooser without
+  /** Tests paths with "." and ".." in them.  Windows will blow up if you use one in a JFileChooser without
    * converting it to a canonical filename.
    */
   public void testDotPaths() {
@@ -394,8 +387,7 @@ public final class CommandLineTest extends DrJavaTestCase {
     _log.log("testDotPaths completed");
   }
   
-  /** 
-   * Helper for testRelativeFile and testDotPaths. 
+  /** Helper for testRelativeFile and testDotPaths. 
    * @param funnyName the name of the directory to create
    * @return the newly-created directory
    */
@@ -410,8 +402,7 @@ public final class CommandLineTest extends DrJavaTestCase {
     return newDirectory;
   }
   
-  /** 
-   * Helper for testRelativeFile and testDotPaths. 
+  /** Helper for testRelativeFile and testDotPaths. 
    * @param relativeFile file to write to
    * @param funnyName name of package to write to file
    * @throws IOException if an IO operation fails

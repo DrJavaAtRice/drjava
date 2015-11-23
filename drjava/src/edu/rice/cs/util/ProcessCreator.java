@@ -43,8 +43,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-/**
- * This class abstracts out process creation, similar to ProcessCreator,
+/** * This class abstracts out process creation, similar to ProcessCreator,
  * which is only available in Java 1.5.
  * This ProcessCreator cannot deal with process sequences and chains.
  * It can only create one processes.

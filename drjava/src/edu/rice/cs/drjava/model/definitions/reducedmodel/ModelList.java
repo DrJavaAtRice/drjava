@@ -70,8 +70,7 @@ class ModelList<T> {
 
   public void insertFront(T item) { insert(_head._next, item); }
   
-  /** 
-   * Insert a node immediately before the specified point. Assumes point is not head. 
+  /** Insert a node immediately before the specified point. Assumes point is not head. 
    * @param point the point at which to insert
    * @param item the item to insert
    * @return the inserted node 
@@ -83,8 +82,7 @@ class ModelList<T> {
     return newNode;
   }
 
-  /** 
-   * Remove a node from the list.  Assumes point is not head or tail. 
+  /** Remove a node from the list.  Assumes point is not head or tail. 
    * @param point the point at which to remove
    */
   private void remove(Node<T> point) {
@@ -104,8 +102,7 @@ class ModelList<T> {
 
   public int length() { return _length; }
 
-  /** 
-   * Create a new iterator for this list and register it as one of the 
+  /** Create a new iterator for this list and register it as one of the 
    * listeners which are notified when the list is
    * updated.
    * @return the newly-created iterator
@@ -121,8 +118,7 @@ class ModelList<T> {
     /** Constructor for _head and _tail nodes. */
     Node() { }
 
-    /** 
-     * Constructor for nodes containing data. 
+    /** Constructor for nodes containing data. 
      * @param item data contained at this node
      * @param pred predecessor node
      * @param succ successor node
@@ -133,8 +129,7 @@ class ModelList<T> {
       _next = succ;
     }
     
-    /** 
-     * Insert a new node before "this". Assumes that "this" is not the head node. 
+    /** Insert a new node before "this". Assumes that "this" is not the head node. 
      * @param item item to insert
      * @return the newly-inserted node
      */
@@ -170,8 +165,7 @@ class ModelList<T> {
       addListener(this);
     }
 
-    /** 
-     * Copy constructor that creates a copy of an existing iterator and adds it to the listeners. 
+    /** Copy constructor that creates a copy of an existing iterator and adds it to the listeners. 
      * @param iter copy of an existing iterator
      */
     public ModelIterator(ModelIterator iter) {
@@ -182,8 +176,7 @@ class ModelList<T> {
 
     public ModelIterator copy() { return new ModelIterator(this); }
 
-    /** 
-     * Tests "that" for equality with "this".
+    /** Tests "that" for equality with "this".
      * @param that thing to be compared with this
      * @return true if this and that are equal; false otherwise
      */
@@ -236,8 +229,7 @@ class ModelList<T> {
     
     public int pos() { return _pos; }
 
-    /** 
-     * Inserts an item before the current item.  If current is head, we need 
+    /** Inserts an item before the current item.  If current is head, we need 
      * to move to the next node to perform the insert properly.  Otherwise, 
      * we'll get a null pointer exception because the function will try 
      * to insert the new item before the head.  Ends pointing to inserted item.
@@ -277,8 +269,7 @@ class ModelList<T> {
       _pos++;
     }
 
-    /** 
-     * Delete all nodes between the current position of this and the current position of the given iterator.
+    /** Delete all nodes between the current position of this and the current position of the given iterator.
      * 1) Two iterators pointing to same node: do nothing
      * 2) Iterator 2 is before iterator 1: remove between iterator 2 and iterator 1
      * 3) Iterator 1 is before iterator 2: remove between iterator 1 and iterator 2
@@ -312,8 +303,7 @@ class ModelList<T> {
       notifyOfCollapse(leftPos, rightPos, rightPoint);
     }
 
-    /** 
-     * Notifies the iterators in _listeners that a node has been inserted. 
+    /** Notifies the iterators in _listeners that a node has been inserted. 
      * @param pos insertion position
      */
     private void notifyOfInsert(int pos) {
@@ -323,8 +313,7 @@ class ModelList<T> {
       } 
     }
 
-    /** 
-     * Notifies the iterators in _listeners that a node has been removed. 
+    /** Notifies the iterators in _listeners that a node has been removed. 
      * @param pos removal position
      * @param point the point that was removed
      */
@@ -336,8 +325,7 @@ class ModelList<T> {
       }
     }
 
-    /** 
-     * Notifies the iterators in _listeners that a range of nodes has been collapsed. 
+    /** Notifies the iterators in _listeners that a range of nodes has been collapsed. 
      * @param leftPos left bound on collapsed region
      * @param rightPos right bound on collapsed region
      * @param rightPoint rightmost node of collaprsed region

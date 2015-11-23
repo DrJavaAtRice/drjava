@@ -261,8 +261,7 @@ public class ExternalProcessPanel extends AbortablePanel {
   
   // public static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("external.txt",true);
   
-  /** 
-   * Called when the user double-clicks on the text pane. 
+  /** Called when the user double-clicks on the text pane. 
    * @param e the double-click event
    */
   public void doubleClicked(MouseEvent e) {

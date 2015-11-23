@@ -39,8 +39,7 @@ package edu.rice.cs.util;
 import java.util.List;
 import java.util.LinkedList;
 
-/**
- * Utility class which can tokenize a String into a list of String arguments,
+/** * Utility class which can tokenize a String into a list of String arguments,
  * with behavior similar to parsing command line arguments to a program.
  * Quoted Strings are treated as single arguments, and escaped characters
  * are translated so that the tokenized arguments have the same meaning.

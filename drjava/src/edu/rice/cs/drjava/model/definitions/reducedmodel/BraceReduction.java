@@ -98,8 +98,7 @@ public interface BraceReduction {
 //  /** Gets the distance to the enclosing brace. */
 //  public IndentInfo getIndentInformation();
 
-  /** 
-   * @param relativeLoc the location to find the distance to
+  /** @param relativeLoc the location to find the distance to
    * @return distance to enclosing new line 
    */
   public int getDistToStart(int relativeLoc);
@@ -107,8 +106,7 @@ public interface BraceReduction {
   /** @return distance to next new line. */
   public int getDistToNextNewline();
 
-  /** 
-   * A simplified toString() method. 
+  /** A simplified toString() method. 
    * @return a string representation of this
    */
   public String simpleString();
@@ -126,8 +124,7 @@ public interface BraceReduction {
    */
   public ArrayList<HighlightStatus> getHighlightStatus(int start, int length);
 
-  /** 
-   * @param relLocation distance from walker to get state at.
+  /** @param relLocation distance from walker to get state at.
    * @return the state at the relLocation, where relLocation is the location relative to the walker
    */
   public ReducedModelState moveWalkerGetState(int relLocation);

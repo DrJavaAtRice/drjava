@@ -42,8 +42,7 @@ import java.awt.*;
 import java.awt.font.*;
 import java.text.*;
 
-/**
- * The DrJavaBook class is DrJava's implementation of a Pageable object. It
+/** * The DrJavaBook class is DrJava's implementation of a Pageable object. It
  * serves as the control class for printing, and is responsible for
  * preparing the print job of previewing or printing given the String
  * representation of the document.
@@ -63,8 +62,7 @@ public class DrJavaBook implements Pageable {
   
   private static FontRenderContext DEFAULT_FRC = new FontRenderContext(null, false, true);
   
-  /** 
-   * Constructs a DrJavaBook which a given content text, filename, and pageformat. 
+  /** Constructs a DrJavaBook which a given content text, filename, and pageformat. 
    * @param text text
    * @param fileName file name
    * @param format page format

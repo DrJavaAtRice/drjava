@@ -78,8 +78,7 @@ public class FindReplaceMachine {
   private volatile SingleDisplayModel _model;
   private volatile Component _frame;  
   
-  /** 
-   * Standard Constructor.
+  /** Standard Constructor.
    * Creates new machine to perform find/replace operations on a particular 
    * document starting from a given position.
    * @param model the model
@@ -229,8 +228,7 @@ public class FindReplaceMachine {
     return matchSpace.equals(findWord);
   }
   
-  /** 
-   * If we're on a match for the find word, replace it with the replace word. 
+  /** If we're on a match for the find word, replace it with the replace word. 
    * Only executes in event thread. 
    * @return true if we're on a match; false otherwise
    */
@@ -273,8 +271,7 @@ public class FindReplaceMachine {
     */
   public int replaceAll() { return replaceAll(_searchAllDocuments, _searchSelectionOnly); }
   
-  /** 
-   * Replaces all occurences of the find word with the replace word in the 
+  /** Replaces all occurences of the find word with the replace word in the 
    * current document of in all documents or in the current selection of the 
    * current document depending the value of the flag searchAll
    * @param searchAll true if we should search for occurrences in all documents
@@ -346,8 +343,7 @@ public class FindReplaceMachine {
     return count;
   }
   
-  /** 
-   * Processes all occurences of the find word with the replace word in the 
+  /** Processes all occurences of the find word with the replace word in the 
    * current document or in all documents depending the value of the machine 
    * register _searchAllDocuments.
    * @param findAction action to perform on the occurrences; input is the FindResult, output is ignored
@@ -359,8 +355,7 @@ public class FindReplaceMachine {
     return processAll(findAction, _searchAllDocuments, _searchSelectionOnly); 
   }
   
-  /** 
-   * Processes all occurences of the find word with the replace word in the 
+  /** Processes all occurences of the find word with the replace word in the 
    * current document or in all documents depending the value of the flag 
    * searchAll.  Assumes that findAction does not modify the document it 
    * processes. Only executes in event thread.
@@ -397,8 +392,7 @@ public class FindReplaceMachine {
     else return _processAllInCurrentDoc(findAction, false);
   }
   
-  /** 
-   * Processes all occurences of _findWord in _doc. Never processes other documents.  Starts at the beginning or the
+  /** Processes all occurences of _findWord in _doc. Never processes other documents.  Starts at the beginning or the
    * end of the document (depending on find direction).  This convention ensures that matches created by string 
    * replacement will not be replaced as in the following example:<p>
    *  findString:    "hello"<br>
@@ -480,8 +474,7 @@ public class FindReplaceMachine {
   }
   
   
-  /** 
-   * Finds next match in specified doc only.  If searching forward, len must 
+  /** Finds next match in specified doc only.  If searching forward, len must 
    * be doc.getLength().  If searching backward, start must be 0.  If 
    * searchAll, suppress executing in-document wrapped search, because it 
    * must be deferred.  Only runs in the event thread.  Note than this method 
@@ -546,8 +539,7 @@ public class FindReplaceMachine {
     return _findNextInDocSegment(doc, newStart, newLen, true, allWrapped);
   } 
   
-  /** 
-   * Find first valid match withing specified segment of doc. 
+  /** Find first valid match withing specified segment of doc. 
    * @param doc the document to search within
    * @param start the start offset
    * @param len the length to search
