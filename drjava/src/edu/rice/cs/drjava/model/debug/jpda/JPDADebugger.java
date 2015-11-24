@@ -824,8 +824,12 @@ public class JPDADebugger implements Debugger {
     OpenDefinitionsDocument doc = null;
 
     final List<File> files = new ArrayList<File>();
-    for(OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()) { files.add(odd.getRawFile()); }
-    Location lll = getLLLocation(location, files); /* Location in source file; adjusted for LL file if necessary. */
+    for(OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()) { 
+      files.add(odd.getRawFile()); 
+    }
+
+    /* Location in source file; adjusted for LL file if necessary. */
+    Location lll = getLLLocation(location, files); 
     
     String fileName;
     try {
@@ -835,17 +839,24 @@ public class JPDADebugger implements Debugger {
       File f = _model.getSourceFile(fileName);
       if (f != null) {
         // Get a document for this file, forcing it to open
-        try { doc = _model.getDocumentForFile(f); }
-        catch (IOException ioe) { doc = null; }
+        try { 
+          doc = _model.getDocumentForFile(f); 
+        }
+        catch (IOException ioe) { 
+          doc = null; 
+        }
       }
     }
     catch(AbsentInformationException e) {
-      // No stored doc, look on the source root set (later, also the sourcepath)
 
+      // No stored doc, look on the source root set (later, also the sourcepath)
       ReferenceType rt = location.declaringType();
       fileName = null;
-      try { fileName = DrJavaFileUtils.getPackageDir(rt.name()) + rt.sourceName(); }
+      try { 
+        fileName = DrJavaFileUtils.getPackageDir(rt.name()) + rt.sourceName(); 
+      }
       catch (AbsentInformationException aie) {
+
         // Don't know real source name:
         //   assume source name is same as file name
         fileName = null;
