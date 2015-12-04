@@ -938,6 +938,7 @@ public class JPDADebugger implements Debugger {
           stackData.getMethod().equals(frame.location().declaringType().name() + "." +
                                        frame.location().method().name())) {
         scrollToSource(lll, false);
+        break;
       }
     }
   }
@@ -1870,7 +1871,8 @@ public class JPDADebugger implements Debugger {
               try { val = _unbox((ObjectReference) val, _runningThread); }
               catch (DebugException e) { error.log("Can't unbox variable", e); }
             }
-            if ((oldVal == null) || (!oldVal.equals(val))) {
+
+            if ((val != null) && (!oldVal.equals(val))) {
               try { _runningThread.frame(0).setValue(var, val); }
               catch (InvalidTypeException e) { error.log("Can't set variable", e); }
               catch (ClassNotLoadedException e) { error.log("Can't set variable", e); }
