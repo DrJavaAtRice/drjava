@@ -2289,8 +2289,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** Gets the document for the specified file; may involve opening the file. */
   public OpenDefinitionsDocument getDocumentForFile(File file) throws IOException {
     if ((file instanceof NullFile) ||
-        (file instanceof FileOps.NullFile)) return null;
-    
+        (file instanceof FileOps.NullFile)) {
+      return null;
+    }
+
     // Check if this file is already open
     OpenDefinitionsDocument doc = _getOpenDocument(file);
     if (doc == null) {
@@ -2625,7 +2627,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       try {
         if (! doc.isUntitled()) {
           File root = doc.getSourceRoot();
-          if (root != null) roots.add(root); // Can't create duplicate entries in a Set
+          if (root != null) {
+            roots.add(root); // Can't create duplicate entries in a Set
+          }
         }
       }
       catch (InvalidPackageException e) {
@@ -2687,7 +2691,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     Iterable<File> sourceRoots = getSourceRootSet();
     for (File s: sourceRoots) {
       File f = _getSourceFileFromPath(fileName, s);
-      if (f != null) return f;
+      if (f != FileOps.NULL_FILE) return f;
     }
     Vector<File> sourcepath = DrJava.getConfig().getSetting(OptionConstants.DEBUG_SOURCEPATH);
     return findFileInPaths(fileName, sourcepath);
@@ -2701,7 +2705,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   public File findFileInPaths(String fileName, Iterable<File> paths) {
     for (File p: paths) {
       File f = _getSourceFileFromPath(fileName, p);
-      if (f != null) return f;
+      if (f != FileOps.NULL_FILE) return f;
     }
     return FileOps.NULL_FILE;
   }
