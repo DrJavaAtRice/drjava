@@ -55,7 +55,7 @@ import edu.rice.cs.plt.iter.IterUtil;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /** A test on the GlobalModel that does deals with everything outside of simple file operations, e.g., compile, quit.
-  * @version $Id: GlobalModelOtherTest.java 5444 2011-08-17 07:54:58Z rcartwright $
+  * @version $Id$
   */
 public final class GlobalModelOtherTest extends GlobalModelTestCase implements OptionConstants {
   
@@ -545,12 +545,12 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     
     // Create a new Java interpreter, and set it to be active
     
-    Utilities.invokeAndWait(new Runnable() { 
+    /*Utilities.invokeAndWait(new Runnable() {
       public void run() { 
         dim.addInterpreter("testInterpreter");
         dim.setActiveInterpreter("testInterpreter", "myPrompt>"); 
       }
-    });
+    });*/
     
 //    Utilities.clearEventQueue();
     listener.assertInterpreterChangedCount(1);
