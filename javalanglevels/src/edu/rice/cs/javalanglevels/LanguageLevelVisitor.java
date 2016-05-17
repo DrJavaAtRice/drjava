@@ -130,7 +130,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
 //  /** The inner classes in this class body; null if this is not within a class body. */
 //  HashSet<String> _innerClassesInThisBody;
   
-  protected static final Log _log = new Log("LLConverter.txt", true);
+  protected static final Log _log = new Log("LLConverter.txt", false);
   
   /** This constructor is called from the subclasses of LanguageLevelVisitor.
     * @param file  The File corresponding to the source file we are visiting

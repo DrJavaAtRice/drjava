@@ -62,7 +62,7 @@ import edu.rice.cs.plt.reflect.PathClassLoader;
   */
 public class LanguageLevelConverter {
   
-  public static final Log _log = new Log("LLConverter.txt", true);
+  public static final Log _log = new Log("LLConverter.txt", false);
   
   /* TODO: get rid of all the static dreck (except constants) used in this class and its affiliated
    * classes.  Ugly, ugly, ugly ...  Corky 11-11-14 */
