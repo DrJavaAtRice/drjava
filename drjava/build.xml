@@ -73,6 +73,7 @@
   <echo message="${extlibs}" />
   <!-- Use ConcJUnit if use-concjunit is not defined and we are not running Java 7. -->
   <!-- ConcJUnit is currently incompatible with Java 7. -->
+  <!-- ConcJunit is causing problems with unit testing on Mac OS x platforms; defeating it here
   <if>
     <contains string="${java.version}" substring="1.7"/>
     <then>
@@ -83,7 +84,8 @@
       <property name="use-concjunit" value="true" />
     </else>
   </if>
-  
+  -->
+  <property name="use-concjunit" value="false" />
   <!-- ************
        Help Targets
        ************ -->

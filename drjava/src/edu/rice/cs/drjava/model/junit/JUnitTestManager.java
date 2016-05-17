@@ -126,8 +126,8 @@ public class JUnitTestManager {
 
   /** Find the test classes among the given classNames and accumulate them in
    * TestSuite for junit.  Returns null if a test suite is already pending.
-   * @param classNames the class names that are test class candidates
-   * @param files the files corresponding to classNames
+   * @param classNames the (fully qualified) class names that are test class candidates
+   * @param Java File objects for the source files corresponding to classNames
    * @param coverageMetadata metadata to be used to generate the coverage report
    * @return list of test class names
    */

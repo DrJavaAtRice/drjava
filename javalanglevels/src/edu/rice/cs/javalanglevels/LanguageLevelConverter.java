@@ -461,11 +461,12 @@ public class LanguageLevelConverter {
             sf = jep.SourceFile();  // Does the SourceFile method parse the file f embedded in jep?  NO!
             // Parse the classes in sf
             final Set<String> topLevelClasses = new HashSet<String>();
+            final SourceFile fsf = sf;
             for (TypeDefBase t: sf.getTypes()) {
               t.visit(new JExpressionIFAbstractVisitor<Void>() {
                 public Void forClassDef(ClassDef that) {
                   String className = that.getName().getText();
-                  _log.log("Class '" + className + "' found in file " + sf):
+                  _log.log("Class '" + className + "' found in file " + fsf);
                   topLevelClasses.add(className); 
                   return null; 
                 }
