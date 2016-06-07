@@ -359,6 +359,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
 `    */
   protected SymbolData _getSymbolDataFromFileSystem(final String qualifiedClassName, SourceInfo si, boolean resolve,
                                                     boolean addError) {
+    LanguageLevelConverter._log.log("***** getSymbolDataFromFileSystem(" + qualifiedClassName + ", " + si + ", " + resolve + ", " + addError + ")");
     // If qualifiedClassName is already defined (and not a continuation to resolve), return
     SymbolData sd = symbolTable.get(qualifiedClassName);
     if (sd != null && (! sd.isContinuation() || ! resolve)) return sd;  
@@ -477,7 +478,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     // if source file does not exist, confirm that a class file does exist
     if (classFile.exists()) {
       // read this classfile, create the SymbolData and return it
-     _log.log("Reading classFile " + qualifiedClassName);
+     LanguageLevelConverter._log.log("Reading classFile " + qualifiedClassName);
       sd = LanguageLevelConverter._classFile2SymbolData(qualifiedClassName, programRoot);
       if (sd == null) {
         if (addError) {
@@ -493,7 +494,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
  
   /** Resolves the continuation cont. */
   public SymbolData resolveSymbol(SourceInfo si, SymbolData cont) { 
-//    _log.log("***ALARM*** resolveSymbol called for '" + cont + "'");
+    LanguageLevelConverter._log.log("***** resolveSymbol(" + si + ", " + cont + ") called");
     return getQualifiedSymbolData(cont.getName(), si, true); 
   }
   
@@ -518,7 +519,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
   
   /** Simple signature for getSymbol that uses the current context to fill in context information, i.e., it passes _file
     * for file, _package for pkg, _importedFiles for importedFiles, _importedPackages for importedPackages, and 
-    * _enclosingClass for enclosingClassName.  This version should be used in all contexts EXCEPT fixups which are 
+    * _enclosingClass for enclosingClassName.  This version should be used in all contexts EXCEPT fixups (continuations) which are 
     * executed outside of any context and must provide saved context information.
     */
   protected SymbolData getSymbolData(String className, SourceInfo si, boolean addError, boolean checkImports) {
@@ -563,13 +564,17 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
                                      boolean checkImports) {
     
     if (className == null) {
-//      _log.log("***ERROR*** getSymbolData called with null className");
+      LanguageLevelConverter._log.log("***ERROR*** getSymbolData called with null className");
       assert false;
     }
+    LanguageLevelConverter._log.log("***** getQualifiedSymbol(... " + className + "...) called");
     
     /** Check to see if type with className (as is) can be found (including a check against generic type variables). */
     SymbolData existingSD = getQualifiedSymbolData(className, si, false, false, addError);
-    if (existingSD != null) return existingSD;
+    if (existingSD != null) {
+      LanguageLevelConverter._log.log("***** returning symbol data for " + className);
+      return existingSD; 
+    }
         
     if (className.endsWith("[]")) { // className refers to an array type
       String eltClassName = className.substring(0, className.length() - 2);  // may not be fully qualified
@@ -582,6 +587,12 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     String qualClassName = getQualifiedClassName(pkg, className);  // TODO: make this work for an inner class
     existingSD = getQualifiedSymbolData(qualClassName, si);
     if (existingSD != null) return existingSD; 
+    
+    // Try loading the class from an already compiled class file in current package.
+    File _fileParent = _file.getParentFile();
+    String programRoot = (_fileParent == null) ? "" : _fileParent.getAbsolutePath();  
+    SymbolData compiledSD = LanguageLevelConverter.getSymbolDataForClassFile(qualClassName, programRoot);
+    if (compiledSD != null) return compiledSD;
     
     // Check for relative inner class reference
     if (enclosingClassName != null) {
@@ -1504,6 +1515,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     // See if this is a Blacklisted class.  Blacklisted classes are any classes in java.lang or TestCase.
     SymbolData javaLangClass = 
        getQualifiedSymbolData("java.lang." + that.getName().getText(), that.getSourceInfo(), false, false, false);
+    LanguageLevelConverter._log.log("Checking to see if " + javaLangClass + " is blacklisted");
     if (that.getName().getText().equals("TestCase") || (javaLangClass != null && ! javaLangClass.isContinuation())) {
       _addError("You cannot define a class with the name " + that.getName().getText() + 
                 " because that class name is reserved." +

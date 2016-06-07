@@ -151,7 +151,7 @@ public class LanguageLevelConverter {
     return new ModifiersAndVisibility(SourceInfo.NONE, strings.toArray(new String[strings.size()]));
   }
   
-  /** Defines library classes assuming they are available to the PathClassLoader. */
+  /** Defines library or already compiled classes assuming they are available to the PathClassLoader. */
   public static SymbolData _classFile2SymbolData(String qualifiedClassName) { 
     return _classFile2SymbolData(qualifiedClassName, null);
   }
@@ -164,15 +164,20 @@ public class LanguageLevelConverter {
     * @return The SymbolData for the class file if the class file was found; null otherwise.
     */
   public static SymbolData _classFile2SymbolData(final String qualifiedClassName, final String programRoot) {
- 
+    _log.log("***** _classFile2SymbolData(" + qualifiedClassName + ", " + programRoot + ") called");
+    
     ClassReader reader = null;
     try {
       String fileName = qualifiedClassName.replace('.', '/') + ".class";
+      _log.log("***** reading class file: " + fileName);
       InputStream stream = RESOURCES.value().getResourceAsStream(fileName);
       if (stream == null && programRoot != null) {
         stream = PathClassLoader.getResourceInPathAsStream(fileName, new File(programRoot));
       }
-      if (stream == null) { return null; }
+      if (stream == null) { 
+        _log.log("***** class file was empty! *****");
+        return null; 
+      }
       // Let IOUtil handle the stream here, because it closes it when it's done, unlike ASM.
       reader = new ClassReader(IOUtil.toByteArray(stream));
     }
@@ -293,7 +298,7 @@ public class LanguageLevelConverter {
       public void visitEnd() {}
       
     };
-//    System.err.println("####### Loading file system class " + qualifiedClassName + " and all of its unloaded supertypes");
+    _log.log("***** Loading member signatures for file system class " + qualifiedClassName + " and all of its unloaded supertypes");
     reader.accept(extractData, ClassReader.SKIP_CODE);
 //    System.err.println("####### Finished loading " + qualifiedClassName);
     
@@ -509,7 +514,7 @@ public class LanguageLevelConverter {
           
           // Conformance checking pass
           sf.visit(llv);
-          _log.log("\nDUMPING SYMBOLTABLE AFTER PHASE 1 PROCESSING OF " + f + "\n\n" + symbolTable + "\n");
+//          _log.log("\nDUMPING SYMBOLTABLE AFTER PHASE 1 PROCESSING OF " + f + "\n\n" + symbolTable + "\n");
           visited.add(new Triple<LanguageLevelVisitor, SourceFile, File>(llv, sf, f));
           _log.log("\nCONTINUATIONS AFTER PHASE 1 PROCESSING OF " + f + "\n\n" + llv.continuations + "\n");
           _log.log("\nERRORS AFTER PHASE 1 PROCESSING OF " + f + "\n\n" + llv.errors + "\n");

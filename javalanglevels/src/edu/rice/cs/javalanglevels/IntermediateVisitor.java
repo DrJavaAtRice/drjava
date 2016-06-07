@@ -406,7 +406,7 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     if (prune(that)) return null;
     
     String className = getQualifiedClassName(that.getName().getText());
-//    System.err.println("Processing class " + className);
+    LanguageLevelConverter._log.log("Processing class " + className);
     
     String superName = that.getSuperclass().getName();
       

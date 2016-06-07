@@ -49,7 +49,7 @@ import edu.rice.cs.plt.iter.*;
 import static edu.rice.cs.javalanglevels.SourceInfo.NONE;
 
 public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
-//  public static final Log _log = new Log("Augmentor.txt", true);
+//  public static final Log _log = new Log("Augmentor.txt", false);
   
   private static final String newLine = System.getProperty("line.separator");
   private static final int indentWidth = 2; // TODO: get this from DrJava?

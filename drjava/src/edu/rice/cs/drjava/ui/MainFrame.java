@@ -2497,14 +2497,14 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       //disables switching documents while the next one is opening up, in order to prevent out of control switching
       
       // add current location to history
-      BrowserHistoryManager rm = _model.getBrowserHistoryManager();      
+      BrowserHistoryManager bhm = _model.getBrowserHistoryManager();      
       addToBrowserHistory();
       
       // then move back    
-      BrowserDocumentRegion r = rm.prevCurrentRegion(_model.getNotifier());
-      if (r != null) scrollToDocumentAndOffset(r.getDocument(), r.getStartOffset(), false, false);
+      BrowserDocumentRegion bdr = bhm.prevCurrentRegion(_model.getNotifier());
+      if (bdr != null) scrollToDocumentAndOffset(bdr.getDocument(), bdr.getStartOffset(), false, false);
       _configureBrowsing();
-//      MainFrame.MFLOG.log("browseBack: "+rm);
+      _log.log("browseBack: " + bhm);
     }
   };
   
@@ -2518,14 +2518,14 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       //disables switching documents while the next one is opening up, in order to prevent out of control switching
       
       // add current location to history
-      BrowserHistoryManager rm = _model.getBrowserHistoryManager();      
+      BrowserHistoryManager bhm = _model.getBrowserHistoryManager();      
       addToBrowserHistoryBefore();
       
       // then move forward
-      BrowserDocumentRegion r = rm.nextCurrentRegion(_model.getNotifier());
-      if (r != null) scrollToDocumentAndOffset(r.getDocument(), r.getStartOffset(), false, false);
+      BrowserDocumentRegion bdr = bhm.nextCurrentRegion(_model.getNotifier());
+      if (bdr != null) scrollToDocumentAndOffset(bdr.getDocument(), bdr.getStartOffset(), false, false);
       _configureBrowsing();
-//      MainFrame.MFLOG.log("browseForward: "+rm);
+      _log.log("browseForward: " + bhm);
     }
   };
 
@@ -10059,7 +10059,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public void browserChanged() { _configureBrowsing(); }
     
     public void updateCurrentLocationInDoc() {
-//      MFLOG.log("updateCurrentLocationInDoc in MainFrame");
+      _log.log("updateCurrentLocationInDoc in MainFrame");
       if (_currentDefPane != null) { _currentDefPane.updateCurrentLocationInDoc(); }
     }
   } // End of ModelListener class
@@ -10075,8 +10075,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _runButton = _updateToolBarButton(_runButton, _runAction);
     }
   }
-  
-//  public static final edu.rice.cs.util.Log MFLOG = new edu.rice.cs.util.Log("mflog.txt",true); 
   
   public JViewport getDefViewport() {
     OpenDefinitionsDocument doc = _model.getActiveDocument();
