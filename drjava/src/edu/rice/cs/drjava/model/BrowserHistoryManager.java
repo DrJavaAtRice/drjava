@@ -48,10 +48,9 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
   /** Two regions are similar if they are in the same document and not more than DIFF_THRESHOLD lines apart. */
   public static final int DIFF_THRESHOLD = 0;
 
-  /** List of regions.  In Java 6, ArrayDeque is a better choice than Stack; should be changed once compatibility
-    * with Java 5 is abandoned. */
-  private volatile Stack<BrowserDocumentRegion> _pastRegions = new Stack<BrowserDocumentRegion>();
-  private volatile Stack<BrowserDocumentRegion> _futureRegions = new Stack<BrowserDocumentRegion>();
+  /** List of regions.  */
+  private volatile ArrayDeque<BrowserDocumentRegion> _pastRegions = new ArrayDeque<BrowserDocumentRegion>();
+  private volatile ArrayDeque<BrowserDocumentRegion> _futureRegions = new ArrayDeque<BrowserDocumentRegion>();
   
   private volatile int _maxSize;
   
@@ -71,9 +70,7 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
     assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
 
     final BrowserDocumentRegion current = getCurrentRegion();
-    if ((current != null) && (r.equals(current))) {
-      return;
-    }
+    if ((current != null) && (r.equiv(current))) return;
     else {
       _pastRegions.push(r);
       r.getDocument().addBrowserRegion(r);
@@ -98,12 +95,10 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
    * @param notifier a GlobalEventNotifier
    */
   public void addBrowserRegionBefore(final BrowserDocumentRegion r, final GlobalEventNotifier notifier) { 
-    /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
 
     final BrowserDocumentRegion current = getCurrentRegion();
-    if ((current != null) && (r.equals(current))) {
-      return;
-    }
+    if ((current != null) && (r.equiv(current))) return;
     else {
       if (_pastRegions.size() == 0) {
         _pastRegions.push(r);
@@ -136,7 +131,7 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
       int diff = size - _maxSize;
       for (int i = 0; i < diff; ++i) {
         // always remove the element farthest away from the larger stack
-        remove(((_pastRegions.size()>_futureRegions.size())?_pastRegions:_futureRegions).get(0));
+        remove(((_pastRegions.size()>_futureRegions.size())?_pastRegions:_futureRegions).getFirst());
       }
     }
   }
@@ -169,7 +164,7 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
   /** Tells the manager to remove all regions. */
   public /* synchronized */ void clearBrowserRegions() {
     while(_pastRegions.size()+_futureRegions.size() > 0) {
-      remove(((_pastRegions.size()>_futureRegions.size())?_pastRegions:_futureRegions).get(0));
+      remove(((_pastRegions.size()>_futureRegions.size())?_pastRegions:_futureRegions).getFirst());
     }
   }
   
@@ -180,10 +175,10 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
   }
   
   /** @return true if the current region is the first in the list, i.e. prevCurrentRegion is without effect */
-  public /* synchronized */ boolean isCurrentRegionFirst() { return (_pastRegions.size()<2); }
+  public /* synchronized */ boolean isCurrentRegionFirst() { return (_pastRegions.size() < 2); }
   
   /** @return true if the current region is the last in the list, i.e. nextCurrentRegion is without effect */
-  public /* synchronized */ boolean isCurrentRegionLast() { return (_futureRegions.size()<1); }
+  public /* synchronized */ boolean isCurrentRegionLast() { return (_futureRegions.size() < 1); }
   
   /** Make the region that is more recent the current region.
    * @param notifier a GlobalEventNotifier

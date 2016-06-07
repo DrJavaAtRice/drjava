@@ -2501,8 +2501,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       addToBrowserHistory();
       
       // then move back    
+//      Utilities.show("browseBack pending; bhm = '" + bhm);
       BrowserDocumentRegion bdr = bhm.prevCurrentRegion(_model.getNotifier());
       if (bdr != null) scrollToDocumentAndOffset(bdr.getDocument(), bdr.getStartOffset(), false, false);
+//      Utilities.show("browseBack executed; bhm = '" + bhm + "'; bdr = '" + bdr + "'");
       _configureBrowsing();
       _log.log("browseBack: " + bhm);
     }

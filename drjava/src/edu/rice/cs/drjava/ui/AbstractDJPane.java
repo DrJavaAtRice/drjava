@@ -95,8 +95,8 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
       DJDocument doc = getDJDocument();
       try { 
         char prevChar = doc.getText(offset - 1, 1).charAt(0);
-        if (prevChar == '{' || prevChar == '(' ) matchUpdate(offset, true);       // forward match
-        else if (prevChar == '}' || prevChar == ')') matchUpdate(offset, false);  // backward match
+        if (prevChar == '{' || prevChar == '(' || prevChar == '[') matchUpdate(offset, true);       // forward match
+        else if (prevChar == '}' || prevChar == ')' || prevChar == ']') matchUpdate(offset, false);  // backward match
         else updateStatusField();  // update main frame status fields; a no-op for InteractionsPanes
         
       }

@@ -113,7 +113,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
 
   /** Maximum character width of the current main font. */
   private static volatile int _maxCharWidth = 0;
-  
+    
   /** Color of the right margin. */
   private volatile Color _rightMarginColor = Color.red;
   
@@ -769,16 +769,11 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
    */
   public static void setEditorKit(DefinitionsEditorKit editorKit) { EDITOR_KIT = editorKit; }
 
-  /** Update the maximum character width of the current font. We can make this static, because DrJava
-   * only supports one font for all panes anyway. 
-   * @param metrics font widths
-   */
+  /** Update the maximum character width of the current font where "_" is used as the widest character.  In monospaced
+    * fonts, it spans the entire width of a character box.
+    */
   public static void updateMaxCharWidth(FontMetrics metrics) {
-    int[] widths = metrics.getWidths();
-    _maxCharWidth = 0;
-    for(int w: widths) {
-      if (w > _maxCharWidth) { _maxCharWidth = w; }
-    }
+    _maxCharWidth = metrics.stringWidth("_");
   }
   
   /** Enable anti-aliased text by overriding paintComponent. */
