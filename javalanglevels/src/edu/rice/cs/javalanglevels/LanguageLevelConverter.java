@@ -780,7 +780,7 @@ public class LanguageLevelConverter {
     }
     
     Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result = 
-      llc.convert(files, new Options(JavaVersion.JAVA_6,
+      llc.convert(files, new Options(JavaVersion.JAVA_8,
                                      IOUtil.parsePath(System.getProperty("java.class.path", ""))));
     System.out.println(result.getFirst().size() + result.getSecond().size() + " errors.");
     for(JExprParseException p : result.getFirst()) {

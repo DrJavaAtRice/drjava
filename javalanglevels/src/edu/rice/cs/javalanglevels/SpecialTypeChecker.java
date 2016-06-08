@@ -581,7 +581,7 @@ public class SpecialTypeChecker extends TypeChecker {
       LanguageLevelConverter.symbolTable.clear();
       _stc = new SpecialTypeChecker(null, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), 
                    new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData, JExpression>>());
-      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_6, EmptyIterable.<File>make());
+      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_8, EmptyIterable.<File>make());
         _stc._importedPackages.addFirst("java.lang");
       _sd1 = new SymbolData("i.like.monkey");
       _sd2 = new SymbolData("i.like.giraffe");

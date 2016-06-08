@@ -703,34 +703,7 @@ public class BodyTypeChecker extends SpecialTypeChecker {
     * Returns null if this try-catch statement doesn't necessarily return a value.  NOTE: null represents an
     * ill-formed type or VOID_TYPE, which is ambiguous.
     */
-<<<<<<< HEAD
-  protected InstanceData tryCatchLeastRestrictiveType(InstanceData tryBlockRes, InstanceData[] catchBlocksRes, 
-                                                      InstanceData finallyBlock_result) {
-  // Return the common superclass or null if there exists a block that doesn't return a value(except the finally block) 
-    if (tryBlockRes == null || tryBlockRes == SymbolData.NOT_FOUND.getInstanceData()) 
-      return finallyBlock_result;
-    SymbolData leastRestrictiveType = tryBlockRes.getSymbolData();
-    for (int i = 0; i < catchBlocksRes.length; i++) {
-      InstanceData cbr = catchBlocksRes[i];
-      if (cbr == null) return finallyBlock_result;
-      if (cbr ==  SymbolData.NOT_FOUND.getInstanceData()) return cbr;
-      if (_isAssignableFrom(catchBlocksRes[i].getSymbolData(), leastRestrictiveType.getSymbolData()))
-        leastRestrictiveType = catchBlocksRes[i].getSymbolData();
-      else leastRestrictiveType = getCommonSuperType(leastRestrictiveType.getSymbolData(), leastRestrictiveType);
-    }
 
-    if (leastRestrictiveType == null) return null;
-//    else if (leastRestrictiveType == null) result = getCommonSuperType(null, finallyBlock_result.getSymbolData());
-    else {
-      SymbolData result;
-      if (finallyBlock_result == null) 
-        result = getCommonSuperType(leastRestrictiveType.getSymbolData(), null);
-      else
-        result = getCommonSuperType(leastRestrictiveType.getSymbolData(), finallyBlock_result.getSymbolData());
-      if (result == null) return null;
-      else return result.getInstanceData();
-    }
-=======
   protected InstanceData tryCatchLeastCommonType(InstanceData tryBlockRes, InstanceData[] catchBlocksRes, 
                                                  InstanceData finallyBlock_result) {
     // If tryBlockRes is ill-typed, then the finallyBlock must return a type that meets context constraints
@@ -761,7 +734,6 @@ public class BodyTypeChecker extends SpecialTypeChecker {
     if (leastCommonType == null || leastCommonType == snfType.getSymbolData()) return fbRes; 
     if (fbType == null || fbType == snfType.getSymbolData()) return leastCommonType.getInstanceData();
     return fbRes; 
->>>>>>> 272a56558150b7258a67798f47b646a32f3760b4
   }
   
   /** Return true if the Exception is unchecked, and false otherwise.
@@ -1099,7 +1071,7 @@ public class BodyTypeChecker extends SpecialTypeChecker {
       _bd2.addVars(((MethodData)_bd2).getParams());
       _bbtc = new BodyTypeChecker(_bd1, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), 
                                   new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData,JExpression>>());
-      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_6, EmptyIterable.<File>make());
+      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_8, EmptyIterable.<File>make());
       _bbtc._importedPackages.addFirst("java.lang");
     }
     

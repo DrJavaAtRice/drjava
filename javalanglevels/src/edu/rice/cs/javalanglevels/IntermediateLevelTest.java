@@ -80,7 +80,7 @@ public class IntermediateLevelTest extends TestCase {
 //    System.err.println("testFiles for IntermediateLevelTest.testSuccessful = " + Arrays.toString(testFiles));
     LanguageLevelConverter llc = new LanguageLevelConverter();
     Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
-    result = llc.convert(testFiles, new Options(JavaVersion.JAVA_6, IterUtil.make(new File("lib/buildlib/junit.jar"))));
+    result = llc.convert(testFiles, new Options(JavaVersion.JAVA_8, IterUtil.make(new File("lib/buildlib/junit.jar"))));
 
 //     System.err.flush();
     assertEquals("should be no parse exceptions", new LinkedList<JExprParseException>(), result.getFirst());
@@ -128,7 +128,7 @@ public class IntermediateLevelTest extends TestCase {
 //      System.err.println("TESTING " + testFiles[i]);
       LanguageLevelConverter llc1 = new LanguageLevelConverter();
 //      System.err.println("Checking " + testFiles[i]);
-      result = llc1.convert(new File[] {testFiles[i]}, new Options(JavaVersion.JAVA_6, EmptyIterable.<File>make()));
+      result = llc1.convert(new File[] {testFiles[i]}, new Options(JavaVersion.JAVA_8, EmptyIterable.<File>make()));
       assertTrue("should be parse exceptions or visitor exceptions in file " + testFiles[i].getName(), 
                  ! result.getFirst().isEmpty() || ! result.getSecond().isEmpty());
     }
@@ -136,7 +136,7 @@ public class IntermediateLevelTest extends TestCase {
     /* Take care of the "references" directory */
     LanguageLevelConverter llc2 = new LanguageLevelConverter();
     File f = new File(new File(directory, "references"), "ReferencingClass.dj1");
-    result = llc2.convert(new File[] { f }, new Options(JavaVersion.JAVA_6, EmptyIterable.<File>make()));
+    result = llc2.convert(new File[] { f }, new Options(JavaVersion.JAVA_8, EmptyIterable.<File>make()));
     assertTrue("should be parse exceptions or visitor exceptions in file " + f.getName(), 
                ! result.getFirst().isEmpty() || ! result.getSecond().isEmpty());
   }
@@ -148,7 +148,7 @@ public class IntermediateLevelTest extends TestCase {
     LanguageLevelConverter llc = new LanguageLevelConverter();
     Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
     assert llc._newSDs != null;
-    result = llc.convert(arrayF, new Options(JavaVersion.JAVA_6, EmptyIterable.<File>make()));
+    result = llc.convert(arrayF, new Options(JavaVersion.JAVA_8, EmptyIterable.<File>make()));
     assertEquals("should be no parse exceptions", new LinkedList<JExprParseException>(), result.getFirst());
     
     assertEquals("should be no visitor exceptions", new LinkedList<Pair<String, JExpressionIF>>(), result.getSecond());

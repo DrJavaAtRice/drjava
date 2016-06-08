@@ -852,38 +852,6 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     if (sdLeft.isAssignableTo(sdRight)) return sdRight;
     return null;
   }
-<<<<<<< HEAD
-  
-    /** Check if the two given SymbolDatas have a common super type.  If so, return it, else return null. */
-  protected SymbolData getCommonSuperType(SymbolData s1, SymbolData s2) {
-    if ((s1 == null) && (s2 == null)) {
-      return null;
-    }
-    
-    if (s1 == SymbolData.NOT_FOUND && s2 != null) return SymbolData.NOT_FOUND;
-    if (s2 == SymbolData.NOT_FOUND && s1 != null) return SymbolData.NOT_FOUND;
-    
-    if (s1 == null && s1 != SymbolData.NOT_FOUND) return s2;
-    if (s2 == null && s1 != SymbolData.NOT_FOUND) return s1;
-    if (s1 == null || s2 == null) return null;
-    if (s1 == SymbolData.EXCEPTION) return s2; 
-    if (s2 == SymbolData.EXCEPTION) return s1; 
-    
-    // See if s1 and s2 have a common super class.
-    SymbolData sd = getCommonSuperTypeBaseCase(s1, s2);
-    if (sd != null )  return sd; 
-    sd = getCommonSuperTypeBaseCase(s2, s1);
-    if (sd != null)  return sd; 
-    
-    //If s1's superClass is null, then we have gone all the way through the superclass hierarchy without finding a matching class.
-    if (s1.getSuperClass() == null) {
-      //return null;
-      //since we know that Object should be the super class of everything, return Object.
-      return LanguageLevelConverter.symbolTable.get("java.lang.Object");
-    }
-    
-    // Recur on the super class chain.   
-=======
 
     /** Check if the two given SymbolDatas corresponding to types have a common super type.  If so, return it, 
       * else return null. NOTE: null means ill-typed! */
@@ -911,7 +879,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
 //    System.err.println("Boxed Types are: " + s1 + ", " + s2);
 //    System.err.println("Boxed Types from symbolTable are: " + symbolTable.get("java.lang.Byte") + ", " + 
 //                       symbolTable.get("java.lang.Boolean"));
->>>>>>> 272a56558150b7258a67798f47b646a32f3760b4
+
     sd = getCommonSuperType(s1.getSuperClass(), s2);
     if (sd != null) {
 //      System.err.println("CommonSuperType is " + sd);
@@ -1407,7 +1375,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       LanguageLevelConverter.loadSymbolTable();
 
       _btc = new TypeChecker(new File(""), "", new LinkedList<String>(), new LinkedList<String>());
-      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_6, EmptyIterable.<File>make());
+      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_8, EmptyIterable.<File>make());
       _btc._importedPackages.addFirst("java.lang");
       _errorAdded = false;
       
@@ -1935,7 +1903,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       assertTrue("Should be able to assign an array to an interface of java.io.Serializable", 
                  _btc._isAssignableFrom(symbolTable.get("java.io.Serializable"), integerArray));
 
-      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_6, EmptyIterable.<File>make());
+      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_8, EmptyIterable.<File>make());
       assertFalse("Should not be assignable.", 
                   _btc._isAssignableFrom(symbolTable.get("java.lang.Double"), SymbolData.INT_TYPE));
       assertFalse("Should not be assignable.", 

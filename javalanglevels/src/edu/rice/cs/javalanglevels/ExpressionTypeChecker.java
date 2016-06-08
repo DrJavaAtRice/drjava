@@ -1430,25 +1430,17 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
     TypeData conseqType = conseq.visit(this);
     TypeData altType = alt.visit(this);
     TypeData returnType = getCommonSuperType(conseqType.getSymbolData(), altType.getSymbolData());
-<<<<<<< HEAD
-    
-    if (! conditionType.getSymbolData().isAssignableTo(SymbolData.BOOLEAN_TYPE, JAVA_VERSION)) {
-=======
-    
-//    System.err.println("[ETC.forCondExprOnly] conditionType = " + conditionType + ", conseqType = " + conseqType + 
-//                       ", alttype = " + altType);
-    
-    if (! conditionType.getSymbolData().isAssignableTo(SymbolData.BOOLEAN_TYPE, true)) {
->>>>>>> 272a56558150b7258a67798f47b646a32f3760b4
+
+    if (! conditionType.equals(SymbolData.BOOLEAN_TYPE)) {
       _addError("The test in this conditional has type " + conditionType.getName() + " instead of boolean.", that);
       return returnType;
     }
-    
-    if (returnType == null) {
+    else if (returnType == null) {
       _addError("The type " + conseqType.getName() + " of the consequent and the type " + altType.getName() +
                 "of this conditional are not compatible", that);
       return returnType;
-    } 
+    }
+
     return returnType; 
   }
   
@@ -1758,7 +1750,7 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
       _etc = 
         new ExpressionTypeChecker(null, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), 
                                   new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData, JExpression>>());
-      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_6, EmptyIterable.<File>make());
+      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_8, EmptyIterable.<File>make());
       _etc._importedPackages.addFirst("java.lang");
       _sd1 = new SymbolData("i.like.monkey");
       _sd2 = new SymbolData("i.like.giraffe");

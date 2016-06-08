@@ -1658,7 +1658,7 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
       _a = new Augmentor(true, null, null, llv);
       LanguageLevelConverter.symbolTable.clear();
       Symboltable _s = LanguageLevelConverter.symbolTable;   
-      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_6, EmptyIterable.<File>make());
+      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_8, EmptyIterable.<File>make());
     }
 
     public void testFormalParameters2TypeDatas() {

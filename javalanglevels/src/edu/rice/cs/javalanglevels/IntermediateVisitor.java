@@ -669,7 +669,7 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       errors = new LinkedList<Pair<String, JExpressionIF>>();
       LanguageLevelConverter.symbolTable.clear();
       LanguageLevelConverter._newSDs.clear();
-      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_6, IterUtil.make(new File("lib/buildlib/junit.jar")));
+      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_8, IterUtil.make(new File("lib/buildlib/junit.jar")));
       visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>();      
 //      _hierarchy = new Hashtable<String, TypeDefBase>();
       
@@ -678,7 +678,7 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
                                     continuations,
                                     new LinkedList<Command>(),
                                     new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>());
-      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_6, IterUtil.make(new File("lib/buildlib/junit.jar")));
+      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_8, IterUtil.make(new File("lib/buildlib/junit.jar")));
       _iv._classesInThisFile = new HashSet<String>();
       _iv.continuations = new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>();
 //      _iv._resetNonStaticFields();

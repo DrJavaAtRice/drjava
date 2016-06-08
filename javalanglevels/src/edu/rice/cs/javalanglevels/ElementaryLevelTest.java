@@ -56,9 +56,7 @@ import edu.rice.cs.plt.io.IOUtil;
 public class ElementaryLevelTest extends TestCase {
   File directory;
   
-  public void setUp() {
-    directory = new File("testFiles" + File.separatorChar + "forElementaryLevelTest");
-  }
+  public void setUp() { directory = new File("testFiles" + File.separatorChar + "forElementaryLevelTest"); }
   
 //  public void assertEquals(String s, Data answer, Data testValue) {
 //    if (! answer.equals(testValue)) 
@@ -75,7 +73,7 @@ public class ElementaryLevelTest extends TestCase {
 //    System.err.println("testFiles for testSuccessful = " + Arrays.toString(testFiles));
     LanguageLevelConverter llc = new LanguageLevelConverter();
     Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
-    result = llc.convert(testFiles, new Options(JavaVersion.JAVA_6,
+    result = llc.convert(testFiles, new Options(JavaVersion.JAVA_8,
                                                 IterUtil.make(new File("lib/buildlib/junit.jar"))));
 //    System.err.println("Visitor exception #1 = " + result.getSecond().getFirst());
 //    fail("Dumping System.err");
@@ -119,7 +117,7 @@ public class ElementaryLevelTest extends TestCase {
     for (int i = 0; i < testFiles.length; i++) {
       LanguageLevelConverter llc1 = new LanguageLevelConverter();
 //      System.err.println("TESTING " + testFiles[i]);
-      result = llc1.convert(new File[]{ testFiles[i] }, new Options(JavaVersion.JAVA_6, EmptyIterable.<File>make()));
+      result = llc1.convert(new File[]{ testFiles[i] }, new Options(JavaVersion.JAVA_8, EmptyIterable.<File>make()));
 //      System.err.println("Test result = " + result);
       assertTrue("should be parse exceptions or visitor exceptions in file " + testFiles[i].getName(),
                  ! result.getFirst().isEmpty() || ! result.getSecond().isEmpty());
@@ -130,7 +128,7 @@ public class ElementaryLevelTest extends TestCase {
   /** Tests that when some files have already been compiled, the .java files are not generated for those files,
     * and files that reference those files are augmented correctly.
     */
-  public void xtestSomeFilesCompiled() {
+  public void testSomeFilesCompiled() {
     directory = new File(directory, "someCompiled");
     File[] testFiles = directory.listFiles(new FileFilter() {
       public boolean accept(File pathName) {
@@ -139,7 +137,7 @@ public class ElementaryLevelTest extends TestCase {
     
     LanguageLevelConverter llc = new LanguageLevelConverter();
     Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
-    result = llc.convert(testFiles, new Options(JavaVersion.JAVA_6, EmptyIterable.<File>make()));
+    result = llc.convert(testFiles, new Options(JavaVersion.JAVA_8, EmptyIterable.<File>make()));
     
     assertEquals("should be no parse exceptions", new LinkedList<JExprParseException>(), result.getFirst());
     assertEquals("should be no visitor exceptions", new LinkedList<Pair<String, JExpressionIF>>(), result.getSecond());
@@ -181,7 +179,7 @@ public class ElementaryLevelTest extends TestCase {
     LanguageLevelConverter llc = new LanguageLevelConverter();
     Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
 //    System.err.println("files for testOrderMatters = " + Arrays.toString(files));
-    result = llc.convert(files, new Options(JavaVersion.JAVA_6, EmptyIterable.<File>make()));
+    result = llc.convert(files, new Options(JavaVersion.JAVA_8, EmptyIterable.<File>make()));
     
     assertEquals("should be no parse exceptions", new LinkedList<JExprParseException>(), result.getFirst());
     assertEquals("should be 1 visitor exception", 1, result.getSecond().size());
@@ -197,7 +195,7 @@ public class ElementaryLevelTest extends TestCase {
     File[] files = new File[]{ new File(directory, "EmptyFile.dj0")};
     LanguageLevelConverter llc = new LanguageLevelConverter();
     Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
-    result = llc.convert(files, new Options(JavaVersion.JAVA_6, EmptyIterable.<File>make()));
+    result = llc.convert(files, new Options(JavaVersion.JAVA_8, EmptyIterable.<File>make()));
     
     assertEquals("should be no parse exceptions", new LinkedList<JExprParseException>(), result.getFirst());
     assertEquals("should be no visitor exceptions", 0, result.getSecond().size());
@@ -214,14 +212,14 @@ public class ElementaryLevelTest extends TestCase {
     
     LanguageLevelConverter llc = new LanguageLevelConverter();
     Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
-    result = llc.convert(testFiles, new Options(JavaVersion.JAVA_6, EmptyIterable.<File>make()));
+    result = llc.convert(testFiles, new Options(JavaVersion.JAVA_8, EmptyIterable.<File>make()));
     
     assertEquals("should be no parse exceptions", new LinkedList<JExprParseException>(), result.getFirst());
     assertEquals("should be no visitor exceptions", new LinkedList<Pair<String, JExpressionIF>>(), result.getSecond());
     
 //    for (int i = 0; i <testFiles.length; i++) {
 //      LanguageLevelConverter llc5 = new LanguageLevelConverter();
-//      result = llc5.convert(new File[]{testFiles[i]}, new Options(JavaVersion.JAVA_6, EmptyIterable.<File>make()));
+//      result = llc5.convert(new File[]{testFiles[i]}, new Options(JavaVersion.JAVA_8, EmptyIterable.<File>make()));
 //      
 //      assertEquals("should be no parse exceptions", new LinkedList<JExprParseException>(), result.getFirst());
 //      assertEquals("should be no visitor exceptions", new LinkedList<Pair<String, JExpressionIF>>(), result.getSecond());
