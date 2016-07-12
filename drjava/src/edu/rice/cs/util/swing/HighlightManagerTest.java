@@ -44,8 +44,7 @@ import javax.swing.text.Highlighter;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 
-/**
- * A JUnit test case class for the class HighlightManager.
+/** * A JUnit test case class for the class HighlightManager.
  * Every method starting with the word "test" will be called when running
  * the test with JUnit.
  */

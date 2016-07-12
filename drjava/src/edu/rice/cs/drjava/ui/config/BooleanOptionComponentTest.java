@@ -42,8 +42,7 @@ import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.util.swing.DefaultSwingFrame;
 import edu.rice.cs.util.swing.Utilities;
 
-/**
- * Tests functionality of this OptionComponent
+/** * Tests functionality of this OptionComponent
  */
 public final class BooleanOptionComponentTest extends DrJavaTestCase {
 

@@ -67,8 +67,8 @@ public class ManifestWriter {
   }
   
   /** Set the main class of the Manifest
-    * @param mainClass
-    */
+   * @param mainClass the class to be set
+   */
   public void setMainClass(String mainClass) {
     _mainClass = mainClass;
     _rawManifest = null;

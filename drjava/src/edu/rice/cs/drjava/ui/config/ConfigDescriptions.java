@@ -123,24 +123,22 @@ public class ConfigDescriptions {
         "Right Margin Position",
         "The number of columns after which the right margin is displayed.");
     
-    add(OptionConstants.FONT_MAIN, "Main Font", 
-        "The font used for most text in DrJava.");
+    add(OptionConstants.FONT_MAIN, "Main Font", "The font used for most text in DrJava.");
     add(OptionConstants.FONT_LINE_NUMBERS, "Line Numbers Font",
         "<html>The font for displaying line numbers on the left side of<br>" +
         "the Definitions Pane if Show All Line Numbers is enabled.<br>" +
         "Cannot be displayed larger than the Main Font.</html>");
-    add(OptionConstants.FONT_DOCLIST, "Document List Font",
-        "The font used in the list of open documents.");
-    add(OptionConstants.FONT_TOOLBAR, "ToolBar Font",
-        "The font used in the toolbar buttons.");
-    add(OptionConstants.TEXT_ANTIALIAS, "Use anti-aliased text",
-        "Whether to graphically smooth the text.");
+    add(OptionConstants.FONT_DOCLIST, "Document List Font", "The font used in the list of open documents.");
+    add(OptionConstants.FONT_MENU, "MenuBar Font", "The font used in menus.");
+    add(OptionConstants.FONT_TOOLBAR, "ToolBar Font", "The font used in the toolbar buttons.");
+     
+    add(OptionConstants.TEXT_ANTIALIAS, "Use anti-aliased text", "Whether to graphically smooth the text.");
     
-    add(OptionConstants.DEFINITIONS_NORMAL_COLOR, "Normal Color",
+    add(OptionConstants.DEFINITIONS_NORMAL_COLOR, "Normal Color", 
         "The default color for text in the Definitions Pane.");
     add(OptionConstants.DEFINITIONS_KEYWORD_COLOR, "Keyword Color",
         "The color for Java keywords in the Definitions Pane.");
-    add(OptionConstants.DEFINITIONS_TYPE_COLOR, "Type Color",
+    add(OptionConstants.DEFINITIONS_TYPE_COLOR, "Type Color", 
         "The color for classes and types in the Definitions Pane.");
     add(OptionConstants.DEFINITIONS_COMMENT_COLOR, "Comment Color",
         "The color for comments in the Definitions Pane.");

@@ -81,8 +81,10 @@ public abstract class AbstractConsoleController /* implements Serializable */ {
   /** Action to change focus to next pane. */
   volatile Action switchToNextPaneAction;
 
-  /** Initializes the Swing console document and Swing interactions pane. Subclasses *must* call _init() at the end 
-   *  of their constructors.
+  /** Initializes the Swing console document and Swing interactions pane. 
+   * Subclasses *must* call _init() at the end of their constructors.
+   * @param doc the Swing console document
+   * @param pane the interactions pane
    */
   protected AbstractConsoleController(InteractionsDJDocument doc, InteractionsPane pane) {
     _interactionsDJDocument = doc;
@@ -92,7 +94,7 @@ public abstract class AbstractConsoleController /* implements Serializable */ {
     _systemErrStyle = new SimpleAttributeSet();
   }
 
-  /** Gets the console document for this console.*/
+  /** @return the console document for this console.*/
   public abstract ConsoleDocument getConsoleDoc();
 
   /** Initialization method.  *Must* be called in constructor by all subclasses. */
@@ -206,10 +208,10 @@ public abstract class AbstractConsoleController /* implements Serializable */ {
     }
   };
 
-  /** Accessor method for the InteractionsDJDocument. */
+  /** @return the InteractionsDJDocument. */
   public InteractionsDJDocument getDocumentAdapter() { return _interactionsDJDocument; }
 
-  /** Accessor method for the InteractionsPane. */
+  /** @return the InteractionsPane. */
   public InteractionsPane getPane() { return _pane; }
 
   /** Determines if the associated console pane is currently computing.

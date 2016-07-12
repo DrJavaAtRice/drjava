@@ -82,12 +82,19 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
     _styles.put(name, s);  // no locking necessary: _styles is final and Hashtable is thread-safe
   }
   
-  /** Returns the style with the given name, or null if no such named style exists. */
+  /** @param name the name of the style
+   * @return the style with the given name, or null if no such named style exists 
+   */
   public AttributeSet getDocStyle(String name) {
     return _styles.get(name);  // no locking necessary: _styles is final and Hashtable is thread-safe
   }
   
-  /** Adds the given coloring style to the styles list.  Not supported in SwingDocument.  ONly runs in event thread. */
+  /** Adds the given coloring style to the styles list. Not supported in 
+   * SwingDocument. Only runs in event thread. 
+   * @param start start position
+   * @param end end position
+   * @param style the coloring style
+   */
   public void addColoring(int start, int end, String style) { }
   
   /** Gets the object which can determine whether an insert or remove edit should be applied, based on the inputs.
@@ -186,22 +193,38 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
     catch (BadLocationException e) { throw new UnexpectedException(e); }  // impossible if read lock is already held
   }
  
-  /** Sanitized version of getText(int, int) that converts BadLocationException to UnexpectedException. */
+  /** Sanitized version of getText(int, int) that converts BadLocationException 
+   * to UnexpectedException. 
+   * @param pos the position at which to get the text
+   * @param len the number of characters to get 
+   * @return the text at the specified position
+   */
   public String _getText(int pos, int len) { 
     try { return getText(pos, len); }  // calls method defined in DefaultStyledDocument
     catch (BadLocationException e) { throw new UnexpectedException(e); }
   }
   
-  /** Appends given string with specified attributes to end of this document. NOT THREAD SAFE. */
+  /** Appends given string with specified attributes to end of this document. 
+   * NOT THREAD SAFE. 
+   * @param str the string to append
+   * @param set the set of attributes attached to str
+   */
   public void append(String str, AttributeSet set) {
     try { insertString(getLength(), str, set); }
     catch (BadLocationException e) { throw new UnexpectedException(e); }  // impossible
   }
   
-  /** Appends given string with specified named style to end of this document. NOT THREAD SAFE. */
+  /** Appends given string with specified named style to end of this document. 
+   * NOT THREAD SAFE. 
+   * @param str the string to be appended
+   * @param style the style of the string to be appended
+   */
   public void append(String str, String style) { append(str, style == null ? null : getDocStyle(style)); }
   
-  /** Appends given string with default style to end of this document. NOT THREAD SAFE. v*/
+  /** Appends given string with default style to end of this document. 
+   * NOT THREAD SAFE. 
+   * @param str the string to be appended
+   */
   public void append(String str) { append(str, (AttributeSet) null); }
   
   /** A SwingDocument instance does not have a default style */
@@ -211,8 +234,13 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
   
   public Pageable getPageable() { throw new UnsupportedOperationException("Printing not supported"); }
 
-  /** Performs the default behavior for createPosition in DefaultStyledDocument. Since createPosition is not overridden
-    * in this class, super is unnecessary but more robust (in case createPosition is overridden).  */
+  /** Performs the default behavior for createPosition in DefaultStyledDocument. 
+   * Since createPosition is not overridden in this class, super is 
+   * unnecessary but more robust (in case createPosition is overridden).  
+   * @param offs the offset at which to create the position
+   * @return the newly-created position
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public Position createUnwrappedPosition(int offs) throws BadLocationException { return super.createPosition(offs); }
 }
 

@@ -57,11 +57,13 @@ public abstract class InputStreamRedirector extends InputStream {
     * input to feed to the input stream.  When using a readLine() method, be sure
     * to append a newline to the end of the input.
     * @return the input to the stream, empty string to indicate end of stream
+    * @throws IOException if an IO operation fails
     */
   protected abstract String _getInput() throws IOException;
 
   /** Reads a single "line" of input into the buffer, i.e. makes a single call
     * to _getInput() and puts the result into the buffer.
+    * @throws IOException if an IO operation fails
     */
   private void _readInputIntoBuffer() throws IOException {
     String input = _getInput();

@@ -106,11 +106,14 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     super.tearDown();
   }
   
-  /** Tests that shift backspace works the same as backspace. (Ease of use issue 693253).  Ideally, this test should
-    * be lighter weight, and not require the creation of an entire MainFrame+GlobalModel.  Refactor?
-    * NOTE: This test doesn't work yet, since we can't currently bind two keys to the same action.  This should be 
-    * implemented as part of feature request 683300.
-    */
+  /** Tests that shift backspace works the same as backspace. (Ease of use 
+   * issue 693253).  Ideally, this test should be lighter weight, and not 
+   * require the creation of an entire MainFrame+GlobalModel.  Refactor?
+   * NOTE: This test doesn't work yet, since we can't currently bind two 
+   * keys to the same action.  This should be implemented as part of 
+   * feature request 683300.
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testShiftBackspace() throws BadLocationException {
 //    _log.log("Starting testShiftBackSpace");
     final DefinitionsPane defPane = _frame.getCurrentDefPane();
@@ -154,7 +157,9 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
   }
 
   
-  /** Tests that typing a brace in a string/comment does not cause an indent. */
+  /** Tests that typing a brace in a string/comment does not cause an indent.
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testTypeBraceNotInCode() throws BadLocationException {
     final DefinitionsPane defPane = _frame.getCurrentDefPane();
     final OpenDefinitionsDocument doc = defPane.getOpenDefDocument();
@@ -174,10 +179,15 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     _log.log("testTypeBraceNotInCode completed");
   }
   
-  /** Tests that typing Enter in a string/comment does cause an indent.  This behavior works in practice, but I can't 
-    * get the test to work.  If we use definitions.processKeyEvent, the caret position is not updated, so the " * " 
-    * is not inserted.  If we try to dispatchEvent from the EventDispatchingThread, it hangs...?
-    */
+  /** Tests that typing Enter in a string/comment does cause an indent.  
+   * This behavior works in practice, but I can't get the test to work.  
+   * If we use definitions.processKeyEvent, the caret position is not 
+   * updated, so the " * " is not inserted.  If we try to dispatchEvent 
+   * from the EventDispatchingThread, it hangs...?
+   * @throws BadLocationException if attempts to reference an invalid location
+   * @throws InterruptedException if execution is interrupted unexpectedly
+   * @throws InvocationTargetException if the invocation target is invalid
+   */
   public void testTypeEnterNotInCode() throws BadLocationException, InterruptedException, InvocationTargetException {
     
     Utilities.invokeAndWait(new Runnable() {
@@ -206,7 +216,9 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     });
   }
   
-  /** Tests that a simulated key press with the meta modifier is correct.  Reveals bug 676586. */
+  /** Tests that a simulated key press with the meta modifier is correct.  Reveals bug 676586.
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testMetaKeyPress() throws BadLocationException {
     final DefinitionsPane defPane = _frame.getCurrentDefPane();
     final OpenDefinitionsDocument doc = defPane.getOpenDefDocument();
@@ -269,7 +281,9 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
   // Used to hold a document offset between successive Runnables moved to the event thread;
   private int _redoPos;
   
-  /** Tests that undoing/redoing a multi-line comment/uncomment will restore the caret position */
+  /** Tests that undoing/redoing a multi-line comment/uncomment will restore the caret position
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testMultilineCommentOrUncommentAfterScroll() throws BadLocationException {
     
     final DefinitionsPane pane = _frame.getCurrentDefPane();
@@ -565,10 +579,16 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     });
   }
       
-  /** This testcase checks that we do no longer discard Alt keys that would be used to make the {,},[,] chars that the 
-    * French keyboards has.  Using the Locale did not work, and checking if the key was consumed by the document would
-    * only pass on the specific keyboards.  It was therefore unavoidable to add a few lines of code in the original code
-    * that is only used for this test case. These lines were added to the DefinitionsPane.java file. */
+  /** This testcase checks that we do no longer discard Alt keys that would be 
+   * used to make the {,},[,] chars that the French keyboards has.  
+   * Using the Locale did not work, and checking if the key was consumed by 
+   * the document would only pass on the specific keyboards.  It was 
+   * therefore unavoidable to add a few lines of code in the original code
+   * that is only used for this test case. These lines were added to the 
+   * DefinitionsPane.java file.
+   * @throws IOException if an IO operation fails
+   * @throws InterruptedException if execution is interrupted unexpectedly
+   */
   public void testFrenchKeyStrokes() throws IOException, InterruptedException {
     
     final DefinitionsPane pane = _frame.getCurrentDefPane(); // pane is NOT null.

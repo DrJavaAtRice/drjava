@@ -36,8 +36,7 @@
 
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
-/**
- * Test the delete functionality of the reduced model.
+/** * Test the delete functionality of the reduced model.
  * @version $Id$
  */
 public final class ReducedModelDeleteTest extends BraceReductionTestCase

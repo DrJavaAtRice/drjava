@@ -36,6 +36,9 @@
 
 package edu.rice.cs.drjava.model;
 
+import java.util.List;
+import java.util.ArrayList;
+
 import javax.swing.text.Position;
 import javax.swing.text.BadLocationException;
 
@@ -44,10 +47,10 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.plt.lambda.Thunk;
 
 /** Class for a document region that moves with changes in the document; it also includes a lazy tool-tip and line
-  * boundaries.  TODO: convert _startPos and _endPos to _cachedStart and _cachedEnd which are updated by updateLines
+  * boundaries.
   * @version $Id$Regiong
   */
-public class MovingDocumentRegion extends DocumentRegion {
+public class MovingDocumentRegion extends StaticDocumentRegion {
   
 //  /** Offset of end of last line of this region as recorded in last call on updateLines (or <init>). */
 //  protected volatile int _cachedLineEnd;
@@ -55,26 +58,37 @@ public class MovingDocumentRegion extends DocumentRegion {
   protected final Position _endPos;
   protected volatile Position _lineStartPos;
   protected volatile Position _lineEndPos;
-    
+
   /** Suspension that generates the JTree label excerpt for this region. */
   protected final Thunk<String> _stringSuspension;
   
   /** Update _lineStartPos and _lineEndPos after line has been edited. */
   public void update() {
-    try {  // _doc is inherited from DocumentRegion
+
+    try {  // _doc is inherited from StaticDocumentRegion
       _lineStartPos = _doc.createPosition(_doc._getLineStartPos(getStartOffset()));
       _lineEndPos = _doc.createPosition(_doc._getLineEndPos(getEndOffset()));
-    }
-    catch (BadLocationException ble) { throw new UnexpectedException(ble); }  // should never happen
+    } 
+
+    catch (BadLocationException ble) { 
+      throw new UnexpectedException(ble); 
+    }  // should never happen
+
   }
     
-  /** Create a new moving document region. */
+  /** Create a new moving document region. 
+   * @param doc the document within which to create the new region
+   * @param start the start offset
+   * @param end the end offset
+   * @param lineStart the line start
+   * @param lineEnd the line end
+   */
   public MovingDocumentRegion(final OpenDefinitionsDocument doc, int start, int end, int lineStart, int lineEnd) {
 
     super(doc, start, end);
 
     assert doc != null;
-    
+
     try {
       _startPos = doc.createPosition(start);
       _endPos = doc.createPosition(end);
@@ -159,7 +173,10 @@ public class MovingDocumentRegion extends DocumentRegion {
   /** @return the string it was assigned */
   public String getString() { return _stringSuspension.value(); }
   
-  /** @return true if objects a and b are equal; null values are handled correctly. */
+  /** @param a first object to compare
+    * @param b second object to compare
+    * @return true if objects a and b are equal; null values are handled correctly. 
+    */
   public static boolean equals(Object a, Object b) {
     if (a == null) return (b == null);
     return a.equals(b);

@@ -36,8 +36,7 @@
 
 package edu.rice.cs.drjava.model.definitions.indent;
 
-/**
- * Tests whether start of line is within a multiline comment.
+/** * Tests whether start of line is within a multiline comment.
  *
  * @version $Id$
  */

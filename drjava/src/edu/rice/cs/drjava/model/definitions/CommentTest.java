@@ -53,8 +53,9 @@ public final class CommentTest extends DrJavaTestCase {
   private GlobalEventNotifier _notifier;
 
   /** Resents configuration settings and sets up the indent level so that we
-    * can predict the correct behavior for indenting.
-    */
+   * can predict the correct behavior for indenting.
+   * @throws Exception if an error occurs during setup
+   */
   public void setUp() throws Exception {
     super.setUp();
     DrJava.getConfig().resetToDefaults();
@@ -63,7 +64,9 @@ public final class CommentTest extends DrJavaTestCase {
     DrJava.getConfig().setSetting(OptionConstants.INDENT_INC,_indentLevel);
   }
 
-  /** Tests the Comment Out Line(s) command with a single line. */
+  /** Tests the Comment Out Line(s) command with a single line. 
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testCommentOutSingleLine() throws BadLocationException {
     String text =
       "Here is some abritrary text that should be commented.\n" +
@@ -81,7 +84,9 @@ public final class CommentTest extends DrJavaTestCase {
     _assertContents("Only the second line should be wing-commented!", commented, doc);
   }
 
-  /** Tests the Comment Out Line(s) command with multiple lines. */
+  /** Tests the Comment Out Line(s) command with multiple lines. 
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testCommentOutMultipleLines() throws BadLocationException {
     String text =
       "Here is some abritrary text that should be commented.\n" +
@@ -100,8 +105,9 @@ public final class CommentTest extends DrJavaTestCase {
   }
 
   /** Tests the Uncomment Line(s) command with a single line.
-    * These sample lines should be ignored by the algorithm.
-    */
+   * These sample lines should be ignored by the algorithm.
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testUncommentIgnoreSingleLine() throws BadLocationException {
     doc.uncommentLines(0,0);
     _assertContents("Uncommenting an empty document should not cause an error", "", doc);
@@ -122,6 +128,7 @@ public final class CommentTest extends DrJavaTestCase {
 
   /** Tests the Uncomment Line(s) command with multiple lines.
    * These sample lines should be ignored by the algorithm.
+   * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testUncommentIgnoreMultipleLines() throws BadLocationException {
     String text =
@@ -138,6 +145,7 @@ public final class CommentTest extends DrJavaTestCase {
 
   /** Tests the Uncomment Line(s) command with a single line.
    * One of these sample lines should be uncommented and indented by the algorithm.
+   * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testUncommentSingleLine() throws BadLocationException {
     String text =
@@ -163,6 +171,7 @@ public final class CommentTest extends DrJavaTestCase {
 
   /** Tests the Uncomment Line(s) command with multiple lines.
    * These sample lines should be uncommented and indented by the algorithm.
+   * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testUncommentMultipleLines() throws BadLocationException {
     String text =

@@ -42,8 +42,7 @@ import java.util.Arrays;
 
 import javax.swing.JOptionPane;
 
-/**
- * A JUnit test case class that tests {@link ScrollableListDialog}.
+/** * A JUnit test case class that tests {@link ScrollableListDialog}.
  * 
  * @author Chris Warrington
  * @version $Id$
@@ -54,8 +53,7 @@ public class ScrollableListDialogTest extends TestCase {
   private static final String LEADER = "DIALOG LEADER";
   private static final java.util.List<String> DATA = Arrays.asList("hello", "there");
   
-  /**
-   * Tests that all the valid message types are accepted and that they
+  /** Tests that all the valid message types are accepted and that they
    * are the only message types accepted.
    */
   public void testValidMessageTypes() {

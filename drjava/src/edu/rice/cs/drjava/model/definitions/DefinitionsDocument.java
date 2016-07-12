@@ -131,9 +131,10 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   private volatile LinkedList<WeakReference<WrappedPosition>> _wrappedPosList;
   
   /** Root constructor that other constructors call; not used directly
-    * @param indenter custom indenter class
-    * @param notifier used by CompoundUndoManager to announce undoable edits
-    */
+   * @param indenter custom indenter class
+   * @param notifier used by CompoundUndoManager to announce undoable edits
+   * @param undoManager a CompoundUndoManager
+   */
   private DefinitionsDocument(Indenter indenter, GlobalEventNotifier notifier, CompoundUndoManager undoManager) {
     super(indenter);
     _notifier = notifier;
@@ -141,7 +142,10 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     _undoManager = undoManager;
   }
   
-  /** Convenience constructor used ?? */
+  /** Convenience constructor used ?? 
+   * @param indenter custom indenter class
+   * @param notifier used by CompoundUndoManager to announce undoable edits
+   */
   public DefinitionsDocument(Indenter indenter, GlobalEventNotifier notifier) {
     // initialize _indenter, _notifier, _undoManager, _wrappedPosListLock, _editor
     this(indenter, notifier, new CompoundUndoManager(notifier));
@@ -157,16 +161,19 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   }
   
   /** Main constructor.
-    * @param notifier used by CompoundUndoManager to announce undoable edits
-    */
+   * @param notifier used by CompoundUndoManager to announce undoable edits
+   * @param undoManager a CommandUndoManager
+   */
   public DefinitionsDocument(GlobalEventNotifier notifier, CompoundUndoManager undoManager) {
     this(new Indenter(DrJava.getConfig().getSetting(INDENT_INC).intValue()), notifier, undoManager);
   }
   
-  /** Returns the document's editor */
+  /** @return the document's editor */
   public DefinitionsEditorKit getEditor() { return _editor; }
   
-  /** Returns a new indenter. */
+  /** @param indentLevel the indentation level 
+   * @return a new indenter. 
+   */
   protected Indenter makeNewIndenter(int indentLevel) { return new Indenter(indentLevel); }
   
   /** Sets the OpenDefinitionsDocument that holds this DefinitionsDocument (the odd can only be set once).
@@ -246,20 +253,25 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   
   
   /** Gets the package and main class/interface name of this OpenDefinitionsDocument
-    * @return the qualified main class/interface name
-    */
+   * @return the qualified main class/interface name
+   * @throws ClassNameNotFoundException if the class cannot be found
+   */
   public String getQualifiedClassName() throws ClassNameNotFoundException {
     return getPackageQualifier() + getMainClassName();
   }
   
-  /** Gets fully qualified class name of the top level class enclosing the given position. */
+  /** @param pos the position for which to get the name of the enclosing class
+   * @return fully qualified class name of the top level class enclosing the given position. 
+   * @throws ClassNameNotFoundException if the class cannot be found
+   */
   public String getQualifiedClassName(int pos) throws ClassNameNotFoundException {
     return getPackageQualifier() + getEnclosingTopLevelClassName(pos);
   }
   
-  /** Gets an appropriate prefix to fully qualify a class name. Returns this class's package followed by a dot, or the
-    * empty string if no package name is found.
-    */
+  /** Gets an appropriate prefix to fully qualify a class name. 
+   * @return this class's package followed by a dot, or the empty string if no 
+   * package name is found.
+   */
   private String getPackageQualifier() {
     String packageName = getPackageName();
     if ((packageName != null) && (! packageName.equals(""))) { packageName = packageName + "."; }
@@ -324,17 +336,19 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     */
   public boolean isModifiedSinceSave() { return  _isModifiedSinceSave; }
   
-  /** Return the current column of the cursor position. Uses a 0 based index. */
+  /** @return the current column of the cursor position. Uses a 0 based index. */
   public int getCurrentCol() {
     Element root = getDefaultRootElement();
     int line = root.getElementIndex(_currentLocation);
     return _currentLocation - root.getElement(line).getStartOffset();
   }
   
-  /** Return the current line of the cursor position.  Uses a 1-based index. */
+  /** @return the current line of the cursor position.  Uses a 1-based index. */
   public int getCurrentLine() { return getLineOfOffset(_currentLocation); }
   
-  /** Return the line number corresponding to offset.  Uses a 1-based index. */
+  /** @param offset the offset for which to get the corresponding line
+   * @return the line number corresponding to offset.  Uses a 1-based index. 
+   */
   public int getLineOfOffset(int offset) { return getDefaultRootElement().getElementIndex(offset) + 1; }
   
   /** Returns the offset corresponding to the first character of the given line number, or -1 if the lineNum is not
@@ -366,13 +380,15 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   }
   
   
-  /** Returns true iff tabs are to removed on text insertion. */
+  /** @return true iff tabs are to removed on text insertion. */
   public boolean tabsRemoved() { return _tabsRemoved; }
   
-  /** Comments out all lines between selStart and selEnd, inclusive. The cursor position is unchanged by the operation.
-    * @param selStart the document offset for the start of the selection
-    * @param selEnd the document offset for the end of the selection
-    */
+  /** Comments out all lines between selStart and selEnd, inclusive. 
+   * The cursor position is unchanged by the operation.
+   * @param selStart the document offset for the start of the selection
+   * @param selEnd the document offset for the end of the selection
+   * @return the end index of the file
+   */
   public int commentLines(int selStart, int selEnd) {
     
     //int key = _undoManager.startCompoundEdit();  //Uncommented in regards to the FrenchKeyBoardFix
@@ -390,9 +406,10 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   
   
   /** Comments out the lines between start and end inclusive, using wing comments -- "// ".
-    * @param start Position in document to start commenting from
-    * @param end Position in document to end commenting at
-    */
+   * @param start Position in document to start commenting from
+   * @param end Position in document to end commenting at
+   * @return the end index of the file
+   */
   private int commentBlock(final int start, final int end) {
     int afterCommentEnd = end;
     try {
@@ -427,10 +444,12 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     catch (BadLocationException e) { throw new UnexpectedException(e); }
   }
   
-  /** Uncomments all lines between selStart and selEnd, inclusive.  The cursor position is unchanged by the operation.
-    * @param selStart the document offset for the start of the selection
-    * @param selEnd the document offset for the end of the selection
-    */
+  /** Uncomments all lines between selStart and selEnd, inclusive.  
+   * The cursor position is unchanged by the operation.
+   * @param selStart the document offset for the start of the selection
+   * @param selEnd the document offset for the end of the selection
+   * @return the end index of the file
+   */
   public int uncommentLines(int selStart, int selEnd) {
     
     //int key = _undoManager.startCompoundEdit(); //commented out for FrenchKeyBoardFix
@@ -450,9 +469,10 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   }
   
   /** Uncomments all lines between start and end inclusive. 
-    * @param start Position in document to start commenting from
-    * @param end Position in document to end commenting at
-    */
+   * @param start Position in document to start commenting from
+   * @param end Position in document to end commenting at
+   * @return the end index of the file
+   */
   private int uncommentBlock(final int start, final int end) {
     int afterUncommentEnd = end;
     try {
@@ -475,9 +495,12 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     return afterUncommentEnd;
   }
   
-  /** Uncomments a single line.  This simply looks for a leading "//".  Assumes that cursor is already located at the
-    * beginning of line.  Also assumes that write lock and _reduced lock are already held.
-    */
+  /** Uncomments a single line.  This simply looks for a leading "//".  
+   * Assumes that cursor is already located at the beginning of line.  
+   * Also assumes that write lock and _reduced lock are already held.
+   * @return the end index of the file
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   private int _uncommentLine() throws BadLocationException {
     // Look for "//" at the beginning of the line, and remove it.
 //    Utilities.show("Uncomment line at location " + _currentLocation);
@@ -493,7 +516,9 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     return WING_COMMENT_OFFSET;
   }
   
-  /** Goes to a particular line in the document. */
+  /** Goes to a particular line in the document. 
+   * @param line the line to go to
+   */
   public void gotoLine(int line) {
     
     int dist;
@@ -508,7 +533,12 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     }
   }  
   
-  /** Assumes that read lock is already held. */
+  /** Assumes that read lock is already held. 
+   * @param text the text to search within
+   * @param pos the position to begin searching from
+   * @return the index of the next open curly brace
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   private int _findNextOpenCurly(String text, int pos) throws BadLocationException {
     
     /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
@@ -546,8 +576,13 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   }
   
   /** Assuming that text is a document prefix including offset pos, finds the index of the keyword kw
-    * searching back from pos.
-    */
+   * searching back from pos.
+   * @param text the text to search within
+   * @param kw the keyword to search for
+   * @param pos the position to begin searching from
+   * @return the index of kw
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public int _findPrevKeyword(String text, String kw, int pos) throws BadLocationException {
     
     /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
@@ -602,23 +637,30 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   
 //  public static boolean log = true;
   
-  /** Searches backwards to find the name of the enclosing named class or interface. NB: ignores comments.
-    * WARNING: In long source files and when contained in anonymous inner classes, this function might take a LONG time.
-    * @param pos Position to start from
-    * @param qual true to find the fully qualified class name
-    * @return name of the enclosing named class or interface
-    */
+  /** Searches backwards to find the name of the enclosing named class or 
+   * interface. NB: ignores comments.
+   * WARNING: In long source files and when contained in anonymous inner 
+   * classes, this function might take a LONG time.
+   * @param pos Position to start from
+   * @param qual true to find the fully qualified class name
+   * @return name of the enclosing named class or interface
+   * @throws BadLocationException if attempts to reference an invalid location
+   * @throws ClassNameNotFoundException if the class is not found
+   */
   public String getEnclosingClassName(int pos, boolean qual) throws BadLocationException, ClassNameNotFoundException {
     return _getEnclosingClassName(pos, qual);
   }
   
-  /** Searches backwards to find the name of the enclosing named class or interface. NB: ignores comments. Only runs in
-    * event thread.
-    * WARNING: In long source files and when contained in anonymous inner classes, this function might take a LONG time.
-    * @param pos Position to start from
-    * @param qual true to find the fully qualified class name
-    * @return name of the enclosing named class or interface
-    */
+  /** Searches backwards to find the name of the enclosing named class or 
+   * interface. NB: ignores comments. Only runs in event thread.
+   * WARNING: In long source files and when contained in anonymous inner 
+   * classes, this function might take a LONG time.
+   * @param pos Position to start from
+   * @param qual true to find the fully qualified class name
+   * @return name of the enclosing named class or interface
+   * @throws BadLocationException if attempts to reference an invalid location
+   * @throws ClassNameNotFoundException if the class is not found
+   */
   public String _getEnclosingClassName(final int pos, final boolean qual) throws BadLocationException, 
     ClassNameNotFoundException {    
     
@@ -731,12 +773,13 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     return name;
   }
   
-  /** Returns true if this position is the instantiation of an anonymous inner class.  Only runs in the event thread.
-    * @param pos position of "new"
-    * @param openCurlyPos position of the next '{'
-    * @return true if anonymous inner class instantiation
-    */
-  
+  /** Returns true if this position is the instantiation of an anonymous inner 
+   * class.  Only runs in the event thread.
+   * @param pos position of "new"
+   * @param openCurlyPos position of the next '{'
+   * @return true if anonymous inner class instantiation
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public boolean _isAnonymousInnerClass(final int pos, final int openCurlyPos) throws BadLocationException {
 //    String t = getText(0, openCurlyPos+1);
 //    System.err.print("_isAnonymousInnerClass(" + pos + ", " + openCurlyPos + ")");
@@ -834,11 +877,14 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     }
   }
   
-  /** Returns the index of the anonymous inner class being instantiated at the specified position (where openining brace
-    * for anonymous inner class is pos).  Only runs in event thread.
-    * @param pos is position of the opening curly brace of the anonymous inner class
-    * @return anonymous class index
-    */
+  /** Returns the index of the anonymous inner class being instantiated at the 
+   * specified position (where openining brace
+   * for anonymous inner class is pos).  Only runs in event thread.
+   * @param pos is position of the opening curly brace of the anonymous inner class
+   * @return anonymous class index
+   * @throws BadLocationException if attempts to reference an invalid location
+   * @throws ClassNameNotFoundException if the class name is not found
+   */
   int _getAnonymousInnerClassIndex(final int pos) throws BadLocationException, ClassNameNotFoundException {   
 //    boolean oldLog = true; // log; log = false;
     
@@ -917,9 +963,10 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   }
   
   /** Returns the name of the class or interface enclosing the caret position at the top level.
-    * @return Name of enclosing class or interface
-    * @throws ClassNameNotFoundException if no enclosing class found
-    */
+   * @param pos the position for which to find the enclosing class
+   * @return Name of enclosing class or interface
+   * @throws ClassNameNotFoundException if no enclosing class found
+   */
   public String getEnclosingTopLevelClassName(int pos) throws ClassNameNotFoundException {
     int oldPos = _currentLocation;
     try {
@@ -960,10 +1007,12 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   }
   
   /** Gets the name of first class/interface/enum declared in file among the definitions anchored at:
-    * @param indexOfClass  index in this of a top-level occurrence of class 
-    * @param indexOfInterface  index in this of a top-level occurrence of interface
-    * @param indexOfEnum index in this of a top-level occurrence of enum
-    */
+   * @param indexOfClass  index in this of a top-level occurrence of class 
+   * @param indexOfInterface  index in this of a top-level occurrence of interface
+   * @param indexOfEnum index in this of a top-level occurrence of enum
+   * @return the name of the first class declared in the file
+   * @throws ClassNameNotFoundException if the class name is not found
+   */
   private String getFirstClassName(int indexOfClass, int indexOfInterface,
                                    int indexOfEnum) throws ClassNameNotFoundException {
     try {
@@ -995,8 +1044,12 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     catch(IllegalStateException ise) { throw ClassNameNotFoundException.DEFAULT; }
   }
   
-  /** Gets the name of the document's main class: the document's only public class/interface or 
-    * first top level class if document contains no public classes or interfaces. */
+  /** Gets the name of the document's main class: the document's only public 
+   * class/interface or first top level class if document contains no public 
+   * classes or interfaces. 
+   * @return the name of the main class 
+   * @throws ClassNameNotFoundException if the class name is not found
+   */
   public String getMainClassName() throws ClassNameNotFoundException {
     final int oldPos = _currentLocation;
     
@@ -1083,8 +1136,13 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     finally { setCurrentLocation(oldPos); }
   }
   
-  /** Finds the next identifier (following a non-whitespace character) in the document starting at start. Assumes that
-    * read lock and _reduced lock are already held. */
+  /** Finds the next identifier (following a non-whitespace character) in the 
+   * document starting at start. Assumes that read lock and _reduced lock are 
+   * already held. 
+   * @param startPos position at which to being searching
+   * @return the next identifier in the document
+   * @throws ClassNameNotFoundException if the class name is not found
+   */
   private String getNextIdentifier(final int startPos) throws ClassNameNotFoundException {
     
 //    _log.log("getNextIdentifer(" + startPos + ") called");
@@ -1168,15 +1226,19 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   /** Wrapper for Position objects to allow relinking to a new Document. */
   public static class WrappedPosition implements Position {
     private Position _wrapped;
-    /** Constructor is only called from createPosition below. */
+    /** Constructor is only called from createPosition below. 
+     * @param w the position to be wrapped
+     */
     WrappedPosition(Position w) { setWrapped(w); }
     public void setWrapped(Position w) { _wrapped = w; }
     public int getOffset() { return _wrapped.getOffset(); }
   }
   
-  /** Factory method for created WrappedPositions. Stores the created Position instance so it can be linked to a 
-    * different DefinitionsDocument later. 
-    */
+  /** Factory method for created WrappedPositions. Stores the created Position 
+   * instance so it can be linked to a different DefinitionsDocument later. 
+   * @param offset the offset at which to create the position
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public Position createPosition(final int offset) throws BadLocationException {
     /* The following attempt to defer document loading did not work because offsets became stale.  Positions must be
      * created eagerly. */
@@ -1217,9 +1279,11 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     }
   }
   
-  /** Re-create the wrapped positions in the hashmap, update the wrapped position, and add them to the list.
-    * @param whm weakly-linked hashmap of wrapped positions and their offsets
-    */
+  /** Re-create the wrapped positions in the hashmap, update the wrapped 
+   * position, and add them to the list.
+   * @param whm weakly-linked hashmap of wrapped positions and their offsets
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void setWrappedPositionOffsets(WeakHashMap<WrappedPosition, Integer> whm) throws BadLocationException {
     synchronized(_wrappedPosListLock) {
       if (_wrappedPosList == null) { _wrappedPosList = new LinkedList<WeakReference<WrappedPosition>>(); }
@@ -1270,10 +1334,10 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     _undoManager.setLimit(UNDO_LIMIT);
   }
   
-  /** Public accessor for the next undo action. */
+  /** @return the next undo action. */
   public UndoableEdit getNextUndo() { return _undoManager.getNextUndo(); }
   
-  /** Public accessor for the next undo action. */
+  /** @return the next redo action. */
   public UndoableEdit getNextRedo() { return _undoManager.getNextRedo(); }
   
   /** Informs this document's undo manager that the document has been saved. */
@@ -1394,8 +1458,10 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   
   public String toString() { return "ddoc for " + _odd; }
   
-  /** Returns true if one of the words 'class', 'interface' or 'enum' is found
-    * in non-comment text. */
+  /** @return true if one of the words 'class', 'interface' or 'enum' is found 
+   *         in non-comment text. 
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public boolean containsClassOrInterfaceOrEnum() throws BadLocationException {
     
     /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();

@@ -52,6 +52,7 @@ public class SavableConfiguration extends Configuration {
    * (and defaults where values weren't specified) and loads them into
    * this Configuration's OptionMap.
    * @param is InputStream containing properties-style keys and values
+   * @throws IOException if an IO operation fails
    */
   public void loadConfiguration(InputStream is) throws IOException {
     new OptionMapLoader(is).loadInto(map);
@@ -61,6 +62,10 @@ public class SavableConfiguration extends Configuration {
    * as a Properties file. The elements weren't ordered, so now the properties
    * are written in the same way as the about dialog.
    * Values equal to their defaults are not written to disk.
+   * 
+   * @param os the stream to which to save the values from this configuration
+   * @param header the header to be written
+   * @throws IOException if an IO operation fails
    */
   public void saveConfiguration(OutputStream os, String header) throws IOException {
     PrintWriter w = new PrintWriter(new BufferedWriter(new OutputStreamWriter(os)));

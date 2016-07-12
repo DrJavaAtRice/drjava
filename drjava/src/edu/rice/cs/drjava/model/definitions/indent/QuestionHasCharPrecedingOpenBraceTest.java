@@ -38,8 +38,7 @@ package edu.rice.cs.drjava.model.definitions.indent;
 
 import javax.swing.text.BadLocationException;
 
-/**
- * Test class according to the JUnit protocol. Tests the proper functionality
+/** * Test class according to the JUnit protocol. Tests the proper functionality
  * of the class QuestionHasCharPrecedingOpenBrace.
  * @version $Id$
  */

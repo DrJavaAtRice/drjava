@@ -351,8 +351,7 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
     }
   }
   
-  /**
-   * Tests basic functionality of undo/redo
+  /** Tests basic functionality of undo/redo
    */
   public void testUndoRedoWorks() {
     final String oldText = _doc.getText();

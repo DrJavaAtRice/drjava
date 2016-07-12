@@ -168,11 +168,14 @@ public class DetachedFrame extends SwingFrame {
   }
   
   /** Recursively process the MenuElement and add entries to the InputMap and ActionMap so that the
-    * menu element's accelerator will invoke the menu element's action even if the MenuElement is
-    * not present in another frame.
-    * Note that this will only use the first key stroke configured for an action, because a menu item
-    * can only have one accelerator key stroke.
-    */
+   * menu element's accelerator will invoke the menu element's action even if the MenuElement is
+   * not present in another frame.
+   * Note that this will only use the first key stroke configured for an action, because a menu item
+   * can only have one accelerator key stroke.
+   * @param elt the MenuElement
+   * @param im the InputMap
+   * @param am the ActionMap
+   */
   protected static void processMenuElement(MenuElement elt, InputMap im, ActionMap am) {
     if ((elt instanceof JMenuItem) && !(elt instanceof JMenu)) {
       // this is a leaf
@@ -195,7 +198,10 @@ public class DetachedFrame extends SwingFrame {
   }
   
   /** Recursively copy the first menu bar's accelerators into the second menu bar.
-    * Installs listeners to keep the accelerators updated. */
+   * Installs listeners to keep the accelerators updated. 
+   * @param source source to copy accelerators from
+   * @param dest destination to copy accelerators to
+   */
   protected void copyAccelerators(JMenuBar source, JMenuBar dest) {
     int sourceIndex = 0;
     int destIndex = 0;
@@ -214,7 +220,10 @@ public class DetachedFrame extends SwingFrame {
   }
   
   /** Recursively copy the first menu's accelerators into the second menu.
-    * Installs listeners to keep the accelerators updated. */
+   * Installs listeners to keep the accelerators updated.
+   * @param source source to copy accelerators from
+   * @param dest destination to copy accelerators to
+   */
   protected void copyAccelerators(MenuElement source, MenuElement dest) {
     if (!(source instanceof JMenu) && !(source instanceof JPopupMenu) &&
         !(dest instanceof JMenu) && !(dest instanceof JPopupMenu) &&

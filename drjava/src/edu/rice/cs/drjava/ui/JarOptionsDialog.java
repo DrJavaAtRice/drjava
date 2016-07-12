@@ -621,13 +621,17 @@ public class JarOptionsDialog extends SwingFrame {
     return _jarFileSelector;
   }
   
-  /** Modifies state for when the executable check box is selected */
+  /** Modifies state for when the executable check box is selected 
+   * @param b value to be set
+   */
   private void _setEnableExecutable(boolean b) {
     _makeExecutable.setEnabled(b);
     _toggleMainClass();
   }
   
-  /** Enables/Disables the custom manifest checkbox */
+  /** Enables/Disables the custom manifest checkbox 
+   * @param b value to be set
+   */
   private void _setEnableCustomManifest(boolean b) {
     _customManifest.setEnabled(b);
     _toggleCustomManifest();
@@ -717,8 +721,7 @@ public class JarOptionsDialog extends SwingFrame {
         return true;
       }
       
-      /**
-       * Takes input of a file which is a directory and compresses all the class files in it
+      /**       * Takes input of a file which is a directory and compresses all the class files in it
        * into a jar file
        *
        * @param dir     the File object representing the directory
@@ -760,8 +763,7 @@ public class JarOptionsDialog extends SwingFrame {
         return true;
       }
       
-      /**
-       * Takes the model and the jar and writes all the sources to the jar
+      /**       * Takes the model and the jar and writes all the sources to the jar
        *
        * @param model the GlobalModel that the files are to come out of
        * @param jar   the JarBuilder that the data should be written to
@@ -1011,7 +1013,9 @@ public class JarOptionsDialog extends SwingFrame {
     worker.start();
   }
   
-  /** Save the settings for this dialog. */
+  /** Save the settings for this dialog. 
+   * @return true always
+   */
   private boolean _saveSettings() {
     _lastState = new FrameState(this);
     if ((_model.getCreateJarFile() == null) ||

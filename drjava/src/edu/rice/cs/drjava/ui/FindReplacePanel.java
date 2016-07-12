@@ -547,7 +547,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     return _findField.requestFocusInWindow();
   }
   
-  /** Getter method for the _findField component */
+  /** @return the _findField component */
   JTextPane getFindField() { return _findField; }
 
   /** Performs "find all" command. */
@@ -566,28 +566,46 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
 //    else tabLabel.append(title.substring(0,10)).append("...");
     String tabLabel = (title.length() <= 20) ? title : title.substring(0,20);
     RegionManager<MovingDocumentRegion> rm = _model.createFindResultsManager();
+
     MovingDocumentRegion region = new MovingDocumentRegion(startDoc, 
-                                                           _defPane.getSelectionStart(), 
-                                                           _defPane.getSelectionEnd(), 
-                                                           startDoc._getLineStartPos(_defPane.getSelectionStart()),
-                                                           startDoc._getLineEndPos(_defPane.getSelectionEnd()));
-    final FindResultsPanel panel = 
-      _frame.createFindResultsPanel(rm, region, tabLabel, searchStr, searchAll, searchSelectionOnly, _machine.getMatchCase(), 
-                                    _machine.getMatchWholeWord(), _machine.getIgnoreCommentsAndStrings(),
-                                    _ignoreTestCases.isSelected(), new WeakReference<OpenDefinitionsDocument>(startDoc),
-                                    this);
-    findAll(searchStr, searchAll, searchSelectionOnly, _machine.getMatchCase(), _machine.getMatchWholeWord(),
-            _machine.getIgnoreCommentsAndStrings(), _ignoreTestCases.isSelected(), startDoc, rm, region, panel);
+      _defPane.getSelectionStart(), _defPane.getSelectionEnd(), 
+      startDoc._getLineStartPos(_defPane.getSelectionStart()),
+      startDoc._getLineEndPos(_defPane.getSelectionEnd()));
+
+    final FindResultsPanel panel = _frame.createFindResultsPanel(rm, region, 
+      tabLabel, searchStr, searchAll, searchSelectionOnly, _machine.getMatchCase(), 
+      _machine.getMatchWholeWord(), _machine.getIgnoreCommentsAndStrings(),
+      _ignoreTestCases.isSelected(), 
+      new WeakReference<OpenDefinitionsDocument>(startDoc), this);
+
+    findAll(searchStr, searchAll, searchSelectionOnly, _machine.getMatchCase(), 
+      _machine.getMatchWholeWord(), _machine.getIgnoreCommentsAndStrings(), 
+      _ignoreTestCases.isSelected(), startDoc, rm, region, panel);
+
     _model.refreshActiveDocument();  // Rationale: a giant findAll left the definitions pane is a strange state
     panel.requestFocusInWindow();
     EventQueue.invokeLater(new Runnable() { public void run() { panel.getRegTree().scrollRowToVisible(0); } });
   }
   
-  /** Performs "find all" with the specified options. */
-  public void findAll(String searchStr, final boolean searchAll, final boolean searchSelectionOnly, final boolean matchCase,
-                      final boolean wholeWord, final boolean noComments, final boolean noTestCases,
-                      final OpenDefinitionsDocument startDoc, final RegionManager<MovingDocumentRegion> rm, final MovingDocumentRegion region,
-                      final FindResultsPanel panel) {
+  /** Performs "find all" with the specified options. 
+   * @param searchStr string to search for
+   * @param searchAll true if we should search all documents
+   * @param searchSelectionOnly true if we should search only the current selection
+   * @param matchCase true if search should be case-sensitive
+   * @param wholeWord true if we want to match the whole word
+   * @param noComments true if we want to ignore comments
+   * @param noTestCases true if we want to ignore test cases
+   * @param startDoc first document to search within
+   * @param rm a RegionManager
+   * @param region a MovingDocumentRegion
+   * @param panel panel in which to display search results
+   */
+  public void findAll(String searchStr, final boolean searchAll, 
+    final boolean searchSelectionOnly, final boolean matchCase,
+    final boolean wholeWord, final boolean noComments, 
+    final boolean noTestCases, final OpenDefinitionsDocument startDoc, 
+    final RegionManager<MovingDocumentRegion> rm, 
+    final MovingDocumentRegion region, final FindResultsPanel panel) {
     
     _machine.setSearchBackwards(false);
 
@@ -695,11 +713,12 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     _machine.setReplaceWord(_replaceField.getText());
     _machine.setSearchBackwards(false);
     OpenDefinitionsDocument startDoc = _defPane.getOpenDefDocument();
+
     MovingDocumentRegion region = new MovingDocumentRegion(startDoc, 
-                                                           _defPane.getSelectionStart(), 
-                                                           _defPane.getSelectionEnd(), 
-                                                           startDoc._getLineStartPos(_defPane.getSelectionStart()),
-                                                           startDoc._getLineEndPos(_defPane.getSelectionEnd()));
+      _defPane.getSelectionStart(), _defPane.getSelectionEnd(), 
+      startDoc._getLineStartPos(_defPane.getSelectionStart()),
+      startDoc._getLineEndPos(_defPane.getSelectionEnd()));
+
     _machine.setSelection(region);
     _frame.clearStatusMessage();
     int count = _machine.replaceAll();
@@ -808,7 +827,9 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     _replaceButton.requestFocusInWindow();
   }
   
-  /** Called from MainFrame in response to opening this or changes in the active document. */
+  /** Called from MainFrame in response to opening this or changes in the active document. 
+   * @param defPane a DefinitionsPane
+   */
   void beginListeningTo(DefinitionsPane defPane) {
     if (_defPane == null) {
       // removed so it doesn't give the pane focus when switching documents
@@ -957,7 +978,9 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
   public void setSearchBackwards(boolean b) { _machine.setSearchBackwards(b); }
   public boolean isSearchBackwards() { return _machine.isSearchBackwards(); }
   
-  /** Sets the font of the find and replace fields to f. */
+  /** Sets the font of the find and replace fields to f. 
+   * @param f font to be set
+   */
   public void setFieldFont(Font f) {
     _findField.setFont(f);
     _replaceField.setFont(f);
@@ -1030,9 +1053,12 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
 //     _findField.selectAll();
 //   }
   
-  /** This method is used to select the item that has been inserted in a replacement.  Assumes the current offset
-    * identifies the found or replaced item.  In a forward search, this offset is the RIGHT edge of the found/replaced
-    * item; in a backwards search it is the LEFT edge. */
+  /** This method is used to select the item that has been inserted in a 
+   * replacement.  Assumes the current offset identifies the found or 
+   * replaced item.  In a forward search, this offset is the RIGHT edge of 
+   * the found/replaced item; in a backwards search it is the LEFT edge. 
+   * @param length length of the found or replaced item
+   */
   private void _selectFoundOrReplacedItem(int length) {
     int offset = _machine.getCurrentOffset();
     int from, to;
@@ -1061,13 +1087,16 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
 //    _selectFoundItem(from, to);
 //  }
   
-  /** Will select the identified text (from, to).  Note that positions are technically between characters, so there
-    * is no distinction between open and closed intervals.  Originally highlighted the text, but we ran into problems
-    * with the document remove method changing the view to where the cursor was located, resulting in 
-    * replace constantly jumping from the replaced text back to the cursor.  There was a 
-    * removePreviousHighlight method which was removed since selections are removed automatically upon
-    * a caret change.
-    */
+  /** Will select the identified text (from, to).  Note that positions are 
+   * technically between characters, so there is no distinction between open 
+   * and closed intervals.  Originally highlighted the text, but we ran into problems
+   * with the document remove method changing the view to where the cursor was located, resulting in 
+   * replace constantly jumping from the replaced text back to the cursor.  There was a 
+   * removePreviousHighlight method which was removed since selections are removed automatically upon
+   * a caret change.
+   * @param from left bound on selection
+   * @param to right bound on selection
+   */
   private void _selectFoundOrReplacedItem(int from, int to) {
     _defPane.centerViewOnOffset(from);
     _defPane.select(from, to);
@@ -1140,8 +1169,28 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
       }
     }
   };  
-  
-  /***************** METHODS FOR TESTING PURPOSES ONLY  ***********************/
+
+  /** Uses the FindReplaceMachine from the most recently run search to check if r is (still) a match for searchString.
+    * @param r the region to check
+    * @param searchString the string to check the region against
+    * @return whether or not the text in r matches searchString
+    */
+  public boolean isMatch(MovingDocumentRegion r, String searchString) {
+    OpenDefinitionsDocument doc = r.getDocument();
+    int startPos = r.getStartOffset();
+    int endPos = r.getEndOffset();
+
+    if ((endPos - startPos == searchString.length()) && (_machine != null)) {
+       _machine.setFindWord(searchString);
+       _machine.setDocument(doc);
+       _machine.setPosition(endPos);
+      return _machine.onMatch();
+    }
+
+    return false;
+  }
+
+  /*--------------------- METHODS FOR TESTING PURPOSES ONLY ---------------------*/
   public DefinitionsPane getDefPane() { return _defPane; }
   public JButton getFindNextButton() {return _findNextButton; }
 }

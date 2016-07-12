@@ -38,8 +38,7 @@ package edu.rice.cs.util.sexp;
 
 //package edu.rice.cs.drjava.project;
 
-/**
- * SExp   ::= Atom | SEList
+/** * SExp   ::= Atom | SEList
  * 
  * SEList   ::= Empty | Cons(SExp, SEList)
  * 

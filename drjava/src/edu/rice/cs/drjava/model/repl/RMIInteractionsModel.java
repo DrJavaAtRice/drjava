@@ -59,6 +59,7 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
   /** Constructs an InteractionsModel which can communicate with another JVM.
     * @param jvm RMI interface to the slave JVM
     * @param cDoc document to use in the InteractionsDocument
+    * @param wd working directory
     * @param historySize Number of lines to store in the history
     * @param writeDelay Number of milliseconds to wait after each println
     */
@@ -177,16 +178,20 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
     */
   protected abstract void _notifyInterpreterChanged(boolean inProgress);
 
-  /** Sets whether or not the interpreter should enforce access to all members. */
+  /** Sets whether or not the interpreter should enforce access to all members. 
+   * @param enforce true if the interpreter should enforce access to all members
+   */
   public void setEnforceAllAccess(boolean enforce) { _jvm.setEnforceAllAccess(enforce); }
   
-  /** Sets whether or not the interpreter should enforce access to private members. */
+  /** Sets whether or not the interpreter should enforce access to private members. 
+   * @param enforce true if the interpreter should enforce access to private members
+   */
   public void setEnforcePrivateAccess(boolean enforce) { _jvm.setEnforcePrivateAccess(enforce); }
 
-  /** Require a semicolon at the end of statements. */
+  /** @param require true if a semicolon is required at the end of statements. */
   public void setRequireSemicolon(boolean require) { _jvm.setRequireSemicolon(require); }
   
-  /** Require variable declarations to include an explicit type. */
+  /** @param require true if variable declarations are required to include an explicit type. */
   public void setRequireVariableType(boolean require) { _jvm.setRequireVariableType(require); }
   
   /** Gets the interpreter class path from the interpreter jvm.

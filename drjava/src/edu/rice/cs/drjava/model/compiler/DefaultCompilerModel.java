@@ -139,14 +139,14 @@ public class DefaultCompilerModel implements CompilerModel {
   //-------------------------- Listener Management --------------------------//
   
   /** Adds a CompilerListener to the model.  This operation is synchronized by the readers/writers protocol in 
-    * EventNotifier<T>.
+    * {@code EventNotifier<T>}.
     * @param listener  A listener that reacts to compiler events.
     */
   public void addListener(CompilerListener listener) { _notifier.addListener(listener); }
   
   /** Removes a CompilerListener from the model.  If the listener is not installed, this method has no effect.
     * @param listener a listener that reacts to compiler events
-    * This operation is synchronized by the readers/writers protocol in EventNotifier<T>.
+    * This operation is synchronized by the readers/writers protocol in {@code EventNotifier<T>}.
     */
   public void removeListener(CompilerListener listener) { _notifier.removeListener(listener); }
   
@@ -161,7 +161,7 @@ public class DefaultCompilerModel implements CompilerModel {
     * step.  The compilation classpath and sourcepath includes the build directory (if it exists), the source roots, 
     * the project "extra classpath" (if it exists), the global "extra classpath", and the current JVM's classpath
     * (which includes drjava.jar, containing JUnit classes).</p>
-    * This method formerly only compiled documents which were out of sync with their class file, as a performance 
+    * <p>This method formerly only compiled documents which were out of sync with their class file, as a performance 
     * optimization.  However, bug #634386 pointed out that unmodified files could depend on modified files, in which 
     * case this command would not recompile a file in some situations when it should.  Since we value correctness over
     * performance, we now always compile all open documents.</p>
@@ -177,7 +177,7 @@ public class DefaultCompilerModel implements CompilerModel {
     * step.  The compilation classpath and sourcepath includes the build directory (if it exists), the source roots, 
     * the project "extra classpath" (if it exists), the global "extra classpath", and the current JVM's classpath
     * (which includes drjava.jar, containing JUnit classes).</p>
-    * This method formerly only compiled documents which were out of sync with their class file, as a performance 
+    * <p>This method formerly only compiled documents which were out of sync with their class file, as a performance 
     * optimization.  However, bug #634386 pointed out that unmodified files could depend on modified files, in which 
     * case this command would not recompile a file in some situations when it should.  Since we value correctness over
     * performance, we now always compile all open documents.</p>
@@ -196,7 +196,7 @@ public class DefaultCompilerModel implements CompilerModel {
     * step.  The compilation classpath and sourcepath includes the build directory (if it exists), the source roots, 
     * the project "extra classpath" (if it exists), the global "extra classpath", and the current JVM's classpath
     * (which includes drjava.jar, containing JUnit classes).</p>
-    * This method formerly only compiled documents which were out of sync with their class file, as a performance 
+    * <p>This method formerly only compiled documents which were out of sync with their class file, as a performance 
     * optimization.  However, bug #634386 pointed out that unmodified files could depend on modified files, in which 
     * case this command would not recompile a file in some situations when it should.  Since we value correctness over
     * performance, we now always compile all open documents.</p>
@@ -212,7 +212,7 @@ public class DefaultCompilerModel implements CompilerModel {
     * step.  The compilation classpath and sourcepath includes the build directory (if it exists), the source roots, 
     * the project "extra classpath" (if it exists), the global "extra classpath", and the current JVM's classpath
     * (which includes drjava.jar, containing JUnit classes).</p>
-    * This method formerly only compiled documents which were out of sync with their class file, as a performance 
+    * <p>This method formerly only compiled documents which were out of sync with their class file, as a performance 
     * optimization.  However, bug #634386 pointed out that unmodified files could depend on modified files, in which 
     * case this command would not recompile a file in some situations when it should.  Since we value correctness over
     * performance, we now always compile all open documents.</p>
@@ -224,7 +224,7 @@ public class DefaultCompilerModel implements CompilerModel {
   }
   
   /** Check that there are no unsaved or untitled files currently open.
-    * @return  @code{true} iff compilation should continue
+    * @return  {@code true} iff compilation should continue
     */
   private boolean _prepareForCompile() {
     if (_model.hasModifiedDocuments()) _notifier.saveBeforeCompile();
@@ -232,7 +232,10 @@ public class DefaultCompilerModel implements CompilerModel {
     return ! _model.hasModifiedDocuments();
   }
   
-  /** Compile the given documents. */
+  /** Compile the given documents. 
+   * @param docs the documents to be compiled
+   * @throws IOException if an IO operation fails
+   */
   private void _doCompile(List<OpenDefinitionsDocument> docs) throws IOException {
     _LLSTM.clearCache();
     final ArrayList<File> filesToCompile = new ArrayList<File>();
@@ -288,7 +291,10 @@ public class DefaultCompilerModel implements CompilerModel {
   
   //-------------------------------- Helpers --------------------------------//
   
-  /** Converts JExprParseExceptions thrown by the JExprParser in language levels to CompilerErrors. */
+  /** Converts JExprParseExceptions thrown by the JExprParser in language levels to CompilerErrors. 
+   * @param pes list of exceptions to be converted
+   * @return list of converted exceptions
+   */
   private LinkedList<DJError> _parseExceptions2CompilerErrors(LinkedList<JExprParseException> pes) {
     final LinkedList<DJError> errors = new LinkedList<DJError>();
     Iterator<JExprParseException> iter = pes.iterator();
@@ -300,7 +306,10 @@ public class DefaultCompilerModel implements CompilerModel {
     return errors;
   }
   
-  /** Converts errors thrown by the language level visitors to CompilerErrors. */
+  /** Converts errors thrown by the language level visitors to CompilerErrors. 
+   * @param visitorErrors list of exceptions to be converted
+   * @return list of converted exceptions
+   */
   private LinkedList<DJError> _visitorErrors2CompilerErrors(LinkedList<Pair<String, JExpressionIF>> visitorErrors) {
     final LinkedList<DJError> errors = new LinkedList<DJError>();
     Iterator<Pair<String, JExpressionIF>> iter = visitorErrors.iterator();
@@ -319,13 +328,16 @@ public class DefaultCompilerModel implements CompilerModel {
     return errors;
   }
   
-  /** Compile the given files and update the model with any errors that result.  Does not notify listeners.  
-    * All public compile methods delegate to this one so this method is the only one that uses synchronization to 
-    * prevent compiling and unit testing at the same time.
-    * @param files The files to be compiled
-    * @param buildDir The output directory for all the .class files; @code{null} means output to the same 
-    *                 directory as the source file
-    */
+  /** Compile the given files and update the model with any errors that result. 
+   * Does not notify listeners.  
+   * All public compile methods delegate to this one so this method is the 
+   * only one that uses synchronization to prevent compiling and unit testing 
+   * at the same time.
+   * @param files The files to be compiled
+   * @param buildDir The output directory for all the .class files; @code{null} 
+   *        means output to the same directory as the source file
+   * @throws IOException if an IO operation fails
+   */
   private void _compileFiles(List<File> files, File buildDir) throws IOException {
     if (! files.isEmpty()) {
       /* Canonicalize buildDir */
@@ -369,7 +381,10 @@ public class DefaultCompilerModel implements CompilerModel {
     }
   }
   
-  /** Reorders files so that all file names containing "Test" are at the end.  */
+  /** Reorders files so that all file names containing "Test" are at the end.  
+   * @param files the files to be sorted
+   * @return the sorted list of files
+   */
   private static List<File> _testFileSort(List<File> files) {
     LinkedList<File> testFiles = new LinkedList<File>();
     LinkedList<File> otherFiles = new LinkedList<File>();
@@ -382,9 +397,13 @@ public class DefaultCompilerModel implements CompilerModel {
   }
   
   /** Compiles the language levels files in the list.  Adds any errors to the given error list.
-    * @return  An updated list for compilation containing no Language Levels files, or @code{null}
-    *          if there were no Language Levels files to process.
-    */
+   * @param files the list of files to be compiled
+   * @param errors to be populated with errors that occur during compilation
+   * @param classPath the classpath
+   * @param bootClassPath the boot classpath
+   * @return  An updated list for compilation containing no Language Levels files, or @code{null}
+   *          if there were no Language Levels files to process.
+   */
   private List<File> _compileLanguageLevelsFiles(List<File> files, List<DJError> errors, Iterable<File> classPath, 
                                                  Iterable<File> bootClassPath) {
     /* Construct the collection of files to be compild by javac, renaming any language levels (.dj*) files to the 
@@ -565,9 +584,12 @@ public class DefaultCompilerModel implements CompilerModel {
     else { return null; }
   }
   
-  /** Sorts the given array of CompilerErrors and divides it into groups based on the file, giving each group to the
-    * appropriate OpenDefinitionsDocument, opening files if necessary.  Called immediately after compilations finishes.
-    */
+  /** Sorts the given array of CompilerErrors and divides it into groups based 
+   * on the file, giving each group to the appropriate OpenDefinitionsDocument, 
+   * opening files if necessary.  Called immediately after compilations finishes.
+   * @param errors the list of errors to be sorted
+   * @throws IOException if an IO operation fails
+   */
   private void _distributeErrors(List<? extends DJError> errors) throws IOException {
 //    resetCompilerErrors();  // Why is this done?
 //    System.err.println("Preparing to construct CompilerErrorModel for errors: " + errors);
@@ -577,16 +599,16 @@ public class DefaultCompilerModel implements CompilerModel {
   
   //----------------------------- Error Results -----------------------------//
   
-  /** Gets the CompilerErrorModel representing the last compile. */
+  /** @return the CompilerErrorModel representing the last compile. */
   public CompilerErrorModel getCompilerErrorModel() { return _compilerErrorModel; }
   
-  /** Gets the total number of errors in this compiler model. */
+  /** @return the total number of errors in this compiler model. */
   public int getNumErrors() { return getCompilerErrorModel().getNumErrors(); }
   
-  /** Gets the total number of current compiler errors. */
+  /** @return the total number of current compiler errors. */
   public int getNumCompilerErrors() { return getCompilerErrorModel().getNumCompilerErrors(); }
   
-  /** Gets the total number of current warnings. */  
+  /** @return the total number of current warnings. */  
   public int getNumWarnings() { return getCompilerErrorModel().getNumWarnings(); }
   
   /** Resets the compiler error state to have no errors. */

@@ -98,6 +98,7 @@ public class JarBuilder {
    * @param file     the file to be added
    * @param parent   the directory to the path in which the file is to be added
    * @param fileName the name of the file in the archive
+   * @throws IOException if an IO operation fails
    */
   public void addFile(File file, String parent, String fileName) throws IOException {
     byte data[] = new byte[2048];
@@ -191,6 +192,7 @@ public class JarBuilder {
   }
   
   /** Close writing on the jar file
+   * @throws IOException if an IO operation fails
    */
   public void close() throws IOException {
     _output.flush();

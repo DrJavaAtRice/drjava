@@ -39,8 +39,7 @@ package edu.rice.cs.drjava.model;
 import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.model.GlobalModelTestCase.TestListener;
 
-/**
- * Tests the functionality of the class that notifies listeners
+/** * Tests the functionality of the class that notifies listeners
  * of a global model.
  * @version $Id$
  */

@@ -107,7 +107,7 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
     }
   }
   
-  /** Returns a runnable object that beeps to the user. */
+  /** @return a runnable object that beeps to the user. */
   public Runnable getBeep() { return _beep; }
   
   private final InteractionsDJDocument _doc;
@@ -242,7 +242,7 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
   public DJDocument getDJDocument() { return _doc; }
   
   /** Updates match highlights.  Only runs in the event thread. 
-    * @param offset   caret position immediately following some form of brace; hence offset > 0. 
+    * @param offset   caret position immediately following some form of brace; hence offset {@literal >} 0. 
     * @param opening  true if the the preceding brace is "opening" 
     */
   protected void matchUpdate(int offset, boolean opening) {
@@ -298,7 +298,7 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
     */
   protected boolean shouldIndent(int selStart, int selEnd) { return true; }
   
-  /** Gets the current prompt position */
+  /** @return the current prompt position */
   public abstract int getPromptPos();
    
   /** Listens to any undoable events in the document, and adds them to the undo manager.  Must be done in the view 
@@ -351,7 +351,7 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
     }
 
     /** What to do when user chooses to undo.
-     *  @param e
+     *  @param e the ActionEvent that was performed
      */
     public void actionPerformed(ActionEvent e) {
       try {
@@ -390,7 +390,7 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
     }
 
     /** In the event that the user chooses to redo something, this is what's called.
-     *  @param e
+     *  @param e the ActionEvent that was performed
      */
     public void actionPerformed(ActionEvent e) {
       try {

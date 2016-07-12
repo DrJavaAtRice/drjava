@@ -97,6 +97,11 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
   }
 
   /** Constructor that allows for a tooltip description.
+   * @param opt the option to display
+   * @param text descriptive text to put in label
+   * @param parent the parent frame
+   * @param colNames column names or empty array to hide
+   * @param description tooltip text
    */
   public VectorOptionComponent(VectorOption<T> opt, String text, SwingFrame parent, String[] colNames,
                                String description) {
@@ -104,12 +109,13 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
   }
   
   /** Builds a new VectorOptionComponent.
-    * @param opt the option
-    * @param text the label to display
-    * @param parent the parent frame
-    * @param colNames column names or empty array to hide
-    * @param moveButtonEnabled true if the move buttons should be enabled
-    */
+   * @param opt the option
+   * @param text the label to display
+   * @param parent the parent frame
+   * @param colNames column names or empty array to hide
+   * @param description tooltip text
+   * @param moveButtonEnabled true if the move buttons should be enabled
+   */
   public VectorOptionComponent(VectorOption<T> opt, String text, SwingFrame parent, String[] colNames,
                                String description, boolean moveButtonEnabled) {
     super(opt, text, parent);
@@ -235,7 +241,10 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
     setComponent(_panel);
   }
 
-  /** Returns the decorated table model. This adds another column to it with remove buttons. */
+  /** Adds another column to the decorated table model with remove buttons.
+   * @param other an AbstractTableModel
+   * @return the decorated table model 
+   */
   protected AbstractTableModel _makeDecoratedTableModel(final AbstractTableModel other) {
     return new AbstractTableModel() {
       public String getColumnName(int col) {
@@ -283,7 +292,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
     };
   }
 
-  /** Returns the table model. Can be overridden by subclasses. */
+  /** @return the table model. Can be overridden by subclasses. */
   protected AbstractTableModel _makeTableModel() {
     return new AbstractTableModel() {
       public String getColumnName(int col) { return (_columnNames.length == 0)?super.getColumnName(col):_columnNames[col]; }
@@ -464,7 +473,9 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
     }
   }
   
-  /** Add the value to the table, update and resize it. */
+  /** Add the value to the table, update and resize it. 
+   * @param value the value to be added
+   */
   protected void _addValue(T value) {
     _data.add(value);
     _tableModel.fireTableRowsInserted(_data.size()-1, _data.size()-1);
@@ -473,14 +484,16 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
     resizeTable();
   }
 
-  /** Remove the value at index i, update the table and resize it. */
+  /** Remove the value at index i, update the table and resize it. 
+   * @param i the index at which to remove
+   */
   protected void _removeIndex(int i) {
     _data.remove(i);
     _tableModel.fireTableRowsDeleted(i,i);
     resizeTable();
   }
 
-  /** Return the buttons that should be added to the table underneath. */
+  /** @return the buttons that should be added to the table underneath. */
   protected java.util.List<JButton> getButtons() {
     List<JButton> buttons = new ArrayList<JButton>();
     buttons.add(_addButton);
@@ -540,24 +553,32 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
     return new Vector<T>(_data);
   }
 
-  /** Displays the given value. */
+  /** Displays the given value. 
+   * @param value the value to display
+   */
   public void setValue(Vector<T> value) {
     _data = new Vector<T>(value);
     _tableModel.fireTableDataChanged();
     resizeTable();
   }
 
-  /** Displays the given value. */
+  /** Displays the given value. 
+   * @param value the value to display
+   */
   public void setValue(ArrayList<T> value) {
     _data = new Vector<T>(value);
     _tableModel.fireTableDataChanged();
     resizeTable();
   }
   
-  /** Set the minimum and maximum number of rows to display before using a scrollbar, or 0 for arbitrarily many. */
+  /** Set the minimum and maximum number of rows to display before using a 
+   * scrollbar, or 0 for arbitrarily many. 
+   * @param minRows the minimum number of rows to display
+   * @param maxRows the maximum number of rows to display=
+   */
   public void setRows(int minRows, int maxRows) { _minRows = minRows; _maxRows = maxRows; resizeTable(); }
 
-  /** Return the required height of the table. */
+  /** @return the required height of the table. */
   protected int getTableHeight() {
     int pixelsPerRow = 16;
     int rows = _tableModel.getRowCount();
@@ -585,6 +606,6 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
     _parent.validate();
   }
 
-  /** Gets an action that adds a component to the set of options. */
+  /** @return an action that adds a component to the set of options. */
   protected abstract Action _getAddAction();
 }

@@ -61,12 +61,23 @@ public class VectorAbsRelFileOptionComponent extends VectorOptionComponent<AbsRe
     this(opt, text, parent, null);
   }
   
-  /** Constructor that allows for a tooltip description. */
+  /** Constructor that allows for a tooltip description. 
+   * @param opt the option to display
+   * @param text descriptive text to put in label
+   * @param parent the parent frame
+   * @param description tooltip text
+   */
   public VectorAbsRelFileOptionComponent (VectorOption<AbsRelFile> opt, String text, SwingFrame parent, String description) {
     this(opt, text, parent, description, false);
   }
 
-  /** Constructor with flag for move buttons. */
+  /** Constructor with flag for move buttons. 
+   * @param opt the option to display
+   * @param text descriptive text to put in label
+   * @param parent the parent frame
+   * @param description tooltip text
+   * @param moveButtonEnabled whether or not the move buttons are enabled
+   */
   public VectorAbsRelFileOptionComponent (VectorOption<AbsRelFile> opt, String text, SwingFrame parent,
                                           String description, boolean moveButtonEnabled) {
     super(opt, text, parent, new String[] { "File", "Absolute" }, description, moveButtonEnabled);  // creates all four buttons
@@ -131,12 +142,16 @@ public class VectorAbsRelFileOptionComponent extends VectorOptionComponent<AbsRe
     };
   }
 
-  /** Set the file filter for this vector option component. */
+  /** Set the file filter for this vector option component. 
+   * @param fileFilter filter to be set
+   */
   public void setFileFilter(FileFilter fileFilter) {
     _fileFilter = fileFilter;
   }
   
-  /** Sets the directory where the chooser will start if no file is selected. */
+  /** Sets the directory where the chooser will start if no file is selected. 
+   * @param f directory to set
+   */
   public void setBaseDir(File f) {
     if (f.isDirectory()) { _baseDir = f; }
   }

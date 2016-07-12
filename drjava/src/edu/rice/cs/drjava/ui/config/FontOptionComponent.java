@@ -79,7 +79,12 @@ public class FontOptionComponent extends OptionComponent<Font,JPanel> {
     setComponent(_panel);
   }
   
-  /** Constructor that allows for a tooltip description. */
+  /** Constructor that allows for a tooltip description. 
+   * @param opt the option
+   * @param text text for descriptive label of this option
+   * @param parent the parent frame
+   * @param description tooltip text
+   */
   public FontOptionComponent(FontOption opt, String text, SwingFrame parent, String description) {
     this(opt, text, parent);
     setDescription(description);
@@ -94,7 +99,9 @@ public class FontOptionComponent extends OptionComponent<Font,JPanel> {
     _label.setToolTipText(description);
   }
 
-  /** Updates the font field to display the given font. */
+  /** Updates the font field to display the given font. 
+   * @param f the font to be displayed
+   */
   private void _updateField(Font f) {
     _fontField.setFont(f);
     _fontField.setText(_option.format(f));

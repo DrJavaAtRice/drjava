@@ -38,14 +38,14 @@ package edu.rice.cs.drjava.model.definitions.indent;
 
 import javax.swing.text.BadLocationException;
 
-/**
- * Tests the action rule which does nothing to the given text.
+/** * Tests the action rule which does nothing to the given text.
  * @version $Id$
  */
 public final class ActionDoNothingTest extends IndentRulesTestCase {
 
 
   /** Tests empty string
+   * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testEmptyString() throws BadLocationException {
     IndentRuleAction rule = new ActionDoNothing();
@@ -57,6 +57,7 @@ public final class ActionDoNothingTest extends IndentRulesTestCase {
   }
   
   /** Tests no leading spaces
+   * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testNoLeadingSpaces() throws BadLocationException {
     IndentRuleAction rule = new ActionDoNothing();
@@ -73,6 +74,7 @@ public final class ActionDoNothingTest extends IndentRulesTestCase {
   }
 
   /** Tests leading spaces
+   * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testLeadingSpaces() throws BadLocationException {
     IndentRuleAction rule = new ActionDoNothing();

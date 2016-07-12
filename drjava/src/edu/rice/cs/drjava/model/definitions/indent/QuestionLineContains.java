@@ -38,8 +38,7 @@ package edu.rice.cs.drjava.model.definitions.indent;
 
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 
-/**
- * Question rule in the indentation decision tree.  Determines if the 
+/** * Question rule in the indentation decision tree.  Determines if the 
  * current line contains the given character. Does not check
  * for the character inside comments or quotes.
  * <p>

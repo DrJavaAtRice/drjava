@@ -58,10 +58,10 @@ public interface ReadersWritersLocking {
   /** Swing-style writeUnlock(). */
   public void releaseWriteLock();
   
-  /** Returns true iff this thread holds a read lock or write lock. */
+  /** @return true iff this thread holds a read lock or write lock. */
   public boolean isReadLocked();
 
-  /** Returns true iff this thread holds a write lock. */
+  /** @return true iff this thread holds a write lock. */
   public boolean isWriteLocked();
 }
 

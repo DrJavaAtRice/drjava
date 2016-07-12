@@ -36,8 +36,7 @@
 
 package edu.rice.cs.drjava.model.definitions;
 
-/**
- * An exception thrown by DefinitionsDocument.getPackageName() when the
+/** * An exception thrown by DefinitionsDocument.getPackageName() when the
  * document contains an invalid package statement.
  * This can happen if there is nothing between "package" and ";", or if there
  * is no terminating semicolon ever.
@@ -57,7 +56,7 @@ public class InvalidPackageException extends Exception {
     _location = location;
   }
   
-  /** Returns the location of the problem. */
+  /** @return the location of the problem. */
   public int getLocation() {
     return _location;
   }

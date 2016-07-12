@@ -80,7 +80,11 @@ public class ProjectTest extends DrJavaTestCase {
     super.tearDown();
   }
   
-  /** Test to make sure all elements of the project are read correctly into the IR */
+  /** Test to make sure all elements of the project are read correctly into the IR 
+   * @throws IOException if an IO operation fails
+   * @throws MalformedProjectFileException if the project file is not in the expected format
+   * @throws java.text.ParseException if parsing fails
+   */
   public void testLegacyParseProject() throws IOException, MalformedProjectFileException, java.text.ParseException {
     String proj1 =
       ";; DrJava project file.  Written with build: 20040623-1933\n" +
@@ -141,7 +145,11 @@ public class ProjectTest extends DrJavaTestCase {
                  pfir.getMainClass());
   }
 
-   /** Test to make sure all elements of the project are read correctly into the IR */
+  /** Test to make sure all elements of the project are read correctly into the IR
+   * @throws IOException if an IO operation fails
+   * @throws MalformedProjectFileException if the project file is not in the expected format
+   * @throws java.text.ParseException if parsing fails
+   */
   public void testParseProject() throws IOException, MalformedProjectFileException, java.text.ParseException {
     String proj2 =
       ";; DrJava project file.  Written with build: 2006??\n" +
@@ -271,7 +279,11 @@ public class ProjectTest extends DrJavaTestCase {
   
   // ----- ProjectFileParser -----
   
-  /** Test to make sure all elements of the project are read correctly into the IR */
+  /** Test to make sure all elements of the project are read correctly into the IR
+   * @throws IOException if an IO operation fails
+   * @throws MalformedProjectFileException if the project file is not in the expected format
+   * @throws java.text.ParseException if parsing fails
+   */
   public void testLegacyParseProjectPJT() throws IOException, MalformedProjectFileException, java.text.ParseException {
     String proj1 =
       ";; DrJava project file.  Written with build: 20040623-1933\n" +
@@ -332,7 +344,11 @@ public class ProjectTest extends DrJavaTestCase {
                  pfir.getMainClass());
   }
 
-   /** Test to make sure all elements of the project are read correctly into the IR */
+  /** Test to make sure all elements of the project are read correctly into the IR
+   * @throws IOException if an IO operation fails
+   * @throws MalformedProjectFileException if the project file is not in the expected format
+   * @throws java.text.ParseException if parsing fails
+   */
   public void testParseProjectPJT() throws IOException, MalformedProjectFileException, java.text.ParseException {
     String proj2 =
       ";; DrJava project file.  Written with build: 2006??\n" +

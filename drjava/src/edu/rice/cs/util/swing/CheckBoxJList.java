@@ -5,7 +5,7 @@ import javax.swing.*;
 import javax.swing.event.*;
 import java.util.*;
 
-/** A JList<String> with checkboxes for each item. */
+/** A {@code JList<String>} with checkboxes for each item. */
 public class CheckBoxJList extends JList<String> implements ListSelectionListener {
   static Color listForeground;
   static Color listBackground;

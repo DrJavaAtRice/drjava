@@ -3,7 +3,7 @@
 /*!DrJava Beginner Level*/
 
 class BeginnerShouldBreakInnerClass extends Object {
-  class InnerClass extends Object{
+  class InnerClass extends Object {
     private final int j;
     private final int k;
   

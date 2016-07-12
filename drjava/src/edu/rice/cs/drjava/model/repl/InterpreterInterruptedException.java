@@ -36,8 +36,7 @@
 
 package edu.rice.cs.drjava.model.repl;
 
-/**
- * Exception to signify that the interpreter was interrupted
+/** * Exception to signify that the interpreter was interrupted
  * before it could complete.
  *
  * @version $Id$

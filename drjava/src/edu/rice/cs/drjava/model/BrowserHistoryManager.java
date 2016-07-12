@@ -46,12 +46,11 @@ import edu.rice.cs.util.swing.Utilities;
 /** Browser history manager for the entire model.  Follows readers/writers locking protocol of EventNotifier. */
 public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<BrowserDocumentRegion>> {
   /** Two regions are similar if they are in the same document and not more than DIFF_THRESHOLD lines apart. */
-  public static final int DIFF_THRESHOLD = 5;
+  public static final int DIFF_THRESHOLD = 0;
 
-  /** List of regions.  In Java 6, ArrayDeque is a better choice than Stack; should be changed once compatibility
-    * with Java 5 is abandoned. */
-  private volatile Stack<BrowserDocumentRegion> _pastRegions = new Stack<BrowserDocumentRegion>();
-  private volatile Stack<BrowserDocumentRegion> _futureRegions = new Stack<BrowserDocumentRegion>();
+  /** List of regions.  */
+  private volatile ArrayDeque<BrowserDocumentRegion> _pastRegions = new ArrayDeque<BrowserDocumentRegion>();
+  private volatile ArrayDeque<BrowserDocumentRegion> _futureRegions = new ArrayDeque<BrowserDocumentRegion>();
   
   private volatile int _maxSize;
   
@@ -63,18 +62,15 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
   /** Create a new ConcreteRegionManager without maximum size. */
   public BrowserHistoryManager() { this(0); }
   
-  /** Add the supplied DocumentRegion r to the manager as current region.
-    * @param r the DocumentRegion to be inserted into the manager */
+  /** Add the supplied StaticDocumentRegion r to the manager as current region.
+    * @param r the StaticDocumentRegion to be inserted into the manager 
+    * @param notifier a GlobalEventNotifier
+    */
   public void addBrowserRegion(final BrowserDocumentRegion r, final GlobalEventNotifier notifier) { 
-    /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
 
     final BrowserDocumentRegion current = getCurrentRegion();
-    if ((current != null) && (similarRegions(current, r))) {
-      // the region to be added is similar to the current region
-      // just update the current region
-//      edu.rice.cs.drjava.ui.MainFrame.MFLOG.log("Updating instead of adding: " + current + " --> " + r);
-      current.update(r);
-    }
+    if ((current != null) && (r.equiv(current))) return;
     else {
       _pastRegions.push(r);
       r.getDocument().addBrowserRegion(r);
@@ -94,18 +90,15 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
     notifier.browserChanged();
   }
   
-  /** Add the supplied DocumentRegion r to the manager before the current region.
-    * @param r the DocumentRegion to be inserted into the manager */
+  /** Add the supplied StaticDocumentRegion r to the manager before the current region.
+   * @param r the StaticDocumentRegion to be inserted into the manager
+   * @param notifier a GlobalEventNotifier
+   */
   public void addBrowserRegionBefore(final BrowserDocumentRegion r, final GlobalEventNotifier notifier) { 
-    /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
 
     final BrowserDocumentRegion current = getCurrentRegion();
-    if ((current != null) && (similarRegions(current, r))) {
-      // the region to be added is similar to the current region
-      // just update the current region
-//      edu.rice.cs.drjava.ui.MainFrame.MFLOG.log("Updating instead of adding: " + current + " --> " + r);
-      current.update(r);
-    }
+    if ((current != null) && (r.equiv(current))) return;
     else {
       if (_pastRegions.size() == 0) {
         _pastRegions.push(r);
@@ -138,13 +131,13 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
       int diff = size - _maxSize;
       for (int i = 0; i < diff; ++i) {
         // always remove the element farthest away from the larger stack
-        remove(((_pastRegions.size()>_futureRegions.size())?_pastRegions:_futureRegions).get(0));
+        remove(((_pastRegions.size()>_futureRegions.size())?_pastRegions:_futureRegions).getFirst());
       }
     }
   }
   
-  /** Remove the given DocumentRegion from the manager.
-    * @param r  the DocumentRegion to be removed.
+  /** Remove the given StaticDocumentRegion from the manager.
+    * @param r  the StaticDocumentRegion to be removed.
     */
   public /* synchronized */ void remove(final BrowserDocumentRegion r) {
     OpenDefinitionsDocument doc = r.getDocument();
@@ -160,17 +153,18 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
     });
   }
   
-  /** @return a SortedSet<BrowserDocumentRegion> containing the DocumentRegion objects in this mangager. */
-  public SortedSet<BrowserDocumentRegion> getRegions() {
-    TreeSet<BrowserDocumentRegion> ts = new TreeSet<BrowserDocumentRegion>(_pastRegions);
-    ts.addAll(_futureRegions);
-    return ts;
+  /** @return a {@code RegionSet>} containing the StaticDocumentRegion objects in this mangager. */
+  public RegionSet<BrowserDocumentRegion> getRegions() {
+    RegionSet<BrowserDocumentRegion> rs = new RegionSet<BrowserDocumentRegion>();
+    rs.addAll(_pastRegions);
+    rs.addAll(_futureRegions);
+    return rs;
   }
   
   /** Tells the manager to remove all regions. */
   public /* synchronized */ void clearBrowserRegions() {
     while(_pastRegions.size()+_futureRegions.size() > 0) {
-      remove(((_pastRegions.size()>_futureRegions.size())?_pastRegions:_futureRegions).get(0));
+      remove(((_pastRegions.size()>_futureRegions.size())?_pastRegions:_futureRegions).getFirst());
     }
   }
   
@@ -181,13 +175,15 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
   }
   
   /** @return true if the current region is the first in the list, i.e. prevCurrentRegion is without effect */
-  public /* synchronized */ boolean isCurrentRegionFirst() { return (_pastRegions.size()<2); }
+  public /* synchronized */ boolean isCurrentRegionFirst() { return (_pastRegions.size() < 2); }
   
   /** @return true if the current region is the last in the list, i.e. nextCurrentRegion is without effect */
-  public /* synchronized */ boolean isCurrentRegionLast() { return (_futureRegions.size()<1); }
+  public /* synchronized */ boolean isCurrentRegionLast() { return (_futureRegions.size() < 1); }
   
   /** Make the region that is more recent the current region.
-    * @return new current region */
+   * @param notifier a GlobalEventNotifier
+   * @return new current region 
+   */
   public /* synchronized */ BrowserDocumentRegion nextCurrentRegion(final GlobalEventNotifier notifier) {
     if (isCurrentRegionLast()) return null;
     _pastRegions.push(_futureRegions.pop());
@@ -196,7 +192,9 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
   }
   
   /** Make the region that is less recent the current region.
-    * @return new current region */
+   * @return new current region 
+   * @param notifier a GlobalEventNotifier
+   */
   public /* synchronized */ BrowserDocumentRegion prevCurrentRegion(final GlobalEventNotifier notifier) {
     if (isCurrentRegionFirst()) return null;
     _futureRegions.push(_pastRegions.pop());
@@ -231,7 +229,10 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
     } });
   }
   
-  /** Return true if the two regions are similar. */
+  /** @param r1 the first region to compare
+   * @param r2 the second region to compare
+   * @return true if the two regions are similar. 
+   */
   public static boolean similarRegions(BrowserDocumentRegion r1, BrowserDocumentRegion r2) {
     OpenDefinitionsDocument d = r1.getDocument();
     if (d!=r2.getDocument()) return false;

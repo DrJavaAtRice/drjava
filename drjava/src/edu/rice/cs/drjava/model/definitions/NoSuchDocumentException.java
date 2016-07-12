@@ -36,8 +36,7 @@
 
 package edu.rice.cs.drjava.model.definitions;
 
-/**
- * This exception is to be thrown when an <code>OpenDefinitionsDocument</code> 
+/** * This exception is to be thrown when an <code>OpenDefinitionsDocument</code> 
  * was asked for its DefinitionsDocument and when the <code>OpenDefinitionsDocument</code>
  * itself is not registered in the Document Cache.  This could happen either if the
  * <code>OpenDefinitionsDocument</code> was not correctly initialized (unlikely) or if

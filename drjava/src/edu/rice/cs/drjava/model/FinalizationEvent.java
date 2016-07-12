@@ -36,8 +36,7 @@
 
 package edu.rice.cs.drjava.model;
 
-/**
- * Objects of this type are given to those
+/** * Objects of this type are given to those
  * listening for finalization.  These objects
  * are meant to hand the user a reference to
  * the object that was going to be gc'd

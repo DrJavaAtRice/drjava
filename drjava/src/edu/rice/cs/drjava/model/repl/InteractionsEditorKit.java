@@ -40,8 +40,7 @@ import edu.rice.cs.drjava.model.definitions.ColoringGlyphPainter;
 import javax.swing.text.*;
 
 
-/**
- * This is an editor kit for editing Java source files. It functions as the controller in the MVC arrangement.
+/** * This is an editor kit for editing Java source files. It functions as the controller in the MVC arrangement.
  * It implements a factory for new documents, and it also has a factory for Views (the things that render the document).
  * @version $Id$
  */

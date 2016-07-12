@@ -38,8 +38,7 @@ package edu.rice.cs.util.docnavigation;
 
 import java.io.File;
 
-/**
- * This visitor runs on NodeData.  The only variation from the
+/** * This visitor runs on NodeData.  The only variation from the
  * standard visitor pattern is that the dispatched methods do
  * not receive an instance of the host, but rather an instance
  * of the data the host was meant to hold.  This allows the host

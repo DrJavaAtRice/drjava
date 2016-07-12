@@ -36,6 +36,7 @@
 
 package edu.rice.cs.drjava.ui;
 
+import java.util.List;
 import java.util.LinkedList;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -90,20 +91,29 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   private final LinkedList<Pair<Option<Color>, OptionListener<Color>>> _colorOptionListeners = 
     new LinkedList<Pair<Option<Color>, OptionListener<Color>>>();
   
-  /** Constructs a new find results panel. This is swing class which should only be accessed from the event thread.
-    * @param frame the MainFrame
-    * @param regionManager the region manager associated with this panel
-    * @param title for the panel
-    * @param searchString string that was searched for
-    * @param searchAll whether all files were searched
-    * @param searchSelectionOnly whether the selection within the document was searched
-    * @param doc weak reference to the document in which the search occurred (or started, if all documents were searched)
-    * @param findReplace the FindReplacePanel that created this FindResultsPanel
-    */
-  public FindResultsPanel(MainFrame frame, RegionManager<MovingDocumentRegion> regionManager, MovingDocumentRegion region, String title, 
-                          String searchString, boolean searchAll, boolean searchSelectionOnly, boolean matchCase, boolean wholeWord, 
-                          boolean noComments, boolean noTestCases, WeakReference<OpenDefinitionsDocument> doc, 
-                          FindReplacePanel findReplace) {
+  /** Constructs a new find results panel. This is swing class which should 
+   * only be accessed from the event thread.
+   * @param frame the MainFrame
+   * @param regionManager the region manager associated with this panel
+   * @param region the region associated with this panel
+   * @param title for the panel
+   * @param searchString string that was searched for
+   * @param searchAll whether all files were searched
+   * @param searchSelectionOnly whether the selection within the document was searched
+   * @param matchCase whether the search was case-sensitive
+   * @param wholeWord whether the search was looking for a match on the whole word
+   * @param noComments whether the search ignored comments
+   * @param noTestCases whether the search ignored test cases
+   * @param doc weak reference to the document in which the search occurred (or started, if all documents were searched)
+   * @param findReplace the FindReplacePanel that created this FindResultsPanel
+   */
+  public FindResultsPanel(MainFrame frame, 
+    RegionManager<MovingDocumentRegion> regionManager, 
+    MovingDocumentRegion region, String title, String searchString, 
+    boolean searchAll, boolean searchSelectionOnly, boolean matchCase, 
+    boolean wholeWord, boolean noComments, boolean noTestCases, 
+    WeakReference<OpenDefinitionsDocument> doc, FindReplacePanel findReplace) {
+
     super(frame, title, regionManager);
     
 //  _regionManager is inherited from RegionsTreePanel
@@ -133,12 +143,19 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     sb.append("</html>");
     _findAgainButton.setToolTipText(sb.toString());
 
+    final FindReplacePanel findReplaceRef = findReplace;
+    final String searchStringRef = searchString;
+
     // Similar (but NOT identical) code found in BookmarksPanel and BreakpointsPanel
     getRegionManager().addListener(new RegionManagerListener<MovingDocumentRegion>() {      
       public void regionAdded(MovingDocumentRegion r) { addRegion(r); }
       public void regionChanged(MovingDocumentRegion r) { 
         regionRemoved(r);
-        regionAdded(r);
+
+        /* Only re-add the region if it is still a match. */
+        if (findReplaceRef.isMatch(r, searchStringRef)) {
+          regionAdded(r);
+        }
       }
       public void regionRemoved(MovingDocumentRegion r) { removeRegion(r); }
     });
@@ -342,7 +359,20 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
       _frame.goToRegionAndHighlight(r.get(0));
     }
   }
-  
+
+  /** Receives the set of documents that have been closed and removes all of 
+    * their regions; also updates the first document, in case it was one of 
+    * the closed files. 
+    * @param docs the documents that were closed 
+    */
+  public void updateOnClose(List<OpenDefinitionsDocument> docs) {
+    for (OpenDefinitionsDocument odd : docs) {
+      this.getRegionManager().removeRegions(odd);
+    }
+    this._findReplace.updateFirstDocInSearch();
+  }
+
+ 
   /** Destroys this panel and its contents. This is a more comprehensive command than _closePanel (which is the
     * _close operation inherited from RegionsTreePanel).  The latter merely removes the panel from the TabbedPane but 
     * does not affect its contents, so panels like Find/Replace can be regenerated with their contents preserved.
@@ -370,10 +400,10 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     }
   }
 
-  /** Return true if all documents were searched. */
+  /** @return true if all documents were searched. */
   public boolean isSearchAll() { return _searchAll; }
   
-  /** Return the document which was searched (or where the search started, if _searchAll is true).
+  /** @return the document which was searched (or where the search started, if _searchAll is true).
     * May return null if the weak reference to the document was severed. */
   public OpenDefinitionsDocument getDocument() { return _doc.get(); }
 

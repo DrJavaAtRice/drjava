@@ -39,8 +39,7 @@ package edu.rice.cs.util.swing;
 import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
-/**
- * A JScrollPane without a traditional Swing border.  Uses its own
+/** * A JScrollPane without a traditional Swing border.  Uses its own
  * EtchedBorder instead, which improves the appearance of nested panes
  * on Mac OS X.
  * @version $Id$

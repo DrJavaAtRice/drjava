@@ -81,10 +81,12 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     super.tearDown();
   }
   
-  /** Asserts that the given string typed by the user is processed to become the given expected string for an
+  /** Asserts that the given string typed by the user is processed to become 
+    * the given expected string for an
     * interpretation.
     * @param typed A string typed by the user
     * @param expected What the processor should return
+    * @throws Exception if something goes wrong
     */
   protected void _assertProcessedContents(final String typed, final String expected) throws Exception {
     assertTrue(_model instanceof TestInteractionsModel);
@@ -115,7 +117,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     assertTrue("main transformation should match expected",
                edu.rice.cs.drjava.model.compiler.JavacCompiler.transformJavaCommand(typed).endsWith(expected));
   }
-
+  
   /** Asserts that the given string typed by the user of the form "applet classname" is transformed to the given
     * expected applet invocation.
     * @param typed the "applet classname args ..." typed by the user
@@ -127,7 +129,9 @@ public final class InteractionsModelTest extends DrJavaTestCase {
                  edu.rice.cs.drjava.model.compiler.JavacCompiler.transformAppletCommand(typed));
   }
   
-  /** Tests that the correct text is returned when interpreting. */
+  /** Tests that the correct text is returned when interpreting.
+    * @throws Exception if something goes wrong
+    */
   public void testInterpretCurrentInteraction() throws Exception {
     _log.log("testInterpretCurrentInteraction started");
     assertTrue(_model instanceof TestInteractionsModel);
@@ -159,7 +163,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     model._logInteractionStart();
     model.interpretCurrentInteraction(); // runs in the event queue 
     model._waitInteractionDone();
-
+    
 //    Utilities.clearEventQueue();
     assertEquals("string being interpreted", code, model.toEval);
     _log.log("testInterpretCurrentInteraction ended");
@@ -179,7 +183,11 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     _log.log("testInterpretCurrentInteractionWithIncompleteInput ended");
   }
   
-  /** Not a test method,  Assumes that _model is an IncompleteInputInteractionsModel. */
+  /** Not a test method. Assumes that _model is an IncompleteInputInteractionsModel. 
+    * @param code code
+    * @throws EditDocumentException if something goes wrong during editing
+    * @throws InterruptedException if execution is interrupted unexpectedly 
+    */
   protected void assertReplThrewContinuationException(final String code) throws EditDocumentException, InterruptedException {
     assertTrue(_model instanceof IncompleteInputInteractionsModel);
     final IncompleteInputInteractionsModel model = (IncompleteInputInteractionsModel) _model;
@@ -198,13 +206,17 @@ public final class InteractionsModelTest extends DrJavaTestCase {
 //    Utilities.clearEventQueue();
     _log.log("Waiting for InteractionDone()");
     model._waitInteractionDone();
-
+    
 //    Utilities.clearEventQueue();
     assertTrue("Code '" + code + "' should generate a continuation exception but not a syntax exception",
                (model.isContinuationException() == true) && (model.isSyntaxException() == false));
   }
   
-  /** Not a test method,  Assumes that _model is an IncompleteInputInteractionsModel. */
+  /** Not a test method,  Assumes that _model is an IncompleteInputInteractionsModel. 
+    * @param code code
+    * @throws EditDocumentException if an error occurs during editing
+    * @throws InterruptedException if execution is interrupted unexpectedly
+    */
   protected void assertReplThrewSyntaxException(final String code) throws EditDocumentException, InterruptedException {
     assertTrue(_model instanceof IncompleteInputInteractionsModel);
     final IncompleteInputInteractionsModel model = (IncompleteInputInteractionsModel)_model;
@@ -216,16 +228,16 @@ public final class InteractionsModelTest extends DrJavaTestCase {
       }
     });
 //    Utilities.clearEventQueue();
-
+    
     model._logInteractionStart();
     model.interpretCurrentInteraction();
     model._waitInteractionDone();
-
+    
 //    Utilities.clearEventQueue();
     assertTrue("Code '" + code +  "' should generate a syntax exception but not a continuation exception",
                (model.isSyntaxException() == true) && (model.isContinuationException() == false));
   }
-    
+  
   /** Tests that "java Classname [args]" runs the class's main method, with simple delimited arguments. */
   public void testInterpretJavaArguments() {
     _log.log("testInterpretJavaArguments started");
@@ -319,7 +331,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     
     // java Foo 'a b'c
     _assertJavaTransformationTail("java Foo 'a b'c", "Foo.main(new String[]{\"a bc\"});");
-     _log.log("testInterpretJavaSingleQuotedArgs ended");
+    _log.log("testInterpretJavaSingleQuotedArgs ended");
   }
   
   /** Tests that "applet Classname [args]" runs the class's main method, with simple delimited arguments. */
@@ -415,16 +427,18 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     
     // applet Foo 'a b'c
     _assertAppletTransformation("applet Foo 'a b'c", "edu.rice.cs.plt.swing.SwingUtil.showApplet(new Foo(\"a bc\"), 400, 300);");
-     _log.log("testInterpretAppletSingleQuotedArgs ended");
+    _log.log("testInterpretAppletSingleQuotedArgs ended");
   }
   
   //public void testLoadHistory();
   // TO DO: test that the correct history is returned (careful of last newline)
   
   
-  /** Tests that a debug port can be generated. */
+  /** Tests that a debug port can be generated. 
+    * @throws IOException if an IO operation fails
+    */
   public void testDebugPort() throws IOException {
-     _log.log("testDebugPort started");
+    _log.log("testDebugPort started");
     int port = _model.getDebugPort();
     assertTrue("generated debug port", port != -1);
     
@@ -444,7 +458,9 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     _log.log("testDebugPort ended");
   }
   
-  /** Tests that an interactions history can be loaded in as a script. */
+  /** Tests that an interactions history can be loaded in as a script. 
+    * @throws Exception if something goes wrong
+    */
   public void testScriptLoading() throws Exception {
     _log.log("testScriptLoading started");
     assertTrue(_model instanceof TestInteractionsModel);
@@ -527,7 +543,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
       public void run() { ism.executeInteraction(); } 
     });
     model._waitInteractionDone();
-
+    
     assertEquals("Should have \"executed\" the second interaction.", line2, model.toEval);
     
     // Should not be able to get the next interaction, since we're at the end
@@ -568,7 +584,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     // Now execute the first interaction
     Utilities.invokeAndWait(new Runnable() { public void run() { ism.executeInteraction();  } });
     model._waitInteractionDone();
-
+    
 //    System.err.println("model.toEval = '" + model.toEval + "'");  
     assertEquals("Should have \"executed\" the first interaction.", line1, model.toEval);
     
@@ -623,7 +639,9 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     _log.log("testSetChangeInputListener ended");
   }
   
-  /** Tests that the interactions history is stored correctly. See bug # 992455 */
+  /** Tests that the interactions history is stored correctly. See bug # 992455
+    * @throws Exception if something goes wrong
+    */
   public void testInteractionsHistoryStoredCorrectly() throws Exception {
     _log.log("testInteractionsHistoryStoredCorrectly started");
     final String code = "public class A {\n";
@@ -688,7 +706,9 @@ public final class InteractionsModelTest extends DrJavaTestCase {
         while (! _interactionDone) _interactionLock.wait(); }
     }
     
-    /** Constructs a new InteractionsModel. */
+    /** Constructs a new InteractionsModel. 
+      * @param adapter adapter
+      */
     public TestInteractionsModel(InteractionsDJDocument adapter) {
       // Adapter, history size, write delay
       super(adapter, new File(System.getProperty("user.dir")), 1000, 25);
@@ -708,7 +728,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
         _interactionLock.notify();
       }
     }
-        
+    
     public Pair<String,String> getVariableToString(String var) {
       fail("cannot getVariableToString in a test");
       return null;
@@ -765,10 +785,11 @@ public final class InteractionsModelTest extends DrJavaTestCase {
       else replReturnedVoid();  // imitate successful return
     }
   }
-
   
-  /** This test model includes a slave JVM, just like a DefaultGlobalModel.  It must be disposed before it is
-    * deallocated to kill the slave JVM.   TODO: the mutation in this class is disgusting -- Corky  2 June 06.
+  
+  /** This test model includes a slave JVM, just like a DefaultGlobalModel.  
+    * It must be disposed before it is deallocated to kill the slave JVM.   
+    * TODO: the mutation in this class is disgusting -- Corky  2 June 06.
     */
   public static class IncompleteInputInteractionsModel extends RMIInteractionsModel {
     boolean continuationException;  // This appears to be the negation of syntaxException making it redundant!
@@ -784,7 +805,10 @@ public final class InteractionsModelTest extends DrJavaTestCase {
         while (! _interactionDone) _interactionLock.wait(); }
     }
     
-    /** Constructs a new IncompleteInputInteractionsModel. */
+    /** Constructs a new IncompleteInputInteractionsModel. 
+      * @param adapter adapter
+      * @throws RemoteException if an exception occurs during communication with the remote JVM
+      */
     public IncompleteInputInteractionsModel(InteractionsDJDocument adapter) throws RemoteException {
       // MainJVM, Adapter, history size, write delay
       super(new MainJVM(null), adapter, new File(System.getProperty("user.dir")), 1000, 25);

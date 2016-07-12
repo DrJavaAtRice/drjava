@@ -117,8 +117,7 @@ public class JoinInputStream extends InputStream {
     return -1;
   }
   
-  /**
-   * Reads up to <code>len</code> bytes of data from one of input streams 
+  /** Reads up to <code>len</code> bytes of data from one of input streams 
    * into an array of bytes. This method blocks until some input is 
    * available. If the first argument is <code>null,</code> up to 
    * <code>len</code> bytes are read and discarded. 

@@ -40,8 +40,7 @@ import javax.swing.text.BadLocationException;
 
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 
-/**
- * This class checks the previous statement for the given character
+/** * This class checks the previous statement for the given character
  * @version $Id$
  */
 public class QuestionExistsCharInPrevStmt extends IndentRuleQuestion {

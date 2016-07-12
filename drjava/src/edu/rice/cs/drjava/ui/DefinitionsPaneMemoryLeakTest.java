@@ -276,7 +276,11 @@ public void testDocumentPaneMemoryLeak() throws InterruptedException, IOExceptio
   
   public static final edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("heap.log",false);
   
-  /** Dumps the current heap to a file. */
+  /** Dumps the current heap to a file. 
+   * @return the newly-created file
+   * @throws IOException if an IO operation fails
+   * @throws InterruptedException if execution is interrupted unexpectedly
+   */
   public static File dumpHeap() throws IOException, InterruptedException {
     String javaHome = System.getenv("JAVA_HOME");
     char SEP = File.separatorChar;
@@ -335,7 +339,9 @@ public void testDocumentPaneMemoryLeak() throws InterruptedException, IOExceptio
     return newDump;
   }
   
-  /** @return the identity hash code in hex. */
+  /** @param o object for which to get the hash code
+   * @return the identity hash code in hex. 
+   */
   public static String hexIdentityHashCode(Object o) {
     return Integer.toHexString(System.identityHashCode(o));
   }

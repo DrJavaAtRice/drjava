@@ -78,11 +78,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-/**
- * Test suite over InputStreamRedirector.
+/** * Test suite over InputStreamRedirector.
  */
 public class StreamRedirectorTest extends DrJavaTestCase {
-  /** Tests that an InputStreamRedirector correctly interprets empty input as end of stream. */
+
+  /** Tests that an InputStreamRedirector correctly interprets empty input as end of stream. 
+   * @throws IOException if an IO operation fails
+   */
   public void testEmptyInput() throws IOException {
     InputStreamRedirector isr = new InputStreamRedirector() {
       protected String _getInput() {
@@ -93,11 +95,12 @@ public class StreamRedirectorTest extends DrJavaTestCase {
         assertEquals("Should return -1 to indicate end of stream", -1, isr.read());
     }
     finally {
-	    isr.close();
+     isr.close();
     }
   }
 
   /** Tests that an InputStreamRedirector correctly redirects input that is static.
+   * @throws IOException if an IO operation fails
    */
   public void testStaticInput() throws IOException {
     InputStreamRedirector isr = new InputStreamRedirector() {
@@ -112,6 +115,7 @@ public class StreamRedirectorTest extends DrJavaTestCase {
   }
 
   /** Tests that an InputStreamRedirector correctly redirects input that changes.
+   * @throws IOException if an IO operation fails
    */
   public void testDynamicInput() throws IOException {
     InputStreamRedirector isr = new InputStreamRedirector() {
@@ -131,6 +135,7 @@ public class StreamRedirectorTest extends DrJavaTestCase {
 
   /** Tests that an InputStreamRedirector correctly calls _getInput() only
    * when it is needed.
+   * @throws IOException if an IO operation fails
    */
   public void testMultiLineInput() throws IOException {
     InputStreamRedirector isr = new InputStreamRedirector() {

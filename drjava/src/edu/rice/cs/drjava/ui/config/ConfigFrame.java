@@ -103,8 +103,11 @@ public class ConfigFrame extends SwingFrame {
     }
   };
   
-  /** Sets up the frame and displays it.  This a Swing view class!  With the exception of initialization,
-   *  this code should only be executed in the event-handling thread. */
+  /** Sets up the frame and displays it.  This a Swing view class!  With the 
+   * exception of initialization, this code should only be executed in the 
+   * event-handling thread. 
+   * @param frame reference to the main frame
+   */
   public ConfigFrame(MainFrame frame) {
     super("Preferences");
 
@@ -288,9 +291,7 @@ public class ConfigFrame extends SwingFrame {
                                             _rtConcJUnitLocationListener);
   }
 
-  /** Returns the current master working directory, or the user's current directory if none is set. 20040213 Changed default 
-   *  value to user's current directory.
-   */
+  /** @return the current master working directory, or the user's current directory if none is set. */
   private File _getWorkDir() {
     File workDir = _mainFrame.getModel().getMasterWorkingDirectory();  // cannot be null
     assert workDir != null;
@@ -300,7 +301,10 @@ public class ConfigFrame extends SwingFrame {
     return workDir;
   }
 
-  /** Call the update method to propagate down the tree, parsing input values into their config options. */
+  /** Call the update method to propagate down the tree, parsing input values 
+   * into their config options. 
+   * @return true on success; false otherwise
+   */
   public boolean apply() {
     // returns false if the update did not succeed
     return _rootNode.update();
@@ -347,7 +351,10 @@ public class ConfigFrame extends SwingFrame {
     super.setVisible(vis);
   }
 
-  /** Write the configured option values to disk. */
+  /** Write the configured option values to disk. 
+   * @return true on success; false on failure
+   * @throws IOException if an IO operation fails
+   */
   public boolean saveSettings() throws IOException {
     boolean successful = apply();
     if (successful) {
@@ -364,7 +371,9 @@ public class ConfigFrame extends SwingFrame {
     return successful;
   }
 
-  /** Sets the given ConfigPanel as the visible panel. */
+  /** Sets the given ConfigPanel as the visible panel. 
+   * @param cf panel to be displayed
+   */
   private void _displayPanel(ConfigPanel cf) {
 
     _mainPanel.removeAll();
@@ -517,7 +526,9 @@ public class ConfigFrame extends SwingFrame {
     return new DirectoryOptionComponent(o, CONFIG_DESCRIPTIONS.get(o), this, CONFIG_LONG_DESCRIPTIONS.get(o), c);
   }
   
-  /** Add all of the components for the Resource Locations panel of the preferences window. */
+  /** Add all of the components for the Resource Locations panel of the preferences window. 
+   * @param panel ConfigPanel to be setup
+   */
   private void _setupResourceLocPanel(ConfigPanel panel) {
     FileOptionComponent browserLoc =
       newFileOptionComponent(OptionConstants.BROWSER_FILE, _browserChooser);
@@ -542,7 +553,9 @@ public class ConfigFrame extends SwingFrame {
     
   }
 
-  /** Add all of the components for the Display Options panel of the preferences window. */
+  /** Add all of the components for the Display Options panel of the preferences window.
+   * @param panel ConfigPanel to be setup
+   */
   private void _setupDisplayPanel(ConfigPanel panel) {
 
     final ForcedChoiceOptionComponent lookAndFeelComponent = newForcedChoiceOptionComponent(OptionConstants.LOOK_AND_FEEL);
@@ -605,18 +618,22 @@ public class ConfigFrame extends SwingFrame {
     panel.displayComponents();
   }
 
-  /** Add all of the components for the Font panel of the preferences window. */
+  /** Add all of the components for the Font panel of the preferences window.
+    * @param panel ConfigPanel to be setup
+    */
   private void _setupFontPanel(ConfigPanel panel) {
     addOptionComponent(panel, newFontOptionComponent(OptionConstants.FONT_MAIN));
     addOptionComponent(panel, newFontOptionComponent(OptionConstants.FONT_LINE_NUMBERS));
     addOptionComponent(panel, newFontOptionComponent(OptionConstants.FONT_DOCLIST));
+    addOptionComponent(panel, newFontOptionComponent(OptionConstants.FONT_MENU));
     addOptionComponent(panel, newFontOptionComponent(OptionConstants.FONT_TOOLBAR));
     addOptionComponent(panel, newBooleanOptionComponent(OptionConstants.TEXT_ANTIALIAS));
     panel.displayComponents();
   }
-
+  
   /** Adds all of the components for the Color panel of the preferences window.
-   */
+    * @param panel ConfigPanel to be setup
+    */
   private void _setupColorPanel(ConfigPanel panel) {
     addOptionComponent(panel, newColorOptionComponent(OptionConstants.DEFINITIONS_NORMAL_COLOR));
     addOptionComponent(panel, newColorOptionComponent(OptionConstants.DEFINITIONS_KEYWORD_COLOR));
@@ -653,7 +670,9 @@ public class ConfigFrame extends SwingFrame {
     panel.displayComponents();
   }
 
-  /** Add all of the components for the Positions panel of the preferences window. */
+  /** Add all of the components for the Positions panel of the preferences window. 
+   * @param panel ConfigPanel to be setup
+   */
   private void _setupPositionsPanel(ConfigPanel panel) {
     addOptionComponent(panel, newBooleanOptionComponent(OptionConstants.WINDOW_STORE_POSITION, false)
                          .setEntireColumn(true));
@@ -768,6 +787,7 @@ public class ConfigFrame extends SwingFrame {
   }
   
   /** Adds all of the components for the Key Bindings panel of the preferences window.
+   * @param panel ConfigPanel to be setup
    */
   private void _setupKeyBindingsPanel(ConfigPanel panel) {
     // using a treemap because it automatically sorts element upon insertion
@@ -808,7 +828,9 @@ public class ConfigFrame extends SwingFrame {
     panel.displayComponents();
   }
 
-  /** Add all of the components for the Debugger panel of the preferences window. */
+  /** Add all of the components for the Debugger panel of the preferences window. 
+   * @param panel ConfigPanel to be setup
+   */
   private void _setupDebugPanel(ConfigPanel panel) {
     if (!_mainFrame.getModel().getDebugger().isAvailable()) {
       // Explain how to use debugger
@@ -845,7 +867,9 @@ public class ConfigFrame extends SwingFrame {
     panel.displayComponents();
   }
 
-  /** Add all of the components for the Javadoc panel of the preferences window. */
+  /** Add all of the components for the Javadoc panel of the preferences window. 
+   * @param panel ConfigPanel to be setup
+   */
   private void _setupJavadocPanel(ConfigPanel panel) {
     addOptionComponent(panel, 
                        newForcedChoiceOptionComponent(OptionConstants.JAVADOC_API_REF_VERSION));
@@ -915,7 +939,9 @@ public class ConfigFrame extends SwingFrame {
     panel.displayComponents();
   }
 
-  /** Adds all of the components for the Prompts panel of the preferences window. */
+  /** Adds all of the components for the Prompts panel of the preferences window. 
+   * @param panel ConfigPanel to be setup
+   */
   private void _setupNotificationsPanel(ConfigPanel panel) {
     // Quit
     addOptionComponent(panel, newBooleanOptionComponent(OptionConstants.QUIT_PROMPT, false)
@@ -1017,7 +1043,9 @@ public class ConfigFrame extends SwingFrame {
     panel.displayComponents();
   }
 
-  /** Adds all of the components for the Miscellaneous panel of the preferences window. */
+  /** Adds all of the components for the Miscellaneous panel of the preferences window. 
+   * @param panel ConfigPanel to be setup
+   */
   private void _setupMiscPanel(ConfigPanel panel) {
     /* Dialog box options */
     addOptionComponent(panel, newIntegerOptionComponent(OptionConstants.INDENT_INC));
@@ -1050,7 +1078,9 @@ public class ConfigFrame extends SwingFrame {
     panel.displayComponents();
   }  
 
-  /** Adds all of the components for the JVMs panel of the preferences window. */
+  /** Adds all of the components for the JVMs panel of the preferences window. 
+   * @param panel ConfigPanel to be setup
+   */
   private void _setupJVMsPanel(ConfigPanel panel) {
     addOptionComponent(panel, 
                        newForcedChoiceOptionComponent(OptionConstants.MASTER_JVM_XMX));
@@ -1063,7 +1093,9 @@ public class ConfigFrame extends SwingFrame {
     panel.displayComponents();
   }
 
-  /** Adds all of the components for the file types panel of the preferences window. */
+  /** Adds all of the components for the file types panel of the preferences window. 
+   * @param panel ConfigPanel to be setup
+   */
   private void _setupFileTypesPanel(ConfigPanel panel) {
     if (PlatformFactory.ONLY.canRegisterFileExtensions()) {
       addOptionComponent(panel, new LabelComponent("<html>Assign DrJava project files and DrJava extensions<br>"+
@@ -1169,7 +1201,8 @@ public class ConfigFrame extends SwingFrame {
   }
   
   /** Adds all of the components for the Compiler Options Panel of the preferences window
-    */
+   * @param panel ConfigPanel to be setup
+   */
   private void _setupCompilerPanel(ConfigPanel panel) {
     addOptionComponent(panel, 
                        newBooleanOptionComponent(OptionConstants.SHOW_UNCHECKED_WARNINGS, false)
@@ -1216,7 +1249,7 @@ public class ConfigFrame extends SwingFrame {
     };
    
     /*
-     * insures that the change is made only when the apply or ok button is hit
+     * ensures that the change is made only when the apply or ok button is hit
      */
     _applyButton.addActionListener(CPCActionListener);
     _okButton.addActionListener(CPCActionListener);
@@ -1234,7 +1267,10 @@ public class ConfigFrame extends SwingFrame {
     panel.displayComponents();
   }
   
-  /** Add all of the components for the Interactions panel of the preferences window. */
+  /**  
+   * Add all of the components for the Interactions panel of the preferences window. 
+   * @param panel ConfigPanel to be setup
+   */
   private void _setupInteractionsPanel(ConfigPanel panel) {
     final DirectoryOptionComponent wdComponent =
       newDirectoryOptionComponent(OptionConstants.FIXED_INTERACTIONS_DIRECTORY, _dirChooser);
@@ -1300,7 +1336,9 @@ public class ConfigFrame extends SwingFrame {
     panel.displayComponents();
   }
 
-  /** Add all of the components for the JUnit panel of the preferences window. */
+  /** Add all of the components for the JUnit panel of the preferences window. 
+   * @param panel ConfigPanel to be setup
+   */
   private void _setupJUnitPanel(ConfigPanel panel) {
     final BooleanOptionComponent junitLocEnabled =
       newBooleanOptionComponent(OptionConstants.JUNIT_LOCATION_ENABLED,false)

@@ -71,7 +71,7 @@ public interface OptionConstants {
   /** A String used to launch a user's preferred browser. It is tokenized and appended to the file path. */
   public static final StringOption BROWSER_STRING = new StringOption("browser.string", "");
   
-  /** A Vector<String> storing the classes to automatically import. */
+  /** A {@code Vector<String>} storing the classes to automatically import. */
   public static final VectorOption<String> INTERACTIONS_AUTO_IMPORT_CLASSES =
     new VectorOption<String>("interactions.auto.import.classes", new StringOption("",""), new Vector<String>());
   
@@ -242,8 +242,8 @@ public interface OptionConstants {
       else return Font.decode("Monospaced-12");
     }
     public static Font getDefaultDocListFont() {
-      if (PlatformFactory.ONLY.isMacPlatform()) return Font.decode("Monaco-10");
-      else return Font.decode("Monospaced-10");
+      /* if (PlatformFactory.ONLY.isMacPlatform()) return Font.decode("Monaco-10");
+      else */ return Font.decode("dialog-10");
     }
   }
   
@@ -255,7 +255,8 @@ public interface OptionConstants {
   public static final FontOption FONT_DOCLIST = new FontOption("font.doclist", DefaultFont.getDefaultDocListFont());
   
   /** ToolBar buttons */
-  public static final FontOption FONT_TOOLBAR = new FontOption("font.toolbar", Font.decode("dialog-10"));
+  public static final FontOption FONT_TOOLBAR = new FontOption("font.toolbar", Font.decode("dialog-12"));
+  public static final FontOption FONT_MENU = new FontOption("font.menu", Font.decode("dialog-12"));
   
   /** Whether to draw anti-aliased text.  (Slightly slower.) */
   public static final BooleanOption TEXT_ANTIALIAS = new BooleanOption("text.antialias", Boolean.TRUE);
@@ -305,7 +306,7 @@ public interface OptionConstants {
     
     private static boolean _registered = false;
     
-    /** Return the look-and-feel class name to use by default */
+    /** @return the look-and-feel class name to use by default */
     public static String getDefaultLookAndFeel() {
       if (PlatformFactory.ONLY.isMacPlatform())
         return UIManager.getSystemLookAndFeelClassName(); // Mac: Let the system decide.
@@ -1163,6 +1164,10 @@ public interface OptionConstants {
   public static final VectorOption<KeyStroke> KEY_NEW_DRJAVA_INSTANCE= 
     new VectorOption<KeyStroke>("key.new.drjava.instance", new KeyStrokeOption("",null),
                                 to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_F1, CTRL_MASK|SHIFT_MASK)));
+
+  /** The key binding for starting a new code coverage frame. */
+  public static final VectorOption<KeyStroke> KEY_CODE_COVERAGE = 
+    new VectorOption<KeyStroke>("key.code.coverage", new KeyStrokeOption("",null), to.vector());
   
   /* ---------- Find Replace Options ---------- */
   
@@ -1246,18 +1251,16 @@ public interface OptionConstants {
   static final String JAVADOC_1_3_TEXT = "1.3";  // deprecated
   static final String JAVADOC_1_4_TEXT = "1.4";  // deprecated
   static final String JAVADOC_1_5_TEXT = "1.5";  // deprecated
-  static final String JAVADOC_1_6_TEXT = "1.6";
-  static final String JAVADOC_1_7_TEXT = "1.7";
+  static final String JAVADOC_1_6_TEXT = "1.6";  
+  static final String JAVADOC_1_7_TEXT = "1.7";  
   static final String JAVADOC_1_8_TEXT = "1.8";
   static final String JAVADOC_AUTO_TEXT = "use compiler version"; // for "Open Java API Javadoc"
   
-  static final String[] linkChoices = new String[]{
-    JAVADOC_NONE_TEXT, JAVADOC_1_6_TEXT, JAVADOC_1_7_TEXT, JAVADOC_1_8_TEXT };
+  static final String[] linkChoices = 
+    new String[]{ JAVADOC_NONE_TEXT, JAVADOC_1_6_TEXT, JAVADOC_1_7_TEXT, JAVADOC_1_8_TEXT };
   static final ArrayList<String> linkVersionChoices = new ArrayList<String>(Arrays.asList(linkChoices));
 
-  static final String[] linkDeprecated = new String[]{
-    JAVADOC_1_3_TEXT, JAVADOC_1_4_TEXT, JAVADOC_1_5_TEXT };
-  
+  static final String[] linkDeprecated = new String[]{JAVADOC_1_3_TEXT, JAVADOC_1_4_TEXT, JAVADOC_1_5_TEXT};
   static final ArrayList<String> linkVersionDeprecated = new ArrayList<String>(Arrays.asList(linkDeprecated));  
   
   public static final StringOption JAVADOC_1_6_LINK =
@@ -1275,20 +1278,20 @@ public interface OptionConstants {
                                  JAVADOC_1_8_TEXT)),
                            linkVersionChoices, linkVersionDeprecated);
   
-  static final String[] apiJavadocChoices = new String[] {
-    JAVADOC_1_6_TEXT, JAVADOC_1_7_TEXT, JAVADOC_1_8_TEXT, JAVADOC_AUTO_TEXT};
+  static final String[] apiJavadocChoices = new String[] {JAVADOC_1_6_TEXT, JAVADOC_1_7_TEXT, JAVADOC_1_8_TEXT, JAVADOC_AUTO_TEXT};
   
   static final ArrayList<String> apiJavadocVersionChoices = new ArrayList<String>(Arrays.asList(apiJavadocChoices));
 
-  static final String[] apiJavadocDeprecated = new String[] {
-    JAVADOC_1_3_TEXT, JAVADOC_1_4_TEXT, JAVADOC_1_5_TEXT}; // deprecated, will be changed to JAVADOC_AUTO_TEXT
+  static final String[] apiJavadocDeprecated = 
+    new String[] { JAVADOC_1_3_TEXT, JAVADOC_1_4_TEXT, JAVADOC_1_5_TEXT, }; // deprecated (changed to JAVADOC_AUTO_TEXT)
   
-  static final ArrayList<String> apiJavadocVersionDeprecated = new ArrayList<String>(Arrays.asList(apiJavadocDeprecated));  
+  static final ArrayList<String> apiJavadocVersionDeprecated = 
+    new ArrayList<String>(Arrays.asList(apiJavadocDeprecated));  
   
   /** The version of Java to use for the "Open Java API Javadoc" feature. */
   public static final ForcedChoiceOption JAVADOC_API_REF_VERSION =
-    new ForcedChoiceOption("javadoc.api.ref.version", JAVADOC_AUTO_TEXT,
-                           apiJavadocVersionChoices, apiJavadocVersionDeprecated);
+    new ForcedChoiceOption("javadoc.api.ref.version", JAVADOC_AUTO_TEXT, apiJavadocVersionChoices, 
+                           apiJavadocVersionDeprecated);
   
   /** URL for JUnit javadocs. */
   public static final StringOption JUNIT_LINK =
@@ -1378,7 +1381,7 @@ public interface OptionConstants {
   /** Whether to warn that a restart is necessary before the default compiler preference will change. */
   public static final BooleanOption WARN_CHANGE_DCP = new BooleanOption("warn.change.dcp", Boolean.TRUE);
 
-  /** Whether to prompt to change the language level extensions (.dj0/.dj1->.dj, .dj2->.java). */
+  /** Whether to prompt to change the language level extensions {@literal (.dj0/.dj1->.dj, .dj2->.java)}. */
   public static final BooleanOption PROMPT_RENAME_LL_FILES = new BooleanOption("prompt.rename.ll.files", Boolean.TRUE);
   
   /* ---------- MISC OPTIONS ---------- */
@@ -1458,20 +1461,18 @@ public interface OptionConstants {
   public static final BooleanOption SHOW_PATH_WARNINGS = 
     new BooleanOption("show.path.warnings", Boolean.FALSE);
   
-  /**
-   * Default compiler to use
-   * Stores the name of the compiler to use, set by changing the selection in
-   * the ForcedChoiceOption created by COMPILER_PREFERENCE_CONTROL.evaluate()
-   */
+  /** Default compiler to use
+    * Stores the name of the compiler to use, set by changing the selection in
+    * the ForcedChoiceOption created by COMPILER_PREFERENCE_CONTROL.evaluate()
+    */
   public static final StringOption DEFAULT_COMPILER_PREFERENCE = 
     new StringOption("default.compiler.preference", COMPILER_PREFERENCE_CONTROL.NO_PREFERENCE);
   
-  /**
-   * Class that is used to dynamically populate the ForcedChoiceOption.
-   * setList method is used by DefaultCompilerModel to set the available
-   * compilers that it has
-   * Must store the selected name into DEFAULT_COMPILER_PREFERENCE to save the setting
-   */
+  /** Class that is used to dynamically populate the ForcedChoiceOption.
+    * setList method is used by DefaultCompilerModel to set the available
+    * compilers that it has
+    * Must store the selected name into DEFAULT_COMPILER_PREFERENCE to save the setting
+    */
   public static final class COMPILER_PREFERENCE_CONTROL {
     public static final String NO_PREFERENCE = "No Preference";
     public static ArrayList<String> _list = new ArrayList<String>();

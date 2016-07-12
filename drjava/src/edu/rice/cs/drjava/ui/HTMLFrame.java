@@ -54,7 +54,7 @@ import edu.rice.cs.util.swing.SwingFrame;
 import edu.rice.cs.util.swing.Utilities;
 
 /** The frame for displaying the HTML help files.
-  * @version $Id$
+  * @version $Id: HTMLFrame.java 5175 2010-01-20 08:46:32Z mgricken $
   */
 public class HTMLFrame extends SwingFrame {
   
@@ -166,12 +166,23 @@ public class HTMLFrame extends SwingFrame {
     _mainDocPane.addHyperlinkListener(linkListener);
   }
   
-  /** Sets up the frame and displays it. */
+  /** Sets up the frame and displays it. 
+   * @param frameName name of the frame
+   * @param introUrl intro URL
+   * @param indexUrl index URL
+   * @param iconString icon string
+   */
   public HTMLFrame(String frameName, URL introUrl, URL indexUrl, String iconString) {
     this(frameName, introUrl, indexUrl, iconString, null);
   }
   
-  /** Sets up the frame and displays it. */
+  /** Sets up the frame and displays it. 
+   * @param frameName name of the frame
+   * @param introUrl intro URL
+   * @param indexUrl index URL
+   * @param iconString icon string
+   * @param baseDir base directory
+   */
   public HTMLFrame(String frameName, URL introUrl, URL indexUrl, String iconString, File baseDir) {
     super(frameName);
     
@@ -307,7 +318,9 @@ public class HTMLFrame extends SwingFrame {
     }
   }
   
-  /** Prints an error indicating that the HTML file to load in the main pane could not be found. */
+  /** Prints an error indicating that the HTML file to load in the main pane could not be found. 
+   * @param url URl that caused the error
+   */
   private void _displayMainError(URL url) {
     if (!_linkError) {
       _linkError = true;
@@ -317,7 +330,9 @@ public class HTMLFrame extends SwingFrame {
   }
   
   /** Prints an error indicating that the HTML file to load in the main pane could not be found
-    */
+   * @param url URL that caused the error
+   * @param ex exception that occurred
+   */
   private void _displayMainError(URL url, Exception ex) {
     if (!_linkError) {
       _linkError = true;
@@ -328,17 +343,25 @@ public class HTMLFrame extends SwingFrame {
   
   /** Prints an error indicating that the HTML file to load in the contentes pane
    * could not be found
+   * @param url URL that caused the error
    */
   private void _displayContentsError(URL url) {
     _contentsDocPane.setText(getErrorText(url));
   }
   
-  /** Prints an error indicating that the HTML file to load in the contentes pane could not be found. */
+  /** Prints an error indicating that the HTML file to load in the contentes 
+   * pane could not be found.
+   * @param url URL that caused the error
+   * @param ex exception that occurred
+   */
   private void _displayContentsError(URL url, Exception ex) {
     _contentsDocPane.setText(getErrorText(url) + "\n" + ex);
   }
   
-  /** This method returns the error text to display when something goes wrong. */
+  /** This method returns the error text to display when something goes wrong.
+   * @param url URL that caused the error
+   * @return error text associated with the failure
+   */
   protected String getErrorText(URL url) {
     return "Could not load the specified URL: " + url;
   }

@@ -83,7 +83,7 @@ public class DocumentCache {
   
   private static final int INIT_CACHE_SIZE = 32;
   
-  /** invariant _residentQueue.size() <= CACHE_SIZE */
+  /** invariant {@code _residentQueue.size() <= CACHE_SIZE} */
   private volatile int CACHE_SIZE;
   
   /** Data structure representing the queue of resident unmodified documents. */
@@ -113,10 +113,13 @@ public class DocumentCache {
     return mgr;
   }
   
-  /** Changes the number of <b>unmodified</b> documents allowed in the cache at one time. <b> Note: modified documents 
-    * are not managed in the cache except in transitional situations when a queue document becomes modified.  Only
-    * used in tests.
-    */
+  /** Changes the number of <b>unmodified</b> documents allowed in the cache at 
+   * one time. <b> 
+   * Note: modified documents are not managed in the cache except in 
+   * transitional situations when a queue document becomes modified.  Only
+   * used in tests.</b>
+   * @param size the new cache size
+   */
   public void setCacheSize(int size) {
     if (size <= 0) throw new IllegalArgumentException("Cannot set the cache size to zero or less.");
     synchronized(_cacheLock) {    // lock the cache so entries can be removed if necessary
@@ -161,8 +164,9 @@ public class DocumentCache {
     private volatile DefinitionsDocument _doc;
     
     /** Instantiates a manager for the documents that are produced by the given document reconstructor.
-      * @param rec The reconstructor used to create the document
-      */
+     * @param rec The reconstructor used to create the document
+     * @param isUntitled true if the document is untitled; false otherwise
+     */
     public DocManager(DDReconstructor rec, boolean isUntitled) {
 //      Utilities.showDebug("DocManager(" + rec + ", " + fn + ", " + isUntitled + ")");
       _rec = rec;
@@ -175,7 +179,9 @@ public class DocumentCache {
     /** Adds DocumentListener to the reconstructor. */
     public void addDocumentListener(DocumentListener l) { _rec.addDocumentListener(l); }
     
-    /** Makes this document; assumes that cacheLock is already held. */
+    /** Makes this document; assumes that cacheLock is already held. 
+     * @return the newly-created document
+     */
     private DefinitionsDocument makeDocument() {
       try { // _doc is not in memory
         _doc = _rec.make();
@@ -294,7 +300,7 @@ public class DocumentCache {
       kickOut();
     }
     
-    /** All of the following private methods presume that _cacheLock is held */
+    /* All of the following private methods presume that _cacheLock is held */
     private boolean isUnmanagedOrUntitled() { return (_stat & 0x1) != 0; }  // tests if _stat is odd
     
     /** Called by the cache when the document is removed from the active queue and subject to virtualization. 
@@ -307,7 +313,9 @@ public class DocumentCache {
       */
     void closingKickOut() { kickOut(true); }
     
-    /** Performs the actual kickOut operation.  Assumes cacheLock is already held. */
+    /** Performs the actual kickOut operation.  Assumes cacheLock is already held. 
+     * @param isClosing true if the document is being closed; false otherwise
+     */
     private void kickOut(boolean isClosing) {
 //      Utilities.showDebug("kickOut(" + isClosing + ") called on " + this);
       if (! isClosing) {

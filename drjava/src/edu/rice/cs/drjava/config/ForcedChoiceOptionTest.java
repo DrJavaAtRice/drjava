@@ -40,8 +40,7 @@ import edu.rice.cs.drjava.DrJavaTestCase;
 
 import java.util.ArrayList;
 
-/**
- * Class according to the JUnit protocol. Tests
+/** * Class according to the JUnit protocol. Tests
  * the proper functionality of the class ForcedChoiceOption.
  * @version $Id$
  */

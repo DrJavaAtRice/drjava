@@ -36,8 +36,7 @@
 
 package edu.rice.cs.drjava.model.definitions.indent;
 
-/**
- * A leaf node in the decision tree for the indentation system.
+/** * A leaf node in the decision tree for the indentation system.
  * Performs the update to the document, based on the context provided
  * by its position in the decision tree.
  * @version $Id$

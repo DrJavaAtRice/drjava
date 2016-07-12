@@ -39,8 +39,13 @@ package edu.rice.cs.drjava.model.junit;
 import junit.framework.*;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
 
 import edu.rice.cs.util.Log;
@@ -56,13 +61,29 @@ import java.lang.reflect.Modifier;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 import static edu.rice.cs.plt.debug.DebugUtil.error;
 
+import edu.rice.cs.drjava.model.compiler.LanguageLevelStackTraceMapper;
+
+import org.jacoco.core.analysis.Analyzer;
+import org.jacoco.core.analysis.CoverageBuilder;
+import org.jacoco.core.analysis.IBundleCoverage;
+import org.jacoco.core.data.ExecutionDataStore;
+import org.jacoco.core.data.SessionInfoStore;
+import org.jacoco.core.instr.Instrumenter;
+import org.jacoco.core.runtime.IRuntime;
+import org.jacoco.core.runtime.LoggerRuntime;
+import org.jacoco.core.runtime.RuntimeData;
+import edu.rice.cs.drjava.model.coverage.*;
+
+import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.swing.Utilities;
+
 /** Runs in the InterpreterJVM. Runs tests given a classname and formats the results into a (serializable) array of 
   * JUnitError that can be passed back to the MainJVM.
   * @version $Id$
   */
 public class JUnitTestManager {
  
-  protected static final Log _log = new Log("JUnitTestManager.txt", false);
+  protected static final Log _log = new Log("JUnitTestManager.txt", true);
   
   /** The interface to the master JVM via RMI. */
   private final JUnitModelCallback _jmc;
@@ -82,25 +103,94 @@ public class JUnitTestManager {
   /** The list of files corresponding to testClassNames; null if no test is pending. */
   private List<File> _testFiles = null;
   
-  /** Standard constructor */
+  // For JaCoCo
+  private String coverageOutdir = null;
+  private IRuntime runtime = null;
+  private RuntimeData myData = null;
+  private List<String> classNames = null;
+  private List<File> files = null;
+  private JUnitResultTuple lastResult = new JUnitResultTuple(false, null);
+
+  /** Standard constructor 
+   * @param jmc a JUnitModelCallback
+   * @param loaderFactory factory to create class loaders
+   */
   public JUnitTestManager(JUnitModelCallback jmc, Lambda<ClassLoader, ClassLoader> loaderFactory) {
     _jmc = jmc;
     _loaderFactory = loaderFactory;
   }
-  
+
+  /** @return result of the last JUnit run */  
+  public JUnitResultTuple getLastResult() {
+    return this.lastResult;
+  }
+
   /** Find the test classes among the given classNames and accumulate them in
     * TestSuite for junit.  Returns null if a test suite is already pending.
-    * @param classNames the class names that are test class candidates
-    * @param files the files corresponding to classNames
+    * @param classNames the (fully qualified) class names that are test class candidates
+    * @param Java File objects for the source files corresponding to classNames
+    * @param coverageMetadata metadata to be used to generate the coverage report
+    * @return list of test class names
     */
-  public List<String> findTestClasses(final List<String> classNames, final List<File> files) {
+  public List<String> findTestClasses(final List<String> classNames, 
+    final List<File> files, CoverageMetadata coverageMetadata) {
+    
+    _log.log("findTestClasses(" + classNames + ", " + files + ") called");
+    boolean doCoverage = coverageMetadata.getFlag();
+
+    // Set up the loader
+    final ClassLoader loader;
+    if (! doCoverage) {
+        loader = JUnitTestManager.class.getClassLoader();
+    } else {
+
+        // JaCoCo: Create instrumented versions of class files.
+        this.coverageOutdir = coverageMetadata.getOutdirPath();
+        this.runtime = new LoggerRuntime();
+        this.myData = new RuntimeData();
+        this.classNames = classNames;
+        this.files = files;
+        final ArrayList<byte[]> instrumenteds = new ArrayList<byte[]>();
+
+        // The Instrumenter creates a modified version of our test target class
+        // that contains additional probes for execution data recording:
+        for (int i = 0 ; i< files.size() ; i++) {
+
+            // Instrument the i-th file
+            try {
+                final Instrumenter instr = new Instrumenter(this.runtime);
+                final byte[] instrumented = instr.instrument(
+                    new FileInputStream(files.get(i).getCanonicalPath().
+                    replace(".java", ".class")), classNames.get(i));
+                String[] pathParts = files.get(i).getAbsolutePath().split("/");
+                instrumenteds.add(instrumented);
+
+            } catch (Exception e) {
+                StringWriter stackTrace = new StringWriter();
+                e.printStackTrace(new PrintWriter(stackTrace));
+                _log.log("Exception during instrumentation: " + stackTrace.toString());
+            }
+        }
+
+        loader = new MemoryClassLoader();
+        for (int i = 0; i < classNames.size(); i++) {
+            ((MemoryClassLoader)loader).addDefinition(classNames.get(i), instrumenteds.get(i));
+        }
+
+        try {
+            this.runtime.startup(myData);
+        } catch (Exception e) {
+            throw new UnexpectedException(e);
+        }
+    }
+
 //    debug.logStart(new String[]{"classNames", "files"}, classNames, files);
     _log.log("findTestClasses(" + classNames + ", " + files + ")");
     
     if (_testClassNames != null && ! _testClassNames.isEmpty()) 
       throw new IllegalStateException("Test suite is still pending!");
     
-    _testRunner = makeRunner();
+    _testRunner = makeRunner(loader);
     
     _testClassNames = new ArrayList<String>();
     _testFiles = new ArrayList<File>();
@@ -109,10 +199,11 @@ public class JUnitTestManager {
     for (Pair<String, File> pair : IterUtil.zip(classNames, files)) {
       String cName = pair.first();
       try {
-        if (_isJUnitTest(_testRunner.loadPossibleTest(cName))) {
+        Class<?> possibleTest = _testRunner.loadPossibleTest(cName); 
+        if (_isJUnitTest(possibleTest)) {
           _testClassNames.add(cName);
           _testFiles.add(pair.second());
-          _suite.addTest(new JUnit4TestAdapter(_testRunner.loadPossibleTest(cName)));
+          _suite.addTest(new JUnit4TestAdapter(possibleTest));
         }
       }
       catch (ClassNotFoundException e) { error.log(e); }
@@ -125,6 +216,7 @@ public class JUnitTestManager {
     
 //    debug.logEnd("result", _testClassNames);
     _log.log("returning: " + _testClassNames);
+
     return _testClassNames;
   }
   
@@ -133,11 +225,16 @@ public class JUnitTestManager {
     * @return false if no test suite (even an empty one) has been set up
     */
   public /* synchronized */ boolean runTestSuite() {
-    
+
     _log.log("runTestSuite() called");
     
-    if (_testClassNames == null || _testClassNames.isEmpty()) return false;
-    
+    if (_testClassNames == null || _testClassNames.isEmpty()) {
+        this.lastResult = new JUnitResultTuple(false, null);
+        return false;
+    }
+    Map<String, List<String>> lineColors = null;
+    this.lastResult = new JUnitResultTuple(true, null);
+
 //    Utilities.show("runTestSuite() in SlaveJVM called");
     
     try {
@@ -145,7 +242,6 @@ public class JUnitTestManager {
       TestResult result = _testRunner.runSuite(_suite);
       
       JUnitError[] errors = new JUnitError[result.errorCount() + result.failureCount()];
-      
       Enumeration<TestFailure> failures = result.failures();
       Enumeration<TestFailure> errEnum = result.errors();
       
@@ -153,33 +249,77 @@ public class JUnitTestManager {
 
       while (errEnum.hasMoreElements()) {
         TestFailure tErr = errEnum.nextElement();
-//        Utilities.show("Processing error " + tErr);
         errors[i] = _makeJUnitError(tErr, _testClassNames, true, _testFiles);
         i++;
       }
-//      Utilities.show("Finished processing errors");
+
       while (failures.hasMoreElements()) {
         TestFailure tFail = failures.nextElement();
-//        Utilities.show("Processing failure " + tFail);
         errors[i] = _makeJUnitError(tFail, _testClassNames, false, _testFiles);
         i++;
       }
-//      new ScrollableDialog(null, "Slave JVM: testSuite ended with errors", "", Arrays.toString(errors)).show();
-//      Utilities.show("Finished processing failures");
-//      Utilities.show("errors = " + Arrays.toString(errors));
        
       _reset();
       _jmc.testSuiteEnded(errors);
+
+    if (this.runtime != null) { /* doCoverage was true */
+
+        /* Collect session info (including which code was executed) */
+        final ExecutionDataStore executionData = new ExecutionDataStore();
+        final SessionInfoStore sessionInfos = new SessionInfoStore();
+        myData.collect(executionData, sessionInfos, false);
+        this.runtime.shutdown();
+
+        /**         * Together with the original class definitions we can calculate 
+         * coverage information
+         */
+        final CoverageBuilder coverageBuilder = new CoverageBuilder();
+        final Analyzer analyzer = new Analyzer(executionData, coverageBuilder);
+
+        try {
+            for (int j = 0; j < classNames.size(); j++) {
+                analyzer.analyzeClass(
+                    new FileInputStream(this.files.get(j).getCanonicalPath().
+                    replace(".java", ".class")), this.classNames.get(j));
+            }
+
+            /**             * Run the structure analyzer on a single class folder to build up
+             * the coverage model. The process would be similar if the classes
+             * were in a jar file; typically you would create a bundle for each
+             * class folder and each jar you want in your report. If you have
+             * more than one bundle you will need to add a grouping node to your
+             * report
+             */
+            final IBundleCoverage bundleCoverage = coverageBuilder.getBundle(
+                this.files.get(0).getParentFile().getName());
+            ReportGenerator rg = new ReportGenerator(this.coverageOutdir, 
+                coverageBuilder); 
+            rg.createReport(bundleCoverage, executionData, 
+                sessionInfos, this.files.get(0).getParentFile());
+            lineColors = rg.getAllLineColors();
+            this.lastResult = new JUnitResultTuple(true, lineColors);
+
+        } catch (Exception e) {
+            StringWriter stackTrace = new StringWriter();
+            e.printStackTrace(new PrintWriter(stackTrace));
+            //Utilities.show(stackTrace.toString());
+        }
+
+        /* Reset the runtime */
+        this.runtime = null;
+      }
     }
-    catch(Exception e) { 
+
+    catch (Exception e) { 
       JUnitError[] errors = new JUnitError[1];      
       errors[0] = new JUnitError(null, -1, -1, e.getMessage(), false, "", "", e.toString(), e.getStackTrace());
       _reset();
       _jmc.testSuiteEnded(errors);
 //      new ScrollableDialog(null, "Slave JVM: testSuite ended with errors", "", Arrays.toString(errors)).show();
     }
+
     _log.log("Exiting runTestSuite()");
-    return true;
+    return this.lastResult.getRetval();
   }
   
   private void _reset() {
@@ -344,7 +484,11 @@ public class JUnitTestManager {
     return new JUnitError(file, lineNum, 0, message, !isFailure, testName, className, exception, stackTrace);
   }
   
-  /** Parses the line number out of the stack trace in the given class name. */
+  /** Parses the line number out of the stack trace in the given class name. 
+   * @param sw stack trace
+   * @param classname class in which stack trace was generated
+   * @return the line number
+   */
   private int _lineNumber(String sw, String classname) {
     // TODO: use stack trace elements to find line number
     int lineNum;
@@ -366,13 +510,10 @@ public class JUnitTestManager {
     return lineNum;
   }
   
-  /** Make a fresh JUnitTestRunner with its own class loader instance. */
-  private JUnitTestRunner makeRunner() {
-    ClassLoader current = JUnitTestManager.class.getClassLoader();
-    // References to JUnit classes must match those of the current loader so that,
-    // for example, when a test fails, the failure exception is of a class we can talk 
-    // about in the current context.
-    ClassLoader parent = ShadowingClassLoader.whiteList(current, "junit", "org.junit");
-    return new JUnitTestRunner(_jmc, _loaderFactory.value(parent));
+  /** @param current template for the runner's class loader
+   * @return a fresh JUnitTestRunner with its own class loader instance. 
+   */
+  private JUnitTestRunner makeRunner(ClassLoader current) {
+    return new JUnitTestRunner(_jmc, _loaderFactory.value(current));
   }
 }

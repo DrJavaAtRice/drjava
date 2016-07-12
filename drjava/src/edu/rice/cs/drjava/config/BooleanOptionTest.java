@@ -38,8 +38,7 @@ package edu.rice.cs.drjava.config;
 
 import edu.rice.cs.drjava.DrJavaTestCase;
 
-/**
- * Class according to the JUnit protocol. Tests
+/** * Class according to the JUnit protocol. Tests
  * the proper functionality of the class BooleanOption.
  * @version $Id$
  */

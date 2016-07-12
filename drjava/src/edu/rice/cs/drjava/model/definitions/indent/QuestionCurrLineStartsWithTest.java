@@ -38,14 +38,15 @@ package edu.rice.cs.drjava.model.definitions.indent;
 
 import javax.swing.text.BadLocationException;
 
-/**
- * Tests the indention rule which detects whether the current line
+/** * Tests the indention rule which detects whether the current line
  * starts with a particular string.
  * @version $Id$
  */
 public final class QuestionCurrLineStartsWithTest extends IndentRulesTestCase {
 
-  /** Tests not having the prefix in the text. */
+  /** Tests not having the prefix in the text.  
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testNoPrefix() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionCurrLineStartsWith("{", null, null);
     
@@ -62,6 +63,7 @@ public final class QuestionCurrLineStartsWithTest extends IndentRulesTestCase {
   }
   
   /** Tests having a line start with prefix, with text following
+   * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testStartsWithPrefixWithText() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionCurrLineStartsWith("}", null, null);
@@ -83,6 +85,7 @@ public final class QuestionCurrLineStartsWithTest extends IndentRulesTestCase {
   }
   
   /** Tests having a line start with prefix, with no text following
+   * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testStartsWithPrefixNoText() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionCurrLineStartsWith("{", null, null);
@@ -103,6 +106,7 @@ public final class QuestionCurrLineStartsWithTest extends IndentRulesTestCase {
   }
   
   /** Tests having a multiple character prefix.
+   * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testMultipleCharPrefix() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionCurrLineStartsWith(".*.", null, null);
@@ -116,6 +120,7 @@ public final class QuestionCurrLineStartsWithTest extends IndentRulesTestCase {
   }
     
   /** Tests having a commented prefix without searching in comments.
+   * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testCommentedPrefixDontSearchComment() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionCurrLineStartsWith("{", null, null);
@@ -128,6 +133,7 @@ public final class QuestionCurrLineStartsWithTest extends IndentRulesTestCase {
   }
 
   /** Tests having a commented prefix with searching in comments.
+   * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testCommentedPrefixSearchComment() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionCurrLineStartsWith("*", null, null);
@@ -141,6 +147,7 @@ public final class QuestionCurrLineStartsWithTest extends IndentRulesTestCase {
   }
   
   /** Tests having text on a line before the prefix.
+   * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testDoesNotStartWithPrefix() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionCurrLineStartsWith("}", null, null);
@@ -154,6 +161,7 @@ public final class QuestionCurrLineStartsWithTest extends IndentRulesTestCase {
   }
 
   /** Prefix appears at the end of a document.
+   * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testPrefixAtEnd() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionCurrLineStartsWith("}", null, null);
@@ -166,6 +174,7 @@ public final class QuestionCurrLineStartsWithTest extends IndentRulesTestCase {
   }
   
   /** Tests multiple-character prefix.
+   * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testMultCharPrefix() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionCurrLineStartsWith("abcdefg", null, null);

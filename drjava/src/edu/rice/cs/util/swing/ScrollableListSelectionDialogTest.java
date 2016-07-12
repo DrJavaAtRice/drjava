@@ -42,8 +42,7 @@ import java.util.Arrays;
 
 import javax.swing.JOptionPane;
 
-/**
- * A JUnit test case class that tests {@link ScrollableListSelectionDialog}.
+/** * A JUnit test case class that tests {@link ScrollableListSelectionDialog}.
  * 
  * @author Chris Warrington
  * @version $Id$

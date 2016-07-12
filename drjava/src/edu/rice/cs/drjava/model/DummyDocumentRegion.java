@@ -42,7 +42,7 @@ import java.io.File;
   * not include a document, are only used transiently during project file input processing.
   * @version $Id$
   */
-public class DummyDocumentRegion implements FileRegion {
+public class DummyDocumentRegion implements IRegion {
 
   protected final File _file;
   protected volatile int _startOffset;

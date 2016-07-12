@@ -36,8 +36,7 @@
 
 package edu.rice.cs.drjava.model.debug;
 
-/**
- * Class for keeping track of a stack frame in the debugger.
+/** * Class for keeping track of a stack frame in the debugger.
  * @version $Id$
  */
 public class DebugStackData {
@@ -53,11 +52,9 @@ public class DebugStackData {
     _line = line;
   }
   
-  /** Returns the name of the method at this frame of the stack.
-   */
+  /** @return the name of the method at this frame of the stack. */
   public String getMethod() { return _method; }
   
-  /** Returns the line number of this frame of the stack.
-   */
+  /** @return the line number of this frame of the stack. */
   public int getLine() { return _line; }
 }

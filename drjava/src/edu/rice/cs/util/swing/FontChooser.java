@@ -36,7 +36,6 @@
 
 package edu.rice.cs.util.swing;
 
-import edu.rice.cs.util.swing.Utilities;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
@@ -44,25 +43,31 @@ import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.*;
 
-/**
- * FontChooser, adapted from NwFontChooserS by Noah Wairauch.
- * (see http:///forum.java.sun.com/thread.jsp?forum=57&thread=195067)
+import edu.rice.cs.util.Log;
+import edu.rice.cs.util.swing.Utilities;
+import edu.rice.cs.util.UnexpectedException;
+
+/** * FontChooser, adapted from NwFontChooserS by Noah Wairauch.
+ * {@literal (see http:///forum.java.sun.com/thread.jsp?forum=57&thread=195067)}
  *
  * @version $Id$
  */
 
 public class FontChooser extends JDialog {
-  /** Available font styles.
-   */
+  private static Log _log = new Log("FontChooser.txt", false);
+  
+  /** Available font styles.b */
   private static final String[] STYLES =
       new String[] { "Plain", "Bold", "Italic", "Bold Italic" };
+  
+  private static final String DEFAULT_STYLE = "Plain";
 
-  /** Available font sizes.
-   */
+  /** Available font sizes. */
   private static final String[] SIZES =
-      new String[] { "3", "4", "5", "6", "7", "8", "9", "10", "11", "12",
-                     "13", "14", "15", "16", "17", "18", "19", "20", "22",
-                     "24", "27", "30", "34", "39", "45", "51", "60"};
+      new String[] { "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", 
+                     "20", "22", "24", "27", "30", "34", "39", "45", "51", "60"};
+  
+  private static final String DEFAULT_SIZE = "12";
 
   // Lists to display
   private NwList _styleList;
@@ -77,14 +82,17 @@ public class FontChooser extends JDialog {
   private boolean _clickedOK = false;
 
   /** Constructs a new modal FontChooser for the given frame,
-   * using the specified font.
-   */
+    * using the specified font.
+    * @param parent The parent frame.
+    * @param font   The previously chosen font.
+    */
   private FontChooser(Frame parent, Font font) {
     super(parent, true);
     initAll();
     if (font == null) font = _sampleText.getFont();
+    _log.log("font in FontChooser = " + font);
     _fontList.setSelectedItem(font.getName());
-    _sizeList.setSelectedItem(font.getSize() + "");
+    _sizeList.setSelectedItem(Integer.toString(font.getSize()));
     _styleList.setSelectedItem(STYLES[font.getStyle()]);
     //this.setResizable(false);
     //resize();
@@ -109,10 +117,13 @@ public class FontChooser extends JDialog {
       chosenFont = fd.getFont();
     }
     fd.dispose();
-    return (chosenFont);
+    return chosenFont;
   }
 
   /** Shows the font chooser with a standard title ("Font Chooser").
+   * @param parent The parent frame.
+   * @param font   The previously chosen font.
+   * @return the newly chosen font.
    */
   public static Font showDialog(Frame parent, Font font) {
     return showDialog(parent, "Font Chooser", font);
@@ -133,7 +144,9 @@ public class FontChooser extends JDialog {
     c.gridy = 0;
     c.weightx = 1.0;
     c.weighty = 1.0;
-    _fontList = new NwList(GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames());
+    String[] fontNames = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
+    if (fontNames.length == 0) throw new UnexpectedException("There are NO fonts in the local graphics environment!");
+    _fontList = new NwList(fontNames, fontNames[0]);
     cpLayout.setConstraints(_fontList, c);
     cp.add(_fontList);
 //    JPanel fontListPanel = new JPanel();
@@ -149,8 +162,8 @@ public class FontChooser extends JDialog {
     c.gridy = 0;
     c.weightx = 0.3;
     c.weighty = 1.0;
-    _styleList = new NwList(STYLES);
-    cpLayout.setConstraints(_styleList , c);
+    _styleList = new NwList(STYLES, DEFAULT_STYLE);   
+    
     cp.add(_styleList);
 //    JPanel styleListPanel = new JPanel();
 //    styleListPanel.setBackground(Color.GREEN);
@@ -165,7 +178,7 @@ public class FontChooser extends JDialog {
     c.gridy = 0;
     c.weightx = 0.3;
     c.weighty = 1.0;
-    _sizeList = new NwList(SIZES);
+    _sizeList = new NwList(SIZES, DEFAULT_SIZE);
     cpLayout.setConstraints(_sizeList, c);
     cp.add(_sizeList);    
 
@@ -229,22 +242,25 @@ public class FontChooser extends JDialog {
 
   private void showSample() {
     int g = 0;
+    _log.log("sizeList = " + _sizeList + "\n" + "_sizeList.getSelectedValue() = " + _sizeList.getSelectedValue());
     try { g = Integer.parseInt(_sizeList.getSelectedValue()); }
-    catch (NumberFormatException nfe) { /* do nothing */ }
+    catch (NumberFormatException nfe) { throw new UnexpectedException(nfe); }
     String st = _styleList.getSelectedValue();
     int s = Font.PLAIN;
     if (st.equalsIgnoreCase("Bold")) s = Font.BOLD;
     if (st.equalsIgnoreCase("Italic")) s = Font.ITALIC;
     if (st.equalsIgnoreCase("Bold Italic")) s = Font.BOLD | Font.ITALIC;
+    _log.log("_fontList = " + _fontList + "\nselectedValue = " + _fontList.getSelectedValue());
     _sampleText.setFont(new Font(_fontList.getSelectedValue(), s, g));
+   _log.log("Selected font is '" + getFont() + "'");
     _sampleText.setText("The quick brown fox jumped over the lazy dog.");
     _sampleText.setVerticalAlignment(SwingConstants.TOP);
   }
 
-  /** Returns whether the user clicked OK when the dialog was closed. (If false, the user clicked cancel.) */
+  /** @return whether the user clicked OK when the dialog was closed. (If false, the user clicked cancel.) */
   public boolean clickedOK() { return _clickedOK; }
 
-  /** Returns the currently selected Font. */
+  /** @return the currently selected Font. */
   public Font getFont() { return _sampleText.getFont(); }
 
   /** Private inner class for a list which displays a list of options in addition to a label indicating the currently
@@ -254,9 +270,9 @@ public class FontChooser extends JDialog {
     JList<String> jl;
     JScrollPane sp;
     JLabel jt;
-    String si = " ";
+    String si;
 
-    public NwList(String[] values) {
+    public NwList(String[] values, String s) {
       GridBagLayout cpLayout = new GridBagLayout();
       GridBagConstraints c = new GridBagConstraints();
       setLayout(cpLayout);
@@ -264,6 +280,7 @@ public class FontChooser extends JDialog {
       jl = new JList<String> (values);
       sp = new JScrollPane(jl);
       jt = new JLabel();
+      si = s;
       jt.setBackground(Color.white);
       jt.setForeground(Color.black);
       jt.setOpaque(true);
@@ -300,8 +317,9 @@ public class FontChooser extends JDialog {
       add(sp);
     }
 
-    public String getSelectedValue() { return (si); }
-
-    public void setSelectedItem(String s) { jl.setSelectedValue(s, true);}
+    public String getSelectedValue() { return si; }
+    public void setSelectedItem(String s) { jl.setSelectedValue(s, true); }
+    public String toString() { return "NwList(" + jl + ", " + si +")"; }
+      
   }
 }

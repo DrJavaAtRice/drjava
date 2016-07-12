@@ -36,8 +36,7 @@
 
 package edu.rice.cs.drjava.model.definitions;
 
-/**
- * Exception indicating that a class name could not be found in
+/** * Exception indicating that a class name could not be found in
  * the DefinitionsDocument from which it was thrown.
  * @version $Id$
  */

@@ -72,8 +72,7 @@
 
 package edu.rice.cs.drjava.model.definitions.indent;
 
-/**
- * Tests whether the current line is empty.
+/** * Tests whether the current line is empty.
  * 
  * @version $Id$
  */

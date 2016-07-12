@@ -149,6 +149,8 @@ public class ConcJUnitUtils {
   
   /** Ask the user if the rt.concjunit.jar file should be regenerated.
     * @param parentFrame parent frame
+    * @param yesRunnable runnable to run if the user selects yes
+    * @param noRunnable runnable to run if the user selects no
     * @return true if the user chose to regenerate
     */
   public static boolean showIncompatibleWantToRegenerateDialog(final Frame parentFrame,
@@ -205,14 +207,13 @@ public class ConcJUnitUtils {
     }
   }
   
-  /**
-   * Show the "Generate ConcJUnit Runtime" dialog (ask for file name, etc.).
-   * @param parentFrame parent frame
-   * @param rtFile suggestion of where we should generate the runtime
-   * @param concJUnitJarFile the concutest-junit-....-withrt.jar file that does the generation
-   * @param successRunnable command to execute after successful generation, parameter is the file
-   * @param failureRunnable command to execute if generation fails
-   */
+  /** Show the "Generate ConcJUnit Runtime" dialog (ask for file name, etc.).
+    * @param parentFrame parent frame
+    * @param rtFile suggestion of where we should generate the runtime
+    * @param concJUnitJarFile the concutest-junit-....-withrt.jar file that does the generation
+    * @param successRunnable command to execute after successful generation, parameter is the file
+    * @param failureRunnable command to execute if generation fails
+    */
   public static void showGenerateRTConcJUnitJarFileDialog(final Frame parentFrame,
                                                           File rtFile,
                                                           final File concJUnitJarFile,

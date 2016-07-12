@@ -40,8 +40,7 @@ import java.io.*;
 
 import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
 
-/**
- * This class represents a sequence of processes. The inputs and outputs of the processes
+/** * This class represents a sequence of processes. The inputs and outputs of the processes
  * are not connected. One process wait until the preceding process has terminated.
  * The class allows the entire sequence to be treated as if it were just one process.
  * The constructor starts the first subprocess.
@@ -190,8 +189,7 @@ public class ProcessSequence extends Process {
 //    _debugOutput.flush();
   }
   
-  /**
-   * Gets the output stream of the process sequence, i.e. the combined
+  /** Gets the output stream of the process sequence, i.e. the combined
    * output stream of all the processes in the sequence.
    *
    * @return  the output stream of the process sequence.
@@ -210,8 +208,7 @@ public class ProcessSequence extends Process {
     });
   }
   
-  /**
-   * Gets the error stream of the process sequence, i.e. the combined
+  /** Gets the error stream of the process sequence, i.e. the combined
    * error stream of all the processes in the sequence.
    *
    * @return  the error stream of the process sequence.
@@ -220,8 +217,7 @@ public class ProcessSequence extends Process {
     return _combinedErrorStream;
   }
   
-  /**
-   * Gets the input stream of the process sequence,  i.e. the combined
+  /** Gets the input stream of the process sequence,  i.e. the combined
    * input stream of all the processes in the sequence.
    *
    * @return  the input stream of the process chain
@@ -230,8 +226,7 @@ public class ProcessSequence extends Process {
     return _combinedInputJoinedWithDebugStream;
   }
   
-  /**
-   * Causes the current thread to wait, if necessary, until the 
+  /** Causes the current thread to wait, if necessary, until the 
    * process sequence has terminated, i.e. until all processes in
    * the sequence have terminated. This method returns immediately if
    * all subprocesses have already terminated. If any of the
@@ -263,8 +258,7 @@ public class ProcessSequence extends Process {
     return exitCode;
   }
   
-  /**
-   * Returns the exit value for the subprocess.
+  /** Returns the exit value for the subprocess.
    *
    * @return  the exit value of the subprocess represented by this 
    *          <code>Process</code> object. by convention, the value 
@@ -282,8 +276,7 @@ public class ProcessSequence extends Process {
     return _processes[_processes.length-1].exitValue();
   }
   
-  /**
-   * Kills all subprocesses. The subprocesses represented by this 
+  /** Kills all subprocesses. The subprocesses represented by this 
    * <code>ProcessChain</code> object is forcibly terminated.
    */
   public void destroy() {
@@ -300,7 +293,9 @@ public class ProcessSequence extends Process {
     _stdErrRedirector.setStopFlag();
   }
   
-  /** Connect the streams of the specified process. */
+  /** Connect the streams of the specified process. 
+   * @param p process for which to connect streams
+   */
   protected void connectProcess(Process p) {
     // redirect all stdout from all the processes into a combined output stream
     // that pipes all the data into a combined input stream that serves as this

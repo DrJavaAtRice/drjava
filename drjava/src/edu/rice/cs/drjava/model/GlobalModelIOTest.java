@@ -62,7 +62,10 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
   
   // _log is inherited from GlobalModelTestCase
   
-  /** Creates a new document, modifies it, and then does the same with a second document, checking for inteference. */
+  /** Creates a new document, modifies it, and then does the same with a second 
+   * document, checking for inteference. 
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testMultipleFiles() throws BadLocationException {
     assertNumOpenDocs(1);
     
@@ -86,7 +89,10 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     _log.log(this + ".testMultipleFiles() completed");
   }
   
-  /** Opens several documents and ensures that the array returned by the model is correct and in the right order. */
+  /** Opens several documents and ensures that the array returned by the model 
+   * is correct and in the right order. 
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testMultipleFilesArray() throws BadLocationException {
     OpenDefinitionsDocument doc1, doc2, doc3;
     doc1 = setupDocument(FOO_TEXT);
@@ -104,7 +110,9 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     _log.log(this + ".testMultipleFilesArray() completed");
   }
   
-  /** Ensures closing documents works correctly. */
+  /** Ensures closing documents works correctly. 
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testCloseMultipleFiles() throws BadLocationException {
     assertNumOpenDocs(1);
     OpenDefinitionsDocument doc1 = setupDocument(FOO_TEXT);
@@ -128,7 +136,10 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
   }
   
   
-  /** Creates a new document, modifies it, then allows it to be closed, ignoring the changes made. */
+  /** Creates a new document, modifies it, then allows it to be closed, 
+   * ignoring the changes made. 
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testCloseFileAllowAbandon() throws BadLocationException {
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     
@@ -149,7 +160,10 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     _log.log("testCloseFileAllowAbandon completed");
   }
   
-  /** Creates a new document, modifies it, but disallows a call to close it without saving changes. */
+  /** Creates a new document, modifies it, but disallows a call to close it 
+   * without saving changes. 
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testCloseFileDisallowAbandon() throws BadLocationException {
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     
@@ -169,7 +183,10 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     _log.log("testCloseFileDisallowAbandon completed");
   }
   
-  /** Opens a file. */
+  /** Opens a file. 
+   * @throws BadLocationException if attempts to reference an invalid location
+   * @throws IOException if an IO operation fails
+   */
   public void testOpenRealFile() throws BadLocationException, IOException {
     final File tempFile = writeToNewTempFile(BAR_TEXT);
     
@@ -203,7 +220,10 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     _log.log("testOpenRealFile completed");
   }
   
-  /** Initiates a file open, but cancels. */
+  /** Initiates a file open, but cancels. 
+   * @throws BadLocationException if attempts to reference an invalid location
+   * @throws IOException if an IO operation fails
+   */
   public void testCancelOpenFile() throws BadLocationException, IOException {
     
     @SuppressWarnings("unused")
@@ -253,7 +273,9 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     _log.log("testCancelOpenFile completed");
   }
   
-  /** Attempts to open a non-existent file. */
+  /** Attempts to open a non-existent file. 
+   * @throws IOException if an IO operation fails
+   */
   public void testOpenNonexistentFile() throws IOException {
     _model.addListener(new TestListener());
     
@@ -280,7 +302,10 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     _log.log("testOpenNonexistentFile completed");
   }
   
-  /** Attempts to reopen an already open file. */
+  /** Attempts to reopen an already open file. 
+   * @throws BadLocationException if attempts to reference an invalid location
+   * @throws IOException if an IO operation fails
+   */
   public void testReopenFile() throws BadLocationException, IOException {
     final File tempFile = writeToNewTempFile(BAR_TEXT);
     
@@ -365,7 +390,10 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     _log.log("testReopenFile completed");
   }
   
-  /** Opens multiple files. */
+  /** Opens multiple files. 
+   * @throws BadLocationException if attempts to reference an invalid location
+   * @throws IOException if an IO operation fails
+   */
   public void testOpenMultipleFiles() throws BadLocationException, IOException {
     final File tempFile1 = writeToNewTempFile(FOO_TEXT);
     final File tempFile2 = writeToNewTempFile(BAR_TEXT);
@@ -410,7 +438,10 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     _log.log("testOpenMultipleFiles completed");
   }
   
-  /** Initiates a file open, but cancels. */
+  /** Initiates a file open, but cancels. 
+   * @throws BadLocationException if attempts to reference an invalid location
+   * @throws IOException if an IO operation fails
+   */
   public void testCancelOpenMultipleFiles() throws BadLocationException, IOException {
     
     @SuppressWarnings("unused")
@@ -466,7 +497,9 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     _log.log("testCancelOpenMultipleFiles completed");
   }
   
-  /** Attempts to open a non-existent file. */
+  /** Attempts to open a non-existent file. 
+   * @throws IOException if an IO operation fails
+   */
   public void testOpenMultipleNonexistentFiles() throws IOException {
     
     final File tempFile1 = writeToNewTempFile(FOO_TEXT);
@@ -521,7 +554,12 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     _log.log("testOpenMultipleFilesError completed");
   }
   
-  /** Force a file to be opened with getDocumentforFile. */
+  /** Force a file to be opened with getDocumentforFile. 
+   * @throws BadLocationException if attempts to reference an invalid location
+   * @throws IOException if an IO operation fails
+   * @throws OperationCanceledException if an operation is canceled unexpectedly
+   * @throws AlreadyOpenException if the file is already open
+   */
   public void testForceFileOpen() throws BadLocationException, IOException, OperationCanceledException,
     AlreadyOpenException {
     
@@ -563,7 +601,10 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     });
   }
   
-  /** Attempts to make the first save of a document, but cancels instead. */
+  /** Attempts to make the first save of a document, but cancels instead. 
+   * @throws BadLocationException if attempts to reference an invalid location
+   * @throws IOException if an IO operation fails
+   */
   public void testCancelFirstSave() throws BadLocationException, IOException {
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     
@@ -579,7 +620,10 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     _log.log("testForceFileOpen completed");
   }
   
-  /** Makes a first save of the current document. */
+  /** Makes a first save of the current document. 
+   * @throws BadLocationException if attempts to reference an invalid location
+   * @throws IOException if an IO operation fails
+   */
   public void testRealSaveFirstSave() throws BadLocationException, IOException {
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file = tempFile();
@@ -608,7 +652,10 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     _log.log("testRealSaveFirstSave completed");
   }
   
-  /** Makes a first save-copy of the current document, ensures that it's still modified. */
+  /** Makes a first save-copy of the current document, ensures that it's still modified. 
+   * @throws BadLocationException if attempts to reference an invalid location
+   * @throws IOException if an IO operation fails
+   */
   public void testRealSaveFirstSaveCopy() throws BadLocationException, IOException {
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file = tempFile();
@@ -637,7 +684,9 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     _log.log("testRealSaveFirstSaveCopy completed");
   }
   
-  /** Saves a file already saved and overwrites its contents. */
+  /** Saves a file already saved and overwrites its contents. 
+   * @throws Exception if something goes wrong
+   */
   public void testSaveAlreadySaved() throws Exception {
     //disable file backups, remember original setting
     Boolean backupStatus = DrJava.getConfig().getSetting(BACKUP_FILES);
@@ -731,9 +780,11 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
   }
   
   /** Saves the document with FOO_TEXT and then saves over the old text, passing in a CancelingSelector
-    * to cancel if we are asked for a new file name.  Confirms that no cancellation happens (since the
-    * file is already saved.
-    */
+   * to cancel if we are asked for a new file name.  Confirms that no cancellation happens (since the
+   * file is already saved.
+   * @throws BadLocationException if attempts to reference an invalid location
+   * @throws IOException if an IO operation fails
+   */
   public void testCancelSaveAlreadySaved() throws BadLocationException, IOException {
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file = tempFile();
@@ -775,7 +826,10 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     _log.log("testCancelSaveAlreadySaved completed");
   }
   
-  /** Make sure that saveAs doesn't save if we cancel! */
+  /** Make sure that saveAs doesn't save if we cancel! 
+   * @throws BadLocationException if attempts to reference an invalid location
+   * @throws IOException if an IO operation fails
+   */
   public void testCancelSaveAsAlreadySaved() throws BadLocationException, IOException {
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file = tempFile();
@@ -799,7 +853,10 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     _log.log("testCancelSaveAsAlreadySaved completed");
   }
   
-  /** Ensures that saveAs saves to a different file. */
+  /** Ensures that saveAs saves to a different file. 
+   * @throws BadLocationException if attempts to reference an invalid location
+   * @throws IOException if an IO operation fails
+   */
   public void testSaveAsAlreadySaved() throws BadLocationException, IOException {
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file1 = tempFile();
@@ -889,8 +946,10 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
   
   
   /** Ensures that all open files are saved in appropriate order, i.e., even with BAR file as active document, save all
-    * should first prompt to save FOO, then BAR.
-    */
+   * should first prompt to save FOO, then BAR.
+   * @throws BadLocationException if attempts to reference an invalid location
+   * @throws IOException if an IO operation fails
+   */
   public void testSaveAllSaveCorrectFiles()
     throws BadLocationException, IOException {
     OpenDefinitionsDocument fooDoc = setupDocument(FOO_TEXT);
@@ -917,7 +976,12 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     _log.log("testSaveAllSaveCorrectFiles completed");
   }
   
-  /** Forces a file to be opened with getDocumentforFile. */
+  /** Forces a file to be opened with getDocumentforFile. 
+   * @throws BadLocationException if attempts to reference an invalid location
+   * @throws IOException if an IO operation fails
+   * @throws OperationCanceledException if an operation is canceled unexpectedly
+   * @throws AlreadyOpenException if the file is already open
+   */
   public void testRevertFile() throws BadLocationException, IOException, OperationCanceledException,
     AlreadyOpenException {
     
@@ -1038,7 +1102,11 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     _log.log("testModifiedByOtherFalse completed");
   }
   
-  /** Interprets some statements, saves the history, clears the history, then loads the history. */
+  /** Interprets some statements, saves the history, clears the history, then loads the history. 
+   * @throws EditDocumentException if an error occurs while editing
+   * @throws IOException if an IO operation fails
+   * @throws InterruptedException if execution is interrupted unexpectedly
+   */
   public void testSaveClearAndLoadHistory() throws EditDocumentException, IOException, InterruptedException {
     String newLine = StringOps.EOL;
     final InteractionListener listener = new InteractionListener();
@@ -1111,8 +1179,11 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
   }
   
   /** Loads two history files, one whose statements end in semicolons, and one whose statements do not.
-    * Makes sure that it doesn't matter.
-    */
+   * Makes sure that it doesn't matter.
+   * @throws EditDocumentException if an error occurs while editing
+   * @throws IOException if an IO operation fails
+   * @throws InterruptedException if execution is interrupted unexpectedly
+   */
   public void testLoadHistoryWithAndWithoutSemicolons() throws IOException, EditDocumentException, 
     InterruptedException {
     
@@ -1147,8 +1218,10 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
   }
   
   /** Test for the possibility that the file has been moved or deleted
-    * since it was last referenced
-    */
+   * since it was last referenced
+   * @throws BadLocationException if attempts to reference an invalid location
+   * @throws IOException if an IO operation fails
+   */
   public void testFileMovedWhenTriedToSave() throws BadLocationException, IOException {
     
     final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);

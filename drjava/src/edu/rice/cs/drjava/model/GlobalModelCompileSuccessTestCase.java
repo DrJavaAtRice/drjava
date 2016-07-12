@@ -38,8 +38,7 @@ package edu.rice.cs.drjava.model;
 
 import edu.rice.cs.plt.reflect.JavaVersion;
 
-/**
- * Tests to ensure that compilation succeeds when expected.
+/** * Tests to ensure that compilation succeeds when expected.
  * 
  * Every test in this class is run for *each* of the compilers that is available.
  *
@@ -71,6 +70,6 @@ public abstract class GlobalModelCompileSuccessTestCase extends GlobalModelTestC
 
   protected String _name() { return "compiler=" + _model.getCompilerModel().getActiveCompiler().getName() + ": "; }
 
-  /** Returns whether the currently active compiler supports generics. */
+  /** @return whether the currently active compiler supports generics. */
   protected boolean _isGenericCompiler() { return JavaVersion.CURRENT.supports(JavaVersion.JAVA_5); }
 }

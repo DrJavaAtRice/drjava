@@ -51,8 +51,7 @@ import java.io.IOException;
 import javax.swing.text.html.*;
 import javax.swing.text.html.parser.*;
 
-/**
- * A class to provide some convenient String operations as static methods.
+/** * A class to provide some convenient String operations as static methods.
  * It's abstract to prevent (useless) instantiation, though it can be subclassed
  * to provide convenient namespace importation of its methods.
  * @version $Id$
@@ -84,7 +83,11 @@ public abstract class StringOps {
   private static final String blank15 = makeBlankString(15);
   private static final String blank16 = makeBlankString(16);
   
-  /** Gets a string consisting of n blanks.  The values for n <= 16 are stored in a switch table.*/
+  /** Gets a string consisting of n blanks.  The values for n {@literal <=} 16 
+   * are stored in a switch table.
+   * @param n number of blanks
+   * @return a string consisting of n blanks
+   */
   public static String getBlankString(int n) {
     switch (n) {
       case 0: return blank0;
@@ -109,7 +112,11 @@ public abstract class StringOps {
     }
   }
   
-  /** Constructs a new string containng n blanks.  Intended for small values of n (typically < 50). */
+  /** Constructs a new string containng n blanks.  Intended for small values of n 
+   * (typically {@literal <} 50). 
+   * @param n number of blanks
+   * @return a string consisting of n blanks
+   */
   private static String makeBlankString(int n) {
     StringBuilder buf = new StringBuilder();
     for (int i = 0; i < n; i++) buf.append(' ');
@@ -117,8 +124,12 @@ public abstract class StringOps {
   }
   
   /** Takes theString fullString and replaces all instances of toReplace with replacement. 
-    * TODO: deprecate and used corresponding String method added in Java 5.0. 
-    */
+   * TODO: deprecate and used corresponding String method added in Java 5.0. 
+   * @param fullString text in which to do the replacing
+   * @param toReplace text to be replaced
+   * @param replacement text to replace toReplace with
+   * @return string post-replacement
+   */
   public static String replace (String fullString, String toReplace, String replacement) {
     int index = 0;
     int pos;
@@ -157,6 +168,10 @@ public abstract class StringOps {
   }
   
   /** Verifies that (startRow, startCol) occurs before (endRow, endCol).
+   * @param startRow start row
+   * @param startCol start column
+   * @param endRow end row
+   * @param endCol end column
    * @throws IllegalArgumentException if end is before start
    */
   private static void _ensureStartBeforeEnd(int startRow, int startCol,
@@ -267,6 +282,8 @@ public abstract class StringOps {
   
   /** Character.isDigit answers <tt>true</tt> to some non-ascii
    * digits.  This one does not.
+   * @param c character to check
+   * @return whether c is an ASCII digit
    */
   public static boolean isAsciiDigit(char c) {
     return '0' <= c && c <= '9';
@@ -326,6 +343,8 @@ public abstract class StringOps {
   }
   
   /** This works just like java.util.Arrays.toString in Java 5.0 but is not version-specific.
+   * @param a array to be converted to string
+   * @return string representation of a
    */
   public static String toString(long[] a) {
     if (a == null)
@@ -346,7 +365,10 @@ public abstract class StringOps {
     return buf.toString();
   }
   
-  /** This works just like java.util.Arrays.toString in Java 5.0 but is not version-specific. */
+  /** This works just like java.util.Arrays.toString in Java 5.0 but is not version-specific. 
+   * @param a array to be converted to string
+   * @return string representation of a
+   */
   public static String toString(int[] a) {
     if (a == null)
       return "null";
@@ -366,7 +388,10 @@ public abstract class StringOps {
     return buf.toString();
   }
   
-  /** This works just like java.util.Arrays.toString in Java 5.0 but is not version-specific. */
+  /** This works just like java.util.Arrays.toString in Java 5.0 but is not version-specific.
+   * @param a array to be converted to string
+   * @return string representation of a
+   */
   public static String toString(short[] a) {
     if (a == null)
       return "null";
@@ -387,6 +412,8 @@ public abstract class StringOps {
   }
   
   /** This works just like java.util.Arrays.toString in Java 5.0 but is not version-specific.
+   * @param a array to be converted to string
+   * @return string representation of a
    */
   public static String toString(char[] a) {
     if (a == null)
@@ -408,6 +435,8 @@ public abstract class StringOps {
   }
   
   /** This works just like java.util.Arrays.toString in Java 5.0 but is not version-specific.
+   * @param a array to be converted to string
+   * @return string representation of a
    */
   public static String toString(byte[] a) {
     if (a == null)
@@ -429,6 +458,8 @@ public abstract class StringOps {
   }
   
   /** This works just like java.util.Arrays.toString in Java 5.0 but is not version-specific.
+   * @param a array to be converted to string
+   * @return string representation of a
    */
   public static String toString(boolean[] a) {
     if (a == null)
@@ -450,6 +481,8 @@ public abstract class StringOps {
   }
   
   /** This works just like java.util.Arrays.toString in Java 5.0 but is not version-specific.
+   * @param a array to be converted to string
+   * @return string representation of a
    */
   public static String toString(float[] a) {
     if (a == null)
@@ -471,6 +504,8 @@ public abstract class StringOps {
   }
   
   /** This works just like java.util.Arrays.toString in Java 5.0 but is not version-specific.
+   * @param a array to be converted to string
+   * @return string representation of a
    */
   public static String toString(double[] a) {
     if (a == null)
@@ -492,6 +527,8 @@ public abstract class StringOps {
   }
   
   /** This works just like java.util.Arrays.toString in Java 5.0 but is not version-specific.
+   * @param a array to be converted to string
+   * @return string representation of a
    */
   public static String toString(Object[] a) {
     if (a == null)
@@ -514,7 +551,7 @@ public abstract class StringOps {
     return buf.toString();
   }
 
-  /** Encode &, <, > and newlines as HTML entities.
+  /** Encode {@literal &, <, >} and newlines as HTML entities.
    * @param s string to encode
    * @return encoded string
    */
@@ -548,7 +585,10 @@ public abstract class StringOps {
     return sb.toString();
   }
      
-/** Converts newline chars to SEPARATOR char (a solid black upright rectangle). */
+  /** Converts newline chars to SEPARATOR char (a solid black upright rectangle). 
+   * @param s string to flatten
+   * @return flattened version of s
+   */
   public static String flatten(String s) { return s.replace(newline, SEPARATOR); }
       
   /** Return a string representing the approximate amount of memory specified in bytes.
@@ -673,7 +713,10 @@ public abstract class StringOps {
     * This method keeps quoted parts together using ", ' and `.
     * It also keeps treats a '\u001b' followed by a space as non-breaking space.
     * And a double '\u001b' becomes a single '\u001b'. 
-    * It does not allow escaping of the quote characters. */
+    * It does not allow escaping of the quote characters. 
+    * @param cmdline command line to be converted to lists
+    * @return list representation of command line
+    */
   public static List<List<List<String>>> commandLineToLists(String cmdline) {
     BalancingStreamTokenizer tok = new BalancingStreamTokenizer(new StringReader(cmdline));
     tok.wordRange(0,255);
@@ -935,6 +978,7 @@ public abstract class StringOps {
     * @param widthInChars approximate width of the new lines
     * @param lineBreak string to be inserted at line breaks
     * @param wordSepChars string of characters that can serve as word separators
+    * @return split version of the string
     */
   public static String splitStringAtWordBoundaries(String s, int widthInChars,
                                                    String lineBreak,

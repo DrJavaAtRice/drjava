@@ -36,8 +36,7 @@
 
 package edu.rice.cs.util.swing;
 
-/**
- * The AsyncTask base class is a framework that facilitates execution of
+/** * The AsyncTask base class is a framework that facilitates execution of
  * operations asynchronously in order to free up the event-handling thread. This
  * task is passed to an implementation of the AsyncTaskLauncher to be run.
  * <p>
@@ -81,12 +80,14 @@ public abstract class AsyncTask<ParamType, ResType> {
    * @param param  Any parameter that should be passed to the task when it is executed
    * @param monitor  An object that controls the flow of information about task progress both to and from the runAsync 
    *                 method. This also offers a means of passing a result from the async step to the completion step.
-   * @throws  RuntimeException
+   * @return result
+   * @throws Exception if something goes wrong
    */
  public abstract ResType runAsync(ParamType param, IAsyncProgress monitor) throws Exception;
 
  /** Performs te completion step where modifications to swing components are made. This method runs in the event thread
    * so changes made to swing components are safe.
+   * @param args args for the AsyncTask
    */
  public abstract void complete(AsyncCompletionArgs<ResType> args);
 

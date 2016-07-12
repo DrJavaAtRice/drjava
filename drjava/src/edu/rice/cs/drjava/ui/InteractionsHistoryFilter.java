@@ -40,8 +40,7 @@ import  java.io.File;
 import  javax.swing.filechooser.FileFilter;
 
 
-/**
- * A file filter for files with extensions ".hist".
+/** * A file filter for files with extensions ".hist".
  * Used in the file choosers for the Interactions History.
  * @version $Id$
  */

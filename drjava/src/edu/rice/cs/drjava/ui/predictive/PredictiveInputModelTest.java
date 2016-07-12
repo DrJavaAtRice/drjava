@@ -41,8 +41,7 @@ import edu.rice.cs.drjava.DrJavaTestCase;
 import java.util.List;
 import java.util.Set;
 
-/**
- * Unit tests for PredictiveInputModel class.
+/** * Unit tests for PredictiveInputModel class.
  */
 public class PredictiveInputModelTest extends DrJavaTestCase {
   public void testInitial() {

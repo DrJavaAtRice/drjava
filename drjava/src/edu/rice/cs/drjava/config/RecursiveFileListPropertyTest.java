@@ -6,8 +6,7 @@ import junit.framework.Assert;
 import java.io.File;
 import java.io.FileFilter;
 
-/**
- * A JUnit test case class.
+/** * A JUnit test case class.
  * Every method starting with the word "test" will be called when running
  * the test with JUnit.
  */

@@ -38,8 +38,7 @@ package edu.rice.cs.drjava.model.definitions.indent;
 
 import javax.swing.text.BadLocationException;
 
-/**
- * Tests ActionStartPrevLinePlusMultilinePreserve(String,int,int,int,int).
+/** * Tests ActionStartPrevLinePlusMultilinePreserve(String,int,int,int,int).
  * It specifically tests the behavior of the auto-closing comments feature.
  * This means it tests cases where the user has just hit ENTER somewhere
  * on the opening line of a block comment.
@@ -48,19 +47,26 @@ import javax.swing.text.BadLocationException;
  */
 public class ActionStartPrevLinePlusMultilinePreserveTest extends IndentRulesTestCase {
   
-  /** A factory method that constructs the specified instance of IndentRuleAction.  @see 
-    * ActionStartPrevLinePlusMultilinePreserve#ActionStartPrevLinePlusMultilinePreserve(String[], int, int, int, int)
-    */
+  /** A factory method that constructs the specified instance of IndentRuleAction. 
+   * @param suffices the new lines to be added
+   * @param cursorLine the line on which to place the cursor
+   * @param cursorPos the position at which to place the cursor
+   * @param psrvLine the line in suffices on which to place the preserved text
+   * @param psrvPos the position at which to place the preserved text
+   * @return a new ActinoStartPrevLinePlusMultilinePreserve object
+   * @see ActionStartPrevLinePlusMultilinePreserve#ActionStartPrevLinePlusMultilinePreserve(String[], int, int, int, int)
+   */
   private IndentRuleAction makeAction(String[] suffices, int cursorLine, int cursorPos, int psrvLine, int psrvPos) {
     return new ActionStartPrevLinePlusMultilinePreserve(suffices, cursorLine, cursorPos, psrvLine, psrvPos);
   }
   
   /** This method abstracts the common behavior in subsequent tests.
-    * @param start The text that should be in the document at time rule is called
-    * @param loc the location of the cursor when rule is called
-    * @param endLoc the expected final size of the document
-    * @param finish the text string that remaining after the rule is called
-    */
+   * @param start The text that should be in the document at time rule is called
+   * @param loc the location of the cursor when rule is called
+   * @param endLoc the expected final size of the document
+   * @param finish the text string that remaining after the rule is called
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void helperCommentTest(String start, int loc, int endLoc, String finish) throws BadLocationException {
       _setDocText(start);
       _doc.setCurrentLocation(loc);
@@ -158,8 +164,7 @@ public class ActionStartPrevLinePlusMultilinePreserveTest extends IndentRulesTes
 // * Text
 // */
 //---------------------------------
-///**
-// * |
+///**// * |
 // * Text
 // */
     helperCommentTest("/**\n * Text\n */",

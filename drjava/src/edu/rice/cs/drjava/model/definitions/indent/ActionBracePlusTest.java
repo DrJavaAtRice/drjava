@@ -38,8 +38,7 @@ package edu.rice.cs.drjava.model.definitions.indent;
 
 import javax.swing.text.BadLocationException;
 
-/**
- * Test class according to the JUnit protocol. Tests the action
+/** * Test class according to the JUnit protocol. Tests the action
  * that aligns the indentation of the current line to the character
  * that opened the most recent block or expression list that contains
  * the beginning of the current line. Optional additional whitespaces 

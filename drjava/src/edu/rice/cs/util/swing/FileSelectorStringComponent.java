@@ -113,26 +113,32 @@ public class FileSelectorStringComponent extends JPanel {
     super.setEnabled(isEnabled);
   }
   
-  /** Returns the file text field. */
+  /** @return the file text field. */
   public JTextField getTextField() { return _textField; }
   
-  /** Returns the file chooser. */
+  /** @return the file chooser. */
   public FileChooser getFileChooser() { return _chooser; }
   
-  /** Converts a string representation from the text field into a File. */
+  /** Converts a string representation from the text field into a File. 
+   * @param s the string to be converted
+   * @return the newly-created file
+   */
   public File convertStringToFile(String s) {
     s = s.trim();
     if (s.equals("")) return null;
     return new File(s);
   }
   
-  /** Converts a file to the string representation of the text field. */
+  /** Converts a file to the string representation of the text field. 
+   * @param f the file to be converted
+   * @return the newly-created string representation of f
+   */
   public String convertFileToString(File f) {    
     if (f == null)  return "";
     return f.toString();
   }
   
-  /** Returns the last file that was selected. */
+  /** @return the last file that was selected. */
   public File getFileFromField() {
     // Get the file from the chooser
     String newValue = _textField.getText();
@@ -147,10 +153,12 @@ public class FileSelectorStringComponent extends JPanel {
     return newFile;
   }
   
-  /** Returns the string in the text field. */
+  /** @return the string in the text field. */
   public String getText() { return _textField.getText(); }
   
-  /** Sets the string in the text field. */
+  /** Sets the string in the text field. 
+   * @param s string to set
+   */
   public void setText(String s) { _textField.setText(s); }
   
   /** Sets the text of the file field to be the given file.
@@ -176,12 +184,16 @@ public class FileSelectorStringComponent extends JPanel {
     _chooserButton.setToolTipText(text);
   }
   
-  /** Adds a filter to decide if a directory can be chosen. */
+  /** Adds a filter to decide if a directory can be chosen. 
+   * @param filter filter to be added
+   */
   public void addChoosableFileFilter(FileFilter filter) {
     _chooser.addChoosableFileFilter(filter);
   }
   
-  /** Removes the given filefilter from the chooser */
+  /** Removes the given filefilter from the chooser
+   * @param filter filter to be removed
+   */
   public void removeChoosableFileFilter(FileFilter filter) {
     _chooser.removeChoosableFileFilter(filter);
   }

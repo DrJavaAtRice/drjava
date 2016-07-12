@@ -38,8 +38,7 @@ package edu.rice.cs.drjava.ui.avail;
 
 import javax.swing.Action;
 
-/**
- * Adapter from Action to ComplexGUIAvailabilityListener.
+/** * Adapter from Action to ComplexGUIAvailabilityListener.
  *
  * @version $Id$
  */
@@ -47,7 +46,10 @@ public class AndGUIAvailabilityActionAdapter extends AndGUIAvailabilityListener 
   protected final Action _adaptee;
   
   /** Create a listener that responds to changes in availability of several GUI components.
-    * @param components components that must be available */
+   * @param adaptee an Action
+   * @param notifier a GUIAvailabilityNotifier
+   * @param components components that must be available 
+   */
   public AndGUIAvailabilityActionAdapter(Action adaptee,
                                          GUIAvailabilityNotifier notifier, ComponentType... components) {
     super(notifier, components);

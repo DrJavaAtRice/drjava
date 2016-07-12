@@ -207,7 +207,7 @@ public class ReaderWriterLock {
     _wakeFrontGroupOfWaitQueue();
   }
   
-  /** Checks if the current thread is already a reader. */
+  /** @return whether the current thread is already a reader. */
   private boolean _alreadyReading() {
     // If the current thread is active, and there are active readers, then
     //  the current thread must be a reader and not a writer.
@@ -269,9 +269,9 @@ public class ReaderWriterLock {
     */
   public abstract class ReaderWriterThread {
     private volatile boolean _isWaiting = true;
-    /** Returns whether this ReaderWriter is a writer. */
+    /** @return whether this ReaderWriter is a writer. */
     public abstract boolean isWriter();
-    /** Returns whether this ReaderWriter is a reader. */
+    /** @return whether this ReaderWriter is a reader. */
     public abstract boolean isReader();
     
     /** Causes this ReaderWriterThread to wait until stopWaiting is called. While it's waiting, it is on the waitQueue.

@@ -87,6 +87,7 @@ public class FileDisplay {
    * there is no way to determine what the new child string of the path should be.
    * However, if the user is creating a new node in the tree, they will be able 
    * to edit it.
+   * @return whether this is editable
    */
   public boolean isEditable() { return (_isNew || (_file.canWrite() && _rep.equals(_file.getName()))); }
   

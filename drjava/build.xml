@@ -33,9 +33,6 @@
   <property name="clean-can-fail" value="yes" /> 
   <property name="link-source" value="no" />
 
-  <property name="benchmark-count" value="5" />
-  <property name="benchmark-skip" value="1" />
-
   <property name="drjava.test.config" value="testFiles/drjava.basic.config" />
   
   <property environment="env" />
@@ -52,24 +49,29 @@
   <!-- This property was added based on a tip found on the internet in response to many failing unit tests using Java 7 -->
   <property name="run.jvmargs.ide" value=""/>
 
-  <!-- Extension that defines the "extendclasspath" task.  This should be a standard feature of Ant, but
-       as long as it's not, we can use this extension from the Clover developers. -->
-  <taskdef resource="com/cenqua/ant/antlib.xml" classpath="lib/buildlib/cenquatasks.jar" />
-
   <!-- Extension containing various tools, including "for" and "if" -->
   <taskdef resource="net/sf/antcontrib/antlib.xml" classpath="lib/buildlib/ant-contrib.jar"/>
 
   <!-- fornum task, used for test-repeat -->
   <taskdef name="fornum" classname="edu.rice.cs.plt.ant.ForNumTask" classpath="lib/buildlib/plt-ant.jar" onerror="report" />
   
+  <!-- For code coverage report -->
+  <taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml">
+      <classpath path="lib/jacocoant.jar"/>
+  </taskdef>
+  <property name="coverage-report-dir" value="coverage_report"/>
+  <property name="coverage-exec" value="jacoco.exec"/>
+
 <!--  <extendclasspath path="lib/buildlib/junit.jar" /> -->
 
   <fileset id="libs" dir="lib" includes="*.jar" /> <!-- Only include jars that are at the top level (not in buildlib) -->
   <fileset id="jrelibs" dir="${java.home}/lib" includes="*.jar" /> 
   <echo message="jrelibs = ${jrelibs}" />
   <fileset id="extlibs" dir="${java.home}/lib/ext" includes="*.jar" /> 
+  <echo message="${extlibs}" />
   <!-- Use ConcJUnit if use-concjunit is not defined and we are not running Java 7. -->
   <!-- ConcJUnit is currently incompatible with Java 7. -->
+  <!-- ConcJunit is causing problems with unit testing on Mac OS x platforms; defeating it here
   <if>
     <contains string="${java.version}" substring="1.7"/>
     <then>
@@ -80,7 +82,8 @@
       <property name="use-concjunit" value="true" />
     </else>
   </if>
-  
+  -->
+  <property name="use-concjunit" value="false" />
   <!-- ************
        Help Targets
        ************ -->
@@ -148,16 +151,10 @@
     <echo message="       'stderr', 'file', 'assert', 'popup', 'tree', or 'void'" />
     <echo message="       (equivalent to setting the property 'plt.error.log'; default: " />
     <echo message="       popup)" />
-    <echo message="benchmark-count: Number of revisions to test during benchmarking"/>
-    <echo message="                 (default: 5)" />
-    <echo message="benchmark-skip: Number of 'PREV' updates to perform between benchmark" />
-    <echo message="                runs (default: 1)" />
     <echo message="drjava.test.config: Location of the DrJava configuration file to use" />
     <echo message="                    in tests (default: testFiles/drjava.basic.config)" />
     <echo message="use-concjunit: Set to true to test ConcJUnit instead of JUnit." />
   </target>
-  
-  
   
   <!-- ************
        Build Target
@@ -165,13 +162,11 @@
   
   <target name="build" depends="clean, test, jar" description="Shortcut for 'clean', 'test', and 'jar'">
   </target>
-  
-
 
   <!-- *************************
        Source-generating Targets
        ************************* -->
-       
+
   <property name="code-status-source" value="${src-working-dir}/CodeStatus.orig" />
   <property name="code-status-target" value="${src-working-dir}/CodeStatus.java" />
   <property name="version-source" value="${src-working-dir}/Version.orig" />
@@ -204,7 +199,7 @@
        Compilation Targets
        ******************* -->
        
-  <!-- The following target assumes that javac resolves a Java 8 compiler -->
+  <!-- The following target assumes that javac resolves to a Java 8 compiler -->
   <target name="compile" depends="generate-source, do-compile, copy-resources, unjar-libs"
           description="Compile all source files (after generating the source)">
   </target>
@@ -220,8 +215,8 @@
     <move todir="classes/base">
       <fileset dir="classes/test" includes="**/*" />
     </move>
-    
-    <javac srcdir="src" destdir="classes/base" source="1.6" target="1.6"
+    <echo message="jrelibs=${jrelibs}" />    
+    <javac srcdir="src" destdir="classes/base" source="1.7" target="1.7"
            bootclasspath="${java8-runtime}" sourcepath="" includeAntRuntime="no"
            executable="${java8-home}/bin/javac" fork="yes" memoryMaximumSize="1024M"
            debug="on" optimize="off" deprecation="on" >
@@ -367,9 +362,9 @@
     </antcall>
   </target>
 
-  
   <target name="iterate-tests" depends="resolve-test-formatter-class">
     <!-- Calls do-test, unless that is overridden by the caller -->
+    <echo message="Executing iterate-tests" />
     <property name="do-test-target" value="do-test" />
     <condition property="test-iteration-message">
       <not>
@@ -454,7 +449,8 @@
   
   <target name="do-test" depends="resolve-jvm-args, resolve-junit-jar">
     <echo message="Running all tests matching '${test-filter-string}' with command '${test-jvm}', using '${junit-jar}' and '${test-tools}'" />
-    <extendclasspath path="${junit-jar}" />
+<!--    <extendclasspath path="${junit-jar}" /> -->
+    <jacoco:coverage xmlns:jacoco="antlib:org.jacoco.ant">
     <junit haltonfailure="${test-halt}" failureproperty="test-failed"
            fork="yes" forkmode="perTest" maxmemory="2G" jvm="${test-jvm}" dir="${basedir}">
       <classpath>
@@ -476,14 +472,37 @@
       </syspropertyset>
       <jvmarg line="${jvm-args} ${concjunit-bootclasspath}" />
       <formatter classname="${test-formatter-class}" usefile="${test-output-to-file}" />
-      <batchtest>
+      <batchtest fork="true">
         <fileset dir="classes/test">
-          <filename name="**/*${test-filter-string}*/**" />
+          <filename name="**/*${test-filter-string}*/**" />  
           <filename name="**/*Test.class" />
         </fileset>
       </batchtest>
     </junit>
+    </jacoco:coverage>
     <fail if="test-failed" message="One or more unit tests failed."/>
+    <antcall target="generate-cover" />
+  </target>
+
+  <target name = "generate-cover" xmlns:jacoco="antlib:org.jacoco.ant">
+  <jacoco:report>
+                        
+    <executiondata>
+        <file file="${coverage-exec}"/>
+    </executiondata>
+                        
+    <structure name="drjava">
+        <classfiles>
+            <fileset dir="classes/base"/>
+        </classfiles>
+        <sourcefiles encoding="UTF-8">
+            <fileset dir="src"/>
+        </sourcefiles>
+    </structure>
+                        
+    <html destdir="${coverage-report-dir}"/>
+                        
+  </jacoco:report>
   </target>
 
 
@@ -568,7 +587,7 @@
       <fileset dir="classes/lib" excludes="about.html"/>
       <fileset dir="classes/base" />
       <!-- Include the specified version of JUnit and rename it to junit.jar -->
-      <zipfileset dir="." includes="${junit-jar-to-include}" fullpath="junit.jar" />
+<!--     <zipfileset dir="." includes="${junit-jar-to-include}" fullpath="junit.jar" /> -->
       <zipfileset dir="." includes="${md5-temp-name}"
 		  fullpath="${md5-properties-path}" />
     </jar>
@@ -615,6 +634,7 @@
         <pathelement location="lib/buildlib/junit.jar" />
         <pathelement location="lib/buildlib/netbeans-memory-leak-utils.jar" />
       </classpath>
+
       <link href="http://docs.oracle.com/javase/8/docs/api/"/>
       <link href="http://junit.org/junit/javadoc/3.8.1" />
       <link href="http://drjava.org/javadoc/plt" />
@@ -653,69 +673,12 @@
     </findbugs>
     <delete file="findbugs-excludes.xml" />
   </target>
-
-
-  <target name="benchmark" depends="benchmark-current, benchmark-report"
-          description="Generate a test performance report">
-  </target>
-  
-  <target name="benchmark-current">
-    <echo message="*****************************************" />
-    <echo message="Running benchmark tests on the local copy" />
-    <echo message="*****************************************" />
-    <mkdir dir="benchmarkResults/local" />
-    <trycatch>
-      <try>
-        <antcall target="compile" />
-        <antcall target="iterate-tests">
-          <param name="test-jvm" value="java" />
-          <param name="test-formatter" value="xml" />
-        </antcall>
-      </try>
-      <catch /> <!-- Continue despite any test failures -->
-    </trycatch>
-    <move todir="benchmarkResults/local" file="testResults" failonerror="no" />
-  </target>
-
-  
-  
-  <target name="do-test-previous">
-    <trycatch>
-      <try>
-        <ant dir="benchmarkSources">
-          <!-- compile in case it doesn't happen automatically -->
-          <target name="compile" />
-          <target name="test" />
-          <!-- Iteration is managed here, so don't do it there -->
-          <property name="test-spec" value="${test-filter-string}" />
-          <property name="test-repeat" value="1" />
-        </ant>
-      </try>
-      <finally>
-        <move todir="${basedir}">
-          <fileset dir="benchmarkSources">
-            <include name="TEST*" />
-            <include name="testResults/**/TEST*" />
-          </fileset>
-        </move>
-      </finally>
-    </trycatch>
-  </target>
-  
-  <target name="benchmark-report">
-    <mkdir dir="docs/benchmark" />
-    <!-- TODO - implement this.  Report should be generated in docs/benchmark. -->
-    <echo message="Report generation not yet implemented" />
-    <!-- <delete dir="benchmarkResults" /> -->
-  </target>
-
   
   <!-- *************
        Clean Targets
        ************* -->
        
-  <target name="clean" depends="clean-intermediate, clean-products, clean-concjunit"
-          description="Remove all build products; the result should match the intended Subversion contents">
+  <target name="clean" depends="clean-intermediate, clean-coverage-report, clean-products, clean-concjunit" description="Remove all build products; the result should match the intended Subversion contents">
   </target>
 
   <target name="clean-intermediate" unless="skip-clean">
@@ -746,7 +709,14 @@
     </delete>
     
   </target>
-  
+
+  <target name="clean-coverage-report" unless="skip-clean">
+    <echo message="Deleting all coverage report products" />
+
+	<delete dir="${coverage-report-dir}" failonerror="${clean-can-fail}" />
+    <delete file="${coverage-exec}"/>
+  </target>
+
   <target name="clean-products" unless="skip-clean">
     <echo message="Deleting all final build products" />
     
@@ -1272,3 +1242,4 @@
   </target>
 
 </project>
+

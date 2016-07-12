@@ -75,6 +75,7 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
   }
 
   /** Tests that the history doesn't overwrite files without prompting.
+   * @throws IOException if an IO operation fails 
    */
   public void testSaveAsExistsForOverwrite() throws IOException {
     _history.add("some text");

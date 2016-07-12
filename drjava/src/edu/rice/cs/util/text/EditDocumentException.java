@@ -43,23 +43,25 @@ public class EditDocumentException extends RuntimeException {
   private Throwable _value;
 
    /** Constructs an exception with
-   * <code>value.toString()</code> as it's message.
-   */
+    * <code>value.toString()</code> as it's message.
+    * @param value Throwable from whcih to create the exception
+    */
   public EditDocumentException(Throwable value) {
     super(value.toString());
     _value = value;
   }
 
    /** Constructs an exception with a custom message string in
-   * addition to <code>value.toString()</code>.
-   */
+    * addition to <code>value.toString()</code>.
+    * @param value Throwable from which to create the exception
+    * @param msg message
+    */
   public EditDocumentException(Throwable value, String msg) {
     super(msg + ": " + value);
     _value = value;
   }
 
-  /** Returns the contained exception.
-   */
+  /** @return the contained exception.  */
   public Throwable getContainedThrowable() {
     return _value;
   }

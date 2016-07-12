@@ -43,8 +43,7 @@ import edu.rice.cs.util.*;
 
 import java.io.*;
 
-/**
- * Tests for the variables and language constructs that can be used in external processes.
+/** * Tests for the variables and language constructs that can be used in external processes.
  * @author Mathias Ricken
  */
 public class DrJavaPropertySetupTest extends MultiThreadedTestCase {

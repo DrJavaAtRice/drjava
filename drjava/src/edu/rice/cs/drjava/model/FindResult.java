@@ -66,15 +66,15 @@ public class FindResult {
     return "FindResult(" + _document + ", " + _foundoffset + ", " + _wrapped + ", " + _allWrapped + ")";
   }
   
-  /** Returns the document where the found instance is located */
+  /** @return the document where the found instance is located */
   public OpenDefinitionsDocument getDocument() { return _document; }
   
-  /** Returns the offset of the instance found */ 
+  /** @return the offset of the instance found */ 
   public int getFoundOffset() { return _foundoffset; }
   
-  /** Returns true if the search wrapped to the beginning (or end) of the document */
+  /** @return true if the search wrapped to the beginning (or end) of the document */
   public boolean getWrapped() { return _wrapped; }
   
-  /** Returns true if the search wrapped to the start document. */
+  /** @return true if the search wrapped to the start document. */
   public boolean getAllWrapped() { return _allWrapped; }
 }

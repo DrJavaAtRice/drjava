@@ -75,11 +75,15 @@ import org.objectweb.asm.*;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
+import edu.rice.cs.drjava.model.coverage.CoverageMetadata;
+
 /** Manages unit testing via JUnit.
   * @version $Id$
   */
 public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
-  
+
+  private CoverageMetadata coverageMetadata = new CoverageMetadata(false, "");
+
   /** log for use in debugging */
   private static Log _log = new Log("DefaultJUnitModel.txt", false);
   
@@ -129,11 +133,24 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   
   //-------------------------- Field Setters --------------------------------//
   
+  public void setCoverage(boolean coverage, String outdirPath) { 
+      this.coverageMetadata = new CoverageMetadata(coverage, outdirPath); 
+  }
+
   public void setForceTestSuffix(boolean b) { _forceTestSuffix = b; }
   
   //------------------------ Simple Predicates ------------------------------//
   
   public boolean isTestInProgress() { return _testInProgress;  }
+  public JUnitResultTuple getLastResult() { 
+    return new JUnitResultTuple(false, null);
+    // @rebecca TODO: why does this result in not finding any test classes?
+    //return this._jvm.getLastJUnitResult(); 
+  }
+
+  public boolean getCoverage() { 
+      return (this.coverageMetadata != null) ? this.coverageMetadata.getFlag() : false; 
+  }
   
   //------------------------Listener Management -----------------------------//
   
@@ -231,8 +248,12 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     debug.logEnd("junit(doc)");
   }
   
-  /** Ensures that all documents have been compiled since their last modification and then delegates the actual testing
-    * to _rawJUnitOpenTestDocs. */
+  /** Ensures that all documents have been compiled since their last 
+   * modification and then delegates the actual testing to 
+   * _rawJUnitOpenTestDocs. 
+   * @param lod list of open documents
+   * @param allTests true if all tests are to be run
+   */
   private void junitOpenDefDocs(final List<OpenDefinitionsDocument> lod, final boolean allTests) {
     // If a test is running, don't start another one.
 
@@ -240,7 +261,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     
     // Check_testInProgress flag
     if (_testInProgress) return;
-    
+
     // Reset the JUnitErrorModel, fixes bug #907211 "Test Failures Not Cleared Properly".
     _junitErrorModel = new JUnitErrorModel(new JUnitError[0], null, false);
 
@@ -294,12 +315,18 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     else _rawJUnitOpenDefDocs(lod, allTests);
   }
   
-  /** Runs all TestCases in the document list lod; assumes all documents have been compiled. It finds the TestCase 
-    * classes by searching the build directories for the documents.  Note: caller must respond to thrown exceptions 
-    * by invoking _junitUnitInterrupted (to run hourglassOff() and reset the unit testing UI).
-    */
+  /** Runs all TestCases in the document list lod; assumes all documents have 
+   * been compiled. It finds the TestCase classes by searching the build 
+   * directories for the documents.  Note: caller must respond to thrown 
+   * exceptions by invoking _junitUnitInterrupted (to run hourglassOff() and 
+   * reset the unit testing UI).
+   * @param lod list of open documents
+   * @param allTests true if all tests are to be run
+   */
   private void _rawJUnitOpenDefDocs(List<OpenDefinitionsDocument> lod, final boolean allTests) {
+
     File buildDir = _model.getBuildDirectory();
+
 //    Utilities.show("Running JUnit tests. Build directory is " + buildDir);
     
     /** Open java source files */
@@ -336,8 +363,8 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
           
           if (! classDirsAndRoots.containsKey(classFileDir)) {
             classDirsAndRoots.put(classFileDir, sourceDir);
-//          System.err.println("Adding " + classFileDir + " with source root " + sourceRoot + 
-//          " to list of class directories");
+//            System.err.println("Adding " + classFileDir + " with source root " + sourceRoot + 
+//            " to list of class directories");
           }
         }
         catch (InvalidPackageException e) { /* Skip the file, since it doesn't have a valid package */ }
@@ -349,8 +376,8 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     /** set of dirs potentially containing test classes */
     Set<File> classDirs = classDirsAndRoots.keySet();
     
-//    System.err.println("openDocFiles = " + openDocFiles);
-    
+    //System.err.println("openDocFiles = " + openDocFiles);
+
     /* Names of test classes. */
     final ArrayList<String> classNames = new ArrayList<String>();
     
@@ -368,23 +395,22 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
         if (listing != null) { // listFiles may return null if there's an IO error
           for (File entry : listing) { /* for each class file in the build directory */        
             
-//            System.err.println("Examining file " + entry);
+            //System.err.println("Examining file " + entry);
             
             /* ignore non-class files */
             String name = entry.getName();
             if (! name.endsWith(".class")) continue;
             
             /* Ignore class names that do not end in "Test" if FORCE_TEST_SUFFIX option is set */
+            String noExtName = "";
             if (_forceTestSuffix) {
-              String noExtName = name.substring(0, name.length() - 6);  // remove ".class" from name
+              noExtName = name.substring(0, name.length() - 6);  // remove ".class" from name
               int indexOfLastDot = noExtName.lastIndexOf('.');
               String simpleClassName = noExtName.substring(indexOfLastDot + 1);
-//            System.err.println("Simple class name is " + simpleClassName);  
+//              System.err.println("Simple class name is " + simpleClassName);  
               if (/*isProject &&*/ ! simpleClassName.endsWith("Test")) continue;
             }
-            
-//            System.err.println("Found test class: " + noExtName);
-            
+                       
             /* ignore entries that do not correspond to files?  Can this happen? */
             if (! entry.isFile()) continue;
             
@@ -414,6 +440,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
               
               /** The canonical pathname for the file (including the file name) */
               String javaSourceFileName = getCanonicalPath(rootDir) + File.separator + sourceName.value();
+ 
 //              System.err.println("Full java source fileName = " + javaSourceFileName);
               
               /* The index in fileName of the dot preceding the extension ".java", ".dj", ".dj0*, ".dj1", or ".dj2" */
@@ -449,6 +476,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
         }
       }
     }
+
     catch(Exception e) {
 //      new ScrollableDialog(null, "UnexceptedExceptionThrown", e.toString(), "").show();
       throw new UnexpectedException(e); // triggers _junitInterrupted which runs hourglassOff
@@ -468,12 +496,12 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
         // _debugger.getPendingRequestManager().classPrepared(e); (which presumably
         // deals with preparing the class) on the event thread using invokeLater.
         // This, however, doesn't get executed because the event thread is still blocking --> deadlock.
-        
         synchronized(_compilerModel.getCompilerLock()) {
           // synchronized over _compilerModel to ensure that compilation and junit testing are mutually exclusive.
           /** Set up junit test suite on slave JVM; get TestCase classes forming that suite */
-          List<String> tests = _jvm.findTestClasses(classNames, files).unwrap(null);
-//          System.err.println("tests = " + tests);
+          _log.log("Calling findTestClasses(" + classNames + ", " + files + " ... )");
+          List<String> tests = _jvm.findTestClasses(classNames, files, coverageMetadata).unwrap(null);
+
           if (tests == null || tests.isEmpty()) {
             nonTestCase(allTests, false);
             return;
@@ -481,20 +509,22 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
         }
         
         try {
-          // Utilities.show("Starting JUnit");
-          
           _notifyJUnitStarted(); 
-          boolean testsPresent = _jvm.runTestSuite();  // The false return value could be changed to an exception.
-          if (! testsPresent) throw new RemoteException("No unit test classes were passed to the slave JVM");
+          // The false return value could be changed to an exception.
+          boolean testsPresent = _jvm.runTestSuite();
+          if (!testsPresent) {
+              throw new RemoteException("No unit test classes were passed to the slave JVM");
+          }
         }
-        catch(RemoteException e) { // Unit testing aborted; cleanup; hourglassOff already called in junitStarted
+        catch (RemoteException e) { // Unit testing aborted; cleanup; hourglassOff already called in junitStarted
           _notifyJUnitEnded();  // balances junitStarted()
           _testInProgress = false;
         }
       }
+
     }).start();
-  }
-  
+ }
+   
 //-------------------------------- Helpers --------------------------------//
   
   /** Helper method to notify JUnitModel listeners that JUnit test suite execution has started. */
@@ -509,7 +539,11 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     EventQueue.invokeLater(new Runnable() { public void run() { _notifier.junitEnded(); } });
   }
   
-  /** Helper method to notify JUnitModel listeners that all open files must be compiled before JUnit is run. */
+  /** Helper method to notify JUnitModel listeners that all open files must be 
+   * compiled before JUnit is run. 
+   * @param testAfterCompile a CompilerListener
+   * @param outOfSync list of out-of-sync documents
+   */
   private void _notifyCompileBeforeJUnit(final CompilerListener testAfterCompile, 
                                          final List<OpenDefinitionsDocument> outOfSync) { 
     Utilities.invokeLater(new Runnable() { 
@@ -517,7 +551,11 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     });
   }
   
-  /** Helper method to notify JUnitModel listeners that JUnit aborted before any tests could be run. */
+  /** Helper method to notify JUnitModel listeners that JUnit aborted before 
+   * any tests could be run.
+   * @param testAll true if all tests are to be run
+   * @param didCompileFail true if compilation failed
+   */
   private void _notifyNonTestCase(final boolean testAll, final boolean didCompileFail) { 
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.nonTestCase(testAll, didCompileFail); } });
   }

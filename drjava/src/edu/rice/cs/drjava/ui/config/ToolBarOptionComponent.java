@@ -44,8 +44,7 @@ import edu.rice.cs.drjava.*;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.util.swing.SwingFrame;
 
-/**
- * The special option component for the toolbar text and toolbar icon options.
+/** * The special option component for the toolbar text and toolbar icon options.
  * Not a true OptionComponent, in that it actually represents and governs the
  * configuration of two BooleanOptions (i.e. those corresponding to TOOLBAR_TEXT_ENABLED
  * and TOOLBAR_ICONS_ENABLED) bypassing the the normal graphical representation
@@ -133,7 +132,11 @@ public class ToolBarOptionComponent extends OptionComponent<Boolean,JComponent> 
     setComponent(_buttonPanel);
   }
 
-  /** Constructor that allows for a tooltip description. */
+  /** Constructor that allows for a tooltip description. 
+   * @param title title
+   * @param parent the parent frame
+   * @param description tooltip text
+   */
   public ToolBarOptionComponent(String title, SwingFrame parent, String description) {
     this(title, parent);
     setDescription(description);
@@ -166,9 +169,10 @@ public class ToolBarOptionComponent extends OptionComponent<Boolean,JComponent> 
   }
 
   /** Selects the radio button corresponding to the specified configuration.
-    * @param textEnabled Whether toolbar text is enabled
-    * @param iconsEnabled Whether toolbar icons are enabled
-    */
+   * @param textEnabled Whether toolbar text is enabled
+   * @param iconsEnabled Whether toolbar icons are enabled
+   * @param isEnabled Whether the button is enabled
+   */
   private void _setSelected(boolean textEnabled, boolean iconsEnabled, boolean isEnabled) {
     if (! isEnabled) { _noneButton.setSelected(true); }
     else if (textEnabled && iconsEnabled) { _textAndIconsButton.setSelected(true); }

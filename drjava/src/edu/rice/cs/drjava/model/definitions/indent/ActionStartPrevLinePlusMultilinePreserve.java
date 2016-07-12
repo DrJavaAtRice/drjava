@@ -74,7 +74,6 @@ class ActionStartPrevLinePlusMultilinePreserve extends IndentRuleAction {
   /** Forwards the call to the enclosed ActionStartPrevLinePlusMultiline.  Only runs in event thread.
     * @param doc AbstractDJDocument containing the line to be indented.
     * @param reason The reason that the indentation is taking place
-    * @return this is always false, since we are updating the cursor location
     */
   public void indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
     try {

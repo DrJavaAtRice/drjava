@@ -38,8 +38,7 @@ package edu.rice.cs.drjava.config;
 
 import java.awt.Font;
 
-/**
- * Class defining all configuration entries of type Font
+/** * Class defining all configuration entries of type Font
  * @version $Id$
  */
 public class FontOption extends Option<Font> {

@@ -36,8 +36,7 @@
 
 package edu.rice.cs.drjava.ui.avail;
 
-/**
- * Convenience methods for starting and finishing tasks that use multiple
+/** * Convenience methods for starting and finishing tasks that use multiple
  * components.
  *
  * <i>No</i> methods on this class should be synchronized using traditional

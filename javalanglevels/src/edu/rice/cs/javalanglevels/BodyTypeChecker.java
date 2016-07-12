@@ -1062,7 +1062,7 @@ public class BodyTypeChecker extends SpecialTypeChecker {
                             
       errors = new LinkedList<Pair<String, JExpressionIF>>();
       symbolTable.clear();
-      _newSDs.clear();  // Refers to LanguageLevelConverter Why OH Why are we doing this??????
+      _newSDs.clear();  // Refers to LanguageLevelConverter.  Why are we doing this?
       
       loadSymbolTable();
 //      System.err.println("Boolean Type is " + symbolTable.get("java.lang.Boolean"));

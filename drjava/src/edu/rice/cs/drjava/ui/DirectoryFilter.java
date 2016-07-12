@@ -40,8 +40,7 @@ import java.io.File;
 import javax.swing.filechooser.FileFilter;
 
 
-/**
- * A file filter for selecting directories.
+/** * A file filter for selecting directories.
  * @version $Id$
  */
 public class DirectoryFilter extends FileFilter {

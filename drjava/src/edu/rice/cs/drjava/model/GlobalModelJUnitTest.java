@@ -191,7 +191,9 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
 //    */
 //  public static Test suite() { return  new TestSuite(GlobalModelJUnitTest.class); }
   
-  /** Tests that a JUnit file with no errors is reported to have no errors. */
+  /** Tests that a JUnit file with no errors is reported to have no errors. 
+   * @throws Exception if something goes wrong 
+   */
   public void testNoJUnitErrors_NOJOIN() throws Exception {
     _log.log("----testNoJUnitErrors-----");
 //    Utilities.show("Running testNoJUnitErrors");
@@ -220,7 +222,9 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     _log.log("testNoJUnitErrors completed");
   }
   
-  /** Tests that a JUnit file with an error is reported to have an error. */
+  /** Tests that a JUnit file with an error is reported to have an error. 
+   * @throws Exception if something goes wrong 
+   */
   public void testOneJUnitError_NOJOIN() throws Exception {
     _log.log("----testOneJUnitError-----");
 //    Utilities.show("Running testOneJUnitError");
@@ -243,7 +247,9 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     _log.log("testOneJUnitError completed");
   }
   
-  /** Tests that a JUnit file with an error is reported to have an error. */
+  /** Tests that a JUnit file with an error is reported to have an error. 
+   * @throws Exception if something goes wrong 
+   */
   public void testElspethOneJUnitError_NOJOIN() throws Exception {
     _log.log("----testElspethOneJUnitError-----");
 //    Utilities.show("Running testElspethOneJunitError");
@@ -267,7 +273,9 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     _log.log("testElspethOneJUnitError completed");
   }
   
-  /** Tests that a test class which throws a *real* Error (not an Exception) is handled correctly. */
+  /** Tests that a test class which throws a *real* Error (not an Exception) is handled correctly. 
+   * @throws Exception if something goes wrong 
+   */
   public void testRealError_NOJOIN() throws Exception {
     _log.log("----testRealError-----");
 //    Utilities.show("Running testRealError");
@@ -291,7 +299,9 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     _log.log("testRealError completed");
   }
   
-  /** Tests that the ui is notified to put up an error dialog if JUnit is run on a non-TestCase. */
+  /** Tests that the ui is notified to put up an error dialog if JUnit is run on a non-TestCase. 
+   * @throws Exception if something goes wrong 
+   */
   public void testNonTestCaseError_NOJOIN() throws Exception {
     _log.log("----testNonTestCaseError-----");
 //    Utilities.show("Running testNonTestCaseError");
@@ -324,7 +334,9 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     _log.log("testNonTestCaseError completed");
   }
   
-  /** Tests that the ui is notified to put up an error dialog if JUnit is run on a non-public TestCase. */
+  /** Tests that the ui is notified to put up an error dialog if JUnit is run on a non-public TestCase. 
+   * @throws Exception if something goes wrong 
+   */
   public void testResultOfNonPublicTestCase_NOJOIN() throws Exception {
     _log.log("----testResultOfNonPublicTestCase-----");
 //    Utilities.show("Running testResultOfNonPublicTestCase");
@@ -381,7 +393,9 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
 //    _log.log("testDoNotRunJUnitIfFileHasBeenMoved completed");
 //  }
   
-  /** Tests a document that has no corresponding class file. */
+  /** Tests a document that has no corresponding class file. 
+   * @throws Exception if something goes wrong 
+   */
   public void testNoClassFile() throws Exception {
     _log.log("----testNoClassFile-----");
 //    Utilities.show("Running testNoClassFile");
@@ -413,7 +427,9 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   
   // Commented out because MultiThreadedTestCase objects to the RemoteException thrown by auxiliary unit testing thread
   // after resetInteractions kills the slave JVM.
-  /** Tests that an infinite loop in a test case can be aborted by clicking the Reset button. */
+  /** Tests that an infinite loop in a test case can be aborted by clicking the Reset button. 
+   * @throws Exception if something goes wrong 
+   */
   public void testInfiniteLoop_NOJOIN() throws Exception {
     _log.log("----testInfiniteLoop-----");
 //    Utilities.show("Running testInfiniteLoop");
@@ -469,8 +485,9 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   }
   
   /** Tests that when a JUnit file with no errors, after being saved and compiled,
-    * has it's contents replaced by a test that should fail, will pass all tests.
-    */
+   * has it's contents replaced by a test that should fail, will pass all tests.
+   * @throws Exception if something goes wrong 
+   */
   public void testUnsavedAndUnCompiledChanges() throws Exception {
     _log.log("-----testUnsavedAndUnCompiledChanges-----");
     
@@ -538,7 +555,9 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     _log.log("testUnsavedAndUnCompiledChanges completed");
   }
   
-  /** Verifies that we get a nonTestCase event and that opening a single test file enables testing. */
+  /** Verifies that we get a nonTestCase event and that opening a single test file enables testing. 
+   * @throws Exception if something goes wrong 
+   */
   public void safeJUnitAllWithNoValidTests() throws Exception {
     
     _log.log("-----testJUnitAllWithNoValidTests-----");
@@ -581,7 +600,9 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     _log.log("testJUnitAllWithNoValidTests completed");
   }
   
-  /** Tests that junit all works with one or two test cases that should pass. */
+  /** Tests that junit all works with one or two test cases that should pass. 
+   * @throws Exception if something goes wrong 
+   */
   public void safeJUnitAllWithNoErrors() throws Exception {
 //    _log.log("Starting testJUnitAllWithNoErrors");
     
@@ -635,7 +656,9 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     _log.log("testJUnitAllWithNoErrors completed");
   }
   
-  /** Tests that junit all works with test cases that do not pass. */
+  /** Tests that junit all works with test cases that do not pass. 
+   * @throws Exception if something goes wrong 
+   */
   public void safeJUnitAllWithErrors() throws Exception {
     
     _log.log("-----testJUnitAllWithErrors-----");
@@ -671,7 +694,9 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     _log.log("testJUnitAllWithErrors completed");
   } 
   
-  /** Tests that junit all works with one or two test cases that should pass. */
+  /** Tests that junit all works with one or two test cases that should pass. 
+   * @throws Exception if something goes wrong 
+   */
   public void safeJUnitStaticInnerClass() throws Exception {
     _log.log("-----testJUnitAllWithStaticInnerClass-----");
     
@@ -734,8 +759,9 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   }
   
   /** Tests that when a JUnit file with no errors is compiled and then modified to contain
-    * an error does not pass unit testing (by running correct class files).
-    */
+   * an error does not pass unit testing (by running correct class files).
+   * @throws Exception if something goes wrong 
+   */
   public void testCorrectFilesAfterIncorrectChanges_NOJOIN() throws Exception {
     _log.log("----testCorrectFilesAfterIncorrectChanges-----");
     
@@ -787,7 +813,9 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   }
   
   
-  /* Tests if a JUnit4 style unit test works. */
+  /** Tests if a JUnit4 style unit test works. 
+   * @throws Exception if something goes wrong 
+   */
   public void testJUnit4StyleTestWorks_NOJOIN() throws Exception {
     
     _log.log("----testJUnit4StyleTestWorks-----");
@@ -818,7 +846,9 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     _log.log("testJUnit4StyleTestWorks completed");
   }
   
-  /** Tests to see if a JUnit4 style test with multiple test cases passes. */
+  /** Tests to see if a JUnit4 style test with multiple test cases passes. 
+   * @throws Exception if something goes wrong 
+   */
   public void testJUnit4MultiTest_NOJOIN() throws Exception {
     
     _log.log("----testJUnit4MultiTest-----");
@@ -850,7 +880,9 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   }
   
   
-  /** Tests to see if a JUnit4 style test with no test cases will not run. */
+  /** Tests to see if a JUnit4 style test with no test cases will not run. 
+   * @throws Exception if something goes wrong 
+   */
   public void testJUnit4NoTest_NOJOIN() throws Exception {
     _log.log("----testJUnit4NoTest-----");
     
@@ -883,7 +915,9 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     _log.log("testJUnit4NoTest completed");
   }
   
-  /** Tests to see if a JUnit4 style test with a test method and multiple nonTest methods will run. */
+  /** Tests to see if a JUnit4 style test with a test method and multiple nonTest methods will run. 
+   * @throws Exception if something goes wrong 
+   */
   public void testJUnit4TwoMethod1Test_NOJOIN() throws Exception {
     
     _log.log("----testJUnit4TwoMethod1Test-----");

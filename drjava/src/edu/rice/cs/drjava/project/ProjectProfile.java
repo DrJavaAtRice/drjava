@@ -56,7 +56,7 @@ import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.drjava.Version;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.drjava.model.FileRegion;
+import edu.rice.cs.drjava.model.IRegion;
 import edu.rice.cs.drjava.model.debug.DebugBreakpointData;
 import edu.rice.cs.drjava.model.debug.DebugWatchData;
 import edu.rice.cs.util.XMLConfig;
@@ -102,7 +102,7 @@ public class ProjectProfile implements ProjectFileIR {
   
   private volatile HashMap<OptionParser<?>,String> _storedPreferences = new HashMap<OptionParser<?>,String>();
   
-  private volatile List<FileRegion> _bookmarks = new ArrayList<FileRegion>();
+  private volatile List<IRegion> _bookmarks = new ArrayList<IRegion>();
   private volatile List<DebugBreakpointData> _breakpoints = new ArrayList<DebugBreakpointData>();
   private volatile List<DebugWatchData> _watches = new ArrayList<DebugWatchData>();
   
@@ -112,14 +112,19 @@ public class ProjectProfile implements ProjectFileIR {
   
   private volatile static Log LOG = new Log("ProjectProfile.txt", false);
   
-  /** Constructs a File for fileName and forwards this call to the main constructor. */
+  /** Constructs a File for fileName and forwards this call to the main constructor. 
+   * @param fileName path to the project file
+   * @throws IOException parent directory of project file does not exist.
+   */
   public ProjectProfile(String fileName) throws IOException { this(new File(fileName)); }
   
-  /** Creates new ProjectProfiles with specifed project file name and project root that is parent folder of
-    * the project file.  The project file presumably may not exist yet, but its parent folder is assumed to exist.
-    * Assumes that the File f is not a null reference.
-    * @throws IOException parent directory of project file does not exist.
-    */
+  /** Creates new ProjectProfiles with specifed project file name and project 
+   * root that is parent folder of the project file.  The project file 
+   * presumably may not exist yet, but its parent folder is assumed to exist.
+   * Assumes that the File f is not a null reference.
+   * @param f the project file
+   * @throws IOException parent directory of project file does not exist.
+   */
   public ProjectProfile(File f) throws IOException { 
     _projectFile = f; 
     _projectRoot = _projectFile.getParentFile();
@@ -194,7 +199,7 @@ public class ProjectProfile implements ProjectFileIR {
   public int getCreateJarFlags() { return _createJarFlags; }
   
   /** @return an array of the bookmarks in this project. */
-  public FileRegion[] getBookmarks() { return _bookmarks.toArray(new FileRegion[_bookmarks.size()]); }
+  public IRegion[] getBookmarks() { return _bookmarks.toArray(new IRegion[_bookmarks.size()]); }
   
   /** @return an array of the breakpoints in this project. */
   public DebugBreakpointData[] getBreakpoints() { return _breakpoints.toArray(new DebugBreakpointData[_breakpoints.size()]); }
@@ -209,8 +214,7 @@ public class ProjectProfile implements ProjectFileIR {
     return new HashMap<OptionParser<?>,String>(_storedPreferences);
   }
   
-  /** Public setters, modifiers */
-  
+  /* Public setters, modifiers */
   public void addSourceFile(DocFile df) { _sourceFiles.add(df); }
   
   public void addSourceFile(DocumentInfoGetter getter) {
@@ -261,7 +265,9 @@ public class ProjectProfile implements ProjectFileIR {
   public void setAuxiliaryFiles(List<DocFile> af) { _auxiliaryFiles = new LinkedList<DocFile>(af); }
   public void setExcludedFiles(List<DocFile> ef) { _excludedFiles = new ArrayList<DocFile>(ef); }
   
-  /** Assumes that root.getParentFile != null */
+  /** Assumes that root.getParentFile != null 
+   * @param root the new project root to be set
+   */
   public void setProjectRoot(File root) { 
     _projectRoot = root; 
     assert root.getParentFile() != null;
@@ -270,7 +276,7 @@ public class ProjectProfile implements ProjectFileIR {
   public void setCreateJarFile(File createJarFile) { _createJarFile = createJarFile; }
   public void setCreateJarFlags(int createJarFlags) { _createJarFlags = createJarFlags; }
   
-  public void setBookmarks(List<? extends FileRegion> bms) { _bookmarks = new ArrayList<FileRegion>(bms); }
+  public void setBookmarks(List<? extends IRegion> bms) { _bookmarks = new ArrayList<IRegion>(bms); }
   public void setBreakpoints(List<? extends DebugBreakpointData> bps) { _breakpoints = new ArrayList<DebugBreakpointData>(bps); }
   public void setWatches(List<? extends DebugWatchData> ws) { _watches = new ArrayList<DebugWatchData>(ws); }
   
@@ -281,7 +287,9 @@ public class ProjectProfile implements ProjectFileIR {
     _storedPreferences.putAll(sp);
   }
   
-  /** Write project file in XML format. */
+  /** Write project file in XML format. 
+   * @throws IOException if an IO operation fails
+   */
   public void write() throws IOException {
     FileOutputStream fos = null;
     try {
@@ -463,7 +471,7 @@ public class ProjectProfile implements ProjectFileIR {
     }
     xc.createNode("drjava/project/bookmarks");
     if (!_bookmarks.isEmpty()) {
-      for (FileRegion bm: _bookmarks) {
+      for (IRegion bm: _bookmarks) {
         Node n = xc.createNode("drjava/project/bookmarks/bookmark", null, false);
         File file = bm.getFile();
         path = FileOps.stringMakeRelativeTo(file, _projectRoot);
@@ -484,7 +492,10 @@ public class ProjectProfile implements ProjectFileIR {
     xc.save(os);
   }
   
-  /** This method writes what information has been passed to this builder so far to disk in s-expression format. */
+  /** This method writes what information has been passed to this builder so 
+   * far to disk in s-expression format. 
+   * @throws IOException if an IO operation fails
+   */
   public void writeOld() throws IOException {
     FileWriter fw = null;
     try {
@@ -634,7 +645,7 @@ public class ProjectProfile implements ProjectFileIR {
     // write bookmarks
     if (!_bookmarks.isEmpty()) {
       fw.write("\n(bookmarks");
-      for(FileRegion bm: _bookmarks) { fw.write("\n" + encodeBookmarkRelative(bm, "  ")); }
+      for(IRegion bm: _bookmarks) { fw.write("\n" + encodeBookmarkRelative(bm, "  ")); }
       fw.write(")"); // close the bookmarks expression
     }
     else fw.write("\n;; no bookmarks");
@@ -646,7 +657,8 @@ public class ProjectProfile implements ProjectFileIR {
   /* Private Methods */
   
   /** @param g The getter that can get all the info needed to make the document file
-   *  @return the document that contains the information retrieved from the getter
+   * @return the document that contains the information retrieved from the getter
+   * @throws IOException if an IO operation fails
    */
   private DocFile docFileFromGetter(DocumentInfoGetter g) throws IOException {    
       return new DocFile(g.getFile().getCanonicalPath(), g.getSelection(), g.getScroll(), g.isActive(), g.getPackage());
@@ -654,10 +666,11 @@ public class ProjectProfile implements ProjectFileIR {
   
   
   /** This encodes a normal file relative to File base.  None of the special tags are added.
-   *  @param f the file to encode
-   *  @param prefix the indent level to place the s-expression at
-   *  @param base Directory to be made relative to
-   *  @return the s-expression syntax to describe the given file.
+   * @param f the file to encode
+   * @param prefix the indent level to place the s-expression at
+   * @param base Directory to be made relative to
+   * @return the s-expression syntax to describe the given file.
+   * @throws IOException if an IO operation fails
    */
   private String encodeFileRelative(File f, String prefix, File base) throws IOException {
     String path = FileOps.stringMakeRelativeTo(f, base);
@@ -672,9 +685,10 @@ public class ProjectProfile implements ProjectFileIR {
 //  }
     
   /** This encodes a normal file with its canonical path.  None of the special tags are added.
-   *  @param f the file to encode
-   *  @param prefix the indent level to place the s-expression at
-   *  @return the s-expression syntax to describe the given file.
+   * @param f the file to encode
+   * @param prefix the indent level to place the s-expression at
+   * @return the s-expression syntax to describe the given file.
+   * @throws IOException if an IO operation fails
    */
   private String encodeFileAbsolute(File f, String prefix) throws IOException {
     String path = f.getCanonicalPath();
@@ -683,10 +697,11 @@ public class ProjectProfile implements ProjectFileIR {
   }
   
   /** This encodes a docfile, adding all the special tags that store document-specific information.
-   *  @param df the doc file to encode
-   *  @param prefix the indent level to place the s-expression at
-   *  @param relative whether this file should be made relative to _projectRoot
-   *  @return the s-expression syntax to describe the given docfile.
+   * @param df the doc file to encode
+   * @param prefix the indent level to place the s-expression at
+   * @param relative whether this file should be made relative to _projectRoot
+   * @return the s-expression syntax to describe the given docfile.
+   * @throws IOException if an IO operation fails
    */
   private String encodeDocFile(DocFile df, String prefix, boolean relative) throws IOException {
     String ret = "";
@@ -728,8 +743,10 @@ public class ProjectProfile implements ProjectFileIR {
     return ret;
   }
   /** Encodes a doc file relative to _projectRoot.
-   *  @param df the DocFile to encode
-   *  @param prefix the indent level
+   * @param df the DocFile to encode
+   * @param prefix the indent level
+   * @return the encoded document
+   * @throws IOException if an IO operation fails
    */
   private String encodeDocFileRelative(DocFile df, String prefix) throws IOException {
     return encodeDocFile(df, prefix, true);
@@ -739,9 +756,10 @@ public class ProjectProfile implements ProjectFileIR {
   }
   
   /** This encodes a breakpoint relative to _projectRoot.
-   *  @param bp the breakpoint to encode
-   *  @param prefix the indent level to place the s-expression at
-   *  @return the s-expression syntax to describe the given breakpoint.
+   * @param bp the breakpoint to encode
+   * @param prefix the indent level to place the s-expression at
+   * @return the s-expression syntax to describe the given breakpoint.
+   * @throws IOException if an IO operation fails
    */
   private String encodeBreakpointRelative(DebugBreakpointData bp, String prefix) throws IOException {
     String ret = "";
@@ -760,9 +778,10 @@ public class ProjectProfile implements ProjectFileIR {
   }
  
   /** This encodes a watch.
-   *  @param w the watch to encode
-   *  @param prefix the indent level to place the s-expression at
-   *  @return the s-expression syntax to describe the given watch.
+   * @param w the watch to encode
+   * @param prefix the indent level to place the s-expression at
+   * @return the s-expression syntax to describe the given watch.
+   * @throws IOException if an IO operation fails
    */
   private String encodeWatch(DebugWatchData w, String prefix) throws IOException {
     String ret = "";
@@ -773,11 +792,12 @@ public class ProjectProfile implements ProjectFileIR {
   }
 
   /** This encodes a bookmark relative to _projectRoot.
-   *  @param bm the bookmark to encode
-   *  @param prefix the indent level to place the s-expression at
-   *  @return the s-expression syntax to describe the given breakpoint.
+   * @param bm the bookmark to encode
+   * @param prefix the indent level to place the s-expression at
+   * @return the s-expression syntax to describe the given breakpoint.
+   * @throws IOException if an IO operation fails
    */
-  private String encodeBookmarkRelative(FileRegion bm, String prefix) throws IOException {
+  private String encodeBookmarkRelative(IRegion bm, String prefix) throws IOException {
     String ret = "";
     String path = FileOps.stringMakeRelativeTo(bm.getFile(), _projectRoot);
     

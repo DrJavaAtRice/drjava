@@ -83,7 +83,9 @@ public class NewVersionPopup extends JDialog {
   private String _newestVersionString = "";
   /** indeterminate progress bar */
   
-  /** Creates a window to display whether a new version of DrJava is available. */
+  /** Creates a window to display whether a new version of DrJava is available. 
+   * @param parent reference to the main frame
+   */
   public NewVersionPopup(MainFrame parent) {
     super(parent, "Check for New Version of DrJava");
     setResizable(false);
@@ -433,7 +435,7 @@ public class NewVersionPopup extends JDialog {
     }).start();
   }
   
-  /** Return the automatic download URL. */
+  /** @return the automatic download URL. */
   protected String getAutomaticDownloadURL() {
     if (_newestVersionString.indexOf("weekly") > 0) {
       return "http://www.cs.rice.edu/~javaplt/drjavarice/weekly/files/";
@@ -443,7 +445,7 @@ public class NewVersionPopup extends JDialog {
     }
   }
   
-  /** Return the manual download URL. */
+  /** @return the manual download URL. */
   protected String getManualDownloadURL() {
     if (_newestVersionString.indexOf("weekly") > 0) {
       return "http://www.cs.rice.edu/~javaplt/drjavarice/weekly/";
@@ -482,13 +484,15 @@ public class NewVersionPopup extends JDialog {
     return DRJAVA_FILES_PAGE;
   }
   
-  /** Opens the specified page. */
+  /** Opens the specified page. 
+   * @param url page to open
+   */
   private void _openFileDownloadPage(String url) {
     try { PlatformFactory.ONLY.openURL(new URL(url)); }
     catch(Exception ex) { /* ignore */ }
   }
   
-  /** Returns true if there is a new version available that matches the users criterion. */
+  /** @return true if there is a new version available that matches the users criterion. */
   public boolean checkNewVersion() {
     Box<Boolean> availableRef = new SimpleBox<Boolean>(false);
     getMessage(availableRef);
@@ -606,7 +610,9 @@ public class NewVersionPopup extends JDialog {
     catch(MalformedURLException e) { return false; }
   }
   
-  /** Returns the build time for the URL, or null if it could not be read. */
+  /** @param url the URL for which to get the build time 
+   * @return the build time for the URL, or null if it could not be read. 
+   */
   public static Date getBuildTime(URL url) {
     return getBuildTime(url, null);
   }

@@ -61,6 +61,7 @@ public final class DependenciesTest extends DrJavaTestCase {
    * left here as an example of what could be done with other modules
    * (although it might be worth discussing whether this is really the right way
    * to test that the right support libs are present).
+   * @throws Throwable if something goes wrong
    */
   public void testUtilVersion() throws Throwable {
     /*Date required = new SimpleDateFormat("yyyyMMdd-HHmm z").parse(REQUIRED_UTIL_VERSION + " GMT");

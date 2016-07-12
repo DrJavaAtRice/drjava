@@ -101,9 +101,10 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
   }
   
   /** Asserts that the results of interpreting the first of each
-    * Pair is equal to the second.
-    * @param cases an array of Pairs
-    */
+   * Pair is equal to the second.
+   * @param cases an array of Pairs
+   * @throws InterpreterException if something goes wrong during interpretation
+   */
   private void tester(Pair<String,Object>[] cases) throws InterpreterException {
     for (int i = 0; i < cases.length; i++) {
       Object out = interpretDirectly(cases[i].first());
@@ -122,7 +123,12 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
     return "compiler=" + _model.getCompilerModel().getActiveCompiler().getName() + ": ";
   }
 
-  /** Tests that we get the correct 'cannot access its superinterface' error for non-public classes. */
+  /** Tests that we get the correct 'cannot access its superinterface' error for non-public classes. 
+   * @throws BadLocationException if attempts to reference an invalid location
+   * @throws IOException if an IO operation fails
+   * @throws InterruptedException if execution if interrupted unexpectedly
+   * @throws InterpreterException if something goes wrong during interpretation
+   */
   public void testInterpretExtendNonPublic()
     throws BadLocationException, IOException, InterruptedException, InterpreterException {
     _log.log("testInterpretExtendNonPublic started");
@@ -155,7 +161,12 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
     }
   }
   
-  /** Tests that we don't get an error for public classes. */
+  /** Tests that we don't get an error for public classes.
+   * @throws BadLocationException if attempts to reference an invalid location
+   * @throws IOException if an IO operation fails
+   * @throws InterruptedException if execution if interrupted unexpectedly
+   * @throws InterpreterException if something goes wrong during interpretation
+   */
   public void testInterpretExtendPublic()
     throws BadLocationException, IOException, InterruptedException, InterpreterException {
     _log.log("testInterpretExtendPublic started");
@@ -182,7 +193,12 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
     _interpreter.interpret("UnaryFun f = new UnaryFun() { Object apply(Object arg) { return (Integer)arg * (Integer)arg; }}");
   }
   
-  /** Tests that we get the correct 'cannot access its superinterface' error for non-public classes. */
+  /** Tests that we get the correct 'cannot access its superinterface' error for non-public classes.
+   * @throws BadLocationException if attempts to reference an invalid location
+   * @throws IOException if an IO operation fails
+   * @throws InterruptedException if execution if interrupted unexpectedly
+   * @throws InterpreterException if something goes wrong during interpretation
+   */
   public void testInterpretExtendNonPublicClass()
     throws BadLocationException, IOException, InterruptedException, InterpreterException {
     _log.log("testInterpretExtendNonPublic started");
@@ -215,7 +231,12 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
     }
   }
   
-  /** Tests that we don't get an error for public classes. */
+  /** Tests that we don't get an error for public classes.
+   * @throws BadLocationException if attempts to reference an invalid location
+   * @throws IOException if an IO operation fails
+   * @throws InterruptedException if execution if interrupted unexpectedly
+   * @throws InterpreterException if something goes wrong during interpretation
+   */
   public void testInterpretExtendPublicClass()
     throws BadLocationException, IOException, InterruptedException, InterpreterException {
     _log.log("testInterpretExtendPublic started");
@@ -242,7 +263,12 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
     _interpreter.interpret("UnaryFun f = new UnaryFun() { public Object apply(Object arg) { return (Integer)arg * (Integer)arg; }}");
   }
   
-  /** Test that we get the right package using getPackage(). */
+  /** Test that we get the right package using getPackage().
+   * @throws BadLocationException if attempts to reference an invalid location
+   * @throws IOException if an IO operation fails
+   * @throws InterruptedException if execution if interrupted unexpectedly
+   * @throws InterpreterException if something goes wrong during interpretation
+   */
   public void testInterpretGetPackageClass()
     throws BadLocationException, IOException, InterruptedException, InterpreterException {
     _log.log("testInterpretGetPackageClass started");
@@ -274,7 +300,12 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
     assertEquals("Package of foo.Bar should be foo", "foo", out);
   }
   
-  /** Test that we get the right package using getPackage() with anonymous inner classes defined in the Interactions Pane. */
+  /** Test that we get the right package using getPackage() with anonymous inner classes defined in the Interactions Pane.
+   * @throws BadLocationException if attempts to reference an invalid location
+   * @throws IOException if an IO operation fails
+   * @throws InterruptedException if execution if interrupted unexpectedly
+   * @throws InterpreterException if something goes wrong during interpretation
+   */
   public void testInterpretGetPackageAnonymous()
     throws BadLocationException, IOException, InterruptedException, InterpreterException {
     _log.log("testInterpretGetPackageAnonymous started");

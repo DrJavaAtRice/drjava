@@ -36,8 +36,7 @@
 
 package edu.rice.cs.util.sexp;
 
-/**
- * Just your every-day visitor.  It works on the 
+/** * Just your every-day visitor.  It works on the 
  * three types of Atoms as well as the two types
  * of lists, as the code suggests.<br>
  * The return types are parameterized.

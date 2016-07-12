@@ -44,8 +44,7 @@ import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
 import edu.rice.cs.util.DirectorySelector;
 
-/**
- * Model interface for Javadoc integration features.
+/** * Model interface for Javadoc integration features.
  * Note: Implementors should have a constructor taking an IGetDocuments.
  * @version $Id$
  */
@@ -55,7 +54,7 @@ public interface JavadocModel {
    */
   public static final String SUGGESTED_DIR_NAME = "doc";
   
-  /** {@code true} iff the classes to run javadoc are available */
+  /** @return {@code true} iff the classes to run javadoc are available */
   public boolean isAvailable();
   
   /** Add a JavadocListener to the model.
@@ -72,7 +71,7 @@ public interface JavadocModel {
   /** Removes all JavadocListeners from this model. */
   public void removeAllListeners();
   
-  /** Accessor for the Javadoc error model. */
+  /** @return the Javadoc error model. */
   public CompilerErrorModel getJavadocErrorModel();
   
   /** Clears all current Javadoc errors. */

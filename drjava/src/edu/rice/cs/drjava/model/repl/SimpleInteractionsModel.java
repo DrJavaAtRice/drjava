@@ -147,16 +147,16 @@ public class SimpleInteractionsModel extends InteractionsModel {
     */
   public void addExtraClassPath(File path) { _classPathManager.addExtraCP(path); }
   
-  /** Sets whether or not the interpreter should enforce access to all members. */
+  /** @param enforce true if the interpreter should enforce access to all members. */
   public void setEnforceAllAccess(boolean enforce) { _interpreterOptions.setEnforceAllAccess(enforce); }
   
-  /** Sets whether or not the interpreter should enforce access to private members. */
+  /** @param enforce true if the interpreter should enforce access to private members. */
   public void setEnforcePrivateAccess(boolean enforce) { _interpreterOptions.setEnforcePrivateAccess(enforce); }
 
-  /** Require a semicolon at the end of statements. */
+  /** @param require true if the interpreter requires a semicolon at the end of statements. */
   public void setRequireSemicolon(boolean require) { _interpreterOptions.setRequireSemicolon(require); }
   
-  /** Require variable declarations to include an explicit type. */
+  /** @param require true if the interpreter requires variable declarations to include an explicit type. */
   public void setRequireVariableType(boolean require) { _interpreterOptions.setRequireVariableType(require); }
   
   /** Any extra action to perform (beyond notifying listeners) when the interpreter fails to reset.

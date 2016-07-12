@@ -45,8 +45,7 @@ import java.awt.image.BufferedImage;
 import java.awt.print.PageFormat;
 import java.awt.print.Printable;
 
-/**
- * Test functions of DrJavaBook
+/** * Test functions of DrJavaBook
  *
  */
 public final class DrJavaBookTest extends DrJavaTestCase {

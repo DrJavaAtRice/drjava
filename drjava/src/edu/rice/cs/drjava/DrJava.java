@@ -151,10 +151,10 @@ public class DrJava {
   /** Name of the resource bundle that controls whether options are editable or not. */
   public static final String RESOURCE_BUNDLE_NAME = "edu.rice.cs.drjava.config.options";
   
-  /** Returns the properties file used by the configuration object. */
+  /** @return the properties file used by the configuration object */
   public static File getPropertiesFile() { return _propertiesFile; }
   
-  /** Returns the configuration object with all customized and default values. */
+  /** @return the configuration object with all customized and default values. */
   public static synchronized FileConfiguration getConfig() {
     if (_config == null) {
       _config = _initConfig();  // read specified .djrava file into _config
@@ -165,7 +165,9 @@ public class DrJava {
   /** @return an array of the files that were passed on the command line. */
   public static synchronized String[] getFilesToOpen() { return _filesToOpen.toArray(new String[0]); }
   
-  /** Add a file to the list of files to open. */
+  /** Add a file to the list of files to open. 
+   * @param s name of the file to be added to the list of files to open
+   */
   public static synchronized void addFileToOpen(String s) {
     _filesToOpen.add(s);
     boolean isProjectFile =
@@ -391,8 +393,9 @@ public class DrJava {
   }
   
   /** Handles any command line arguments that have been specified.
-    * @return true if DrJava should load, false if not
-    */
+   * @param args command-line arguments
+   * @return true if DrJava should load, false if not
+   */
   static boolean handleCommandLineArgs(String[] args) {
     boolean heapSizeGiven = false;  // indicates whether args includes an argument of the form -Xmx<number>
     
@@ -493,16 +496,18 @@ public class DrJava {
     System.out.println("  -jll [ARGS]           invoke the Java Language Level converter, specify files in ARGS");
   }
   
-  /** Switches the config object to use a custom config file. Ensures that Java source files aren't 
-    * accidentally used.
-    */
+  /** Switches the config object to use a custom config file. Ensures that Java 
+   * source files aren't accidentally used.
+   * @param fileName path to the new properties file
+   */
   static void setPropertiesFile(String fileName) {
     if (!DrJavaFileUtils.isSourceFile(fileName))  _propertiesFile = new File(fileName);
   }
   
   /** Initializes the configuration object with the current notion of the properties file.
-    * @throws IllegalStateException if config has already been assigned
-    */
+   * @return the configuration object
+   * @throws IllegalStateException if config has already been assigned
+   */
   static FileConfiguration _initConfig() throws IllegalStateException {
 //// Make sure someone doesn't try to change the config object.
 //    if (_config != null) throw new IllegalStateException("Can only call initConfig once!");
@@ -591,7 +596,9 @@ public class DrJava {
     // Do not set _config or _propertiesFile to null because THEY ARE static
   }
 
-  /** Warn if this system is Linux with Compiz. */
+  /** Warn if this system is Linux with Compiz. 
+   * @return true if is Linux with Compiz; false otherwise
+   */
   public static boolean warnIfLinuxWithCompiz() {
     try {
       if (!System.getProperty("os.name").equals("Linux")) return false; // not Linux

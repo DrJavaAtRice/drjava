@@ -36,8 +36,7 @@
 
 package edu.rice.cs.drjava.model.debug;
 
-/**
- * Class for keeping track of the currently running threads.
+/** * Class for keeping track of the currently running threads.
  * @version $Id$
  */
 public abstract class DebugThreadData {
@@ -51,14 +50,12 @@ public abstract class DebugThreadData {
     _uniqueID = uniqueID;
   }
   
-  /** Returns the name of this thread.
-   */
+  /** @return the name of this thread. */
   public String getName() {
     return _name;
   }
   
-  /** Returns the status of this thread (at the time of this object's construction)
-   */
+  /** @return the status of this thread (at the time of this object's construction) */
   public String getStatus() {
     return _status;
   }

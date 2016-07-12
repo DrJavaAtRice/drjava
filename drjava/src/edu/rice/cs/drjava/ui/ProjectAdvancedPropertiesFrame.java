@@ -113,7 +113,11 @@ public class ProjectAdvancedPropertiesFrame extends SwingFrame {
   //  private JButton _saveSettingsButton;
   private JPanel _mainPanel;
   
-  /** Constructs project properties frame for a new project and displays it.  Assumes that a project is active. */
+  /** Constructs project properties frame for a new project and displays it.  
+   * Assumes that a project is active. 
+   * @param mf reference to the main frame
+   * @param parentFrame reference to the parent frame
+   */
   public ProjectAdvancedPropertiesFrame(MainFrame mf, SwingFrame parentFrame) {
     super("Advanced Project Properties");
 
