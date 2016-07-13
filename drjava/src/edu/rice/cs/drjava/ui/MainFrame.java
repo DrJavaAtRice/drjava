@@ -52,6 +52,8 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
@@ -230,6 +232,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private volatile JMenu _projectMenu;
   private volatile JMenu _languageLevelMenu;
   private volatile JMenu _helpMenu;
+  
+  private volatile ButtonGroup _languageLevelButtonGroup;
   
   private volatile JMenu _debugMenu;
   private volatile JMenuItem _debuggerEnabledMenuItem;
@@ -6653,6 +6657,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
 
   void _setUpMenuBar(JMenuBar menuBar, JMenu fileMenu, JMenu editMenu, JMenu toolsMenu, JMenu projectMenu, 
                      JMenu debugMenu, JMenu languageLevelMenu, JMenu helpMenu) {
+    _updateMenuBars();
     menuBar.add(fileMenu);
     menuBar.add(editMenu);
     menuBar.add(toolsMenu);
@@ -6891,13 +6896,24 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Update the MainFrame and _tabbedPanes menu bars, following any change to FONT_MENU (name, style, text) */
   private void _updateMenuBars() {
-    //    _menuBar.setFont(DrJava.getConfig().getSetting(FONT_MENU));  // does not work!  Why?
+    Font menuFont = DrJava.getConfig().getSetting(FONT_MENU);
+    //    _menuBar.setFont(menuFont);  // does not work!  Why?
     _updateMenus(_menuBar.getComponents());
     
-    _tabbedPane.setFont(DrJava.getConfig().getSetting(FONT_MENU));  // sets the font for tab titles
+    // Update ButtonGroup in LanguageLevels menu (which has RadioButton entries)
+    // Oracle has not extended Enumeration<T> to support the Iterable<T> trait; ugh
+    // So we convert it an ArrayList<T>
+    
+    if (_languageLevelButtonGroup != null) {  // _updateMenuBars is called during initialization
+      for (AbstractButton button: Collections.list(_languageLevelButtonGroup.getElements())) {
+        button.setFont(menuFont);
+      }
+    }
+    
+    _tabbedPane.setFont(menuFont);  // sets the font for tab titles
     
     // set font within FindResultsPanels in _tabbedPane
-    Font tabbedFont = DrJava.getConfig().getSetting(FONT_MENU);
+    Font tabbedFont = menuFont;
     int count = _tabbedPane.getTabCount();
     for (int i = 0; i < count; i++) {
       Component comp = _tabbedPane.getComponentAt(i);
@@ -6908,24 +6924,21 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Update the fonts in the specified menus. */ 
   private static void _updateMenus(Component[] menus) {
     final Font menuFont = DrJava.getConfig().getSetting(FONT_MENU);
-    try {
-      for (int i = 0; i < menus.length; i++) {
-        if (menus[i] instanceof JMenu) {  
-          JMenu m = (JMenu) menus[i];
-          m.setFont(menuFont);
-          Component[] menuItems = m.getComponents();
-          for (int j = 0; j < menuItems.length; j++) {
-            if (menuItems[j] instanceof JMenuItem) {
-              JMenuItem mj = (JMenuItem) menuItems[j];
-              mj.setFont(menuFont);
-            }
+    for (int i = 0; i < menus.length; i++) {
+      if (menus[i] instanceof JMenu) {  
+        JMenu m = (JMenu) menus[i];
+        m.setFont(menuFont);
+        Component[] menuItems = m.getComponents();
+        for (int j = 0; j < menuItems.length; j++) {
+          if (menuItems[j] instanceof JMenuItem) {
+            Component mj = (JMenuItem) menuItems[j];
+            mj.setFont(menuFont);
           }
         }
-//      else menus[i].getName().setFont(menuFont);
       }
     }
-    catch(Exception e) { Utilities.show(e + " thrown"); }
   }
+ 
   
   /** Creates and returns a tools menu.
    * @param mask the keystroke modifier to be used
@@ -7262,6 +7275,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     JMenu languageLevelMenu = _newJMenu("Language Level");
     PlatformFactory.ONLY.setMnemonic(languageLevelMenu,KeyEvent.VK_L);
     ButtonGroup group = new ButtonGroup();
+    _languageLevelButtonGroup = group;
     
     final Configuration config = DrJava.getConfig();
     int currentLanguageLevel = config.getSetting(LANGUAGE_LEVEL);
@@ -7697,6 +7711,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /* Only called from MainFrame constructor. */
   private void _setUpTabs() {
+    
+    _updateMenuBars();
     
     // Interactions
     _interactionsController.setPrevPaneAction(_switchToPreviousPaneAction);
