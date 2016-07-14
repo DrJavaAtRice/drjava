@@ -50,9 +50,9 @@ import edu.rice.cs.util.Log;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.Utilities;
 
-/** * Tests opening/creating files specified as command line arguments.
- * @version $Id$
- */
+/** Tests opening/creating files specified as command line arguments.
+  * @version $Id$
+  */
 public final class CommandLineTest extends DrJavaTestCase {
   /** File separator, i.e. '/' or '\\'. */
   private static final char FS = File.separatorChar;

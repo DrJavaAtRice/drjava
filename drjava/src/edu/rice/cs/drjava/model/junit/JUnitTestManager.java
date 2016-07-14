@@ -135,7 +135,7 @@ public class JUnitTestManager {
   public List<String> findTestClasses(final List<String> classNames, 
     final List<File> files, CoverageMetadata coverageMetadata) {
     
-    _log.log("findTestClasses(" + classNames + ", " + files + ") called");
+    _log.log("findTestClasses(" + classNames + ", " + files + ", " + coverageMetadata + ") called");
     boolean doCoverage = coverageMetadata.getFlag();
 
     // Set up the loader
@@ -154,7 +154,7 @@ public class JUnitTestManager {
 
         // The Instrumenter creates a modified version of our test target class
         // that contains additional probes for execution data recording:
-        for (int i = 0 ; i< files.size() ; i++) {
+        for (int i = 0 ; i < files.size() ; i++) {
 
             // Instrument the i-th file
             try {
@@ -174,7 +174,10 @@ public class JUnitTestManager {
 
         loader = new MemoryClassLoader();
         for (int i = 0; i < classNames.size(); i++) {
-            ((MemoryClassLoader)loader).addDefinition(classNames.get(i), instrumenteds.get(i));
+          String name = classNames.get(i);
+          byte[] code = instrumenteds.get(i);
+          _log.log("Loading class file for '" + name + "' consisting of " + code.length + " bytes");
+          ((MemoryClassLoader)loader).addDefinition(classNames.get(i), instrumenteds.get(i));
         }
 
         try {
@@ -184,9 +187,6 @@ public class JUnitTestManager {
         }
     }
 
-//    debug.logStart(new String[]{"classNames", "files"}, classNames, files);
-    _log.log("findTestClasses(" + classNames + ", " + files + ")");
-    
     if (_testClassNames != null && ! _testClassNames.isEmpty()) 
       throw new IllegalStateException("Test suite is still pending!");
     
@@ -200,6 +200,7 @@ public class JUnitTestManager {
       String cName = pair.first();
       try {
         Class<?> possibleTest = _testRunner.loadPossibleTest(cName); 
+        _log.log("Exploring possibleTest " + possibleTest);
         if (_isJUnitTest(possibleTest)) {
           _testClassNames.add(cName);
           _testFiles.add(pair.second());
@@ -336,11 +337,19 @@ public class JUnitTestManager {
     * @return true iff the given class is an instance of junit.framework.Test
     */
   private boolean _isJUnitTest(Class<?> c) {
-
-    boolean result = (Test.class.isAssignableFrom(c) && !Modifier.isAbstract(c.getModifiers()) && !Modifier.isInterface(c.getModifiers()) ||
-      (new JUnit4TestAdapter(c).getTests().size()>0)) && !new JUnit4TestAdapter(c).getTests().get(0).toString().contains("initializationError")
-      ; //had to add specific check for initializationError. Is there a better way of checking if a class contains a test?
-    debug.logValues(new String[]{"c", "isJUnitTest(c)"}, c, result);
+    boolean isAssignable = Test.class.isAssignableFrom(c);
+    boolean isAbstract = Modifier.isAbstract(c.getModifiers());
+    boolean isInterface = Modifier.isInterface(c.getModifiers());
+    JUnit4TestAdapter a = new JUnit4TestAdapter(c);                                            
+    boolean isJUnit4Test = (a.getTests().size() > 0) && ! a.getTests().get(0).toString().contains("initializationError");
+    //had to add specific check for initializationError. Is there a better way of checking if a class contains a test?
+    
+    _log.log("isAssignable = " + isAssignable + " isAbstract = " + isAbstract + " isInterface = " + isInterface + 
+             " isJUnit4Test = " + isJUnit4Test);
+                                                                                                                        
+    boolean result = (isAssignable && !isAbstract && !isInterface) || isJUnit4Test;
+      
+    _log.log("isJUnitTest(" + c + ") = " + result);
     return result;
   }
   
