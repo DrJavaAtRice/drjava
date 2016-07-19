@@ -48,7 +48,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
 
+import edu.rice.cs.drjava.model.coverage.*;
+import edu.rice.cs.drjava.model.compiler.LanguageLevelStackTraceMapper;
 import edu.rice.cs.util.Log;
+import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.lambda.Lambda;
@@ -61,8 +64,6 @@ import java.lang.reflect.Modifier;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 import static edu.rice.cs.plt.debug.DebugUtil.error;
 
-import edu.rice.cs.drjava.model.compiler.LanguageLevelStackTraceMapper;
-
 import org.jacoco.core.analysis.Analyzer;
 import org.jacoco.core.analysis.CoverageBuilder;
 import org.jacoco.core.analysis.IBundleCoverage;
@@ -72,7 +73,7 @@ import org.jacoco.core.instr.Instrumenter;
 import org.jacoco.core.runtime.IRuntime;
 import org.jacoco.core.runtime.LoggerRuntime;
 import org.jacoco.core.runtime.RuntimeData;
-import edu.rice.cs.drjava.model.coverage.*;
+
 
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
@@ -112,9 +113,9 @@ public class JUnitTestManager {
   private JUnitResultTuple lastResult = new JUnitResultTuple(false, null);
 
   /** Standard constructor 
-   * @param jmc a JUnitModelCallback
-   * @param loaderFactory factory to create class loaders
-   */
+    * @param jmc a JUnitModelCallback
+    * @param loaderFactory factory to create class loaders
+    */
   public JUnitTestManager(JUnitModelCallback jmc, Lambda<ClassLoader, ClassLoader> loaderFactory) {
     _jmc = jmc;
     _loaderFactory = loaderFactory;
@@ -172,7 +173,7 @@ public class JUnitTestManager {
             }
         }
 
-        loader = new MemoryClassLoader();
+        loader = new MemoryClassLoader(JUnitTestManager.class.getClassLoader());
         for (int i = 0; i < classNames.size(); i++) {
           String name = classNames.get(i);
           byte[] code = instrumenteds.get(i);
@@ -180,9 +181,11 @@ public class JUnitTestManager {
           ((MemoryClassLoader)loader).addDefinition(classNames.get(i), instrumenteds.get(i));
         }
 
+        _log.log("Instrumented class files defined in MemoryClassLoader");
         try {
             this.runtime.startup(myData);
         } catch (Exception e) {
+            _log.log("In code coverage startup, throwing wrapped exception " + e);
             throw new UnexpectedException(e);
         }
     }
@@ -190,6 +193,7 @@ public class JUnitTestManager {
     if (_testClassNames != null && ! _testClassNames.isEmpty()) 
       throw new IllegalStateException("Test suite is still pending!");
     
+    _log.log("Preparing to run test cases");
     _testRunner = makeRunner(loader);
     
     _testClassNames = new ArrayList<String>();
@@ -204,7 +208,9 @@ public class JUnitTestManager {
         if (_isJUnitTest(possibleTest)) {
           _testClassNames.add(cName);
           _testFiles.add(pair.second());
-          _suite.addTest(new JUnit4TestAdapter(possibleTest));
+          Test test = new JUnit4TestAdapter(possibleTest);
+          _suite.addTest(test); 
+          _log.log("Adding test " + test + " to test suite"); 
         }
       }
       catch (ClassNotFoundException e) { error.log(e); }
@@ -239,7 +245,7 @@ public class JUnitTestManager {
 //    Utilities.show("runTestSuite() in SlaveJVM called");
     
     try {
-//      System.err.println("Calling _testRunner.runSuite(...)");
+      _log.log("Calling _testRunner.runSuite(" + _suite + ")");
       TestResult result = _testRunner.runSuite(_suite);
       
       JUnitError[] errors = new JUnitError[result.errorCount() + result.failureCount()];
@@ -340,7 +346,8 @@ public class JUnitTestManager {
     boolean isAssignable = Test.class.isAssignableFrom(c);
     boolean isAbstract = Modifier.isAbstract(c.getModifiers());
     boolean isInterface = Modifier.isInterface(c.getModifiers());
-    JUnit4TestAdapter a = new JUnit4TestAdapter(c);                                            
+    JUnit4TestAdapter a = new JUnit4TestAdapter(c); 
+    _log.log("a.getTests() = " + a.getTests());
     boolean isJUnit4Test = (a.getTests().size() > 0) && ! a.getTests().get(0).toString().contains("initializationError");
     //had to add specific check for initializationError. Is there a better way of checking if a class contains a test?
     
@@ -494,10 +501,10 @@ public class JUnitTestManager {
   }
   
   /** Parses the line number out of the stack trace in the given class name. 
-   * @param sw stack trace
-   * @param classname class in which stack trace was generated
-   * @return the line number
-   */
+    * @param sw stack trace
+    * @param classname class in which stack trace was generated
+    * @return the line number
+    */
   private int _lineNumber(String sw, String classname) {
     // TODO: use stack trace elements to find line number
     int lineNum;
@@ -520,8 +527,8 @@ public class JUnitTestManager {
   }
   
   /** @param current template for the runner's class loader
-   * @return a fresh JUnitTestRunner with its own class loader instance. 
-   */
+    * @return a fresh JUnitTestRunner with its own class loader instance. 
+    */
   private JUnitTestRunner makeRunner(ClassLoader current) {
     return new JUnitTestRunner(_jmc, _loaderFactory.value(current));
   }

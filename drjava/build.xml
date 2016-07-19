@@ -66,9 +66,10 @@
 
   <fileset id="libs" dir="lib" includes="*.jar" /> <!-- Only include jars that are at the top level (not in buildlib) -->
   <fileset id="jrelibs" dir="${java.home}/lib" includes="*.jar" /> 
-  <echo message="jrelibs = ${jrelibs}" />
+  <echo message="libs = ${toString:libs}" />
+  <echo message="jrelibs = ${toString:jrelibs}" />
   <fileset id="extlibs" dir="${java.home}/lib/ext" includes="*.jar" /> 
-  <echo message="${extlibs}" />
+  <echo message="extlibs = ${toString:extlibs}" />
   <!-- Use ConcJUnit if use-concjunit is not defined and we are not running Java 7. -->
   <!-- ConcJUnit is currently incompatible with Java 7. -->
   <!-- ConcJunit is causing problems with unit testing on Mac OS x platforms; defeating it here
@@ -215,7 +216,7 @@
     <move todir="classes/base">
       <fileset dir="classes/test" includes="**/*" />
     </move>
-    <echo message="jrelibs=${jrelibs}" />    
+    <echo message="jrelibs=${toString:jrelibs}" />    
     <javac srcdir="src" destdir="classes/base" source="1.7" target="1.7"
            bootclasspath="${java8-runtime}" sourcepath="" includeAntRuntime="no"
            executable="${java8-home}/bin/javac" fork="yes" memoryMaximumSize="1024M"
