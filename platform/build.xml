@@ -31,10 +31,10 @@
   <property name="error" value="stderr" />
   <property name="plt.error.log" value="${error}" />
   <property name="clean-can-fail" value="yes" /> 
-  
+  <property name="drjava-jar" value="${env.DRJAVA_JAR}" />  
+
   <!-- *** Environment properties that are not needed may be removed *** -->
   <property environment="env" />
-  <property name="drjava-jar" value="${env.DRJAVA_JAR}" />
   <property name="java5-home" value="${env.JAVA5_HOME}" />
   <property name="java6-home" value="${env.JAVA6_HOME}" />
   <property name="java7-home" value="${env.JAVA7_HOME}" />

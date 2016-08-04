@@ -29,7 +29,9 @@
   <property name="clean-can-fail" value="yes" /> 
   <property name="link-source" value="no" />
   
+  <!-- *** Environment properties that are not needed may be removed *** -->
   <property environment="env" />
+  <property name="drjava-jar" value="${env.DRJAVA_JAR}" />
   <property name="java8-home" value="${env.JAVA8_HOME}" />
   <property name="clover-jar" value="${env.CLOVER_JAR}" />
   <property name="findbugs-home" value="${env.FINDBUGS_HOME}" />
@@ -141,7 +143,7 @@
           description="Compile all source files">
   </target>
   
-  <target name="do-compile" depends="resolve-java8-runtime">
+  <target name="do-compile" depends="resolve-java8-runtime, assert-drjava-jar-exists">
   
     <echo message="Compiling src directory to classes/base and classes/test with command 'javac'" />
     
@@ -161,6 +163,7 @@
         <fileset refid="libs" />
         <pathelement location="lib/buildlib/junit.jar" />
         <pathelement location="classes/base" />
+        <pathelement location="${drjava-jar}" />
       </classpath>
       <compilerarg value="-Xlint" />
       <!-- Ignore serial warnings, because they occur for every Throwable definition (among others) -->
@@ -429,6 +432,7 @@
       <param name="clean-can-fail" value="no" />
     </antcall>
   </target>
+
 
   <target name="setup-clover" depends="assert-clover-jar-exists">
     <extendclasspath path="${clover-jar}" />
@@ -767,6 +771,11 @@
     <fail message="Can't find the java executable in the Java 8 home: ${java8-home}" unless="java8-exec" />
   </target>
   
+  <target name="assert-drjava-jar-exists">
+    <available property="drjava-jar-exists" file="${drjava-jar}" />
+    <fail message="${drjava-jar} does not exist" unless="drjava-jar-exists" />
+  </target>
+
   <target name="assert-jar-exists">
     <available property="jar-exists" file="${ant.project.name}.jar" />
     <fail message="Can't find ${ant.project.name}.jar" unless="jar-exists" />

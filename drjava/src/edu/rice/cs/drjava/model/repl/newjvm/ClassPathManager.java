@@ -44,9 +44,9 @@ import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.plt.reflect.PathClassLoader;
 
-/** * Maintains a dynamic class path, allowing entries to be incrementally added in the appropriate
- * place in the list.  This class is used in the interpreter JVM, and may be accessed concurrently.
- */
+/** Maintains a dynamic class path, allowing entries to be incrementally added in the appropriate
+  * place in the list.  This class is used in the interpreter JVM, and may be accessed concurrently.
+  */
 public class ClassPathManager implements Lambda<ClassLoader, ClassLoader> {
   
   // For thread safety, all accesses to these lists are synchronized on this, and when they are made available
@@ -160,7 +160,7 @@ public class ClassPathManager implements Lambda<ClassLoader, ClassLoader> {
     return new PathClassLoader(parent, _fullPath);
   }
   
-  /** Lambda value method */
+  /** Lambda value method.  In DrJava usage, parent is often null. */
   public ClassLoader value(ClassLoader parent) { return makeClassLoader(parent); }
   
   /** @return a dynamic view of the full class path. */

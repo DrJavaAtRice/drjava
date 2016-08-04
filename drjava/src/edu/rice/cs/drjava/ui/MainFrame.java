@@ -1124,21 +1124,21 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Show the coverage report dialogue */
   private volatile AbstractAction _coverageAction = new AbstractAction("Code Coverage") {
     {}// _addGUIAvailabilityListener(this,                                             // init
-                                 //GUIAvailabilityListener.ComponentType.INTERACTIONS);}
+    //GUIAvailabilityListener.ComponentType.INTERACTIONS);}
     public void actionPerformed(ActionEvent ae) {
       
-    if (!_model.hasOutOfSyncDocuments()) {  
-      showCoverageFrame();    
-    }
-    else {
-      
-      CompilerListener coverage = new DummyCompilerListener() {
-              @Override public void compileAborted(Exception e) {
+      if (!_model.hasOutOfSyncDocuments()) {  
+        showCoverageFrame();    
+      }
+      else {
+        
+        CompilerListener coverage = new DummyCompilerListener() {
+          @Override public void compileAborted(Exception e) {
             // gets called if there are modified files and the user chooses NOT to save the files
             // see bug report 2582488: Hangs If Testing Modified File, But Choose "No" for Saving
             final CompilerListener listenerThis = this;
-             _model.getCompilerModel().removeListener(listenerThis); 
-            }
+            _model.getCompilerModel().removeListener(listenerThis); 
+          }
           
           @Override public void compileEnded(File workDir, List<? extends File> excludedFiles) {
             final CompilerListener listenerThis = this;
@@ -1156,14 +1156,14 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
               });
             }
           }
+          
+          
+        }; //end coverage listener
         
-    
-    }; //end coverage listener
-    
-    compileBeforeCodeCoverage(coverage);
-    
-    } //end else
-  }
+        compileBeforeCodeCoverage(coverage);
+        
+      } //end else
+    }
   };
 
   public void showCoverageFrame() {   
@@ -9927,8 +9927,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       assert EventQueue.isDispatchThread();
       
       final String message = 
-        "The class file for class " + e.getClassName() + " in source file " + e.getCanonicalPath() + 
-        " cannot be loaded.\n "
+        "The class file for class " + e.getClassName() + " in source file " + e.getCanonicalPath() + " cannot be loaded.\n "
         + "When DrJava tries to load it, the following error is generated:\n" +  e.getError();
       
       JOptionPane.showMessageDialog(MainFrame.this, message,

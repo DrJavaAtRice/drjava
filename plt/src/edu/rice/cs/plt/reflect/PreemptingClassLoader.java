@@ -40,23 +40,22 @@ import java.io.IOException;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.io.IOUtil;
 
-/**
- * <p>A class loader that claims a set of classes available in its parent as its own.  This allows classes 
- * that would otherwise be loaded by a grandparent or distant ancestor to be loaded in a context that 
- * gives them access to all classes available to the parent.  For example, if a library must be loaded 
- * with a {@link PathClassLoader}, while an adapter for that library is available on the static class
- * path (without any custom class loading), loading the adapter directly will lead to errors &mdash; the 
- * library will not be visible to it.  When loaded instead by this class loader, the adapter can see both the 
- * application classes and the library classes.</p>
- * 
- * <p>The implementation is somewhat limited: the only way to access a class definition in an arbitrary class 
- * loader without actually <em>defining</em> that class is to invoke {@link ClassLoader#getResource} with
- * the name of a {@code .class} file.  To work correctly, then, all preempted classes must be available 
- * as class files via {@code parent.getResource(classFileName)}.  Most class loaders (especially those 
- * that simply load class files from some repository) follow the convention that a class will be loaded 
- * only if a resource with the appropriate class file name exists.  But there is no guarantee that all 
- * class loaders (such as those that generate class definitions on the fly) will follow this convention.</p>  
- */
+/** <p>A class loader that claims a set of classes available in its parent as its own.  This allows classes 
+  * that would otherwise be loaded by a grandparent or distant ancestor to be loaded in a context that 
+  * gives them access to all classes available to the parent.  For example, if a library must be loaded 
+  * with a {@link PathClassLoader}, while an adapter for that library is available on the static class
+  * path (without any custom class loading), loading the adapter directly will lead to errors &mdash; the 
+  * library will not be visible to it.  When loaded instead by this class loader, the adapter can see both the 
+  * application classes and the library classes.</p>
+  * 
+  * <p>The implementation is somewhat limited: the only way to access a class definition in an arbitrary class 
+  * loader without actually <em>defining</em> that class is to invoke {@link ClassLoader#getResource} with
+  * the name of a {@code .class} file.  To work correctly, then, all preempted classes must be available 
+  * as class files via {@code parent.getResource(classFileName)}.  Most class loaders (especially those 
+  * that simply load class files from some repository) follow the convention that a class will be loaded 
+  * only if a resource with the appropriate class file name exists.  But there is no guarantee that all 
+  * class loaders (such as those that generate class definitions on the fly) will follow this convention.</p>  
+  */
 public class PreemptingClassLoader extends AbstractClassLoader {
   
   private Iterable<String> _prefixes;

@@ -39,20 +39,16 @@ package edu.rice.cs.drjava.model.coverage;
 import java.io.Serializable;
 
 public class CoverageMetadata implements Serializable {
-
-    private boolean doCoverage;
-    private String outputDirectory;
-
-    public CoverageMetadata(boolean doCoverage, String outputDirectory) {
-        this.doCoverage = doCoverage;
-        this.outputDirectory = outputDirectory;  
-    }
-
-    public boolean getFlag() {
-        return this.doCoverage;
-    }
-
-    public String getOutdirPath() {
-        return this.outputDirectory;
-    }
+  
+  private boolean doCoverage;
+  private String outputDirectory;
+  
+  public CoverageMetadata(boolean doCoverage, String outputDirectory) {
+    this.doCoverage = doCoverage;
+    this.outputDirectory = outputDirectory;  
+  }
+  
+  public boolean getFlag() { return this.doCoverage; }
+  
+  public String getOutdirPath() { return this.outputDirectory; }
 }

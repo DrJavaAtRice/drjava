@@ -59,6 +59,7 @@ import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.reflect.ShadowingClassLoader;
 
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
@@ -122,8 +123,24 @@ public class JUnitTestManager {
   }
 
   /** @return result of the last JUnit run */  
-  public JUnitResultTuple getLastResult() {
-    return this.lastResult;
+  public JUnitResultTuple getLastResult() { return this.lastResult; }
+  
+  /** Only called from findTestClasses which sets many fields of this. */
+  private ClassLoader makeCoverageLoader(ClassLoader parentLoader, final ArrayList<byte[]> instrumenteds) {
+    final ClassLoader pathLoader = _loaderFactory.value(parentLoader);
+    final ClassLoader shadowingLoader = ShadowingClassLoader.blackList(pathLoader, classNames);
+    final MemoryClassLoader memoryLoader = new MemoryClassLoader(shadowingLoader);
+    for (int i = 0; i < classNames.size(); i++) {
+      String name = classNames.get(i);
+      byte[] code = instrumenteds.get(i);
+      _log.log("Defining class file for '" + name + "' (" + code.length + " bytes) in MemoryClassLoader");
+      memoryLoader.addDefinition(classNames.get(i), instrumenteds.get(i));
+      _log.log("Adding definition of class file for " + name + " to MemoryClassLoader");
+    }
+    
+//    Need to construct Jacoco class loader with pathLoader as parent!  What is fully qualified name of that loader?
+//    ClassLoader memoryLoader = shadowingLoader;
+    return memoryLoader; 
   }
 
   /** Find the test classes among the given classNames and accumulate them in
@@ -133,19 +150,20 @@ public class JUnitTestManager {
     * @param coverageMetadata metadata to be used to generate the coverage report
     * @return list of test class names
     */
-  public List<String> findTestClasses(final List<String> classNames, 
-    final List<File> files, CoverageMetadata coverageMetadata) {
+  public List<String> findTestClasses(final List<String> classNames, final List<File> files, 
+                                      final CoverageMetadata coverageMetadata) {
     
     _log.log("findTestClasses(" + classNames + ", " + files + ", " + coverageMetadata + ") called");
     boolean doCoverage = coverageMetadata.getFlag();
 
     // Set up the loader
+    final ClassLoader defaultLoader = JUnitTestManager.class.getClassLoader();
+    final ClassLoader testingLoader = _loaderFactory.value(defaultLoader);
     final ClassLoader loader;
-    if (! doCoverage) {
-        loader = JUnitTestManager.class.getClassLoader();
-    } else {
+    if (! doCoverage) loader = testingLoader;
+    else {
 
-        // JaCoCo: Create instrumented versions of class files.
+        // JaCoCo: Create instrumented versions of class files and save
         this.coverageOutdir = coverageMetadata.getOutdirPath();
         this.runtime = new LoggerRuntime();
         this.myData = new RuntimeData();
@@ -153,40 +171,31 @@ public class JUnitTestManager {
         this.files = files;
         final ArrayList<byte[]> instrumenteds = new ArrayList<byte[]>();
 
-        // The Instrumenter creates a modified version of our test target class
-        // that contains additional probes for execution data recording:
+        /* The jacoco instrumenter creates a modified version of our test classes that invoke jacoco (as a Java agent) 
+         * to insert byte code to monitor code coverage. */
         for (int i = 0 ; i < files.size() ; i++) {
-
-            // Instrument the i-th file
-            try {
-                final Instrumenter instr = new Instrumenter(this.runtime);
-                final byte[] instrumented = instr.instrument(
-                    new FileInputStream(files.get(i).getCanonicalPath().
-                    replace(".java", ".class")), classNames.get(i));
-                String[] pathParts = files.get(i).getAbsolutePath().split("/");
-                instrumenteds.add(instrumented);
-
-            } catch (Exception e) {
-                StringWriter stackTrace = new StringWriter();
-                e.printStackTrace(new PrintWriter(stackTrace));
-                _log.log("Exception during instrumentation: " + stackTrace.toString());
-            }
+          // Instrument the i-th file
+          try {
+            final Instrumenter instr = new Instrumenter(this.runtime);
+            final byte[] instrumented = 
+              instr.instrument(new FileInputStream(files.get(i).getCanonicalPath().replace(".java", ".class")), 
+                               classNames.get(i));
+//                String[] pathParts = files.get(i).getAbsolutePath().split("/");
+            instrumenteds.add(instrumented);  
+          } catch (Exception e) {
+            StringWriter stackTrace = new StringWriter();
+            e.printStackTrace(new PrintWriter(stackTrace));
+            _log.log("Exception during instrumentation: " + stackTrace.toString());
+          }
         }
-
-        loader = new MemoryClassLoader(JUnitTestManager.class.getClassLoader());
-        for (int i = 0; i < classNames.size(); i++) {
-          String name = classNames.get(i);
-          byte[] code = instrumenteds.get(i);
-          _log.log("Loading class file for '" + name + "' consisting of " + code.length + " bytes");
-          ((MemoryClassLoader)loader).addDefinition(classNames.get(i), instrumenteds.get(i));
-        }
-
-        _log.log("Instrumented class files defined in MemoryClassLoader");
-        try {
-            this.runtime.startup(myData);
-        } catch (Exception e) {
-            _log.log("In code coverage startup, throwing wrapped exception " + e);
-            throw new UnexpectedException(e);
+        
+        _log.log("Instrumented test class files for MemoryClassLoader");
+        
+        loader = makeCoverageLoader(testingLoader, instrumenteds);
+        try { this.runtime.startup(myData); }
+        catch (Exception e) {
+          _log.log("In code coverage startup, throwing the wrapped exception " + e);
+          throw new UnexpectedException(e);
         }
     }
 
@@ -200,6 +209,7 @@ public class JUnitTestManager {
     _testFiles = new ArrayList<File>();
     _suite = new TestSuite();
     
+    // Assemble test suite (as _suite) and return list of test class names
     for (Pair<String, File> pair : IterUtil.zip(classNames, files)) {
       String cName = pair.first();
       try {
@@ -335,31 +345,26 @@ public class JUnitTestManager {
     _testFiles = null;
     _log.log("test manager state reset");
   }
-  
-
     
   /** Determines if the given class is a junit Test.
     * @param c the class to check
     * @return true iff the given class is an instance of junit.framework.Test
     */
   private boolean _isJUnitTest(Class<?> c) {
-    boolean isAssignable = Test.class.isAssignableFrom(c);
+    _log.log("Testing class " + c + " to determine if it is a JUnit test class");
     boolean isAbstract = Modifier.isAbstract(c.getModifiers());
     boolean isInterface = Modifier.isInterface(c.getModifiers());
-    JUnit4TestAdapter a = new JUnit4TestAdapter(c); 
-    _log.log("a.getTests() = " + a.getTests());
-    boolean isJUnit4Test = (a.getTests().size() > 0) && ! a.getTests().get(0).toString().contains("initializationError");
-    //had to add specific check for initializationError. Is there a better way of checking if a class contains a test?
+    if (isAbstract || isInterface) return false;
     
-    _log.log("isAssignable = " + isAssignable + " isAbstract = " + isAbstract + " isInterface = " + isInterface + 
-             " isJUnit4Test = " + isJUnit4Test);
-                                                                                                                        
-    boolean result = (isAssignable && !isAbstract && !isInterface) || isJUnit4Test;
-      
-    _log.log("isJUnitTest(" + c + ") = " + result);
-    return result;
+    if (Test.class.isAssignableFrom(c)) return true; // JUnit 3 test class
+    
+    boolean result = false;
+    for (Method method : Test.class.getDeclaredMethods()) {
+      if (method.isAnnotationPresent(org.junit.Test.class)) return true;
+    }
+    return false;  
   }
-  
+                                                                                                                        
   /** Constructs a new JUnitError from a TestFailure
     * @param failure A given TestFailure
     * @param classNames The classes that were used for this test suite
