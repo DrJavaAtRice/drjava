@@ -48,8 +48,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
 
-import edu.rice.cs.drjava.model.coverage.*;
+import edu.rice.cs.drjava.model.coverage.CoverageMetadata;
+import edu.rice.cs.drjava.model.coverage.JacocoClassLoader;
+import edu.rice.cs.drjava.model.coverage.ReportGenerator;
+
 import edu.rice.cs.drjava.model.compiler.LanguageLevelStackTraceMapper;
+import edu.rice.cs.drjava.model.repl.newjvm.ClassPathManager;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.classloader.ClassFileError;
@@ -91,7 +95,7 @@ public class JUnitTestManager {
   private final JUnitModelCallback _jmc;
   
   /** A factory producing a ClassLoader for tests with the given parent */
-  private final Lambda<ClassLoader, ClassLoader> _loaderFactory;
+  private final ClassPathManager _loaderFactory;
   
   /** The current testRunner; initially null.  Each test suite requires a new runner. */
   private JUnitTestRunner _testRunner;
@@ -117,31 +121,13 @@ public class JUnitTestManager {
     * @param jmc a JUnitModelCallback
     * @param loaderFactory factory to create class loaders
     */
-  public JUnitTestManager(JUnitModelCallback jmc, Lambda<ClassLoader, ClassLoader> loaderFactory) {
+  public JUnitTestManager(JUnitModelCallback jmc, ClassPathManager loaderFactory) {
     _jmc = jmc;
     _loaderFactory = loaderFactory;
   }
 
   /** @return result of the last JUnit run */  
   public JUnitResultTuple getLastResult() { return this.lastResult; }
-  
-  /** Only called from findTestClasses which sets many fields of this. */
-  private ClassLoader makeCoverageLoader(ClassLoader parentLoader, final ArrayList<byte[]> instrumenteds) {
-    final ClassLoader pathLoader = _loaderFactory.value(parentLoader);
-    final ClassLoader shadowingLoader = ShadowingClassLoader.blackList(pathLoader, classNames);
-    final MemoryClassLoader memoryLoader = new MemoryClassLoader(shadowingLoader);
-    for (int i = 0; i < classNames.size(); i++) {
-      String name = classNames.get(i);
-      byte[] code = instrumenteds.get(i);
-      _log.log("Defining class file for '" + name + "' (" + code.length + " bytes) in MemoryClassLoader");
-      memoryLoader.addDefinition(classNames.get(i), instrumenteds.get(i));
-      _log.log("Adding definition of class file for " + name + " to MemoryClassLoader");
-    }
-    
-//    Need to construct Jacoco class loader with pathLoader as parent!  What is fully qualified name of that loader?
-//    ClassLoader memoryLoader = shadowingLoader;
-    return memoryLoader; 
-  }
 
   /** Find the test classes among the given classNames and accumulate them in
     * TestSuite for junit.  Returns null if a test suite is already pending.
@@ -158,45 +144,19 @@ public class JUnitTestManager {
 
     // Set up the loader
     final ClassLoader defaultLoader = JUnitTestManager.class.getClassLoader();
-    final ClassLoader testingLoader = _loaderFactory.value(defaultLoader);
     final ClassLoader loader;
-    if (! doCoverage) loader = testingLoader;
+    if (! doCoverage) loader = _loaderFactory.value(defaultLoader);
     else {
-
-        // JaCoCo: Create instrumented versions of class files and save
-        this.coverageOutdir = coverageMetadata.getOutdirPath();
-        this.runtime = new LoggerRuntime();
-        this.myData = new RuntimeData();
-        this.classNames = classNames;
-        this.files = files;
-        final ArrayList<byte[]> instrumenteds = new ArrayList<byte[]>();
-
-        /* The jacoco instrumenter creates a modified version of our test classes that invoke jacoco (as a Java agent) 
-         * to insert byte code to monitor code coverage. */
-        for (int i = 0 ; i < files.size() ; i++) {
-          // Instrument the i-th file
-          try {
-            final Instrumenter instr = new Instrumenter(this.runtime);
-            final byte[] instrumented = 
-              instr.instrument(new FileInputStream(files.get(i).getCanonicalPath().replace(".java", ".class")), 
-                               classNames.get(i));
-//                String[] pathParts = files.get(i).getAbsolutePath().split("/");
-            instrumenteds.add(instrumented);  
-          } catch (Exception e) {
-            StringWriter stackTrace = new StringWriter();
-            e.printStackTrace(new PrintWriter(stackTrace));
-            _log.log("Exception during instrumentation: " + stackTrace.toString());
-          }
-        }
-        
-        _log.log("Instrumented test class files for MemoryClassLoader");
-        
-        loader = makeCoverageLoader(testingLoader, instrumenteds);
-        try { this.runtime.startup(myData); }
-        catch (Exception e) {
-          _log.log("In code coverage startup, throwing the wrapped exception " + e);
-          throw new UnexpectedException(e);
-        }
+      // create a Jacoco runtime, output directory, report descriptors, and loader
+      this.coverageOutdir = coverageMetadata.getOutdirPath();
+      this.runtime = new LoggerRuntime();
+      this.myData = new RuntimeData();
+      loader = new JacocoClassLoader(_loaderFactory.getClassPath(), new Instrumenter(this.runtime), defaultLoader);
+      try { this.runtime.startup(myData); }
+      catch (Exception e) {
+        _log.log("In code coverage startup, throwing the wrapped exception " + e);
+        throw new UnexpectedException(e);
+      }
     }
 
     if (_testClassNames != null && ! _testClassNames.isEmpty()) 
@@ -534,7 +494,7 @@ public class JUnitTestManager {
   /** @param current template for the runner's class loader
     * @return a fresh JUnitTestRunner with its own class loader instance. 
     */
-  private JUnitTestRunner makeRunner(ClassLoader current) {
-    return new JUnitTestRunner(_jmc, _loaderFactory.value(current));
+  private JUnitTestRunner makeRunner(ClassLoader loader) {
+    return new JUnitTestRunner(_jmc, loader);
   }
 }

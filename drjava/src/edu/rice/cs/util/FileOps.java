@@ -459,7 +459,7 @@ public abstract class FileOps {
     }
     finally { if (reader != null) reader.close(); }
   }
-  
+    
   /** Copies the text of one file into another.
    * @param source the file to be copied
    * @param dest the file to be copied to
@@ -1329,5 +1329,9 @@ public abstract class FileOps {
       }
     }
     return found.getAbsoluteFile();
+  }
+  
+  public static String classNameToClassFilename(String className) {
+    return className.replace('.', '/') + ".class";
   }
 }
