@@ -893,7 +893,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     
     // add project source root to projectFilesClassPath.  All files in project tree have this root.
     
-    _interactionsModel.addProjectFilesClassPath(getProjectRoot());  // is sync advisable here?
+    _interactionsModel.addProjectFilesClassPath(getProjectRoot());
     setClassPathChanged(false);  // reset classPathChanged state
   } 
 }

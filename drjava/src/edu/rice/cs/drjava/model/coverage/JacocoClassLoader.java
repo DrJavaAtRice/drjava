@@ -66,11 +66,10 @@ import java.util.Arrays;
 
 import org.jacoco.core.instr.Instrumenter;
 
-/** A class loader that loads classes from in-memory data. The parent class loader must be a ShadowingClassLoader
-  * that fails to load classes for the class names in memory. */
+/** A class loader that instruments classes for code coverage.*/
 public class JacocoClassLoader extends ClassLoader {
   
-  private static final Log _log = new Log("JUnitTestManager.txt", true);
+  private static final Log _log = new Log("JUnitTestManager.txt", false);
   
   private final File[] _binaryDirectories; 
   private final Instrumenter _instrumenter; 
@@ -99,9 +98,12 @@ public class JacocoClassLoader extends ClassLoader {
       // first try to load from one of the binary directories and instrument the class
       File classFile = findBinaryFile(className);
       if (classFile != null) {
+        _log.log("Found the class file " + classFile + " for the class " + className);
         _log.log("Instrumenting and defining class: " + className); 
-        byte[] instrumentedBytes = _instrumenter.instrument(IOUtil.toByteArray(classFile), className); 
-        return defineClass(className, instrumentedBytes, 0, instrumentedBytes.length); 
+        final byte[] instrumentedBytes = _instrumenter.instrument(IOUtil.toByteArray(classFile), className); 
+        final Class<?> definedClass = defineClass(className, instrumentedBytes, 0, instrumentedBytes.length);
+        _log.log("Returning instrumented class " + className);
+        return definedClass;
       }  
       else { 
         // was not found, try to load with the parent, but it will not be instrumented 

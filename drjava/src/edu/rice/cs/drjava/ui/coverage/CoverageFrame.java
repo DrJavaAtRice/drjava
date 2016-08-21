@@ -168,7 +168,7 @@ public class CoverageFrame extends SwingFrame {
     public void displayReport(JUnitResultTuple result) {
 
         /* Only display the result if testing was successful */
-        //if (result.getRetval()) {
+        //if (result.getRetVal()) {
             if (_openHTMLBrowser.isSelected()) {
                 String indexURL = _outputDirSelector.getFileFromField().getPath()
                      + "/index.html";

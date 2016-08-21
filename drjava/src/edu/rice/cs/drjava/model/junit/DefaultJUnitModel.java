@@ -142,7 +142,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   //------------------------ Simple Predicates ------------------------------//
   
   public boolean isTestInProgress() { return _testInProgress;  }
-  public JUnitResultTuple getLastResult() { 
+  public JUnitResultTuple getFinalResult() { 
     return new JUnitResultTuple(false, null);
     // @rebecca TODO: why does this result in not finding any test classes?
     //return this._jvm.getLastJUnitResult(); 
@@ -628,7 +628,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
       List<File> files = new ArrayList<File>();
       for(OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()) { files.add(odd.getRawFile()); }
 //    Utilities.show("errors.length = " + errors.length + " files = " + files);
-      for(JUnitError e: errors){
+      for(JUnitError e: errors) {
         try {
           e.setStackTrace(_compilerModel.getLLSTM().replaceStackTrace(e.stackTrace(),files));
         } catch(Exception ex) { DrJavaErrorHandler.record(ex); }

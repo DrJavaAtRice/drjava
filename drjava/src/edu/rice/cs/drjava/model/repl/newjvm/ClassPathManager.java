@@ -94,10 +94,9 @@ public class ClassPathManager implements Lambda<ClassLoader, ClassLoader> {
     }
   };
   
-  /** Adds the entry to the front of the project classpath
-   * (this is the classpath specified in project properties)
-   * @param f the file to be added to the classpath
-   */
+  /** Adds the entry to the front of the project classpath (this is the classpath specified in project properties)
+    * @param f the file to be added to the classpath
+    */
   public synchronized void addProjectCP(File f) { _projectCP.addFirst(f); updateProperty(); }
   
   public synchronized Iterable<File> getProjectCP() { return IterUtil.snapshot(_projectCP); }
@@ -113,10 +112,9 @@ public class ClassPathManager implements Lambda<ClassLoader, ClassLoader> {
   
   public synchronized Iterable<File> getBuildDirectoryCP() { return IterUtil.snapshot(_buildCP); }
   
-  /** Adds the entry to the front of the project files classpath (this is the 
-   * classpath for all open project files). 
-   * @param f the file to be added to the classpath
-   */
+  /** Adds the entry to the front of the project files classpath (this is the classpath for all open project files). 
+    * @param f the file to be added to the classpath
+    */
   public synchronized void addProjectFilesCP(File f) {
     _projectFilesCP.remove(f); // eliminate duplicates
     _projectFilesCP.addFirst(f);

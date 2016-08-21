@@ -55,7 +55,7 @@ public interface JUnitModel {
     */
   public void setForceTestSuffix(boolean b);
 
-  public JUnitResultTuple getLastResult(); 
+  public JUnitResultTuple getFinalResult(); 
   public boolean getCoverage();
   
   //-------------------------- Listener Management --------------------------//

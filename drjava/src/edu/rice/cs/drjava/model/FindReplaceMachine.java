@@ -59,10 +59,8 @@ public class FindReplaceMachine {
   /* Visible machine state; manipulated directly or indirectly by FindReplacePanel. */
   private volatile OpenDefinitionsDocument _doc;      // Current search document 
   private volatile OpenDefinitionsDocument _firstDoc; // First document where searching started (when searching all documents)
-//  private Position _current;                 // Position of the cursor in _doc when machine is stopped
-  private volatile int _current;                 // Position of the cursor in _doc when machine is stopped
-  private MovingDocumentRegion _selectionRegion; // selected text region
-//  private Position _start;                   // Position in _doc from which searching started or will start.
+  private volatile int _current;                      // Position of the cursor in _doc when machine is stopped
+  private MovingDocumentRegion _selectionRegion;      // selected text region
   private volatile String _findWord;                  // Word to find. */
   private volatile String _replaceWord;               // Word to replace _findword.
   private volatile boolean _matchCase;
@@ -79,13 +77,11 @@ public class FindReplaceMachine {
   private volatile Component _frame;  
   
   /** Standard Constructor.
-   * Creates new machine to perform find/replace operations on a particular 
-   * document starting from a given position.
-   * @param model the model
-   * @param docIterator an object that allows navigation through open Swing 
-   *        documents (it is DefaultGlobalModel)
-   * @param frame the frame
-   */
+    * Creates new machine to perform find/replace operations on a particular document starting from a given position.
+    * @param model the model
+    * @param docIterator an object that allows navigation through open Swing documents (it is DefaultGlobalModel)
+    * @param frame the frame
+    */
   public FindReplaceMachine(SingleDisplayModel model, DocumentIterator docIterator, Component frame) {    
     _skipText = false;
 //    _checkAllDocsWrapped = false;
@@ -163,9 +159,7 @@ public class FindReplaceMachine {
   public void setPosition(int pos) { _current = pos; }
   
   /** @return the character offset to which this machine is currently pointing. */
-  public int getCurrentOffset() { //return _current.getOffset(); 
-    return _current;
-  }
+  public int getCurrentOffset() { return _current; }
   
   public String getFindWord() { return _findWord; }
   
@@ -229,9 +223,9 @@ public class FindReplaceMachine {
   }
   
   /** If we're on a match for the find word, replace it with the replace word. 
-   * Only executes in event thread. 
-   * @return true if we're on a match; false otherwise
-   */
+    * Only executes in event thread. 
+    * @return true if we're on a match; false otherwise
+    */
   public boolean replaceCurrent() {
     
     assert EventQueue.isDispatchThread();
@@ -271,14 +265,16 @@ public class FindReplaceMachine {
     */
   public int replaceAll() { return replaceAll(_searchAllDocuments, _searchSelectionOnly); }
   
-  /** Replaces all occurences of the find word with the replace word in the 
-   * current document of in all documents or in the current selection of the 
-   * current document depending the value of the flag searchAll
-   * @param searchAll true if we should search for occurrences in all documents
-   * @param searchSelectionOnly true if we should only search in the current selection of documents
-   * @return the number of replacements
-   */
+  /** Replaces all occurences of the find word with the replace word in the current document of in all documents or in 
+    * the current selection depending the value of the flag searchAll
+    * @param searchAll true if we should search for occurrences in all documents
+    * @param searchSelectionOnly true if we should only search in the current selection of documents
+    * @return the number of replacements
+    */
   private int replaceAll(boolean searchAll, boolean searchSelectionOnly) {
+    
+    assert EventQueue.isDispatchThread();
+
     if (searchAll) {
       int count = 0;           // the number of replacements done so far
       int n = _docIterator.getDocumentCount();
@@ -343,14 +339,16 @@ public class FindReplaceMachine {
     return count;
   }
   
-  /** Processes all occurences of the find word with the replace word in the 
-   * current document or in all documents depending the value of the machine 
-   * register _searchAllDocuments.
-   * @param findAction action to perform on the occurrences; input is the FindResult, output is ignored
-   * @param region the selection region
-   * @return the number of processed occurrences
-   */
-  public int processAll(Runnable1<FindResult> findAction, MovingDocumentRegion region) { 
+  /** Processes all occurences of the find word with the replace word in the current document or in all documents 
+    * depending the value of the machine register _searchAllDocuments.
+    * @param findAction action to perform on the occurrences; input is the FindResult, output is ignored
+    * @param region the selection region
+    * @return the number of processed occurrences
+    */
+  public int processAll(Runnable1<FindResult> findAction, MovingDocumentRegion region) {
+    
+    assert EventQueue.isDispatchThread();
+
     _selectionRegion = region;
     return processAll(findAction, _searchAllDocuments, _searchSelectionOnly); 
   }
@@ -405,6 +403,9 @@ public class FindReplaceMachine {
    * @return the number of replacements
    */
   private int _processAllInCurrentDoc(Runnable1<FindResult> findAction, boolean searchSelectionOnly) {
+    
+    assert EventQueue.isDispatchThread();
+
     if(!searchSelectionOnly) {
       _selectionRegion = new MovingDocumentRegion(_doc, 0, _doc.getLength(), _doc._getLineStartPos(0),
                                                   _doc._getLineEndPos(_doc.getLength()));
@@ -486,6 +487,9 @@ public class FindReplaceMachine {
    * @return the next match in the specified document
    */
   private FindResult _findNextInDoc(OpenDefinitionsDocument doc, int start, int len, boolean searchAll) {
+    
+    assert EventQueue.isDispatchThread();
+
     // search from current position to "end" of document ("end" is start if searching backward)
 //    Utilities.show("_findNextInDoc([" + doc.getText() + "], " + start + ", " + len + ", " + searchAll + ")");
 //    _log.log("_findNextInDoc([" + doc.getText() + "], " + start + ", " + len + ", " + searchAll + ")");
@@ -505,6 +509,8 @@ public class FindReplaceMachine {
     * @return the offset where the instance was found. Returns -1 if no instance was found between start and end
     */  
   private FindResult _findWrapped(OpenDefinitionsDocument doc, int start, int len, boolean allWrapped) {
+    
+    assert EventQueue.isDispatchThread();
     
     final int docLen = doc.getLength();
     if (docLen == 0) return new FindResult(doc, -1, true, allWrapped); // failure result
@@ -563,6 +569,9 @@ public class FindReplaceMachine {
                                            final boolean wrapped, final boolean allWrapped) {  
 //    Utilities.show("called _findNextInDocSegment(" + doc.getText() + ",\n" + start + ", " + len + ", " + wrapped +
 //      " ...)");
+    
+    assert EventQueue.isDispatchThread();
+
     boolean inTestCase = false;
     for(String ext: OptionConstants.LANGUAGE_LEVEL_EXTENSIONS) {
       inTestCase |= doc.getFileName().endsWith("Test"+ext);
@@ -659,6 +668,8 @@ public class FindReplaceMachine {
     */
   private FindResult _findNextInOtherDocs(final OpenDefinitionsDocument startDoc, int start, int len) {
     
+    assert EventQueue.isDispatchThread();
+
 //    System.err.println("_findNextInOtherDocs(" + startDoc.getText() + ", " + start + ", " + len + ")");
     
     boolean allWrapped = false;
@@ -700,7 +711,9 @@ public class FindReplaceMachine {
     * @param foundOffset - the position where that instance was found
     * @return true if the whole word is found at foundOffset, false otherwise
     */
-  private boolean wholeWordFoundAtCurrent(OpenDefinitionsDocument doc, int foundOffset) {    
+  private boolean wholeWordFoundAtCurrent(OpenDefinitionsDocument doc, int foundOffset) {
+    
+    assert EventQueue.isDispatchThread();
     
     char leftOfMatch = 0;   //  forced initialization
     char rightOfMatch = 0;  //  forced initialization

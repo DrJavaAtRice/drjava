@@ -1002,10 +1002,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         return prefWorkDir;
       }
       
-      // otherwise determine the working directory based on the source root
+      // otherwise determine the working directory based on the source root of current document
       File file = FileOps.NULL_FILE;
       try {
-        file = getActiveDocument().getSourceRoot(); // source root of the current document
+        file = getActiveDocument().getSourceRoot();
       }
       catch(InvalidPackageException ipe) { file = FileOps.NULL_FILE; }
       if ((file != null) && (file != FileOps.NULL_FILE)) {
@@ -3495,11 +3495,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       }
     }
     
-    /** Returns the class file for this source document by searching the source 
-     * roots of open documents, the system classpath, and the 
-     * "extra.classpath ".  Returns NULL_FILE if the class file could not be found.
-     * @return the class file for this source document
-     */
+    /** Returns the class file for this source document by searching the source roots of open documents, the system 
+      * classpath, and the "extra.classpath ".  Returns NULL_FILE if the class file could not be found.
+      * @return the class file for this source document
+      */
     private File _locateClassFile() {
       // TODO: define in terms of GlobalModel.getClassPath()
       

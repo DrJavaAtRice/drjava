@@ -9606,7 +9606,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         public void run() { 
           _junitPanel.reset();
           if (_model.getJUnitModel().getCoverage()) {
-            _coverageFrame.displayReport(_model.getJUnitModel().getLastResult());
+            _coverageFrame.displayReport(_model.getJUnitModel().getFinalResult());
           }
         }
       });

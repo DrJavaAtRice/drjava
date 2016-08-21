@@ -241,7 +241,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     * @param cancelIndex cancel index
     * @param items varargs/array of items
     */
-  @SafeVarargs
+  @SuppressWarnings({"unchecked", "varargs"}) // @SafeVarargs does not work here
   public PredictiveInputFrame(SwingFrame owner, String title, boolean force, boolean ignoreCase, InfoSupplier<? super T> info, 
                               List<PredictiveInputModel.MatchingStrategy<T>> strategies,
                               java.util.List<CloseAction<T>> actions, int cancelIndex, T... items) {
@@ -349,7 +349,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     * @param ignoreCase true if case should be ignored
     * @param items varargs/array of items
     */
-  @SafeVarargs
+  @SuppressWarnings({"unchecked", "varargs"})  // @SafeVarargs does not work here
   public final void setItems(boolean ignoreCase, T... items) {
 //    Utilities.show("matching items in PIM set to: " + items);
     _pim = new PredictiveInputModel<T>(ignoreCase, _currentStrategy, items);

@@ -75,7 +75,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
  */
 public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   
-  public static final Log _log  = new Log("GlobalModel.txt", false);
+  public static final Log _log = new Log("GlobalModelTest.txt", true);
 
   protected volatile DefaultGlobalModel _model;
   protected volatile InteractionsController _interactionsController;
@@ -673,6 +673,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     }
 
     public synchronized void resetCounts() {
+      _log.log("Restting all counts to 0 and boolean flags to false");
       fileNotFoundCount = 0;
       newCount = 0;
       openCount = 0;
@@ -1251,16 +1252,17 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     }
     
     public synchronized void logJUnitStart() { 
+      _log.log("JUnitStart called");
 //      logCompileStart();
       _junitDone = false; 
     }
     
     /** Runs JUnit on doc to completion. 
-     * @param doc the document on which to run JUnit
-     * @throws IOException if an IO operation fails
-     * @throws ClassNotFoundException if a class is not found
-     * @throws InterruptedException if execution is interrupted unexpectedly
-     */
+      * @param doc the document on which to run JUnit
+      * @throws IOException if an IO operation fails
+      * @throws ClassNotFoundException if a class is not found
+      * @throws InterruptedException if execution is interrupted unexpectedly
+      */
     public void runJUnit(OpenDefinitionsDocument doc) throws IOException, ClassNotFoundException, 
       InterruptedException {
       logJUnitStart();
@@ -1272,7 +1274,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     
     public void runJUnit(JUnitModel jm) throws IOException, ClassNotFoundException, InterruptedException {  
       logJUnitStart();
-//    System.err.println("Starting JUnit");
+//    _log.log("Starting JUnit");
       jm.junitAll();
       waitJUnitDone();
     }
@@ -1303,20 +1305,20 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     }
      
     @Override public void junitStarted() {
-      _log.log("listener.junitStarted");
+      _log.log("listener.junitStarted, incrementing count");
       synchronized(this) { junitStartCount++; }
     }
     @Override public void junitSuiteStarted(int numTests) {
-      _log.log("listener.junitSuiteStarted, numTests = " + numTests);
+      _log.log("listener.junitSuiteStarted, incrementing count, numTests = " + numTests);
       assertJUnitStartCount(1);
       synchronized(this) { junitSuiteStartedCount++; }
     }
     @Override public void junitTestStarted(String name) {
-      _log.log("  listener.junitTestStarted, " + name);
+      _log.log("  listener.junitTestStarted, incrementing count " + name);
       synchronized(this) { junitTestStartedCount++; }
     }
     @Override public void junitTestEnded(String name, boolean wasSuccessful, boolean causedError) {
-      _log.log("  listener.junitTestEnded, name = " + name + " succ = " + wasSuccessful + 
+      _log.log("  listener.junitTestEnded, incrementing count, name = " + name + " succ = " + wasSuccessful + 
                                             " err = " + causedError);
       synchronized(this) { junitTestEndedCount++; }
       assertEquals("junitTestEndedCount should be same as junitTestStartedCount", junitTestEndedCount, 
@@ -1325,7 +1327,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     @Override public void nonTestCase(boolean isTestAll, boolean didCompileFail) {
       _log.log("listener.nonTestCase, isTestAll=" + isTestAll);
       synchronized(this) { nonTestCaseCount++; }
-      _log.log("nonTestCase() called; notifying JUnitDone");
+      _log.log("nonTestCase() called, incrementing count, notifying JUnitDone");
       _notifyJUnitDone();
     }
     @Override public void classFileError(ClassFileError e) {

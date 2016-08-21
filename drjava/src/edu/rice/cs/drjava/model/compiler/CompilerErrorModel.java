@@ -184,6 +184,9 @@ public class CompilerErrorModel {
     Utilities.invokeLater(new Runnable() { public void run() { _calculatePositions(); } });
   }
   
+  /** Accessor for errors field; only used in testing and debugging. */
+  public DJError[] getErrors() { return _errors; }
+  
   /** Accessor for errors maintained here.
     * @param idx the index of the error to retrieve
     * @return the error at index idx

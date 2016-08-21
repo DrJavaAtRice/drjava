@@ -93,7 +93,7 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
     super();
 
     _classPathManager = new ClassPathManager(ReflectUtil.SYSTEM_CLASS_PATH);
-    _interpreterLoader = _classPathManager.makeClassLoader(null);
+    _interpreterLoader = _classPathManager.makeClassLoader(InterpreterJVM.class.getClassLoader());
     
     // _interpreterOptions = Options.DEFAULT;
     _interpreterOptions = new InteractionsPaneOptions();
