@@ -2,7 +2,7 @@ package edu.rice.cs.drjava.ui;
 
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -339,7 +339,7 @@ public class AutoCompletePopup {
     Iterator<Runnable3<AutoCompletePopupEntry,Integer,Integer>> actionIt =
       acceptedActions.iterator();
     Iterator<KeyStroke> ksIt = actionKeyStrokes.iterator();
-    for(int i=0; i<acceptedActions.size(); ++i) {
+    for(int i = 0; i<acceptedActions.size(); ++i) {
       final String name = nameIt.next();
       final Runnable3<AutoCompletePopupEntry,Integer,Integer> runnable = actionIt.next();
       final KeyStroke ks = ksIt.next();

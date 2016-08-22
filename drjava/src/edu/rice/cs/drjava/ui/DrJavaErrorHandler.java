@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -174,14 +174,14 @@ public class DrJavaErrorHandler implements Thread.UncaughtExceptionHandler {
 
     StackTraceElement[] tst = thrown.getStackTrace();
     
-    if (tst.length<stes.length+stesBottom.length) return false;
+    if (tst.length < stes.length+stesBottom.length) return false;
     
-    for(int i=0; i<stes.length; ++i) {
+    for(int i = 0; i < stes.length; ++i) {
       if (!stes[i].equals(tst[i])) return false;
     }
 
-    for(int i=0; i<stesBottom.length; ++i) {
-      if (!stesBottom[stesBottom.length-i-1].equals(tst[tst.length-i-1])) return false;
+    for(int i = 0; i < stesBottom.length; ++i) {
+      if (!stesBottom[stesBottom.length - i - 1].equals(tst[tst.length - i - 1])) return false;
     }
     
     return true;

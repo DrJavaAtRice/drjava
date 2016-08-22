@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -98,7 +98,7 @@ public class MD5ChecksumProperties extends Properties {
   public static String getMD5String(InputStream is, OutputStream os) throws IOException {
     byte[] messageDigest = getMD5(is,os);
     StringBuilder hexString = new StringBuilder();
-    for (int i=0;i<messageDigest.length;i++) {
+    for (int i = 0;i<messageDigest.length;i++) {
       String oneByte = "0"+Integer.toHexString(0xFF & messageDigest[i]);
       hexString.append(oneByte.substring(oneByte.length()-2,oneByte.length()));
     }

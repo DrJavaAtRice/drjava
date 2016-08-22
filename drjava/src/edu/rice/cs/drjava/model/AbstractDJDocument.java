@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -93,8 +93,8 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   /** A set of normal endings for lines. */
   protected static final HashSet<String> _normEndings = _makeNormEndings();
   /** A set of Java keywords. */
-  protected final HashSet<String> _keywords = new HashSet<String>
-    (edu.rice.cs.drjava.model.compiler.JavacCompiler.JAVA_KEYWORDS);
+  protected final HashSet<String> _keywords = 
+    new HashSet<String>(edu.rice.cs.drjava.model.compiler.JavacCompiler.JAVA_KEYWORDS);
   /** A set of Java primitive types. */
   protected static final HashSet<String> _primTypes = _makePrimTypes();
   /** The default indent setting. */
@@ -143,22 +143,18 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   /*-------- CONSTRUCTORS --------*/
   
   /** Constructor used in super calls from DefinitionsDocument and InteractionsDJDocument. */
-  protected AbstractDJDocument() { 
-    this(new Indenter(DrJava.getConfig().getSetting(INDENT_INC).intValue()));
-  }
+  protected AbstractDJDocument() { this(new Indenter(DrJava.getConfig().getSetting(INDENT_INC).intValue())); }
   
   /** Constructor used from anonymous test classes. 
    * @param indentLevel the indentation level
    */
-  protected AbstractDJDocument(int indentLevel) { 
-    this(new Indenter(indentLevel));
-  }
+  protected AbstractDJDocument(int indentLevel) {  this(new Indenter(indentLevel)); }
   
   /** Constructor used to build a new document with an existing indenter.  
-   * Used in tests and super calls from DefinitionsDocument and 
-   * interactions documents. 
-   * @param indenter the indenter to use for this document
-   */
+    * Used in tests and super calls from DefinitionsDocument and 
+    * interactions documents. 
+    * @param indenter the indenter to use for this document
+    */
   protected AbstractDJDocument(Indenter indenter) { 
     _indenter = indenter;
     _queryCache = null;

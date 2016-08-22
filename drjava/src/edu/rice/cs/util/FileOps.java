@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -850,17 +850,17 @@ public abstract class FileOps {
     */
   public abstract static class DefaultFileSaver implements FileSaver {
     
-    private File outputFile = FileOps.NULL_FILE;
-    private static Set<File> filesNotNeedingBackup = new HashSet<File>();
-    private boolean backupsEnabled = DrJava.getConfig().getSetting(BACKUP_FILES);  // uses the config default
+    private volatile File outputFile = FileOps.NULL_FILE;
+    private static volatile Set<File> filesNotNeedingBackup = new HashSet<File>();
+    private volatile boolean backupsEnabled = DrJava.getConfig().getSetting(BACKUP_FILES);  // uses the config default
     
     /** This field keeps track of whether or not outputFile has been resolved to its canonical name. */
-    private boolean isCanonical = false;
+    private volatile boolean isCanonical = false;
     
 ///** Globally enables backups for any DefaultFileSaver that does not override the shouldBackup method. */
 //    public static void setBackupsEnabled(boolean isEnabled) { backupsEnabled = isEnabled; }
     
-    public DefaultFileSaver(File file){ outputFile = file.getAbsoluteFile(); }
+    public DefaultFileSaver(File file) { outputFile = file.getAbsoluteFile(); }
     
     public boolean continueWhenTempFileCreationFails() { return true; }
     

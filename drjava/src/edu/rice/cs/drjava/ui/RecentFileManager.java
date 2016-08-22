@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -106,7 +106,7 @@ public class RecentFileManager implements OptionConstants {
     if (_recentFiles.size()>0) {
       mirroredMenu.insertSeparator(_initPos);  //one at top
     }
-    for(int i=0; i<_recentFiles.size(); ++i) {
+    for(int i = 0; i<_recentFiles.size(); ++i) {
       final File file = _recentFiles.get(i);
       final FileOpenSelector recentSelector = new FileOpenSelector() {
         public File[] getFiles() { return new File[] { file }; }

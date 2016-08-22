@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -57,22 +57,22 @@ public class FindReplaceMachine {
   static private Log _log = new Log("FindReplace.txt", false);
   
   /* Visible machine state; manipulated directly or indirectly by FindReplacePanel. */
-  private volatile OpenDefinitionsDocument _doc;      // Current search document 
-  private volatile OpenDefinitionsDocument _firstDoc; // First document where searching started (when searching all documents)
-  private volatile int _current;                      // Position of the cursor in _doc when machine is stopped
-  private MovingDocumentRegion _selectionRegion;      // selected text region
-  private volatile String _findWord;                  // Word to find. */
-  private volatile String _replaceWord;               // Word to replace _findword.
+  private volatile OpenDefinitionsDocument _doc;           // Current search document 
+  private volatile OpenDefinitionsDocument _firstDoc;      // First document where searching started (when searching all documents)
+  private volatile int _current;                           // Position of the cursor in _doc when machine is stopped
+  private volatile MovingDocumentRegion _selectionRegion;  // selected text region
+  private volatile String _findWord;                       // Word to find. */
+  private volatile String _replaceWord;                    // Word to replace _findword.
   private volatile boolean _matchCase;
   private volatile boolean _matchWholeWord;
-  private volatile boolean _searchAllDocuments;       // Whether to search all documents (or just the current document)
-  private volatile boolean _searchSelectionOnly;      // Whether to search only the selection
-  private volatile boolean _isForward;                // Whether search direction is forward (false means backward)
-  private volatile boolean _ignoreCommentsAndStrings; // Whether to ignore matches in comments and strings
-  private volatile boolean _ignoreTestCases;          // Whether to ignore documents that end in *Test.java
-  private volatile String _lastFindWord;              // Last word found; set to null by FindReplacePanel if caret is updated
-  private volatile boolean _skipText;                 // Whether to skip over the current match if direction is reversed
-  private volatile DocumentIterator _docIterator;     // An iterator of open documents; _doc is current
+  private volatile boolean _searchAllDocuments;            // Whether to search all documents (or just the current document)
+  private volatile boolean _searchSelectionOnly;           // Whether to search only the selection
+  private volatile boolean _isForward;                     // Whether search direction is forward (false means backward)
+  private volatile boolean _ignoreCommentsAndStrings;      // Whether to ignore matches in comments and strings
+  private volatile boolean _ignoreTestCases;               // Whether to ignore documents that end in *Test.java
+  private volatile String _lastFindWord;                   // Last word found; set to null by FindReplacePanel if caret is updated
+  private volatile boolean _skipText;                      // Whether to skip over the current match if direction is reversed
+  private volatile DocumentIterator _docIterator;          // An iterator of open documents; _doc is current
   private volatile SingleDisplayModel _model;
   private volatile Component _frame;  
   
@@ -301,17 +301,17 @@ public class FindReplaceMachine {
   }
   
   /** Replaces all occurences of _findWord with _replaceWord in _doc. Never searches in other documents.  Starts at
-   * the beginning or the end of the document (depending on find direction).  This convention ensures that matches 
-   * created by string replacement will not be replaced as in the following example:<p>
-   *   findString:    "hello"<br>
-   *   replaceString: "e"<br>
-   *   document text: "hhellollo"<p>
-   * Depending on the cursor position, clicking replace all could either make the document text read "hello" 
-   * (which is correct) or "e".  This is because of the behavior of findNext(), and it would be incorrect
-   * to change that behavior.  Only executes in event thread.
-   * @param searchSelectionOnly true if we should only search in the current selection of documents
-   * @return the number of replacements
-   */
+    * the beginning or the end of the document (depending on find direction).  This convention ensures that matches 
+    * created by string replacement will not be replaced as in the following example:<p>
+    *   findString:    "hello"<br>
+    *   replaceString: "e"<br>
+    *   document text: "hhellollo"<p>
+    * Depending on the cursor position, clicking replace all could either make the document text read "hello" 
+    * (which is correct) or "e".  This is because of the behavior of findNext(), and it would be incorrect
+    * to change that behavior.  Only executes in event thread.
+    * @param searchSelectionOnly true if we should only search in the current selection of documents
+    * @return the number of replacements
+    */
   private int _replaceAllInCurrentDoc(boolean searchSelectionOnly) {
     
     assert EventQueue.isDispatchThread();
@@ -328,7 +328,7 @@ public class FindReplaceMachine {
     FindResult fr = findNext(false);  // find next match in current doc   
     //  Utilities.show(fr + " returned by call on findNext()");
     
-    while (!fr.getWrapped() && fr.getFoundOffset() <= _selectionRegion.getEndOffset()) {
+    while (!fr.isWrapped() && fr.getFoundOffset() <= _selectionRegion.getEndOffset()) {
       replaceCurrent();
       count++;
       //  Utilities.show("Found " + count + " occurrences. Calling findNext() inside loop");
@@ -368,13 +368,13 @@ public class FindReplaceMachine {
     
     if (searchAll) {
       int count = 0;           // the number of replacements done so far
-      int n = _docIterator.getDocumentCount();
+      final int n = _docIterator.getDocumentCount();
       for (int i = 0; i < n; i++) {
         // process all in the rest of the documents
         count += _processAllInCurrentDoc(findAction, false);
         _doc = _docIterator.getNextDocument(_doc, _frame);
         
-        if(_doc==null) break;
+        if(_doc == null) break;
       }
       
       // update display (perhaps adding "*") in navigatgorPane
@@ -393,11 +393,11 @@ public class FindReplaceMachine {
   /** Processes all occurences of _findWord in _doc. Never processes other documents.  Starts at the beginning or the
    * end of the document (depending on find direction).  This convention ensures that matches created by string 
    * replacement will not be replaced as in the following example:<p>
-   *  findString:    "hello"<br>
-   *  replaceString: "e"<br>
-   *  document text: "hhellollo"<p>
-   * Assumes this has mutually exclusive access to _doc (e.g., by hourglassOn) and findAction does not modify _doc.
-   * Only executes in event thread.
+   *   findString:    "hello"<br>
+   *   replaceString: "e"<br>
+   *   document text: "hhellollo"<p>
+   * Only executes in event thread.  Assumes (i) this has exclusive access to _doc (since it only runs in event thread) 
+   * and (ii) findAction does not modify _doc.
    * @param findAction action to perform on the occurrences; input is the FindResult, output is ignored
    * @param searchSelectionOnly true if we should only search in the current selection of documents
    * @return the number of replacements
@@ -406,7 +406,7 @@ public class FindReplaceMachine {
     
     assert EventQueue.isDispatchThread();
 
-    if(!searchSelectionOnly) {
+    if (!searchSelectionOnly) {
       _selectionRegion = new MovingDocumentRegion(_doc, 0, _doc.getLength(), _doc._getLineStartPos(0),
                                                   _doc._getLineEndPos(_doc.getLength()));
     }
@@ -416,7 +416,7 @@ public class FindReplaceMachine {
     int count = 0;
     FindResult fr = findNext(false);  // find next match in current doc   
     
-    while (! fr.getWrapped() && fr.getFoundOffset() <= _selectionRegion.getEndOffset()) {
+    while (! fr.isWrapped() && fr.getFoundOffset() <= _selectionRegion.getEndOffset()) {
       findAction.run(fr);
       count++;
       fr = findNext(false);           // find next match in current doc

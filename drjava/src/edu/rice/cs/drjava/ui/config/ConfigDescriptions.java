@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -351,7 +351,7 @@ public class ConfigDescriptions {
     // Prompt to change the language level extensions (.dj0/.dj1->.dj, .dj2->.java)
     add(OptionConstants.PROMPT_RENAME_LL_FILES, "Prompt to Rename Old Language Level Files When Saving",
         "<html>Whether DrJava should prompt the user to rename old language level files.<br>"+
-        "DrJava suggests to rename .dj0 and .dj1 files to .dj, and .dj2 files to .java.</html>");
+        "DrJava suggests renaming .dj0 and .dj1 files as .dj files, and .dj2 files as .java files.</html>");
     
     
     

@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -2742,7 +2742,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   /** A wrapper around a DefinitionsDocument or potential DefinitionsDocument (if it has been kicked out of the cache)
     * The GlobalModel interacts with DefinitionsDocuments through this wrapper.<br>
-    * This call was formerly called the <code>DefinitionsDocumentHandler</code> but was renamed (2004-Jun-8) to be more
+    * This class was formerly called the <code>DefinitionsDocumentHandler</code> but was renamed (2004-Jun-8) to be more
     * descriptive/intuitive.
     * 
     * Note that this class has a natural ordering based on hashCode (with LexiName as a tiebreaker) that determines a 
@@ -3812,13 +3812,15 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     /** Decorator pattern for the definitions document. */
     public CompoundUndoManager getUndoManager() { return getDocument().getUndoManager(); }
     
-    /** Gets start of line containing pos. */    
+    /** Gets start of line containing pos. NOTE: this method could be optimized to avoid concretizing a virtual 
+      * document. */    
     public int _getLineStartPos(int pos) { 
       DefinitionsDocument doc = getDocument();
       return doc._getLineStartPos(pos); 
     }
     
-    /** Gets end of line containing pos (line includes closing '\n'). */
+    /** Gets end of line containing pos (line includes closing '\n').  NOTE: this method could be optimized to avoid 
+      * concretizing a virtual document.*/
     public int _getLineEndPos(int pos) { 
       DefinitionsDocument doc = getDocument();
       return doc._getLineEndPos(pos); 

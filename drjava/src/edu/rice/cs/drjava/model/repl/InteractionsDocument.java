@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -301,7 +301,7 @@ public class InteractionsDocument extends ConsoleDocument {
   public void appendSyntaxErrorResult(String message, String interaction, int startRow, int startCol,
                                       int endRow, int endCol, String styleName) {
     try {
-      if (null == message || "null".equals(message))  message = "";
+      if (message == null || message.equals("null"))  message = "";
       
       if (message.indexOf("Lexical error") != -1) {
         int i = message.lastIndexOf(':');
