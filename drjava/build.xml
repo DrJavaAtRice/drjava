@@ -880,8 +880,7 @@
     </replace>
   </target>
   
-  <!-- Standardize all newline character sequences.  Subversion takes care of this 
-       automatically, but sometimes files crop up with the wrong sequence.-->
+  <!-- Standardize all newline character sequences.-->
   <target name="fix-newlines" description="Standardize newline character sequences in all text files">
     <!-- If we're in Windows, use \r\n -->
     <condition property="newline-code" value="crlf">
@@ -1151,7 +1150,6 @@
               value="${ant.project.name}${tag-append}-${DSTAMP}-${TSTAMP}"/>
   </target>  
   
-
   <!-- Sets "already-generated" if "generate-file" is more recent than "generate-sourcefile";
        otherwise, the out-of-date target file is deleted (if it exists).  Note that, since
        properties can only be set once, this should happen underneath an "antcall". -->

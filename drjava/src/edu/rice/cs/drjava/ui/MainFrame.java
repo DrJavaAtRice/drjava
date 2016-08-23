@@ -4854,29 +4854,28 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _updateBackgroundColor();
   }
   
-  /** Asks the user to select the project file to open and starts the process of opening the project. */
-  private void _openProject() { openProject(_openProjectSelector); }
+  /** Closes existing project if one exists, asks the user to select the project file to open, and opens it. */
+  private void _openProject() {
+    if (_model.isProjectActive()) closeProject();  // does not reset interactions
+    openProject(_openProjectSelector);             // resets interactions if successful
+  }
   
-  public void openProject(FileOpenSelector projectSelector) {
-    
-    try { 
+  /** Assumes any existing project has already been closed. */
+  public void openProject(final FileOpenSelector projectSelector) {
+    try {
       final File[] files = projectSelector.getFiles();
       if (files.length < 1)
         throw new IllegalStateException("Open project file selection not canceled but no project file was selected.");
       final File file = files[0];
-      
-      updateStatusField("Opening project " + file);
-      
-      try {
-        hourglassOn();
-        // make sure there are no open projects
-        if (! _model.isProjectActive() || (_model.isProjectActive() && _closeProject())) _openProjectHelper(file);
-      }
-      catch(Exception e) { e.printStackTrace(System.out); }
-      finally { hourglassOff(); } 
+      if (file != null && file != FileOps.NULL_FILE)
+        Utilities.invokeLater(new Runnable() {
+          public void run() {
+            updateStatusField("Opening project " + file);
+            _openProjectHelper(file);
+          }
+        }); 
     }
-    catch(OperationCanceledException oce) { /* do nothing, we just won't open anything */ }
-    
+    catch(OperationCanceledException oce) { return; /* do nothing if getFiles() fails; we just don't open anything */ } 
   }  
   
   /** Oversees the opening of the project by delegating to the model to parse and initialize the project 

@@ -48,7 +48,7 @@ import edu.rice.cs.util.UnexpectedException;
   */
 public class JUnitTestRunner extends BaseTestRunner {
   
-  protected static final Log _log = new Log("JUnitTestManager.txt", true);
+  protected static final Log _log = new Log("JUnitTestManager.txt", false);
   
   /** Receives updates on the test suite's progress. */
   private JUnitModelCallback _jmc;
