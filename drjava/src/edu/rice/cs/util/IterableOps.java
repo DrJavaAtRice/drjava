@@ -25,20 +25,35 @@
  * This file is part of DrJava.  Download the current version of this project from http://www.drjava.org/ or 
  * http://github.com/DrJavaAtRice/drjava.
  * 
- * END_COPYRIGHT_BLOCK*/
+ * END_COPYRIGHT_BLOCK */
 
 package edu.rice.cs.util;
 
-import java.util.ArrayList;
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 
-public class IterableOps {
-  public static <T> T[] toArray(Iterable<T> elements, Class<T> eltType) {
-    ArrayList<T> arrayListElements = new ArrayList<T>();
-    for (T element : elements) arrayListElements.add(element);
-    int size = arrayListElements.size();
-    @SuppressWarnings("unchecked")  // Create an array of the proper type and size using reflection
-    T[] arrayElements = (T[]) Array.newInstance(eltType, size);
-    return arrayListElements.toArray(arrayElements);
+/** A class to provide some convenient Iterable operations as static methods.
+  * It's abstract to prevent (useless) instantiation, though it can be subclassed
+  * to provide convenient namespace importation of its methods.
+  */
+public abstract class IterableOps {
+
+  /** Convert an Iterable to an array.
+    *
+    * @param iter Iterable object to be converted.
+    * @param <T>  Parameterized type of the iterable.
+    * @return     the array NOTE: at compile time the type of the array is Object[]; can cause ClassCastException.
+    */
+  @SuppressWarnings("unchecked")
+  public static <T> T[] toArray(Iterable<T> iter, Class<T> elemType) {
+    ArrayList<T> al = new ArrayList();
+
+    for (T elem : iter) {
+      al.add(elem);
+    }
+
+    int size = al.size();
+    T[] array = (T[]) Array.newInstance(elemType, size);
+    return al.toArray(array);
   }
 }
