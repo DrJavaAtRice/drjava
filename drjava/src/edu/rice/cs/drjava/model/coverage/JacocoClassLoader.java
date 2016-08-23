@@ -50,8 +50,10 @@
 
 package edu.rice.cs.drjava.model.coverage;
 
-import java.util.Map;
-import java.util.HashMap;
+
+import java.io.File;
+import java.io.IOException;
+
 import java.lang.ClassLoader;
 
 import edu.rice.cs.plt.io.IOUtil;
@@ -59,10 +61,6 @@ import edu.rice.cs.util.Log;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.IterableOps;
 import edu.rice.cs.util.UnexpectedException;
-
-import java.io.File; 
-import java.io.IOException; 
-import java.util.Arrays; 
 
 import org.jacoco.core.instr.Instrumenter;
 

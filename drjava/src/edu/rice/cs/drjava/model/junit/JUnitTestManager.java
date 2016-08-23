@@ -36,39 +36,57 @@
 
 package edu.rice.cs.drjava.model.junit;
 
-import edu.rice.cs.drjava.model.coverage.JacocoClassLoader;
-import edu.rice.cs.plt.reflect.EmptyClassLoader;
-import junit.framework.*;
-
 import java.io.File;
 import java.io.InputStream;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.*;
+
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Enumeration;
+import java.util.Arrays;
 
 import edu.rice.cs.drjava.model.coverage.CoverageMetadata;
 import edu.rice.cs.drjava.model.coverage.ReportGenerator;
 
 import edu.rice.cs.drjava.model.repl.newjvm.ClassPathManager;
+
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.classloader.ClassFileError;
+
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.iter.IterUtil;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import edu.rice.cs.drjava.model.coverage.JacocoClassLoader;
+import edu.rice.cs.plt.reflect.EmptyClassLoader;
 
 import static edu.rice.cs.plt.debug.DebugUtil.error;
+
+import junit.framework.JUnit4TestAdapter;
+
+import junit.framework.AssertionFailedError;
+
+import junit.framework.Test;
+import junit.framework.TestResult;
+import junit.framework.TestSuite;
+import junit.framework.TestFailure;
+import junit.framework.JUnit4TestCaseFacade;
 
 import org.jacoco.core.analysis.Analyzer;
 import org.jacoco.core.analysis.CoverageBuilder;
 import org.jacoco.core.analysis.IBundleCoverage;
 import org.jacoco.core.data.ExecutionDataStore;
 import org.jacoco.core.data.SessionInfoStore;
+
 import org.jacoco.core.instr.Instrumenter;
 import org.jacoco.core.runtime.IRuntime;
 import org.jacoco.core.runtime.LoggerRuntime;
@@ -106,6 +124,8 @@ public class JUnitTestManager {
   private RuntimeData _myData = null;
   private List<String> _nonTestClassNames = null;
   private JUnitResultTuple _finalResult = new JUnitResultTuple(false, null);
+
+  private ArrayList<String> nonTestClassNames = new ArrayList();
 
   /** Standard constructor 
     * @param jmc a JUnitModelCallback
@@ -261,7 +281,6 @@ public class JUnitTestManager {
       _log.log("Testing doCoverage");
       
       if (_runtime != null) { /* doCoverage was true */
-        
         _log.log("Analyzing coverage data for " + _nonTestClassNames);
 
         /* Collect session info (including which code was executed) */
