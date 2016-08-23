@@ -1812,24 +1812,22 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     setProjectChanged(projChanged);
   }
   
-  /** Parses the given project file and loads it into the document navigator  
-   * and resets interactions pane. Assumes preceding project, if any, has 
-   * already been closed.
-   *
-   * @param projectFile The project file to parse
-   * @throws IOException if an IO operation fails
-   * @throws MalformedProjectFileException if one of the project files was malformed
-   */
+  /** Parses the given project file and loads it into the document navigator and resets interactions pane. Assumes
+    * that any existing project has been closed.
+    * @param projectFile The project file to parse
+    * @throws IOException if an IO operation fails
+    * @throws MalformedProjectFileException if one of the project files was malformed
+    */
   public void openProject(File projectFile) throws IOException, MalformedProjectFileException {
-    _loadProject(ProjectFileParserFacade.ONLY.parse(projectFile));
+    _loadProject(ProjectFileParserFacade.ONLY.parse(projectFile));  // resets interactions if successful
   }
   
   /** Loads the specified project into the document navigator and opens all of 
-   * the files (if not already open).
-   * Assumes that any prior project has been closed.  Only runs in event thread.
-   * @param ir The project file to load
-   * @throws IOException if an IO operation fails
-   */
+    * the files (if not already open).
+    * Assumes that any prior project has been closed.  Only runs in event thread.
+    * @param ir The project file to load
+    * @throws IOException if an IO operation fails
+    */
   private void _loadProject(final ProjectFileIR ir) throws IOException {
     
     assert EventQueue.isDispatchThread();
@@ -2011,16 +2009,16 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   public void autoRefreshProject() { openNewFilesInProject(); }
   
   /** Performs any needed operations on the model after project files have been 
-   * closed. This method is not responsible for closing any files; both the 
-   * files in the project and the project file have already been closed (by 
-   * MainFrame._closeProject()). Resets interations unless suppressReset is 
-   * true, which only happens when DrJava is quitting.
-   * 
-   * @param suppressReset false if we want to reset the interactions pane; true otherwise
-   */
+    * closed. This method is not responsible for closing any files; both the 
+    * files in the project and the project file have already been closed (by 
+    * MainFrame._closeProject()). Resets interations unless suppressReset is 
+    * true, which only happens when DrJava is quitting.
+    * 
+    * @param suppressReset false if we want to reset the interactions pane; true otherwise
+    */
   public void closeProject(boolean suppressReset) {
-    setDocumentNavigator(new AWTContainerNavigatorFactory<OpenDefinitionsDocument>().
-                           makeListNavigator(getDocumentNavigator()));
+    IDocumentNavigator<OpenDefinitionsDocument> nav = getDocumentNavigator();
+    setDocumentNavigator(new AWTContainerNavigatorFactory<OpenDefinitionsDocument>().makeListNavigator(nav));
     setFileGroupingState(makeFlatFileGroupingState());
     
     // remove previous listeners
