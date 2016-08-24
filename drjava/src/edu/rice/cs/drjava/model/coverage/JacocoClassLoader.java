@@ -65,7 +65,7 @@ import edu.rice.cs.util.UnexpectedException;
 import org.jacoco.core.instr.Instrumenter;
 
 /** A class loader that instruments classes for code coverage.
-  * @version $Id:$
+  * @version $Id$
   */
 public class JacocoClassLoader extends ClassLoader {
   
