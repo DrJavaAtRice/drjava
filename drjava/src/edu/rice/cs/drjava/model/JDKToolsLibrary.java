@@ -73,7 +73,7 @@ import edu.rice.cs.util.swing.Utilities;
 public class JDKToolsLibrary {
   
   /* Create debugging log. */
-  public static final Log _log = new Log("GlobalModel.txt", true);
+  public static final Log _log = new Log("GlobalModel.txt", false);
   
   private final FullVersion _version;
   private final CompilerInterface _compiler;

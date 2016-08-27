@@ -55,6 +55,7 @@ import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.reflect.ShadowingClassLoader;
 
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
@@ -68,7 +69,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.error;
   */
 public class JUnitTestManager {
  
-  protected static final Log _log = new Log("JUnitTestManager.txt", false);
+  protected static final Log _log = new Log("GlobalModel.txt", true);
   
   /** The interface to the master JVM via RMI. */
   private final JUnitModelCallback _jmc;
@@ -116,7 +117,9 @@ public class JUnitTestManager {
     for (Pair<String, File> pair : IterUtil.zip(classNames, files)) {
       String cName = pair.first();
       try {
-        if (_isJUnitTest(_testRunner.loadPossibleTest(cName))) {
+        Class<?> possibleTest = _testRunner.loadPossibleTest(cName); 
+        _log.log("Exploring possibleTest " + possibleTest);
+        if (_isJUnitTest(possibleTest)) {
           _testClassNames.add(cName);
           _testFiles.add(pair.second());
           _suite.addTest(new JUnit4TestAdapter(_testRunner.loadPossibleTest(cName)));
@@ -197,20 +200,26 @@ public class JUnitTestManager {
     _log.log("test manager state reset");
   }
   
-
-    
-  /** Determines if the given class is a junit Test.
+  /** Determines if the given class is a junit Test.  This determination is not completely accurate.  Any
+    * method that is annotated with a property corresponding to org.junit.Test.class is classified as a
+    * test method.  Hence the annotation @ignore is not recognized.
     * @param c the class to check
     * @return true iff the given class is an instance of junit.framework.Test
     */
   private boolean _isJUnitTest(Class<?> c) {
-
-    boolean result = (Test.class.isAssignableFrom(c) && !Modifier.isAbstract(c.getModifiers()) && 
-                      !Modifier.isInterface(c.getModifiers()) ||
-      (new JUnit4TestAdapter(c).getTests().size()>0)) && 
-      ! new JUnit4TestAdapter(c).getTests().get(0).toString().contains("initializationError")
-      ; //The specific check for initializationError detect when a class contains no tests
-    debug.logValues(new String[]{"c", "isJUnitTest(c)"}, c, result);
+    _log.log("Testing class " + c + " to determine if it is a JUnit test class");
+    
+    // test first for JUnit 4 annotated test methods
+    for (Method method : c.getDeclaredMethods()) {
+      if (method.isAnnotationPresent(org.junit.Test.class)) return true;
+    };
+    // now test for conventional JUnit 3 test classes (which must extend org.junit.Test.class
+    boolean isAbstract = Modifier.isAbstract(c.getModifiers());
+    boolean isInterface = Modifier.isInterface(c.getModifiers());
+    boolean result;
+    if (isAbstract || isInterface) result = false;
+    else result = Test.class.isAssignableFrom(c);
+    _log.log("Returning result = " + result);
     return result;
   }
   

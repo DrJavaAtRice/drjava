@@ -56,7 +56,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
   */
 public abstract class RMIInteractionsModel extends InteractionsModel {
   
-  static final Log _log = new Log("MasterJVM.txt", true);
+  static final Log _log = new Log("MasterJVM.txt", false);
   
   /** RMI interface to the remote Java interpreter.*/
   protected final MainJVM _jvm;

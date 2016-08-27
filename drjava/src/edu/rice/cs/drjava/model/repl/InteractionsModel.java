@@ -81,7 +81,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   /** GUI component availability notifier.  An identical copy is heavily used in MainFrame. */
   final DefaultGUIAvailabilityNotifier _guiNotifier = DefaultGUIAvailabilityNotifier.ONLY;
   
-  public static final Log _log = new Log("MasterJVM.txt", true);
+  public static final Log _log = new Log("MasterJVM.txt", false);
   
 //  public static final String _newLine = "\n"; // was StringOps.EOL; but Swing uses '\n' for newLine
   

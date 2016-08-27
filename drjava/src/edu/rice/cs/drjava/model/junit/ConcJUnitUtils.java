@@ -59,27 +59,17 @@ public class ConcJUnitUtils {
     * @param checkFilesInJar file names that should be in the jar file
     * @return true if f is a jar file and the files are in the jar */
   protected static boolean isValidJarFile(final File f, String... checkFilesInJar) {
-    if ((f==null) || (FileOps.NULL_FILE.equals(f)) || (!f.exists())) return false;
+    if ((f == null) || (FileOps.NULL_FILE.equals(f)) || (!f.exists())) return false;
       JarFile jf = null;
       try {
         jf = new JarFile(f);
-        for(String s: checkFilesInJar) {
+        for (String s: checkFilesInJar) {
           JarEntry je = jf.getJarEntry(s);
-          if (je==null) return false;
+          if (je == null) return false;
         }
         return true;
-        // we already have a JUnit version 4.4 as junit.jar
-        // running junit.runner.Version to get the version string
+        // we already have a JUnit version 4.4+ as junit.jar running junit.runner.Version to get the version string
         // isn't a valid criterion for compatibility
-//        JVMBuilder jvmb = JVMBuilder.DEFAULT.classPath(f);
-//        Process p = jvmb.start("junit.runner.Version");
-//        BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
-//        String line = br.readLine();
-//        try {
-//          p.waitFor();
-//        }
-//        catch(InterruptedException ie) { return false; }
-//        return "3.8.2".equals(line);
       }
       catch(IOException ioe) { return false; }
       finally {
@@ -123,8 +113,7 @@ public class ConcJUnitUtils {
                           "edu/rice/cs/cunit/concJUnit/ThreadSets.class");
   }
 
-  /** Check if the file is a valid rt.concjunit.jar file that matches
-    * the currently running Java version.
+  /** Check if the file is a valid rt.concjunit.jar file that matches the currently running Java version.
     * @param f file to check
     * @return true if f is a compatible rt.concjunit.jar file */
   public static boolean isCompatibleRTConcJUnitFile(final File f) {

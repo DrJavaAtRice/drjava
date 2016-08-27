@@ -56,7 +56,7 @@ public class DrScalaInterpreter implements Interpreter {
     */
   final private Pattern scalaColonCmd = Pattern.compile("^\\s*:.*$");
   
-  final Log _log = new Log("MasterJVM.txt", true);
+  final Log _log = new Log("MasterJVM.txt", false);
 
   /* Used to record whether the interpreter has been initialized */
   private volatile boolean _isInitialized = false;

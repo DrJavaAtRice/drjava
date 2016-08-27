@@ -58,7 +58,7 @@ import edu.rice.cs.drjava.config.OptionListener;
   */
 public class InteractionsDocument extends ConsoleDocument {
   
-  public static Log _log = new Log("MasterJVM.txt", true);
+  public static Log _log = new Log("MasterJVM.txt", false);
   
   /** Default prompt. */
   public static final String DEFAULT_PROMPT = "> ";

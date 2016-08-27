@@ -105,7 +105,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   public static final InterpreterJVM ONLY = new InterpreterJVM();
   
   /** Debugging log. */
-  private static final Log _log  = new Log("MasterJVM.txt", true);
+  private static final Log _log  = new Log("MasterJVM.txt", false);
   
   // Since RMI can lead to parallel threads, all fields must be thread-safe.  Consequently, we use
   // concurrent Collections

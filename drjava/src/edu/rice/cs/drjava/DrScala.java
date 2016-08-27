@@ -103,7 +103,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
   * @version $Id: DrScala.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class DrScala {
-  public static volatile Log _log = new Log("MasterJVM.txt", true);
+  public static volatile Log _log = new Log("MasterJVM.txt", false);
   
   private static final String DEFAULT_MAX_HEAP_SIZE_ARG = "-Xmx256M";
   

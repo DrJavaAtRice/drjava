@@ -158,7 +158,13 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       if ( (_compilerModel.getNumErrors() == 0 || _compilerModel.getCompilerErrorModel().hasOnlyWarnings())
             && ! _junitModel.isTestInProgress() && _resetAfterCompile) {
 //        Utilities.show("compileEnded called in clearInteractionsListener");
+        System.err.println("Calling resetInteractions in _clearInteractionsListener");
         resetInteractions(workDir);  // use same working directory as current interpreter
+      }
+      else { 
+        System.err.println("resetInteractions not called! NumErrors = " + _compilerModel.getNumErrors() + "; hasOnlyWarnings = " + 
+                           _compilerModel.getCompilerErrorModel().hasOnlyWarnings() + "; isTestInProgress = " + _junitModel.isTestInProgress() +
+                           "; resetAfterCompiler = " + _resetAfterCompile);
       }
     }
     public void activeCompilerChanged() {

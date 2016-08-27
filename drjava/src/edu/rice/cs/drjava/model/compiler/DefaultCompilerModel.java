@@ -74,7 +74,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 public class DefaultCompilerModel implements CompilerModel {
   
   /** for logging debug info */
-  private static edu.rice.cs.util.Log _log = new edu.rice.cs.util.Log("GlobalModel.txt", false);
+  private static edu.rice.cs.util.Log _log = new edu.rice.cs.util.Log("GlobalModel.txt", true);
   
   /** The available compilers */
   private final List<CompilerInterface> _compilers;
@@ -188,6 +188,7 @@ public class DefaultCompilerModel implements CompilerModel {
     * @throws IOException if a filesystem-related problem prevents compilation
     */
   public void compileProject() throws IOException {
+    _log.log("compileProject() called");
     if (! _model.isProjectActive()) 
       throw new UnexpectedException("compileProject invoked when DrScala is not in project mode");
     
@@ -239,7 +240,7 @@ public class DefaultCompilerModel implements CompilerModel {
   /** Compile the given documents. All compile commands invoke this private method! */
   private void _doCompile(List<OpenDefinitionsDocument> docs) throws IOException {
 //    _LLSTM.clearCache();
-//    System.err.println("_doCompile(" + docs + ") called");
+    _log.log("_doCompile(" + docs + ") called");
     final ArrayList<File> filesToCompile = new ArrayList<File>();
 //    final ArrayList<OpenDefinitionsDocument> validDocs = new ArrayList<OpenDefinitionsDocument>();
     final ArrayList<File> excludedFiles = new ArrayList<File>();
@@ -251,7 +252,6 @@ public class DefaultCompilerModel implements CompilerModel {
         File f = doc.getFile();
         // Check for null in case the file is untitled (not sure this is the correct check)
         if (f != null && f != FileOps.NULL_FILE) filesToCompile.add(f);
-
         doc.setCachedClassFile(FileOps.NULL_FILE); // clear cached class file
         
         try { doc.getSourceRoot(); }
@@ -262,54 +262,20 @@ public class DefaultCompilerModel implements CompilerModel {
       else excludedFiles.add(doc.getFile());
     }
        
-    /* No longer checked since a unique build directory is always passed to scalac.  Not sure what happens when
-     * multiple source roots are present in flat file mode. */
-//    // in flat file mode, ensure that all files have a common source root
-//    try {
-//      if (sourceRoot == FileOps.NULL_FILE || sourceRoot == null) sourceRoot = doc.getSourceRoot();
-//      else {
-//        File newRoot = doc.getSourceRoot();
-//        if (! newRoot.equals(sourceRoot)) {
-////                  System.err.println("***** File " + f + " has a different source root.");
-//          throw new IllegalArgumentException("File " + f + " has a different source root than the first file: "
-//                                               + filesToCompile.get(0).getName());
-//        }
-//      } 
-//    }
-//    catch (Exception e) {
-//      prelimErrors.add(new DJError(f, e.getMessage(), false));
-//    }
-    
+    _log.log("Files to compile = " + filesToCompile);
     if (filesToCompile.size() == 0) 
       prelimErrors.add(new DJError("None of the documents in " + docs + " is a valid source file!", false));
     
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.compileStarted(); } });
     
     try {
-      if (! prelimErrors.isEmpty()) { 
-//        System.err.println("Preliminary errors found in compilation");
-        _distributeErrors(prelimErrors); 
-      }
-      else
-        try {
-//        assert filesToCompile.size() > 0;
-        // Determine output directory (buildDir)
+      if (! prelimErrors.isEmpty()) { _distributeErrors(prelimErrors); }
+      else try {
         File buildDir = _model.getBuildDirectory();
-        
         if (buildDir != null && buildDir != FileOps.NULL_FILE && ! buildDir.exists() && ! buildDir.mkdirs())
           throw new IOException("Could not create build directory: " + buildDir);
         
-        
-//        File buildDir = _model.isProjectActive() ? _model.getBuildDirectory() : sourceRoot;
-        if (buildDir == null || buildDir == FileOps.NULL_FILE) {  // flat file mode or unset build directory in a project 
-          buildDir = _model.getProjectRoot();
-          _model.setBuildDirectory(buildDir);
-          
-//        Utilities.show("buildDir is: " + buildDir);
-          
-          System.err.println("Calling _compileFiles(" + filesToCompile + ", " + buildDir + ")");
-          _compileFiles(filesToCompile, buildDir);
-        }
+        _compileFiles(filesToCompile, buildDir);
       }
       catch (Throwable t) {
         DJError err = new DJError(t.toString(), false);
@@ -323,6 +289,45 @@ public class DefaultCompilerModel implements CompilerModel {
       });
     }
   }
+  /* The preceding code replaced (lifted from the current DrJava build on 27 Aug 2016 with 
+     packageErrors => prelimErrors) the following mess: */
+//      try {
+//      if (! prelimErrors.isEmpty()) { 
+////        System.err.println("Preliminary errors found in compilation");
+//        _distributeErrors(prelimErrors); 
+//      }
+//      else
+//        try {
+//        // Determine output directory (buildDir)
+//        File buildDir = _model.getBuildDirectory();
+//        _log.log("Initial value for buildDir is: " + buildDir);
+//        if (buildDir != null && buildDir != FileOps.NULL_FILE && ! buildDir.exists() && ! buildDir.mkdirs())
+//          throw new IOException("Could not create build directory: " + buildDir);
+//        
+//        
+////        File buildDir = _model.isProjectActive() ? _model.getBuildDirectory() : sourceRoot;
+//        if (buildDir == null || buildDir == FileOps.NULL_FILE) {  // flat file mode or unset build directory in a project 
+//          buildDir = _model.getProjectRoot();
+//          _model.setBuildDirectory(buildDir);
+//          
+//        _log.log("In flat file mode, buildDir is: " + buildDir);
+//          
+//          _log.log("Calling _compileFiles(" + filesToCompile + ", " + buildDir + ")");
+//          _compileFiles(filesToCompile, buildDir);
+//        }
+//      }
+//      catch (Throwable t) {
+//        DJError err = new DJError(t.toString(), false);
+//        _distributeErrors(Arrays.asList(err));
+//        throw new UnexpectedException(t);
+//      }
+//    }
+//    finally {
+//      Utilities.invokeLater(new Runnable() {
+//        public void run() { _notifier.compileEnded(_model.getWorkingDirectory(), excludedFiles); }
+//      });
+//    }
+//  }
   
   /** Compile the given files and update the model with any errors that result.  Does not notify listeners.  
     * All public compile methods delegate to this method so this method is the only one that uses synchronization to 
@@ -332,6 +337,8 @@ public class DefaultCompilerModel implements CompilerModel {
     */
   private void _compileFiles(List<File> files, File buildDir) throws IOException {
     _log.log("DefaultCompilerModel._compileFiles called with files = " + files + " and buildDir = " + buildDir);
+    Utilities.show("DefaultCompilerModel._compileFiles called with files = " + files + " and buildDir = " + buildDir);
+    
     assert ! files.isEmpty();
     
     /* Canonicalize buildDir */

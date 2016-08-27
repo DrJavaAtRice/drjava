@@ -109,7 +109,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 //    debug.logStart();
     _log.log("Setting up " + this);
     _model = new TestGlobalModel();
-    Utilities.invokeAndWait(new Runnable() {
+    Utilities.invokeLater(new Runnable() {
       public void run() {
         // ensure that the JVM is ready to run; the GlobalModelJUnitTest test cases sometimes received a
         // late _junitModel.junitJVMReady() notification after the unit tests had already been started, and
@@ -130,7 +130,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
         }
       }
     });
-    Utilities.clearEventQueue(); // Let some pending event queue operations complete
+    Utilities.clearEventQueue(); // Let some pending event queue operations complete; performs a longer wait than invokeAndWait version of preceding
     _model.setResetAfterCompile(false);
     
     _log.log("Completed (GlobalModelTestCase) set up of " + this);

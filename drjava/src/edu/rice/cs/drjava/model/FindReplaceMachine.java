@@ -58,26 +58,24 @@ public class FindReplaceMachine {
   static private Log _log = new Log("FindReplace.txt", false);
   
   /* Visible machine state; manipulated directly or indirectly by FindReplacePanel. */
-  private OpenDefinitionsDocument _doc;      // Current search document 
-  private OpenDefinitionsDocument _firstDoc; // First document where searching started (when searching all documents)
-//  private Position _current;                 // Position of the cursor in _doc when machine is stopped
-  private int _current;                 // Position of the cursor in _doc when machine is stopped
-  private MovingDocumentRegion _selectionRegion; // selected text region
-//  private Position _start;                   // Position in _doc from which searching started or will start.
-  private String _findWord;                  // Word to find. */
-  private String _replaceWord;               // Word to replace _findword.
-  private boolean _matchCase;
-  private boolean _matchWholeWord;
-  private boolean _searchAllDocuments;       // Whether to search all documents (or just the current document)
-  private boolean _searchSelectionOnly;      // Whether to search only the selection
-  private boolean _isForward;                // Whether search direction is forward (false means backward)
-  private boolean _ignoreCommentsAndStrings; // Whether to ignore matches in comments and strings
-  private boolean _ignoreTestCases;          // Whether to ignore documents that end in *Test.java
-  private String _lastFindWord;              // Last word found; set to null by FindReplacePanel if caret is updated
-  private boolean _skipText;                 // Whether to skip over the current match if direction is reversed
-  private DocumentIterator _docIterator;     // An iterator of open documents; _doc is current
-  private SingleDisplayModel _model;
-  private Component _frame;  
+  private volatile OpenDefinitionsDocument _doc;           // Current search document 
+  private volatile OpenDefinitionsDocument _firstDoc;      // First document where searching started (when searching all documents)
+  private volatile int _current;                           // Position of the cursor in _doc when machine is stopped
+  private volatile MovingDocumentRegion _selectionRegion;  // selected text region
+  private volatile String _findWord;                       // Word to find. */
+  private volatile String _replaceWord;                    // Word to replace _findword.
+  private volatile boolean _matchCase;
+  private volatile boolean _matchWholeWord;
+  private volatile boolean _searchAllDocuments;            // Whether to search all documents (or just the current document)
+  private volatile boolean _searchSelectionOnly;           // Whether to search only the selection
+  private volatile boolean _isForward;                     // Whether search direction is forward (false means backward)
+  private volatile boolean _ignoreCommentsAndStrings;      // Whether to ignore matches in comments and strings
+  private volatile boolean _ignoreTestCases;               // Whether to ignore documents that end in *Test.java
+  private volatile String _lastFindWord;                   // Last word found; set to null by FindReplacePanel if caret is updated
+  private volatile boolean _skipText;                      // Whether to skip over the current match if direction is reversed
+  private volatile DocumentIterator _docIterator;          // An iterator of open documents; _doc is current
+  private volatile SingleDisplayModel _model;
+  private volatile Component _frame;
   
   /** Standard Constructor.
     * Creates new machine to perform find/replace operations on a particular document starting from a given position.

@@ -63,7 +63,7 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
 //  public static final String INPUT_REQUIRED_MESSAGE =
 //    "Please enter input in the Console tab." + _newLine;
   
-  public static final Log _log = new Log("MainJVM.txt", true);
+  public static final Log _log = new Log("MainJVM.txt", false);
   
   /** Model that contains the interpreter to use. */
   protected final DefaultGlobalModel _model;

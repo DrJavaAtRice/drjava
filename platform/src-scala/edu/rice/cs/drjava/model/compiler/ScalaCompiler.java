@@ -81,7 +81,7 @@ import scala.tools.nsc.reporters.ConsoleReporter;
 public class ScalaCompiler extends Javac160FilteringCompiler implements /* Scala */ CompilerInterface {
   
 //  _log is also defined in a superclass
-  public static final Log _log = new Log("jdk8.txt", true);
+  public static final Log _log = new Log("jdk8.txt", false);
   
   private File _outputDir = null;
     
@@ -109,14 +109,14 @@ public class ScalaCompiler extends Javac160FilteringCompiler implements /* Scala
       if (parentDir == null) return Collections.emptyList();
       try {
         File[] jarFiles = new File[] {
-          Util.oneOf(parentDir, "jline-2.12.1.jar"),
+          Util.oneOf(parentDir, "jline-2.14.1.jar"),
           Util.oneOf(parentDir, "scala-compiler.jar"),
           Util.oneOf(parentDir, "scala-library.jar"),
-          Util.oneOf(parentDir, "scalap-2.12.0-M2.jar"),
-          Util.oneOf(parentDir, "scala-swing_2.12.0-M2-2.0.0-M2.jar"),
+          Util.oneOf(parentDir, "scalap-2.12.0-M5.jar"),
+          Util.oneOf(parentDir, "scala-swing_2.12.0-M5-2.0.0-M2.jar"),
           Util.oneOf(parentDir, "scala-reflect.jar"),
-          Util.oneOf(parentDir, "scala-parser-combinators_2.12.0-M2-1.0.4.jar"),
-          Util.oneOf(parentDir, "scala-xml_2.12.0-M2-1.0.4.jar") 
+          Util.oneOf(parentDir, "scala-parser-combinators_2.12.0-M5-1.0.4.jar"),
+          Util.oneOf(parentDir, "scala-xml_2.12.0-M5-1.0.5.jar") 
         };
         return Arrays.asList(jarFiles);    
       }

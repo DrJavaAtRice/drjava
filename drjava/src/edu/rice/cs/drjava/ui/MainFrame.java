@@ -4492,25 +4492,19 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private void _openProject() { openProject(_openProjectSelector); }
   
   public void openProject(FileOpenSelector projectSelector) {
-    
+    assert EventQueue.isDispatchThread();
     try { 
       final File[] files = projectSelector.getFiles();
       if (files.length < 1)
         throw new IllegalStateException("Open project file selection not canceled but no project file was selected.");
       final File file = files[0];
-      
-      updateStatusField("Opening project " + file);
-      
-      try {
-        hourglassOn();
-        // make sure there are no open projects
+      if (file != null && file != FileOps.NULL_FILE) {
+        updateStatusField("Opening project " + file);
+        //Open new project after closing current project (if one exists)
         if (! _model.isProjectActive() || _closeProject()) _openProjectHelper(file);
       }
-      catch(Exception e) { e.printStackTrace(System.out); }
-      finally { hourglassOff(); } 
     }
-    catch(OperationCanceledException oce) { /* do nothing, we just won't open anything */ }
-    
+    catch(OperationCanceledException oce) { /* do nothing, we just don't open anything */ }
   }  
   
   /** Oversees the opening of the project by delegating to the model to parse and initialize the project 

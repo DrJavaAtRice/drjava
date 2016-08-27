@@ -38,10 +38,12 @@ package edu.rice.cs.util;
 
 import java.io.*;
 
-import java.util.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.TimeZone;
+
+import edu.rice.cs.util.swing.Utilities;
 
 /** Logging class to record errors or unexpected behavior to a file.  The file is created in the current directory,
   * and is only used if the log is enabled.  All logs can be enabled at once with the ENABLE_ALL field.
@@ -87,7 +89,8 @@ public class Log {
         try {
           FileWriter w = new FileWriter(_file.getAbsolutePath(), true);
           _writer = new PrintWriter(w);
-          log("Log '" + _name + "' opened: " + DATE_FORMAT.format(new Date()));
+          log("Log '" + _name + "' opened: " + DATE_FORMAT.format(new Date()) + " with name " + _file.getAbsolutePath());
+//          Utilities.show("Opening log file: " + _file.getAbsolutePath());
         }
         catch (IOException ioe) {
           throw new RuntimeException("Could not create log: " + ioe);

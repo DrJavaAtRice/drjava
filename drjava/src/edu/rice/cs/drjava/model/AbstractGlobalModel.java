@@ -168,7 +168,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
   */
 public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants, DocumentIterator {
   
-  public static final Log _log = new Log("GlobalModel.txt", false);
+  public static final Log _log = new Log("AbstractGlobalModel.txt", false);
   
   /** A document cache that manages how many unmodified documents are open at once. */
   protected DocumentCache _cache;  

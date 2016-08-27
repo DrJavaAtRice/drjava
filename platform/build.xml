@@ -38,11 +38,7 @@
   <!-- *** Environment properties that are not needed may be removed *** -->
   <property environment="env" />
   <property name="drscala-jar" value="${env.DRSCALA_JAR}" />
-  <property name="java6-home" value="${env.JAVA6_HOME}" />
-  <property name="java7-home" value="${env.JAVA7_HOME}" />
   <property name="java8-home" value="${env.JAVA8_HOME}" />
-  <property name="openjdk6-home" value="${env.OPENJDK6_HOME}" />
-  <property name="openjdk7-home" value="${env.OPENJDK7_HOME}" />
 
   <if>
         <equals arg1="${env.SCALA_HOME}" arg2=""/>
@@ -93,9 +89,6 @@
     <echo message="      in Subversion targets" />
     <echo message="DRSCALA_JAR: Location of the drscala.jar file (most classes here " />
     <echo message="            implement interfaces defined there)." />
-    <echo message="JAVA6_HOME: Home folder of the Java 6 JDK" />
-    <echo message="JAVA7_HOME: Home folder of the Java 7 JDK" />
-    <echo message="OPENJDK6_HOME: Home folder of the OpenJDK 6" />
     <echo message="" />
     <echo message="For control over the version of Java used to run Ant, set JAVA_HOME." />
     <echo message="Ant may also require ANT_HOME to be set.  Note that the value of " />
@@ -158,41 +151,21 @@
        later APIs, the DrScala application is responsible for ensuring that those classes are 
        only loaded when the necessary APIs are available. -->
        
-  <target name="compile-jdk6" depends="resolve-java6-runtime, resolve-java6-tools" 
-          description="Compile the 'jdk6' sources">
+  <target name="compile-jdk7+" depends="resolve-java8-runtime, resolve-java8-tools" 
+          description="Compile the 'jdk7+' sources">
     <antcall target="do-compile">
-      <param name="platform-tag" value="jdk6" />
-      <param name="source-version" value="1.6" />
-      <param name="runtime-jar" value="${java6-runtime}" />
-      <param name="extra-classpath" value="${java6-tools}" />
-    </antcall>
-  </target>
-  
-  <target name="compile-jdk7" depends="resolve-java7-runtime, resolve-java7-tools" 
-          description="Compile the 'jdk7' sources">
-    <antcall target="do-compile">
-      <param name="platform-tag" value="jdk7" />
+      <param name="platform-tag" value="jdk7" /> <!-- TODO: "jdk7" -> "jdk7+" -->
       <param name="source-version" value="1.7" />
-      <param name="runtime-jar" value="${java7-runtime}" />
-      <param name="extra-classpath" value="${java7-tools}" />
+      <param name="runtime-jar" value="${java8-runtime}" />
+      <param name="extra-classpath" value="${java8-tools}" />
     </antcall>
   </target>
   
-  <target name="compile-openjdk6" depends="resolve-openjdk6-runtime, resolve-openjdk6-tools" 
-          description="Compile the 'openjdk6' sources">
-    <antcall target="do-compile">
-      <param name="platform-tag" value="openjdk6" />
-      <param name="source-version" value="1.6" />
-      <param name="runtime-jar" value="${openjdk6-runtime}" />
-      <param name="extra-classpath" value="${openjdk6-tools}" />
-    </antcall>
-  </target>
-
   <target name="compile-scala" depends="resolve-java8-runtime, resolve-scala-tools" 
           description="Compile the 'scala-specific' sources">
     <antcall target="do-compile">
       <param name="platform-tag" value="scala" />
-      <param name="source-version" value="1.6" />
+      <param name="source-version" value="1.8" />
       <param name="runtime-jar" value="${java8-runtime}" />
       <param name="extra-classpath" 
              value="${scala-home}/lib/scala-compiler.jar:${scala-home}/lib/scala-library.jar:${scala-home}/lib/scala-reflect.jar:${basedir}/../drjava/drscala.jar" />  
@@ -202,7 +175,8 @@
 
   </target>
 
-  <target name="compile-mac" depends="resolve-java6-runtime" 
+  <!--
+      <target name="compile-mac" depends="resolve-java6-runtime" 
           description="Compile the 'mac' sources">
     <antcall target="do-compile">
       <param name="platform-tag" value="mac" />
@@ -210,8 +184,10 @@
       <param name="runtime-jar" value="${java6-runtime}" />
       <param name="extra-classpath" value="${java6-runtime}/../ui.jar" />
     </antcall>
-  </target>
+    </target>
+    -->
   
+  <!--
   <target name="compile-windows" depends="resolve-java6-runtime" 
           description="Compile the 'windows' sources">
     <antcall target="do-compile">
@@ -221,7 +197,7 @@
       <param name="extra-classpath" value="" />
     </antcall>
   </target>
-  
+  -->
   
   <!-- Requires that the properties 'platform-tag', 'source-version', 'runtime-jar', and
        'extra-classpath' be set -->
@@ -318,30 +294,12 @@
        Testing Targets
        *************** -->
   
-  <target name="test-jdk6" depends="compile-jdk6, resolve-java6-exec, resolve-java6-tools" 
-          description="Run all 'jdk6' tests (after compiling); use -Dtest-spec=... to filter">
-    <antcall target="iterate-tests">
-      <param name="platform-tag" value="jdk6" />
-      <param name="extra-classpath" value="${java6-tools}" />
-      <param name="test-jvm" value="${java6-exec}" />
-    </antcall>
-  </target>
-
-  <target name="test-jdk7" depends="compile-jdk7, resolve-java7-exec, resolve-java7-tools" 
+  <target name="test-jdk7" depends="compile-jdk7+, resolve-java8-exec, resolve-java8-tools" 
           description="Run all 'jdk7' tests (after compiling); use -Dtest-spec=... to filter">
     <antcall target="iterate-tests">
       <param name="platform-tag" value="jdk7" />
-      <param name="extra-classpath" value="${java7-tools}" />
-      <param name="test-jvm" value="${java7-exec}" />
-    </antcall>
-  </target>
-
-  <target name="test-openjdk6" depends="compile-openjdk6, resolve-openjdk6-exec, resolve-openjdk6-tools" 
-          description="Run all 'openjdk6' tests (after compiling); use -Dtest-spec=... to filter">
-    <antcall target="iterate-tests">
-      <param name="platform-tag" value="openjdk6" />
-      <param name="extra-classpath" value="${openjdk6-tools}" />
-      <param name="test-jvm" value="${openjdk6-exec}" />
+      <param name="extra-classpath" value="${java8-tools}" />
+      <param name="test-jvm" value="${java8-exec}" />
     </antcall>
   </target>
 
@@ -354,7 +312,7 @@
     </antcall>
   </target>
 
-  <target name="test-mac" depends="compile-mac" 
+<!--  <target name="test-mac" depends="compile-mac" 
           description="Run all 'mac' tests (after compiling); use -Dtest-spec=... to filter">
     <antcall target="iterate-tests">
       <param name="platform-tag" value="mac" />
@@ -362,8 +320,10 @@
       <param name="test-jvm" value="java" />
     </antcall>
   </target>
+-->
 
-  <target name="test-windows" depends="compile-windows" 
+<!--
+    <target name="test-windows" depends="compile-windows" 
           description="Run all 'windows' tests (after compiling); use -Dtest-spec=... to filter">
     <antcall target="iterate-tests">
       <param name="platform-tag" value="windows" />
@@ -371,8 +331,9 @@
       <param name="test-jvm" value="java" />
     </antcall>
   </target>
-  
-  <target name="iterate-tests" depends="resolve-test-formatter-class">
+-->  
+
+<target name="iterate-tests" depends="resolve-test-formatter-class">
     <!-- Calls do-test, unless that is overridden by the caller -->
     <property name="do-test-target" value="do-test" />
     <condition property="test-iteration-message">
@@ -502,9 +463,9 @@
         <attribute name="Build-Version" value="${version-tag}" />
       </manifest>
       <fileset dir="classes/lib" />
-      <fileset dir="classes/base-jdk6" />
+<!--      <fileset dir="classes/base-jdk6" /> -->
       <fileset dir="classes/base-jdk7" />
-      <fileset dir="classes/base-openjdk6" />
+<!--      <fileset dir="classes/base-openjdk6" /> -->
       <fileset dir="classes/base-scala" />
       <fileset dir="classes/base-mac" />
       <fileset dir="classes/base-windows" />
@@ -519,9 +480,9 @@
         <attribute name="Built-By" value="${user.name}" />
         <attribute name="Build-Version" value="${version-tag}" />
       </manifest>
-      <fileset dir="classes/base-jdk6" />
+<!--      <fileset dir="classes/base-jdk6" /> -->
       <fileset dir="classes/base-jdk7" />
-      <fileset dir="classes/base-openjdk6" />
+<!--      <fileset dir="classes/base-openjdk6" /> -->
       <fileset dir="classes/base-scala" />
       <fileset dir="classes/base-mac" />
       <fileset dir="classes/base-windows" />
@@ -542,9 +503,9 @@
     <echo message="Deleting all intermediate build products" />
     
     <delete dir="classes/lib" failonerror="${clean-can-fail}" />
-    <delete dir="classes/test-jdk6" failonerror="${clean-can-fail}" />
+<!--   <delete dir="classes/test-jdk6" failonerror="${clean-can-fail}" /> -->
     <delete dir="classes/test-jdk7" failonerror="${clean-can-fail}" />
-    <delete dir="classes/test-openjdk6" failonerror="${clean-can-fail}" />
+<!--    <delete dir="classes/test-openjdk6" failonerror="${clean-can-fail}" /> -->
     <delete dir="classes/test-nextgen" failonerror="${clean-can-fail}" />
     <delete dir="classes/test-mac" failonerror="${clean-can-fail}" />
     <delete dir="classes/test-windows" failonerror="${clean-can-fail}" />
@@ -778,122 +739,7 @@
   <!-- ***************************
        Property-resolution Targets 
        *************************** -->
-  
-  <target name="resolve-java5-runtime">
-    <!-- We rely on "location" to generate a platform-specific path; note that properties
-         are immutable and so java5-runtime will only be set the *first* time. -->
 
-    <property name="java5-runtime-1" location="${java5-home}/lib/rt.jar" />
-    <available property="java5-runtime" value="${java5-runtime-1}" file="${java5-runtime-1}" />
-
-    <property name="java5-runtime-2" location="${java5-home}/jre/lib/rt.jar" />
-    <available property="java5-runtime" value="${java5-runtime-2}" file="${java5-runtime-2}" />
-
-    <property name="java5-runtime-3" location="${java5-home}/../Classes/classes.jar" />
-    <available property="java5-runtime" value="${java5-runtime-3}" file="${java5-runtime-3}" />
-
-    <fail message="Can't find rt.jar in the Java 5 home: ${java5-home}" unless="java5-runtime" />
-  </target>
-  
-  <target name="resolve-java5-exec">
-    <!-- We rely on "location" to generate a platform-specific path -->
-
-    <property name="java5-exec-1" location="${java5-home}/bin/java.exe" />
-    <condition property="java5-exec" value="${java5-exec-1}">
-      <and>
-        <available file="${java5-exec-1}" />
-        <os family="windows" />
-      </and>
-    </condition>
-    
-    <property name="java5-exec-2" location="${java5-home}/bin/java" />
-    <available property="java5-exec" value="${java5-exec-2}" file="${java5-exec-2}" />
-
-    <fail message="Can't find the java executable in the Java 5 home: ${java5-home}" unless="java5-exec" />
-  </target>
-  
-  <target name="resolve-java5-tools">
-    <!-- We rely on "location" to generate a platform-specific path; note that properties
-         are immutable and so java5-tools will only be set the *first* time. -->
-
-    <property name="java5-tools-1" location="${java5-home}/lib/tools.jar" />
-    <available property="java5-tools" value="${java5-tools-1}" file="${java5-tools-1}" />
-
-    <property name="java5-tools-2" location="${java5-home}/jre/lib/tools.jar" />
-    <available property="java5-tools" value="${java5-tools-2}" file="${java5-tools-2}" />
-
-    <property name="java5-tools-3" location="${java5-home}/../Classes/classes.jar" />
-    <available property="java5-tools" value="${java5-tools-3}" file="${java5-tools-3}" />
-
-    <fail message="Can't find tools.jar in the Java 5 home: ${java5-home}" unless="java5-tools" />
-  </target>
-  
-  
-  <target name="resolve-java6-runtime">
-    <!-- We rely on "location" to generate a platform-specific path; note that properties
-         are immutable and so java6-runtime will only be set the *first* time. -->
-
-    <property name="java6-runtime-1" location="${java6-home}/lib/rt.jar" />
-    <available property="java6-runtime" value="${java6-runtime-1}" file="${java6-runtime-1}" />
-
-    <property name="java6-runtime-2" location="${java6-home}/jre/lib/rt.jar" />
-    <available property="java6-runtime" value="${java6-runtime-2}" file="${java6-runtime-2}" />
-
-    <property name="java6-runtime-3" location="${java6-home}/../Classes/classes.jar" />
-    <available property="java6-runtime" value="${java6-runtime-3}" file="${java6-runtime-3}" />
-
-    <fail message="Can't find rt.jar in the Java 6 home: ${java6-home}" unless="java6-runtime" />
-  </target>
-  
-  <target name="resolve-java6-exec">
-    <!-- We rely on "location" to generate a platform-specific path -->
-
-    <property name="java6-exec-1" location="${java6-home}/bin/java.exe" />
-    <condition property="java6-exec" value="${java6-exec-1}">
-      <and>
-        <available file="${java6-exec-1}" />
-        <os family="windows" />
-      </and>
-    </condition>
-    
-    <property name="java6-exec-2" location="${java6-home}/bin/java" />
-    <available property="java6-exec" value="${java6-exec-2}" file="${java6-exec-2}" />
-
-    <fail message="Can't find the java executable in the Java 6 home: ${java6-home}" unless="java6-exec" />
-    <echo message="${java6-exec}"/>
-  </target>
-  
-  <target name="resolve-java6-tools">
-    <!-- We rely on "location" to generate a platform-specific path; note that properties
-         are immutable and so java6-tools will only be set the *first* time. -->
-
-    <property name="java6-tools-1" location="${java6-home}/lib/tools.jar" />
-    <available property="java6-tools" value="${java6-tools-1}" file="${java6-tools-1}" />
-
-    <property name="java6-tools-2" location="${java6-home}/jre/lib/tools.jar" />
-    <available property="java6-tools" value="${java6-tools-2}" file="${java6-tools-2}" />
-
-    <property name="java6-tools-3" location="${java6-home}/../Classes/classes.jar" />
-    <available property="java6-tools" value="${java6-tools-3}" file="${java6-tools-3}" />
-
-    <fail message="Can't find tools.jar in the Java 6 home: ${java6-home}" unless="java6-tools" />
-  </target>
-
-  <target name="resolve-java7-runtime">
-    <!-- We rely on "location" to generate a platform-specific path; note that properties
-         are immutable and so java7-runtime will only be set the *first* time. -->
-
-    <property name="java7-runtime-1" location="${java7-home}/lib/rt.jar" />
-    <available property="java7-runtime" value="${java7-runtime-1}" file="${java7-runtime-1}" />
-
-    <property name="java7-runtime-2" location="${java7-home}/jre/lib/rt.jar" />
-    <available property="java7-runtime" value="${java7-runtime-2}" file="${java7-runtime-2}" />
-
-    <property name="java7-runtime-3" location="${java7-home}/../Classes/classes.jar" />
-    <available property="java7-runtime" value="${java7-runtime-3}" file="${java7-runtime-3}" />
-
-    <fail message="Can't find rt.jar in the Java 7 home: ${java7-home}" unless="java7-runtime" />
-  </target>
   <target name="resolve-java8-runtime">
     <!-- We rely on "location" to generate a platform-specific path; note that properties
          are immutable and so java8-runtime will only be set the *first* time. -->
@@ -907,91 +753,40 @@
     <property name="java8-runtime-3" location="${java8-home}/../Classes/classes.jar" />
     <available property="java8-runtime" value="${java8-runtime-3}" file="${java8-runtime-3}" />
 
-    <fail message="Can't find dt.jar/rt.jar in the Java 7 home: ${java8-home}" unless="java8-runtime" />
+    <fail message="Can't find dt.jar/rt.jar in the Java 8 home: ${java8-home}" unless="java8-runtime" />
     <echo message="java8-runtime=${java8-runtime}" />
   </target>
   
-  <target name="resolve-java7-exec">
+  <target name="resolve-java8-exec">
     <!-- We rely on "location" to generate a platform-specific path -->
 
-    <property name="java7-exec-1" location="${java7-home}/bin/java.exe" />
-    <condition property="java7-exec" value="${java7-exec-1}">
+    <property name="java8-exec-1" location="${java8-home}/bin/java.exe" />
+    <condition property="java8-exec" value="${java8-exec-1}">
       <and>
-        <available file="${java7-exec-1}" />
+        <available file="${java8-exec-1}" />
         <os family="windows" />
       </and>
     </condition>
     
-    <property name="java7-exec-2" location="${java7-home}/bin/java" />
-    <available property="java7-exec" value="${java7-exec-2}" file="${java7-exec-2}" />
+    <property name="java8-exec-2" location="${java8-home}/bin/java" />
+    <available property="java8-exec" value="${java8-exec-2}" file="${java8-exec-2}" />
 
-    <fail message="Can't find the java executable in the Java 7 home: ${java7-home}" unless="java7-exec" />
-    <echo message="${java7-exec}"/>
-  </target>
-  
-  <target name="resolve-java7-tools">
-    <!-- We rely on "location" to generate a platform-specific path; note that properties
-         are immutable and so java7-tools will only be set the *first* time. -->
-
-    <property name="java7-tools-1" location="${java7-home}/lib/tools.jar" />
-    <available property="java7-tools" value="${java7-tools-1}" file="${java7-tools-1}" />
-
-    <property name="java7-tools-2" location="${java7-home}/jre/lib/tools.jar" />
-    <available property="java7-tools" value="${java7-tools-2}" file="${java7-tools-2}" />
-
-    <property name="java7-tools-3" location="${java7-home}/../Classes/classes.jar" />
-    <available property="java7-tools" value="${java7-tools-3}" file="${java7-tools-3}" />
-
-    <fail message="Can't find tools.jar in the Java 7 home: ${java7-home}" unless="java7-tools" />
+    <fail message="Can't find the java executable in the Java 8 home: ${java8-home}" unless="java8-exec" />
+    <echo message="java8-exec=${java8-exec}" />
   </target>
 
-  <target name="resolve-openjdk6-runtime">
-    <!-- We rely on "location" to generate a platform-specific path; note that properties
-         are immutable and so openjdk6-runtime will only be set the *first* time. -->
+  <target name="resolve-java8-tools">
+    <property name="java8-tools-1" location="${java8-home}/lib/tools.jar" />
+    <available property="java8-tools" value="${java8-tools-1}" file="${java8-tools-1}" />
 
-    <property name="openjdk6-runtime-1" location="${openjdk6-home}/lib/rt.jar" />
-    <available property="openjdk6-runtime" value="${openjdk6-runtime-1}" file="${openjdk6-runtime-1}" />
+    <property name="java8-tools-2" location="${java8-home}/../lib/tools.jar" />
+    <available property="java8-tools" value="${java8-tools-2}" file="${java8-tools-2}" />
 
-    <property name="openjdk6-runtime-2" location="${openjdk6-home}/jre/lib/rt.jar" />
-    <available property="openjdk6-runtime" value="${openjdk6-runtime-2}" file="${openjdk6-runtime-2}" />
+    <property name="java8-tools-3" location="${java8-home}/../Classes/classes.jar" />
+    <available property="java8-tools" value="${java8-tools-3}" file="${java8-tools-3}" />
 
-    <property name="openjdk6-runtime-3" location="${openjdk6-home}/../Classes/classes.jar" />
-    <available property="openjdk6-runtime" value="${openjdk6-runtime-3}" file="${openjdk6-runtime-3}" />
-
-    <fail message="Can't find rt.jar in the Java 6 home: ${openjdk6-home}" unless="openjdk6-runtime" />
-  </target>
-  
-  <target name="resolve-openjdk6-exec">
-    <!-- We rely on "location" to generate a platform-specific path -->
-
-    <property name="openjdk6-exec-1" location="${openjdk6-home}/bin/java.exe" />
-    <condition property="openjdk6-exec" value="${openjdk6-exec-1}">
-      <and>
-        <available file="${openjdk6-exec-1}" />
-        <os family="windows" />
-      </and>
-    </condition>
-    
-    <property name="openjdk6-exec-2" location="${openjdk6-home}/bin/java" />
-    <available property="openjdk6-exec" value="${openjdk6-exec-2}" file="${openjdk6-exec-2}" />
-
-    <fail message="Can't find the java executable in the Java 6 home: ${openjdk6-home}" unless="openjdk6-exec" />
-  </target>
-  
-  <target name="resolve-openjdk6-tools">
-    <!-- We rely on "location" to generate a platform-specific path; note that properties
-         are immutable and so openjdk6-tools will only be set the *first* time. -->
-
-    <property name="openjdk6-tools-1" location="${openjdk6-home}/lib/tools.jar" />
-    <available property="openjdk6-tools" value="${openjdk6-tools-1}" file="${openjdk6-tools-1}" />
-
-    <property name="openjdk6-tools-2" location="${openjdk6-home}/jre/lib/tools.jar" />
-    <available property="openjdk6-tools" value="${openjdk6-tools-2}" file="${openjdk6-tools-2}" />
-
-    <property name="openjdk6-tools-3" location="${openjdk6-home}/../Classes/classes.jar" />
-    <available property="openjdk6-tools" value="${openjdk6-tools-3}" file="${openjdk6-tools-3}" />
-
-    <fail message="Can't find tools.jar in the Java 6 home: ${openjdk6-home}" unless="openjdk6-tools" />
+    <fail message="Can't find tools.jar in the Java 8 home: ${java8-home}" unless="java8-tools" />
+    <echo message="java8-tools='${java8-tools}" />
   </target>
 
   <target name="resolve-scala-tools">

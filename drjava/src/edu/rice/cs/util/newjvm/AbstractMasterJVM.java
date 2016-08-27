@@ -79,7 +79,7 @@ public abstract class AbstractMasterJVM implements MasterRemote {
     */
   private enum State { FRESH, STARTING, RUNNING, QUITTING, DISPOSED };
   
-  private static Log _log = new Log("MasterJVM.txt", true);
+  private static Log _log = new Log("MasterJVM.txt", false);
   
   /** Loads an instance of the given AbstractSlaveJVM class.  Invoked in the slave JVM. */
   private static class SlaveFactory implements Thunk<AbstractSlaveJVM>, Serializable {

@@ -118,7 +118,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
 //  state machines should obviously be consolidated.
 
   /** Debugging log. */
-  public static final Log _log  = new Log("MasterJVM.txt", true);
+  public static final Log _log  = new Log("MasterJVM.txt", false);
   
   /* TODO: add additional phase to Phase called BusyPhase instead of using a _busy flag */
   private volatile boolean _busy = false;  // flag that records whether the interpreter is busy

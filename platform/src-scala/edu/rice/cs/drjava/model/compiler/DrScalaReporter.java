@@ -39,7 +39,6 @@ package edu.rice.cs.drjava.model.compiler;
 import java.util.LinkedList;
 
 import scala.Function1;
-import scala.Function1$class;
 import scala.Unit;
 import scala.runtime.AbstractFunction1;
 import scala.runtime.BoxedUnit;

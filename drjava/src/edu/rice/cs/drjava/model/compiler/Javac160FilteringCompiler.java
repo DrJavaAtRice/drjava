@@ -65,7 +65,7 @@ public abstract class Javac160FilteringCompiler extends JavacCompiler {
   protected static final String PREFIX = "drscala-junit";
   protected static final String SUFFIX = ".jar";
   
-  protected static final Log _log = new Log("jdk8.txt",true);
+  protected static final Log _log = new Log("jdk8.txt", false);
   
   protected Javac160FilteringCompiler(JavaVersion.FullVersion version,
                                       String location,

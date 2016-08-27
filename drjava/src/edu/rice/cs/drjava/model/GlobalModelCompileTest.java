@@ -52,6 +52,8 @@ import edu.rice.cs.util.text.EditDocumentException;
 public final class GlobalModelCompileTest extends GlobalModelTestCase {
   protected static final Log _log  = new Log("GlobalModelCompileTest.txt", false);
   
+    static { Utilities.show("Loading GlobalModelCompileTest class with _log = " + _log); }
+  
 // (WilliamF): I'm commenting out the test below, for now; it fails, but I
 //             don't know if it is the test or the compiler model which is
 //             out of date. At any rate, it is strictly an aesthetic
@@ -85,13 +87,16 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
   public void testCompileResetsInteractions() throws BadLocationException, IOException, InterruptedException,
     EditDocumentException {
     
-//    System.err.println("Starting testCompileResetsInteractions");
+    Utilities.show("Starting testCompileResetsInteractions");
+    
+     _log.log("Starting testCompileResetsInteractions");
     
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file = new File(_tempDir, "DrScalaTestFoo.scala");
     saveFile(doc, new FileSelector(file));
     
     // Use the interpreter so resetInteractions is not optimized to a no-op
+    _log.log("Calling interpreter to evaluate 0");
     interpret("0");
     
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
@@ -103,8 +108,10 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
         catch(Exception e) { throw new UnexpectedException(e); }
       }
     });
+    _log.log("Waiting for compile to complete");
     listener.waitCompileDone();
     
+    _log.log("Compilation finished");
     if (_model.getCompilerModel().getNumErrors() > 0) {
 //        System.err.println("Compile failed");
       fail("compile failed: " + getCompilerErrorString());
@@ -124,7 +131,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
   /** If we try to compile an unsaved file, and if we don't save when asked to saveAllBeforeProceeding, it should
     * not do the compile or any other actions.
     */
-  public void testCompileAbortsIfUnsaved() throws Exception {
+  public void xtestCompileAbortsIfUnsaved() throws Exception {
     final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener() {
@@ -148,7 +155,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
   /** If we try to compile while any files are unsaved, and if we don't save when asked to saveAllBeforeProceeding,
     * it should not do the compile or any other actions.
     */
-  public void testCompileAbortsIfAnyUnsaved() throws Exception {
+  public void xtestCompileAbortsIfAnyUnsaved() throws Exception {
     final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
     
@@ -175,7 +182,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
   /** If we try to compile while any files (including the active file) are unsaved but we do save it from within saveAllBeforeProceeding, the
     * compile should occur happily.  Doesn't reset interactions because no interpretations are performed.
     */
-  public void testCompileAnyUnsavedButSaveWhenAsked() throws BadLocationException, IOException, InterruptedException {
+  public void xtestCompileAnyUnsavedButSaveWhenAsked() throws BadLocationException, IOException, InterruptedException {
     final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
     final File file = tempFile();
@@ -239,7 +246,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
   /** If we try to compile while any files (but not the active file) are unsaved but we do save it from within 
     * saveAllBeforeProceeding, the compile should occur happily.  Does not reset interactions.
     */
-  public void testCompileActiveSavedAnyUnsavedButSaveWhenAsked() throws BadLocationException, IOException, 
+  public void xtestCompileActiveSavedAnyUnsavedButSaveWhenAsked() throws BadLocationException, IOException, 
     InterruptedException {
     
     final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
