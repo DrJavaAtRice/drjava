@@ -36,53 +36,61 @@
 
 package edu.rice.cs.drjava.model.junit;
 
-import edu.rice.cs.drjava.model.coverage.JacocoClassLoader;
-import edu.rice.cs.plt.reflect.EmptyClassLoader;
-import junit.framework.*;
-
 import java.io.File;
 import java.io.InputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.*;
-
-import edu.rice.cs.drjava.model.coverage.CoverageMetadata;
-import edu.rice.cs.drjava.model.coverage.JacocoClassLoader;
-import edu.rice.cs.drjava.model.coverage.ReportGenerator;
-
-import edu.rice.cs.drjava.model.compiler.LanguageLevelStackTraceMapper;
-import edu.rice.cs.drjava.model.repl.newjvm.ClassPathManager;
-import edu.rice.cs.util.Log;
-import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.classloader.ClassFileError;
-import edu.rice.cs.plt.io.IOUtil;
-import edu.rice.cs.plt.lambda.Lambda;
-import edu.rice.cs.plt.tuple.Pair;
-import edu.rice.cs.plt.iter.IterUtil;
-import edu.rice.cs.plt.reflect.ShadowingClassLoader;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-import static edu.rice.cs.plt.debug.DebugUtil.debug;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Enumeration;
+import java.util.Arrays;
+
+import edu.rice.cs.drjava.model.coverage.CoverageMetadata;
+import edu.rice.cs.drjava.model.coverage.ReportGenerator;
+
+import edu.rice.cs.drjava.model.repl.newjvm.ClassPathManager;
+
+import edu.rice.cs.util.Log;
+import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.classloader.ClassFileError;
+
+import edu.rice.cs.plt.io.IOUtil;
+import edu.rice.cs.plt.tuple.Pair;
+import edu.rice.cs.plt.iter.IterUtil;
+
+import edu.rice.cs.drjava.model.coverage.JacocoClassLoader;
+import edu.rice.cs.plt.reflect.EmptyClassLoader;
+
 import static edu.rice.cs.plt.debug.DebugUtil.error;
+
+import junit.framework.JUnit4TestAdapter;
+
+import junit.framework.AssertionFailedError;
+
+import junit.framework.Test;
+import junit.framework.TestResult;
+import junit.framework.TestSuite;
+import junit.framework.TestFailure;
+import junit.framework.JUnit4TestCaseFacade;
 
 import org.jacoco.core.analysis.Analyzer;
 import org.jacoco.core.analysis.CoverageBuilder;
 import org.jacoco.core.analysis.IBundleCoverage;
 import org.jacoco.core.data.ExecutionDataStore;
 import org.jacoco.core.data.SessionInfoStore;
+
 import org.jacoco.core.instr.Instrumenter;
 import org.jacoco.core.runtime.IRuntime;
 import org.jacoco.core.runtime.LoggerRuntime;
 import org.jacoco.core.runtime.RuntimeData;
-
-import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.swing.Utilities;
 
 /** Runs in the InterpreterJVM. Runs tests given a classname and formats the results into a (serializable) array of 
   * JUnitError that can be passed back to the MainJVM.
@@ -114,10 +122,11 @@ public class JUnitTestManager {
   private String _coverageOutdir = null;
   private IRuntime _runtime = null;
   private RuntimeData _myData = null;
-  private List<File> _files = null;
   private List<String> _nonTestClassNames = null;
   private JUnitResultTuple _finalResult = new JUnitResultTuple(false, null);
-  
+
+  private ArrayList<String> nonTestClassNames = new ArrayList();
+
   /** Standard constructor 
     * @param jmc a JUnitModelCallback
     * @param loaderFactory factory to create class loaders
@@ -143,7 +152,7 @@ public class JUnitTestManager {
     }
     return new URLClassLoader(urls.toArray(new URL[urls.size()]), EmptyClassLoader.INSTANCE);
   }
-  
+
   /** Find the test classes among the given classNames and accumulate them in
     * TestSuite for junit.  Returns null if a test suite is already pending.
     * @param classNames the (fully qualified) class names that are test class candidates
@@ -186,7 +195,7 @@ public class JUnitTestManager {
     _testFiles = new ArrayList<File>();
     _nonTestClassNames = new ArrayList(classNames.size());
     _suite = new TestSuite();
-    
+
     // Assemble test suite (as _suite) and return list of test class names
     for (Pair<String, File> pair : IterUtil.zip(classNames, files)) {
       String cName = pair.first();
@@ -199,8 +208,7 @@ public class JUnitTestManager {
           Test test = new JUnit4TestAdapter(possibleTest);
           _suite.addTest(test); 
           _log.log("Adding test " + test + " to test suite"); 
-        }
-        else { // cName is a program class that is not a test class
+        } else { // cName is a program class that is not a test class
           _nonTestClassNames.add(cName);
           _log.log("adding " + cName + " to nonTestClassNames");
         }
@@ -269,13 +277,12 @@ public class JUnitTestManager {
           i++;
         }
       }
-      
+
       _log.log("Testing doCoverage");
       
       if (_runtime != null) { /* doCoverage was true */
-        
         _log.log("Analyzing coverage data for " + _nonTestClassNames);
-        
+
         /* Collect session info (including which code was executed) */
         final ExecutionDataStore _executionDataStore = new ExecutionDataStore();
         final SessionInfoStore sessionInfos = new SessionInfoStore();
@@ -317,8 +324,7 @@ public class JUnitTestManager {
         lineColors = rg.getAllLineColors();
         _finalResult = new JUnitResultTuple(true, lineColors);
         
-      }
-      else {
+      } else {
         _log.log("runtime was null");
       }
       /* Reset the runtime */
@@ -468,8 +474,9 @@ public class JUnitTestManager {
     String message =  (isError) ? failure.thrownException().toString(): 
       failure.thrownException().getMessage();
     
-    boolean isFailure = (failure.thrownException() instanceof AssertionError || failure.thrownException() instanceof AssertionFailedError) &&
-      !classNameAndTest.equals("junit.framework.TestSuite$1.warning");
+    boolean isFailure = (failure.thrownException() instanceof AssertionError ||
+        failure.thrownException() instanceof AssertionFailedError) &&
+        !classNameAndTest.equals("junit.framework.TestSuite$1.warning");
     
 //    for debugging    
 //    try{
