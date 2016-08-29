@@ -87,7 +87,7 @@ public class Log {
         try {
           FileWriter w = new FileWriter(_file.getAbsolutePath(), true);
           _writer = new PrintWriter(w);
-          log("Log '" + _name + "' opened: " + DATE_FORMAT.format(new Date()));
+          log("Log '" + _name + "' opened: " + DATE_FORMAT.format(new Date()) + " with name " + _file.getAbsolutePath());
         }
         catch (IOException ioe) {
           throw new RuntimeException("Could not create log: " + ioe);

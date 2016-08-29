@@ -45,7 +45,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
   */
 public class ShadowingClassLoader extends ClassLoader {
   
-  private static final Log _log = new Log("JUnitTestManager.txt", true);
+  private static final Log _log = new Log("JUnitTestManager.txt", false);
   
   private final Iterable<? extends String> _prefixes;
   private final boolean _blackList;

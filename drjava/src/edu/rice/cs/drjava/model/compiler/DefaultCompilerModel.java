@@ -233,14 +233,15 @@ public class DefaultCompilerModel implements CompilerModel {
   }
   
   /** Compile the given documents. 
-   * @param docs the documents to be compiled
-   * @throws IOException if an IO operation fails
-   */
+    * @param docs the documents to be compiled
+    * @throws IOException if an IO operation fails
+    */
   private void _doCompile(List<OpenDefinitionsDocument> docs) throws IOException {
     _LLSTM.clearCache();
     final ArrayList<File> filesToCompile = new ArrayList<File>();
     final ArrayList<File> excludedFiles = new ArrayList<File>();
     final ArrayList<DJError> packageErrors = new ArrayList<DJError>();
+    
     for (OpenDefinitionsDocument doc : docs) {
       if (doc.isSourceFile()) {
         File f = doc.getFile();
@@ -256,22 +257,17 @@ public class DefaultCompilerModel implements CompilerModel {
       else excludedFiles.add(doc.getFile());
     }
     
+    if (filesToCompile.size() == 0) 
+      packageErrors.add(new DJError("None of the documents in " + docs + " is a valid source file!", false));
+        
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.compileStarted(); } });
     
     try {
       if (! packageErrors.isEmpty()) { _distributeErrors(packageErrors); }
-      else
-        try {
+      else try {
         File buildDir = _model.getBuildDirectory();
-        if (buildDir != null && buildDir != FileOps.NULL_FILE && ! buildDir.exists() && ! buildDir.mkdirs()) {
+        if (buildDir != null && buildDir != FileOps.NULL_FILE && ! buildDir.exists() && ! buildDir.mkdirs())
           throw new IOException("Could not create build directory: " + buildDir);
-        }
-        
-//          File workDir = _model.getWorkingDirectory();
-//          if (workDir == FileOps.NULL_FILE) workDir = null;
-//          if (workDir != null && ! workDir.exists() && ! workDir.mkdirs()) {
-//            throw new IOException("Could not create working directory: " + workDir);
-//          }
         
         _compileFiles(filesToCompile, buildDir);
       }

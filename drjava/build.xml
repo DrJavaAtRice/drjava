@@ -577,7 +577,7 @@
     <available property="junit-jar-to-include-exists" file="${junit-jar-to-include}" />
     <fail message="Can't find ${junit-jar-to-include}"
 	  unless="junit-jar-to-include-exists" />
-    <jar jarfile="${ant.project.name}.jar">
+    <jar jarfile="${version-tag}.jar">
       <manifest>
         <attribute name="Main-Class" value="${main-class}" />
         <attribute name="Built-By" value="${user.name}" />
@@ -637,10 +637,10 @@
       </classpath>
 
       <link href="http://docs.oracle.com/javase/8/docs/api/"/>
-      <link href="http://junit.org/junit/javadoc/3.8.1" />
-      <link href="http://drjava.org/javadoc/plt" />
-      <link href="http://drjava.org/javadoc/javalanglevels" />
-      <link href="http://drjava.org/javadoc/dynamicjava" />
+      <link href="http://junit.org/junit4/javadoc/4.12/index.html?org/junit/"/>
+      <link href="http://drjava.org/javadoc/plt/" />
+      <link href="http://drjava.org/javadoc/javalanglevels/" />
+      <link href="http://drjava.org/javadoc/dynamicjava/" />
       <!-- Additional external library APIs may be listed here -->
     </javadoc>
   </target>

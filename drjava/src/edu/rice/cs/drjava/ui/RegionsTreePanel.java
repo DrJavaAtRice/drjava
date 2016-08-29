@@ -613,7 +613,7 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
     if (_hasNextPrevButtons) {
       int count = _regionManager.getRegionCount();
       if (count>0) {
-        if (_lastSelectedRegion==null) {
+        if (_lastSelectedRegion == null) {
           // nothing selected, but we have at least one region
           _prevButton.setEnabled(false); // no "prev"
           _nextButton.setEnabled(true); // "next" will go to the first region
@@ -882,7 +882,7 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
     if ((_lastSelectedRegion!=null) && (_lastSelectedRegion.equals(r))) {
       // we need to change the _lastSelectedRegion
       R newLast = getPrevRegionInTree(_lastSelectedRegion);
-      if (newLast==null) newLast = getNextRegionInTree(_lastSelectedRegion);
+      if (newLast == null) newLast = getNextRegionInTree(_lastSelectedRegion);
       _lastSelectedRegion = newLast;
       if (_lastSelectedRegion!=null) {
         selectRegion(_lastSelectedRegion);

@@ -2098,7 +2098,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
 
   /** Initialize the "Complete Word" dialog. */
   private void initCompleteWordDialog() {
-    if (_completeWordDialog==null) {
+    if (_completeWordDialog == null) {
       _completeWordDialog = new AutoCompletePopup(this);
     }
   }
@@ -6862,7 +6862,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _setMenuShortcut(tempDetachTabbedPanesMenuItem, _detachTabbedPanesAction, KEY_DETACH_TABBEDPANES,
                      updateKeyboardManager);
     panesMenu.add(tempDetachTabbedPanesMenuItem);
-    if (_detachTabbedPanesMenuItem==null) {
+    if (_detachTabbedPanesMenuItem == null) {
       // assign the first time
       _detachTabbedPanesMenuItem = tempDetachTabbedPanesMenuItem;
     }
@@ -7150,7 +7150,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     tempDebuggerEnabledMenuItem.setSelected(false);
     _setMenuShortcut(tempDebuggerEnabledMenuItem, _toggleDebuggerAction, KEY_DEBUG_MODE_TOGGLE, updateKeyboardManager);
     debugMenu.add(tempDebuggerEnabledMenuItem);
-    if (_debuggerEnabledMenuItem==null) {
+    if (_debuggerEnabledMenuItem == null) {
       // assign the first time
       _debuggerEnabledMenuItem = tempDebuggerEnabledMenuItem;
     }
@@ -7190,7 +7190,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _setMenuShortcut(tempAutomaticTraceMenuItem, _automaticTraceDebugAction, KEY_DEBUG_AUTOMATIC_TRACE,
                      updateKeyboardManager);
     debugMenu.add(tempAutomaticTraceMenuItem);
-    if (_automaticTraceMenuItem==null) {
+    if (_automaticTraceMenuItem == null) {
       // assign the first time
       _automaticTraceMenuItem = tempAutomaticTraceMenuItem;
     }
@@ -7216,7 +7216,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     tempDetachDebugFrameMenuItem.setSelected(DrJava.getConfig().getSetting(DETACH_DEBUGGER));
     _setMenuShortcut(tempDetachDebugFrameMenuItem, _detachDebugFrameAction, KEY_DETACH_DEBUGGER, updateKeyboardManager);
     debugMenu.add(tempDetachDebugFrameMenuItem);
-    if (_detachDebugFrameMenuItem==null) {
+    if (_detachDebugFrameMenuItem == null) {
       // assign the first time
       _detachDebugFrameMenuItem = tempDetachDebugFrameMenuItem;
     }

@@ -358,7 +358,7 @@ public class CompilerErrorModel {
           }
           else throw new UnexpectedException(e);
         }
-        if (document==null) {
+        if (document == null) {
           do { curError++;}
           while ((curError < _numErrors) && (_errors[curError].file().equals(file)));
           //If the document couldn't be loaded, start the loop over at the top

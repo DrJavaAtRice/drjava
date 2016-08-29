@@ -333,6 +333,7 @@
            fork="yes" forkmode="perTest" maxmemory="512M" jvm="${test-jvm}" dir="${basedir}">
       <classpath>
         <pathelement location="lib/buildlib/junit.jar" />
+        <pathelement location="${drjava-jar}" />  <!-- required for Log class -->
         <pathelement location="lib/buildlib/plt-ant.jar" /> <!-- required for custom formatter -->
         <pathelement location="${clover-jar}" />
         <pathelement location="classes/test" />

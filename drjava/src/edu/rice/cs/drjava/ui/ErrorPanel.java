@@ -951,7 +951,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
   public JPopupMenu getPopupMenu() { return _popupMenu; }
   
   public void addPopupMenu(Action... actions) {
-    if (_popupMenu==null) {
+    if (_popupMenu == null) {
       _popupMenu = new JPopupMenu();
     }
     else {

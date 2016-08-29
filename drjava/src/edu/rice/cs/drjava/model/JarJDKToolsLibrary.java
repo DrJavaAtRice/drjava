@@ -736,7 +736,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     f = IOUtil.attemptCanonicalFile(f);
     if (IOUtil.attemptIsFile(f)) {
       Set<JDKDescriptor> set = map.get(f);
-      if (set==null) {
+      if (set == null) {
         set = new LinkedHashSet<JDKDescriptor>();
         map.put(f, set);
       }

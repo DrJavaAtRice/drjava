@@ -1473,7 +1473,7 @@ public class JPDADebugger implements Debugger {
 //        indices[i] = arr_index.get(i);
 //      }
       Pair<String,String> pair = _model.getInteractionsModel().getVariableToString(name);
-      // System.out.println("pair==null? "+(pair==null));
+      // System.out.println("pair == null? "+(pair == null));
       val = pair.first();
       type = pair.second();
       

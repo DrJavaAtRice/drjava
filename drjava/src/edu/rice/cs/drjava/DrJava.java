@@ -554,7 +554,7 @@ public class DrJava {
 //    String selectedVersion = _getToolsJarVersion(selectedFile);
 //    
 //    final String[] text;
-//    if (selectedVersion==null) {
+//    if (selectedVersion == null) {
 //      text = new String[] {
 //        "The file you chose did not appear to be the correct 'tools.jar'",
 //        "that is compatible with the version of Java that is used to",

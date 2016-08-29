@@ -70,10 +70,10 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
       }
     });
     listener.waitCompileDone();
-    if (_model.getCompilerModel().getNumErrors() > 0) {
-      fail("compile failed: " + getCompilerErrorString());
+    if (_model.getCompilerModel().getNumErrors() != 1) {
+      fail("Compilation Failure should generate one error: " + getCompilerErrorString());
     }
-    assertCompileErrorsPresent("compile should succeed", false);
+    assertCompileErrorsPresent("compile should succeed", true);
     listener.checkCompileOccurred();
     _model.removeListener(listener);
     _log.log("testCompileAllWithNoFiles complete");
@@ -88,13 +88,14 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
   public void testCompileResetsInteractions() throws BadLocationException, IOException, InterruptedException,
     EditDocumentException {
     
-//    System.err.println("Starting testCompileResetsInteractions");
+    _log.log("Starting testCompileResetsInteractions");
     
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file = new File(_tempDir, "DrJavaTestFoo.java");
     saveFile(doc, new FileSelector(file));
     
     // Use the interpreter so resetInteractions is not optimized to a no-op
+    _log.log("Interpreting 0");
     interpret("0");
     
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
@@ -107,6 +108,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
       }
     });
     listener.waitCompileDone();
+    _log.log("Compilation complete");
     
     if (_model.getCompilerModel().getNumErrors() > 0) {
 //        System.err.println("Compile failed");

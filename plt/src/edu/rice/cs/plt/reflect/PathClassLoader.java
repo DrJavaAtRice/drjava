@@ -64,7 +64,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
   */
 public class PathClassLoader extends AbstractClassLoader {
   
-  private static final Log _log = new Log("JUnitTestManager.txt", true);
+  private static final Log _log = new Log("JUnitTestManager.txt", false);
   
   /** Locate a resource in the given path.  Returns {@code null} if the resource is not found.
     * If multiple queries will be performed on the same path, a PathClassLoader instance

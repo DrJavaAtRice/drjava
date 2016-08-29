@@ -1469,7 +1469,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** @return the file extension for the "Open Folder..." command for the currently selected compiler. */
   public String getOpenAllFilesInFolderExtension() {
     CompilerModel cm = getCompilerModel();
-    if (cm==null) {
+    if (cm == null) {
       return OptionConstants.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)];
     }
     else {

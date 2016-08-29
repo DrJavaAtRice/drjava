@@ -349,7 +349,7 @@ public class DetachedFrame extends SwingFrame {
   
   public void setUpMenuBar() {
     // Mac only
-    if (PlatformFactory.ONLY.isMacPlatform() && (getJMenuBar()==null)) {
+    if (PlatformFactory.ONLY.isMacPlatform() && (getJMenuBar() == null)) {
       JMenuBar menuBar = new MainFrame.MenuBar(_mainFrame);
       _mainFrame._setUpMenuBar(menuBar);
       _mainFrame.addMenuBarInOtherFrame(menuBar);

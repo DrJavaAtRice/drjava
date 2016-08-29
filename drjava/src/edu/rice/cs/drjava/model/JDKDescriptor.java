@@ -207,7 +207,7 @@ public abstract class JDKDescriptor {
           JarFile jf = new JarFile(jarOrDir);
           for (String fn: fileNames) {
 
-            if (jf.getJarEntry(fn)==null) {
+            if (jf.getJarEntry(fn) == null) {
               jf.close();
               return false;
             }

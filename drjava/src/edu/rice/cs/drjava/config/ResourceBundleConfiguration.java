@@ -65,7 +65,7 @@ public class ResourceBundleConfiguration extends FileConfiguration {
     _shadowed = shadowed;
     map = new OptionMap() {
       public <T> T getOption(OptionParser<T> o) {
-        if (o==null) return _shadowed.getOptionMap().getOption(o);
+        if (o == null) return _shadowed.getOptionMap().getOption(o);
         try {
           String str = _bundle.getString(o.getName());
           return o.parse(str); // defined in resource bundle
@@ -89,7 +89,7 @@ public class ResourceBundleConfiguration extends FileConfiguration {
       }
       
       public <T> String getString(OptionParser<T> o) {
-        if (o==null) return _shadowed.getOptionMap().getString(o);
+        if (o == null) return _shadowed.getOptionMap().getString(o);
         try {
           String str = _bundle.getString(o.getName());
           return str; // defined in resource bundle
@@ -101,7 +101,7 @@ public class ResourceBundleConfiguration extends FileConfiguration {
       }
       
       public <T> void setString(OptionParser<T> o, String s) {
-        if (o==null) _shadowed.getOptionMap().setString(o, s);
+        if (o == null) _shadowed.getOptionMap().setString(o, s);
         try {
           _bundle.getString(o.getName());
           return; // defined in resource bundle, can't be set
@@ -113,7 +113,7 @@ public class ResourceBundleConfiguration extends FileConfiguration {
       }
       
       public <T> T removeOption(OptionParser<T> o) {
-        if (o==null) return _shadowed.getOptionMap().removeOption(o);
+        if (o == null) return _shadowed.getOptionMap().removeOption(o);
         try {
           _bundle.getString(o.getName());
           return null; // defined in resource bundle, can't be removed
@@ -143,7 +143,7 @@ public class ResourceBundleConfiguration extends FileConfiguration {
     * @param value New value for the option
     */
   public <T> T setSetting(final Option<T> op, final T value) {
-    if (op==null) return _shadowed.setSetting(op, value);
+    if (op == null) return _shadowed.setSetting(op, value);
     try {
       _bundle.getString(op.getName());
       return null; // defined in resource bundle, can't be set
@@ -156,7 +156,7 @@ public class ResourceBundleConfiguration extends FileConfiguration {
   
   /** Gets the current value of the given Option. */
   public <T> T getSetting(Option<T> op) {
-    if (op==null) return _shadowed.getSetting(op);
+    if (op == null) return _shadowed.getSetting(op);
     try {
       String str = _bundle.getString(op.getName());
       return op.parse(str); // defined in resource bundle
@@ -169,7 +169,7 @@ public class ResourceBundleConfiguration extends FileConfiguration {
 
   /** Return true if the option is editable. If it was defined in the resource bundle, it is not editable. */
   public <T> boolean isEditable(Option<T> op) {
-    if (op==null) return _shadowed.isEditable(op);
+    if (op == null) return _shadowed.isEditable(op);
     try {
       _bundle.getString(op.getName());
       return false; // defined, not editable

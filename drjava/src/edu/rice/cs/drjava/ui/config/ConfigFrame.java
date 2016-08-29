@@ -1512,7 +1512,7 @@ public class ConfigFrame extends SwingFrame {
           File f = junitLoc.getComponent().getFileFromField();
           String[] s = new String[] { " ", " ", " ", " " };
           boolean isConcJUnit = true;
-          if ((!junitLocEnabled.getComponent().isSelected()) || (f==null) || FileOps.NULL_FILE.equals(f) || !f.exists()) {
+          if ((!junitLocEnabled.getComponent().isSelected()) || (f == null) || FileOps.NULL_FILE.equals(f) || !f.exists()) {
             s[0] = "DrJava uses the built-in ConcJUnit framework.";
           }
           else {

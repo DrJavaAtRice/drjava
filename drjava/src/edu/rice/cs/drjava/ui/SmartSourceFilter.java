@@ -58,7 +58,7 @@ public class SmartSourceFilter extends JavaSourceFilter {
 
     // this is a ".java" file
     File parent = f.getParentFile();
-    if (parent==null) {
+    if (parent == null) {
       // can't do the smart thing; but since this is a ".java" file, accept it
       return true;
     }

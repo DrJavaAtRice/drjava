@@ -74,7 +74,7 @@ public final class ActionBracePlusTest extends IndentRulesTestCase {
   }
   
 
-  public void xtestSpaceSuffix() throws BadLocationException {
+  public void testSpaceSuffix() throws BadLocationException {
     _action = new ActionBracePlus(1);
     
     // (2) 

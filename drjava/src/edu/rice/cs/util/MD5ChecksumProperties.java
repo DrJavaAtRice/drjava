@@ -141,7 +141,7 @@ public class MD5ChecksumProperties extends Properties {
   public boolean addMD5(String key, InputStream is, OutputStream os) throws IOException {
     String md5 = getMD5String(is, os);
     Object prev = setProperty(key,md5);
-    return ((prev==null) || (prev.equals(md5)));
+    return ((prev == null) || (prev.equals(md5)));
   }
 
   /** Add the MD5 checksum for the data in the input stream to the
