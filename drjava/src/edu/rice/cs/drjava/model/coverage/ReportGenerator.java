@@ -17,21 +17,17 @@ import java.util.List;
 import java.util.HashMap;
 import java.util.ArrayList;
 
-import org.jacoco.core.analysis.Analyzer;
 import org.jacoco.core.analysis.CoverageBuilder;
 import org.jacoco.core.analysis.IBundleCoverage;
 import org.jacoco.core.analysis.IClassCoverage;
 import org.jacoco.core.analysis.ICounter;
 import org.jacoco.core.data.ExecutionDataStore;
 import org.jacoco.core.data.SessionInfoStore;
-import org.jacoco.core.instr.Instrumenter;
 
 import org.jacoco.report.DirectorySourceFileLocator;
 import org.jacoco.report.FileMultiReportOutput;
 import org.jacoco.report.IReportVisitor;
 import org.jacoco.report.html.HTMLFormatter;
-
-import edu.rice.cs.drjava.model.*;
 
 /** This example creates a HTML report for eclipse like projects based on a single execution data store called 
   * jacoco.exec. The report contains no grouping information. The class files under test must be compiled with debug 
