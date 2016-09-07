@@ -124,9 +124,7 @@ public class JUnitTestManager {
   private RuntimeData _myData = null;
   private List<String> _nonTestClassNames = null;
   private JUnitResultTuple _finalResult = new JUnitResultTuple(false, null);
-
-  private ArrayList<String> nonTestClassNames = new ArrayList();
-
+  
   /** Standard constructor 
     * @param jmc a JUnitModelCallback
     * @param loaderFactory factory to create class loaders

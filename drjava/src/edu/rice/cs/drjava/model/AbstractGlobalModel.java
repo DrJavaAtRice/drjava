@@ -160,7 +160,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /** In simple terms, a DefaultGlobalModel without an interpreter, compiler, junit testing, debugger or javadoc.
   * Hence, it only has only document handling functionality
-  * @version $Id: AbstractGlobalModel.java 5553 2012-05-01 17:28:45Z rcartwright $
+  * @version $Id$
   */
 public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants, DocumentIterator {
   
