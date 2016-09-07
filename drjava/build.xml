@@ -553,8 +553,8 @@
   </target>
 
   <target name="do-run-jar" depends="resolve-jvm-args">
-    <echo message="Running ${ant.project.name}.jar with command '${run-jvm}'" />
-    <java jar="${ant.project.name}.jar" jvm="${run-jvm}" fork="yes" spawn="yes">
+    <echo message="Running ${version-tag}.jar with command '${run-jvm}'" />
+    <java jar="${version-tag}.jar" jvm="${run-jvm}" fork="yes" spawn="yes">
       <assertions>
         <enable />
       </assertions>
