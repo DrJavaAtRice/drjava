@@ -94,6 +94,8 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
   
   private volatile JLabel _findLabelBot; // Dynamically updated
   
+  /* The choice of fields names here is really obnoxious because this class is closely linked with FindReplaceMachine
+   * and the SAME field (property) names have completely different meanings in that class! */
   private volatile JCheckBox _ignoreCommentsAndStrings;
   private volatile JCheckBox _matchCase;
   private volatile JCheckBox _searchAllDocuments;
@@ -115,17 +117,15 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
   /** Listens for changes to the cursor position in order to reset the start position */
   private CaretListener _caretListener = new CaretListener() {
     public void caretUpdate(CaretEvent e) {
-           
+      
       assert EventQueue.isDispatchThread();
-//      Utilities.invokeLater(new Runnable() {
-//        public void run() {
-          _replaceAction.setEnabled(false);
-          _replaceFindNextAction.setEnabled(false);
-          _replaceFindPreviousAction.setEnabled(false);
-          _machine.positionChanged();
-          _caretChanged = true;
-//        }
-//      });
+      
+      _replaceAction.setEnabled(false);
+      _replaceFindNextAction.setEnabled(false);
+      _replaceFindPreviousAction.setEnabled(false);
+      _machine.positionChanged();
+      _caretChanged = true;
+      
     }
   };
   
@@ -355,7 +355,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
       public void itemStateChanged(ItemEvent e) {
         boolean isSelected = (e.getStateChange() == ItemEvent.SELECTED);
         _machine.setSearchSelectionOnly(isSelected);
-        if(isSelected) {
+        if (isSelected) {
           _ignoreTestCases.setSelected(false);
           _searchAllDocuments.setSelected(false);
           _findNextAction.setEnabled(false);
@@ -555,7 +555,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
 
   /** Performs "find all" command. */
   private void _findAll() {
-    // The following two line was moved to _findAll(...) so it is executed by FindResultsPanel._findAgain
+    // The following line was moved to _findAll(...) so it is executed by FindResultsPanel._findAgain
 //    _machine.setSearchBackwards(false);
     
     _findLabelBot.setText("Next");
@@ -603,12 +603,17 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     * @param region a MovingDocumentRegion
     * @param panel panel in which to display search results
     */
-  public void findAll(String searchStr, final boolean searchAll, 
-    final boolean searchSelectionOnly, final boolean matchCase,
-    final boolean wholeWord, final boolean noComments, 
-    final boolean noTestCases, final OpenDefinitionsDocument startDoc, 
-    final RegionManager<MovingDocumentRegion> rm, 
-    final MovingDocumentRegion region, final FindResultsPanel panel) {
+  public void findAll(String searchStr, 
+                      final boolean searchAll, 
+                      final boolean searchSelectionOnly,
+                      final boolean matchCase,
+                      final boolean wholeWord, 
+                      final boolean noComments, 
+                      final boolean noTestCases, 
+                      final OpenDefinitionsDocument startDoc, 
+                      final RegionManager<MovingDocumentRegion> rm, 
+                      final MovingDocumentRegion region, 
+                      final FindResultsPanel panel) {
     
     _machine.setSearchBackwards(false);
 
@@ -648,10 +653,10 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     _frame.hourglassOn();
     try {
       /* Accumulate all occurrences of searchStr in results. */
-      final int count = _machine.processAll(new Runnable1<FindResult>() {
-        public void run(FindResult fr) { results.add(fr); }
-      }, region);
+      final int count = 
+        _machine.processAll(new Runnable1<FindResult>() { public void run(FindResult fr) { results.add(fr); }}, region);
       
+      /* Restore state of FindReplaceMachine */
       _machine.setDocument(oldDoc);
       _machine.setFirstDoc(oldFirstDoc);
       _machine.setFindWord(oldFindWord);

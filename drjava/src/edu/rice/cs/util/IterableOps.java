@@ -46,7 +46,7 @@ public abstract class IterableOps {
     */
   @SuppressWarnings("unchecked")
   public static <T> T[] toArray(Iterable<T> iter, Class<T> elemType) {
-    ArrayList<T> al = new ArrayList();
+    ArrayList<T> al = (ArrayList<T>) new ArrayList();
 
     for (T elem : iter) {
       al.add(elem);

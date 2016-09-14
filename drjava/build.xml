@@ -553,8 +553,8 @@
   </target>
 
   <target name="do-run-jar" depends="resolve-jvm-args">
-    <echo message="Running ${version-tag}.jar with command '${run-jvm}'" />
-    <java jar="${version-tag}.jar" jvm="${run-jvm}" fork="yes" spawn="yes">
+    <echo message="Running ${ant.project.name}.jar with command '${run-jvm}'" />
+    <java jar="${ant.project.name}.jar" jvm="${run-jvm}" fork="yes" spawn="yes">
       <assertions>
         <enable />
       </assertions>
@@ -577,7 +577,7 @@
     <available property="junit-jar-to-include-exists" file="${junit-jar-to-include}" />
     <fail message="Can't find ${junit-jar-to-include}"
 	  unless="junit-jar-to-include-exists" />
-    <jar jarfile="${version-tag}.jar">
+    <jar jarfile="${ant.project.name}.jar">
       <manifest>
         <attribute name="Main-Class" value="${main-class}" />
         <attribute name="Built-By" value="${user.name}" />

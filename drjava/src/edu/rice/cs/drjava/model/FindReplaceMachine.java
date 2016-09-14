@@ -54,7 +54,7 @@ import java.awt.Component;
   */
 public class FindReplaceMachine {
   
-  static private Log _log = new Log("FindReplace.txt", false);
+  static private final Log _log = new Log("FindReplace.txt", false);
   
   /* Visible machine state; manipulated directly or indirectly by FindReplacePanel. */
   private volatile OpenDefinitionsDocument _doc;           // Current search document 
@@ -90,6 +90,8 @@ public class FindReplaceMachine {
     _frame = frame;
     _docIterator = docIterator;
     _current = -1;
+    /* Using setters for internal initilization is VERY BAD taste; it obscures the initial state.  What
+     * is the invariant for instances of this class?  Who knows? */
     setFindAnyOccurrence();
     setFindWord("");
     setReplaceWord("");
@@ -258,7 +260,8 @@ public class FindReplaceMachine {
     */
   public void setSelection(MovingDocumentRegion s) { _selectionRegion = s; }
 
-  /** Alternative interface for the private method replaceAll(...) */
+  /** Alternative interface for the private method replaceAll(...) 
+    * @return the number of replacements */
   public int replaceAll() { return replaceAll(_searchAllDocuments, _searchSelectionOnly); }
   
   /** Replaces all occurences of the find word with the replace word
@@ -313,11 +316,12 @@ public class FindReplaceMachine {
     
     assert EventQueue.isDispatchThread();
     
-    if (!searchSelectionOnly) {
+    if (! searchSelectionOnly) {
       _selectionRegion = new MovingDocumentRegion(_doc, 0, _doc.getLength(),
                                                   _doc._getLineStartPos(0),
                                                   _doc._getLineEndPos(_doc.getLength()));
     }
+    /* _selectionRegion is not degenerate unless document is degenerate; may be entire document. */
     if (_isForward) setPosition(_selectionRegion.getStartOffset());
     else setPosition(_selectionRegion.getEndOffset());
     
@@ -336,9 +340,12 @@ public class FindReplaceMachine {
     return count;
   }
   
-  /** Processes all occurrences of the find word with the replace word in the current document or in all documents
-    * depending the values of fields _searchAllDocuments and _searchSelectionOnly and parameter region.  Assumes that 
-    * findAction does not modify the document it processes.  Only executes in event thread.
+  /** Replaces all occurrences of the find word with the replace word in the specified region while performing the
+    * which occurs within the current document.  On each match, the findAction command is executed, assuming that
+    * indAction does not modify the document it processes.  Saves value of _searchAllDocuments and _searchSelectionOnly 
+    * and restores trem, an ugly hack dictated by embedding this information in the FindReplaceMachine. During this 
+    * particular search action, _searchAllDocuments is false since it is confined to a region within the current document.  
+    * Only executes in event thread.
     * @param findAction action to perform on the occurrences; input is the FindResult, output is ignored
     * @param region the selection region
     * @return the number of processed occurrences
@@ -346,17 +353,19 @@ public class FindReplaceMachine {
   public int processAll(Runnable1<FindResult> findAction, MovingDocumentRegion region) {
     
     assert EventQueue.isDispatchThread();
-
+    
     _selectionRegion = region;
-    return processAll(findAction); 
+    
+    int count = processAll(findAction);
+
+    return count;
   }
   
   /** Processes all occurences of the find word with the replace word in the current document or in all documents
     * depending the value of fields _searchAllDocuments, _searchSelectionOnly, _selectionRegion.  Assumes that 
     * findAction does not modify the document it processes.  Only executes in event thread.
-    * @param findAction action to perform on the occurrences; input is the FindResult, output is ignored
-    * @param searchAll true if we should search for occurrences in all documents
-    * @param searchSelectionOnly true if we should only search in the current selection of document
+    * Modifies _searchSelectionOnly if it is inconsistent with _searchAllDocuments
+    * @param findAction action to perform on the occurrences; input is the FindResult, output is ignored.
     * @return the number of replacements
     */
   private int processAll(Runnable1<FindResult> findAction) {
@@ -364,11 +373,12 @@ public class FindReplaceMachine {
     assert EventQueue.isDispatchThread();
     
     if (_searchAllDocuments) {
-      int count = 0;           // the number of replacements done so far
+      int count = 0;                 // the number of replacements done so far
+      _searchSelectionOnly = false;  // force _searchSelectionOnly to be false
       final int n = _docIterator.getDocumentCount();
       for (int i = 0; i < n; i++) {
         // process all in the rest of the documents
-        _searchSelectionOnly = false;  // force _searchSelectionOnly to be false
+
         count += _processAllInCurrentDoc(findAction);
         _doc = _docIterator.getNextDocument(_doc, _frame);
         
@@ -385,25 +395,27 @@ public class FindReplaceMachine {
       count += _processAllInCurrentDoc(findAction);
       return count;
     }
-    else return _processAllInCurrentDoc(findAction);
+    else /* search entire current document */
+      return _processAllInCurrentDoc(findAction);
   }
   
-  /** Processes all occurences of _findWord in _doc. Never processes other documents.  Starts at the beginning or the
-   * end of the document (depending on find direction).  This convention ensures that matches created by string 
-   * replacement will not be replaced as in the following example:<p>
-   *   findString:    "hello"<br>
-   *   replaceString: "e"<br>
-   *   document text: "hhellollo"<p>
-   * Only executes in event thread.  Assumes (i) this has exclusive access to _doc (since it only runs in event thread) 
-   * and (ii) findAction does not modify _doc.
-   * @param findAction action to perform on the occurrences; input is the FindResult, output is ignored
-   * @return the number of replacements
-   */
+  /** Processes all occurences of _findWord in _doc depending the values of fields _searchSelectionOnly,
+    * _selectionRegion and _isForward.  Ignores value of _searchAllDocuments.  Processes selected region (which may be 
+    * the whole document) sequentially depending on find direction. This convention ensures that matches created by 
+    * string replacement will not be replaced as in the following example:<p>
+    *   findString:    "hello"<br>
+    *   replaceString: "e"<br>
+    *   document text: "hhellollo"<p>
+    * Only executes in event thread.  Assumes (i) this has exclusive access to _doc (since it only runs in event thread) 
+    * and (ii) findAction does not modify _doc.
+    * @param findAction action to perform on the occurrences; input is the FindResult, output is ignored
+    * @return the number of replacements
+    */
   private int _processAllInCurrentDoc(Runnable1<FindResult> findAction) {
     
     assert EventQueue.isDispatchThread();
 
-    if (!_searchSelectionOnly) {
+    if (! _searchSelectionOnly) {
       _selectionRegion = new MovingDocumentRegion(_doc, 0, _doc.getLength(), _doc._getLineStartPos(0),
                                                   _doc._getLineEndPos(_doc.getLength()));
     }
