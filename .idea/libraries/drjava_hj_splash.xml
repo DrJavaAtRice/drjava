@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="drjava-hj-splash">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/misc/drjava-hj/misc/drjava-hj-splash.zip!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

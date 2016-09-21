@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="buildlib3">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/plt/lib/buildlib/findbugs-ant.jar!/" />
+      <root url="jar://$PROJECT_DIR$/plt/lib/buildlib/plt-ant.jar!/" />
+      <root url="jar://$PROJECT_DIR$/plt/lib/buildlib/ant-contrib.jar!/" />
+      <root url="jar://$PROJECT_DIR$/plt/lib/buildlib/cenquatasks.jar!/" />
+      <root url="jar://$PROJECT_DIR$/plt/lib/buildlib/junit.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

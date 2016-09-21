@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="eclipse-compiler">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/misc/eclipse-compiler/ecjsrc-3.6M7.zip!/" />
+      <root url="jar://$PROJECT_DIR$/misc/eclipse-compiler/ecj-3.6M7.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

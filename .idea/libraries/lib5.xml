@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="lib5">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/dynamicjava/lib/plt.jar!/" />
+      <root url="jar://$PROJECT_DIR$/dynamicjava/lib/asm-all-5.0.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

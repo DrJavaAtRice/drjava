@@ -1,0 +1,16 @@
+<component name="libraryTable">
+  <library name="buildlib7">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/drjava/lib/buildlib/netbeans-memory-leak-utils.jar!/" />
+      <root url="jar://$PROJECT_DIR$/drjava/lib/buildlib/concutest-junit-4.7-withrt-nodep.jar!/" />
+      <root url="jar://$PROJECT_DIR$/drjava/lib/buildlib/ant-contrib.jar!/" />
+      <root url="jar://$PROJECT_DIR$/drjava/lib/buildlib/plt-ant.jar!/" />
+      <root url="jar://$PROJECT_DIR$/drjava/lib/buildlib/findbugs-ant.jar!/" />
+      <root url="jar://$PROJECT_DIR$/drjava/lib/buildlib/junit.jar!/" />
+      <root url="jar://$PROJECT_DIR$/drjava/lib/buildlib/concjunitrt.jar!/" />
+      <root url="jar://$PROJECT_DIR$/drjava/lib/buildlib/cenquatasks.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

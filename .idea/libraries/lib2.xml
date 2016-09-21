@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="lib2">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/java-repl/lib/shavenmaven.jar!/" />
+      <root url="jar://$PROJECT_DIR$/java-repl/lib/manual.zip!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

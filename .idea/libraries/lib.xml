@@ -1,0 +1,15 @@
+<component name="libraryTable">
+  <library name="lib">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/eclipse/lib/asm-3.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/eclipse/lib/plt.jar!/" />
+      <root url="jar://$PROJECT_DIR$/eclipse/lib/junit.jar!/" />
+      <root url="jar://$PROJECT_DIR$/eclipse/lib/looks-2.1.4.jar!/" />
+      <root url="jar://$PROJECT_DIR$/eclipse/lib/dynamicjava-base-15.jar!/" />
+      <root url="jar://$PROJECT_DIR$/eclipse/lib/platform.jar!/" />
+      <root url="jar://$PROJECT_DIR$/eclipse/lib/javalanglevels.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

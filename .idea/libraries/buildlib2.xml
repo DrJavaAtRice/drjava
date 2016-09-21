@@ -1,0 +1,15 @@
+<component name="libraryTable">
+  <library name="buildlib2">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/dynamicjava/lib/buildlib/findbugs-ant.jar!/" />
+      <root url="jar://$PROJECT_DIR$/dynamicjava/lib/buildlib/astgen.jar!/" />
+      <root url="jar://$PROJECT_DIR$/dynamicjava/lib/buildlib/junit.jar!/" />
+      <root url="jar://$PROJECT_DIR$/dynamicjava/lib/buildlib/cenquatasks.jar!/" />
+      <root url="jar://$PROJECT_DIR$/dynamicjava/lib/buildlib/plt-ant.jar!/" />
+      <root url="jar://$PROJECT_DIR$/dynamicjava/lib/buildlib/ant-contrib.jar!/" />
+      <root url="jar://$PROJECT_DIR$/dynamicjava/lib/buildlib/jlbench-base.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

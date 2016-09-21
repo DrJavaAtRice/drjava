@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="buildlib">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/javalanglevels/lib/buildlib/findbugs-ant.jar!/" />
+      <root url="jar://$PROJECT_DIR$/javalanglevels/lib/buildlib/junit.jar!/" />
+      <root url="jar://$PROJECT_DIR$/javalanglevels/lib/buildlib/astgen.jar!/" />
+      <root url="jar://$PROJECT_DIR$/javalanglevels/lib/buildlib/cenquatasks.jar!/" />
+      <root url="jar://$PROJECT_DIR$/javalanglevels/lib/buildlib/ant-contrib.jar!/" />
+      <root url="jar://$PROJECT_DIR$/javalanglevels/lib/buildlib/plt-ant.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

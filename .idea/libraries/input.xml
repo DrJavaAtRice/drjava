@@ -1,0 +1,16 @@
+<component name="libraryTable">
+  <library name="input">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/misc/drjava-hj/input/hj.jar!/" />
+      <root url="jar://$PROJECT_DIR$/misc/drjava-hj/input/hjc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/misc/drjava-hj/input/lpg.jar!/" />
+      <root url="jar://$PROJECT_DIR$/misc/drjava-hj/input/sootclasses-2.3.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/misc/drjava-hj/input/hj-ant-task.jar!/" />
+      <root url="jar://$PROJECT_DIR$/misc/drjava-hj/input/java_cup.jar!/" />
+      <root url="jar://$PROJECT_DIR$/misc/drjava-hj/input/jasminclasses-2.3.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/misc/drjava-hj/input/polyglot.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

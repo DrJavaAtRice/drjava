@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="lib3">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/misc/netbeans-memory-leak-utils/lib/assertgc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/misc/netbeans-memory-leak-utils/lib/org-netbeans-insane.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

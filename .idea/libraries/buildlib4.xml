@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="buildlib4">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/platform/lib/buildlib/junit.jar!/" />
+      <root url="jar://$PROJECT_DIR$/platform/lib/buildlib/cenquatasks.jar!/" />
+      <root url="jar://$PROJECT_DIR$/platform/lib/buildlib/ant-contrib.jar!/" />
+      <root url="jar://$PROJECT_DIR$/platform/lib/buildlib/plt-ant.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

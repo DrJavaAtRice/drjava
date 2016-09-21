@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="buildlib1">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/misc/netbeans-memory-leak-utils/lib/buildlib/cenquatasks.jar!/" />
+      <root url="jar://$PROJECT_DIR$/misc/netbeans-memory-leak-utils/lib/buildlib/plt-ant.jar!/" />
+      <root url="jar://$PROJECT_DIR$/misc/netbeans-memory-leak-utils/lib/buildlib/findbugs-ant.jar!/" />
+      <root url="jar://$PROJECT_DIR$/misc/netbeans-memory-leak-utils/lib/buildlib/junit.jar!/" />
+      <root url="jar://$PROJECT_DIR$/misc/netbeans-memory-leak-utils/lib/buildlib/ant-contrib.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/plt/testFiles/classLoading/classLoading.iml" filepath="$PROJECT_DIR$/plt/testFiles/classLoading/classLoading.iml" />
+      <module fileurl="file://$PROJECT_DIR$/drjava/drjava.iml" filepath="$PROJECT_DIR$/drjava/drjava.iml" />
+      <module fileurl="file://$PROJECT_DIR$/misc/drjava-hj/drjava-hj.iml" filepath="$PROJECT_DIR$/misc/drjava-hj/drjava-hj.iml" />
+      <module fileurl="file://$PROJECT_DIR$/dynamicjava/dynamicjava.iml" filepath="$PROJECT_DIR$/dynamicjava/dynamicjava.iml" />
+      <module fileurl="file://$PROJECT_DIR$/eclipse/eclipse.iml" filepath="$PROJECT_DIR$/eclipse/eclipse.iml" />
+      <module fileurl="file://$PROJECT_DIR$/java-repl/intellij-plugin/intellij-plugin.iml" filepath="$PROJECT_DIR$/java-repl/intellij-plugin/intellij-plugin.iml" />
+      <module fileurl="file://$PROJECT_DIR$/java-repl/java-repl.iml" filepath="$PROJECT_DIR$/java-repl/java-repl.iml" />
+      <module fileurl="file://$PROJECT_DIR$/javalanglevels/javalanglevels.iml" filepath="$PROJECT_DIR$/javalanglevels/javalanglevels.iml" />
+      <module fileurl="file://$PROJECT_DIR$/jedit/jedit.iml" filepath="$PROJECT_DIR$/jedit/jedit.iml" />
+      <module fileurl="file://$PROJECT_DIR$/misc/netbeans-memory-leak-utils/netbeans-memory-leak-utils.iml" filepath="$PROJECT_DIR$/misc/netbeans-memory-leak-utils/netbeans-memory-leak-utils.iml" />
+      <module fileurl="file://$PROJECT_DIR$/platform/platform.iml" filepath="$PROJECT_DIR$/platform/platform.iml" />
+      <module fileurl="file://$PROJECT_DIR$/plt/plt.iml" filepath="$PROJECT_DIR$/plt/plt.iml" />
+      <module fileurl="file://$PROJECT_DIR$/misc/plt-ant/plt-ant.iml" filepath="$PROJECT_DIR$/misc/plt-ant/plt-ant.iml" />
+      <module fileurl="file://$PROJECT_DIR$/drjava/testFiles/testFiles.iml" filepath="$PROJECT_DIR$/drjava/testFiles/testFiles.iml" />
+    </modules>
+  </component>
+</project>
