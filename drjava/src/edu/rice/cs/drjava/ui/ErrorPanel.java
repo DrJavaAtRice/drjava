@@ -54,7 +54,7 @@ import edu.rice.cs.drjava.model.print.DrScalaBook;
 import edu.rice.cs.util.swing.RightClickMouseAdapter;
 
 import java.util.HashMap;
-import java.util.Vector;
+import java.util.ArrayList;
 
 import javax.swing.*;
 import javax.swing.text.*;
@@ -406,18 +406,18 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       addActionForKeyStroke(DrScala.getConfig().getSetting(OptionConstants.KEY_CUT), cutAction);
       addActionForKeyStroke(DrScala.getConfig().getSetting(OptionConstants.KEY_COPY), copyAction);
       addActionForKeyStroke(DrScala.getConfig().getSetting(OptionConstants.KEY_PASTE_FROM_HISTORY), pasteAction);
-      DrScala.getConfig().addOptionListener(OptionConstants.KEY_CUT, new OptionListener<Vector<KeyStroke>>() {
-        public void optionChanged(OptionEvent<Vector<KeyStroke>> oe) {
+      DrScala.getConfig().addOptionListener(OptionConstants.KEY_CUT, new OptionListener<ArrayList<KeyStroke>>() {
+        public void optionChanged(OptionEvent<ArrayList<KeyStroke>> oe) {
           addActionForKeyStroke(DrScala.getConfig().getSetting(OptionConstants.KEY_CUT), cutAction);
         }
       });
-      DrScala.getConfig().addOptionListener(OptionConstants.KEY_COPY, new OptionListener<Vector<KeyStroke>>() {
-        public void optionChanged(OptionEvent<Vector<KeyStroke>> oe) {
+      DrScala.getConfig().addOptionListener(OptionConstants.KEY_COPY, new OptionListener<ArrayList<KeyStroke>>() {
+        public void optionChanged(OptionEvent<ArrayList<KeyStroke>> oe) {
           addActionForKeyStroke(DrScala.getConfig().getSetting(OptionConstants.KEY_COPY), copyAction);
         }
       });
-      DrScala.getConfig().addOptionListener(OptionConstants.KEY_PASTE_FROM_HISTORY, new OptionListener<Vector<KeyStroke>>() {
-        public void optionChanged(OptionEvent<Vector<KeyStroke>> oe) {
+      DrScala.getConfig().addOptionListener(OptionConstants.KEY_PASTE_FROM_HISTORY, new OptionListener<ArrayList<KeyStroke>>() {
+        public void optionChanged(OptionEvent<ArrayList<KeyStroke>> oe) {
           addActionForKeyStroke(DrScala.getConfig().getSetting(OptionConstants.KEY_PASTE_FROM_HISTORY), pasteAction);
         }
       });
@@ -435,7 +435,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
      *  @param stroke keystroke that triggers the action
      *  @param action Action to perform
      */
-    public void addActionForKeyStroke(Vector<KeyStroke> stroke, Action action) {
+    public void addActionForKeyStroke(ArrayList<KeyStroke> stroke, Action action) {
       // remove previous bindings
       KeyStroke[] keys = _keymap.getKeyStrokesForAction(action);
       if (keys != null) {

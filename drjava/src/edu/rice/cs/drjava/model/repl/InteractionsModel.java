@@ -107,14 +107,6 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   /** Number of milliseconds to wait after each println, to prevent the JVM from being flooded with print calls. */
   private final int _writeDelay;
   
-  
-  /* Debugger deactivated in DrScala */
-//  /** Port used by the debugger to connect to the Interactions JVM. Uniquely created in getDebugPort(). */
-//  private volatile int _debugPort;
-//  
-//  /** Whether the debug port has already been set.  If not, calling getDebugPort will generate an available port. */
-//  private volatile boolean _debugPortSet;
-  
   /** The String added to history when the interaction is complete or an error is thrown */
   private volatile String _toAddToHistory = "";
   
@@ -124,7 +116,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   /** The embedded interactions document (a SwingDocument in native DrJava) */
   protected final ConsoleDocumentInterface _cDoc;
   
-  /** The interactions pane bundled with this document.  In contrast to a standard MVC decomposition, where the model
+  /** The interactions pane attached to this document.  In contrast to a standard MVC decomposition, where the model
     * and the view are independent components, an interactions model inherently includes a prompt and a cursor marking
     * where the next input expression (in progress) begins and where the cursor is within that expression.  In Swing, the
     * view contains the cursor.  Our InteractionsDocument (a form of ConsoleDocument) contains the prompt.  Public only for
@@ -260,7 +252,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   
   /** Executes import statements for the classes and packages in the auto-import set. */
   public void autoImport() {
-    java.util.Vector<String> classes = DrScala.getConfig().getSetting(OptionConstants.INTERACTIONS_AUTO_IMPORT_CLASSES);
+    java.util.ArrayList<String> classes = DrScala.getConfig().getSetting(OptionConstants.INTERACTIONS_AUTO_IMPORT_CLASSES);
     final StringBuilder sb = new StringBuilder();
     
     for(String s: classes) {
@@ -344,38 +336,17 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   
   /** Returns the working directory for the current interpreter. */
   public File getWorkingDirectory() { return _workingDir; }
-  
-  /** These add the given path to the classpaths used in the interpreter.
-    * @param f  the path to add
-    */
-  public abstract void addProjectClassPath(File f);
-
-  /** These add the given path to the build directory classpaths used in the interpreter.
-    * @param f  the path to add
-    */
-  public abstract void addBuildDirectoryClassPath(File f);
 
   /** These add the given path to the project files classpaths used in the interpreter.
     * @param f  the path to add
     */
-  public abstract void addProjectFilesClassPath(File f);
-
-  /** These add the given path to the external files classpaths used in the interpreter.
-    * @param f  the path to add
-    */
-  public abstract void addExternalFilesClassPath(File f);
-
-  /** These add the given path to the extra classpaths used in the interpreter.
-    * @param f  the path to add
-    */
-  public abstract void addExtraClassPath(File f);
+  public abstract void addInteractionsClassPath(File f);
   
   /** Handles a syntax error being returned from an interaction
     * @param offset the first character of the error in the InteractionsDocument
     * @param length the length of the error.
     */
   protected abstract void _notifySyntaxErrorOccurred(int offset, int length);
-  
  
   /** Interprets the files selected in the FileOpenSelector. Assumes all strings have no trailing whitespace.
     * Interprets the array all at once so if there are any errors, none of the statements after the first 
@@ -881,14 +852,11 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
         _notifyInterpreterReady(wd);
       }
     });
-//    }
-//    _waitingForFirstInterpreter = false;
-//    debug.logEnd();
   }
 
   /** Perform the default imports of the classes and packages listed in the INTERACTIONS_AUTO_IMPORT_CLASSES. */
   public void performDefaultImports() {
-    java.util.Vector<String> classes = DrScala.getConfig().getSetting(OptionConstants.INTERACTIONS_AUTO_IMPORT_CLASSES);
+    java.util.ArrayList<String> classes = DrScala.getConfig().getSetting(OptionConstants.INTERACTIONS_AUTO_IMPORT_CLASSES);
     final StringBuilder sb = new StringBuilder();
     
     for(String s: classes) {

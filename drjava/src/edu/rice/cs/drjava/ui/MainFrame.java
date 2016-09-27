@@ -61,7 +61,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.StringTokenizer;
-import java.util.Vector;
+import java.util.ArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 import java.util.jar.JarEntry;
@@ -132,7 +132,7 @@ import static edu.rice.cs.drjava.ui.MainFrameStatics.*;
 
 /** DrScala's main window. */
 public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetListener {
-  private static final Log _log = new Log("MainFrame.txt", false);
+  private static final Log _log = DrScala._log;
   
   private static final int INTERACTIONS_TAB = 0;
   private static final int CONSOLE_TAB = 1;
@@ -147,7 +147,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private volatile ModelListener _mainListener; 
   
   /** Maps an OpenDefDoc to its JScrollPane.  Why doesn't OpenDefDoc contain a defScrollPane field? */
-  private HashMap<OpenDefinitionsDocument, JScrollPane> _defScrollPanes;
+  private volatile HashMap<OpenDefinitionsDocument, JScrollPane> _defScrollPanes;
   
   /** The currently displayed DefinitionsPane. */
   private volatile DefinitionsPane _currentDefPane;
@@ -173,10 +173,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private volatile JUnitPanel _junitPanel;
   private volatile ScaladocErrorPanel _scaladocErrorPanel;
   private volatile FindReplacePanel _findReplace;
-    
-  /* Debugger deactivated in DrScala */
-//  private volatile BreakpointsPanel _breakpointsPanel;
-//  private volatile DebugPanel _debugPanel;
   
   private volatile BookmarksPanel _bookmarksPanel;
   private volatile InteractionsPane _consolePane;
@@ -188,11 +184,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private volatile InteractionsController _interactionsController;
   private volatile InteractionsScriptController _interactionsScriptController;
   private volatile InteractionsScriptPane _interactionsScriptPane;
-  
-//  private volatile boolean _showDebugger;  // whether the supporting context is debugger capable
-  
-  /* Debugger deactivated in DrScala */
-//  private volatile DetachedFrame _debugFrame;
   
   /** Panel to hold both InteractionsPane and its sync message. */
   
@@ -256,12 +247,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   private volatile File _currentProjFile;
   
-  /* Debugger deactivated in DrScala */
-//  /** Timer to display "Stepping..." message if a step takes longer than a certain amount of time.  All accesses
-//    * must be synchronized on it.
-//    */
-//  private volatile Timer _debugStepTimer;
-  
   /** Timer to step into another line of code. The delay for each step is recorded in milliseconds. */
   private volatile Timer _automaticTraceTimer;
   
@@ -269,12 +254,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     * if there is one.  If there is none, this is null.
     */
   private volatile HighlightManager.HighlightInfo _currentLocationHighlight = null;
-  
-    
-  /* Debugger deactivated in DrScala */
-//  /** Table to map breakpoints to their corresponding highlight objects. */
-//  private final IdentityHashMap<Breakpoint, HighlightManager.HighlightInfo> _documentBreakpointHighlights =
-//    new IdentityHashMap<Breakpoint, HighlightManager.HighlightInfo>();
   
   /** Table to map bookmarks to their corresponding highlight objects. */
   private final IdentityHashMap<OrderedDocumentRegion, HighlightManager.HighlightInfo> _documentBookmarkHighlights =
@@ -886,10 +865,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public void actionPerformed(ActionEvent ae) {
       if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
         _mainSplit.resetToPreferredSizes();
-      updateStatusField("Compiling all source files in open project");
+      String projectName = _model.getProjectFile().getName();
+      updateStatusField("Compiling all source files of project " + projectName);
       _compileProject(); 
-      _findReplace.updateFirstDocInSearch();
-      updateStatusField("Compilation of open project completed");
+//      _findReplace.updateFirstDocInSearch();  // why is this necessary?
+      updateStatusField("Compilation of project " + projectName + " is complete");
+      /* The _clearInteractionsListener performs a resetInteractions operation. */
     }
   };
   
@@ -901,7 +882,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         _mainSplit.resetToPreferredSizes();
       updateStatusField("Compiling all sources in current folder");
       _compileFolder();
-      _findReplace.updateFirstDocInSearch();
+//      _findReplace.updateFirstDocInSearch(); // why is this necessary?
       updateStatusField("Compilation of folder completed");
     }
   };
@@ -913,7 +894,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
         _mainSplit.resetToPreferredSizes();
       _compileAll();
-      _findReplace.updateFirstDocInSearch();
+//      _findReplace.updateFirstDocInSearch();  // why is this necessary?
     }
   };
   
@@ -971,7 +952,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public void actionPerformed(ActionEvent e) {
       if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) _mainSplit.resetToPreferredSizes();
       _junitAll();
-      _findReplace.updateFirstDocInSearch();
+//      _findReplace.updateFirstDocInSearch();
     }
     
   };
@@ -986,7 +967,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public void actionPerformed(ActionEvent e) {
       if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) _mainSplit.resetToPreferredSizes();
       _junitProject();
-      _findReplace.updateFirstDocInSearch();
+//      _findReplace.updateFirstDocInSearch();
     }
   };
   
@@ -1264,7 +1245,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       }
       _findReplace.findNext();
 //      _currentDefPane.requestFocusInWindow();  
-      // atempt to fix intermittent bug where _currentDefPane listens but does not echo and won't undo!
+      // attempt to fix intermittent bug where _currentDefPane listens but does not echo and won't undo!
     }
   };
   
@@ -1725,8 +1706,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       if (linkVersion.equals(SCALADOC_AUTO_TEXT)) {
         try {
           _javaAPISet.add(new JavaAPIListEntry("#package",
-                                               "http://www.scala-lang.org/api/2.12.0-M2/",
-                                               new URL("http://www.scala-lang.org/api/2.12.0-M2/")));
+                                               "http://www.scala-lang.org/api/2.12.0",
+                                               new URL("http://www.scala-lang.org/api/2.12.0")));
         }
         catch(MalformedURLException mue) { /* ignore, we'll just not put this class in the list */ }                                             
       }
@@ -2131,11 +2112,19 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public void actionPerformed(ActionEvent ae) { _model.resetConsole(); }
   };
   
-  /** Resets the Interactions pane. */
+  /** Resets the Interactions pane using Scala :reset command if possible. */
   private final Action _resetInteractionsAction = new AbstractAction("Reset Interactions") {
     public void actionPerformed(ActionEvent ae) {
       /* Revised reset implementation relies on fast internal Scala reset. */
       _doResetInteractions();
+    }
+  };
+  
+  /** Resets the Interactions pane by killing the slave JVM and resgtarting */
+  private final Action _hardResetInteractionsAction = new AbstractAction("Hard Reset Interactions") {
+    public void actionPerformed(ActionEvent ae) {
+      /* Revised reset implementation relies on fast internal Scala reset. */
+      _doHardResetInteractions();
     }
   };
   
@@ -2146,15 +2135,22 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _interactionsPane.discardUndoEdits();
     /* Relying on lightweight internal reset in Scala interpreter */
     MainJVM._log.log("MainFrame invoking DefaultGlobalModel.resetInteractions");
-//    new Thread(new Runnable() {
-//      public void run() {
     _model.resetInteractions(_model.getWorkingDirectory());
     MainJVM._log.log("DefaultGlobalModel.resetInteractions complete");
     _closeSystemInAction.setEnabled(true);
     _enableInteractionsPane();
-//      }
-//    }).start();
-   
+  }
+  
+    private void _doHardResetInteractions() {
+    _tabbedPane.setSelectedIndex(INTERACTIONS_TAB);
+    updateStatusField("Hard Resetting Interactions");
+    // Lots of work, so use another thread.  NOT!
+    _interactionsPane.discardUndoEdits();
+    _log.log("MainFrame invoking DefaultGlobalModel.hardResetInteractions");
+    _model.hardResetInteractions(_model.getWorkingDirectory());
+    _log.log("In MainFrame, DefaultGlobalModel.hardResetInteractions complete");
+    _closeSystemInAction.setEnabled(true);
+    _enableInteractionsPane();
   }
   
   /** Defines actions that displays the interactions classpath. */
@@ -2164,14 +2160,16 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Displays the interactions classpath. */  
   public void viewInteractionsClassPath() {
-    String cp = IterUtil.multilineToString(IterUtil.filter(_model.getInteractionsClassPath(),
-                                                           new Predicate<File>() {
-      HashSet<File> alreadySeen = new HashSet<File>();
-      public boolean contains(File arg) {
-        // filter out empty strings and duplicates
-        return !("".equals(arg.toString().trim())) && alreadySeen.add(arg);
-      }
-    }));
+    Predicate<File> filterPredicate =
+      new Predicate<File>() {
+        HashSet<File> alreadySeen = new HashSet<File>();
+        public boolean contains(File arg) {
+          // filter out empty strings and duplicates
+          return !("".equals(arg.toString().trim())) && alreadySeen.add(arg);
+        }
+    };
+      
+    String cp = IterUtil.multilineToString(IterUtil.filter(_model.getInteractionsClassPath(), filterPredicate));
     new DrScalaScrollableDialog(this, "Interactions Classpath", "Current Interpreter Classpath", cp).show();
   }
   
@@ -3025,36 +3023,29 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /* ----------------------- Constructor is here! --------------------------- */
   
   /** Creates the main window, and shows it. */ 
-  public MainFrame() {    
-    Utilities.invokeAndWait(new Runnable() { public void run() {
-      // Cache the config object, since we use it many, many times.
-      final Configuration config = DrScala.getConfig(); 
-      
-      // _historyListener (declared and initialized above) required by new FindReplacePanel(...)
-      assert _historyListener != null;
-      
-      // create our model
-      _model = new DefaultGlobalModel();
-      
-      /* Debugger is deactivated in DrScala */     
+  public MainFrame() { 
+   
+    Utilities.invokeAndWait(new Runnable() { public void run() { 
+    // Cache the config object, since we use it many, many times.
+    final Configuration config = DrScala.getConfig(); 
+    
+    // _historyListener (declared and initialized above) required by new FindReplacePanel(...)
+    assert _historyListener != null;
+    
+    // create our model
+    _model = new DefaultGlobalModel();
+    
+    _log.log("In MainJVM, DefaultGlobalModel constructed");
+    
+    /* Debugger is deactivated in DrScala */     
 //      _showDebugger = _model.getDebugger().isAvailable();
-      
+ 
       _findReplace = new FindReplacePanel(MainFrame.this, _model);
       
       // add listeners to activate/deactivate the find/replace actions in MainFrame together with
       // those in the Find/Replace panel
       Utilities.enableDisableWith(_findReplace._findNextAction, _findNextAction);
       Utilities.enableDisableWith(_findReplace._findPreviousAction, _findPrevAction);
-      
-      /* Debugger deactivated in DrScala */
-//      if (_showDebugger) {
-//        _debugPanel = new DebugPanel(MainFrame.this);
-//        _breakpointsPanel = new BreakpointsPanel(MainFrame.this, _model.getBreakpointManager());
-//      }
-//      else {
-//        _debugPanel = null;
-//        _breakpointsPanel = null; 
-//      }
      
       _compilerErrorPanel = new CompilerErrorPanel(_model, MainFrame.this);
       _consoleController = new ConsoleController(_model.getConsoleDocument(), _model.getSwingConsoleDocument());
@@ -3071,9 +3062,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         new InteractionsController(_model.getInteractionsModel(),
                                    _model.getSwingInteractionsDocument(),
                                    new Runnable() {
-        public void run() {
-          _closeSystemInAction.setEnabled(false);
-        }
+        public void run() {  _closeSystemInAction.setEnabled(false); }
       });
       
       _interactionsPane = _interactionsController.getPane();
@@ -3115,9 +3104,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _docSplitPane = 
         new BorderlessSplitPane(JSplitPane.HORIZONTAL_SPLIT, true,
                                 new JScrollPane(_model.getDocumentNavigator().asContainer()), defScroll);
-      
-      /* Debugger is deactivated in DrScala */
-//      _debugSplitPane = new BorderlessSplitPane(JSplitPane.VERTICAL_SPLIT, true);
+
       _mainSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true, _docSplitPane, _tabbedPane);
       
 // Lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
@@ -3151,17 +3138,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
        * purposes. */
       _model.getDocumentNavigator().asContainer().addMouseListener(_resetFindReplaceListener);
       
-      /* Debugger is deactivated in DrScala */
-//      if (_showDebugger) _model.getDebugger().addListener(new UIDebugListener()); // add listener to debug manager
-//      
-//      // Timer to display a message if a debugging step takes a long time
-//      _debugStepTimer = new Timer(DEBUG_STEP_TIMER_VALUE, new ActionListener() {
-//        public void actionPerformed(ActionEvent e) {
-//          if (!_model.getDebugger().isAutomaticTraceEnabled()) { _model.printDebugMessage("Stepping ..."); }
-//        }
-//      });
-//      _debugStepTimer.setRepeats(false);
-      
       // Working directory is default place to start (bug #895998).
       File workDir = _model.getMasterWorkingDirectory();
       
@@ -3184,12 +3160,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _folderChooser = makeFolderChooser(workDir);
       
       //Get most recently opened project for filechooser
-      Vector<File> recentProjects = config.getSetting(RECENT_PROJECTS);
+      ArrayList<File> recentProjects = config.getSetting(RECENT_PROJECTS);
       _openProjectChooser = new JFileChooser();
       _openProjectChooser.setPreferredSize(new Dimension(650, 410));
       
-      if (recentProjects.size() > 0 && recentProjects.elementAt(0).getParentFile() != null)
-        _openProjectChooser.setCurrentDirectory(recentProjects.elementAt(0).getParentFile());
+      if (recentProjects.size() > 0 && recentProjects.get(0).getParentFile() != null)
+        _openProjectChooser.setCurrentDirectory(recentProjects.get(0).getParentFile());
       else
         _openProjectChooser.setCurrentDirectory(workDir);
       
@@ -3950,7 +3926,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                        "\tdquote=\"<true to enclose file in double quotes>\"") {
       protected List<File> getList(PropertyMaps pm) {
         ArrayList<File> l = new ArrayList<File>();
-        for(File f: _model.getExclFiles()) { l.add(f); }
+        for(File f: _model.getExcludedFiles()) { l.add(f); }
         return l;
       }
       public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
@@ -4512,6 +4488,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     * @param projectFile the file of the project to open
     */
   private void _openProjectHelper(File projectFile) {
+    _log.log("In MainJVM, opening project file " + projectFile);
     _currentProjFile = projectFile;
     try {
       _mainListener.resetFNFCount();
@@ -6152,6 +6129,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _setUpAction(_clearHistoryAction, "Clear History", "Clear the current history of interactions");
     
     _setUpAction(_resetInteractionsAction, "Reset", "Reset the Interactions Pane");
+    _setUpAction(_hardResetInteractionsAction, "Hard Reset", "Hard Reset the Interactions Pane");
+                   
     _setUpAction(_closeSystemInAction, "Close System.in", "Close System.in Stream in Interactions Pane"); 
     
     _setUpAction(_viewInteractionsClassPathAction, "View Interactions Classpath", 
@@ -6284,7 +6263,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     * @param updateKeyboardManager true if the keyboard manager should be updated; pass true only for MainFrame!
     * @return the added menu item
     */
-  private JMenuItem _addMenuItem(JMenu menu, Action a, VectorOption<KeyStroke> opt, boolean updateKeyboardManager) {
+  private JMenuItem _addMenuItem(JMenu menu, Action a, ArrayListOption<KeyStroke> opt, boolean updateKeyboardManager) {
     JMenuItem item;
     item = menu.add(a);
     _setMenuShortcut(item, a, opt, updateKeyboardManager);
@@ -6300,7 +6279,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     * @param updateKeyboardManager true if the keyboard manager should be updated; pass true only for MainFrame!
     * @return the added menu item
     */
-  private JMenuItem _addMenuItem(JMenu menu, Action a, VectorOption<KeyStroke> opt, int index,
+  private JMenuItem _addMenuItem(JMenu menu, Action a, ArrayListOption<KeyStroke> opt, int index,
                                  boolean updateKeyboardManager) {
     JMenuItem item;
     item = menu.insert(a, index);
@@ -6314,8 +6293,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     * @param opt Configurable keystroke for the menu item
     * @param updateKeyboardManager true if the keyboard manager should be updated; pass true only for MainFrame!
     */
-  private void _setMenuShortcut(JMenuItem item, Action a, VectorOption<KeyStroke> opt, boolean updateKeyboardManager) {
-    Vector<KeyStroke> keys = DrScala.getConfig().getSetting(opt);
+  private void _setMenuShortcut(JMenuItem item, Action a, ArrayListOption<KeyStroke> opt, boolean updateKeyboardManager) {
+    ArrayList<KeyStroke> keys = DrScala.getConfig().getSetting(opt);
     // Checks that "a" is the action associated with the keystroke.
     // Need to check in case two actions were assigned to the same
     // key in the config file.
@@ -6509,6 +6488,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     /* Omit this menu item until Scala applets are supported. */
 //    _addMenuItem(toolsMenu, _runAppletAction, KEY_RUN_APPLET, updateKeyboardManager);
     _addMenuItem(toolsMenu, _resetInteractionsAction, KEY_RESET_INTERACTIONS, updateKeyboardManager);
+    _addMenuItem(toolsMenu, _hardResetInteractionsAction, KEY_HARD_RESET_INTERACTIONS, updateKeyboardManager);
     toolsMenu.addSeparator();
     
     // Scaladoc
@@ -6563,10 +6543,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         (savedCount!=workdirsCount) ||
         (savedCount!=enclosingFileCount)) {
       DrScala.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_COUNT, 0);
-      DrScala.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_NAMES, new Vector<String>());
-      DrScala.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES, new Vector<String>());
-      DrScala.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS, new Vector<String>());
-      DrScala.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES, new Vector<String>());
+      DrScala.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_NAMES, new ArrayList<String>());
+      DrScala.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES, new ArrayList<String>());
+      DrScala.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS, new ArrayList<String>());
+      DrScala.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES, new ArrayList<String>());
     }
     
     OptionListener<Integer> externalSavedCountListener =
@@ -6577,10 +6557,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         extMenu.addSeparator();
         for (int count=0; count<oce.value; ++count) {
           final int i = count;
-          final Vector<String> names = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
-          final Vector<String> cmdlines = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
-          final Vector<String> workdirs = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
-          final Vector<String> enclosingfiles = 
+          final ArrayList<String> names = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
+          final ArrayList<String> cmdlines = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
+          final ArrayList<String> workdirs = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
+          final ArrayList<String> enclosingfiles = 
             DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES);
           
           extMenu.insert(new AbstractAction(names.get(i)) {
@@ -7503,6 +7483,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _interactionsPanePopupMenu.add(_clearHistoryAction);
     _interactionsPanePopupMenu.addSeparator();
     _interactionsPanePopupMenu.add(_resetInteractionsAction);
+    _interactionsPanePopupMenu.add(_hardResetInteractionsAction);
     _interactionsPanePopupMenu.add(_viewInteractionsClassPathAction);
     _interactionsPanePopupMenu.add(_copyInteractionToDefinitionsAction);
     _interactionsPane.addMouseListener(new RightClickMouseAdapter() {
@@ -8323,103 +8304,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
             (_model.getBuildDirectory() != null) &&
             (_model.getBuildDirectory() != FileOps.NULL_FILE));
   }
-  /* Debugger is deactivated in DrScala */
-//  /** Listens to events from the debugger. */
-//  private class UIDebugListener implements DebugListener {
-//    /* Must be executed in evevt thread.*/
-//    public void debuggerStarted() { EventQueue.invokeLater(new Runnable() { public void run() { showDebugger(); } }); }
-//    
-//    /* Must be executed in event thread.*/
-//    public void debuggerShutdown() {
-//      EventQueue.invokeLater(new Runnable() {
-//        public void run() {
-//          _disableStepTimer();
-//          hideDebugger();
-//          removeCurrentLocationHighlight();
-//        }
-//      } );
-//    }                        
-//    
-//    /** Called when a step is requested on the current thread.  Must be executed in event thread. */
-//    public void stepRequested() {
-//      // Print a message if step takes a long time; timer must be restarted on every step (automatic trace)
-//      synchronized(_debugStepTimer) { 
-//        // only print the stepping message if we're not doing automatic trace
-//        // i.e. do it if the _automaticTraceTimer is null, or if the _automaticTraceTimer is not running
-//        if ((_automaticTraceTimer == null) || (! _automaticTraceTimer.isRunning())) {
-//          if (! _debugStepTimer.isRunning()) _debugStepTimer.start();
-//          else _debugStepTimer.restart();
-//        }
-//      }
-//    }
-//    
-//    public void currThreadSuspended() {
-//      assert EventQueue.isDispatchThread();
-//      _disableStepTimer();
-//      _setThreadDependentDebugMenuItems(true);
-//      _model.getInteractionsModel().autoImport();               
-//      if(_model.getDebugger().isAutomaticTraceEnabled()) {
-//        //System.out.println("new _automaticTraceTimer AUTO_STEP_RATE=" + AUTO_STEP_RATE + ", " + 
-//        //                   System.identityHashCode(_automaticTraceTimer);                                
-//        if ((_automaticTraceTimer != null) && (! _automaticTraceTimer.isRunning())) _automaticTraceTimer.start();
-//      }
-//    }
-//    
-//    /* Must be executed in the event thread. */
-//    public void currThreadResumed() {
-//      _setThreadDependentDebugMenuItems(false);
-//      removeCurrentLocationHighlight();
-//    }    
-//    
-//    /** Called when the given line is reached by the current thread in the debugger, to request that the line be 
-//      * displayed.  Must be executed only in the event thread.
-//      * @param doc Document to display
-//      * @param lineNumber Line to display or highlight
-//      * @param shouldHighlight true iff the line should be highlighted.
-//      */
-//    public void threadLocationUpdated(OpenDefinitionsDocument doc, int lineNumber, boolean shouldHighlight) {
-//      scrollToDocumentAndOffset(doc, doc._getOffset(lineNumber), shouldHighlight); 
-//    }
-//    
-//    /* Must be executed in event thread. */
-//    public void currThreadDied() {
-//      assert EventQueue.isDispatchThread();
-//      _model.getDebugger().setAutomaticTraceEnabled(false);
-//      if (_automaticTraceTimer != null) {
-//        _automaticTraceTimer.stop();
-//      }
-//      _disableStepTimer();
-//      if (isDebuggerReady()) {
-//        try {        
-//          if (!_model.getDebugger().hasSuspendedThreads()) {
-//            // no more suspended threads, resume default debugger state
-//            // all thread dependent debug menu items are disabled
-//            _setThreadDependentDebugMenuItems(false);
-//            removeCurrentLocationHighlight();
-//            // Make sure we're at the prompt
-//            // (This should really be fixed in InteractionsController, not here.)
-//            _interactionsController.moveToPrompt(); // there are no suspended threads, bring back prompt
-//          }
-//        }
-//        catch (DebugException de) {
-//          MainFrameStatics.showError(MainFrame.this, de, "Debugger Error", "Error with a thread in the debugger.");
-//        }
-//      }
-//    }
-//    
-//    public void currThreadSet(DebugThreadData dtd) { }
-//    public void regionAdded(final Breakpoint bp) { }
-//    public void breakpointReached(Breakpoint bp) {
-//      showTab(_interactionsContainer, true);
-//    }
-//    public void regionChanged(Breakpoint bp) {  }
-//    public void regionRemoved(final Breakpoint bp) { }    
-//    public void watchSet(final DebugWatchData w) { }
-//    public void watchRemoved(final DebugWatchData w) { }
-//    public void threadStarted() { }
-//    public void nonCurrThreadDied() { }
-//  }
-  
+
   /** @author jlugo */
   private class DJAsyncTaskLauncher extends AsyncTaskLauncher {
     
@@ -8879,6 +8764,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       assert EventQueue.isDispatchThread();    
       
       _guiNotifier.available(GUIAvailabilityListener.ComponentType.COMPILER);
+      
+      /* Note: interactions class path is set in _clearInteractionsListener. */
       
       _compilerErrorPanel.reset(excludedFiles.toArray(new File[0]));
       

@@ -1131,9 +1131,7 @@ public class XMLConfigTest extends TestCase {
   }
   
   
-  /**
-   * Tests XMLConfig(String filename)
-   */
+  /** Tests XMLConfig(String filename) */
   public void testConstructorWithFileName() throws Exception{
     
     XMLConfig xc = 

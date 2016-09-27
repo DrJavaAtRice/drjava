@@ -48,7 +48,6 @@ import java.awt.event.FocusListener;
 
 import java.io.File;
 
-import java.util.Vector;
 import java.util.ArrayList;
 import java.util.EventListener;
 
@@ -270,7 +269,7 @@ public class InteractionsController extends AbstractConsoleController {
     }
     
     public void interpreterReady(File wd) { 
-          _interactionsDJDocument.clearColoring();  // probably redundant
+      _interactionsDJDocument.clearColoring();  // probably redundant
     }
     public void interpreterResetFailed(Throwable t) { }
     public void interpreterExited(int status) { }
@@ -469,15 +468,15 @@ public class InteractionsController extends AbstractConsoleController {
     
     // Prevent previous word action from going past the prompt
     _pane.addActionForKeyStroke(DrScala.getConfig().getSetting(OptionConstants.KEY_PREVIOUS_WORD), prevWordAction);
-    DrScala.getConfig().addOptionListener(OptionConstants.KEY_PREVIOUS_WORD, new OptionListener<Vector<KeyStroke>>() {
-      public void optionChanged(OptionEvent<Vector<KeyStroke>> oe) {
+    DrScala.getConfig().addOptionListener(OptionConstants.KEY_PREVIOUS_WORD, new OptionListener<ArrayList<KeyStroke>>() {
+      public void optionChanged(OptionEvent<ArrayList<KeyStroke>> oe) {
         _pane.addActionForKeyStroke(DrScala.getConfig().getSetting(OptionConstants.KEY_PREVIOUS_WORD), prevWordAction);
       }
     });
     
     _pane.addActionForKeyStroke(DrScala.getConfig().getSetting(OptionConstants.KEY_NEXT_WORD), nextWordAction);
-    DrScala.getConfig().addOptionListener(OptionConstants.KEY_NEXT_WORD, new OptionListener<Vector<KeyStroke>>() {
-      public void optionChanged(OptionEvent<Vector<KeyStroke>> oe) {
+    DrScala.getConfig().addOptionListener(OptionConstants.KEY_NEXT_WORD, new OptionListener<ArrayList<KeyStroke>>() {
+      public void optionChanged(OptionEvent<ArrayList<KeyStroke>> oe) {
         _pane.addActionForKeyStroke(DrScala.getConfig().getSetting(OptionConstants.KEY_NEXT_WORD), nextWordAction);
       }
     });
@@ -698,8 +697,8 @@ public class InteractionsController extends AbstractConsoleController {
   public Action getRedoAction() { return _redoAction; }
  
   /** OptionListener responding to changes for the undo/redo key bindings. */
-  private final OptionListener<Vector<KeyStroke>> _keyBindingOptionListener = new OptionListener<Vector<KeyStroke>>() {
-    public void optionChanged(OptionEvent<Vector<KeyStroke>> oce) {
+  private final OptionListener<ArrayList<KeyStroke>> _keyBindingOptionListener = new OptionListener<ArrayList<KeyStroke>>() {
+    public void optionChanged(OptionEvent<ArrayList<KeyStroke>> oce) {
       if (_box != null) { _box.updateKeyBindings(); }
     }
   };

@@ -54,7 +54,7 @@ import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
-import java.util.Vector;
+import java.util.ArrayList;
 
 /** The panel which houses the list of errors after an unsuccessful compilation.  If the user clicks on the combobox,
   * it moves the definitions cursor to the error in the source.  If the cursor is moved onto a line with an error, it 
@@ -118,7 +118,7 @@ public class CompilerErrorPanel extends ErrorPanel {
     customPanel.add(_compilerChoiceBox, BorderLayout.NORTH);
     
     DrScala.getConfig().addOptionListener(OptionConstants.JAVAC_LOCATION, new CompilerLocationOptionListener<File>());
-    DrScala.getConfig().addOptionListener(OptionConstants.EXTRA_COMPILERS, new CompilerLocationOptionListener<Vector<String>>());
+    DrScala.getConfig().addOptionListener(OptionConstants.EXTRA_COMPILERS, new CompilerLocationOptionListener<ArrayList<String>>());
   }
   
   

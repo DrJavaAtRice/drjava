@@ -37,6 +37,7 @@
 package edu.rice.cs.drjava.model.repl;
 
 import edu.rice.cs.drjava.DrScalaTestCase;
+import edu.rice.cs.drjava.model.DummyGlobalModel;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.repl.newjvm.MainJVM;
 import edu.rice.cs.drjava.model.FileSaveSelector;
@@ -722,11 +723,7 @@ public final class InteractionsModelTest extends DrScalaTestCase {
       return null;
     }
     
-    public void addProjectClassPath(File path) { fail("cannot add to classpath in a test"); }
-    public void addBuildDirectoryClassPath(File path) { fail("cannot add to classpath in a test"); }
-    public void addProjectFilesClassPath(File path) { fail("cannot add to classpath in a test"); }
-    public void addExternalFilesClassPath(File path) { fail("cannot add to classpath in a test"); }
-    public void addExtraClassPath(File path) { fail("cannot add to classpath in a test"); }
+    public void addInteractionsClassPath(File path) { fail("cannot add to classpath in a test"); }
     protected boolean _resetInterpreter(File wd) { 
       throw new UnexpectedException("cannot reset interpreter in a test"); 
     }
@@ -798,7 +795,7 @@ public final class InteractionsModelTest extends DrScalaTestCase {
     /** Constructs a new IncompleteInputInteractionsModel. */
     public IncompleteInputInteractionsModel(InteractionsDJDocument adapter) throws RemoteException {
       // MainJVM, Adapter, history size, write delay
-      super(new MainJVM(null), adapter, new File(System.getProperty("user.dir")), 1000, 25);
+      super(new MainJVM(null, new DummyGlobalModel()), adapter, new File(System.getProperty("user.dir")), 1000, 25);
       _jvm.setInteractionsModel(this); // _jvm is set to MainJVM(null) by super call;
       _jvm.startInterpreterJVM();
       continuationException = false;

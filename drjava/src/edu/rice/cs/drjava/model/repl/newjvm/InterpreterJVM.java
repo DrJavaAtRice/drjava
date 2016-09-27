@@ -54,7 +54,9 @@ import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.newjvm.*;
 import edu.rice.cs.plt.collect.CollectUtil;
 import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.plt.reflect.ReflectException;
 import edu.rice.cs.plt.reflect.ReflectUtil;
+import edu.rice.cs.plt.reflect.ShadowingClassLoader;
 import edu.rice.cs.plt.tuple.Option;
 import edu.rice.cs.plt.tuple.OptionVisitor;
 import edu.rice.cs.plt.tuple.Pair;
@@ -68,25 +70,10 @@ import edu.rice.cs.drjava.model.repl.InteractionsPaneOptions;
 
 import edu.rice.cs.util.swing.Utilities;
 
-//import edu.rice.cs.dynamicjava.Options;
-
-/* Most of these imports involve debugger code that I don't think works in DrScala. */
-//import edu.rice.cs.dynamicjava.interpreter.ClassContext;
-//import edu.rice.cs.dynamicjava.interpreter.ClassSignatureContext;
-//import edu.rice.cs.dynamicjava.interpreter.DelegatingContext;
-//import edu.rice.cs.dynamicjava.interpreter.EvaluatorException;  // moved to this package
-//import edu.rice.cs.dynamicjava.interpreter.ImportContext;
-//import edu.rice.cs.dynamicjava.interpreter.InterpreterException;  // moved to this package
-//import edu.rice.cs.dynamicjava.interpreter.LocalContext;
-//import edu.rice.cs.dynamicjava.interpreter.RuntimeBindings;
-//import edu.rice.cs.dynamicjava.interpreter.TypeContext;
-//import edu.rice.cs.dynamicjava.symbol.DJClass;
-//import edu.rice.cs.dynamicjava.symbol.SymbolUtil;  // no longer used
-//import edu.rice.cs.dynamicjava.symbol.LocalVariable;
-//import edu.rice.cs.dynamicjava.symbol.type.Type;
-
 // For Windows focus fix
 import javax.swing.JDialog;
+
+import edu.rice.cs.drjava.DrScala;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 import static edu.rice.cs.plt.debug.DebugUtil.error;
@@ -101,28 +88,23 @@ import static edu.rice.cs.plt.debug.DebugUtil.error;
   */
 public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRemoteI, JUnitModelCallback {
   
+    
+  /** Debugging log. Note this statement must appear before the binding of ONLY! */
+  public static final Log _log  = DrScala._log;
+  
   /** Singleton instance of this class. */
   public static final InterpreterJVM ONLY = new InterpreterJVM();
-  
-  /** Debugging log. */
-  private static final Log _log  = new Log("MasterJVM.txt", false);
   
   // Since RMI can lead to parallel threads, all fields must be thread-safe.  Consequently, we use
   // concurrent Collections
   
-  private final InteractionsPaneOptions _interpreterOptions;
-//  private volatile Pair<String, Interpreter> _activeInterpreter;
-  private final Interpreter _defaultInterpreter;
+//  private final InteractionsPaneOptions _interpreterOptions;
   
-  /** In DrScala, these data structures are used in a degenerate fashion.  _busyInterpreters is either empty if
-    * _defaultInterpreter is available or {_defaultInterpreter} if interpretation is in progress.  In this degenerate
-    * case, I think this information could be recorded in a volatile boolean field.
-    */
-//  private final ConcurrentHashMap<String, Interpreter> _interpreters;
-//  private final /* CONCURRENT */ Set<Interpreter> _busyInterpreters;
+  private volatile Interpreter _defaultInterpreter;  // it should be final but static checks are too weak
 
   private final ClassPathManager _classPathManager;
   private final ClassLoader _interpreterLoader;
+  private volatile Class<?> _interpreterClass;      // it should be final but static checks are too weak
   
   // Lock object for ensuring mutual exclusion on updates and compound accesses
   private final Object _stateLock = new Object();
@@ -138,23 +120,44 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   /** Private constructor; use the singleton ONLY instance. */
   private InterpreterJVM() {
     super("Reset Interactions Thread", "Poll DrScala Thread");
+    if (_log != null) _log.log("InterpreterJVM starting");
+//    Utilities.show("Interpreter JVM starting");
+    /* Important singleton objects embedded in an InterpreterJVM */
+    final String scalaInterpreterName = "edu.rice.cs.drjava.model.repl.newjvm.DrScalaInterpreter";
     
     _classPathManager = new ClassPathManager(ReflectUtil.SYSTEM_CLASS_PATH);
-    _interpreterLoader = _classPathManager.makeClassLoader(null);
+    
+    ClassLoader interpreterLoaderParent =
+      ShadowingClassLoader.blackList(InterpreterJVM.class.getClassLoader(), scalaInterpreterName);
+    _log.log("Interpreter loader parent = " + interpreterLoaderParent);
+    _interpreterLoader = _classPathManager.makeClassLoader(interpreterLoaderParent);
+    _log.log("Interpreter loader = " + _interpreterLoader);
+    try {
+      Class<?> _interpreterClass = Class.forName(scalaInterpreterName, true, _interpreterLoader);
+      _log.log("Class " + _interpreterClass + " was loaded by " + _interpreterClass.getClassLoader());
+      _defaultInterpreter = (Interpreter) _interpreterClass.newInstance();  // The unique constructor for DrScalaInterpreter is 0-ary
+      _log.log("_defaultInterpreter = " + _defaultInterpreter);
+    }
+    catch(Exception e) {
+      _log.log("Either ClassforName(" + scalaInterpreterName + ", true, " + _interpreterLoader + 
+               ") or _interpreterClass.newInstance() failed");
+      throw new UnexpectedException(e); 
+    }
+      
     _junitTestManager = new JUnitTestManager(this, _classPathManager);
 
-    // set the thread context class loader, this way NextGen and Mint can use the interpreter's class loader
-    Thread.currentThread().setContextClassLoader(_interpreterLoader);
+//    // set the thread context class loader, this way NextGen and Mint can use the interpreter's class loader
+//    Thread.currentThread().setContextClassLoader(_interpreterLoader);
     
-    // _interpreterOptions = Options.DEFAULT;
-    _interpreterOptions = new InteractionsPaneOptions();
-
-    _defaultInterpreter = new DrScalaInterpreter();
-    
-//    _interpreters = new ConcurrentHashMap<String,Interpreter>();
-//    _busyInterpreters = Collections.synchronizedSet(new HashSet<Interpreter>());
-//
-//    _activeInterpreter = Pair.make("", _defaultInterpreter);
+//    try {
+//      _defaultInterpreter = (Interpreter) _interpreterClass.newInstance();  // The unique constructor for DrScalaInterpreter is 0-ary
+//      _log.log("_defaultInterpreter = " + _defaultInterpreter);
+//      _log.log("Interpreter Loader = " +  _defaultInterpreter.getClass().getClassLoader());
+//    }
+//    catch(ReflectException e) { 
+//      _log.log("loadObject(" + _interpreterLoader + ", " + "edu.rice.cs.drjava.model.repl.newjvm.DrScalaInterpreter failed");
+//      throw new UnexpectedException(e); 
+//    }
   }
  
   /** Actions to perform when this JVM is started (through its superclass, AbstractSlaveJVM). Not synchronized
@@ -227,8 +230,8 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     
     _log.log("interpret(" + input + ") called in InterpreterJVM running in SLAVE JVM");
     
-    // This may be overkill for DrScala; there is only one loader for the interpreter
-    Thread.currentThread().setContextClassLoader(_interpreterLoader);  // _interpreterLoader is final
+//    // This may be overkill for DrScala; there is only one loader for the interpreter
+//    Thread.currentThread().setContextClassLoader(_interpreterLoader);  // _interpreterLoader is final
 
     String result = null;
     try { result = _defaultInterpreter.interpret(input); }  // may block forever
@@ -259,49 +262,6 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     _log.log("reset() called in InterpreterJVM");
     _defaultInterpreter.reset(); 
   }
-
-//    return result.apply(new OptionVisitor<Object, InterpretResult>() {
-//      public InterpretResult forNone() { return InterpretResult.noValue(); }
-//      public InterpretResult forSome(Object obj) {
-//        if (obj instanceof String) { debug.logEnd(); return InterpretResult.stringValue((String) obj); }
-//        else if (obj instanceof Character) { debug.logEnd(); return InterpretResult.charValue((Character) obj); }
-//        else if (obj instanceof Number) { debug.logEnd(); return InterpretResult.numberValue((Number) obj); }
-//        else if (obj instanceof Boolean) { debug.logEnd(); return InterpretResult.booleanValue((Boolean) obj); }
-//        else {
-//          try {
-//            String resultString = TextUtil.toString(obj);
-//            String resultTypeStr = null;
-//            if (obj!=null) {
-//                Class<?> c = obj.getClass();
-//                resultTypeStr = getClassName(c);
-//            }
-//            debug.logEnd();
-//            return InterpretResult.objectValue(resultString,resultTypeStr);
-//          }
-//          catch (Throwable t) {
-//            // an exception occurred during toString
-//            debug.logEnd(); 
-//            return InterpretResult.exception(new EvaluatorException(t));
-//          }
-//        }
-//      }
-//    });
-//  }
-  
-//  /** Gets the value of the variable with the given name in the current interpreter.
-//    * Invoked reflectively by the debugger.  To simplify the inter-process exchange,
-//    * an array here is used as the return type rather than an {@code Option<Object>} --
-//    * an empty array corresponds to "none," and a singleton array corresponds to a "some."
-//    * @param var name of the variable to look up
-//    * @return empty array for "none", singleton array for "some" value
-//    * @see edu.rice.cs.drjava.model.debug.jpda.JPDADebugger#GET_VARIABLE_VALUE_SIG
-//    * @see edu.rice.cs.drjava.model.debug.jpda.JPDADebugger#_copyVariablesFromInterpreter()
-//    */
-//  public Object[] getVariableValue(String var) {
-//    Pair<Object,String>[] arr = getVariable(var);
-//    if (arr.length == 0) return new Object[0];
-//    else return new Object[] { arr[0].first() };
-//  }
   
   /** Gets the value and type string of the variable with the given name in the current interpreter.
     * Invoked reflectively by the debugger.  To simplify the inter-process exchange,
@@ -387,105 +347,42 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   
   /* DrScala only has one interpreter. */
   
-//  /** Adds a named Interpreter to the list.
-//    * @param name the unique name for the interpreter
-//    * @throws IllegalArgumentException if the name is not unique
-//    */
-//  public void addInterpreter(String name) {
+//  /** Check that all access of class members is permitted by accessibility controls. */
+//  public void setEnforceAllAccess(boolean enforce) {
 //    synchronized(_stateLock) {
-//      if (isInterpreterName(name)) {
-//        throw new IllegalArgumentException("'" + name + "' is not a unique interpreter name");
-//      }
-////      Interpreter i = new Interpreter(_interpreterOptions, _interpreterLoader);
-//      Interpreter i = new DrScalaInterpreter();
-//      putInterpreter(name, i);
+//      _interpreterOptions.setEnforceAllAccess(enforce);
 //    }
 //  }
   
-//  /** Adds a named Interpreter in the given environment to the list.  Invoked reflectively by
-//    * the debugger.
-//    * @param name  The unique name for the interpreter
-//    * @param thisVal  The value of {@code this} (may be null, implying this is a static context)
-//    * @param thisClass  The class in whose context the interpreter is to be created
-//    * @param localVars  Values of local variables
-//    * @param localVarNames  Names of the local variables
-//    * @param localVarClasses  Classes of the local variables.  To simplify the work callers must
-//    *                         do, a value with a primitive type may have a {@code null} entry here.
-//    * @throws IllegalArgumentException if the name is not unique, or if the local var arrays
-//    *                                  are not all of the same length
-//    * @see edu.rice.cs.drjava.model.debug.jpda.JPDADebugger#ADD_INTERPRETER_SIG
-//    * @see edu.rice.cs.drjava.model.debug.jpda.JPDADebugger#_dumpVariablesIntoInterpreterAndSwitch
-//    */
-//// <
-//  
-//  /** A custom context for interpreting within the body of a defined method. */
-//  private static class DebugMethodContext extends DelegatingContext {
-//    private final boolean _isStatic;
-//    public DebugMethodContext(TypeContext next, boolean isStatic) { super(next); _isStatic = isStatic; }
-//    protected TypeContext duplicate(TypeContext next) { return new DebugMethodContext(next, _isStatic); }
-//    @Override public DJClass getThis() { return _isStatic ? null : super.getThis(); }
-//    @Override public DJClass getThis(String className) { return _isStatic ? null : super.getThis(className); }
-//    @Override public Type getReturnType() { return null; }
-//    @Override public Iterable<Type> getDeclaredThrownTypes() { return IterUtil.empty(); }
-//  }
-  
-  /* In DrScala, there is only one interpreter. */
-//  /** Sets the current interpreter to be the one specified by the given name
-//    * @param name the unique name of the interpreter to set active
-//    * @return Status flags: whether the current interpreter changed, and whether it is busy
-//    */
-//  public Pair<Boolean, Boolean> setActiveInterpreter(String name) {
+//  /** Check that access of private class members is permitted (irrelevant if setEnforceAllAccess() is set to true). */
+//  public void setEnforcePrivateAccess(boolean enforce) {
 //    synchronized(_stateLock) {
-//      Interpreter i = getInterpreter(name);
-//      if (i == null) { throw new IllegalArgumentException("Interpreter '" + name + "' does not exist."); }
-//      boolean changed = (i != _activeInterpreter.second());
-//      _activeInterpreter = Pair.make(name, i);
-//      return Pair.make(changed, isBusyInterpreter(i));
+//      _interpreterOptions.setEnforcePrivateAccess(enforce);
 //    }
 //  }
-  
-//  /** Sets the default interpreter to be active.
-//    * @return Status flags: whether the current interpreter changed, and whether it is busy
-//    */
-//  public Pair<Boolean, Boolean> setToDefaultInterpreter() {
-//    synchronized(_stateLock) {
-//      boolean changed = (_defaultInterpreter != _activeInterpreter.second());
-//      _activeInterpreter = Pair.make("", _defaultInterpreter);
-//      return Pair.make(changed, isBusyInterpreter(_defaultInterpreter));
-//    }
-//  }
-// 
-  
-  /** Check that all access of class members is permitted by accessibility controls. */
-  public void setEnforceAllAccess(boolean enforce) {
-    synchronized(_stateLock) {
-      _interpreterOptions.setEnforceAllAccess(enforce);
-    }
-  }
-  
-  /** Check that access of private class members is permitted (irrelevant if setEnforceAllAccess() is set to true). */
-  public void setEnforcePrivateAccess(boolean enforce) {
-    synchronized(_stateLock) {
-      _interpreterOptions.setEnforcePrivateAccess(enforce);
-    }
-  }
 
-  /** Require a semicolon at the end of statements. */
-  public void setRequireSemicolon(boolean require) {
-    synchronized(_stateLock) {
-      _interpreterOptions.setRequireSemicolon(require);
-    }
-  }
+//  /** Require a semicolon at the end of statements. */
+//  public void setRequireSemicolon(boolean require) {
+//    synchronized(_stateLock) {
+//      _interpreterOptions.setRequireSemicolon(require);
+//    }
+//  }
   
-  /** Require variable declarations to include an explicit type. */
-  public void setRequireVariableType(boolean require) {
-    synchronized(_stateLock) {
-      _interpreterOptions.setRequireVariableType(require);
-    }
-  }
+//  /** Require variable declarations to include an explicit type. */
+//  public void setRequireVariableType(boolean require) {
+//    synchronized(_stateLock) {
+//      _interpreterOptions.setRequireVariableType(require);
+//    }
+//  }
   
   /** Gets the default interpreter */
   public Interpreter getInterpreter() throws RemoteException { return _defaultInterpreter; }
+  
+  /** Gets the actual class path maintained by the ClassPathManager. */
+  public Iterable<File> getInteractionsClassPath() {
+    // need to make a serializable snapshot
+    return IterUtil.snapshot(_classPathManager.getInteractionsClassPath());
+  }
   
   // ---------- JUnit methods ----------
   /** Sets up a JUnit test suite in the Interpreter JVM and finds which classes are really TestCases classes (by 
@@ -575,29 +472,15 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   public void junitJVMReady() { }
   
   // --------- Class path methods ----------
-  public void addExtraClassPath(File f) { 
-      _classPathManager.addExtraCP(f); 
-      _defaultInterpreter.addCP("addExtraCP", f.getPath());
+  public void addInteractionsClassPath(File f) { 
+    boolean alreadyPresent = _classPathManager.addInteractionsClassPath(f); 
+//    if (! alreadyPresent) _defaultInterpreter.addInteractionsClassPath(f);  // omitted since Scala dropped :require
   }
-  public void addProjectClassPath(File f) { 
-      _classPathManager.addProjectCP(f); 
-      _defaultInterpreter.addCP("addProjectCP", f.getPath());
-  }
-  public void addBuildDirectoryClassPath(File f) { 
-      _classPathManager.addBuildDirectoryCP(f); 
-      _defaultInterpreter.addCP("addBuildDirectoryCP", f.getPath()); 
-  }
-  public void addProjectFilesClassPath(File f) { 
-      _classPathManager.addProjectFilesCP(f); 
-      _defaultInterpreter.addCP("addProjectFilesCP", f.getPath()); 
-  }
-  public void addExternalFilesClassPath(File f) { 
-      _classPathManager.addExternalFilesCP(f); 
-      _defaultInterpreter.addCP("addExternalFilesCP", f.getPath()); 
-  }
-  public Iterable<File> getClassPath() {
-    // need to make a serializable snapshot
-    return IterUtil.snapshot(_classPathManager.getClassPath());
-//    return null;
+  /** Traverses cp in reverse order adding the elements of cp to the interactions class path.  As a result, the elements
+    * of cp will appear in order at the front of the interactions class path. */
+  public void addInteractionsClassPath(Iterable<File> cp) {
+    List<File> cpl = CollectUtil.makeArrayList(cp);
+    ListIterator<File> li = cpl.listIterator(cpl.size());
+    while (li.hasPrevious()) addInteractionsClassPath(li.previous());
   }
 }

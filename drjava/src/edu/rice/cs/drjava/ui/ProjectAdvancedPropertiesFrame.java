@@ -76,7 +76,7 @@ public class ProjectAdvancedPropertiesFrame extends SwingFrame {
   private MainFrame _mainFrame;
   private SwingFrame _parentFrame;
   private SingleDisplayModel _model; 
-  private VectorOptionComponent<PreferencesRecord> _preferencesList;
+  private ArrayListOptionComponent<PreferencesRecord> _preferencesList;
   private volatile Map<OptionParser<?>,String> _unmodifiedStoredPreferences = new HashMap<OptionParser<?>,String>();
   
   protected static class PreferencesRecord implements Comparable<PreferencesRecord> {
@@ -301,7 +301,7 @@ public class ProjectAdvancedPropertiesFrame extends SwingFrame {
   }
   
   public Component _preferencesComponent() {
-    _preferencesList = new VectorOptionComponent<PreferencesRecord>
+    _preferencesList = new ArrayListOptionComponent<PreferencesRecord>
       (null, "Stored Preferences", this, new String[0],
        "The list of preferences that are stored and restored with the project.",false) {
       protected Action _getAddAction() {

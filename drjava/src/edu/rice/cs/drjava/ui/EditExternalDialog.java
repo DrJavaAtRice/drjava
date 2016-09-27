@@ -360,7 +360,7 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
       return;
     }
 
-    Vector<String> v = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
+    ArrayList<String> v = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
     v.remove(selectedIndex);
     DrScala.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_NAMES,v);
 
@@ -392,7 +392,7 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
       return;
     }
 
-    Vector<String> v = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
+    ArrayList<String> v = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
     String s = v.remove(selectedIndex);
     v.add(selectedIndex-1,s);
     DrScala.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_NAMES,v);
@@ -427,7 +427,7 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
       return;
     }
 
-    Vector<String> v = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
+    ArrayList<String> v = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
     String s = v.remove(selectedIndex);
     v.add(selectedIndex+1,s);
     DrScala.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_NAMES,v);
@@ -524,20 +524,22 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
   
   /** Update the properties. */
   public void updateList(int selectedIndex) {
-    final Vector<String> names = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
-    _list.setListData(names);
-    _editButton.setEnabled(names.size() > 0);
-    _removeButton.setEnabled(names.size() > 0);
+    final ArrayList<String> names = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
+    final String[] namesArray = new String[names.size()];
+    _list.setListData(names.toArray(namesArray)); // ugly workaround caused by type erasure!
+    boolean namesNonEmpty = names.size() > 0;
+    _editButton.setEnabled(namesNonEmpty);
+    _removeButton.setEnabled(namesNonEmpty);
     
-    if (names.size() > 0) _list.setSelectedIndex(selectedIndex);
+    if (namesNonEmpty) _list.setSelectedIndex(selectedIndex);
     else _list.clearSelection();
 
     _upButton.setEnabled((_list.getModel().getSize() > 0) && (_list.getSelectedIndex() > 0));
     _upAction.setEnabled((_list.getModel().getSize() > 0) && (_list.getSelectedIndex() > 0));
     _downButton.setEnabled((_list.getModel().getSize() > 0) && (_list.getSelectedIndex() < _list.getModel().getSize()-1));
     _downAction.setEnabled((_list.getModel().getSize() > 0) && (_list.getSelectedIndex() < _list.getModel().getSize()-1));
-    _exportButton.setEnabled(names.size() > 0);
-    _exportAction.setEnabled(names.size() > 0);
+    _exportButton.setEnabled(namesNonEmpty);
+    _exportAction.setEnabled(namesNonEmpty);
   }
 
   /** Lambda that calls _ok. */

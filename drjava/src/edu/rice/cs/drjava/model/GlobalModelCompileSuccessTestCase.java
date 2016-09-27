@@ -49,9 +49,7 @@ public abstract class GlobalModelCompileSuccessTestCase extends GlobalModelTestC
 
   protected static final String FOO_PACKAGE_AS_PART_OF_FIELD = "class DrScalaTestFoo { val cur_package = 5; }";
   protected static final String FOO2_EXTENDS_FOO_TEXT = "// import DrScalaTestFoo \n class DrScalaTestFoo2 extends DrScalaTestFoo {}";
-  protected static final String FOO_NON_PUBLIC_CLASS_TEXT = 
-    "class DrScalaTestFoo {}\n" +
-    "class Foo{}";
+  protected static final String FOO_NON_PUBLIC_CLASS_TEXT = "class DrScalaTestFoo {}\n" + "class Foo{}";
   protected static final String FOO2_REFERENCES_NON_PUBLIC_CLASS_TEXT = "// import Foo \n class DrScalaTestFoo2 extends Foo{}";
   protected static final String FOO_WITH_ASSERT = 
     "class DrScalaTestFoo { def foo() { assert(true, \"a vacuous assert failed!\") } }";
@@ -72,7 +70,7 @@ public abstract class GlobalModelCompileSuccessTestCase extends GlobalModelTestC
 //    }
 //  }
 
-  protected String _name() { return "compiler=" + _model.getCompilerModel().getActiveCompiler().getName() + ": "; }
+  protected String _name() { return "compiler = " + _model.getCompilerModel().getActiveCompiler().getName() + ": "; }
 
   /** Returns whether the currently active compiler supports generics. */
   protected boolean _isGenericCompiler() { return JavaVersion.CURRENT.supports(JavaVersion.JAVA_5); }

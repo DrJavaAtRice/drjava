@@ -51,7 +51,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Vector;
+import java.util.ArrayList;
 import java.util.Date;
 
 /** Tests the Definitions Pane
@@ -414,7 +414,7 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     assertEquals("The text should have been inserted", "a!B9",  doc.getText());
     
     // Call the undoAction in MainFrame through the KeyBindingManager.
-    final Vector<KeyStroke> ks = DrScala.getConfig().getSetting(OptionConstants.KEY_UNDO);
+    final ArrayList<KeyStroke> ks = DrScala.getConfig().getSetting(OptionConstants.KEY_UNDO);
     final Action a = KeyBindingManager.ONLY.get(ks.get(0));
     
     final KeyEvent e = new KeyEvent(defPane, PRESSED, 0, ks.get(0).getModifiers(), ks.get(0).getKeyCode(), UNDEFINED);

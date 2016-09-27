@@ -47,74 +47,70 @@ import java.util.LinkedList;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.io.IOUtil;
 
+import edu.rice.cs.util.Log;
+import edu.rice.cs.util.swing.Utilities;
+
 import static edu.rice.cs.plt.debug.DebugUtil.error;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
-/**
- * A class loader that mimics the standard application system loader by loading classes from
- * a file path of directories and jar files.  This class also supports a <em>dynamic</em>
- * class path: an {@code Iterable} provided as input to the constructor is held, not copied,
- * and subsequent changes to that iterable are reflected in the path that is searched.  Of 
- * course, once a class is loaded, subsequent changes to the path will not change the class 
- * bound to that name.  The dynamic nature of the search path makes possible unusual errors --
- * a class may be valid in the path in which it is initially loaded, but when the JVM 
- * later transitively resolves the referenced classes, they may no longer exist, or may be
- * shadowed.  This is not a unique problem, however -- the standard system class loader is
- * based on an underlying file system that may also change in arbitrary ways at any time.
- */
+/** A class loader that mimics the standard application system loader by loading classes from
+  * a file path of directories and jar files.  This class also supports a <em>dynamic</em>
+  * class path: an {@code Iterable} provided as input to the constructor is held, not copied,
+  * and subsequent changes to that iterable are reflected in the path that is searched.  Of 
+  * course, once a class is loaded, subsequent changes to the path will not change the class 
+  * bound to that name.  The dynamic nature of the search path makes possible unusual errors --
+  * a class may be valid in the path in which it is initially loaded, but when the JVM 
+  * later transitively resolves the referenced classes, they may no longer exist, or may be
+  * shadowed.  This is not a unique problem, however -- the standard system class loader is
+  * based on an underlying file system that may also change in arbitrary ways at any time.
+  */
 public class PathClassLoader extends AbstractClassLoader {
   
-  /**
-   * Locate a resource in the given path.  Returns {@code null} if the resource is not found.
-   * If multiple queries will be performed on the same path, a PathClassLoader instance
-   * should be created for better performance.
-   */
+  static Log _log = new Log("MasterJVM.txt", false);
+  
+  /** Locate a resource in the given path.  Returns {@code null} if the resource is not found.
+    * If multiple queries will be performed on the same path, a PathClassLoader instance
+    * should be created for better performance.
+    */
   public static URL getResourceInPath(String name, File... path) {
     return getResourceInPath(name, IterUtil.asIterable(path));
   }
 
-  /**
-   * Locate a resource in the given path.  Returns {@code null} if the resource is not found.
-   * If multiple queries will be performed on the same path, a PathClassLoader instance
-   * should be created for better performance.
-   */
+  /** Locate a resource in the given path.  Returns {@code null} if the resource is not found.
+    * If multiple queries will be performed on the same path, a PathClassLoader instance
+    * should be created for better performance.
+    */
   public static URL getResourceInPath(String name, Iterable<File> path) {
+    _log.log("getResourceInPath(" + name + ", " + path + ") called");
     return new PathClassLoader(EmptyClassLoader.INSTANCE, path).getResource(name);
   }
 
-  /**
-   * Locate a resource in the given path.  Returns {@code null} if the resource is not found.
-   * If multiple queries will be performed on the same path, a PathClassLoader instance
-   * should be created for better performance.
-   */
+  /** Locate a resource in the given path.  Returns {@code null} if the resource is not found.
+    * If multiple queries will be performed on the same path, a PathClassLoader instance
+    * should be created for better performance.
+    */
   public static InputStream getResourceInPathAsStream(String name, File... path) {
     return getResourceInPathAsStream(name, IterUtil.asIterable(path));
   }
 
-  /**
-   * Locate a resource in the given path.  Returns {@code null} if the resource is not found.
-   * If multiple queries will be performed on the same path, a PathClassLoader instance
-   * should be created for better performance.
-   */
+  /** Locate a resource in the given path.  Returns {@code null} if the resource is not found. If multiple queries will 
+    * be performed on the same path, a PathClassLoader instance should be created for better performance.
+    */
   public static InputStream getResourceInPathAsStream(String name, Iterable<File> path) {
+    _log.log("Called getResourceInPathAsStream(" + name + ", " + path + ")");
     return new PathClassLoader(EmptyClassLoader.INSTANCE, path).getResourceAsStream(name);
   }
   
-
   private final Iterable<? extends File> _path;
   private URLClassLoader _urlLoader;
   private Iterable<File> _urlLoaderPath;
 
-  /**
-   * Create a path class loader with the default parent ({@link ClassLoader#getSystemClassLoader})
-   * and the specified path.
-   */
+  /** Create a path class loader with the default parent ({@link ClassLoader#getSystemClassLoader}) and the specified 
+    * path. */
   public PathClassLoader(File... path) { this(IterUtil.asIterable(path)); }
   
-  /**
-   * Create a path class loader with the default parent ({@link ClassLoader#getSystemClassLoader})
-   * and the specified path.
-   */
+  /** Create a path class loader with the default parent ({@link ClassLoader#getSystemClassLoader}) and the specified 
+    * path. */
   public PathClassLoader(Iterable<? extends File> path) {
     super();
     _path = path;
@@ -129,21 +125,34 @@ public class PathClassLoader extends AbstractClassLoader {
     super(parent);
     _path = path;
     updateURLLoader();
+    _log.log("Created PathClassLoader with path: " + path);
   }
 
   private void updateURLLoader() {
     _urlLoaderPath = IterUtil.snapshot(_path);
     List<URL> urls = new LinkedList<URL>();
+    _log.log("urlLoaderPath = " + _urlLoaderPath);
     for (File f : _urlLoaderPath) {
       try { urls.add(f.toURI().toURL()); }
       catch (IllegalArgumentException e) { error.log(e); }
       catch (MalformedURLException e) { error.log(e); }
       // just skip the path element if there's an error
     }
+    _log.log("_urlLoader now has path " + urls);
     _urlLoader = new URLClassLoader(urls.toArray(new URL[urls.size()]), EmptyClassLoader.INSTANCE);
   }
   
-  @Override protected Class<?> findClass(String name) throws ClassNotFoundException {
+  @Override
+  public Class<?> loadClass(String name) throws ClassNotFoundException {
+    _log.log("loadClass("  + name + ") called");
+    Class<?> result = super.loadClass(name);
+    _log.log("Result of loadClass operation is: " + result);
+    return result;
+  }
+    
+  @Override 
+  protected Class<?> findClass(String name) throws ClassNotFoundException {
+    _log.log("findClass("  + name + ") called");
     URL resource = findResource(name.replace('.', '/') + ".class");
     if (resource == null) { throw new ClassNotFoundException(); }
     else {
@@ -161,14 +170,19 @@ public class PathClassLoader extends AbstractClassLoader {
     }
   }
   
-  @Override protected URL findResource(String name) {
-    if (!IterUtil.isEqual(_path, _urlLoaderPath)) { updateURLLoader(); }
-    return _urlLoader.findResource(name);
+  @Override 
+  protected URL findResource(String name) {
+    _log.log("findResource(" + name + ") called; _path is " + _path);
+    if (! IterUtil.isEqual(_path, _urlLoaderPath)) { updateURLLoader(); }
+    URL result = _urlLoader.findResource(name);
+    _log.log("returning " + result);
+    return result;
   }
   
-  @Override protected Enumeration<URL> findResources(String name) throws IOException {
-    if (!IterUtil.isEqual(_path, _urlLoaderPath)) { updateURLLoader(); }
+  @Override 
+  protected Enumeration<URL> findResources(String name) throws IOException {
+    _log.log("findResources(" + name + ") called _path is " + _path);
+    if (! IterUtil.isEqual(_path, _urlLoaderPath)) { updateURLLoader(); }
     return _urlLoader.findResources(name);
   }
-  
 }

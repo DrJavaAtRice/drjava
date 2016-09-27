@@ -50,7 +50,7 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
 import java.util.StringTokenizer;
 import java.util.NoSuchElementException;
-import java.util.Vector;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.*;
@@ -307,8 +307,8 @@ public class DetachedFrame extends SwingFrame {
   }  
     
   /** OptionListener responding to changes for the undo/redo key bindings. */
-  private final OptionListener<Vector<KeyStroke>> _keyBindingOptionListener = new OptionListener<Vector<KeyStroke>>() {
-    public void optionChanged(OptionEvent<Vector<KeyStroke>> oce) {
+  private final OptionListener<ArrayList<KeyStroke>> _keyBindingOptionListener = new OptionListener<ArrayList<KeyStroke>>() {
+    public void optionChanged(OptionEvent<ArrayList<KeyStroke>> oce) {
       updateKeyBindings();
     }
   };

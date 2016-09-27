@@ -40,16 +40,15 @@ package edu.rice.cs.util.newjvm;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
-/**
- * The remote interface for a slave JVM.
- * @version $Id: SlaveRemote.java 5594 2012-06-21 11:23:40Z rcartwright $
- */
+/** The remote interface for a slave JVM.
+  * @version $Id: SlaveRemote.java 5594 2012-06-21 11:23:40Z rcartwright $
+  */
 public interface SlaveRemote extends Remote {
-  /**
-   * This method is called when the slave JVM is initialized.
-   * @param master  The remote link to the master JVM. Note that the implementation of the slave class will have to 
-   *                downcast this reference to the correct master remote interface.
-   */
+  
+  /** This method is called when the slave JVM is initialized.
+    * @param master  The remote link to the master JVM. Note that the implementation of the slave class will have to 
+    *                downcast this reference to the correct master remote interface.
+    */
   public void start(MasterRemote master) throws RemoteException;
 
   /** Quits the slave JVM. */

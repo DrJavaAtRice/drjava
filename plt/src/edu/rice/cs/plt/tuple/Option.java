@@ -40,14 +40,14 @@ import edu.rice.cs.plt.collect.CollectUtil;
 import edu.rice.cs.plt.collect.TotalOrder;
 import edu.rice.cs.plt.object.ObjectUtil;
 
-/**
- * A wrapper for optional values.  This provides a strictly-typed alternative to using
- * {@code null} to represent the absence of a value.  Options have two variants: "some"
- * and "none."  The "some" case is represented by {@link Wrapper}s; the "none" case is
- * represented by the {@link Null} singleton.  {@code Option} values may be decomposed
- * by invoking {@link #unwrap()} or {@link #unwrap(Object)}, or by using an
- * {@link OptionVisitor}.
- */
+// TODO: use the Java * type Optional instead; BEWARE: the class name Option is already used in DrJava, creating
+// confusion.  Using Optional instead of Option would eliminate this problem.
+
+/** A wrapper for optional values.  This provides a strictly-typed alternative to using {@code null} to represent the 
+  * absence of a value.  Options have two variants: "some" and "none."  The "some" case is represented by {@link Wrapper}s; 
+  * the "none" case is represented by the {@link Null} singleton.  {@code Option} values may be decomposed by invoking 
+  * {@link #unwrap()} or {@link #unwrap(Object)}, or by using an {@link OptionVisitor}.
+  */
 public abstract class Option<T> extends Tuple {
   
   protected Option() {}
@@ -61,46 +61,33 @@ public abstract class Option<T> extends Tuple {
   /** Determine whether this Option is a "none" case.  Mutually exclusive with {@link #isSome}. */
   public final boolean isNone() { return !isSome(); }
   
-  /**
-   * Get the value wrapped by this Option, or throw an {@link OptionUnwrapException} if there
-   * is no wrapped value.
-   */
+  /** Get the value wrapped by this Option, or throw an {@link OptionUnwrapException} if there is no wrapped value. */
   public abstract T unwrap() throws OptionUnwrapException;
   
   /** Get the value wrapped by this Option, or {@code forNone} if there is no wrapped value. */
   public abstract T unwrap(T forNone);
-  
 
   /** Create a "some" case wrapper for the given value. */
   public static <T> Option<T> some(T val) { return new Wrapper<T>(val); }
   
   /** Return the "none" case singleton, cast to the appropriate type. */
-  @SuppressWarnings("unchecked") public static <T> Option<T> none() {
-    return (Option<T>) Null.INSTANCE;
-  }
+  @SuppressWarnings("unchecked") public static <T> Option<T> none() { return (Option<T>) Null.INSTANCE; }
   
-  /**
-   * Treat a possibly-null value as an {@code Option}: if the value is {@code null}, produce
-   * a "none"; otherwise, produce a "some" wrapping the value.
-   */
+  /** Treat a possibly-null value as an {@code Option}: if the value is {@code null}, produce a "none"; otherwise, 
+    * produce a "some" wrapping the value. */
   @SuppressWarnings("unchecked") public static <T> Option<T> wrap(T val) {
     if (val == null) { return (Option<T>) Null.INSTANCE; }
     else { return new Wrapper<T>(val); }
   }
   
-  /**
-   * A more general form of the instance method {@link #unwrap(Object)}, allowing {@code forNone}
-   * to have a different type than {@code opt} (the result has a common supertype).
-   */
+  /** A more general form of the instance method {@link #unwrap(Object)}, allowing {@code forNone} to have a different 
+    * type than {@code opt} (the result has a common supertype). */
   public static <T> T unwrap(Option<? extends T> opt, T forNone) {
     if (opt.isSome()) { return opt.unwrap(); }
     else { return forNone; }
   }
     
-  /**
-   * Produce a comparator for options, ordered by the natural order of the elements with "none" values at
-   * the front.
-   */
+  /** Produce a comparator for options, ordered by the natural order of the elements with "none" values at the front. */
   public static <T extends Comparable<? super T>> TotalOrder<Option<? extends T>> comparator() {
     return new OptionComparator<T>(CollectUtil.<T>naturalOrder());
   }

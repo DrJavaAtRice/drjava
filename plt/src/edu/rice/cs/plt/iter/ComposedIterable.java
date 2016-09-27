@@ -38,10 +38,9 @@ import java.io.Serializable;
 import edu.rice.cs.plt.object.Composite;
 import edu.rice.cs.plt.object.ObjectUtil;
 
-/**
- * Defines an iterable by composing two other iterables (or a value with an iterable).
- * Subsequent changes to the input lists will be reflected.
- */
+/** Defines an iterable by composing two other iterables (or a value with an iterable).
+  * Subsequent changes to the input lists will be reflected.
+  */
 public class ComposedIterable<T> extends AbstractIterable<T> 
   implements SizedIterable<T>, OptimizedLastIterable<T>, Composite, Serializable {
   
@@ -106,13 +105,12 @@ public class ComposedIterable<T> extends AbstractIterable<T>
   
   public boolean isStatic() { return _isStatic; }
   
-  /**
-   * Determine the last value in the iterable.  This implementation will usually be faster than
-   * the general approach of iterating through the entire list -- for a balanced
-   * {@code ComposedIterable} tree, it takes log(n) time; if the right subtree is a singleton, 
-   * the result is computed trivially.  (Note that the approach used avoids recursion in order 
-   * to prevent a stack overflow.)
-   */
+  /** Determine the last value in the iterable.  This implementation will usually be faster than
+    * the general approach of iterating through the entire list -- for a balanced
+    * {@code ComposedIterable} tree, it takes log(n) time; if the right subtree is a singleton, 
+    * the result is computed trivially.  (Note that the approach used avoids recursion in order 
+    * to prevent a stack overflow.)
+    */
   public T last() {
     Iterable<? extends T> lastIterable;
     if (IterUtil.isEmpty(_i2)) { lastIterable = _i1; }

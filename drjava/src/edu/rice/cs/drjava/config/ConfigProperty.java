@@ -38,7 +38,7 @@ package edu.rice.cs.drjava.config;
 
 import edu.rice.cs.drjava.DrScala;
 
-import java.util.Vector;
+import java.util.ArrayList;
 
 /** Class representing values from the DrScala configuration file that can be inserted as variables in external processes.
   * @version $Id: ConfigProperty.java 5594 2012-06-21 11:23:40Z rcartwright $
@@ -61,9 +61,9 @@ public class ConfigProperty extends EagerProperty {
       String key = op.getName();
       String value = om.getString(op);
       if (_name.equals("config." + key)) {
-        if (op instanceof VectorOption<?>) {
+        if (op instanceof ArrayListOption<?>) {
           @SuppressWarnings("unchecked")
-          Vector<?> vec = ((VectorOption)op).parse(value);
+          ArrayList<?> vec = ((ArrayListOption)op).parse(value);
           StringBuilder sb = new StringBuilder();
           for(Object o: vec) {
             sb.append(_attributes.get("sep"));
@@ -102,7 +102,7 @@ public class ConfigProperty extends EagerProperty {
     for (OptionParser<?> op : om.keys()) {
       String key = op.getName();
       if (_name.equals("config." + key)) {
-        if (op instanceof VectorOption<?>) {
+        if (op instanceof ArrayListOption<?>) {
           _isList = true;
           _attributes.put("sep", java.io.File.pathSeparator);
         }

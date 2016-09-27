@@ -34,21 +34,19 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package edu.rice.cs.plt.iter;
 
-/**
- * A parent class for iterables that implements {@code toString}, {@code hashCode},
- * and {@code equals}.
- */
+/** A parent class for iterables that implements {@code toString}, {@code hashCode},
+  * and {@code equals}.
+  */
 public abstract class AbstractIterable<T> implements Iterable<T> {
   
   /** Defers to {@link IterUtil#toString}. */
   public String toString() { return IterUtil.toString(this); }
   
-  /**
-   * Defers to {@link IterUtil#isEqual} (unless {@code obj} is not an {@code AbstractIterable}).  It's tempting
-   * to check for equality whenever {@code obj} is <em>any</em> iterable, but that would break the contract of
-   * {@code equals()}, since it would not necessarily be symmetric.  See {@link java.util.Collection#equals} for 
-   * further discussion.
-   */
+  /** Defers to {@link IterUtil#isEqual} (unless {@code obj} is not an {@code AbstractIterable}).  It's tempting
+    * to check for equality whenever {@code obj} is <em>any</em> iterable, but that would break the contract of
+    * {@code equals()}, since it would not necessarily be symmetric.  See {@link java.util.Collection#equals} for 
+    * further discussion.
+    */
   public final boolean equals(Object obj) {
     if (obj instanceof AbstractIterable<?>) { return IterUtil.isEqual(this, (AbstractIterable<?>) obj); }
     else { return false; }

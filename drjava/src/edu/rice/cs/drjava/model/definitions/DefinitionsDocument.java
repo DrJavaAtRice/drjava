@@ -1331,12 +1331,12 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 //  }
 //
 //
-//  public java.util.Vector getEdits() {
+//  public java.util.ArrayList getEdits() {
 //     return _undoManager._compoundEdit.getEdits();
 //  }
 //
 //  private class OurCompoundEdit extends CompoundEdit {
-//     public java.util.Vector getEdits() {
+//     public java.util.ArrayList getEdits() {
 //        return edits;
 //     }
 //  }

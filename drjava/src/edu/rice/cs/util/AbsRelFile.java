@@ -40,7 +40,6 @@ import java.io.*;
 import java.net.URI;
 
 /** A subclass of File that stores if it should be saved as absolute or relative.
-  *
   * @version $Id: AbsRelFile.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class AbsRelFile extends File {

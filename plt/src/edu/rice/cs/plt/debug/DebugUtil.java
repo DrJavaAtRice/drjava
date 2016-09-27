@@ -9,26 +9,23 @@ Developed by:   Java Programming Languages Team
                 Rice University
                 http://www.cs.rice.edu/~javaplt/
 
-Redistribution and use in source and binary forms, with or without modification, are permitted 
-provided that the following conditions are met:
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the 
+following conditions are met:
 
-    - Redistributions of source code must retain the above copyright notice, this list of conditions 
-      and the following disclaimer.
-    - Redistributions in binary form must reproduce the above copyright notice, this list of 
-      conditions and the following disclaimer in the documentation and/or other materials provided 
-      with the distribution.
-    - Neither the name of the JavaPLT group, Rice University, nor the names of the library's 
-      contributors may be used to endorse or promote products derived from this software without 
-      specific prior written permission.
+    - Redistributions of source code must retain the above copyright notice, this list of conditions  and the following 
+      disclaimer.
+    - Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the 
+      following disclaimer in the documentation and/or other materials provided with the distribution.
+    - Neither the name of the JavaPLT group, Rice University, nor the names of the library's contributors may be used to
+      endorse or promote products derived from this software without specific prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
-IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
-FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS AND 
-CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
-IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
-OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS AND CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *END_COPYRIGHT_BLOCK*/
 
@@ -57,37 +54,33 @@ public final class DebugUtil {
   /** Prevents instance creation */
   private DebugUtil() {}
   
-  /**
-   * A globally-accessible debugging log, declared in the spirit of {@link System#out}.  This log is intended to 
-   * record information that would be useful in a debugging session, but that is too detailed for typical program 
-   * executions.  By default, its value is a {@link VoidLog}; logging behavior may be changed by setting the system
-   * property {@code plt.debug.log}, or by directly setting this field (it is declared {@code volatile} so that 
-   * changes take immediate effect in all threads).
-   * 
-   * @see #initializeLogs
-   */
+  /** A globally-accessible debugging log, declared in the spirit of {@link System#out}.  This log is intended to record
+    * information that would be useful in a debugging session, but that is too detailed for typical program  executions.
+    * By default, its value is a {@link VoidLog}; logging behavior may be changed by setting the system property {@code 
+    * plt.debug.log}, or by directly setting this field (it is declared {@code volatile} so that changes take immediate 
+    * effect in all threads).
+    * 
+    * @see #initializeLogs
+    */
   public static volatile Log debug;
 
-  /**
-   * A globally-accessible error log, declared in the spirit of {@link System#out}.  This log is intended to 
-   * record errors that should be noted, but that do not require the propagation of an exception.  By default, 
-   * its value is a {@link VoidLog}; logging behavior may be changed by setting the system
-   * property {@code plt.error.log}, or by directly setting this field (it is declared 
-   * {@code volatile} so that changes take immediate effect in all threads).
-   * 
-   * @see #initializeLogs
-   */
+  /** A globally-accessible error log, declared in the spirit of {@link System#out}.  This log is intended to record 
+    * errors that should be noted, but that do not require the propagation of an exception.  By default,  its value is a
+    * {@link VoidLog}; logging behavior may be changed by setting the system property {@code plt.error.log}, or by 
+    * directly setting this field (it is declared  {@code volatile} so that changes take immediate effect in all threads).
+    * 
+    * @see #initializeLogs
+    */
   public static volatile Log error;
   
   static { initializeLogs(); }
   
-  /**
-   * Initialize {@link #debug} and {@link #error} based on the descriptors appearing in system properties
-   * {@code plt.debug.log} and {@code plt.error.log}.  This method is run automatically when the
-   * {@code DebugUtil} class is loaded.  If desired, it may be re-invoked at any time.
-   * @see #makeLog
-   * @see #makeLogSink
-   */
+  /** Initialize {@link #debug} and {@link #error} based on the descriptors appearing in system properties {@code 
+    * plt.debug.log} and {@code plt.error.log}.  This method is run automatically when the {@code DebugUtil} class is 
+    * loaded.  If desired, it may be re-invoked at any time.
+    * @see #makeLog
+    * @see #makeLogSink
+    */
   public static void initializeLogs() {
     String debugProp = System.getProperty("plt.debug.log");
     debug = (debugProp == null) ? VoidLog.INSTANCE : makeLog(debugProp, "Debug");
@@ -95,12 +88,11 @@ public final class DebugUtil {
     error = (errorProp == null) ? VoidLog.INSTANCE : makeLog(errorProp, "Error");
   }
   
-  /**
-   * Produce a Log corresponding to the given descriptor.  If the descriptor is a valid sink descriptor,
-   * a {@link StandardLog} is returned; otherwise, a {@link VoidLog} is returned.  ({@code "void"} is a
-   * convenient special case of an invalid sink descriptor.)
-   * @see #makeLogSink
-   */
+  /** Produce a Log corresponding to the given descriptor.  If the descriptor is a valid sink descriptor, a {@link 
+    * StandardLog} is returned; otherwise, a {@link VoidLog} is returned.  ({@code "void"} is aconvenient special case 
+    * of an invalid sink descriptor.)
+    * @see #makeLogSink
+    */
   public static Log makeLog(String descriptor, String defaultName) {
     LogSink sink = makeLogSink(descriptor, defaultName);
     if (sink == null) { return VoidLog.INSTANCE; }

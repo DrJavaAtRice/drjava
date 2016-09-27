@@ -317,7 +317,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     */
   private void _rawJUnitOpenDefDocs(List<OpenDefinitionsDocument> lod, final boolean allTests) {
     File buildDir = _model.getBuildDirectory();
-//    Utilities.show("Running JUnit tests. Build directory is " + buildDir);
+    _log.log("Running JUnit tests. Build directory is " + buildDir);
     
     /** Open java source files */
     HashSet<String> openDocFiles = new HashSet<String>();
@@ -624,8 +624,8 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     return _model.getSourceFile(className + OptionConstants.JAVA_FILE_EXTENSION);
   }
   
-  /** Returns the current classpath in use by the JUnit JVM. */
-  public Iterable<File> getClassPath() {  return _jvm.getClassPath().unwrap(IterUtil.<File>empty()); }
+//  /** Returns the current classpath in use by the JUnit JVM. */
+//  public Iterable<File> getClassPath() {  return _jvm.getClassPath().unwrap(IterUtil.<File>empty()); }
   
   /** Called when the JVM used for unit tests has registered.  Does not necessarily run in even thread. */
   public void junitJVMReady() {

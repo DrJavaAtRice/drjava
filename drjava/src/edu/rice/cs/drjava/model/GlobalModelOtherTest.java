@@ -41,7 +41,6 @@ import javax.swing.text.BadLocationException;
 import javax.swing.event.*;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Vector;
 
 import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.config.*;
@@ -147,7 +146,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
   }
   
   /** Creates a new class, compiles it and then checks that the REPL can see it.  Then checks that a compiled class
-    * file in another directory can be both accessed and extended if it is on the "extra.classpath" config option.
+    * file in another directory can be both accessed and extended if it is on the "extra.class.path" config option.
     */
   public void testInteractionsCanSeeCompiledClasses() throws BadLocationException, EditDocumentException,
     IOException, InterruptedException {
@@ -159,9 +158,9 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     OpenDefinitionsDocument doc1 = setupDocument(FOO_TEXT);
     File dir1 = tempDirectory("dir1");
     File file1 = tempFile("TestFile1", dir1);
-//    System.err.println("Original class Path is: " + _model.getInteractionsClassPath());
+    _log.log("Prior to compilation, interactions class Path is: " + _model.getInteractionsClassPath());
     doCompile(doc1, file1);
-//    System.err.println("After loading " + file1 + ", class Path is now: " + _model.getInteractionsClassPath());
+    _log.log("After compiling " + file1 + ", interactions class Path is now: " + _model.getInteractionsClassPath());
     assertTrue("class file for file1 exists", new File(dir1, "DrScalaTestFoo.class").exists());
 
     // example format of REPL result: res0: java.lang.String = DrScalaTestFoo
@@ -171,7 +170,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     assertTrue("interactions result matches pattern", result.matches(pattern));
     
     // Add directory 1 to extra classpath and close doc1
-    Vector<File> cp = new Vector<File>();
+    ArrayList<File> cp = new ArrayList<File>();
     cp.add(dir1);
     DrScala.getConfig().setSetting(EXTRA_CLASSPATH, cp);
     
@@ -501,10 +500,10 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     assertFalse("interactions should have an error, not the correct answer", "\"DrScalaTestFoo\"".equals(result));
 //    System.err.println("Result1 is: " + result);
     
-    System.err.println("Classpath before extension = '" + _model.getInteractionsClassPath() + "'");
+    System.err.println("Classpath before extension = '" + _model.getClassPath() + "'");
     
     // Add new directory to classpath through Config
-    Vector<File> cp = new Vector<File>();
+    ArrayList<File> cp = new ArrayList<File>();
     
     File renamedDir = makeCanonical(new File(tempPath + "a"));
     renamedDir.deleteOnExit();
@@ -517,9 +516,9 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     Utilities.clearEventQueue();
     _model.resetInteractionsClassPath();
     
-    Iterable<File> newCp = _model.getInteractionsClassPath();
+    Iterable<File> newCp = _model.getClassPath();
     System.err.println("New class path is:\n" + IterUtil.multilineToString(newCp));
-    System.err.println("Classpath after extension = '" + _model.getInteractionsClassPath() + "'");
+    System.err.println("Classpath after extension = '" + _model.getClassPath() + "'");
 //    Utilities.show("Pause to inspect class path including " + cp);
     
     // example format of REPL result: res0: String = DrScalaTestFoo

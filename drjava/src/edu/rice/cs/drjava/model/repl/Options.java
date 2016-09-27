@@ -26,14 +26,14 @@ public class Options {
   
 //  public final TypeSystem typeSystem() { return _tsFactory.value(); }
   
-  /** Require a semicolon at the end of statements. */
-  public boolean requireSemicolon() { return false; }
-  /** Require variable declarations to include an explicit type. */
-  public boolean requireVariableType() { return false; }
-  /** Check that all access of class members is permitted by accessibility controls. */
-  public boolean enforceAllAccess() { return false; }
-  /** Check that access of private class members is permitted (irrelevant if enforceAllAccess() is true). */
-  public boolean enforcePrivateAccess() { return false; }
+//  /** Require a semicolon at the end of statements. */
+//  public boolean requireSemicolon() { return false; }
+//  /** Require variable declarations to include an explicit type. */
+//  public boolean requireVariableType() { return false; }
+//  /** Check that all access of class members is permitted by accessibility controls. */
+//  public boolean enforceAllAccess() { return false; }
+//  /** Check that access of private class members is permitted (irrelevant if enforceAllAccess() is true). */
+//  public boolean enforcePrivateAccess() { return false; }
   /** Disallow boxing conversion. */
   public boolean prohibitBoxing() { return false; }
   /** Disallow unchecked casting conversion. */

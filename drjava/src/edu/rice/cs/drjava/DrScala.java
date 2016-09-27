@@ -1,38 +1,30 @@
-/*BEGIN_COPYRIGHT_BLOCK
+/* BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2015, JavaPLT group at Rice University (drjava@rice.edu)
- * All rights reserved.
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu). All rights reserved.
  * 
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *    * Redistributions of source code must retain the above copyright
- *      notice, this list of conditions and the following disclaimer.
- *    * Redistributions in binary form must reproduce the above copyright
- *      notice, this list of conditions and the following disclaimer in the
- *      documentation and/or other materials provided with the distribution.
- *    * Neither the names of DrScala, DrScala, the JavaPLT group, Rice University, nor the
- *      names of its contributors may be used to endorse or promote products
- *      derived from this software without specific prior written permission.
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the 
+ * following conditions are met:
+ *    * Redistributions of source code must retain the above copyright notice, this list of conditions and the following
+ *      disclaimer in the documentation.
+ *    * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the 
+ *      following disclaimer in the documentation and/or other materials provided with the distribution.
+ *    * Neither the names of DrScala, DrScala, the JavaPLT group, Rice University, nor the names of its contributors may
+ *      be used to endorse or promote products derived from this software without specific prior written permission.
  * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * This software is Open Source Initiative approved Open Source Software.
  * Open Source Initative Approved is a trademark of the Open Source Initiative.
  * 
- * This file is part of DrScala.  Download the current version of this project
- * from http://www.drscala.org/.
+ * This file is part of DrScala.  Download the current version of this project from http://github.com/DrJavaAtRice.
  * 
- * END_COPYRIGHT_BLOCK*/
+ * END_COPYRIGHT_BLOCK */
 
 package edu.rice.cs.drjava;
 
@@ -58,8 +50,6 @@ import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.drjava.model.DrScalaFileUtils;
-
-import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /** Startup class for DrScala consisting entirely of static members.  The main method reads the .drscala file (creating 
   * one if none exists) to get the critical information required to start the main JVM for DrScala, namely the argument
@@ -103,15 +93,12 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
   * @version $Id: DrScala.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class DrScala {
-  public static volatile Log _log = new Log("MasterJVM.txt", false);
+  public static volatile Log _log = new Log("DrScala.txt", false);
   
   private static final String DEFAULT_MAX_HEAP_SIZE_ARG = "-Xmx256M";
   
   private static final ArrayList<String> _filesToOpen = new ArrayList<String>();
   private static final ArrayList<String> _jvmArgs = new ArrayList<String>();
-  
-  /* Debugging is deactivated in DrScala */
-//  static volatile boolean _showDebugConsole = false;
   
   /** true if a new instance of DrScala should be started instead of
     * connecting to an already running instance. */
@@ -187,48 +174,6 @@ public class DrScala {
     _filesToOpen.clear();
   }
   
-//  /** Open the specified files using the remote control. If the remote control server is not
-//    * running, numAttempts attempts will be made, with WAIT_BEFORE_REMOTE_CONTROL_RETRY
-//    * ms of sleep time in between.
-//    * @param files files to open with remote control
-//    * @param numAttempts of attempts to be made
-//    * @return true if successful
-//    */
-//  public static synchronized boolean openWithRemoteControl(ArrayList<String> files, int numAttempts) {
-//    if (! DrScala.getConfig().getSetting(OptionConstants.REMOTE_CONTROL_ENABLED) ||
-//        ! _restartedDrScalaUsesRemoteControl ||
-//        files.size() == 0) return false;
-//    
-//    ArrayList<String> fs = new ArrayList<String>(files);
-//    int failCount = 0;
-//    while(failCount<numAttempts) {
-//      try {
-//        RemoteControlClient.openFile(null);
-//        if (RemoteControlClient.isServerRunning()) {
-//          // existing instance is running and responding
-//          for (int i = 0; i < fs.size(); ++i) {
-//            _log.log("opening with remote control "+fs.get(i));
-//            RemoteControlClient.openFile(new File(fs.get(i)));
-//            files.remove(fs.get(i));
-//          }
-//          return true; // success
-//        }
-//        else {
-//          ++failCount;
-//          _log.log("Failed to open with remote control, attempt "+failCount+" of "+NUM_REMOTE_CONTROL_RETRIES);
-//          if (failCount>=numAttempts) return false; // failure
-//          try { Thread.sleep(WAIT_BEFORE_REMOTE_CONTROL_RETRY); }
-//          catch(InterruptedException ie) { /* just try again now */ }
-//        }
-//      }
-//      catch(IOException ioe) { ioe.printStackTrace(); }
-//    }
-//    return false; // failure
-//  }
-  
-//  /** @return true if the debug console should be enabled */
-//  public static boolean getShowDebugConsole() { return _showDebugConsole; }
-  
   /** Starts running DrScala.
     * @param args Command line argument array
     */
@@ -237,21 +182,12 @@ public class DrScala {
     if (handleCommandLineArgs(args)) {
       // Platform-specific UI setup.
       PlatformFactory.ONLY.beforeUISetup();
-      
-//    Utilities.showDebug("Calling configureAndLoadDrScalaRoot with args = " + args);
       configureAndLoadDrScalaRoot(args); 
     }
   }
   
   public static void configureAndLoadDrScalaRoot(String[] args) {
     try {
-//      // if there were files passed on the command line,
-//      // try to open them in an existing instance
-//      if (!_forceNewInstance &&
-//          DrScala.getConfig().getSetting(OptionConstants.REMOTE_CONTROL_ENABLED) &&
-//          (_filesToOpen.size() > 0)) {
-//        if (openWithRemoteControl(_filesToOpen,1)) System.exit(0); // files opened in existing instance, quit
-//      }
       
       // The code below is in a loop so that DrScala can retry launching itself
       // if it fails the first time after resetting the .
@@ -267,9 +203,6 @@ public class DrScala {
         
         LinkedList<String> classArgs = new LinkedList<String>();
         
-//        // Add the parameters "-debugConsole" to classArgsList if _showDebugConsole is true
-//        if (_showDebugConsole) { classArgs.addFirst("-debugConsole"); }
-        
         if (! _propertiesFile.equals(DEFAULT_PROPERTIES_FILE)) {
           // Placed in reversed order to get "-config filename"
           classArgs.addFirst(_propertiesFile.getAbsolutePath());
@@ -283,14 +216,7 @@ public class DrScala {
         }
         
         if (_doRestart) {
-//          if (DrScala.getConfig().getSetting(OptionConstants.REMOTE_CONTROL_ENABLED)) {
-//            // at this time, OUR remote control server hasn't been started yet
-//            // if one is running, then we won't be able to contact the restarted DrScala
-//           _restartedDrScalaUsesRemoteControl = !RemoteControlClient.isServerRunning();
-//          } else {
-            // no remote control
-            _restartedDrScalaUsesRemoteControl = false;
-//          }
+          _restartedDrScalaUsesRemoteControl = false;
           
           // Run a new copy of DrScala and exit
           try {
@@ -346,34 +272,22 @@ public class DrScala {
                 continue;
               }
             }
-//            else {
-//              // check if there are any files left in _filesToOpen
-//              _log.log("not failed, send remaining files via remote control: "+_filesToOpen);
-//              openWithRemoteControl(_filesToOpen, NUM_REMOTE_CONTROL_RETRIES);
-//            }
           }
           catch (IOException ioe) {
             // Display error
             final String[] text = {
-              "DrScala was unable to load its compiler and debugger.  Would you ",
-              "like to start DrScala without a compiler and debugger?", "\nReason: " + ioe.toString()
+              "DrScala was unable to load its compiler.  Would you like to start DrScala without a compiler?", 
+              "\nReason: " + ioe.toString()
             };
-            int result = JOptionPane.showConfirmDialog(null, text, "Could Not Load Compiler and Debugger",
+            int result = JOptionPane.showConfirmDialog(null, text, "Could Not Load Compiler",
                                                        JOptionPane.YES_NO_OPTION);
             if (result != JOptionPane.YES_OPTION) { System.exit(0); }
           }
         }
         
         else {
-          // No restart -- just invoke DrScalaRoot.main.
+          // No restart -- just invoke DrScalaRoot.main.  
           DrScalaRoot.main(classArgs.toArray(new String[0]));
-          // when we return from here, DrScalaRoot._mainFrame has been initialized
-          // but we may still have files in _filesToOpen that were not processed
-          // do that now
-//          ArrayList<String> fs = new ArrayList<String>(_filesToOpen);
-//          for(String f: fs) {
-//            DrScalaRoot.handleRemoteOpenFile(new File(f), -1);
-//          }
         }
         break;
       }
@@ -413,8 +327,6 @@ public class DrScala {
         if (arg.startsWith("-Xmx")) { heapSizeGiven = true; }
         _jvmArgs.add(arg); 
       }
-      
-//      else if (arg.equals("-debugConsole")) _showDebugConsole = true;
       
       else if (arg.equals("-new")) _forceNewInstance = true;
       
@@ -530,46 +442,7 @@ public class DrScala {
     }
   }
   
-//  /** Displays a prompt to the user indicating that tools.jar could not be found in the specified location, and asks
-//    * if he would like to specify a new location.
-//    */
-//  private static boolean _userWantsToPickAgain() {
-//    File selectedFile = getConfig().getSetting(JAVAC_LOCATION);
-//    String selectedVersion = _getToolsJarVersion(selectedFile);
-//    
-//    final String[] text;
-//    if (selectedVersion==null) {
-//      text = new String[] {
-//        "The file you chose did not appear to be the correct 'tools.jar'",
-//        "that is compatible with the version of Java that is used to",
-//        "run DrScala (Java version " + System.getProperty("java.version") + ").",
-//        "Your choice might be an incompatible version of the file.",
-//        "Would you like to pick again?  The 'tools.jar' file is ",
-//        "generally located in the 'lib' subdirectory under your ",
-//        "JDK installation directory.",
-//        "(If you say 'No', DrScala might be unable to compile or ",
-//        "debug programs.)"
-//      };
-//    }
-//    else {
-//      text = new String[] {
-//        "The file you chose did not appear to be the correct 'tools.jar'",
-//        "that is compatible with the version of Java that is used to",
-//        "run DrScala (Java version " + System.getProperty("java.version") + ").",
-//        "The file you have selected appears to be for",
-//        "Java version " + selectedVersion + ".",
-//        "Your choice might be an incompatible version of the file.",
-//        "Would you like to pick again?  The 'tools.jar' file is ",
-//        "generally located in the 'lib' subdirectory under your ",
-//        "JDK installation directory.",
-//        "If you say 'No', DrScala might be unable to compile or ",
-//        "debug programs."
-//      };
-//    }
-//
-//    int result = JOptionPane.showConfirmDialog(null, text, "Locate 'tools.jar'?", JOptionPane.YES_NO_OPTION);
-//    return result == JOptionPane.YES_OPTION;
-//  } 
+
   
   /* Erase all non-final bindings created in this class.  Only used in testing. */
   public static void cleanUp() {

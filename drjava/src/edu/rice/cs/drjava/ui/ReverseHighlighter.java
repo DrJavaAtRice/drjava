@@ -352,7 +352,7 @@ public class ReverseHighlighter extends DefaultHighlighter {
   
   private final static Highlighter.Highlight[] noHighlights =
     new Highlighter.Highlight[0];
-  private ArrayList<HighlightInfo> _highlights = new ArrayList<HighlightInfo>();  // Vector<HighlightInfo>
+  private ArrayList<HighlightInfo> _highlights = new ArrayList<HighlightInfo>();  // ArrayList<HighlightInfo>
   private JTextComponent component;
   private boolean drawsLayeredHighlights;
   private SafeDamager safeDamager = new SafeDamager();

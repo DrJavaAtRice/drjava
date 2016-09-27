@@ -75,7 +75,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
  */
 public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   
-  public static final Log _log  = new Log("GlobalModel.txt", false);
+  public static final Log _log = new Log("GlobalModel.txt", false);
 
   protected volatile DefaultGlobalModel _model;
   protected volatile InteractionsController _interactionsController;
@@ -120,6 +120,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
           new InteractionsController(_model.getInteractionsModel(),
                                      _model.getSwingInteractionsDocument(),
                                      new Runnable() { public void run() { } });
+
         _log.log("Global model created for " + this);
         DrScala.getConfig().resetToDefaults();
         String user = System.getProperty("user.name");
@@ -131,19 +132,18 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       }
     });
     Utilities.clearEventQueue(); // Let some pending event queue operations complete; performs a longer wait than invokeAndWait version of preceding
-    _model.setResetAfterCompile(false);
+//    _model.setResetAfterCompile(false);
     
     _log.log("Completed (GlobalModelTestCase) set up of " + this);
-//    debug.logEnd();
   }
   
-
   /** Teardown for each test case, which recursively deletes the temporary directory created in setUp. */
   public void tearDown() throws Exception {
-//    debug.logStart();
+
     _log.log("Tearing down " + this);
 //    System.err.println("Tearing down " + this);
     _model.dispose();
+    _log.log("Global model has been disposed");
     // We have disposed of the model, remove all interaction listeners to ensure
     // we do not get any late notifications from the interpreter JVM.
     // This fixes the "MainJVM is disposed" errors.
@@ -154,10 +154,8 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 
     _tempDir = null;
     _model = null;
-
     super.tearDown();
     _log.log("Completed tear down of " + this);
-//    debug.logEnd();
 //    System.err.println("Completed tear down of " + this);
   }
 
@@ -240,18 +238,19 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     return temp;
   }
 
-  /** Creates and returns a new document, makes sure newFile is fired, and then adds some text.  When this method is
-    * done newCount is reset to 0.
+  /** Creates and returns a new document, adds a TestListener to the model, makes sure newFile is fired, adds some text,
+    * and deletes the listener.  When this method is done newCount is reset to 0.
     * @return the new modified document
     */
   protected OpenDefinitionsDocument setupDocument(final String text) throws BadLocationException {
+    
     TestListener listener = new TestListener() {
       public void newFileCreated(OpenDefinitionsDocument doc) { newCount++; }
-      public String toString() { return "TestListener created in GlobalModelTestCase"; }
+      public String toString() { return "TestListener created in global model"; }
     };
 
     _model.addListener(listener);
-    System.err.println("Added " + listener);
+    _log.log("Added " + listener + " to model");
 
     // Open a new document
     int numOpen = _model.getOpenDefinitionsDocuments().size();
@@ -259,15 +258,18 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     // newFile() accesses and modifies Swing objects
     Utilities.invokeAndWait(new Runnable() { public void run () { _doc = _model.newFile(); } });
     
+    _log.log("Asserting that " + (numOpen + 1) + " documents are open");
     assertNumOpenDocs(numOpen + 1);
 
     listener.assertNewCount(1);
     assertLength(0, _doc);
     assertModified(false, _doc);
 
+    _log.log("Setting text for document " + _doc);
     Utilities.invokeAndWait(new Runnable() { public void run() { changeDocumentText(text, _doc); } });
     
     assertModified(true, _doc);
+    _log.log("TestListener removed from global model");
     _model.removeListener(listener); 
 
     return _doc;
@@ -323,7 +325,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     catch (EditDocumentException e) { throw new UnexpectedException(e); }
     Utilities.clearEventQueue();
     
-    _model.setResetAfterCompile(true);
+//    _model.setResetAfterCompile(true);
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
     _model.addListener(listener);
     
@@ -640,6 +642,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     public TestListener() {
       _startupTrace = new Exception();
       resetCounts();
+      _log.log("TestListener created");
     }
 
     public synchronized void resetCounts() {
@@ -941,7 +944,10 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 
     public void prepareForRun(OpenDefinitionsDocument doc) { listenerFail("prepareForRun fired unexpectedly"); }
     
-    public void interpreterResetting() { listenerFail("interpreterResetting fired unexpectedly"); }
+    public void interpreterResetting() {
+      _log.log(this + " failed; interpreterResetting fired unexpectedly");
+      listenerFail("interpreterResetting fired unexpectedly");
+    }
 
     public void interpreterReady(File wd) { listenerFail("interpreterReady fired unexpectedly");  }
     public void interpreterExited(int status) {
@@ -994,7 +1000,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   }
   
   public static class InteractionListener extends TestListener {
-    private static final int WAIT_TIMEOUT = 300000; // time to wait for _interactionDone or _resetDone 
+    private static final int WAIT_TIMEOUT = 10000; // time to wait for _interactionDone or _resetDone 
     private volatile CompletionMonitor _interactionDone;
     private volatile CompletionMonitor _resetDone;
     

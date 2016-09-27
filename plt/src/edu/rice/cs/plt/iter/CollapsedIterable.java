@@ -40,10 +40,9 @@ import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.plt.object.Composite;
 import edu.rice.cs.plt.object.ObjectUtil;
 
-/**
- * Collapses a list of lists into a single list.  Subsequent changes to the list or its sublists will be
- * reflected.
- */
+/** Collapses a list of lists into a single list.  Subsequent changes to the list or its sublists will be
+  * reflected.
+  */
 public class CollapsedIterable<T> extends AbstractIterable<T> 
   implements SizedIterable<T>, OptimizedLastIterable<T>, Composite, Serializable {
   

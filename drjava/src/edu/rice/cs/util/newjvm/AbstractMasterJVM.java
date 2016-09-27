@@ -42,7 +42,8 @@ import java.rmi.server.UnicastRemoteObject;
 import java.io.Serializable;
 import java.util.Map;
 
-import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.drjava.DrScala;
+
 import edu.rice.cs.plt.collect.CollectUtil;
 import edu.rice.cs.plt.concurrent.ConcurrentUtil;
 import edu.rice.cs.plt.concurrent.JVMBuilder;
@@ -55,6 +56,7 @@ import edu.rice.cs.plt.reflect.ReflectException;
 import edu.rice.cs.plt.reflect.ReflectUtil;
 
 import edu.rice.cs.util.Log;
+import edu.rice.cs.util.UnexpectedException;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 import static edu.rice.cs.plt.debug.DebugUtil.error;
@@ -79,7 +81,7 @@ public abstract class AbstractMasterJVM implements MasterRemote {
     */
   private enum State { FRESH, STARTING, RUNNING, QUITTING, DISPOSED };
   
-  private static Log _log = new Log("MasterJVM.txt", false);
+  public static Log _log = DrScala._log;
   
   /** Loads an instance of the given AbstractSlaveJVM class.  Invoked in the slave JVM. */
   private static class SlaveFactory implements Thunk<AbstractSlaveJVM>, Serializable {
@@ -100,11 +102,10 @@ public abstract class AbstractMasterJVM implements MasterRemote {
   /** The slave JVM remote stub (non-null when the state is RUNNING). */
   private volatile SlaveRemote _slave;
   
-  /**
-   * Set up the master JVM object.  Does not start a slave JVM.
-   * @param slaveClassName The fully-qualified class name of the class to start up in the second JVM.  Must be a
-   *                       subclass of {@link AbstractSlaveJVM}.
-   */
+  /** Set up the master JVM object.  Does not start a slave JVM.
+    * @param slaveClassName The fully-qualified class name of the class to start up in the second JVM.  Must be a
+    *                       subclass of {@link AbstractSlaveJVM}.
+    */
   protected AbstractMasterJVM(String slaveClassName) {
     _monitor = new StateMonitor<State>(State.FRESH);
     _slaveFactory = new SlaveFactory(slaveClassName);
@@ -165,28 +166,28 @@ public abstract class AbstractMasterJVM implements MasterRemote {
           public void run(Process p) {
             _log.log("Remote JVM quit");
             _monitor.set(State.FRESH);
-            _log.log("Entered state " + State.FRESH + "; Invoking handleSlaveQuit(" + p.exitValue() + ")");
+            _log.log("In AbstactMasterJVM, entered state " + State.FRESH + "; Invoking handleSlaveQuit(" + p.exitValue() + ")");
             handleSlaveQuit(p.exitValue());
           }
         });
     }
     catch (Exception e) {
-      _log.log("invoking remote JVM process failed with exception " + e);
+      _log.log("In AbstactMasterJVM, invoking remote JVM process failed with exception " + e);
       _monitor.set(State.FRESH);
-      _log.log("Entered state " + State.FRESH + "\nInvoking handleSlaveWontStart(" + e + ")");              
+      _log.log("In AbstactMasterJVM, entered state " + State.FRESH + "\nInvoking handleSlaveWontStart(" + e + ")");              
       handleSlaveWontStart(e);
     }
 
     if (newSlave != null) {
-      _log.log("newSlave is not null");
+      _log.log("In AbstractMasterJVM, newSlave is not null");
       try {
-        _log.log("Starting newSlave with arg = '" + _masterStub.value() + "'");
+        _log.log("In AbstractMasterJVM, starting newSlave with arg = '" + _masterStub.value() + "'");
         newSlave.start(_masterStub.value());   // advances state to RUNNING
       }
       catch (RemoteException e) {
-        _log.log("Threw Exception " + e + "\nAttempting to quit with argument '" + newSlave + "'");
+        _log.log("In AbstactMasterJVM, threw Exception " + e + "\nAttempting to quit with argument '" + newSlave + "'");
         attemptQuit(newSlave);
-        _log.log("Entered state " + State.FRESH + "\nCalling handleSlaveWontStart(" + e + ")");
+        _log.log("In AbstactMasterJVM, entered state " + State.FRESH + "\nCalling handleSlaveWontStart(" + e + ")");
         _monitor.set(State.FRESH);
         handleSlaveWontStart(e);
         return;
@@ -195,8 +196,8 @@ public abstract class AbstractMasterJVM implements MasterRemote {
       _log.log("Calling handleSlaveConnected(" + newSlave + ")");
       handleSlaveConnected(newSlave);  // calls  _stateMonitor.value().started
       _slave = newSlave;
-//      _log.log("Entered new state " + State.RUNNING);
-//      _monitor.set(State.RUNNING);  // already accomplished by newSlave.start() above
+      _log.log("In AbstactMasterJVM, entered new state " + State.RUNNING + " slave = " + _slave);
+      _monitor.set(State.RUNNING);  // already accomplished by newSlave.start() above (?)
     }
   }
   
@@ -208,7 +209,7 @@ public abstract class AbstractMasterJVM implements MasterRemote {
     transition(State.RUNNING, State.QUITTING);
     attemptQuit(_slave);
     _slave = null;
-    _log.log("Entered state " + State.FRESH);
+    _log.log("In AbstactMasterJVM, entered state " + State.FRESH);
     _monitor.set(State.FRESH);
   }
     
@@ -255,7 +256,7 @@ public abstract class AbstractMasterJVM implements MasterRemote {
       try { s = _monitor.ensureNotState(s); }
       catch (InterruptedException e) { throw new UnexpectedException(e); }
     }
-   _log.log("Entered state " + to);
+   _log.log("In AbstactMasterJVM, entered state " + to);
   }
   
   protected boolean isDisposed() { return _monitor.value().equals(State.DISPOSED); }

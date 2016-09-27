@@ -47,7 +47,7 @@ import edu.rice.cs.drjava.model.definitions.*;
 
 import java.awt.event.KeyEvent;
 import java.awt.datatransfer.*;
-import java.util.Vector;
+import java.util.ArrayList;
 
 import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.Log;
@@ -111,8 +111,6 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
   public Runnable getBeep() { return _beep; }
   
   private final InteractionsDJDocument _doc;
-  
-//  private List<Integer> _listOfPrompt = new Vector<Integer>(); // Vector used because it is synchronized. // NOT USED
   
   /** Creates an InteractionsPane with the given document.
     * Uses default keymap name ("INTERACTIONS_KEYMAP")
@@ -198,7 +196,7 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
     * @param stroke keystroke that triggers the action
     * @param action Action to perform
     */
-  public void addActionForKeyStroke(Vector<KeyStroke> stroke, Action action) {
+  public void addActionForKeyStroke(ArrayList<KeyStroke> stroke, Action action) {
     // remove previous bindings
     KeyStroke[] keys = _keymap.getKeyStrokesForAction(action);
     if (keys != null) {

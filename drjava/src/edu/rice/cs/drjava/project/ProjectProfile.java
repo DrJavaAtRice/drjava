@@ -58,10 +58,6 @@ import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.FileRegion;
 
-/* Debugger deactivated in DrScala */
-//import edu.rice.cs.drjava.model.debug.DebugBreakpointData;
-//import edu.rice.cs.drjava.model.debug.DebugWatchData;
-
 import edu.rice.cs.util.XMLConfig;
 
 import edu.rice.cs.plt.text.TextUtil;
@@ -107,11 +103,6 @@ public class ProjectProfile implements ProjectFileIR {
   
   private List<FileRegion> _bookmarks = new ArrayList<FileRegion>();
   
-  
-  /* Debugger deactivated in DrScala */
-//  private List<DebugBreakpointData> _breakpoints = new ArrayList<DebugBreakpointData>();
-//  private List<DebugWatchData> _watches = new ArrayList<DebugWatchData>();
-  
   private String _version = "unknown";
   
   private String _manifest = null;
@@ -129,8 +120,8 @@ public class ProjectProfile implements ProjectFileIR {
   public ProjectProfile(File f) throws IOException { 
     _projectFile = f; 
     _projectRoot = _projectFile.getParentFile();
-    if (! _projectRoot.exists()) throw new IOException("Parent directory of project root " + _projectRoot + 
-                                                       " does not exist");
+    if (! _projectRoot.exists()) 
+      throw new IOException("Parent directory of project root " + _projectRoot + " does not exist");
   }
   
   /* Public getters */

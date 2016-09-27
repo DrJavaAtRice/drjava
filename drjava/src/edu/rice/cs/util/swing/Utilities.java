@@ -42,6 +42,7 @@ import javax.swing.*;
 import java.awt.datatransfer.*;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
+import java.util.ArrayList;
 
 import edu.rice.cs.plt.lambda.LambdaUtil;
 import edu.rice.cs.util.UnexpectedException;
@@ -49,10 +50,16 @@ import edu.rice.cs.util.StringOps;
 
 public class Utilities {
   
-  /** True if the program is run in non-interactive test mode. */
+  /** true if the program is run in non-interactive test mode. */
   public static volatile boolean TEST_MODE = false;
   
   public static final String JGOODIES_PACKAGE = "com.jgoodies.looks";
+  
+  /** Returns String[] correspoding to given stringList (an ArrayList<String>). */  
+  public static String[] toStringArray(ArrayList<String> stringList) {
+    String[] result = new String[stringList.size()];
+    return stringList.toArray(result);
+  }
   
   /** Runs the task synchronously if the current thread is the event thread; otherwise passes it to the
     * event thread to be run asynchronously after all events already on the queue have been processed.
@@ -276,7 +283,6 @@ public class Utilities {
           return i;
       }
     }
-    
     return -1;
   }
 }

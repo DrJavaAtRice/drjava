@@ -68,6 +68,8 @@ public class ConfigDescriptions {
         "Display all compiler versions, even if they have the same major version.");
     add(EXTRA_CLASSPATH, "Extra Classpath", "<html>Any directories or jar files to add to the classpath<br>" +
         "of the Compiler and Interactions Pane.</html>");
+    add(INTERACTIONS_CLASSPATH, "Interactions Classpath", "<html>The directories and jar files on the classl path " +
+        "for the Interactions Pane.</html>");
     add(LOOK_AND_FEEL, "Look and Feel", "Changes the general appearance of DrScala.");
     add(PLASTIC_THEMES, "Plastic Theme", "Pick the theme to be used by the Plastic family of Look and Feels");
     

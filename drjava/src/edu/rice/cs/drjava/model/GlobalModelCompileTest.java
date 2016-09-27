@@ -52,7 +52,7 @@ import edu.rice.cs.util.text.EditDocumentException;
 public final class GlobalModelCompileTest extends GlobalModelTestCase {
   protected static final Log _log  = new Log("GlobalModelCompileTest.txt", false);
   
-    static { Utilities.show("Loading GlobalModelCompileTest class with _log = " + _log); }
+//    static { Utilities.show("Loading GlobalModelCompileTest class with _log = " + _log); }
   
 // (WilliamF): I'm commenting out the test below, for now; it fails, but I
 //             don't know if it is the test or the compiler model which is
@@ -87,7 +87,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
   public void testCompileResetsInteractions() throws BadLocationException, IOException, InterruptedException,
     EditDocumentException {
     
-    Utilities.show("Starting testCompileResetsInteractions");
+//    Utilities.show("Starting testCompileResetsInteractions");
     
      _log.log("Starting testCompileResetsInteractions");
     
@@ -95,12 +95,11 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     final File file = new File(_tempDir, "DrScalaTestFoo.scala");
     saveFile(doc, new FileSelector(file));
     
-    // Use the interpreter so resetInteractions is not optimized to a no-op
     _log.log("Calling interpreter to evaluate 0");
     interpret("0");
     
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
-    _model.setResetAfterCompile(true);
+    
     _model.addListener(listener);
      Utilities.invokeLater(new Runnable() { 
       public void run() { 
@@ -116,8 +115,8 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
 //        System.err.println("Compile failed");
       fail("compile failed: " + getCompilerErrorString());
     }
-    listener.waitResetDone();
-    _log.log("reset confirmed");
+    /* Reset is no longer performed as part of compilation in testing */
+//    _log.log("reset confirmed");
 //    System.err.println("Reached end of compilation");
     assertCompileErrorsPresent("compile should succeed", false);
     listener.checkCompileOccurred();

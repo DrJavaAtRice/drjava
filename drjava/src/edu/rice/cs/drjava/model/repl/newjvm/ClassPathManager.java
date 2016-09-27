@@ -37,15 +37,22 @@
 package edu.rice.cs.drjava.model.repl.newjvm;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.lang.ClassLoader;
+
+import edu.rice.cs.drjava.DrScala;
+
 import edu.rice.cs.plt.io.IOUtil;
+import edu.rice.cs.plt.collect.CollectUtil;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.plt.reflect.PathClassLoader;
+import edu.rice.cs.util.Log;
 
-import static edu.rice.cs.plt.debug.DebugUtil.error;
-import static edu.rice.cs.plt.debug.DebugUtil.debug;
+//import static edu.rice.cs.plt.debug.DebugUtil.error;
+//import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /** Maintains a dynamic class path, allowing entries to be incrementally added in the appropriate
   * place in the list.  In normal DrScala sessions, this class is used in the interpreter JVM, and 
@@ -54,109 +61,49 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
   */
 public class ClassPathManager implements Lambda<ClassLoader, ClassLoader> {
   
+  public static final Log _log = DrScala._log;
+  
+  public static final String INTERACTIONS_CLASS_PATH = "edu.rice.cs.drjava.interactions.class.path";
+  
   // For thread safety, all accesses to these lists are synchronized on this, and when they are made available
-  // to others (via getters or in the class loader), a snapshot is used.
+  // to others (via getters or in the class loader), a new copy is made.
   
-  private final LinkedList<File> _projectCP;       /* The custom project class path. */
-  private final LinkedList<File> _buildCP;         /* The build directory. */
-  private final LinkedList<File> _projectFilesCP;  /* The open project files. */
-  private final LinkedList<File> _externalFilesCP; /* The open external files. */
-  private final LinkedList<File> _extraCP;         /* The extra preferences class path. */
-  // these can be accessed concurrently:
+  private final List<File> _interactionsClassPath;       /* The class path maintained for the slave JVM. */
   
-  private final Iterable<File> _fullPath;
-  
-  public ClassPathManager(Iterable<File> builtInCP) {
-    _projectCP = new LinkedList<File>();
-    _buildCP = new LinkedList<File>();
-    _projectFilesCP = new LinkedList<File>();
-    _externalFilesCP = new LinkedList<File>();
-    _extraCP = new LinkedList<File>();
-    // conversions to SizedIterables are necessary to support 1.4 compatibility
-    Iterable<Iterable<File>> allPaths =
-      IterUtil.<Iterable<File>>make(IterUtil.asSizedIterable(_projectCP),
-                                    IterUtil.asSizedIterable(_buildCP),
-                                    IterUtil.asSizedIterable(_projectFilesCP),
-                                    IterUtil.asSizedIterable(_externalFilesCP),
-                                    IterUtil.asSizedIterable(_extraCP),
-                                    IterUtil.snapshot(builtInCP));
-    // lazily map the lists to their snapshots -- the snapshot code executes every time
-    // _fullPath is traversed
-    _fullPath = IterUtil.collapse(IterUtil.map(allPaths, _makeSafeSnapshot));
-    updateProperty();
+  /* NOTE: this method should be synchronised to robustly support for multi-threading, but Java does not allow it. */
+  public ClassPathManager(Iterable<File> initialClassPath) {
+    _interactionsClassPath = CollectUtil.makeArrayList(initialClassPath);
   }
   
-  public static final String INTERACTIONS_CLASS_PATH_PROPERTY = "edu.rice.cs.drjava.interactions.class.path";
-  
-  protected void updateProperty() {
-    System.setProperty(INTERACTIONS_CLASS_PATH_PROPERTY, IOUtil.pathToString(_fullPath));
+  // Saves the current value of _interactionsClassPath in a System property
+  protected synchronized void updateProperty() {
+    System.setProperty(INTERACTIONS_CLASS_PATH, _interactionsClassPath.toString());
   }
   
-  private final Lambda<Iterable<File>, Iterable<File>> _makeSafeSnapshot =
-    new Lambda<Iterable<File>, Iterable<File>>() {
-    public Iterable<File> value(Iterable<File> arg) {
-      synchronized(ClassPathManager.this) { return IterUtil.snapshot(arg); }
-    }
-  };
-  
-  /** Adds the entry to the front of the project classpath
-    * (this is the classpath specified in project properties)
+  /** Adds the entry to the front of the interactions classpath, unless already present.
+    * @return true iff f is already present in the interactions class path. 
+    * Note: a better data structure might be used to avoid O(N^2) cost for adding N new files.
     */
-  public synchronized void addProjectCP(File f) { _projectCP.addFirst(f); updateProperty(); }
-  
-  public synchronized Iterable<File> getProjectCP() { return IterUtil.snapshot(_projectCP); }
-  
-  /** Adds the entry to the front of the build classpath. */
-  public synchronized void addBuildDirectoryCP(File f) {
-    _buildCP.remove(f); // eliminate duplicates
-    _buildCP.addFirst(f);
-    updateProperty();
+  public synchronized boolean addInteractionsClassPath(File f) {
+    _log.log("In ClassPathManager, addInteractionsClassPath(" + f + ") called");
+    boolean isPresent = _interactionsClassPath.contains(f);
+    if (! isPresent) _interactionsClassPath.add(0,f); // Terrible notation for cons(f, _interactionsClassPath)
+    return isPresent;
   }
   
-  public synchronized Iterable<File> getBuildDirectoryCP() { return IterUtil.snapshot(_buildCP); }
+  /** returns a copy of _interactionsClassPath. */
+  public synchronized Iterable<File> getInteractionsClassPath() { return new ArrayList<File>(_interactionsClassPath); }
   
-  /** Adds the entry to the front of the project files classpath (this is the classpath for all open project files). */
-  public synchronized void addProjectFilesCP(File f) {
-    _projectFilesCP.remove(f); // eliminate duplicates
-    _projectFilesCP.addFirst(f);
-    updateProperty();
-  }
-  
-  public synchronized Iterable<File> getProjectFilesCP() { return IterUtil.snapshot(_projectFilesCP); }
-  
-  /** Adds new entry containing f to the front of the external classpath. */
-  public synchronized void addExternalFilesCP(File f) {
-    _externalFilesCP.remove(f); // eliminate duplicates
-    _externalFilesCP.addFirst(f);
-    updateProperty();
-  }
-  
-  public synchronized Iterable<File> getExternalFilesCP() { return IterUtil.snapshot(_externalFilesCP); }
-  
-  /** Adds the entry to the front of the extra classpath. */
-  public synchronized void addExtraCP(File f) {
-    _extraCP.remove(f); // eliminate duplicates
-    _extraCP.addFirst(f);
-    updateProperty();
-  }
-  
-  public Iterable<File> getExtraCP() { return IterUtil.snapshot(_extraCP); }
-  
-  /** Create a new class loader based on the given path.  The loader's path is dynamically updated
-    * as changes are made in the ClassPathManager.  Each loader returned by this method will
-    * have its own set of loaded classes, and will only share those classes that are loaded
-    * by a common parent.
-    * @param parent  The parent class loader.  May be {@code null}, signifying the bootstrap
-    *                class loader.
+   /** Create a new class loader based on the given path.  The loader's path is dynamically updated as changes are made 
+    * in the ClassPathManager.  Each loader returned by this method will have its own set of loaded classes, and will 
+    * only share those classes that are loaded by a common parent.
+    * @param parent  The parent class loader.  May be {@code null}, signifying the bootstrap class loader.
     */
   public synchronized ClassLoader makeClassLoader(ClassLoader parent) {
-    updateProperty();
-    return new PathClassLoader(parent, _fullPath);
+    _log.log("Creating new PathClassLoader with parent " + parent + " and path " + _interactionsClassPath);
+    return new PathClassLoader(parent, _interactionsClassPath);
   }
   
-  /** Lambda value method */
+  /** value method supporting Lambda<ClassLoader, ClassLoader> interface. */
   public ClassLoader value(ClassLoader parent) { return makeClassLoader(parent); }
-  
-  /** Get a dynamic view of the full class path. */
-  public synchronized Iterable<File> getClassPath() { updateProperty(); return _fullPath; }
 }

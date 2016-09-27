@@ -42,7 +42,7 @@ import java.awt.event.*;
 import java.awt.*;
 
 // TODO: Check synchronization.
-import java.util.Vector;
+import java.util.ArrayList;
 
 /** The panel that set of configuration options (e.g. Fonts, Colors) uses to display its configurable items as read
  *  from OptionConstants.
@@ -51,7 +51,7 @@ import java.util.Vector;
 public class ConfigPanel extends JPanel {
 
   protected final String _title;
-  protected final Vector<OptionComponent<?,?>> _components;
+  protected final ArrayList<OptionComponent<?,?>> _components;
 
   /** Constructor for this ConfigPanel
    *  @param title the title for this panel
@@ -59,7 +59,7 @@ public class ConfigPanel extends JPanel {
   public ConfigPanel(String title) {
     //_title = new JLabel(title);
     _title = title;
-    _components = new Vector<OptionComponent<?,?>>();
+    _components = new ArrayList<OptionComponent<?,?>>();
   }
 
   public String getTitle() { return _title; }
@@ -156,8 +156,8 @@ public class ConfigPanel extends JPanel {
   public void resetToCurrent() {
     for (int i = 0; i < _components.size(); i++) {
       _components.get(i).resetToCurrent();
-      if (_components.get(i) instanceof VectorOptionComponent<?>)
-        ((VectorOptionComponent<?>)_components.get(i)).resizeTable();
+      if (_components.get(i) instanceof ArrayListOptionComponent<?>)
+        ((ArrayListOptionComponent<?>)_components.get(i)).resizeTable();
     }
   }
 
@@ -165,10 +165,10 @@ public class ConfigPanel extends JPanel {
   public void resetToDefault() {
     for (int i = 0; i < _components.size(); i++) {
       _components.get(i).resetToDefault();
-      if (_components.get(i) instanceof VectorOptionComponent<?>)
-        ((VectorOptionComponent<?>)_components.get(i)).resizeTable();
+      if (_components.get(i) instanceof ArrayListOptionComponent<?>)
+        ((ArrayListOptionComponent<?>)_components.get(i)).resizeTable();
     }
     // must reset the "current keystroke map" when resetting
-    VectorKeyStrokeOptionComponent.resetCurrentKeyStrokeMap();
+    ArrayListKeyStrokeOptionComponent.resetCurrentKeyStrokeMap();
   }
 }

@@ -47,7 +47,7 @@ import javax.swing.border.EmptyBorder;
 
 import edu.rice.cs.util.*;
 import edu.rice.cs.util.swing.FileSelectorComponent;
-import edu.rice.cs.drjava.ui.config.VectorFileOptionComponent;
+import edu.rice.cs.drjava.ui.config.ArrayListFileOptionComponent;
 import edu.rice.cs.util.swing.SwingFrame;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.drjava.config.OptionConstants;
@@ -83,7 +83,7 @@ public class GenerateCustomDrScalaJarFrame extends SwingFrame {
   private FileSelectorComponent _jarFileSelector;
   
   /** List with additional sources. */
-  private VectorFileOptionComponent _sourcesList;
+  private ArrayListFileOptionComponent _sourcesList;
   
   /** Constructs a frame to generate a custom drjava.jar. */
   public GenerateCustomDrScalaJarFrame(MainFrame mf) {
@@ -650,7 +650,7 @@ public class GenerateCustomDrScalaJarFrame extends SwingFrame {
     * Side effect: The option component will be assigned to the _sourcesList field.
     * @return GUI component with the table */
   public Component _sourcesComponent() {
-    _sourcesList = new VectorFileOptionComponent(null, "Additional Sources", this, null, true) {
+    _sourcesList = new ArrayListFileOptionComponent(null, "Additional Sources", this, null, true) {
       protected Action _getAddAction() {
         final Action a = super._getAddAction();
         return new AbstractAction("Add") {

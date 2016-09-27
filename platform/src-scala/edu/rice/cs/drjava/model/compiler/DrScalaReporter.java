@@ -66,13 +66,6 @@ public class DrScalaReporter extends ConsoleReporter {
   
   /** Error table passed in from client. */
   final LinkedList<DJError> djErrors;
-  
-//  final Function1<String, BoxedUnit> scalacError = new AbstractFunction1<String, BoxedUnit>() {
-//    public BoxedUnit apply(String msg) { 
-//      error(new FakePos("scalac"), msg + "\n  scalac -help  gives more information");
-//      return BoxedUnit.UNIT;
-//    }
-//  };
 
   public DrScalaReporter(final LinkedList<DJError> errors) { 
     super(new Settings(new AbstractFunction1<String, BoxedUnit>() {

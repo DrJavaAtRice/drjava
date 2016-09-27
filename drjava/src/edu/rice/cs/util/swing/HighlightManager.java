@@ -37,7 +37,7 @@
 package edu.rice.cs.util.swing;
 
 import java.util.Stack;
-import java.util.Vector;
+import java.util.ArrayList;
 
 import javax.swing.text.JTextComponent;
 import javax.swing.text.Highlighter;
@@ -53,12 +53,12 @@ public class HighlightManager {
   
   //private Hashtable<HighlightPosition, Stack<HighlightInfo>> _highlights;
   
-  /** An unsorted Vector of Stack<HighlightInfo>, each of which corresponds to a unique
+  /** An unsorted ArrayList of Stack<HighlightInfo>, each of which corresponds to a unique
     * region in the document. All HighlightInfo objects within a given stack must correspond
     * to the same region but must have unique Highlighter.HighlightPainters.
     * Each stack is ordered so the most recent highlight is at the top.
     */
-  private Vector<Stack<HighlightInfo>> _highlights;
+  private ArrayList<Stack<HighlightInfo>> _highlights;
   
   /** The component necessary for creating positions in in the document, which is also
     * contained within this component.
@@ -70,7 +70,7 @@ public class HighlightManager {
     */
   public HighlightManager(JTextComponent jtc) {
     _component = jtc;
-    _highlights = new Vector<Stack<HighlightInfo>>();
+    _highlights = new ArrayList<Stack<HighlightInfo>>();
   }
   
   /** Overrides to toString() to support unit testing */

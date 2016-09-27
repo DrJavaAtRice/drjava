@@ -73,7 +73,7 @@ public class FindResult {
   public int getFoundOffset() { return _foundoffset; }
   
   /** Returns true if the search wrapped to the beginning (or end) of the document */
-  public boolean getWrapped() { return _wrapped; }
+  public boolean isWrapped() { return _wrapped; }
   
   /** Returns true if the search wrapped to the start document. */
   public boolean getAllWrapped() { return _allWrapped; }

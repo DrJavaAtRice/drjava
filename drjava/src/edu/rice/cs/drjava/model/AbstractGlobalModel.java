@@ -66,7 +66,6 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Vector;
 import java.util.WeakHashMap;
 import java.util.Map;
 
@@ -93,14 +92,6 @@ import edu.rice.cs.drjava.model.cache.DCacheAdapter;
 import edu.rice.cs.drjava.model.cache.DDReconstructor;
 import edu.rice.cs.drjava.model.cache.DocumentCache ;
 import edu.rice.cs.drjava.model.compiler.CompilerModel;
-
-/* Debugger deactivated in DrScala */
-//import edu.rice.cs.drjava.model.debug.Breakpoint;
-//import edu.rice.cs.drjava.model.debug.DebugBreakpointData;
-//import edu.rice.cs.drjava.model.debug.DebugException ;
-//import edu.rice.cs.drjava.model.debug.DebugWatchData;
-//import edu.rice.cs.drjava.model.debug.Debugger;
-//import edu.rice.cs.drjava.model.debug.NoDebuggerAvailable;
 
 import edu.rice.cs.drjava.model.javadoc.ScaladocModel;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
@@ -168,7 +159,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
   */
 public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants, DocumentIterator {
   
-  public static final Log _log = new Log("AbstractGlobalModel.txt", false);
+  public static final Log _log = DrScala._log;
   
   /** A document cache that manages how many unmodified documents are open at once. */
   protected DocumentCache _cache;  
@@ -231,14 +222,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** Notifier list for the global model. */
   public GlobalEventNotifier getNotifier() { return _notifier; }
   
-  
-  /* Debugger deactivated in DrScala */
-//  /** Manager for breakpoint regions. */
-//  protected final ConcreteRegionManager<Breakpoint> _breakpointManager;
-//  
-//  /** @return manager for breakpoint regions. */
-//  public RegionManager<Breakpoint> getBreakpointManager() { return _breakpointManager; }
-  
   /** Manager for bookmark regions. */
   protected final ConcreteRegionManager<MovingDocumentRegion> _bookmarkManager;
   
@@ -294,23 +277,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     _bookmarkManager = new ConcreteRegionManager<MovingDocumentRegion>();
     _findResultsManagers = new LinkedList<RegionManager<MovingDocumentRegion>>();
     _browserHistoryManager = new BrowserHistoryManager();
-    
 
-    /* Debugger deactivated in DrScala */
-//    _breakpointManager = new ConcreteRegionManager<Breakpoint>();
-    
-    /* The following method was included in an anonymous class definition of _breakpointManager, but it
-     was inacessible because no such method exists in the visible interface of ConcreteRegionManager. */
-    
-//      public boolean changeRegionHelper(final Breakpoint oldBP, final Breakpoint newBP) {
-//        // override helper so the enabled flag is copied
-//        if (oldBP.isEnabled() != newBP.isEnabled()) {
-//          oldBP.setEnabled(newBP.isEnabled());
-//          return true;
-//        }
-//        return false;
-//      }
-//    };
     /* Unnecessary in DrScala. */
 //    _registerOptionListeners();
     
@@ -637,9 +604,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       _projectFile = project;
       _projectFiles = srcFiles;
       _auxFiles = new ArrayList<File>(auxFiles.length);
-      for(File f: auxFiles) { _auxFiles.add(f); }
+      for (File f: auxFiles) { _auxFiles.add(f); }
       _exclFiles = new ArrayList<File>(excludedFiles.length);
-      for(File f: excludedFiles) { _exclFiles.add(f); }
+      for (File f: excludedFiles) { _exclFiles.add(f); }
       _projExtraClassPath = cp;
       
       if (_projectFiles != null) {
@@ -772,7 +739,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       }
     }
     
-    public File[] getExclFiles() { return _exclFiles.toArray(new File[_exclFiles.size()]); }
+    public File[] getExcludedFiles() { return _exclFiles.toArray(new File[_exclFiles.size()]); }
     
     public void setExcludedFiles(File[] fs) {
       if(fs == null) return;
@@ -931,12 +898,13 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         }
         
       } else if (f.getName().endsWith(".class")) acc.add(f);
-    }    
+    }
     
     // ----- FIND ALL DEFINED CLASSES IN FOLDER ---
     
     public Iterable<AbsRelFile> getExtraProjectClassPath() { return _projExtraClassPath; }
-    public void setExtraClassPath(Iterable<AbsRelFile> cp) { 
+    
+    public void setExtraProjectClassPath(Iterable<AbsRelFile> cp) { 
       _projExtraClassPath = cp; 
       setClassPathChanged(true);
     }
@@ -1059,12 +1027,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public void setCreateJarFlags(int f) { }
     public int getCreateJarFlags() { return 0; }
     public Iterable<AbsRelFile> getExtraProjectClassPath() { return IterUtil.empty(); }
-    public void setExtraClassPath(Iterable<AbsRelFile> cp) { }
+    public void setExtraProjectClassPath(Iterable<AbsRelFile> cp) { }
     public boolean isProjectChanged() { return false; }
     public void setProjectChanged(boolean changed) { /* Do nothing  */  }
     public boolean isAuxiliaryFile(File f) { return false; }
     public boolean isExcludedFile(File f) { return false; }
-    public File[] getExclFiles() { return null; }
+    public File[] getExcludedFiles() { return null; }
     public void addExcludedFile(File f) { }
     public void removeExcludedFile(File f) { }
     public void setExcludedFiles(File[] fs) { }
@@ -1126,6 +1094,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** throws UnsupportedOperationException */
   public InteractionsDocument getInteractionsDocument() {
     throw new UnsupportedOperationException("AbstractGlobalModel does not support interaction");
+  }
+  
+  /** throws new UnsupportedOperationException */
+  public Iterable<File> getInteractionsClassPath() {
+    throw new UnsupportedOperationException("AbstractGlobalModel does not support interactions");
   }
   
   public ConsoleDocument getConsoleDocument() { return _consoleDoc; }
@@ -1350,12 +1323,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     // This code is duplicated in MainFrame._setCurrentDirectory(File) for safety.
     final File file = (com.getFiles())[0].getCanonicalFile();  // may throw an IOException if path is invalid
-    OpenDefinitionsDocument odd = _openFile(file);
-//    Utilities.showDebug("File " + file + " opened");
+    OpenDefinitionsDocument doc = _openFile(file);
+    _log.log("File " + file + " opened");
     // Make sure this is on the classpath
-    addDocToClassPath(odd);  // Redundant; done in _openFile
     setClassPathChanged(true);
-    return odd;
+    return doc;
   }
   
   /** Open multiple files and add them to the pool of definitions documents.  The provided file selector chooses
@@ -1588,19 +1560,19 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       docsToWrite.clear();
       if (readOnlyDocs.size() > 0) {
         ArrayList<File> files = new ArrayList<File>();
-        for(OpenDefinitionsDocument odd: readOnlyDocs) {
+        for(OpenDefinitionsDocument doc: readOnlyDocs) {
           try { 
-            File roFile = odd.getFile();
+            File roFile = doc.getFile();
             files.add(roFile);
           }
           catch(FileMovedException fme) { /* ignore, don't know what to do here */ }
         }
         File[] res = _notifier.filesReadOnly(files.toArray(new File[files.size()]));
         HashSet<File> rewriteFiles = new HashSet<File>(java.util.Arrays.asList(res));
-        for(OpenDefinitionsDocument odd: readOnlyDocs) {
-          File roFile = odd.getFile();
+        for(OpenDefinitionsDocument doc: readOnlyDocs) {
+          File roFile = doc.getFile();
           if (rewriteFiles.contains(roFile)) {
-            docsToWrite.add(odd);
+            docsToWrite.add(doc);
             FileOps.makeWritable(roFile);
           }
         }
@@ -1691,7 +1663,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     if (exCp != null) {
       for (AbsRelFile f : exCp) { builder.addClassPathFile(f); }
     }
-//    else System.err.println("Project ClasspathVector is null!");
+//    else System.err.println("Project ClasspathArrayList is null!");
     
     // add build directory
     File bd = getBuildDirectory();
@@ -1715,8 +1687,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     /* Debugger is deactivated in DrScala */
     // add breakpoints and watches
 //    ArrayList<DebugBreakpointData> l = new ArrayList<DebugBreakpointData>();  
-//    for (OpenDefinitionsDocument odd: _breakpointManager.getDocuments()) {
-//      for(Breakpoint bp: _breakpointManager.getRegions(odd)) { l.add(bp); }
+//    for (OpenDefinitionsDocument doc: _breakpointManager.getDocuments()) {
+//      for(Breakpoint bp: _breakpointManager.getRegions(doc)) { l.add(bp); }
 //    }
 //    builder.setBreakpoints(l);
 //    try { builder.setWatches(getDebugger().getWatches()); }
@@ -1728,14 +1700,14 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     builder.setAutoRefreshStatus(_state.getAutoRefreshStatus());
     
     //add excluded files
-    for(File f: _state.getExclFiles()) { builder.addExcludedFile(f); }
+    for (File f: _state.getExcludedFiles()) { builder.addExcludedFile(f); }
     
     //add custom manifest
     builder.setCustomManifest(_state.getCustomManifest());
     
     // update preference values here
     Map<OptionParser<?>,String> sp = _state.getPreferencesStoredInProject();
-    for(OptionParser<?> key: sp.keySet()) {
+    for (OptionParser<?> key: sp.keySet()) {
       sp.put(key, DrScala.getConfig().getOptionMap().getString(key));
     }
     builder.setPreferencesStoredInProject(sp);
@@ -1783,6 +1755,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     * @param projectFile The project file to parse
     */
   public void openProject(File projectFile) throws IOException, MalformedProjectFileException {
+    _log.log("In AbstractGlobalModel, openProject(" + projectFile + ") called");
     _loadProject(XMLProjectFileParser.ONLY.parse(projectFile));
   }
   
@@ -1813,6 +1786,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     final boolean autoRefresh = ir.getAutoRefreshStatus();
     final String manifest = ir.getCustomManifest();
     final Map<OptionParser<?>,String> storedPreferences = ir.getPreferencesStoredInProject();
+    
+    _log.log("In AbstractGlobalModel.loadProject, all of the in information in ir has been extracted");
     
     // clear browser, breakpoint, and bookmark histories
     
@@ -1866,8 +1841,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
                                                       auxFiles, excludedFiles, projectClassPaths, createJarFile, 
                                                       createJarFlags, autoRefresh, manifest, storedPreferences));
     
-    resetInteractions(getWorkingDirectory());  // Reset interactions pane in new working directory
-    
+    // Reset interactions pane in new working directory as part of loading this projet
+    resetInteractions(getWorkingDirectory());  
+     
     ArrayList<DocFile> projFiles = new ArrayList<DocFile>();
     DocFile active = null;
     
@@ -1914,47 +1890,22 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       public File[] getFiles() { return filesToOpen; }
     });
     
-    /* Debugger is deactivated in DrScala */
-//    /* Files are opened synchronously by the preceding notification.  If this process is made asynchronous, we need to 
-//     * wait here (using the projectLoaded CompletionMonitor above (commented out). */
-//    // set breakpoints
-//    for (DebugBreakpointData dbd: ir.getBreakpoints()) {
-//      try {
-//        File f = dbd.getFile();
-//        if (! modifiedFiles.contains(f)) {
-//          int lnr = dbd.getLineNumber();
-//          OpenDefinitionsDocument odd = getDocumentForFile(f);
-//          getDebugger().toggleBreakpoint(odd, odd._getOffset(lnr), dbd.isEnabled());
-//        }
-//      }
-//      catch(DebugException de) { /* ignore, just don't add breakpoint */ }
-//    }
-    
     //Set active document from project file
     if (active != null) setActiveDocument(getDocumentForFile(active));
-    
-    /* Debugger is deactivated in DrScala */
-//    // set watches
-//    try { getDebugger().removeAllWatches(); }
-//    catch(DebugException de) { /* ignore, just don't remove old watches */ }
-//    for (DebugWatchData dwd: ir.getWatches()) {
-//      try { getDebugger().addWatch( dwd.getName()); }
-//      catch(DebugException de) { /* ignore, just don't add watch */ }
-//    }
     
     // set bookmarks
     for (FileRegion bm: ir.getBookmarks()) {
       File f = bm.getFile();
       if (! modifiedFiles.contains(f)) {
-        OpenDefinitionsDocument odd = getDocumentForFile(f);
+        OpenDefinitionsDocument doc = getDocumentForFile(f);
         int start = bm.getStartOffset();
         int end = bm.getEndOffset();
-        if (getOpenDefinitionsDocuments().contains(odd) && 
-            _bookmarkManager.getRegionsOverlapping(odd, start, end).size() == 0) { // bookmark is valid
+        if (getOpenDefinitionsDocuments().contains(doc) && 
+            _bookmarkManager.getRegionsOverlapping(doc, start, end).size() == 0) { // bookmark is valid
           try { 
-            int lineStart = odd._getLineStartPos(start);
-            int lineEnd = odd._getLineEndPos(end);
-            _bookmarkManager.addRegion(new MovingDocumentRegion(odd, start, end, lineStart, lineEnd)); 
+            int lineStart = doc._getLineStartPos(start);
+            int lineEnd = doc._getLineEndPos(end);
+            _bookmarkManager.addRegion(new MovingDocumentRegion(doc, start, end, lineStart, lineEnd)); 
           }
           catch(Exception e) { DrScalaErrorHandler.record(e); }  // should never happen
         }
@@ -1977,7 +1928,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   /** Performs any needed operations on the model after project files have been closed.  This method is not 
     * responsible for closing any files; both the files in the project and the project file have already been 
-    * closed (by MainFrame._closeProject()).  Resets interations unless suppressReset is true.
+    * closed (by MainFrame._closeProject()).  Resets interations pane unless suppressReset is true.
     */
   public void closeProject(boolean suppressReset) {
     setDocumentNavigator(new AWTContainerNavigatorFactory<OpenDefinitionsDocument>().
@@ -1987,6 +1938,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     // remove previous listeners
     removePreviousListeners();
     
+    /* Unless false value is passed as suppressRest, reset interactions as part of closing project */
     if (! suppressReset) resetInteractions(getWorkingDirectory());
     _notifier.projectClosed();
     setActiveDocument(getDocumentNavigator().getDocuments().get(0));
@@ -2324,20 +2276,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
   }
   
-//  /** Returns a new collection of all language level documents currently open for editing.
-//    * @return a random-access List of the open definitions documents..
-//    */
-//  public List<OpenDefinitionsDocument> getLLOpenDefinitionsDocuments() {
-//    synchronized(_documentsRepos) {
-//      ArrayList<OpenDefinitionsDocument> docs = new ArrayList<OpenDefinitionsDocument>(_documentsRepos.size());
-//      for (OpenDefinitionsDocument doc: _documentsRepos.values()) {
-//        File f = doc.getRawFile();
-//        if (DrJavaFileUtils.isLLFile(f.getName())) docs.add(doc);
-//      }
-//      return docs;
-//    }
-//  }
-  
   /* Returns a sorted (by time of insertion) collection of all open documents. */
   public List<OpenDefinitionsDocument> getSortedOpenDefinitionsDocuments() { return getOpenDefinitionsDocuments(); }
   
@@ -2391,6 +2329,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   /** A degenerate operation since this has no slave JVM and no interactions model. */
   public void resetInteractions(File wd) { /* do nothing */ }
+    
+  /** A degenerate operation since this has no slave JVM and no interactions model. */
+  public void hardResetInteractions(File wd) { /* do nothing */ }
   
   /** Resets the console. Fires consoleReset() event. */
   public void resetConsole() {
@@ -2444,43 +2385,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     throw new UnsupportedOperationException("AbstractGlobalModel does not support interactions");
   }
   
-  /* All of the listeners involve models in the DynamicJava interpreter which has been replaced in DrScala 
-   * by a Scala interpreter. */
-  /** Registers OptionListeners.  Factored out code from the two constructor. */
-//  private void _registerOptionListeners() {
-//    // Listen to any relevant config options
-//    DrJava.getConfig().addOptionListener(EXTRA_CLASSPATH, new ExtraClasspathOptionListener());
-    
-    // The following is unnecessary because the DefaultFileSaver constructor directly uses BACKUP_FILES
-//    DrJava.getConfig().addOptionListener(BACKUP_FILES, new BackUpFileOptionListener());
-//    Boolean makeBackups = DrJava.getConfig().getSetting(BACKUP_FILES);
-//    FileOps.DefaultFileSaver.setBackupsEnabled(makeBackups.booleanValue ());
-    
-//    DrJava.getConfig().addOptionListener(DYNAMICJAVA_ACCESS_CONTROL, new OptionListener<String>() {
-//      public void optionChanged(OptionEvent<String> oce) {
-//        boolean enforceAllAccess = DrJava.getConfig().getSetting(OptionConstants.DYNAMICJAVA_ACCESS_CONTROL)
-//          .equals(OptionConstants.DynamicJavaAccessControlChoices.PRIVATE_AND_PACKAGE); // "all"
-//        getInteractionsModel().setEnforceAllAccess(enforceAllAccess);
-//        
-//        boolean enforcePrivateAccess = !DrJava.getConfig().getSetting(OptionConstants.DYNAMICJAVA_ACCESS_CONTROL)
-//          .equals(OptionConstants.DynamicJavaAccessControlChoices.DISABLED); // not "none"
-//        getInteractionsModel().setEnforcePrivateAccess(enforcePrivateAccess);
-//      }
-//    });
-//    
-//    DrJava.getConfig().addOptionListener(DYNAMICJAVA_REQUIRE_SEMICOLON, new OptionListener<Boolean>() {
-//      public void optionChanged(OptionEvent<Boolean> oce) {
-//        getInteractionsModel().setRequireSemicolon(oce.value);
-//      }
-//    });
-//    
-//    DrJava.getConfig().addOptionListener(DYNAMICJAVA_REQUIRE_VARIABLE_TYPE, new OptionListener<Boolean>() {
-//      public void optionChanged(OptionEvent<Boolean> oce) {
-//        getInteractionsModel().setRequireVariableType(oce.value);
-//      }
-//    });
-//  }
-  
   /** Appends a string to the given document using a particular attribute set.
     * Also waits for a small amount of time (InteractionsModel.WRITE_DELAY) to prevent any one
     * writer from flooding the model with print calls to the point that the
@@ -2505,33 +2409,22 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** Prints to the DrScala console as an echo of System.in.  This method can safely be run outside the event thread. */
   public void systemInEcho(final String s) { _docAppend(_consoleDoc, s, ConsoleDocument.SYSTEM_IN_STYLE); }
   
-  /* Debugger deactivated in DrScala */ 
-//  /** throws UnsupportedOperationException */
-//  public void printDebugMessage(String s) {
-//    throw new UnsupportedOperationException("AbstractGlobalModel does not support debugging");
-//  }
-  
-  /** throws new UnsupportedOperationException */
-  public Iterable<File> getInteractionsClassPath() {
-    throw new UnsupportedOperationException("AbstractGlobalModel does not support interactions");
-  }
-  
   /** Returns a project's extra classpaths; empty for FlatFileGroupingState
     * @return The classpath entries loaded along with the project
     */
   public Iterable<AbsRelFile> getExtraProjectClassPath() { return _state.getExtraProjectClassPath(); }
   
   /** Sets the set of classpath entries to use as the projects set of classpath entries.  This is normally used by the
-    * project preferences..
+    * project preferences.
     */
-  public void setExtraClassPath(Iterable<AbsRelFile> cp) {
-    _state.setExtraClassPath(cp);
+  public void setExtraProjectClassPath(Iterable<AbsRelFile> cp) {
+    _state.setExtraProjectClassPath(cp);
     setClassPathChanged(true);
     //System.out.println("Setting project classpath to: " + cp);
   }
   
   /** Return an array of the files excluded from the current project */
-  public File[] getExclFiles() { return _state.getExclFiles(); }
+  public File[] getExcludedFiles() { return _state.getExcludedFiles(); }
   
   /** Sets the array of files excluded from the current project */
   public void setExcludedFiles(File[] fs) { _state.setExcludedFiles(fs); }
@@ -2611,7 +2504,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
     
     /* Debugger deactivated in DrScala */ 
-//    Vector<File> sourcepath = DrScala.getConfig().getSetting(OptionConstants.DEBUG_SOURCEPATH);
+//    ArrayList<File> sourcepath = DrScala.getConfig().getSetting(OptionConstants.DEBUG_SOURCEPATH);
 //    return findFileInPaths(fileName, sourcepath);
     return FileOps.NULL_FILE;
   }
@@ -2677,6 +2570,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   /** throws an UnsupportedOperationException */
   public Iterable<File> getClassPath() {
+    throw new UnsupportedOperationException("AbstractGlobalModel does not support class paths");
+  }
+  
+  public void updateInteractionsClassPath() {
     throw new UnsupportedOperationException("AbstractGlobalModel does not support class paths");
   }
   
@@ -2966,7 +2863,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     /** Sets the cached _packageName for the preceding method. */  
     public void setPackage(String name)   {
       try {
-      _log.log("In AbstractGlobalModel, setting package for " + getFile() + "to '" + name + "'");
+      _log.log("In AbstractGlobalModel, setting package for " + getFile() + " to '" + name + "'");
       _packageName = name; 
       }
       catch(Exception e) { }
@@ -3127,7 +3024,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 //          System.err.println ("_packageName in make() = " + _packageName);
 //          System.err.println("tempDoc.getLength() = " + tempDoc.getLength());
           _packageName = newDefDoc.getPackageName();
-          _log.log("Setting _packageName for " + newDefDoc + " in make() to " + _packageName);
+          _log.log("Setting _packageName for " + newDefDoc + " in make() to '" + _packageName + "'");
           return newDefDoc;
         }
         
@@ -3432,6 +3329,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         if ((classFile == FileOps.NULL_FILE) || (! classFile.exists())) {
           // couldn't find the class file
           _log.log(this + ": Could not find class file");
+          System.err.println(this + ": Could not find class file");
           setClassFileInSync(false);
           return false;
         }
@@ -3529,7 +3427,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       if (classFile != FileOps.NULL_FILE) return classFile;
       
       // not on system classpath, check interactions classpath
-      Vector<File> cpSetting = DrScala.getConfig().getSetting(EXTRA_CLASSPATH);
+      ArrayList<File> cpSetting = DrScala.getConfig().getSetting(INTERACTIONS_CLASSPATH);
       return findFileInPaths(fileName, cpSetting);
     }
     
@@ -4112,7 +4010,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       Pair<Integer,Integer> scroll = df.getScroll();
       Pair<Integer,Integer> sel = df.getSelection();
       String pkg = df.getPackage();
-      _log.log("Setting package name for DocFile " + file);
+      _log.log("Setting package name for document to '" + file + "'");
       doc.setPackage(pkg);  // Trust information in the project file; if it is wrong, _packageName invariant is broken
       doc.setInitialVScroll(scroll.first());
       doc.setInitialHScroll( scroll.second());
@@ -4121,7 +4019,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
     else { // doc is freshly opened file, ostensibly a source file
 //      Utilities.show("Opened a file " + file.getName() + " that is not a DocFile");
-      _log.log("Setting package for file " + file.getName() + " to " + doc.getPackageNameFromDocument());
+      _log.log("Setting package for file " + file.getName() + " to '" + doc.getPackageNameFromDocument() + "'");
       doc.setPackage(doc.getPackageNameFromDocument()); // get the package name from the file; forces file to be read
     }
     return doc;
@@ -4163,16 +4061,16 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   private void _completeOpenFile(OpenDefinitionsDocument d) {
     addDocToNavigator(d);
-    addDocToClassPath(d);
-    
-    try {
-      File f = d.getFile();
-      if (! inProject(f) && inProjectPath(d)) setProjectChanged(true);
-    } 
-    catch(FileMovedException fme) {
-      /** project is not modified in this case */
+//    addDocToClassPath(d);  // should be done by compiler
+    if (isProjectActive()) {
+      try {
+        File f = d.getFile();
+        if (! inProject(f) && inProjectPath(d)) setProjectChanged(true);
+      } 
+      catch(FileMovedException fme) {
+        /** project is not modified in this case */
+      }
     }
-    
     _notifier.fileOpened(d);
   }
   

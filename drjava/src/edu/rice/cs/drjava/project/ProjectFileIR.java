@@ -43,14 +43,11 @@ import java.util.Map;
 import edu.rice.cs.drjava.config.OptionParser;
 import edu.rice.cs.drjava.model.FileRegion;
 
-
-/* Debugger deactivated in DrScala */
-//import edu.rice.cs.drjava.model.debug.DebugBreakpointData;
-//import edu.rice.cs.drjava.model.debug.DebugWatchData;
-
 import edu.rice.cs.util.AbsRelFile;
 
+/* Interface to the information stored in a project file.  IR means (?) "internal representation". */
 public interface ProjectFileIR {
+  
   /** @return an array full of all the source files in this project file. */
   public DocFile[] getSourceFiles();
     
@@ -100,14 +97,6 @@ public interface ProjectFileIR {
   /** @return the array of bookmarks. */
   public FileRegion[] getBookmarks();
   
-  
-  /* Debugger deactivated in DrScala */
-//  /** @return the array of breakpoints. */
-//  public DebugBreakpointData[] getBreakpoints();
-//  
-//  /** @return the array of watches. */
-//  public DebugWatchData[] getWatches();
-  
   public boolean getAutoRefreshStatus();
   
   /** @return the stored preferences. */
@@ -126,39 +115,25 @@ public interface ProjectFileIR {
   public void setCreateJarFlags(int createJarFlags);
   public void setBookmarks(List<? extends FileRegion> bms);
   
-/* Debugger deactivated in DrScala */
-//  public void setBreakpoints(List<? extends DebugBreakpointData> bps);
-//  public void setWatches(List<? extends DebugWatchData> ws);
-  
   public void setAutoRefreshStatus(boolean b);
   public void setPreferencesStoredInProject(Map<OptionParser<?>,String> sp);
   
-  /**
-   * The version of drscala that created this project (as determined from its serialization as a .drscala file)
-   * 
+  /**The version of drscala that created this project (as determined from its serialization as a .drscala file) 
    * @return The version string, if known, or "unknown" otherwise.
    */
   public String getDrScalaVersion();
   
-  /**
-   * Sets the version of DrScala that built this project.
-   * 
-   * @param version - the version string, should be called with "unknown" if the version could not be determined.
-   */
+  /** Sets the version of DrScala that built this project.
+    * @param version - the version string, should be called with "unknown" if the version could not be determined.
+    */
   public void setDrScalaVersion(String version);
   
-  /**
-   * Accessor for custom manifest in project.
-   * Note that the existance of such a manifest does not mean
-   * that the custom manifest is in USE.
-   * That depends on other JAR creation settings.
-   * 
-   * @see #getCreateJarFlags()
-   */
+  /** Accessor for custom manifest in project. Note that the existance of such a manifest does not mean that the custom 
+    * manifest is in USE.That depends on other JAR creation settings.
+    * @see #getCreateJarFlags()
+    */
   public String getCustomManifest();
   
-  /**
-   * Mutator for custom manifest.
-   */
+  /** Mutator for custom manifest. */
   public void setCustomManifest(String manifest);
 }

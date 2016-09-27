@@ -37,7 +37,7 @@
 package edu.rice.cs.drjava;
 
 import java.io.*;
-import java.util.Vector;
+import java.util.ArrayList;
 // TODO: Change the usage of these classes to Collections style.
 // TODO: Do these need to be synchronized?
 import edu.rice.cs.plt.io.IOUtil;
@@ -59,7 +59,7 @@ public class IndentFiles {
     * @param args Command line arguments
     */
   public static void main(String[] args) {
-    Vector<String> fileNames = new Vector<String>();
+    ArrayList<String> fileNames = new ArrayList<String>();
     int indentInc = 2;
     boolean silent = false;
     if (args.length < 1) _displayUsage();
@@ -90,11 +90,11 @@ public class IndentFiles {
   }
   
   /** Applies the indent logic to each file in the list of file names, saving the new copy of each one.
-    * @param fileNames Vector of filenames of files to be indented
+    * @param fileNames ArrayList of filenames of files to be indented
     * @param indentInc The number of spaces to use for a level of indentation
     * @param silent Whether to print any output to System.out
     */
-  public static void indentFiles(Vector<String> fileNames, int indentInc, boolean silent) {
+  public static void indentFiles(ArrayList<String> fileNames, int indentInc, boolean silent) {
     //System.setProperty("java.awt.headless", "true"); // attempt headless AWT
     //System.out.println("Using Headless AWT: " + isHeadless());
     Indenter indenter = new Indenter(indentInc);

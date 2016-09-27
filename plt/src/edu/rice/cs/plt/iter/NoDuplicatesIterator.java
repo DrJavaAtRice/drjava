@@ -43,11 +43,10 @@ import edu.rice.cs.plt.object.ObjectUtil;
 import edu.rice.cs.plt.tuple.Option;
 import edu.rice.cs.plt.tuple.OptionUnwrapException;
 
-/**
- * An Iterator that returns each value only once.  Values are compared via {@code equals()} and
- * hashed in order to detect duplicates.  A set of previously-seen values is maintained, which
- * requires space linear in the number of times {@code next()} has been invoked.
- */
+/** An Iterator that returns each value only once.  Values are compared via {@code equals()} and
+  * hashed in order to detect duplicates.  A set of previously-seen values is maintained, which
+  * requires space linear in the number of times {@code next()} has been invoked.
+  */
 public class NoDuplicatesIterator<T> extends ReadOnlyIterator<T> implements Composite {
   
   private final Iterator<? extends T> _i;
@@ -74,10 +73,8 @@ public class NoDuplicatesIterator<T> extends ReadOnlyIterator<T> implements Comp
     catch (OptionUnwrapException e) { throw new NoSuchElementException(); }
   }
   
-  /**
-   * Finds the next unique value in {@code _i}.  Ignores the previous value of
-   * {@code _lookahead}.  If a value is found, sets {@code _lookahead} to that
-   * value; otherwise, sets it to Option.none.
+  /** Finds the next unique value in {@code _i}. Ignores the previous value of {@code _lookahead}.  If a value is found,
+    * sets {@code _lookahead} to that value; otherwise, sets it to Option.none.
    */
   private void advanceLookahead() {
     // This class is similar to FilteredIterator, but can't be implemented
@@ -93,7 +90,6 @@ public class NoDuplicatesIterator<T> extends ReadOnlyIterator<T> implements Comp
       }
     }
   }
-  
   
   /** Call the constructor (allows {@code T} to be inferred) */
   public static <T> NoDuplicatesIterator<T> make(Iterator<? extends T> i) {

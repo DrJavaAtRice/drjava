@@ -56,7 +56,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
   */
 public abstract class RMIInteractionsModel extends InteractionsModel {
   
-  static final Log _log = new Log("MasterJVM.txt", false);
+  static final Log _log = new Log("GlobalModel.txt", false);
   
   /** RMI interface to the remote Java interpreter.*/
   protected final MainJVM _jvm;
@@ -92,30 +92,17 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
     return retval;
   }
   
-  /** Adds the given path to the interpreter's class path.
-    * @param f  the path to add
-    */
-  public void addProjectClassPath(File f) { _jvm.addProjectClassPath(f); }
+
   
-  /** These add the given path to the build directory class paths used in the interpreter.
+  /** Adds the given path to the interactions class path used in the interpreter.
     * @param f  the path to add
     */
-  public void addBuildDirectoryClassPath(File f) { _jvm.addBuildDirectoryClassPath(f); }
+  public void addInteractionsClassPath(File f) { _jvm.addInteractionsClassPath(f); }
   
-  /** These add the given path to the project files class paths used in the interpreter.
-    * @param f  the path to add
+  /** Adds the given path(s) to the interactions class path used in the interpreter.
+    * @param cp the path to add
     */
-  public void addProjectFilesClassPath(File f) { _jvm.addProjectFilesClassPath(f); }
-  
-  /** These add the given path to the external files class paths used in the interpreter.
-    * @param f  the path to add
-    */
-  public void addExternalFilesClassPath(File f) { _jvm.addExternalFilesClassPath(f); }
-  
-  /** These add the given path to the extra class paths used in the interpreter.
-    * @param f  the path to add
-    */
-  public void addExtraClassPath(File f) { _jvm.addExtraClassPath(f); }
+  public void addInteractionsClassPath(Iterable<File> cp) { _jvm.addInteractionsClassPath(cp); }
   
   /** Attempts to reset the Scala interpreter in the slave JVM.  */
   protected boolean _resetInterpreter(final File wd) {
@@ -124,8 +111,10 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
     /* Try to reset the interpreter using the internal scala interpreter reset command.  If this fails restart the
      * slave JVM. */
     _log.log("_resetInterpreter in RMIInteractions model has been called");
+    System.err.println("_resetInterpreter in RMIInteractions model has been called");
     boolean success = _jvm.resetInterpreter();  // 
     _log.log("_resetInterpreter returned " + success);
+    System.err.println("_resetInterpreter returned " + success);
     if (success) documentReset();
     return success;
   }
@@ -135,6 +124,7 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
     EventQueue.invokeLater(new Runnable() {
       public void run() {
         _log.log("RMIInteractionsModel.setUpNewInterpreter called");
+        System.err.println("RMIInteractionsModel.setUpNewInterpreter called");
         _jvm.restartInterpreterJVM();
         _notifyInterpreterReplaced(inProgress);
         EventQueue.invokeLater(new Runnable() { public void run() { documentReset(); } });
@@ -143,8 +133,8 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
     });
   }
   
-  /** Updates the prompt and status of the document after an interpreter change.
-    * Must run in event thread. (TODO: is it okay that related RMI calls occur in the event thread?)
+  /** Updates the prompt and status of the document after an interpreter change. Must run in event thread. 
+    * (TODO: is it okay that related RMI calls occur in the event thread?)
     * @param prompt New prompt to display
     */
   private void _updateDocument(String prompt) {
@@ -157,24 +147,23 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
     scrollToCaret();
   }
 
-  /** Sets whether or not the interpreter should enforce access to all members. */
-  public void setEnforceAllAccess(boolean enforce) { _jvm.setEnforceAllAccess(enforce); }
+  /** Sets whether or not the interpreter should enforce access to all members.  Disabled in DrScala */
+//  public void setEnforceAllAccess(boolean enforce) { _jvm.setEnforceAllAccess(enforce); }
   
-  /** Sets whether or not the interpreter should enforce access to private members. */
-  public void setEnforcePrivateAccess(boolean enforce) { _jvm.setEnforcePrivateAccess(enforce); }
+//  /** Sets whether or not the interpreter should enforce access to private members. */
+//  public void setEnforcePrivateAccess(boolean enforce) { _jvm.setEnforcePrivateAccess(enforce); }
 
-  /** Require a semicolon at the end of statements. */
-  public void setRequireSemicolon(boolean require) { _jvm.setRequireSemicolon(require); }
+//  /** Require a semicolon at the end of statements. */
+//  public void setRequireSemicolon(boolean require) { _jvm.setRequireSemicolon(require); }
+//  
+//  /** Require variable declarations to include an explicit type. */
+//  public void setRequireVariableType(boolean require) { _jvm.setRequireVariableType(require); }
   
-  /** Require variable declarations to include an explicit type. */
-  public void setRequireVariableType(boolean require) { _jvm.setRequireVariableType(require); }
-  
-  /** Gets the interpreter class path from the interpreter jvm.
-    * @return a list of class path elements
-    */
-  public Iterable<File> getClassPath() { 
-    Option<Iterable<File>> result = _jvm.getClassPath();
-    return result.unwrap(IterUtil.<File>empty());
-  }
-  
+//  /** Gets the interpreter class path from the interpreter jvm.
+//    * @return a list of class path elements
+//    */
+//  public Iterable<File> getInteractionsClassPath() { 
+//    Option<Iterable<File>> result = _jvm.getInteractionsClassPath();
+//    return result.unwrap(IterUtil.<File>empty());
+//  }
 }

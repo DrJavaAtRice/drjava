@@ -39,7 +39,7 @@ package edu.rice.cs.drjava.model;
 import java.io.File;
 import java.util.List;
 
-/** A GlobalModel that enforces invariants associated with having Aone active document at a time. 
+/** A GlobalModel that enforces invariants associated with having one active document at a time. 
   * Invariants:
   * <OL>
   * <LI>{@link #getOpenDefinitionsDocuments} will always return an array of
@@ -103,7 +103,7 @@ public interface SingleDisplayModel extends GlobalModel {
   public boolean closeAllFilesOnQuit();
   
   /** Return an array of the files excluded from the current project */
-  public File[] getExclFiles();
+  public File[] getExcludedFiles();
   
   /** Sets the array of files excluded from the current project */
   public void setExcludedFiles(File[] fs);

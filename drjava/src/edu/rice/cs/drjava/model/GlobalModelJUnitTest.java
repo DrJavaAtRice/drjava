@@ -55,7 +55,7 @@ import edu.rice.cs.util.swing.Utilities;
   */
 public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   
-  private static Log _log = new Log("GlobalModelJUnit.txt", false);
+  private static Log _log = new Log("GlobalModel.txt", false);
   
   /** Whether or not to print debugging output. */
   static final boolean printMessages = false;
@@ -284,7 +284,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   /** Tests that a JUnit file with no errors is reported to have no errors. */
   public void testNoJUnitErrors_NOJOIN() throws Exception {
     if (printMessages) System.err.println("----testNoJUnitErrors-----");
-//    Utilities.show("Running testNoJUnitErrors");
+    _log.log("Starting testNoJUnitErrors_NOJOIN");
     
     final OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_PASS_TEXT);
     final File file = new File(_tempDir, "MonkeyTestPass.scala");
@@ -307,13 +307,13 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
                  _model.getJUnitModel().getJUnitErrorModel().getNumErrors());
     
     _model.removeListener(listener);
-    _log.log("testNoJUnitErrors completed");
+    _log.log("testNoJUnitErrors_NOJOIN completed");
   }
   
   /** Tests that a JUnit file with an error is reported to have an error. */
   public void testOneJUnitError_NOJOIN() throws Exception {
     if (printMessages) System.err.println("----testOneJUnitError-----");
-//    Utilities.show("Running testOneJUnitError");
+    _log.log("Starting testOneJUnitError_NOJOIN");
     
     final OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_FAIL_TEXT);
     final File file = new File(_tempDir, "MonkeyTestFail.scala");
@@ -336,7 +336,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   /** Tests that a JUnit file with an error is reported to have an error. */
   public void testElspethOneJUnitError_NOJOIN() throws Exception {
     if (printMessages) System.err.println("----testElspethOneJUnitError-----");
-//    Utilities.show("Running testElspethOneJunitError");
+    _log.log("Starting testElspethOneJunitError_NOJOIN");
     
     OpenDefinitionsDocument doc = setupDocument(ELSPETH_ERROR_TEXT);
     final File file = new File(_tempDir, "Elspeth.scala");
@@ -360,7 +360,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   /** Tests that a test class which throws a *real* Error (not an Exception) is handled correctly. */
   public void testRealError_NOJOIN() throws Exception {
     if (printMessages) System.err.println("----testRealError-----");
-//    Utilities.show("Running testRealError");
+    _log.log("Startinging testRealError_NOJOIN");
     
     OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_ERROR_TEXT);
     final File file = new File(_tempDir, "MonkeyTestError.scala");
@@ -384,7 +384,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   /** Tests that the ui is notified to put up an error dialog if JUnit is run on a non-TestCase. */
   public void testNonTestCaseError_NOJOIN() throws Exception {
     if (printMessages) System.err.println("----testNonTestCaseError-----");
-//    Utilities.show("Running testNonTestCaseError");
+    _log.log("Starting testNonTestCaseError_NOJOIN");
     
     final OpenDefinitionsDocument doc = setupDocument(NON_TESTCASE_TEXT);
     final File file = new File(_tempDir, "NonTestCase.scala");
@@ -474,7 +474,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   /** Tests a document that has no corresponding class file. */
   public void testNoClassFile() throws Exception {
     if (printMessages) System.err.println("----testNoClassFile-----");
-//    Utilities.show("Running testNoClassFile");
+    _log.log("Starting testNoClassFile");
     
     final OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_PASS_TEXT);
     final File file = new File(_tempDir, "MonkeyTestPass.scala");
@@ -506,7 +506,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   /** Tests that an infinite loop in a test case can be aborted by clicking the Reset button. */
   public void testInfiniteLoop_NOJOIN() throws Exception {
     if (printMessages) System.err.println("----testInfiniteLoop-----");
-//    Utilities.show("Running testInfiniteLoop");
+    _log.log("Starting testInfiniteLoop_NOJOIN");
     
     final OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_INFINITE_TEXT);
     final File file = new File(_tempDir, "MonkeyTestInfinite.scala");

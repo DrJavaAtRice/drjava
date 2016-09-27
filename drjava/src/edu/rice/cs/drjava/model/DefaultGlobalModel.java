@@ -43,12 +43,11 @@ import java.io.*;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Vector;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
 
 import edu.rice.cs.drjava.DrScala;
-
 import edu.rice.cs.drjava.config.BooleanOption;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.FileSaveSelector;
@@ -56,16 +55,6 @@ import edu.rice.cs.drjava.model.compiler.DummyCompilerListener;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.drjava.model.repl.InterpreterBusyException;
-
-/* Debugger deactivated in DrScala */
-//import edu.rice.cs.drjava.model.debug.Breakpoint;
-//import edu.rice.cs.drjava.model.debug.Debugger;
-//import edu.rice.cs.drjava.model.debug.DebugException;
-//import edu.rice.cs.drjava.model.debug.NoDebuggerAvailable;
-//import edu.rice.cs.drjava.model.debug.DebugListener;
-//import edu.rice.cs.drjava.model.debug.DebugWatchData;
-//import edu.rice.cs.drjava.model.debug.DebugThreadData;
-
 import edu.rice.cs.drjava.model.javadoc.ScaladocModel;
 import edu.rice.cs.drjava.model.javadoc.NoScaladocAvailable;
 import edu.rice.cs.drjava.model.repl.DefaultInteractionsModel;
@@ -106,6 +95,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
   * @version $Id: DefaultGlobalModel.java 5727 2012-09-30 03:58:32Z rcartwright $
   */
 public class DefaultGlobalModel extends AbstractGlobalModel {
+  
   /* FIELDS */
   public static int BUSY_WAIT_DELAY = 500;  // wait 500 milliseconds between attempts to get the starting interpreter
   
@@ -135,11 +125,12 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     
     public void interpreterResetting() { }
     
+    /** This transaction with the slave JVM appears redundant since it is done after each compilation. */
     public void interpreterReady(File wd) {
       File buildDir = _state.getBuildDirectory();
-      if (buildDir != null) {
-        //        System.out.println("adding for reset: " + _state.getBuildDirectory().getAbsolutePath());
-        _mainJVM.addBuildDirectoryClassPath(IOUtil.attemptAbsoluteFile(buildDir));
+      if (buildDir != null && buildDir != FileOps.NULL_FILE) {
+        _log.log("InterpreterReady in DefaultGlobalModel: calling addInteractionsClassPath with " + buildDir);
+        _mainJVM.addInteractionsClassPath(IOUtil.attemptAbsoluteFile(buildDir));
       }
     }
     
@@ -155,16 +146,12 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   private CompilerListener _clearInteractionsListener = new DummyCompilerListener() {
     public void compileEnded(File workDir, List<? extends File> excludedFiles) {
       // Only clear interactions if there were no errors and unit testing is not in progress
-      if ( (_compilerModel.getNumErrors() == 0 || _compilerModel.getCompilerErrorModel().hasOnlyWarnings())
-            && ! _junitModel.isTestInProgress() && _resetAfterCompile) {
+      if ((_compilerModel.getNumErrors() == 0 || _compilerModel.getCompilerErrorModel().hasOnlyWarnings())
+            && ! _junitModel.isTestInProgress() && ! Utilities.TEST_MODE) {
 //        Utilities.show("compileEnded called in clearInteractionsListener");
-        System.err.println("Calling resetInteractions in _clearInteractionsListener");
-        resetInteractions(workDir);  // use same working directory as current interpreter
-      }
-      else { 
-        System.err.println("resetInteractions not called! NumErrors = " + _compilerModel.getNumErrors() + "; hasOnlyWarnings = " + 
-                           _compilerModel.getCompilerErrorModel().hasOnlyWarnings() + "; isTestInProgress = " + _junitModel.isTestInProgress() +
-                           "; resetAfterCompiler = " + _resetAfterCompile);
+        _log.log("In _clearInteractionsListener, calling hardResetInteractions in _clearInteractionsListener");
+        System.err.println("Calling hardResetInteractions in _clearInteractionsListener");
+        hardResetInteractions(workDir);  // use current working directory and class paths for open files
       }
     }
     public void activeCompilerChanged() {
@@ -178,8 +165,8 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   /** CompilerModel manages all compiler functionality. */
   private final CompilerModel _compilerModel;
   
-  /** Whether or not to reset the interactions JVM after compiling.  Should only be false in test cases. */
-  private volatile boolean _resetAfterCompile = true;
+//  /** Whether or not to reset the interactions JVM after compiling.  Should only be false in test cases. */
+//  private volatile boolean _resetAfterCompile = true;
   
   /** Number of errors in last compilation.  compilerModel._numErrors is trashed when the compile model is reset. */
   private volatile int _numCompilerErrors = 0;
@@ -194,37 +181,30 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   /** Manages all Scaladoc functionality. */
   protected volatile ScaladocModel _scaladocModel;
   
-  /* Debugger Fields */
-  
-  /* Debugger deactivated in DrScala */
-//  /** Interface to the integrated debugger.  If unavailable, set NoDebuggerAvailable.ONLY. */
-//  private volatile Debugger _debugger;
-  
-  /* CONSTRUCTORS */
+  /* Constructors */
   /** Constructs a new GlobalModel. Creates a new MainJVM and starts its Interpreter JVM. */
   public DefaultGlobalModel() {
+    _log.log("Constructing DefaultGlobalModel");
+    
     Iterable<? extends JDKToolsLibrary> tools = findLibraries();
     List<CompilerInterface> compilers = new LinkedList<CompilerInterface>();
-    /* Debugger deactivated in DrScala */
-//    _debugger = null;
+
     _scaladocModel = null;
     for (JDKToolsLibrary t : tools) {
-      // check for support of JAVA_6; Scala 2.12.0_M2+ requires Java 8. */
-      if (t.compiler().isAvailable() && t.version().supports(JavaVersion.JAVA_8)) {
-//        Utilities.show("For compiler " + t.compiler() + " isAvailable() = " + t.compiler().isAvailable());
+      // check for support of JAVA_7; change to JAVA_8 for Scala 2.12*/
+      if (t.compiler().isAvailable() && t.version().supports(JavaVersion.JAVA_7)) {
+      _log.log("For compiler " + t.compiler() + ", isAvailable() = " + t.compiler().isAvailable());
         compilers.add(t.compiler());
       }
-      /* Debugger deactivated in DrScala */
-//      if (_debugger == null && t.debugger().isAvailable()) { _debugger = t.debugger(); }
+
       if (_scaladocModel == null && t.scaladoc().isAvailable()) { _scaladocModel = t.scaladoc(); }
 //      else if (_scaladocModel == null) Utilities.show("No compiler found for JDKToolsLibrary" + t);
     }
-//    if (_debugger == null) { _debugger = NoDebuggerAvailable.ONLY; }
     if (_scaladocModel == null) { _scaladocModel = new NoScaladocAvailable(this); }
 //    Utilities.show("_scaladocModel = " + _scaladocModel);
     
     File workDir = Utilities.TEST_MODE ? new File(System.getProperty("user.home")) : getWorkingDirectory();
-    _mainJVM = new MainJVM(workDir);
+    _mainJVM = new MainJVM(workDir, this);
 //    AbstractMasterJVM._log.log(this + " has created a new MainJVM");
     _compilerModel = new DefaultCompilerModel(this, compilers);     
     _junitModel = new DefaultJUnitModel(_mainJVM, _compilerModel, this);
@@ -234,9 +214,6 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     _interactionsModel.addListener(_interactionsListener);
     _mainJVM.setInteractionsModel(_interactionsModel);
     _mainJVM.setJUnitModel(_junitModel);
-    
-    /* Debugger deactivated in DrScala */
-//    _setupDebugger();
     
     // Chain notifiers so that all events also go to GlobalModelListeners.
     _interactionsModel.addListener(_notifier);
@@ -249,13 +226,17 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     //      This is obnoxiously order-dependent, but it works for now.
     _compilerModel.addListener(_clearInteractionsListener);
     
+    _log.log("In DefaultGlobalModel constructor, listeners added");
+    
     _interpreterJVMStarter = new Thread("Start interpreter JVM") {
       public void run() { _mainJVM.startInterpreterJVM(); }
     };
+    _log.log("In DefaultGlobalModel constructor, starting InterpreterJVM");
     _interpreterJVMStarter.start();
-    
+    _log.log("In DefaultGlobalModel, InterpreterJVM started");
 // Lightweight parsing has been disabled until we have something that is beneficial and works better in the background.    
 //    _parsingControl = new DefaultLightWeightParsingControl(this);
+    _log.log("DefaultGlobalModel construction complete");
   }
 
   // makes the version coarser, if desired: if DISPLAY_ALL_COMPILER_VERSIONS is disabled, then only
@@ -272,7 +253,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   // If the descriptor is something different than JDKDescriptor.NONE, then this pair will always
   // return false for equals(), except if it is compared to the identical pair.
   private static class LibraryKey implements Comparable<LibraryKey> {    
-    public static final int PRIORITY_BUILTIN = 4;  // Currenty the Scala 12.0_M2 compiler
+    public static final int PRIORITY_BUILTIN = 4;  // Currenty the Scala 2.12.0 compiler
     public static final int PRIORITY_SEARCH = 1;
     public static final int PRIORITY_RUNTIME = 2;
     public static final int PRIORITY_SCALA = 3;
@@ -354,50 +335,29 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     // map is sorted first by LibraryKey.priority and second by version, lowest-to-highest
     Map<LibraryKey, JDKToolsLibrary> results = new TreeMap<LibraryKey, JDKToolsLibrary>();
     
-    JarJDKToolsLibrary._log.log("Creating DefaultGlobalModel; " + JavaVersion.CURRENT + " is running");
+    JarJDKToolsLibrary._log.log("DefaultGlobalModel.findLibraries() called; " + JavaVersion.CURRENT + " is running");
     File configTools = DrScala.getConfig().getSetting(JAVAC_LOCATION);
-    if (configTools != FileOps.NULL_FILE) {
+    if (configTools != null && configTools != FileOps.NULL_FILE) {
       JDKToolsLibrary fromConfig = JarJDKToolsLibrary.makeFromFile(configTools, this, JDKDescriptor.NONE);
       if (fromConfig.isValid()) { 
-        JarJDKToolsLibrary._log.log("Adding: " + fromConfig  + " from config");
+        JarJDKToolsLibrary._log.log("In DefaultGlobalModel.findLibraries, adding: " + fromConfig  + " from config");
         results.put(getLibraryKey(LibraryKey.PRIORITY_CONFIG, fromConfig), fromConfig);
       }
-      else { JarJDKToolsLibrary._log.log("From config: invalid " + fromConfig); }
+      else { JarJDKToolsLibrary._log.log("In DefaultGlobalModel.findLibraries, " + fromConfig + " is invalid"); }
     }
-    else { JarJDKToolsLibrary._log.log("From config: not set"); }
+    else { JarJDKToolsLibrary._log.log("In DefaultGlobalModel.findLibraries, JAVAC_LOCATION not set"); }
     
     Iterable<JDKToolsLibrary> allFromRuntime = JDKToolsLibrary.makeFromRuntime(this);
 
     for(JDKToolsLibrary fromRuntime: allFromRuntime) {
       if (fromRuntime.isValid()) {
         if (! results.containsKey(getLibraryKey(LibraryKey.PRIORITY_RUNTIME, fromRuntime))) {
-          JarJDKToolsLibrary._log.log("Adding: " + fromRuntime + "from runtime");
+          JarJDKToolsLibrary._log.log("In DefaultGlobalModel.findLibraries, adding: " + fromRuntime + " from runtime");
           results.put(getLibraryKey(LibraryKey.PRIORITY_RUNTIME, fromRuntime), fromRuntime);
         }
-//        else { JarJDKToolsLibrary._log.log("From runtime: duplicate "+fromRuntime); }
       }
-//      else { JarJDKToolsLibrary._log.log("From runtime: invalid " + fromRuntime); }
     }
-    
-    Iterable<JarJDKToolsLibrary> fromSearch = JarJDKToolsLibrary.search(this);
-    for (JDKToolsLibrary t : fromSearch) {
-      JavaVersion.FullVersion tVersion = t.version();
-//      JarJDKToolsLibrary._log.log("From search: "+t);
-//      JavaVersion.FullVersion coarsenedVersion = coarsenVersion(tVersion);
-//      JarJDKToolsLibrary._log.log("\ttVersion: " + tVersion + " " + tVersion.vendor());
-//      JarJDKToolsLibrary._log.log("\tcoarsenedVersion: " + coarsenedVersion + " " + coarsenedVersion.vendor());
-      // give a lower priority to built-in compilers
-      int priority = (edu.rice.cs.util.FileOps.getDrScalaFile().equals(tVersion.location())) ? 
-        LibraryKey.PRIORITY_BUILTIN : LibraryKey.PRIORITY_SEARCH;
-      if (t.compiler().getSuggestedFileExtension().equals(OptionConstants.SCALA_FILE_EXTENSION)) priority = LibraryKey.PRIORITY_SCALA;
-      if (! results.containsKey(getLibraryKey(priority, t))) {
-        JarJDKToolsLibrary._log.log("Adding: " + t + " with extension " + t.compiler().getSuggestedFileExtension() + " and priority " + priority);
-        results.put(getLibraryKey(priority, t), t);
-      }
-//      else { JarJDKToolsLibrary._log.log("\tduplicate"); }
-    }
-    
-    JarJDKToolsLibrary._log.log("***** Compiler results = " + results);
+    _log.log("In DefaultGlobalModel.findLibraries, compiler results = " + results);
     return IterUtil.reverse(results.values());
   }
   
@@ -407,8 +367,8 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   public void setBuildDirectory(File f) {
     _state.setBuildDirectory(f);
     if (f != FileOps.NULL_FILE) {
-      //      System.out.println("adding: " + f.getAbsolutePath());
-      _mainJVM.addBuildDirectoryClassPath(IOUtil.attemptAbsoluteFile(f));
+      // This transaction appears redundant since the information is passed to the slave JVM after each compilation. */
+      _mainJVM.addInteractionsClassPath(IOUtil.attemptAbsoluteFile(f));
     }
     
     _notifier.projectBuildDirChanged();
@@ -463,14 +423,14 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   public void resetInteractions(File wd) {
     assert _interactionsModel._pane != null;
     
-    MainJVM._log.log("DefaultGlobalModel.resetInteractions(" + wd + ") called.");
-    
-//    debug.logStart();
+    _log.log("DefaultGlobalModel.resetInteractions(" + wd + ") called.");
+//    System.err.println("DefaultGlobalModel.resetInteractions(" + wd + ") called.");
     
     /* Determine new working directory. */
     File workDir = _interactionsModel.getWorkingDirectory();
     if (wd == null) { wd = workDir; }
-    MainJVM._log.log("Old Working Directory is: " + workDir + " New Working Directory is: " + wd);
+    _log.log("Old Working Directory is: " + workDir + " New Working Directory is: " + wd);
+//    System.err.println("Old Working Directory is: " + workDir + " New Working Directory is: " + wd);
     
     // update the setting
     DrScala.getConfig().setSetting(LAST_INTERACTIONS_DIRECTORY, wd);
@@ -478,33 +438,54 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     // Try to reset the interpreter internally without killing and restarting the slave JVM
     try {
       boolean success = _interactionsModel.resetInterpreter(wd);
-      MainJVM._log.log("_interationsModel.resetInterpreter(" + wd + ") returned " + success);
-      if (! success) {
+      _log.log("_interactionsModel.resetInterpreter(" + wd + ") returned " + success);
+//      System.err.println("_interactionsModel.resetInterpreter(" + wd + ") returned " + success);
+      if (success && ! _mainJVM.isDisposed()) {  // In some tests, _mainJVM is already dip
+        // inform InteractionsModel that interpreter is ready
+        _interactionsModel._notifyInterpreterReady(wd);
+      }
+      else {
         // Internal reset failed by returning false
-        MainJVM._log.log("Fast reset failed forcing a full reset");
+        _log.log("Fast reset failed forcing a full reset");
         _hardResetInteractions(false);
       }
     }
-      
-//    catch(InterruptedException e) { /* ignore: should never happen */ }
     catch(InterpreterBusyException e) {
-      //  Internal reset failed by throwing an exception. 
-      MainJVM._log.log("Attempt to perform internal reset threw InterpreterBusy exception forcing a full reset.");
+      //  Hard reset failed by throwing an exception. 
+      _log.log("Performing an internal reset threw InterpreterBusy exception forcing a full reset.");
       _hardResetInteractions(true);
     }
     
-    MainJVM._log.log("Reset is complete");   
-//    debug.logEnd();
+    _log.log("Reset is complete");   
   }
   
+  public void hardResetInteractions(File wd) {
+    
+    assert _interactionsModel._pane != null;
+    
+//    Utilities.show("DefaultGlobalModel.hardResetInteractions(" + wd + ") called.");
+    
+    _log.log("DefaultGlobalModel.hardResetInteractions(" + wd + ") called.");
+    
+    /* Determine new working directory. */
+    File workDir = _interactionsModel.getWorkingDirectory();
+    if (wd == null) { wd = workDir; };
+    
+    // update the setting
+    DrScala.getConfig().setSetting(LAST_INTERACTIONS_DIRECTORY, wd);
+    
+    _hardResetInteractions(true);
+    _log.log("Hard Reset is complete");
+  }
+      
+    
   /** Reset the interactions pane by terminating the slave JVM. */
   private void _hardResetInteractions(final boolean inProgress) {
-    MainJVM._log.log("performing a hard reset of interactions pane");
+    _log.log("performing a hard reset of interactions pane");
     _interactionsModel.setUpNewInterpreter(inProgress);
-    MainJVM._log.log("Interpreter restarted");
+    _log.log("Interpreter restarted");
   }
     
-  
   /** Interprets the current given text at the prompt in the interactions pane. */
   public void interpretCurrentInteraction() { _interactionsModel.interpretCurrentInteraction(); }
   
@@ -570,26 +551,18 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
 //      insertBeforeLastPrompt(s + "\n", InteractionsDocument.DEBUGGER_STYLE);
 //  }
   
-  /** Returns the current class path in use by the Interpreter JVM. */
-  public Iterable<File> getInteractionsClassPath() {
-    return _mainJVM.getClassPath().unwrap(IterUtil.<File>empty());
-  }
+//  /** Returns the current class path in use by the Interpreter JVM. */
+//  public Iterable<File> getInteractionsClassPath() {
+//    return _mainJVM.getClassPath().unwrap(IterUtil.<File>empty());
+//  }
   
-  /** Sets whether or not the Interactions JVM will be reset after a compilation succeeds.  This should ONLY be used 
-    * in tests!  This method is not supported by AbstractGlobalModel.
-    * @param shouldReset Whether to reset after compiling
-    */
-  void setResetAfterCompile(boolean shouldReset) { _resetAfterCompile = shouldReset; }
+//  /** Sets whether or not the Interactions JVM will be reset after a compilation succeeds.  This should ONLY be used 
+//    * in tests!  This method is not supported by AbstractGlobalModel.
+//    * @param shouldReset Whether to reset after compiling
+//    */
+//  void setResetAfterCompile(boolean shouldReset) { _resetAfterCompile = shouldReset; }
   
   /* Debugger deactivated in DrScala */
-  
-//  /** Gets the Debugger used by DrJava. */
-//  public Debugger getDebugger() { return _debugger; }
-//  
-//  /** Returns an available port number to use for debugging the interactions JVM.
-//    * @throws IOException if unable to get a valid port number.
-//    */
-//  public int getDebugPort() throws IOException { return _interactionsModel.getDebugPort(); }
   
   // ---------- ConcreteOpenDefDoc inner class ----------
   
@@ -775,19 +748,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       // Use the model's classpath, and use the EventNotifier as the listener
       _scaladocModel.scaladocDocument(this, saver);
     }
-    
-//    /** Called to indicate the document is being closed, so to remove all related state from the debug manager. */
-//    public void removeFromDebugger() { getBreakpointManager().removeRegions(this); }
-    
-    // This creation context is useful for debugging memory leaks in DefinitionsPaneMemoryLeakTest.
-    // It should be commented out for normal compilation.
-//    String creationContext;
-//    {
-//      StringWriter sw = new StringWriter();
-//      new RuntimeException("new ConcreteOpenDefDoc").printStackTrace(new PrintWriter(sw));
-//      creationContext = sw.toString();
-//    }
-  } /* End of ConcreteOpenDefDoc */
+  }
   
   /** Creates a ConcreteOpenDefDoc for a new DefinitionsDocument.
     * @return OpenDefinitionsDocument object for a new document
@@ -802,70 +763,23 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     return new ConcreteOpenDefDoc(f); 
   }
   
+  /* NOTE: this method appears redundant because the interactions class path is updated by the compilation process. */
   /** Adds the source root for doc to the interactions classpath; this function is a helper to _openFiles.
     * @param doc the document to add to the classpath
     */
   protected void addDocToClassPath(OpenDefinitionsDocument doc) {
     try {
       File sourceRoot = doc.getSourceRoot();
-      if (doc.isAuxiliaryFile()) { _interactionsModel.addProjectFilesClassPath(sourceRoot); }
-      else { _interactionsModel.addExternalFilesClassPath(sourceRoot); }
+      _log.log("In DefaultGlobalModel, adding '" + sourceRoot + "'to interactions class path");
+      _interactionsModel.addInteractionsClassPath(sourceRoot);
       setClassPathChanged(true);
     }
     catch (InvalidPackageException e) {
       // Invalid package-- don't add it to classpath
     }
   }
-  
-//  private void _setupDebugger() {
-//    _jvm.setDebugModel(_debugger.callback());
-//    
-//    // add listener to set the project file to "changed" when a breakpoint or watch is added, removed, or changed
-//    getBreakpointManager().addListener(new RegionManagerListener<Breakpoint>() {
-//      public void regionAdded(final Breakpoint bp) { setProjectChanged(true); }
-//      public void regionChanged(final Breakpoint bp) { setProjectChanged(true); }
-//      public void regionRemoved(final Breakpoint bp) { 
-//        try { getDebugger().removeBreakpoint(bp); } 
-//        catch(DebugException de) {
-//          /* just ignore it */
-//          // TODO: should try to pop up dialog to give the user the option of restarting the debugger (mgricken)
-////          int result = JOptionPane.showConfirmDialog(null, "Could not remove breakpoint.", "Restart debugger?", JOptionPane.YES_NO_OPTION);
-////          if (result==JOptionPane.YES_OPTION) {
-////            getDebugger().shutdown();
-////            getDebugger().startUp();
-////          }
-//        }
-//        setProjectChanged(true);
-//      }
-//    });
-//    getBookmarkManager().addListener(new RegionManagerListener<MovingDocumentRegion>() {
-//      public void regionAdded(MovingDocumentRegion r) { setProjectChanged(true); }
-//      public void regionChanged(MovingDocumentRegion r) { setProjectChanged(true); }
-//      public void regionRemoved(MovingDocumentRegion r) { setProjectChanged(true); }
-//    });
-//    
-//    _debugger.addListener(new DebugListener() {
-//      public void watchSet(final DebugWatchData w) { setProjectChanged(true); }
-//      public void watchRemoved(final DebugWatchData w) { setProjectChanged(true); }    
-//      
-//      public void regionAdded(final Breakpoint bp) { }
-//      public void regionChanged(final Breakpoint bp) { }
-//      public void regionRemoved(final Breakpoint bp) { }
-//      public void debuggerStarted() { }
-//      public void debuggerShutdown() { }
-//      public void threadLocationUpdated(OpenDefinitionsDocument doc, int lineNumber, boolean shouldHighlight) { }
-//      public void breakpointReached(final Breakpoint bp) { }
-//      public void stepRequested() { }
-//      public void currThreadSuspended() { }
-//      public void currThreadResumed() { }
-//      public void threadStarted() { }
-//      public void currThreadDied() { }
-//      public void nonCurrThreadDied() {  }
-//      public void currThreadSet(DebugThreadData thread) { }
-//    });
-//  }
-  
-  /** Get the class path to be used in all class-related operations.
+
+  /** Get the class path to be used in all class-related operations.  Used before compilation.
     * TODO: Ensure that this is used wherever appropriate.
     */
   public Iterable<File> getClassPath() {
@@ -873,71 +787,56 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     
     if (isProjectActive()) {
       File buildDir = getBuildDirectory();
-      if (buildDir != null) { result = IterUtil.compose(result, buildDir); }
+      if (buildDir != null && buildDir != FileOps.NULL_FILE) { result = IterUtil.compose(result, buildDir); }
       
-      /* We prefer to assume the project root is the project's source root, rather than
-       * checking *every* file in the project for its source root.  This is a bit problematic,
-       * because "Compile Project" won't care if the user has multiple source roots (or even just a
-       * single "src" subdirectory), and the user in this situation (assuming the build dir is 
-       * null) wouldn't notice a problem until trying to access the compiled classes in the 
+      /* We prefer to assume the project root is the project's source root, rather than checking *every* file in the 
+       * project for its source root.  This is a bit problematic, because "Compile Project" won't care if the user 
+       * has multiple source roots (or even just a single "src" subdirectory), and the user in this situation (assuming 
+       * the build dir is null) wouldn't notice a problem until trying to access the compiled classes in the 
        * Interactions.
        */
       File projRoot = getProjectRoot();
-      if (projRoot != null) { result = IterUtil.compose(result, projRoot); }
+      if (projRoot != null && projRoot != FileOps.NULL_FILE) { result = IterUtil.compose(result, projRoot); }
       
       Iterable<AbsRelFile> projectExtras = getExtraProjectClassPath();
-      if (projectExtras != null) { result = IterUtil.compose(result, projectExtras); }
+      if (projectExtras != null && projectExtras != FileOps.NULL_FILE) { result = IterUtil.compose(result, projectExtras); }
     }
     else { result = IterUtil.compose(result, getSourceRootSet()); }
     
-    Vector<File> globalExtras = DrScala.getConfig().getSetting(EXTRA_CLASSPATH);
+    ArrayList<File> globalExtras = DrScala.getConfig().getSetting(EXTRA_CLASSPATH);
     if (globalExtras != null) { result = IterUtil.compose(result, globalExtras); }
     
-    /* We must add JUnit to the class path.  We do so by including the current JVM's class path.
+    /* We must add JUnit to the class path.  We do so by including the current JVM's class path (fixed on startup).
      * This is not ideal, because all other classes on the current class path (including all of DrScala's
      * internal classes) are also included.  But we're probably stuck doing something like this if we
      * want to continue bundling JUnit with DrJava.
      */
     result = IterUtil.compose(result, ReflectUtil.SYSTEM_CLASS_PATH);
     
+    _log.log("getClassPath() is returning '" + result + "'");
+    
     return result;
   }
   
-  /** Adds the project root (if a project is open), the source roots for other open documents, the paths in the 
-    * "extra classpath" config option, as well as any project-specific classpaths to the interpreter's classpath. 
-    * This method is called in DefaultInteractionsModel when the interpreter becomes ready.  Runs outside the event
-    * thread.
-    */
+  /** Returns the current class path actually in use by the Interpreter JVM. */
+  public Iterable<File> getInteractionsClassPath() {
+    return _mainJVM.getInteractionsClassPath().unwrap(IterUtil.<File>empty());
+  }
+  
+  /** Ensures that all of the entries in getClassPath() appear in the interactions class path.  Entries are passed
+    * to the Scala interpreter in reverse order so that the first entry is the last one passed. Can be called from
+    * outside the event handling thread. */
+  public void updateInteractionsClassPath() {
+    Iterable<File> icp = getClassPath();
+    _log.log("In DefaultGlobalModel, updating interactions class path '" + icp + "'");
+    _interactionsModel.addInteractionsClassPath(icp);
+  }
+  
+  /** Reconstructs the class path from the state of the global model and passes it to the interpreter in the slave JVM.
+    * Can be called from outside the event handling thread. */
   public void resetInteractionsClassPath() {
-//    System.err.println("Resetting interactions class path");
-    Iterable<AbsRelFile> projectExtras = getExtraProjectClassPath();
-    //System.out.println("Adding project classpath vector to interactions classpath: " + projectExtras);
-    if (projectExtras != null)  for (File cpE : projectExtras) { _interactionsModel.addProjectClassPath(cpE); }
-    
-    Vector<File> cp = DrScala.getConfig().getSetting(EXTRA_CLASSPATH);
-//    System.err.println("Extra class path used in resetInteraction is: '" + cp + "'");  // shows in console
-    if (cp != null) {
-      for (File f : cp) { _interactionsModel.addExtraClassPath(f); }
-    }
-    
-    for (OpenDefinitionsDocument odd: getAuxiliaryDocuments()) {
-      // this forwards directly to InterpreterJVM.addClassPath(String)
-      try { _interactionsModel.addProjectFilesClassPath(odd.getSourceRoot()); }
-      catch(InvalidPackageException e) {  /* ignore it */ }
-    }
-    
-    for (OpenDefinitionsDocument odd: getNonProjectDocuments()) {
-      // this forwards directly to InterpreterJVM.addClassPath(String)
-      try {
-        File sourceRoot = odd.getSourceRoot();
-        if (sourceRoot != null) _interactionsModel.addExternalFilesClassPath(sourceRoot); 
-      }
-      catch(InvalidPackageException e) { /* ignore it */ }
-    }
-    
-    // add project source root to projectFilesClassPath.  All files in project tree have this root.
-    
-    _interactionsModel.addProjectFilesClassPath(getProjectRoot());  // is sync advisable here?
+    _log.log("In DefaultGlobalModel, resetting interactions class path");
+    updateInteractionsClassPath();  
     setClassPathChanged(false);  // reset classPathChanged state  // Why is this flag set to false here?
   } 
 }

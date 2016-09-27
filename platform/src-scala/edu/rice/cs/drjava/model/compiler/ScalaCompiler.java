@@ -112,11 +112,11 @@ public class ScalaCompiler extends Javac160FilteringCompiler implements /* Scala
           Util.oneOf(parentDir, "jline-2.14.1.jar"),
           Util.oneOf(parentDir, "scala-compiler.jar"),
           Util.oneOf(parentDir, "scala-library.jar"),
-          Util.oneOf(parentDir, "scalap-2.12.0-M5.jar"),
-          Util.oneOf(parentDir, "scala-swing_2.12.0-M5-2.0.0-M2.jar"),
+          Util.oneOf(parentDir, "scalap-2.12.0-RC1.jar"),
+          Util.oneOf(parentDir, "scala-swing_2.12.0-RC1-2.0.0-M2.jar"),
           Util.oneOf(parentDir, "scala-reflect.jar"),
-          Util.oneOf(parentDir, "scala-parser-combinators_2.12.0-M5-1.0.4.jar"),
-          Util.oneOf(parentDir, "scala-xml_2.12.0-M5-1.0.5.jar") 
+          Util.oneOf(parentDir, "scala-parser-combinators_2.12.0-RC1-1.0.4.jar"),
+          Util.oneOf(parentDir, "scala-xml_2.12.0-RC1-1.0.5.jar") 
         };
         return Arrays.asList(jarFiles);    
       }

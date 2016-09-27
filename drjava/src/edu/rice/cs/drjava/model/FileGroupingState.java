@@ -151,17 +151,17 @@ public interface FileGroupingState {
     */
   public Iterable<AbsRelFile> getExtraProjectClassPath();
   
-  /** Sets the list of project-specific classpath entries. */
-  public void setExtraClassPath(Iterable<AbsRelFile> cp);
+   /** Sets the list of project-specific classpath entries. */
+  public void setExtraProjectClassPath(Iterable<AbsRelFile> cp);
+  
+  /** Return an array of the files excluded from the current project */
+  public File[] getExcludedFiles();
   
   /** Excludes file from the project. */
   public void addExcludedFile(File f);
   
   /** Returns true if the file is excluded from the current project */
   public boolean isExcludedFile(File f);
-  
-  /** Return an array of the files excluded from the current project */
-  public File[] getExclFiles();
   
   /** Remove the specified file from the files excluded from the current project */
   public void removeExcludedFile(File f);

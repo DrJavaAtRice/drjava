@@ -322,7 +322,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * if the given text contains a keyword. If it does, it splits the HighlightStatus block into separate blocks
     * so that each keyword has its own block. This process identifies all keywords in the given block.
     * Note that the given block must have state NORMAL.  Only runs in the event thread.  Perturbs _currentLocation.
-    * @param v Vector with highlight info
+    * @param v ArrayList with highlight info
     * @param i Index of the single HighlightStatus to check for keywords in
     * @return the index into the vector of the last processed element
     */

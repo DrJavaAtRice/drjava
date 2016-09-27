@@ -37,7 +37,7 @@
 package edu.rice.cs.drjava.model.repl.newjvm;
 
 import edu.rice.cs.drjava.DrScalaTestCase;
-
+import edu.rice.cs.drjava.model.DummyGlobalModel;
 import edu.rice.cs.plt.concurrent.CompletionMonitor;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.util.Log;
@@ -291,7 +291,7 @@ public final class NewJVMTest extends DrScalaTestCase {
     private volatile InterpretResult.Visitor<Void> _testHandler;
 
     public TestJVMExtension() throws RemoteException {
-      super(IOUtil.WORKING_DIRECTORY);
+      super(IOUtil.WORKING_DIRECTORY, new DummyGlobalModel());
       _done = new CompletionMonitor();
       _testHandler = new TestResultHandler();
       startInterpreterJVM();

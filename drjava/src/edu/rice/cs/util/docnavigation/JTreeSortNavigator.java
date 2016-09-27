@@ -479,7 +479,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     */
   public ArrayList<ItemT> getDocuments() {
     
-    final ArrayList<ItemT> list = new ArrayList<ItemT>(getDocumentCount()); // Use Vector because it implements an Enumeration
+    final ArrayList<ItemT> list = new ArrayList<ItemT>(getDocumentCount()); // Use ArrayList because it implements an Enumeration
     
     synchronized(_model) { // locks out mutation
       // e has a raw type because depthFirstEnumeration() has a raw type signature

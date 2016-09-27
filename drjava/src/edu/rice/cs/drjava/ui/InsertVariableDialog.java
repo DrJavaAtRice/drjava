@@ -53,30 +53,24 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 
-/**
- * Dialog allowing the user to select a variable.
- */
+/** Dialog allowing the user to select a variable. */
 public class InsertVariableDialog extends SwingFrame implements OptionConstants {
   /** Tab pane. */
   JTabbedPane _tabbedPane = new JTabbedPane();
   
-  /** Table with variables.
-   */
+  /** Table with variables. */
   private Map<String, JTable> _varTable = new HashMap<String, JTable>();
   
-  /** Model for the table.
-   */
+  /** Model for the table. */
   private Map<String, DefaultTableModel> _varTableModel = new HashMap<String, DefaultTableModel>();
   
-  /** Field to preview the value of the variable.
-   */
+  /** Field to preview the value of the variable. */
   private JTextField _varValueField;
   
   /** Help/Description for the variable. */
   private JTextPane _helpPane;
   
-  /** Button to accept the selection.
-   */
+  /** Button to accept the selection. */
   private JButton _okBtn;
   
   /** Button to cancel.
@@ -246,9 +240,9 @@ public class InsertVariableDialog extends SwingFrame implements OptionConstants 
     }
     
     for(String key: sorted) {
-      Vector<String> row = new Vector<String>();  // Vector is mandated by interface to DefaultTableModel
+      ArrayList<String> row = new ArrayList<String>();  // ArrayList is mandated by interface to DefaultTableModel
       row.add(key);
-      _varTableModel.get(category).addRow(row);
+      _varTableModel.get(category).addRow(row.toArray());
     }
     
     _varTable.get(category).setRowSelectionInterval(0,0);

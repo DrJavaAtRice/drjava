@@ -94,21 +94,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
 //    super.setUp();
 //    _model.getOpenDefinitionsDocuments().get(0).saveFile(new FileSelector(new File(_tempDir, "blank document")));
 //  }
-  
-//  /** Overrides {@link TestCase#runBare} to interatively run this test case for each compiler, without resetting
-//   * the interactions JVM.  This method is called once per test method, and it magically invokes the method.
-//   */
-//  public void runBare() throws Throwable {
-//    CompilerInterface[] compilers = CompilerRegistry.ONLY.getAvailableCompilers();
-//    for (int i = 0; i < compilers.length; i++) {
-//      //System.out.println("Run " + i + ": " + compilers[i]);
-//      setUp();
-//      _model.getCompilerModel().setActiveCompiler(compilers[i]);
-//      try { runTest();  }
-//      finally { tearDown(); }
-//    }
-//  }
-  
+
   /** Gets the name of the compiler.
     * @return the string representation of the active compiler
     */
@@ -122,7 +108,6 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     * As the test is then run one time per compiler it can find. 
     */
   public void testCompileAllFailsDifferentSourceRoots() throws BadLocationException, IOException, InterruptedException {
-//    debug.logStart();
     
 //    System.err.println("Starting testCompileAllFailsDifferentSourceRoots");
     
@@ -143,6 +128,8 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     
     _model.addListener(listener);
     
+    assert ! _model.isProjectActive();
+        
     CompilerModel cm = _model.getCompilerModel();    
     cm.compileAll();
     listener.waitCompileDone();
@@ -157,12 +144,12 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     // Make sure .class does not exist for both files
     File compiled1 = classForScala(file1, "DrScalaTestFoo");
     assertEquals(_name() + "Class file exists after failing compile (1)", false, compiled1.exists());
-    /* Scalac does not respond toa null destination by placing all class files in corresponding source location. */
+    /* Scalac does not respond to a null destination by placing all class files in corresponding source location. */
 //    File compiled2 = classForScala(file2, "DrScalaTestBar");
 //    assertEquals(_name() + "Class file exists after failing compile (2)", false, compiled2.exists());
     _model.removeListener(listener);
     
-//    System.err.println("testCompileAllFailsDifferentSourceRoots completed");
+//    _log.log("testCompileAllFailsDifferentSourceRoots completed");
     
 //    debug.logEnd();
   }
@@ -173,11 +160,11 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
   public void testCompilePackageAsField() throws BadLocationException, IOException, InterruptedException {
 //    debug.logStart();
     
-//    System.err.println("Starting testCompilePackageAsField");
+//    _log.log("Starting testCompilePackageAsField");
     
     OpenDefinitionsDocument doc = setupDocument(FOO_PACKAGE_AS_FIELD);
     final File file = tempFile();
-    saveFile(doc,new FileSelector(file));
+    saveFile(doc, new FileSelector(file));
     
     CompileShouldFailListener listener = new CompileShouldFailListener();
     _model.addListener(listener);
@@ -300,18 +287,14 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     
 //    debug.logEnd();
   }
-  
-  
-  
+
   /** Tests the compiler errors have the correct line numbers.
     * TODO: rewrite this test for the new error model interface
     */
   public void testCompileFailsCorrectLineNumbers() throws BadLocationException, IOException, InterruptedException {
-//    debug.logStart();
-    
+   
     _log.log("Starting testCompileFailsCorrectLineNumbers");
-//    System.err.println("Starting testCompileFailsCorrectLineNumbers");
-    
+
     File aDir = new File(_tempDir, "a");
     // bDir has been eleted; it is a second source root
 //    File bDir = new File(_tempDir, "b");
@@ -329,6 +312,8 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     // do compile -- should fail since package decl is not valid!  Note: doc precedes doc2 alphabetically
     CompileShouldFailListener listener = new CompileShouldFailListener();
     _model.addListener(listener);
+    
+    assert ! _model.isProjectActive();
     
     CompilerModel cm = _model.getCompilerModel();
     cm.compileAll();

@@ -314,7 +314,7 @@ public class ConfigFrame extends SwingFrame {
   public void resetToCurrent() {
     _rootNode.resetToCurrent();
     // must reset the "current keystroke map" when resetting
-    VectorKeyStrokeOptionComponent.resetCurrentKeyStrokeMap();
+    ArrayListKeyStrokeOptionComponent.resetCurrentKeyStrokeMap();
   }
 
   /** Resets the frame and hides it. */
@@ -491,11 +491,11 @@ public class ConfigFrame extends SwingFrame {
   protected BooleanOptionComponent newBooleanOptionComponent(BooleanOption o, boolean left) {
     return new BooleanOptionComponent(o, CONFIG_DESCRIPTIONS.get(o), this, CONFIG_LONG_DESCRIPTIONS.get(o), left);
   }
-  protected VectorFileOptionComponent newVectorFileOptionComponent(VectorOption<File> o, boolean mbe) {
-    return new VectorFileOptionComponent(o, CONFIG_DESCRIPTIONS.get(o), this, CONFIG_LONG_DESCRIPTIONS.get(o), mbe);
+  protected ArrayListFileOptionComponent newArrayListFileOptionComponent(ArrayListOption<File> o, boolean mbe) {
+    return new ArrayListFileOptionComponent(o, CONFIG_DESCRIPTIONS.get(o), this, CONFIG_LONG_DESCRIPTIONS.get(o), mbe);
   }
-  protected VectorStringOptionComponent newVectorStringOptionComponent(VectorOption<String> o, boolean mbe) {
-    return new VectorStringOptionComponent(o, CONFIG_DESCRIPTIONS.get(o), this, CONFIG_LONG_DESCRIPTIONS.get(o), mbe);
+  protected ArrayListStringOptionComponent newArrayListStringOptionComponent(ArrayListOption<String> o, boolean mbe) {
+    return new ArrayListStringOptionComponent(o, CONFIG_DESCRIPTIONS.get(o), this, CONFIG_LONG_DESCRIPTIONS.get(o), mbe);
   }
   protected ForcedChoiceOptionComponent newForcedChoiceOptionComponent(ForcedChoiceOption o) {
     return new ForcedChoiceOptionComponent(o, CONFIG_DESCRIPTIONS.get(o), this, CONFIG_LONG_DESCRIPTIONS.get(o));
@@ -541,7 +541,7 @@ public class ConfigFrame extends SwingFrame {
       newBooleanOptionComponent(DISPLAY_ALL_COMPILER_VERSIONS);
     addOptionComponent(panel, displayAllCompilerVersions );
    
-    addOptionComponent(panel, newVectorFileOptionComponent(EXTRA_CLASSPATH, true));
+    addOptionComponent(panel, newArrayListFileOptionComponent(EXTRA_CLASSPATH, true));
     
     panel.displayComponents();
     
@@ -789,9 +789,9 @@ public class ConfigFrame extends SwingFrame {
    */
   private void _setupKeyBindingsPanel(ConfigPanel panel) {
     // using a treemap because it automatically sorts element upon insertion
-    TreeMap<String,VectorKeyStrokeOptionComponent> _comps = new TreeMap<String,VectorKeyStrokeOptionComponent>();
+    TreeMap<String,ArrayListKeyStrokeOptionComponent> _comps = new TreeMap<String,ArrayListKeyStrokeOptionComponent>();
 
-    VectorKeyStrokeOptionComponent vksoc;
+    ArrayListKeyStrokeOptionComponent vksoc;
 
     for (KeyStrokeData ksd: KeyBindingManager.ONLY.getKeyStrokeData()) {
       if (ksd.getOption() != null) {
@@ -813,14 +813,14 @@ public class ConfigFrame extends SwingFrame {
             name = ksd.getOption().getName();
           }
         }
-        vksoc = new VectorKeyStrokeOptionComponent(ksd.getOption(), name, this, desc);
+        vksoc = new ArrayListKeyStrokeOptionComponent(ksd.getOption(), name, this, desc);
         if (vksoc != null) _comps.put(name, vksoc);
       }
     }
 
-    Iterator<VectorKeyStrokeOptionComponent> iter = _comps.values().iterator();
+    Iterator<ArrayListKeyStrokeOptionComponent> iter = _comps.values().iterator();
     while (iter.hasNext()) {
-      VectorKeyStrokeOptionComponent x = iter.next();
+      ArrayListKeyStrokeOptionComponent x = iter.next();
       addOptionComponent(panel, x);
     }
     panel.displayComponents();
@@ -841,8 +841,8 @@ public class ConfigFrame extends SwingFrame {
 //      addOptionComponent(panel, label);
 //    }
 //
-//    VectorFileOptionComponent sourcePath =
-//      newVectorFileOptionComponent(DEBUG_SOURCEPATH, true);
+//    ArrayListFileOptionComponent sourcePath =
+//      newArrayListFileOptionComponent(DEBUG_SOURCEPATH, true);
 //    // Source path can only include directories
 //    sourcePath.getFileChooser().setFileFilter(new DirectoryFilter("Source Directories"));
 //    addOptionComponent(panel, sourcePath);
@@ -856,7 +856,7 @@ public class ConfigFrame extends SwingFrame {
 //                                          "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</html>", 
 //                                          this, true));
 //    addOptionComponent(panel, 
-//                       newVectorStringOptionComponent(DEBUG_STEP_EXCLUDE, false));
+//                       newArrayListStringOptionComponent(DEBUG_STEP_EXCLUDE, false));
 //    addOptionComponent(panel, newBooleanOptionComponent(DEBUG_AUTO_IMPORT));
 //    
 //    addOptionComponent(panel, newIntegerOptionComponent(AUTO_STEP_RATE));                                                            
@@ -870,11 +870,11 @@ public class ConfigFrame extends SwingFrame {
     addOptionComponent(panel, newForcedChoiceOptionComponent(SCALADOC_ACCESS_STATUS));
 //    addOptionComponent(panel, newForcedChoiceOptionComponent(SCALADOC_LINK_VERSION));
     addOptionComponent(panel, newStringOptionComponent(JAVADOC_1_8_LINK));
-    addOptionComponent(panel, newStringOptionComponent(OptionConstants.SCALADOC_2_12_LINK));
+    addOptionComponent(panel, newStringOptionComponent(OptionConstants.SCALADOC_2_12_LINK));  // change with Scala 2.12
     addOptionComponent(panel, newStringOptionComponent(JUNIT_LINK));
 
-    VectorStringOptionComponent additionalScaladoc =
-      new VectorStringOptionComponent(SCALADOC_ADDITIONAL_LINKS, 
+    ArrayListStringOptionComponent additionalScaladoc =
+      new ArrayListStringOptionComponent(SCALADOC_ADDITIONAL_LINKS, 
                                       CONFIG_DESCRIPTIONS.get(SCALADOC_ADDITIONAL_LINKS),
                                       this,
                                       CONFIG_LONG_DESCRIPTIONS.get(SCALADOC_ADDITIONAL_LINKS)) {
@@ -1266,8 +1266,8 @@ public class ConfigFrame extends SwingFrame {
       
     addOptionComponent(panel, newIntegerOptionComponent(HISTORY_MAX_SIZE));
     addOptionComponent(panel, newBooleanOptionComponent(DIALOG_AUTOIMPORT_ENABLED));
-    VectorStringOptionComponent autoImportClasses =
-      new VectorStringOptionComponent(INTERACTIONS_AUTO_IMPORT_CLASSES,
+    ArrayListStringOptionComponent autoImportClasses =
+      new ArrayListStringOptionComponent(INTERACTIONS_AUTO_IMPORT_CLASSES,
                                       CONFIG_DESCRIPTIONS.get(INTERACTIONS_AUTO_IMPORT_CLASSES),
                                       this,
                                       CONFIG_LONG_DESCRIPTIONS.get(INTERACTIONS_AUTO_IMPORT_CLASSES)) {

@@ -352,9 +352,9 @@ public class DrScalaErrorWindow extends JDialog {
     b.append("\n\nNumber of processors/cores: ");
     b.append(Runtime.getRuntime().availableProcessors());
     b.append("\n\n");
-    b.append("Compiler Discovery Log:\n");
-    b.append(edu.rice.cs.drjava.model.JarJDKToolsLibrary.LOG_STRINGWRITER.toString());
-    b.append("\n\n");
+//    b.append("Compiler Discovery Log:\n");
+//    b.append(edu.rice.cs.drjava.model.JarJDKToolsLibrary.LOG_STRINGWRITER.toString());
+//    b.append("\n\n");
     
     // filter out user.dir, user.home and user.name
     String infoText = b.toString();

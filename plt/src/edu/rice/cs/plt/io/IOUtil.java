@@ -57,21 +57,21 @@ import edu.rice.cs.plt.recur.RecursionStack;
 import edu.rice.cs.plt.reflect.ReflectUtil;
 import edu.rice.cs.plt.text.TextUtil;
 
+import edu.rice.cs.util.swing.Utilities;
+
 import static edu.rice.cs.plt.debug.DebugUtil.error;
 
-/**
- * Provides additional operations on {@link File}s, {@link InputStream}s, {@link OutputStream}s,
- * {@link Reader}s, and {@link Writer}s not defined in the {@code java.io} package.
- */
+/** Provides additional operations on {@link File}s, {@link InputStream}s, {@link OutputStream}s,
+  * {@link Reader}s, and {@link Writer}s not defined in the {@code java.io} package.
+  */
 public final class IOUtil {
   
   /** Prevents instance creation */
   private IOUtil() {}
   
-  /**
-   * The current working directory, used as the base for relative paths.  Based on System property {@code user.dir},
-   * if defined, converted to an absolute path.
-   */
+  /** The current working directory, used as the base for relative paths.  Based on System property {@code user.dir},
+    * if defined, converted to an absolute path.
+    */
   public static final File WORKING_DIRECTORY = IOUtil.attemptAbsoluteFile(new File(System.getProperty("user.dir", "")));
   
   /** A factory for Files based on a String filename. */
@@ -82,11 +82,10 @@ public final class IOUtil {
     public File value(String name) { return new File(name); }
   };
   
-  /**
-   * Make a best attempt at evaluating {@link File#getAbsoluteFile()}.  In the event of a
-   * {@link SecurityException}, the result is just {@code f}.  (Clients <em>cannot</em>
-   * assume, then, that the result is absolute.)
-   */
+  /** Make a best attempt at evaluating {@link File#getAbsoluteFile()}.  In the event of a
+    * {@link SecurityException}, the result is just {@code f}.  (Clients <em>cannot</em>
+    * assume, then, that the result is absolute.)
+    */
   public static File attemptAbsoluteFile(File f) {
     try { return f.getAbsoluteFile(); }
     catch (SecurityException e) { return f; }
@@ -292,8 +291,7 @@ public final class IOUtil {
     return attemptListFiles(f, (FileFilter) filter);
   }
   
-  /**
-   * Similar to {@link #attemptListFiles(File)}, but returns a non-null {@code Iterable}
+  /** Similar to {@link #attemptListFiles(File)}, but returns a non-null {@code Iterable}
    * rather than an array.  Where {@code attemptListFiles(f)} returns {@code null},
    * the result here is an empty iterable.
    */
@@ -303,8 +301,7 @@ public final class IOUtil {
     else { return IterUtil.asIterable(result); }
   }
   
-  /**
-   * Similar to {@link #attemptListFiles(File, FileFilter)}, but returns a non-null {@code Iterable}
+  /** Similar to {@link #attemptListFiles(File, FileFilter)}, but returns a non-null {@code Iterable}
    * rather than an array.  Where {@code attemptListFiles(f)} returns {@code null},
    * the result here is an empty iterable.
    */
@@ -314,8 +311,7 @@ public final class IOUtil {
     else { return IterUtil.asIterable(result); }
   }
   
-  /**
-   * Similar to {@link #attemptListFiles(File, FileFilter)}, but returns a non-null {@code Iterable}
+  /** Similar to {@link #attemptListFiles(File, FileFilter)}, but returns a non-null {@code Iterable}
    * rather than an array.  Where {@code attemptListFiles(f)} returns {@code null},
    * the result here is an empty iterable.  The given predicate is converted to a {@code FileFilter}.
    */
@@ -323,12 +319,11 @@ public final class IOUtil {
     return attemptListFilesAsIterable(f, (FileFilter) asFilePredicate(filter));
   }
   
-  /**
-   * Similar to {@link #attemptListFiles(File, FileFilter)}, but returns a non-null {@code Iterable}
-   * rather than an array.  Where {@code attemptListFiles(f)} returns {@code null},
-   * the result here is an empty iterable.  (Defined to resolve method ambiguity when called with
-   * a FilePredicate.)
-   */
+  /**Similar to {@link #attemptListFiles(File, FileFilter)}, but returns a non-null {@code Iterable}
+    * rather than an array.  Where {@code attemptListFiles(f)} returns {@code null},
+    * the result here is an empty iterable.  (Defined to resolve method ambiguity when called with
+    * a FilePredicate.)
+    */
   public static SizedIterable<File> attemptListFilesAsIterable(File f, FilePredicate filter) {
     return attemptListFilesAsIterable(f, (FileFilter) filter);
   }
@@ -869,8 +864,11 @@ public final class IOUtil {
     * are interpreted according to the {@code File} constructor.
     */
   public static SizedIterable<File> parsePath(String path) {
+//    Utilities.show("parsePath(" + path + ") called");
     String[] filenames = path.split(TextUtil.regexEscape(File.pathSeparator));
-    return IterUtil.mapSnapshot(IterUtil.asIterable(filenames), FILE_FACTORY);
+    SizedIterable<File> result = IterUtil.mapSnapshot(IterUtil.asIterable(filenames), FILE_FACTORY);
+//    Utilities.show("In IOUtil, parsePath(" + path + ") = " + result);
+    return result;
   }
       
   /** Produce a path string from a list of files.  Filenames in the result are delimited

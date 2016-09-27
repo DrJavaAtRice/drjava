@@ -326,10 +326,11 @@ public interface GlobalModel extends ILoadDocuments {
   /** Gets the (toolkit-independent) interactions document. */
   public InteractionsDocument getInteractionsDocument();
   
-  /** TODO: remove this swing dependency.
-    * @return InteractionsDJDocument in use by the InteractionsDocument.
-    */
+  /** @return InteractionsDJDocument in use by the InteractionsDocument. (TODO: Remove this swing dependency?) */
   public InteractionsDJDocument getSwingInteractionsDocument();
+  
+    /** Returns the actual classpath in use by the Interpreter JVM. */
+  public Iterable<File> getInteractionsClassPath();
   
   /** Clears and resets the interactions pane in the specified working directory, provided that the operation has some effect.
     * Invoked by "Reset interactions" command (in MainFrame) and as part of other actions such as the run, project loading, 
@@ -338,13 +339,6 @@ public interface GlobalModel extends ILoadDocuments {
   
   /** Interprets the current given text at the prompt in the interactions pane. */
   public void interpretCurrentInteraction();
-  
-  /** Returns the current classpath in use by the Interpreter JVM. This includes the original jvm classpath, the global
-    * drjava extra classpaths, and the project extra classpaths.
-    */
-  public Iterable<File> getInteractionsClassPath();
-  
-  // TODO: Move history methods to a more appropriate home.
   
   /** Interprets file selected in the FileOpenSelector. Assumes all strings have no trailing whitespace. Interprets 
     * the list of interactions as a single transaction so the first error aborts all processing.
@@ -392,10 +386,11 @@ public interface GlobalModel extends ILoadDocuments {
   
   //--------------------------------- Misc ---------------------------------//
   
-  /** Get the class path to be used in all class-related operations.
-    * TODO: Insure that this is used wherever appropriate.
-    */
+  /** Gets the class path to be used in all class-related operations. */
   public Iterable<File> getClassPath();
+    
+  /* Updates the interactions class path (in the slave JVM) to include the files (directories) in getClassPath() */
+  public void updateInteractionsClassPath();
   
   // TODO: comment
   public PageFormat getPageFormat();
@@ -444,14 +439,14 @@ public interface GlobalModel extends ILoadDocuments {
   /** @return the file that points to the current project file. Null if not currently in project view */
   public File getProjectFile();
   
+  /** Sets project file to specifed value; used in "Save Project As ..." command in MainFrame. */
+  public void setProjectFile(File f);
+  
   /** @return the directory that the class files should be stored after compilation. */
   public File[] getProjectFiles();
   
   /** @return the source root for the project. */
   public File getProjectRoot();
-  
-  /** Sets project file to specifed value; used in "Save Project As ..." command in MainFrame. */
-  public void setProjectFile(File f);
   
   /** Sets the source root for the project. */
   public void setProjectRoot(File f);
@@ -491,16 +486,16 @@ public interface GlobalModel extends ILoadDocuments {
   
   /** Return the File that contains the Main-Class. */
   public File getMainClassContainingFile();
-  
+ 
   /** Returns only the project's extra classpaths.
     * @return The classpath entries loaded along with the project
     */
   public Iterable<AbsRelFile> getExtraProjectClassPath();
-  
+   
   /** Sets the set of classpath entries to use as the projects set of classpath entries.  This is normally used by the
     * project preferences.
     */
-  public void setExtraClassPath(Iterable<AbsRelFile> cp);
+  public void setExtraProjectClassPath(Iterable<AbsRelFile> cp);
   
   /** Sets the create jar file of the project. */
   public void setCreateJarFile(File f);

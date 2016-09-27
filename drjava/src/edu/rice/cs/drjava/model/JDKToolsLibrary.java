@@ -40,6 +40,15 @@ import java.util.List;
 import java.util.ArrayList;
 import java.io.File;
 
+import edu.rice.cs.drjava.DrScala;
+import edu.rice.cs.drjava.model.compiler.CompilerInterface;
+import edu.rice.cs.drjava.model.compiler.NoCompilerAvailable;
+import edu.rice.cs.drjava.model.compiler.ScalaCompiler;
+import edu.rice.cs.drjava.model.javadoc.ScaladocModel;
+import edu.rice.cs.drjava.model.javadoc.NoScaladocAvailable;
+import edu.rice.cs.drjava.model.javadoc.DefaultScaladocModel;
+import edu.rice.cs.drjava.model.JDKDescriptor;
+
 import edu.rice.cs.plt.reflect.ReflectUtil;
 import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.plt.reflect.JavaVersion.FullVersion;
@@ -47,19 +56,6 @@ import edu.rice.cs.plt.reflect.ReflectException;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.collect.CollectUtil;
 import edu.rice.cs.plt.object.ObjectUtil;
-
-import edu.rice.cs.drjava.model.compiler.CompilerInterface;
-import edu.rice.cs.drjava.model.compiler.NoCompilerAvailable;
-import edu.rice.cs.drjava.model.compiler.ScalaCompiler;
-
-/* Debugger deactivated in DrScala */
-//import edu.rice.cs.drjava.model.debug.Debugger;
-//import edu.rice.cs.drjava.model.debug.NoDebuggerAvailable;
-
-import edu.rice.cs.drjava.model.javadoc.ScaladocModel;
-import edu.rice.cs.drjava.model.javadoc.NoScaladocAvailable;
-import edu.rice.cs.drjava.model.javadoc.DefaultScaladocModel;
-import edu.rice.cs.drjava.model.JDKDescriptor;
 
 import edu.rice.cs.util.Log;
 
@@ -73,7 +69,7 @@ import edu.rice.cs.util.swing.Utilities;
 public class JDKToolsLibrary {
   
   /* Create debugging log. */
-  public static final Log _log = new Log("GlobalModel.txt", false);
+  public static final Log _log = DrScala._log;
   
   private final FullVersion _version;
   private final CompilerInterface _compiler;

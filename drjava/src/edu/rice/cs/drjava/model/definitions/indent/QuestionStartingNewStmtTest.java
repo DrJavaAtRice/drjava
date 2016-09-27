@@ -51,7 +51,7 @@ public final class QuestionStartingNewStmtTest extends IndentRulesTestCase {
     IndentRuleQuestion rule = new QuestionStartingNewStmt(null, null);
 
     // Starting new stmt, prev char docstart
-    _setDocText("import java.util.Vector\n");
+    _setDocText("import java.util.ArrayList\n");
     _doc.setCurrentLocation(4);
     assertTrue("starting new stmt, prev char docstart",
         rule.applyRule(_doc, Indenter.IndentReason.OTHER));

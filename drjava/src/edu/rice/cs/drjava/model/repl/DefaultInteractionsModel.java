@@ -63,7 +63,7 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
 //  public static final String INPUT_REQUIRED_MESSAGE =
 //    "Please enter input in the Console tab." + _newLine;
   
-  public static final Log _log = new Log("MainJVM.txt", false);
+  public static final Log _log = DrScala._log;
   
   /** Model that contains the interpreter to use. */
   protected final DefaultGlobalModel _model;
@@ -152,16 +152,17 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
     * This method may run outside the event thread. 
     */
   public void interpreterReady(File wd) {
+    _log.log("Resetting interactions class path in DefaultInteractions.interpreterReady method");
     _model.resetInteractionsClassPath();  // Done here rather than in the superclass because _model is available here.
-    super.interpreterReady(wd);
-    _log.log("****Event: interpreterReady(" + wd +") called");
+    super.interpreterReady(wd);  // invokes interpreterReady(wd) in abstract class InteractionsModel.
+    _log.log("In InteractionsModel, Event: interpreterReady(" + wd +") called");
   }
   
   /** In the event thread, notifies listeners that an interaction has started. */
   public void _notifyInteractionStarted() { 
     Utilities.invokeLater(new Runnable() { public void run() { 
       _notifier.interactionStarted(); 
-      _log.log("****Event: an interaction has started");
+      _log.log("In InteractionsModel, Event: an interaction has started");
     } });
   }
   
@@ -169,7 +170,7 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   protected void _notifyInteractionEnded() { 
     Utilities.invokeLater(new Runnable() { public void run() { 
       _notifier.interactionEnded();
-      _log.log("****Event: the current interaction has ended");
+      _log.log("In InteractionsModel, Event: the current interaction has ended");
     } });
   }
   
@@ -177,7 +178,7 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   protected void _notifySyntaxErrorOccurred(final int offset, final int length) {
     Utilities.invokeLater(new Runnable() { public void run() { 
       _notifier.interactionErrorOccurred(offset,length);
-      _log.log("****Event: a syntax error occurred in the interactions model");
+      _log.log("In InteractionsModel, Event: a syntax error occurred in the interactions model");
     } });
   }
   
@@ -187,7 +188,7 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   protected void _notifyInterpreterReplaced(final boolean inProgress) {
 //    Utilities.invokeLater(new Runnable() { public void run() { 
       _notifier.interpreterReplaced(inProgress);
-      _log.log("****Event: the interpreter was changed; inProgess = " + inProgress);
+      _log.log("In InteractionsModel, Event: the interpreter was changed; inProgess = " + inProgress);
 //    } });
   }
   
@@ -195,7 +196,7 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   protected void _notifyInterpreterResetting() { 
 //    Utilities.invokeLater(new Runnable() { public void run() { 
     _notifier.interpreterResetting();
-    _log.log("****Event: the interpreter is resetting");
+    _log.log("In InteractionsModel, Event: the interpreter is resetting");
 //    } });
   }
   
@@ -206,7 +207,7 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
     Utilities.invokeLater(new Runnable() { 
       public void run() { 
         _notifier.interpreterReady(wd); 
-        _log.log("****Event: the interpreter is ready with wd " + wd);
+        _log.log("In InteractionsModel, Event: the interpreter is ready with wd " + wd);
         _document.clearColoring();  // _document is inherited from the abstract superclass InteractionsModel
       } 
     });
@@ -218,7 +219,7 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   protected void _notifyInterpreterExited(final int status) {
     Utilities.invokeLater(new Runnable() { public void run() { 
       _notifier.interpreterExited(status); 
-      _log.log("****Event: the interpreter exited unexpectedly with status = " + status);
+      _log.log("In InteractionsModel, Event: the interpreter exited unexpectedly with status = " + status);
     } });
   }
   
@@ -228,7 +229,7 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   protected void _notifyInterpreterResetFailed(final Throwable t) {
     Utilities.invokeLater(new Runnable() { public void run() { 
       _notifier.interpreterResetFailed(t);
-      _log.log("****Event: interpreter reset failed");
+      _log.log("In InteractionsModel, Event: interpreter reset failed");
     } });
   }
   

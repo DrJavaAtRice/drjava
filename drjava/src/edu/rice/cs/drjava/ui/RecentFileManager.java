@@ -40,7 +40,7 @@ import javax.swing.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.Vector;
+import java.util.ArrayList;
 import java.util.HashSet;
 
 import edu.rice.cs.drjava.DrScala;
@@ -62,7 +62,7 @@ public class RecentFileManager implements OptionConstants {
   protected int _pos;
   
   /** All of the recently used files in the list, in order. */
-  protected Vector<File> _recentFiles;
+  protected ArrayList<File> _recentFiles;
   
   /** The maximum number of files to display in the list. */
   protected int MAX = DrScala.getConfig().getSetting(RECENT_FILES_MAX_SIZE).intValue();
@@ -74,7 +74,7 @@ public class RecentFileManager implements OptionConstants {
   protected HashSet<JMenu> _mirroredMenus = new HashSet<JMenu>();
   
   /** The OptionConstant that should be used to retrieve the list of recent files. */
-  protected VectorOption<File> _settingConfigConstant;
+  protected ArrayListOption<File> _settingConfigConstant;
   
   /** An action that will be invoked when the file is clicked. */
   protected RecentFileAction _recentFileAction;
@@ -83,15 +83,15 @@ public class RecentFileManager implements OptionConstants {
     * @param pos  Position in the file menu
     * @param fileMenu  File menu to add the entry to
     */
-  public RecentFileManager(int pos, JMenu fileMenu, RecentFileAction action, VectorOption<File> settingConfigConstant) {
+  public RecentFileManager(int pos, JMenu fileMenu, RecentFileAction action, ArrayListOption<File> settingConfigConstant) {
     _initPos = _pos = pos;
     _fileMenu = fileMenu;
     _recentFileAction = action;
-    _recentFiles = new Vector<File>();
+    _recentFiles = new ArrayList<File>();
     _settingConfigConstant = settingConfigConstant;
     
     // Add each of the files stored in the config
-    Vector<File> files = DrScala.getConfig().getSetting(_settingConfigConstant);
+    ArrayList<File> files = DrScala.getConfig().getSetting(_settingConfigConstant);
     
     for (int i = files.size() - 1; i >= 0; i--) {
       File f = files.get(i);
@@ -136,7 +136,7 @@ public class RecentFileManager implements OptionConstants {
   }
   
   /** Returns the list of recently used files, in order. */
-  public Vector<File> getFileVector() { return _recentFiles; }
+  public ArrayList<File> getFileArrayList() { return _recentFiles; }
   
   /** Changes the maximum number of files to display in the list.
     * @param newMax The new maximum number of files to display

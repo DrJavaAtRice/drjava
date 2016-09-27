@@ -44,7 +44,7 @@ import java.awt.Font;
 import javax.swing.*;
 import javax.swing.text.*;
 
-import java.util.Vector;
+import java.util.ArrayList;
 
 import edu.rice.cs.util.text.ConsoleDocument;
 
@@ -144,36 +144,36 @@ public abstract class AbstractConsoleController /* implements Serializable */ {
     _pane.addActionForKeyStroke(DrScala.getConfig().getSetting(OptionConstants.KEY_END_LINE), gotoEndAction);
     _pane.addActionForKeyStroke(DrScala.getConfig().getSetting(OptionConstants.KEY_END_LINE_SELECT), selectToEndAction);
 
-    DrScala.getConfig().addOptionListener(OptionConstants.KEY_BEGIN_LINE, new OptionListener<Vector<KeyStroke>>() {
-      public void optionChanged(OptionEvent<Vector<KeyStroke>> oe) {
+    DrScala.getConfig().addOptionListener(OptionConstants.KEY_BEGIN_LINE, new OptionListener<ArrayList<KeyStroke>>() {
+      public void optionChanged(OptionEvent<ArrayList<KeyStroke>> oe) {
         _pane.addActionForKeyStroke(oe.value, gotoPromptPosAction);
       }
     });
-    DrScala.getConfig().addOptionListener(OptionConstants.KEY_BEGIN_LINE_SELECT, new OptionListener<Vector<KeyStroke>>() {
-      public void optionChanged(OptionEvent<Vector<KeyStroke>> oe) {
+    DrScala.getConfig().addOptionListener(OptionConstants.KEY_BEGIN_LINE_SELECT, new OptionListener<ArrayList<KeyStroke>>() {
+      public void optionChanged(OptionEvent<ArrayList<KeyStroke>> oe) {
         _pane.addActionForKeyStroke(oe.value, selectToPromptPosAction);
      }
     });
-    DrScala.getConfig().addOptionListener(OptionConstants.KEY_END_LINE, new OptionListener<Vector<KeyStroke>>() {
-      public void optionChanged(OptionEvent<Vector<KeyStroke>> oe) {
+    DrScala.getConfig().addOptionListener(OptionConstants.KEY_END_LINE, new OptionListener<ArrayList<KeyStroke>>() {
+      public void optionChanged(OptionEvent<ArrayList<KeyStroke>> oe) {
         _pane.addActionForKeyStroke(oe.value, gotoEndAction);
      }
     });
-    DrScala.getConfig().addOptionListener(OptionConstants.KEY_END_LINE_SELECT, new OptionListener<Vector<KeyStroke>>() {
-      public void optionChanged(OptionEvent<Vector<KeyStroke>> oe) {
+    DrScala.getConfig().addOptionListener(OptionConstants.KEY_END_LINE_SELECT, new OptionListener<ArrayList<KeyStroke>>() {
+      public void optionChanged(OptionEvent<ArrayList<KeyStroke>> oe) {
         _pane.addActionForKeyStroke(oe.value, selectToEndAction);
      }
     });
     
     _pane.addActionForKeyStroke(DrScala.getConfig().getSetting(OptionConstants.KEY_CUT), cutAction);
     _pane.addActionForKeyStroke(DrScala.getConfig().getSetting(OptionConstants.KEY_COPY), copyAction);
-    DrScala.getConfig().addOptionListener(OptionConstants.KEY_CUT, new OptionListener<Vector<KeyStroke>>() {
-      public void optionChanged(OptionEvent<Vector<KeyStroke>> oe) {
+    DrScala.getConfig().addOptionListener(OptionConstants.KEY_CUT, new OptionListener<ArrayList<KeyStroke>>() {
+      public void optionChanged(OptionEvent<ArrayList<KeyStroke>> oe) {
         _pane.addActionForKeyStroke(DrScala.getConfig().getSetting(OptionConstants.KEY_CUT), cutAction);
      }
     });
-    DrScala.getConfig().addOptionListener(OptionConstants.KEY_COPY, new OptionListener<Vector<KeyStroke>>() {
-      public void optionChanged(OptionEvent<Vector<KeyStroke>> oe) {
+    DrScala.getConfig().addOptionListener(OptionConstants.KEY_COPY, new OptionListener<ArrayList<KeyStroke>>() {
+      public void optionChanged(OptionEvent<ArrayList<KeyStroke>> oe) {
         _pane.addActionForKeyStroke(DrScala.getConfig().getSetting(OptionConstants.KEY_COPY), copyAction);
      }
     });
@@ -281,8 +281,8 @@ public abstract class AbstractConsoleController /* implements Serializable */ {
     // We do this here since switchToPrevPaneAction is set after the constructor is called.
     _pane.addActionForKeyStroke(DrScala.getConfig().getSetting(OptionConstants.KEY_PREVIOUS_PANE),
                                 switchToPrevPaneAction);
-    DrScala.getConfig().addOptionListener(OptionConstants.KEY_PREVIOUS_PANE, new OptionListener<Vector<KeyStroke>>() {
-      public void optionChanged(OptionEvent<Vector<KeyStroke>> oe) {
+    DrScala.getConfig().addOptionListener(OptionConstants.KEY_PREVIOUS_PANE, new OptionListener<ArrayList<KeyStroke>>() {
+      public void optionChanged(OptionEvent<ArrayList<KeyStroke>> oe) {
         _pane.addActionForKeyStroke(DrScala.getConfig().getSetting(OptionConstants.KEY_PREVIOUS_PANE), switchToPrevPaneAction);
       }
     });
@@ -295,8 +295,8 @@ public abstract class AbstractConsoleController /* implements Serializable */ {
     // constructor is called.
     _pane.addActionForKeyStroke(DrScala.getConfig().getSetting(OptionConstants.KEY_NEXT_PANE),
                                 switchToNextPaneAction);
-    DrScala.getConfig().addOptionListener(OptionConstants.KEY_NEXT_PANE, new OptionListener<Vector<KeyStroke>>() {
-      public void optionChanged(OptionEvent<Vector<KeyStroke>> oe) {
+    DrScala.getConfig().addOptionListener(OptionConstants.KEY_NEXT_PANE, new OptionListener<ArrayList<KeyStroke>>() {
+      public void optionChanged(OptionEvent<ArrayList<KeyStroke>> oe) {
         _pane.addActionForKeyStroke(DrScala.getConfig().getSetting(OptionConstants.KEY_NEXT_PANE), switchToNextPaneAction);
       }
     });

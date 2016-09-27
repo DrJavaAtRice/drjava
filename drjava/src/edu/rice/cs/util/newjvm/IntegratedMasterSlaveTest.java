@@ -75,7 +75,7 @@ public class IntegratedMasterSlaveTest extends DrScalaTestCase {
   
   private static class TestMasterJVM extends AbstractMasterJVM implements TestMasterRemote {
     
-    private static final int WAIT_TIMEOUT = 100000; 
+    private static final int WAIT_TIMEOUT = 10000; 
     
     /** Field and lock used to signal slave quit events. */
     private final CompletionMonitor _justQuit = new CompletionMonitor(); 

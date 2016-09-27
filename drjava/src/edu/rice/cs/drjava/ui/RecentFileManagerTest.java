@@ -45,7 +45,7 @@ import junit.framework.TestSuite;
 import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.Vector;
+import java.util.ArrayList;
 
 /** Test functions of RecentFileManager.
   * @version $Id: RecentFileManagerTest.java 5594 2012-06-21 11:23:40Z rcartwright $
@@ -102,7 +102,7 @@ public final class RecentFileManagerTest extends DrScalaTestCase {
     _rfm.updateMax(1);
     _rfm.updateOpenFiles(tempFile);
     _rfm.updateOpenFiles(tempFile2);
-    Vector<File> vector = _rfm.getFileVector();
+    ArrayList<File> vector = _rfm.getFileArrayList();
     assertEquals("number of recent files", 1, vector.size());
     assertEquals("text of recent file", FOO_TEXT, IOUtil.toString(vector.get(0)));
   }
@@ -116,13 +116,13 @@ public final class RecentFileManagerTest extends DrScalaTestCase {
     
     _rfm.updateOpenFiles(tempFile);
     _rfm.updateOpenFiles(tempFile2);
-    Vector<File> vector = _rfm.getFileVector();
+    ArrayList<File> vector = _rfm.getFileArrayList();
     assertEquals("number of recent files", 2, vector.size());
     assertEquals("text of most-recent file", FOO_TEXT, IOUtil.toString(vector.get(0)));
     assertEquals("text of second-most recent file", BAR_TEXT, IOUtil.toString(vector.get(1)));
     _rfm.updateMax(1);
     _rfm.numberItems();
-    vector = _rfm.getFileVector();
+    vector = _rfm.getFileArrayList();
     assertEquals("number of recent files", 1, vector.size());
     assertEquals("text of recent file", FOO_TEXT, IOUtil.toString(vector.get(0)));
   }
@@ -135,7 +135,7 @@ public final class RecentFileManagerTest extends DrScalaTestCase {
     _rfm.updateMax(2);
     _rfm.updateOpenFiles(tempFile);
     _rfm.updateOpenFiles(tempFile2);
-    Vector<File> vector = _rfm.getFileVector();
+    ArrayList<File> vector = _rfm.getFileArrayList();
     assertEquals("tempFile2 should be at top", vector.get(0), tempFile2);
     
     // Remove top
@@ -161,13 +161,13 @@ public final class RecentFileManagerTest extends DrScalaTestCase {
     _rfm.updateMax(2);
     _rfm.updateOpenFiles(tempFile2);
     _rfm.updateOpenFiles(tempFile);
-    Vector<File> vector = _rfm.getFileVector();
+    ArrayList<File> vector = _rfm.getFileArrayList();
     
     assertEquals("tempFile should be at top", vector.get(0), tempFile);
     
     // Re-open tempFile2
     _rfm.updateOpenFiles(tempFile2);
-    vector = _rfm.getFileVector();
+    vector = _rfm.getFileArrayList();
     assertEquals("tempFile2 should be at top", vector.get(0), tempFile2);
     
     // Re-open tempFile with a different path, e.g. /tmp/MyFile -> /tmp/./MyFile
@@ -177,7 +177,7 @@ public final class RecentFileManagerTest extends DrScalaTestCase {
     File sameFile = new File(parent, tempFile.getName());
     
     _rfm.updateOpenFiles(sameFile);
-    vector = _rfm.getFileVector();
+    vector = _rfm.getFileArrayList();
     assertEquals("sameFile should be at top", vector.get(0), sameFile);
     assertEquals("should only have two files", 2, vector.size());
     assertTrue("should not contain tempFile", !(vector.contains(tempFile)));

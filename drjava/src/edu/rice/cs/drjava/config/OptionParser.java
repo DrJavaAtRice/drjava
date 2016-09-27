@@ -58,9 +58,7 @@ public abstract class OptionParser<T> implements ParseStrategy<T> {
     * @param name the name of this option (i.e. "indent.level");
     * @param def default value
     */
-  public OptionParser(String name, T def) {
-      this.name = name; defaultValue = def;
-  }
+  public OptionParser(String name, T def) { this.name = name; defaultValue = def; }
   
   /** Accessor for name option
     * @return name of this option (i.e. "indent.level")

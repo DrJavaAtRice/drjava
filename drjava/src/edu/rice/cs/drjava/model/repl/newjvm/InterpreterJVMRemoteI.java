@@ -53,17 +53,17 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
   
   public boolean runTestSuite() throws RemoteException;
   
-  /** Check that all access of class members is permitted by accessibility controls. */
-  public void setEnforceAllAccess(boolean enforce) throws RemoteException;
+//  /** Check that all access of class members is permitted by accessibility controls. */
+//  public void setEnforceAllAccess(boolean enforce) throws RemoteException;
   
-  /** Check that access of private class members is permitted (irrelevant if setEnforceAllAccess() is set to true). */
-  public void setEnforcePrivateAccess(boolean enforce) throws RemoteException;
+//  /** Check that access of private class members is permitted (irrelevant if setEnforceAllAccess() is set to true). */
+//  public void setEnforcePrivateAccess(boolean enforce) throws RemoteException;
 
-  /** Require a semicolon at the end of statements. */
-  public void setRequireSemicolon(boolean require) throws RemoteException;
-  
-  /** Require variable declarations to include an explicit type. */
-  public void setRequireVariableType(boolean require) throws RemoteException;
+//  /** Require a semicolon at the end of statements. */
+//  public void setRequireSemicolon(boolean require) throws RemoteException;
+//  
+//  /** Require variable declarations to include an explicit type. */
+//  public void setRequireVariableType(boolean require) throws RemoteException;
   
   /* In DrScala, there is only one interpreter. */
 
@@ -86,32 +86,16 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
     */
   public Pair<String,String> getVariableToString(String var) throws RemoteException;
   
-  /** Returns the current class path. */
-  public Iterable<File> getClassPath() throws RemoteException;  
+  /** Returns the current class path in the interactions pane. */
+  public Iterable<File> getInteractionsClassPath() throws RemoteException;  
   
-  /** Adds the given path to the class path shared by ALL Java interpreters.  Only unique paths are added.
+  /** Adds the given file to the class path used in the Scala interpreter.
     * @param f Entry to add to the accumulated class path
     */
-  public void addProjectClassPath(File f) throws RemoteException;
+  public void addInteractionsClassPath(File f) throws RemoteException;
   
-  /** Adds the given path to the class path shared by ALL Java interpreters. Only unique paths are added.
-    * @param f Entry to add to the accumulated class path
+  /** Adds the given path to the class path used in the Scala interpreter.
+    * @param cp Entry to add to the accumulated class path
     */
-  public void addBuildDirectoryClassPath(File f) throws RemoteException;
-  
-  /** Adds the given path to the class path shared by ALL Java interpreters. Only unique paths are added.
-    * @param f Entry to add to the accumulated class path
-    */
-  public void addProjectFilesClassPath(File f) throws RemoteException;
-  
-  /** Adds the given path to the class path shared by ALL Java interpreters. Only unique paths are added.
-    * @param f Entry to add to the accumulated class path
-    */
-  public void addExternalFilesClassPath(File f) throws RemoteException;
-  
-  /** Adds the given path to the class path shared by ALL Java interpreters.  Only unique paths are added.
-    * @param f Entry to add to the accumulated class path
-    */
-  public void addExtraClassPath(File f) throws RemoteException;
-  
+  public void addInteractionsClassPath(Iterable<File> cp) throws RemoteException;
 }

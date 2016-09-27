@@ -48,12 +48,11 @@ import edu.rice.cs.plt.collect.ConsList;
 import edu.rice.cs.plt.text.TextUtil;
 import edu.rice.cs.plt.object.ObjectUtil;
 
-/**
- * <p>A collection of static methods operating on iterables and iterators.</p>
- * 
- * <p>Most classes instantiated by these methods are serializable.  However, since the classes generally 
- * wrap other objects, those objects must be serializable in order for serialization to succeed.</p>
- */
+/** <p>A collection of static methods operating on iterables and iterators.</p>
+  * 
+  * <p>Most classes instantiated by these methods are serializable.  However, since the classes generally 
+  * wrap other objects, those objects must be serializable in order for serialization to succeed.</p>
+  */
 
 public final class IterUtil {
   
@@ -67,12 +66,11 @@ public final class IterUtil {
     else { return ! iter.iterator().hasNext(); }
   }
   
-  /**
-   * Compute the size of the given iterable.  Where possible (when {@code iter} is a {@code SizedIterable} or a 
-   * {@code Collection}), this is a potentially constant-time operation; otherwise, it is linear in the size of 
-   * {@code iter} (if {@code iter} is infinite in this case, this method will loop {@code Integer.MAX_VALUE} times
-   * before returning).
-   */
+  /** Compute the size of the given iterable.  Where possible (when {@code iter} is a {@code SizedIterable} or a 
+    * {@code Collection}), this is a potentially constant-time operation; otherwise, it is linear in the size of 
+    * {@code iter} (if {@code iter} is infinite in this case, this method will loop {@code Integer.MAX_VALUE} times
+    * before returning).
+    */
   public static int sizeOf(Iterable<?> iter) {
     if (iter instanceof SizedIterable<?>) { return ((SizedIterable<?>) iter).size(); }
     else if (iter instanceof Collection<?>) { return ((Collection<?>) iter).size(); }
@@ -85,12 +83,11 @@ public final class IterUtil {
     }
   }
   
-  /**
-   * Compute the size of the given iterable, or {@code bound} -- whichever is less.  This allows a size to be 
-   * computed where the iterable may be infinite.  Where possible (when {@code iter} is a {@code SizedIterable} 
-   * or a {@code Collection}), this is a potentially constant-time operation; otherwise, it is linear in the size 
-   * of {@code iter} or {@code bound} (whichever is smaller).
-   */
+  /** Compute the size of the given iterable, or {@code bound} -- whichever is less.  This allows a size to be 
+    * computed where the iterable may be infinite.  Where possible (when {@code iter} is a {@code SizedIterable} 
+    * or a {@code Collection}), this is a potentially constant-time operation; otherwise, it is linear in the size 
+    * of {@code iter} or {@code bound} (whichever is smaller).
+    */
   public static int sizeOf(Iterable<?> iter, int bound) {
     if (iter instanceof SizedIterable<?>) { return ((SizedIterable<?>) iter).size(bound); }
     else if (iter instanceof Collection<?>) {
@@ -99,27 +96,23 @@ public final class IterUtil {
     }
     else {
       int result = 0;
-      // javac 1.5.0_16 crashes with this annotation
-      //for (@SuppressWarnings("unused") Object o : iter) { result++; if (result == bound) break; }
       for (Object o : iter) { result++; if (result == bound) break; }
       return result;
     }
   }
   
-  /**
-   * Return {@code true} iff the given iterable is known to have an infinite size.
-   * @see SizedIterable#isInfinite
-   */
+  /** Return {@code true} iff the given iterable is known to have an infinite size.
+    * @see SizedIterable#isInfinite
+    */
   public static boolean isInfinite(Iterable<?> iter) {
     if (iter instanceof SizedIterable<?>) { return ((SizedIterable<?>) iter).isInfinite(); }
     else { return false; }
   }
   
-  /**
-   * Return {@code true} iff the given iterable is known to have a fixed size.  Infinite iterables are considered
-   * fixed if they will never become finite.
-   * @see SizedIterable#hasFixedSize
-   */
+  /** Return {@code true} iff the given iterable is known to have a fixed size.  Infinite iterables are considered
+    * fixed if they will never become finite.
+    * @see SizedIterable#hasFixedSize
+    */
   public static boolean hasFixedSize(Iterable<?> iter) {
     if (iter instanceof SizedIterable<?>) { return ((SizedIterable<?>) iter).hasFixedSize(); }
     else if (iter instanceof Collection<?>) { return isFixedSizeCollection((Collection<?>) iter); }
@@ -146,22 +139,20 @@ public final class IterUtil {
     return (iter == Collections.EMPTY_SET) || (iter == Collections.EMPTY_LIST);
   }
   
-  /**
-   * Test whether the given object appears in an iteration of {@code iter}.  Uses the
-   * {@link Collection#contains} method where possible; otherwise, may take linear time.
-   */
+  /** Test whether the given object appears in an iteration of {@code iter}.  Uses the
+    * {@link Collection#contains} method where possible; otherwise, may take linear time.
+    */
   public static boolean contains(Iterable<?> iter, Object o) {
     if (iter instanceof Collection<?>) { return ((Collection<?>) iter).contains(o); }
     else { return iteratedContains(iter, o); }
   }
   
-  /**
-   * Test whether the given objects all appear in when iterating over {@code iter}.  Uses the
-   * {@link Collection#containsAll} and {@link Collection#contains} methods where possible;
-   * otherwise, may take quadratic time.
-   * @see CollectUtil#containsAll
-   * @see #and
-   */
+  /** Test whether the given objects all appear in when iterating over {@code iter}.  Uses the
+    * {@link Collection#containsAll} and {@link Collection#contains} methods where possible;
+    * otherwise, may take quadratic time.
+    * @see CollectUtil#containsAll
+    * @see #and
+    */
   public static boolean containsAll(Iterable<?> iter, Iterable<?> subset) {
     if (iter instanceof Collection<?>) { return CollectUtil.containsAll((Collection<?>) iter, subset); }
     else {
@@ -172,11 +163,10 @@ public final class IterUtil {
     }
   }
   
-  /**
-   * Test whether one of the given objects appears in an iteration of {@code iter}.  Uses the
-   * {@link Collection#contains} method where possible; otherwise, may take quadratic time.
-   * @see #or
-   */
+  /** Test whether one of the given objects appears in an iteration of {@code iter}.  Uses the
+    * {@link Collection#contains} method where possible; otherwise, may take quadratic time.
+    * @see #or
+    */
   public static boolean containsAny(Iterable<?> iter, Iterable<?> candidates) {
     if (iter instanceof Collection<?>) { return CollectUtil.containsAny((Collection<?>) iter, candidates); }
     else {
@@ -202,31 +192,21 @@ public final class IterUtil {
     }
   }
   
-  /** 
-   * Generate a string representation of the given iterable, matching the {@link Collection}
-   * conventions (results like {@code "[foo, bar, baz]"}).  Invokes 
-   * {@link TextUtil#toString(Object)} on each element.  If the iterable is known to be
-   * infinite ({@link #isInfinite}), the string contains a few elements followed by {@code "..."}.
-   */
-  public static String toString(Iterable<?> iter) {
-    return toString(iter, "[", ", ", "]");
-  }
+  /** Generate a string representation of the given iterable, matching the {@link Collection} conventions (results like
+    * {@code "[foo, bar, baz]"}).  Invokes {@link TextUtil#toString(Object)} on each element.  If the iterable is known
+    * to be infinite ({@link #isInfinite}), the string contains a few elements followed by {@code "..."}.
+    */
+  public static String toString(Iterable<?> iter) { return toString(iter, "[", ", ", "]"); }
   
-  /** 
-   * Generate a string representation of the given iterable where each element is listed on a
-   * separate line.  Invokes {@link TextUtil#toString(Object)} on each element.  If the iterable 
-   * is known to be infinite ({@link #isInfinite}), the string contains a few elements followed by 
-   * {@code "..."}.
-   */
-  public static String multilineToString(Iterable<?> iter) {
-    return toString(iter, "", TextUtil.NEWLINE, "");
-  }
+  /** Generate a string representation of the given iterable where each element is listed on a separate line.  Invokes 
+    * {@link TextUtil#toString(Object)} on each element.  If the iterable is known to be infinite ({@link #isInfinite}),
+    * the string contains a few elements followed by {@code "..."}.
+    */
+  public static String multilineToString(Iterable<?> iter) { return toString(iter, "", TextUtil.NEWLINE, ""); }
   
-  /** 
-   * Generate a string representation of the given iterable beginning with {@code prefix}, ending with
-   * {@code suffix}, and delimited by {@code delimiter}.  Invokes {@link TextUtil#toString(Object)} 
-   * on each element.  If the iterable is known to be infinite ({@link #isInfinite}), the string contains 
-   * a few elements followed by {@code "..."}.
+  /** Generate a string representation of the given iterable beginning with {@code prefix}, ending with {@code suffix},
+    * and delimited by {@code delimiter}.  Invokes {@link TextUtil#toString(Object)} on each element.  If the iterable 
+    * is known to be infinite ({@link #isInfinite}), the string contains a few elements followed by {@code "..."}.
    */
   public static String toString(Iterable<?> iter, String prefix, String delimiter, String suffix) {
     if (isInfinite(iter)) { iter = compose(new TruncatedIterable<Object>(iter, 8), "..."); }
@@ -242,10 +222,9 @@ public final class IterUtil {
     return result.toString();
   }
   
-  /**
-   * Return {@code true} iff the lists are identical (according to {@code ==}), or they
-   * have the same size (according to {@link #sizeOf}) and each corresponding element is equal 
-   * (according to {@link LambdaUtil#EQUAL}).  Assumes that at least one of the iterables is finite.
+  /** Return {@code true} iff the lists are identical (according to {@code ==}), or they have the same size (according 
+    * to {@link #sizeOf}) and each corresponding element is equal (according to {@link LambdaUtil#EQUAL}).  Assumes that
+    * at least one of the iterables is finite.
    */
   public static boolean isEqual(Iterable<?> iter1, Iterable<?> iter2) {
     if (iter1 == iter2) { return true; }
@@ -350,7 +329,6 @@ public final class IterUtil {
       public T nextElement() { return iter.next(); }
     };
   }
-  
   
   /** Create an {@link EmptyIterable}; equivalent to {@link #make()}. */
   @SuppressWarnings("unchecked") public static <T> EmptyIterable<T> empty() {

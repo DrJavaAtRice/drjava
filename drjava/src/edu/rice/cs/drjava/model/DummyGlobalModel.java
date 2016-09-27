@@ -44,6 +44,7 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
 
+import edu.rice.cs.plt.iter.EmptyIterable;
 import edu.rice.cs.util.AbsRelFile;
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.OperationCanceledException;
@@ -319,6 +320,10 @@ public class DummyGlobalModel implements GlobalModel {
     throw new UnsupportedOperationException("Tried to call resetInteractions on a Dummy");
   }
   
+  public Iterable<File> getInteractionsClassPath() {
+    throw new UnsupportedOperationException("Tried to call getInteractionsClasspath on a Dummy");
+  }
+  
   public void resetInteractions(File wd, boolean forceReset) { 
     throw new UnsupportedOperationException("Tried to call resetInteractions on a Dummy");
   }
@@ -326,10 +331,7 @@ public class DummyGlobalModel implements GlobalModel {
   public void interpretCurrentInteraction() {
     throw new UnsupportedOperationException("Tried to call interpretCurrentInteraction on a Dummy");
   }
-  
-  public Iterable<File> getInteractionsClassPath() {
-    throw new UnsupportedOperationException("Tried to call getInteractionsClasspath on a Dummy");
-  }
+
   
   public void loadHistory(FileOpenSelector selector) throws IOException {
     throw new UnsupportedOperationException("Tried to call loadHistory on a Dummy");
@@ -364,17 +366,11 @@ public class DummyGlobalModel implements GlobalModel {
     throw new UnsupportedOperationException("Tried to call getHistory on a Dummy");
   }
   
-  /* Debugger deactivated in DrScala */
-//  public void printDebugMessage(String s) {
-//    throw new UnsupportedOperationException("Tried to call printDebugMessage on a Dummy");
-//  }
-//  
-//  public int getDebugPort() throws IOException {
-//    throw new UnsupportedOperationException("Tried to call getDebugPort on a Dummy");
-//  }
+  /** @return a degenerate class path so that tests do not break. */
+  public Iterable<File> getClassPath() { return EmptyIterable.make(); }
   
-  public Iterable<File> getClassPath() {
-    throw new UnsupportedOperationException("Tried to call getClassPath on a Dummy");
+  public void updateInteractionsClassPath() {
+    throw new UnsupportedOperationException("Tried to call updateInteractionsClassPath on a Dummy");
   }
   
   public PageFormat getPageFormat() {
@@ -481,7 +477,7 @@ public class DummyGlobalModel implements GlobalModel {
     throw new UnsupportedOperationException("Tried to call getExtraClasspath on a Dummy");
   }
   
-  public void setExtraClassPath(Iterable<AbsRelFile> cp) {
+  public void setExtraProjectClassPath(Iterable<AbsRelFile> cp) {
     throw new UnsupportedOperationException("Tried to call setExtraClasspath on a Dummy");
   }
   

@@ -54,17 +54,17 @@ public class KeyBindingManager {
   private KeyBindingManager() {   }
   
   // Key-binding configuration tables
-  private HashMap<KeyStroke, KeyStrokeData> _keyToDataMap = new HashMap<KeyStroke, KeyStrokeData>();
-  private HashMap<Action, KeyStrokeData> _actionToDataMap = new HashMap<Action, KeyStrokeData>();
+  private final HashMap<KeyStroke, KeyStrokeData> _keyToDataMap = new HashMap<KeyStroke, KeyStrokeData>();
+  private final HashMap<Action, KeyStrokeData> _actionToDataMap = new HashMap<Action, KeyStrokeData>();
 
-  private MainFrame _mainFrame = null;
+  private volatile MainFrame _mainFrame = null;
 
   /** Should only check conflicts when the keyboard configuration options are first entered into the maps. Afterwards, 
     * the GUI configuration will warn the user about actions whose key-bindings will be overwritten in the GetKeyDialog,
     * and the preferences panel will reflect the changes. When the user hit apply, no conflicts should exist in the 
     * preferences panel, and there should be no need to check for conflicts in the configuration.
     */
-  private boolean _shouldCheckConflict = true;
+  private volatile boolean _shouldCheckConflict = true;
 
   public void setMainFrame (MainFrame mainFrame) { _mainFrame = mainFrame; }
 
@@ -72,9 +72,9 @@ public class KeyBindingManager {
   
   public Collection<KeyStrokeData> getKeyStrokeData() { return _actionToDataMap.values(); }
 
-  public void put(VectorOption<KeyStroke> vkso, Action a, JMenuItem jmi, String name)  {
-    Vector<KeyStroke> keys = DrScala.getConfig().getSetting(vkso);
-    Vector<KeyStroke> retained = new Vector<KeyStroke>();
+  public void put(ArrayListOption<KeyStroke> vkso, Action a, JMenuItem jmi, String name)  {
+    ArrayList<KeyStroke> keys = DrScala.getConfig().getSetting(vkso);
+    ArrayList<KeyStroke> retained = new ArrayList<KeyStroke>();
     KeyStrokeData ksd = new KeyStrokeData(keys, a, jmi, name, vkso);
     _actionToDataMap.put(a, ksd);
     for(KeyStroke ks: keys) {
@@ -83,7 +83,7 @@ public class KeyBindingManager {
         _keyToDataMap.put(ks, ksd);
       }
     }
-    DrScala.getConfig().addOptionListener(vkso, new VectorKeyStrokeOptionListener(jmi, a, retained));
+    DrScala.getConfig().addOptionListener(vkso, new ArrayListKeyStrokeOptionListener(jmi, a, retained));
     if (retained.size() != keys.size()) {
       // not all keys were added
       DrScala.getConfig().setSetting(vkso,retained);
@@ -167,7 +167,7 @@ public class KeyBindingManager {
       // remove ks from the conflicting keystroke data
       Set<KeyStroke> conflictKeys = new LinkedHashSet<KeyStroke>(conflictKSD.getKeyStrokes());
       conflictKeys.remove(ks);
-      conflictKSD.setKeyStrokes(new Vector<KeyStroke>(conflictKeys));
+      conflictKSD.setKeyStrokes(new ArrayList<KeyStroke>(conflictKeys));
       updateMenuItem(conflictKSD);
       _keyToDataMap.remove(ks);
       DrScala.getConfig().setSetting(conflictKSD.getOption(), conflictKSD.getKeyStrokes());
@@ -179,7 +179,7 @@ public class KeyBindingManager {
     
     // Check associated Menu Item. If jmi is null, this keystroke maps to an action that isn't in the menu
     if (jmi != null) {
-      Vector<KeyStroke> keys = data.getKeyStrokes();
+      ArrayList<KeyStroke> keys = data.getKeyStrokes();
       if (keys.size() > 0) {
         // Since we can have multiple keys mapped to the same action, we use the first key as menu item accelerator
         jmi.setAccelerator(keys.get(0));
@@ -191,25 +191,25 @@ public class KeyBindingManager {
     }
   }
   
-  /** A listener that can be attached to VectorKeyStrokeOptions that automatically updates the Hashtables in 
+  /** A listener that can be attached to ArrayListKeyStrokeOptions that automatically updates the Hashtables in 
     * KeyBindingManager, the corresponding selection Action bindings, and the menu accelerators.
     */
-  public class VectorKeyStrokeOptionListener implements OptionListener<Vector<KeyStroke>> {
+  public class ArrayListKeyStrokeOptionListener implements OptionListener<ArrayList<KeyStroke>> {
     protected JMenuItem _jmi; // the JMenuItem associated with this option
     protected Action _a; // the Action associated with this option
     protected Set<KeyStroke> _oldKeys; // the old KeyStroke value
 
-    public VectorKeyStrokeOptionListener(JMenuItem jmi, Action a, Vector<KeyStroke> keys) {
+    public ArrayListKeyStrokeOptionListener(JMenuItem jmi, Action a, ArrayList<KeyStroke> keys) {
       _jmi = jmi;
       _a = a;
       _oldKeys = new LinkedHashSet<KeyStroke>(keys);
     }
 
-    public VectorKeyStrokeOptionListener(Action a, Vector<KeyStroke> keys) {
+    public ArrayListKeyStrokeOptionListener(Action a, ArrayList<KeyStroke> keys) {
       this(null, a, keys);
     }
 
-    public void optionChanged(OptionEvent<Vector<KeyStroke>> oce) {
+    public void optionChanged(OptionEvent<ArrayList<KeyStroke>> oce) {
       Set<KeyStroke> newKeys = new LinkedHashSet<KeyStroke>(oce.value);
       Set<KeyStroke> removed = new LinkedHashSet<KeyStroke>(_oldKeys);
       removed.removeAll(newKeys); // the keys that were removed
@@ -244,7 +244,7 @@ public class KeyBindingManager {
       }
       
       if (update) {        
-        Vector<KeyStroke> v = new Vector<KeyStroke>(retained);
+        ArrayList<KeyStroke> v = new ArrayList<KeyStroke>(retained);
         data.setKeyStrokes(v);
         updateMenuItem(data);
         _oldKeys = retained;
@@ -253,30 +253,30 @@ public class KeyBindingManager {
   }
 
   public static class KeyStrokeData {
-    private Vector<KeyStroke> _ks;
+    private ArrayList<KeyStroke> _ks;
     private Action _a;
     private JMenuItem _jmi;
     private String _name;
-    private VectorOption<KeyStroke> _vkso;
+    private ArrayListOption<KeyStroke> _vkso;
 
-    public KeyStrokeData(Vector<KeyStroke> ks, Action a, JMenuItem jmi, String name, VectorOption<KeyStroke> vkso) {
-      _ks = new Vector<KeyStroke>(ks);
+    public KeyStrokeData(ArrayList<KeyStroke> ks, Action a, JMenuItem jmi, String name, ArrayListOption<KeyStroke> vkso) {
+      _ks = new ArrayList<KeyStroke>(ks);
       _a = a;
       _jmi = jmi;
       _name = name;
       _vkso = vkso;
     }
 
-    public Vector<KeyStroke> getKeyStrokes() { return _ks; }
+    public ArrayList<KeyStroke> getKeyStrokes() { return _ks; }
     public Action getAction() { return _a; }
     public JMenuItem getJMenuItem() { return _jmi; }
     public String getName() { return _name; }
-    public VectorOption<KeyStroke> getOption() { return _vkso; }
+    public ArrayListOption<KeyStroke> getOption() { return _vkso; }
     
-    public void setKeyStrokes(Vector<KeyStroke> ks) { _ks = new Vector<KeyStroke>(ks); }
+    public void setKeyStrokes(ArrayList<KeyStroke> ks) { _ks = new ArrayList<KeyStroke>(ks); }
     public void setAction(Action a) { _a = a; }
     public void setJMenuItem(JMenuItem jmi) { _jmi = jmi; }
     public void setName(String name) { _name = name; }
-    public void setOption(VectorOption<KeyStroke> vkso) { _vkso = vkso; }
+    public void setOption(ArrayListOption<KeyStroke> vkso) { _vkso = vkso; }
   }
 }

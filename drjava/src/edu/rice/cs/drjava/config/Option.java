@@ -39,7 +39,7 @@ package edu.rice.cs.drjava.config;
 import edu.rice.cs.util.swing.Utilities;
 
 import java.util.HashMap;
-import java.util.Vector;
+import java.util.ArrayList;
 // TODO: Change the usage of these classes to Collections style.
 // TODO: Do these need to be synchronized?
 
@@ -63,14 +63,14 @@ public abstract class Option<T> extends OptionParser<T> implements FormatStrateg
   /** A hashtable that maps Configuration objects to a list of listeners for this particular option.  Part of the magic
     * inner workings of this package.
     */
-  final HashMap<Configuration,Vector<OptionListener<T>>> listeners =
-    new HashMap<Configuration,Vector<OptionListener<T>>>();
+  final HashMap<Configuration,ArrayList<OptionListener<T>>> listeners =
+    new HashMap<Configuration,ArrayList<OptionListener<T>>>();
   
   /** Constructor that takes in a name and default value
     * @param name the name of this option (eg. "indent.level");
     * @param def the default value for this option (eg. "2")
     */
-  public Option(String name, T def) { super(name,def); }
+  public Option(String name, T def) { super(name, def); }
   
   /** Formats a statically typed T value as a String.  The default implementation uses the toString() method.
     * @param value the statically-typed value to format into a String
@@ -90,7 +90,7 @@ public abstract class Option<T> extends OptionParser<T> implements FormatStrateg
   
   /** Sends an OptionEvent to all OptionListeners who have registered on this Option. */
   synchronized void notifyListeners(Configuration config, T val) {
-    final Vector<OptionListener<T>> v = listeners.get(config);
+    final ArrayList<OptionListener<T>> v = listeners.get(config);
 //    System.err.println("Notifying " + v + " with value " + val);
     if (v == null) return; // no listeners
     final OptionEvent<T> e = new OptionEvent<T>(this, val);
@@ -104,9 +104,9 @@ public abstract class Option<T> extends OptionParser<T> implements FormatStrateg
   
   /** Magic listener-bag adder */
   synchronized void addListener(Configuration c, OptionListener<T> l) {
-    Vector<OptionListener<T>> v = listeners.get(c);
+    ArrayList<OptionListener<T>> v = listeners.get(c);
     if (v == null) {
-      v = new Vector<OptionListener<T>>();
+      v = new ArrayList<OptionListener<T>>();
       listeners.put(c,v);
     }
     v.add(l);
@@ -114,7 +114,7 @@ public abstract class Option<T> extends OptionParser<T> implements FormatStrateg
   
   /** Magic listener-bag remover */
   synchronized void removeListener(Configuration c, OptionListener<T> l) {
-    Vector<OptionListener<T>> v = listeners.get(c);
+    ArrayList<OptionListener<T>> v = listeners.get(c);
     if (v != null && v.remove(l) && v.size() == 0) listeners.remove(c);  // v.remove(l) has a side effect!
   }
 }

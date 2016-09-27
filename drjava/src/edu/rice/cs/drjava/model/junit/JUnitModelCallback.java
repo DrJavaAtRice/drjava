@@ -84,8 +84,8 @@ public interface JUnitModelCallback {
     */
   public File getFileForClassName(String className);
   
-  /** Returns the accumulated classpath in use by all Java interpreters */
-  public Iterable<File> getClassPath();
+//  /** Returns the accumulated classpath in use by all Java interpreters */
+//  public Iterable<File> getClassPath();
   
   /** Called when the JVM used for unit tests has registered. */
   public void junitJVMReady();

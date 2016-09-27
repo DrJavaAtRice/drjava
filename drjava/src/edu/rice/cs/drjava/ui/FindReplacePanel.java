@@ -887,7 +887,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
           else _model.refreshActiveDocument();  // the unmodified active document may have been kicked out of the cache!
         } 
         
-        if (fr.getWrapped() && ! searchAll) {
+        if (fr.isWrapped() && ! searchAll) {
           Toolkit.getDefaultToolkit().beep();
           if (! _machine.isSearchBackwards()) _frame.setStatusMessage("Search wrapped to beginning.");
           else _frame.setStatusMessage("Search wrapped to end.");
@@ -965,6 +965,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     _replaceField.setFont(f);
   }
   
+  /* This should be done at the beginning of the search action not in almost every MainFrame action! */
   /** Updates the first document where the current all-document search began (called in two places: either when the 
     * _findField is updated, or when the user changes documents.
     */

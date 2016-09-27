@@ -142,8 +142,8 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
 //    _log.log("found class file");
 //
 //    _log.log("path to add: " + compiled.getParentFile().getPath());
-//    _interpreter.addCP("BuildDirectoryCP", compiled.getParentFile().getPath());
-//    _log.log("added CP");
+//    _interpreter.addInteractionsClassPath(compiled.getParentFile().getPath());
+//    _log.log("added class path");
     
     try {
       String res1 = _interpreter.interpret(UNARY_FUN_PUBLIC_INTERFACE_TEXT);
@@ -180,8 +180,8 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
     // Make sure .class exists
     File compiled = classForScala(file, "UnaryFun");
     assertTrue(_name() + "Class file should exist after compile", compiled.exists());    
-    
-    _interpreter.addCP("BuildDirectoryCP", compiled.getParentFile().getPath());
+    // _manually reset the class path?  clearInteractions normally resets class path
+//    _interpreter.addInteractionsClassPath(compiled.getParentFile());
     
     try {
       String res = _interpreter.interpret("val f = new UnaryFun() " + 
@@ -217,7 +217,7 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
 //    File compiled = classForScala(file, "UnaryFun");
 //    assertTrue(_name() + "Class file should exist after compile", compiled.exists());    
 //    
-//    _interpreter.addCP("BuildDirectoryCP", compiled.getParentFile().getPath());
+//    _interpreter.addInteractionsClassPath(compiled.getParentFile().getPath());
     
    try {
      String res1 = _interpreter.interpret(UNARY_FUN_PUBLIC_CLASS_TEXT);
@@ -259,7 +259,8 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
     File compiled = classForScala(file, "Bar");
     assertTrue(_name() + "Class file should exist after compile", compiled.exists()); 
     
-    _interpreter.addCP("BuildDirectoryCP", compiled.getParentFile().getPath());
+    // _manually reset the class path?  clearInteractions normally resets class path
+//    _interpreter.addInteractionsClassPath(compiled.getParentFile());
     
     try {
       String res2 = _interpreter.interpret(

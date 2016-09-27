@@ -68,7 +68,7 @@ public class JavaInterpreterTest extends DrScalaTestCase {
   // inside the DrScala intereactions pane.
   // ***************************
   
-  private volatile InteractionsPaneOptions _interpreterOptions;
+//  private volatile InteractionsPaneOptions _interpreterOptions;
   private volatile Interpreter _interpreter;  
   private volatile ClassPathManager _classPathManager;
   private volatile ClassLoader _interpreterLoader;
@@ -86,7 +86,7 @@ public class JavaInterpreterTest extends DrScalaTestCase {
 //    // _interpreterOptions = Options.DEFAULT;
 //    _interpreterOptions = new InteractionsPaneOptions();
     _interpreter = new DrScalaInterpreter();
-//    _interpreter.addCP("Default CP", System.getProperty("java.class.path");
+//    _interpreter.addInteractionsClassPath(System.getProperty("java.class.path"));
   }
 
   /** Asserts that the results of interpreting the first of each

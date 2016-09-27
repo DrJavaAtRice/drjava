@@ -52,24 +52,24 @@ public interface RegionManager<R extends IDocumentRegion> {
   
   /** Returns the unique region [start,end), if any, containing the specified offset.  Assumes that document regions
     * are disjoint.
-    * @param odd the document
+    * @param doc the document
     * @param offset the offset in the document
     * @return the unique DocumentRegion containing the given offset, or null if it does not exist.
     */
-  public R getRegionAt(OpenDefinitionsDocument odd, int offset);
+  public R getRegionAt(OpenDefinitionsDocument doc, int offset);
   
   /** Returns the first and last region r where r.getLineStart() <= offset < r.getLineEnd().  Assumes that 
     * document regions are disjoint and that lineStart precedes the start offset by at most 119 characters.
-    * @param odd the document
+    * @param doc the document
     * @param offset the offset in the document
     * @return the unique DocumentRegion containing the given offset, or null if it does not exist.
     */
-  public Pair<R, R> getRegionInterval(OpenDefinitionsDocument odd, int offset);
+  public Pair<R, R> getRegionInterval(OpenDefinitionsDocument doc, int offset);
   
   /** Returns the rightmost region starting on the same line containing the specified selection
    *  @return the rightmost DocumentRegion containing the given selection, or null if it does not exist.
    */
-  public Collection<R> getRegionsOverlapping(OpenDefinitionsDocument odd, int startOffset, int endOffset);
+  public Collection<R> getRegionsOverlapping(OpenDefinitionsDocument doc, int startOffset, int endOffset);
 
   /** Tests if specified region r is contained in this manager.
       * @param r  The region
@@ -93,17 +93,17 @@ public interface RegionManager<R extends IDocumentRegion> {
   public void removeRegions(Iterable<? extends R> regions);
   
   /** Remove the given OpenDefinitionsDocument and all of its regions from the manager. */
-  public void removeRegions(OpenDefinitionsDocument odd);
+  public void removeRegions(OpenDefinitionsDocument doc);
 
   /** Apply the given command to the specified region to change it.
    *  @param region the region to find and change
    *  @param cmd command that mutates the region. */
   public void changeRegion(R region, Lambda<R,Object> cmd);
   
-  /** @return a Vector<R> containing the DocumentRegion objects for document odd in this manager. */
-  public SortedSet<R> getRegions(OpenDefinitionsDocument odd);
+  /** @return a ArrayList<R> containing the DocumentRegion objects for document doc in this manager. */
+  public SortedSet<R> getRegions(OpenDefinitionsDocument doc);
   
-  /** @return a Vector<R> containing all the DocumentRegion objects in this mangager. */
+  /** @return a ArrayList<R> containing all the DocumentRegion objects in this mangager. */
   public ArrayList<R> getRegions();
 
   /** @return the number if regions contained in this manager. */

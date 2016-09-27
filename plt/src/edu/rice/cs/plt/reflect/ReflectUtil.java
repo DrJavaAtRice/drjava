@@ -43,6 +43,7 @@ import java.io.Serializable;
 import edu.rice.cs.plt.lambda.*;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.io.IOUtil;
+import edu.rice.cs.util.swing.Utilities;
 
 import static edu.rice.cs.plt.reflect.ReflectException.*;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
@@ -65,6 +66,8 @@ public final class ReflectUtil {
     * other uses of JVM properties in Java libraries, does not reflect subsequent changes to the property.
     */
   public static final Iterable<File> SYSTEM_CLASS_PATH = IOUtil.parsePath(System.getProperty("java.class.path", ""));
+  
+//  static { Utilities.show("SYSTEM_CLASS_PATH bound to " + SYSTEM_CLASS_PATH); }
   
   /** Produce the simple name of the given class, as specified by {@link Class#getSimpleName},
     * with an improved scheme for anonymous classes.  The simple name of a class is generally
@@ -185,28 +188,27 @@ public final class ReflectUtil {
     else { return null; }
   }
   
-  /**
-   * <p>Create an instance of the given class.  This is a convenience method that uses the class loader of
-   * {@code ReflectUtil} to load {@code className}, and that infers the constructor signature from the
-   * given arguments.</p>
-   * 
-   * <p>Note that the inference process for the constructor signature is potentially error-prone, because it 
-   * uses the concrete runtime types of the objects, which may be more specific than what is needed.  It is
-   * impossible, for example, to use this method to invoke a constructor whose parameters include
-   * interface, abstract class, or primitive types.  In such cases, 
-   * {@link #loadObject(String, Class[], Object[])} should be used instead.</p>
-   * 
-   * <p>A typical use of this method is to instantiate an object that belongs to or directly refers to
-   * a library that is not guaranteed to be statically available at runtime.  Since no direct reference
-   * can by made to that object's class or any of the library's classes in the main body of code 
-   * (otherwise, a {@link NoClassDefFoundError} may occur), reflection must be used to load 
-   * the object.</p>
-   * 
-   * @throws ReflectException  As specified by {@link #loadObject(ClassLoader, String, Class[], Object[])}
-   * 
-   * @see #loadObject(String, Class[], Object[])
-   * @see #loadObject(ClassLoader, String, Class[], Object[])
-   */
+  /** <p>Create an instance of the given class.  This is a convenience method that uses the class loader of
+    * {@code ReflectUtil} to load {@code className}, and that infers the constructor signature from the
+    * given arguments.</p>
+    * 
+    * <p>Note that the inference process for the constructor signature is potentially error-prone, because it 
+    * uses the concrete runtime types of the objects, which may be more specific than what is needed.  It is
+    * impossible, for example, to use this method to invoke a constructor whose parameters include
+    * interface, abstract class, or primitive types.  In such cases, 
+    * {@link #loadObject(String, Class[], Object[])} should be used instead.</p>
+    * 
+    * <p>A typical use of this method is to instantiate an object that belongs to or directly refers to
+    * a library that is not guaranteed to be statically available at runtime.  Since no direct reference
+    * can by made to that object's class or any of the library's classes in the main body of code 
+    * (otherwise, a {@link NoClassDefFoundError} may occur), reflection must be used to load 
+    * the object.</p>
+    * 
+    * @throws ReflectException  As specified by {@link #loadObject(ClassLoader, String, Class[], Object[])}
+    * 
+    * @see #loadObject(String, Class[], Object[])
+    * @see #loadObject(ClassLoader, String, Class[], Object[])
+    */
   public static Object loadObject(String className, Object... constructorArgs) throws ReflectException {
     return loadObject(CURRENT_LOADER, className, getClasses(constructorArgs), constructorArgs);
   }
@@ -257,45 +259,46 @@ public final class ReflectUtil {
     return loadObject(loader, className, getClasses(constructorArgs), constructorArgs);
   }
   
-  /**
-   * <p>Create an instance of the given class.  This method invokes
-   * {@link Class#forName(String, boolean, ClassLoader)} (with {@code initialize} set to {@code true}), 
-   * {@link Class#getConstructor(Class[])}, and {@link Constructor#newInstance}.</p>
-   * 
-   * <p>A typical use of this method is to instantiate an object that belongs to or directly refers to
-   * a library that is not guaranteed to be statically available at runtime.  Since no direct reference
-   * can by made to that object's class or any of the library's classes in the main body of code 
-   * (otherwise, a {@link NoClassDefFoundError} may occur), reflection must be used to load 
-   * the object.</p>
-   * 
-   * @param loader  A class loader used to load the specified class
-   * @param className  The name of the class to be instantiated
-   * @param constructorSig  The types of the desired constructor's parameters; these must exactly match the
-   *                        the constructor's declared signature (may not be {@code null})
-   * @param constructorArgs  The arguments to pass to the constructor ({@code null} is also acceptable where
-   *                         there are no parameters)
-   *
-   * @throws ReflectException  This operation may trigger any of the following, which is wrapped as a
-   *                           {@code ReflectException}:<ul>
-   *                           <li>A {@link ClassNotFoundException} if {@code className} cannot be found</li>
-   *                           <li>A {@link NoSuchMethodException} if no constructor with the given signature 
-   *                           exists</li>
-   *                           <li>An {@link IllegalArgumentException} if the cardinality and types of
-   *                           {@code constructorArgs} are inconsistent with {@code constructorSig}</li>
-   *                           <li>An {@link InvocationTargetException} in any throwable is thrown by the
-   *                           constructor</li>
-   *                            <li>An {@link InstantiationException} if the class is abstract</li>
-   *                           <li>An {@link IllegalAccessException} if the constructor is inaccessible</li>
-   *                           <li>A {@link SecurityException} if the security manager denies access to the 
-   *                           constructor</li>
-   *                           
-   * @see #loadObject(String, Object[])
-   * @see #loadObject(String, Class[], Object[])
-   */
+  /** <p>Create an instance of the given class.  This method invokes
+    * {@link Class#forName(String, boolean, ClassLoader)} (with {@code initialize} set to {@code true}), 
+    * {@link Class#getConstructor(Class[])}, and {@link Constructor#newInstance}.</p>
+    * 
+    * <p>A typical use of this method is to instantiate an object that belongs to or directly refers to
+    * a library that is not guaranteed to be statically available at runtime.  Since no direct reference
+    * can by made to that object's class or any of the library's classes in the main body of code 
+    * (otherwise, a {@link NoClassDefFoundError} may occur), reflection must be used to load 
+    * the object.</p>
+    * 
+    * @param loader  A class loader used to load the specified class
+    * @param className  The name of the class to be instantiated
+    * @param constructorSig  The types of the desired constructor's parameters; these must exactly match the
+    *                        the constructor's declared signature (may not be {@code null})
+    * @param constructorArgs  The arguments to pass to the constructor ({@code null} is also acceptable where
+    *                         there are no parameters)
+    *
+    * @throws ReflectException  This operation may trigger any of the following, which is wrapped as a
+    *                           {@code ReflectException}:<ul>
+    *                           <li>A {@link ClassNotFoundException} if {@code className} cannot be found</li>
+    *                           <li>A {@link NoSuchMethodException} if no constructor with the given signature 
+    *                           exists</li>
+    *                           <li>An {@link IllegalArgumentException} if the cardinality and types of
+    *                           {@code constructorArgs} are inconsistent with {@code constructorSig}</li>
+    *                           <li>An {@link InvocationTargetException} in any throwable is thrown by the
+    *                           constructor</li>
+    *                            <li>An {@link InstantiationException} if the class is abstract</li>
+    *                           <li>An {@link IllegalAccessException} if the constructor is inaccessible</li>
+    *                           <li>A {@link SecurityException} if the security manager denies access to the 
+    *                           constructor</li>
+    *                           
+    * @see #loadObject(String, Object[])
+    * @see #loadObject(String, Class[], Object[])
+    */
   public static Object loadObject(ClassLoader loader, String className, Class<?>[] constructorSig, 
                                   Object... constructorArgs) throws ReflectException {
     try {
+//      Utilities.show("Loader passed to loadObject is " + loader);
       Class<?> c = Class.forName(className, true, loader);
+//      Utilities.show("Class " + c + " was loaded by " + c.getClassLoader());
       Constructor<?> k = c.getConstructor(constructorSig);
       return k.newInstance(constructorArgs);
     }

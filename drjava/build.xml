@@ -8,7 +8,7 @@
 
   <property name="readable-project-name" value="DrScala" />
   <property name="src-working-dir" value="src/edu/rice/cs/drjava" />
-  <property name="junit-jar-to-include" value="lib/buildlib/junit.jar" />
+  <property name="junit-jar" value = "lib/buildlib/junit.jar" />
   <property name="md5-temp-name" value="classes/md5.properties" />
   <property name="md5-properties-path" value="edu/rice/cs/drjava/md5.properties" />
   <property name="main-class" value="edu.rice.cs.drjava.DrScala" />
@@ -64,8 +64,6 @@
 
   <fileset id="libs" dir="lib" includes="*.jar" /> <!-- Only include jars that are at the top level (not in buildlib) -->
   
-  <property name="use-concjunit" value="true" />
-    
   <!-- ************
        Help Targets
        ************ -->
@@ -139,7 +137,6 @@
     <echo message="                runs (default: 1)" />
     <echo message="drscala.test.config: Location of the DrScala configuration file to use" />
     <echo message="                    in tests (default: testFiles/drscala.basic.config)" />
-    <echo message="use-concjunit: Set to true to test ConcJUnit instead of JUnit." />
   </target>
   
   
@@ -290,7 +287,6 @@
     <antcall target="iterate-tests">
       <param name="test-jvm" value="java" />
       <param name="test-tools" value="${current-tools}" />
-      <param name="test-force-disable-concjunit" value="false" />
     </antcall>
   </target>
 
@@ -299,7 +295,6 @@
     <antcall target="iterate-tests">
       <param name="test-jvm" value="${java8-exec}" />
       <param name="test-tools" value="${java8-tools}" />
-      <param name="test-force-disable-concjunit" value="false" />
     </antcall>
   </target>
 
@@ -387,7 +382,7 @@
   </target>
   
   
-  <target name="do-test" depends="resolve-jvm-args, resolve-junit-jar">
+  <target name="do-test" depends="resolve-jvm-args">
     <echo message="Running all tests matching '${test-filter-string}' with command '${test-jvm}', using '${junit-jar}' and '${test-tools}'" />
     <extendclasspath path="${junit-jar}" />
     <junit haltonfailure="${test-halt}" failureproperty="test-failed"
@@ -409,7 +404,7 @@
         <propertyref prefix="drscala." />
         <!-- Add any properties that should be passed on -->
       </syspropertyset>
-      <jvmarg line="${jvm-args} ${concjunit-bootclasspath}" />
+      <jvmarg line="${jvm-args}" />
       <formatter classname="${test-formatter-class}" usefile="${test-output-to-file}" />
       <batchtest>
         <fileset dir="classes/test">
@@ -476,9 +471,6 @@
        
   <target name="jar" depends="compile, resolve-version-tag" 
           description="Create the jar file with all classes and libs (compiling first)">
-    <available property="junit-jar-to-include-exists" file="${junit-jar-to-include}" />
-    <fail message="Can't find ${junit-jar-to-include}"
-	  unless="junit-jar-to-include-exists" />
     <jar jarfile="${ant.project.name}.jar">
       <manifest>
         <attribute name="Main-Class" value="${main-class}" />
@@ -490,7 +482,7 @@
       <fileset dir="classes/lib" excludes="about.html"/>
       <fileset dir="classes/base" />
       <!-- Include the specified version of JUnit and rename it to junit.jar -->
-      <zipfileset dir="." includes="${junit-jar-to-include}" fullpath="junit.jar" />
+      <zipfileset dir="." includes="${junit-jar}" fullpath="junit.jar" />
       <zipfileset dir="." includes="${md5-temp-name}"
 		  fullpath="${md5-properties-path}" />
     </jar>
@@ -612,7 +604,7 @@
        Clean Targets
        ************* -->
       
-  <target name="clean" depends="clean-intermediate, clean-products, clean-concjunit"
+  <target name="clean" depends="clean-intermediate, clean-products"
           description="Remove all build products; the result should match the intended Subversion contents">
   </target>
 
@@ -662,14 +654,6 @@
 	
   </target>
   
-  <target name="clean-concjunit" unless="skip-clean">
-    <echo message="Deleting ConcJUnit artifacts" />
-    
-    <delete file="instr.concjunit.txt" failonerror="${clean-can-fail}" />
-    <delete file="rt.concjunit.jar" failonerror="${clean-can-fail}" />	
-  </target>
-  
-
   <!-- ***************
        Release Targets
        *************** -->
@@ -907,8 +891,7 @@
     <tempfile property="junit.jar.tempfile"
 	      suffix=".txt" prefix="junit.jar." deleteonexit="true"/>
 
-    <echo file="${junit.jar.tempfile}"
-	  message="${junit-jar-to-include}"/>
+    <echo file="${junit.jar.tempfile}" message="${junit-jar}"/>
     <java classname="edu.rice.cs.util.MD5ChecksumProperties"
 	  dir="${basedir}" fork="true">
       <classpath>
@@ -922,7 +905,7 @@
 
     <!-- rename the line in md5.properties to junit.jar=... -->
     <replace file="${basedir}/${md5-temp-name}"
-	     token="${junit-jar-to-include}"
+	     token="${junit-jar}"
 	     value="junit.jar"/>
   </target>  
   
@@ -1064,11 +1047,11 @@
     <!-- Get a timestamp based on GMT, rather than local time -->
     <tstamp>
       <format property="DSTAMP" pattern="yyyyMMdd" timezone="GMT" />
-      <format property="TSTAMP" pattern="HH:mm:ss" timezone="GMT" />
+      <format property="TSTAMP" pattern="HHmmss" timezone="GMT" />
       <format property="TODAY" pattern="MMMM dd yyyy" timezone="GMT" />
     </tstamp>
     <property name="version-tag"
-              value="${ant.project.name}${tag-append}-${DSTAMP}-${TSTAMP}" />
+              value="${ant.project.name}${tag-append}-${DSTAMP}-${TSTAMP}"/>
   </target>  
   
   <!-- Sets "already-generated" if "generate-file" is more recent than "generate-sourcefile";
@@ -1115,50 +1098,4 @@
 
   
   
-  <!-- *****************
-       ConcJUnit Targets
-       ***************** -->
-  <target name="resolve-junit-jar">
-    <if>
-      <and>
-        <istrue value="${use-concjunit}" />
-        <isfalse value="${test-force-disable-concjunit}" />
-      </and>
-      <then>
-        <property name="junit-jar-1" location="lib/buildlib/concutest-junit-4.7-withrt-nodep.jar" />
-        <available property="junit-jar" value="${junit-jar-1}" file="${junit-jar-1}" />
-
-        <fail message="Can't find concutest-junit-4.7-withrt-nodep.jar in the lib/buildlib directory" unless="junit-jar" />
-
-        <property name="concjunitrt-jar-1" location="lib/buildlib/concjunitrt.jar" />
-        <available property="concjunitrt-jar" value="${concjunitrt-jar-1}" file="${concjunitrt-jar-1}" />
-
-        <fail message="Can't find concjunitrt.jar in the lib/buildlib directory" unless="concjunitrt-jar" />
-
-        <property name="rt-concjunit-jar-1" location="rt.concjunit.jar" />
-
-        <if>
-          <not>
-            <available file="${rt-concjunit-jar-1}" />
-          </not>
-          <then>
-            <echo message="Instrumenting Java runtime (no changes made to original), java=${test-jvm}" />
-            <java jar="${concjunitrt-jar}" jvm="${test-jvm}" fork="yes" inputstring="Y"/>
-          </then>
-          <else>
-            <echo message="${rt-concjunit-jar-1} already exists, not instrumenting." />
-          </else>
-        </if>
-        <available property="concjunit-bootclasspath" value="-Xbootclasspath/p:'${rt-concjunit-jar-1}'" file="${rt-concjunit-jar-1}" />
-        <echo message="boot classpath: ${concjunit-bootclasspath}" />
-      </then>
-      <else>
-        <property name="junit-jar-1" location="lib/buildlib/junit.jar" />
-        <available property="junit-jar" value="${junit-jar-1}" file="${junit-jar-1}" />
-        <available property="concjunit-bootclasspath" value="" file="${junit-jar-1}" />
-        <fail message="Can't find junit.jar in the lib/buildlib directory" unless="junit-jar" />
-      </else>
-    </if>
-  </target>
-
 </project>

@@ -41,7 +41,6 @@ import java.awt.*;
 import java.io.IOException;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Vector;
 import java.util.Map;
 import java.util.HashMap;
 import javax.swing.*;
@@ -96,8 +95,8 @@ public class ProjectPropertiesFrame extends SwingFrame {
   
   private JCheckBox _autoRefreshComponent;
 
-  private VectorAbsRelFileOptionComponent _extraClassPathList;
-  private VectorFileOptionComponent _excludedFilesList;
+  private ArrayListAbsRelFileOptionComponent _extraClassPathList;
+  private ArrayListFileOptionComponent _excludedFilesList;
   private Map<OptionParser<?>,String> _storedPreferences = new HashMap<OptionParser<?>,String>();
   
   /** Constructs project properties frame for a new project and displays it.  Assumes that a project is active. */
@@ -229,7 +228,7 @@ public class ProjectPropertiesFrame extends SwingFrame {
     _extraClassPathList.setValue(cp);
 
     ArrayList<File> ef = new ArrayList<File>();
-    for(File f: _model.getExclFiles()) { ef.add(f); }
+    for(File f: _model.getExcludedFiles()) { ef.add(f); }
     _excludedFilesList.setValue(ef);
     
     _storedPreferences.clear();
@@ -262,8 +261,8 @@ public class ProjectPropertiesFrame extends SwingFrame {
     if(mc == null) mc = "";
     _model.setMainClass(mc);
 
-    Vector<AbsRelFile> extras = _extraClassPathList.getValue();  // Vector mandated by interface to VectorFileOptionComponent
-    _model.setExtraClassPath(IterUtil.snapshot(extras));
+    ArrayList<AbsRelFile> extras = _extraClassPathList.getValue();  // ArrayList mandated by interface to ArrayListFileOptionComponent
+    _model.setExtraProjectClassPath(extras);  // Should we copy extras here?
 
     _model.setAutoRefreshStatus(_autoRefreshComponent.isSelected());
 
@@ -548,7 +547,7 @@ public class ProjectPropertiesFrame extends SwingFrame {
   }
 
   public Component _extraClassPathComponent() {
-    _extraClassPathList = new VectorAbsRelFileOptionComponent(null, "Extra Project Classpaths", this, null, true) {
+    _extraClassPathList = new ArrayListAbsRelFileOptionComponent(null, "Extra Project Classpaths", this, null, true) {
       protected Action _getAddAction() {
         final Action a = super._getAddAction();
         return new AbstractAction("Add") {
@@ -571,7 +570,7 @@ public class ProjectPropertiesFrame extends SwingFrame {
   }
 
   public Component _excludedFilesComponent() {
-    _excludedFilesList = new VectorFileOptionComponent(null, "Files Excluded from Auto-Refresh", this, null, false) {
+    _excludedFilesList = new ArrayListFileOptionComponent(null, "Files Excluded from Auto-Refresh", this, null, false) {
       protected Action _getAddAction() {
         final Action a = super._getAddAction();
         return new AbstractAction("Add") {

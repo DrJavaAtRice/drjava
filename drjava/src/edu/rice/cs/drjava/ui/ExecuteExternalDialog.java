@@ -866,7 +866,7 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
   /** Save the command line to the menu. */
   private void _saveCommand() {          
     if (_editMode) {
-      final Vector<String> names = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
+      final ArrayList<String> names = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
       _mainFrame.removeModalWindowAdapter(this);
       String name = JOptionPane.showInputDialog(this, "Name for saved process:", names.get(_editIndex));
       _mainFrame.installModalWindowAdapter(this, LambdaUtil.NO_OP, CANCEL);
@@ -911,10 +911,10 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     GeneralProcessCreator.LOG.log("addToMenu(): enclosingFile = " + enclosingFile);
     int count = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT);
     ++count;
-    final Vector<String> names = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
-    final Vector<String> cmdlines = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
-    final Vector<String> workdirs = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
-    final Vector<String> enclosingFiles = 
+    final ArrayList<String> names = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
+    final ArrayList<String> cmdlines = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
+    final ArrayList<String> workdirs = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
+    final ArrayList<String> enclosingFiles = 
       DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES);
     
     names.add(name);
@@ -943,10 +943,10 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     */
   public static void editInMenu(int editIndex, String name, String cmdline, String workdir, String enclosingFile) {
     GeneralProcessCreator.LOG.log("editInMenu(): enclosingFile = " + enclosingFile);
-    final Vector<String> names = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
-    final Vector<String> cmdlines = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
-    final Vector<String> workdirs = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
-    final Vector<String> enclosingFiles = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES);
+    final ArrayList<String> names = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
+    final ArrayList<String> cmdlines = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
+    final ArrayList<String> workdirs = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
+    final ArrayList<String> enclosingFiles = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES);
     
     names.set(editIndex,name);
     DrScala.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_NAMES,names);
@@ -965,10 +965,10 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     * @param index index of the process to save
     * @param f file */
   public static void saveToFile(int index, File f) {
-    final Vector<String> names = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
-    final Vector<String> cmdlines = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
-    final Vector<String> workdirs = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
-    final Vector<String> enclosingFiles = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES);
+    final ArrayList<String> names = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
+    final ArrayList<String> cmdlines = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
+    final ArrayList<String> workdirs = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
+    final ArrayList<String> enclosingFiles = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES);
     
     XMLConfig xc = new XMLConfig();
 //    System.out.println("saveToFile(" + index + ", " + f + ")");

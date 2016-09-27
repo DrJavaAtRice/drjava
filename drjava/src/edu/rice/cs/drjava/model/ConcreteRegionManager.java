@@ -83,8 +83,8 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
     * defined in DocumentRegion. 
     */
   @SuppressWarnings("unchecked")
-  private <T> T newDocumentRegion(OpenDefinitionsDocument odd, int start, int end) { 
-    return (T) new DocumentRegion(odd, start, end);
+  private <T> T newDocumentRegion(OpenDefinitionsDocument doc, int start, int end) { 
+    return (T) new DocumentRegion(doc, start, end);
   }
   
   /** Gets the sorted set of regions less than r. */
@@ -114,16 +114,16 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
   /** Returns the region [start, end) containing offset.  Since regions can never overlap, there is at most one such 
     * region in the given document.  (Degenerate regions can coalesce but they are empty implying that
     * they are never returned by this method.)  Only runs in the event thread.
-    * @param odd the document
+    * @param doc the document
     * @param offset the offset in the document
     * @return the DocumentRegion at the given offset, or null if it does not exist.
     */
-  public R getRegionAt(OpenDefinitionsDocument odd, int offset) { 
+  public R getRegionAt(OpenDefinitionsDocument doc, int offset) { 
 /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
     /* Get the tailSet consisting of the ordered set of regions [start, end) such that end > offset. */
     @SuppressWarnings("unchecked")
-    SortedSet<R> tail = getTailSet((R) newDocumentRegion(odd, 0, offset + 1));
+    SortedSet<R> tail = getTailSet((R) newDocumentRegion(doc, 0, offset + 1));
     
     /* If tail contains a match, it must be the first region, since all regions in a document are disjoint and no
      * degenerate region in tail can contain offset. (Every degenerate region is disjoint from every other region 
@@ -136,12 +136,12 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
     else return null;
   }
   
-  /** Finds the interval of regions in odd such that their line labels (excerpts) contain offset.
+  /** Finds the interval of regions in doc such that their line labels (excerpts) contain offset.
     * NOTE: not all regions in the interval necessarily have this property.   -- Corky 4/30/12 */
-  public Pair<R, R> getRegionInterval(OpenDefinitionsDocument odd, int offset) {
+  public Pair<R, R> getRegionInterval(OpenDefinitionsDocument doc, int offset) {
     assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
-//    System.err.println("getRegionsNear(" + odd + ", " + offset + ") called");
+//    System.err.println("getRegionsNear(" + doc + ", " + offset + ") called");
     
     /* Get the interval of regions whose line labels (excerpts) contain offset. The maximium size of the excerpt 
      * enclosing a region is 120 characters; it begins at the start of the line containing the start of the region. 
@@ -149,7 +149,7 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
      * less than 120 characters from offset.  Find the tail set of all regions [start, end) where offset - 120 < end.
      */
     @SuppressWarnings("unchecked") // max operator inserted to ensure that [start,end) interval is non-degenerate.
-    SortedSet<R> tail = getTailSet((R) new DocumentRegion(odd, 0, Math.max(0, offset - 119)));  
+    SortedSet<R> tail = getTailSet((R) new DocumentRegion(doc, 0, Math.max(0, offset - 119)));  
     
     /* Search tail, selecting first and last regions r such that r.getLineEnd() >= offset and r.getLineStart <= offset.
      * The tail is totally ordered on BOTH getLineStart() and getLineEnd() because the functions mapping start to lineStart
@@ -202,19 +202,19 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
 //    * not exist.  Only executes in the event thread.  Otherwise offset args could be invalid.
 //    * Note: this method could be implemented  more cleanly using a revserseIterator on the headSet containing all
 //    * regions preceding or equal to the selection. but this functionality was not added to TreeSet until Java 6.0.
-//    * @param odd the document
+//    * @param doc the document
 //    * @param offset the offset in the document
 //    * @return the DocumentRegion at the given offset, or null if it does not exist.
 //    */
-//  public Collection<R> getOverlappingRegions(OpenDefinitionsDocument odd, int startOffset, int endOffset) {
+//  public Collection<R> getOverlappingRegions(OpenDefinitionsDocument doc, int startOffset, int endOffset) {
 //    
 //    assert EventQueue.isDispatchThread();
 //    
 //    /* First try finding the rightmost region on the same line containing the selection. Unnecessary in Java 6.0. */
-//    int lineStart = odd._getLineStartPos(startOffset);
+//    int lineStart = doc._getLineStartPos(startOffset);
 //    
 //    @SuppressWarnings("unchecked")
-//    SortedSet<R> tail = getTailSet((R) newDocumentRegion(odd, lineStart, endOffset));
+//    SortedSet<R> tail = getTailSet((R) newDocumentRegion(doc, lineStart, endOffset));
 //    // tail is sorted by <startOffset, endOffset>; tail may be empty
 //    R match = null;
 //    for (R r: tail) {
@@ -227,7 +227,7 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
 //    
 //    /* No match found starting on same line; look for best match starting on preceding lines. */
 //    @SuppressWarnings("unchecked")
-//    SortedSet<R> revHead = reverse(getHeadSet((R) newDocumentRegion(odd, lineStart, lineStart))); // linear cost! Ugh!
+//    SortedSet<R> revHead = reverse(getHeadSet((R) newDocumentRegion(doc, lineStart, lineStart))); // linear cost! Ugh!
 //    
 //    /* Find first match in revHead */
 //    Iterator<R> it = revHead.iterator();  // In Java 6.0, it is computable in constant time from headSet using reverseIterator
@@ -245,7 +245,7 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
 //      next = it.next();
 //      if (next.getStartOffset() < match.getStartOffset()) return match;  // no more improvement possible
 //      assert next.getStartOffset() == match.getStartOffset();
-//      if (next.getEndOffset() >= endOffset) match = next;  // improvement because next precedes match in getRegions(odd)
+//      if (next.getEndOffset() >= endOffset) match = next;  // improvement because next precedes match in getRegions(doc)
 //    }
 //
 //    return match;  // last region in revHead was the best match
@@ -257,12 +257,12 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
     * vacuously satisfy this property.  Only executes in the event thread.
     * Note: this method could be implemented more cleanly using a revserseIterator on the headSet containing all
     * regions preceding or equal to the selection. but this functionality was not added to TreeSet until Java 6.0.
-    * @param odd the document
+    * @param doc the document
     * @param startOffset  the left end of the specified interval
     * @param endOffset  the right end of the specified interval
     * @return the Collection<DocumentRegion> of regions overlapping the interval.
     */
-  public Collection<R> getRegionsOverlapping(OpenDefinitionsDocument odd, int startOffset, int endOffset) {
+  public Collection<R> getRegionsOverlapping(OpenDefinitionsDocument doc, int startOffset, int endOffset) {
     
 /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     LinkedList<R> result = new LinkedList<R>();
@@ -271,7 +271,7 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
     /* Find all regions with an endPoint greater than startOffset. */
     
     @SuppressWarnings("unchecked")
-    SortedSet<R> tail = getTailSet((R) newDocumentRegion(odd, 0, startOffset + 1));
+    SortedSet<R> tail = getTailSet((R) newDocumentRegion(doc, 0, startOffset + 1));
     
     // tail is sorted by <startOffset, endOffset>; tail may be empty
 
@@ -286,12 +286,12 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
     * @param region the DocumentRegion to be inserted into the manager
     */
   public void addRegion(final R region) {
-    final OpenDefinitionsDocument odd = region.getDocument();
-    SortedSet<R> docRegions = _regions.get(odd);
-    if (docRegions == null) { // if necessary create a Hashtable entry for odd and insert it in the _documents set
-      _documents.add(odd);
+    final OpenDefinitionsDocument doc = region.getDocument();
+    SortedSet<R> docRegions = _regions.get(doc);
+    if (docRegions == null) { // if necessary create a Hashtable entry for doc and insert it in the _documents set
+      _documents.add(doc);
       docRegions = new TreeSet<R>(); 
-      _regions.put(odd, docRegions);
+      _regions.put(doc, docRegions);
     }
     
     // Check for duplicate region
@@ -300,7 +300,7 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
       docRegions.add(region);  // modifies docRegions, which is part of _regions
     }
     
-    assert _documents.contains(odd);
+    assert _documents.contains(doc);
     
     // only notify if the region was actually added
     if (! alreadyPresent) {
@@ -362,26 +362,26 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
     }
   }
   
-  /** @return a Vector<R> containing the DocumentRegion objects for document odd in this mangager. */
-  public SortedSet<R> getRegions(OpenDefinitionsDocument odd) { return _regions.get(odd); }
+  /** @return a ArrayList<R> containing the DocumentRegion objects for document doc in this mangager. */
+  public SortedSet<R> getRegions(OpenDefinitionsDocument doc) { return _regions.get(doc); }
   
   public int getRegionCount() {
     int regions = 0;
-    for (OpenDefinitionsDocument odd: _documents) regions += _regions.get(odd).size();
+    for (OpenDefinitionsDocument doc: _documents) regions += _regions.get(doc).size();
     return regions;
   }
   
   public ArrayList<R> getRegions() {
     ArrayList<R> regions = new ArrayList<R>();
-    for (OpenDefinitionsDocument odd: _documents) regions.addAll(_regions.get(odd));
+    for (OpenDefinitionsDocument doc: _documents) regions.addAll(_regions.get(doc));
     return regions;
   }
   
   public ArrayList<FileRegion> getFileRegions() {
     ArrayList<FileRegion> regions = new ArrayList<FileRegion>();
-    for (OpenDefinitionsDocument odd: _documents) {
-      File f = odd.getRawFile();
-      for (R r: _regions.get(odd)) regions.add(new DummyDocumentRegion(f, r.getStartOffset(), r.getEndOffset()));
+    for (OpenDefinitionsDocument doc: _documents) {
+      File f = doc.getRawFile();
+      for (R r: _regions.get(doc)) regions.add(new DummyDocumentRegion(f, r.getStartOffset(), r.getEndOffset()));
     }
     return regions;
   } 

@@ -208,7 +208,7 @@ public final class DefinitionsDocumentTest extends DrScalaTestCase implements Re
   }
   
   /** Make sure the vector is consistent: all elements immediately adjoin one another (no overlap), and make sure all
-    * indices between start and end are in the vector. Vector is guaranteed to not have size zero.
+    * indices between start and end are in the vector. ArrayList is guaranteed to not have size zero.
     */
   private void _checkHighlightStatusConsistent(List<HighlightStatus> v, int start, int end) {
     // location we're at so far

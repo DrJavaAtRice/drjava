@@ -46,7 +46,7 @@ import java.awt.Toolkit;
 import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
+import java.util.ArrayList;
 
 
 /** <p>The ScrollableListDialog is a popup dialog with a message and a scrollable list of items. A ScrollableListDialog
@@ -179,7 +179,7 @@ public class ScrollableListDialog<T> extends JDialog {
     
     /* create the item list box */
     //copy the items string representations into a vector
-    final Vector<String> dataAsStrings = new Vector<String>(listItems.size());
+    final ArrayList<String> dataAsStrings = new ArrayList<String>(listItems.size());
     //keep track of the longest string for use later
     String longestString = "";
     for (T obj : listItems) {
@@ -194,7 +194,7 @@ public class ScrollableListDialog<T> extends JDialog {
     }
     
     if (selectable) {
-      final Vector<String> selAsStrings = new Vector<String>(selItems.size());
+      final ArrayList<String> selAsStrings = new ArrayList<String>(selItems.size());
       for (T obj : selItems) {
         if (obj != null) {
           final String objAsString = obj.toString();
@@ -206,7 +206,7 @@ public class ScrollableListDialog<T> extends JDialog {
       list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
     }
     else {
-      list = new JList<String>(dataAsStrings);
+      list = new JList<String>(Utilities.toStringArray(dataAsStrings));
       //let the user select several
       list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     }

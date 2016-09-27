@@ -22,7 +22,7 @@ public class CheckBoxJList extends JList<String> implements ListSelectionListene
   
   HashSet<Integer> selectionCache = new HashSet<Integer>();
   
-  protected void init(Vector<String> listData, Vector<String> selData) {
+  protected void init(ArrayList<String> listData, ArrayList<String> selData) {
     setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
     CheckBoxListCellRenderer r = new CheckBoxListCellRenderer();
     if (selData != null) {
@@ -34,11 +34,7 @@ public class CheckBoxJList extends JList<String> implements ListSelectionListene
           getSelectionModel().addSelectionInterval(i, i);
           sel = true;
         }
-        r.getListCellRendererComponent(this,
-                                       listData.get(i),
-                                       i,
-                                       sel,
-                                       (i == 0));
+        r.getListCellRendererComponent(this, listData.get(i), i, sel, (i == 0));
         ++i;
       }
     }    
@@ -46,22 +42,23 @@ public class CheckBoxJList extends JList<String> implements ListSelectionListene
     addListSelectionListener(this);
   }
 
-  public CheckBoxJList(Vector<String> listData) {
-    super(listData);
+  public CheckBoxJList(ArrayList<String> listData) {
+    super(Utilities.toStringArray(listData));
     init(listData, null);
   }
 
-  public CheckBoxJList(Vector<String> listData, Vector<String> selData) {
-    super(listData);
+
+  public CheckBoxJList(ArrayList<String> listData, ArrayList<String> selData) {
+    super(Utilities.toStringArray(listData));
     init(listData, selData);
   }
   
   @SuppressWarnings({"unchecked"})
   public CheckBoxJList(ListModel<String> lm) {
     super(lm);
-    Vector<String> listData = new Vector<String>();
+    ArrayList<String> listData = new ArrayList<String>();
     for(int i = 0; i < lm.getSize(); ++i) listData.add(lm.getElementAt(i));
-    init(listData, new Vector<String>());
+    init(listData, new ArrayList<String>());
   }
   
   // ListSelectionListener implementation
