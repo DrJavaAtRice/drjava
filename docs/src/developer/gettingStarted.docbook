@@ -65,22 +65,18 @@ document in devdoc.docbook.
     
     <para>You will need to have three programs properly installed and set up on
     any system you intend to use for development.  These are the Sun Java
-    Development Kit (for compilation), a Subversion client (to access the
-    source code repository), and Apache Ant (for scripted building).</para>
+    Development Kit or OpenJDK (for compilation), a Subversion or Git client
+    (to access the source code repository), and Apache Ant (for scripted
+    building).</para>
     
     <section id="installJDK"> <title>Sun Java Development Kit</title> <para>If
     it's not already installed on your system, you can download the JDK from
     <ulink url="http://java.sun.com">Sun's Web site</ulink>.  You will need to
-    have installed the JDK version 5 (note the distinction on the download
+    have installed the JDK version 8 (note the distinction on the download
     pages between a Java <emphasis>Runtime Environment</emphasis>, which just
     contains the tools needed to <emphasis>run</emphasis> Java programs, and a
     Java <emphasis>Development Kit</emphasis>, which contains a compiler and
-    other tools, in addition to the runtime application).  You may also want to
-    install JDK version 6.  The DrJava sources depend on Java 5 (but not 6)
-    language features and APIs. (Note: theoretically, any Java 5 compiler
-    should be able to handle the DrJava sources.  However, there are currently
-    some dependencies on Sun's tools in the main DrJava code module, so you
-    will need to have those tools available.)</para>
+    other tools, in addition to the runtime application).</para>
       
       <para>You should set up your command-line environment so that you can
       access the <command>java</command> and <command>javac</command> commands.
@@ -92,17 +88,12 @@ document in devdoc.docbook.
       <filename>/home/javaplt/java</filename>, organized by platform (such as
       <filename>Linux-i686</filename>) and then by version.</para> </note>
       
-      <note id="osx-java"> <title>Mac OS X</title> <para>Java is built in to
-      Mac OS X, which makes Apple, rather than Sun, the main source of core
-      Java software for the platform.  Java 5 is only supported since version
-      10.4 (Tiger) of the operating system, and Java 6 requires OS X 10.5
-      (Leopard) and a recent (64-bit Intel) machine.  If you haven't done so
-      already, you should install the Xcode Tools, distributed on CD or DVD
-      with the OS, and also available from the <ulink
-      url="http://developer.apple.com">Apple Developer Connection</ulink> (free
-      membership may be required).  This will contain <emphasis>at
-      least</emphasis> the Java 1.4 tools.  If you need to, you can then
-      dowload the Java 5 or Java 6 tools from the ADC Web site.  To see what is
+      <note id="osx-java"> <title>Mac OS X</title> <para>As of OS X 10.7 (2011)
+      Java is no longer built into Mac OS X, so you'll have to install it
+      yourself. If you haven't done so already, you should install the Xcode
+      Tools, distributed on CD or DVD with the OS, and also available from the
+      <ulink url="http://developer.apple.com">Apple Developer
+      Connection</ulink> (free membership is required). To see what is
       currently installed, go to
       <filename>/System/Library/Frameworks/JavaVM.framework/Versions</filename>.</para>
 
@@ -163,6 +154,7 @@ document in devdoc.docbook.
       <filename>/home/javaplt/packages/apache-ant-1.x.x</filename>
       directories.</para> </note>
       
+      <!--
       <note> <title>Microsoft Windows (95, 98, &amp; Me)</title>
       <para>According to the Ant installation instructions, the
       <command>ant</command> executable script will not work correctly in older
@@ -170,6 +162,7 @@ document in devdoc.docbook.
       They recommend creating a <filename>C:\ant</filename> directory.  See the
       <ulink url="http://ant.apache.org/manual">Ant Manual</ulink> for
       details.</para> </note>
+      -->
       
       <note> <title>Mac OS X</title> <para>Ant is installed with the Xcode
       Tools.  See the <link linkend="osx-java">previous note</link> for
@@ -186,14 +179,15 @@ document in devdoc.docbook.
       familiarize yourself with the idiosyncrasies of your particular
       platform.</para>
       
-      <note> <title>Unix</title> <para>On Unix systems, the environment
-      variables can be set by modifying a login script file.  Assuming you are
-      running a <command>bash</command> shell, you can see how your environment
-      is currently set up by typing <literal>env</literal>.  You can also use
-      <command>which</command> to test the <literal>PATH</literal> variable
-      &mdash; for example, <literal>which ant</literal> will print a full path
-      to the <command>ant</command> executable if Ant is correctly set up.  It
-      is important to check the current settings before making changes.</para>
+      <note> <title>*nix</title> <para>On Unix and Unix-like systems, the
+      environment variables can be set by modifying a login script file.
+      Assuming you are running a <command>bash</command> shell, you can see how
+      your environment is currently set up by typing <literal>env</literal>.
+      You can also use <command>which</command> to test the
+      <literal>PATH</literal> variable &mdash; for example, <literal>which
+      ant</literal> will print a full path to the <command>ant</command>
+      executable if Ant is correctly set up.  It is important to check the
+      current settings before making changes.</para>
         
         <para>To make changes to the default environment settings, edit (or
         create) the <filename>.bashrc</filename> file in your home directory to
@@ -215,22 +209,12 @@ document in devdoc.docbook.
         <para>After making changes, you will need to open a new terminal window
         before the settings will take effect.</para> </note>
       
-      <note> <title>Microsoft Windows</title> <para>Each version of Windows has
-      a slightly different method for setting environment variables.  In most
-      cases, you can select <guibutton>System</guibutton> in the Control Panel
-      (or choose <guibutton>Properties</guibutton> after right-clicking on
-      <guibutton>My Computer</guibutton>), and then find a button for
-      <guibutton>Environment Variables</guibutton> (usually on the
-      <guibutton>Advanced</guibutton> tab).  You may need to log out and back
-      in before your settings will take effect.  Note that path-like variables
-      (such as <literal>PATH</literal> and <literal>CLASSPATH</literal>) should
-      use a semicolon (<literal>;</literal>) to delimit filenames.  You can use
-      a variable's value at any time (both in a later declaration and at the
-      command line) with syntax like <literal>$ANT_HOME</literal> [TODO: is
-      this true?].</para>
+      <note> <title>Microsoft Windows</title> <para>We recommend using <ulink
+      url="https://msdn.microsoft.com/en-us/commandline/wsl/about">Ubuntu on
+      Windows</ulink>.</para>
         
         <para>If you're using Cygwin (a Unix-like environment for Windows),
-        many of the Unix instructions above are relevant.  You
+        many of the *nix instructions above are relevant.  You
         <emphasis>could</emphasis>, for example, define the environment
         variables in a <filename>.bashrc</filename> file.  However, it's
         probably best to use the system-wide Windows facilities (such as the
@@ -255,8 +239,8 @@ document in devdoc.docbook.
             
             <tbody>
               
-              <row> <entry><literal>JAVA5_HOME</literal></entry>
-              <entry>Location of the Java 5 installation.  The specified
+              <row> <entry><literal>JAVA_HOME</literal></entry>
+              <entry>Location of the Java installation.  The specified
               directory should have a <filename>bin</filename> subdirectory
               containing <command>java</command>, <command>javac</command>,
               <command>javadoc</command>, etc.</entry> <entry>Required in order
@@ -265,6 +249,7 @@ document in devdoc.docbook.
               <filename>/home/javaplt/java/Linux-i686/1.5</filename>.</entry>
               </row>
 
+              <!--
               <row> <entry><literal>JAVA6_HOME</literal></entry>
               <entry>Location of the Java 6 installation.  The specified
               directory should have a <filename>bin</filename> subdirectory
@@ -274,6 +259,7 @@ document in devdoc.docbook.
               script when running or testing.  Rice CS:
               <filename>/home/javaplt/java/Linux-i686/1.6</filename>.</entry>
               </row>
+              -->
 
               <row> <entry><literal>ANT_HOME</literal></entry> <entry>Location
               of the Ant installation.  The specified directory should contain
