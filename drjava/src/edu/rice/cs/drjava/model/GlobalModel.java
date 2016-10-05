@@ -387,9 +387,7 @@ public interface GlobalModel extends ILoadDocuments {
   /** Interprets the current given text at the prompt in the interactions pane. */
   public void interpretCurrentInteraction();
   
-  /** Returns the current classpath in use by the Interpreter JVM. This 
-   * includes the original jvm classpath, the global
-   * drjava extra classpaths, and the project extra classpaths.
+  /** Returns the current classpath in use by the Interpreter JVM.
    * @return the current classpath in use by the Interpreter JVM
    */
   public Iterable<File> getInteractionsClassPath();

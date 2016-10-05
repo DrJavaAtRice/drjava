@@ -82,7 +82,7 @@ public class History implements OptionConstants, Serializable {
     public void optionChanged (OptionEvent<Integer> oce) {
       int newSize = oce.value;
 //      System.err.println("optionChanged called for historyOptionListener; newSize = " + newSize);
-      setMaxSize(newSize);
+      setMaximumSize(newSize);
     }
     public String toString() { return "HISTORY_MAX_SIZE OptionListener #" + hashCode(); }
   };
@@ -258,7 +258,7 @@ public class History implements OptionConstants, Serializable {
   /** Changes the maximum number of interactions remembered by this History.
     * @param newSize New number of interactions to remember.
     */
-  public void setMaxSize(int newSize) {
+  public void setMaximumSize(int newSize) {
     if (newSize < 0) newSize = 0;    // Sanity check
 
     // Remove old elements if the new size is less than current size

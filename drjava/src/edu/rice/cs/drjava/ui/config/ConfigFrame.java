@@ -625,7 +625,7 @@ public class ConfigFrame extends SwingFrame {
     addOptionComponent(panel, newFontOptionComponent(OptionConstants.FONT_MAIN));
     addOptionComponent(panel, newFontOptionComponent(OptionConstants.FONT_LINE_NUMBERS));
     addOptionComponent(panel, newFontOptionComponent(OptionConstants.FONT_DOCLIST));
-    addOptionComponent(panel, newFontOptionComponent(OptionConstants.FONT_MENU));
+    addOptionComponent(panel, newFontOptionComponent(OptionConstants.FONT_MENUBAR));
     addOptionComponent(panel, newFontOptionComponent(OptionConstants.FONT_TOOLBAR));
     addOptionComponent(panel, newBooleanOptionComponent(OptionConstants.TEXT_ANTIALIAS));
     panel.displayComponents();

@@ -308,15 +308,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     final NodeDataVisitor<OpenDefinitionsDocument, Boolean>  _gainVisitor = 
       new NodeDataVisitor<OpenDefinitionsDocument, Boolean>() {
       public Boolean itemCase(OpenDefinitionsDocument doc, Object... p) {
-        _setActiveDoc(doc);  // sets _activeDocument, the shadow copy of the active document
-//        addToBrowserHistory();
-        
+        _setActiveDoc(doc);  // sets _activeDocument, the shadow copy of the active document   
 //        Utilities.showDebug("Setting the active doc done");
         final File oldDir = _activeDirectory;  // _activeDirectory can be null
         final File dir = doc.getParentDirectory();  // dir can be null
         if (dir != null && ! dir.equals(oldDir)) {
-          /* If the file is in External or Auxiliary Files then then we do not want to change our project directory
-           * to something outside the project. ?? */
           _activeDirectory = dir;
           _notifier.currentDirectoryChanged(_activeDirectory);
         }
@@ -1310,18 +1306,16 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   //---------------------- Specified by ILoadDocuments ----------------------//
   
-  /** Open a file and add it to the pool of definitions documents. The provided 
-   * file selector chooses a file, and on a successful open, the fileOpened() 
-   * event is fired. This method also checks if there was previously a single
-   * unchanged, untitled document open, and if so, closes it after a
-   * successful opening.
-   *
-   * @param com a command pattern command that selects what file to open
-   * @return The open document, or null if unsuccessful
-   * @exception IOException if an IO operation fails
-   * @exception OperationCanceledException if the open was canceled
-   * @exception AlreadyOpenException if the file is already open
-   */
+  /** Open a file and add it to the pool of definitions documents. The provided file selector chooses a file, and on a 
+    * successful open, the fileOpened()  event is fired. This method also checks if there was previously a single
+    * unchanged, untitled document open, and if so, closes it after a successful opening.
+    *
+    * @param com a command pattern command that selects what file to open
+    * @return The open document, or null if unsuccessful
+    * @exception IOException if an IO operation fails
+    * @exception OperationCanceledException if the open was canceled
+    * @exception AlreadyOpenException if the file is already open
+    */
   public OpenDefinitionsDocument openFile(FileOpenSelector com) throws
     IOException, OperationCanceledException, AlreadyOpenException {
     // Close an untitled, unchanged document if it is the only one open
@@ -1332,7 +1326,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     OpenDefinitionsDocument openedDoc = openFileHelper(com);
     if (closeUntitled) closeFileHelper(oldDoc);
 //    Utilities.showDebug("DrJava has opened" + openedDoc + " and is setting it active");
-//    addToBrowserHistory();
+    addToBrowserHistory();
     setActiveDocument(openedDoc);
     setProjectChanged(true);
 //    Utilities.showDebug("active doc set; openFile returning");
@@ -1375,7 +1369,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     OpenDefinitionsDocument[] openedDocs = openFilesHelper(com);
     if (openedDocs.length > 0) {
       if (closeUntitled) closeFileHelper(oldDoc);
-//      addToBrowserHistory();
       setActiveDocument(openedDocs[0]);
     }
     return openedDocs;
@@ -2688,19 +2681,15 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   /** Add the current location to the browser history.  Only runs in event thread. Assumes that doc is not null. */
-  public void addToBrowserHistory() {
-    addToBrowserHistory(false);
-  }
+  public void addToBrowserHistory() { addToBrowserHistory(false); }
   
-  /** Add the current location to the browser history.  Only runs in event thread. Assumes that doc is not null.
+  /** Add the current location (point region) to browser history.  Only runs in event thread. Assumes doc is not null.
     * @param before true if the location should be inserted before the current region */
   public void addToBrowserHistory(boolean before) {
-    assert EventQueue.isDispatchThread();
-//    edu.rice.cs.drjava.ui.MainFrame.MFLOG.log("addToBrowserHistory()");
+     _log.log("AbstractGlobalModel.addToBrowserHistory(" + before + ") called");
     _notifier.updateCurrentLocationInDoc();
-//    edu.rice.cs.drjava.ui.MainFrame.MFLOG.log("addToBrowserHistory: after updateCurrentLocationInDoc");
     final OpenDefinitionsDocument doc = getActiveDocument();
-//    assert doc != null && EventQueue.isDispatchThread();
+    assert (doc != null && EventQueue.isDispatchThread()) || Utilities.TEST_MODE;
     
     Position startPos = null;
     Position endPos = null;
@@ -2711,15 +2700,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
     
     catch (BadLocationException ble) { throw new UnexpectedException(ble); }
-//    edu.rice.cs.drjava.ui.MainFrame.MFLOG.log("addToBrowserHistory: startPos = "+startPos.getOffset());
     BrowserDocumentRegion r = new BrowserDocumentRegion(doc, startPos, endPos);
-    if (before) {
-      _browserHistoryManager.addBrowserRegionBefore(r, _notifier);
-    }
-    else {
-      _browserHistoryManager.addBrowserRegion(r, _notifier);
-    }
-//    edu.rice.cs.drjava.ui.MainFrame.MFLOG.log("addToBrowserHistory: "+_browserHistoryManager);
+    if (before) _browserHistoryManager.addBrowserRegionBefore(r, _notifier);
+    else _browserHistoryManager.addBrowserRegion(r, _notifier);
   }
   
   /** throws an UnsupportedOperationException */

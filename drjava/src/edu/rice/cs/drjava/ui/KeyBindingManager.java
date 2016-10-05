@@ -38,6 +38,8 @@ package edu.rice.cs.drjava.ui;
 
 import edu.rice.cs.drjava.*;
 import edu.rice.cs.drjava.config.*;
+
+import java.awt.EventQueue;
 import javax.swing.*;
 import java.util.*;
 
@@ -72,6 +74,7 @@ public class KeyBindingManager {
   public Collection<KeyStrokeData> getKeyStrokeData() { return _actionToDataMap.values(); }
 
   public void put(VectorOption<KeyStroke> vkso, Action a, JMenuItem jmi, String name)  {
+    assert (EventQueue.isDispatchThread()); 
     Vector<KeyStroke> keys = DrJava.getConfig().getSetting(vkso);
     Vector<KeyStroke> retained = new Vector<KeyStroke>();
     KeyStrokeData ksd = new KeyStrokeData(keys, a, jmi, name, vkso);

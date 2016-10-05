@@ -170,7 +170,8 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   }
   
   class ColorComboRenderer extends JPanel implements ListCellRenderer<Color> {
-    private volatile Color _color = DrJava.getConfig().getSetting(OptionConstants.FIND_RESULTS_COLORS[_colorBox.getSelectedIndex()]);
+    private volatile Color _color = 
+      DrJava.getConfig().getSetting(OptionConstants.FIND_RESULTS_COLORS[_colorBox.getSelectedIndex()]);
     private final DefaultListCellRenderer _defaultRenderer = new DefaultListCellRenderer();
     private final Dimension _size = new Dimension(0, 20);  
     private final CompoundBorder _compoundBorder = 
@@ -300,9 +301,9 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
       getRegTreeModel().nodeStructureChanged(getRootNode());
       _lastSelectedRegion = null;
 //      _requestFocusInWindow();
-//      System.err.println("Root has been cleared; child count = " + getRootNode().getChildCount());
-      _findReplace.findAll(_searchString, _searchAll, _searchSelectionOnly, _matchCase, _wholeWord, _noComments, _noTestCases, odd, 
-                           getRegionManager(), _region, this);
+      _log.log("Root has been cleared; child count = " + getRootNode().getChildCount());
+      _findReplace.findAll(_searchString, _searchAll, _searchSelectionOnly, _matchCase, _wholeWord, _noComments, 
+                           _noTestCases, odd, getRegionManager(), _region, this);
       getRegTree().scrollRowToVisible(0);  // Scroll to the first line in the new panel
       _requestFocusInWindow();
     }

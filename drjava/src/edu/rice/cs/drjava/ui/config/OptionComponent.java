@@ -173,13 +173,9 @@ public abstract class OptionComponent<T,C extends JComponent> implements Seriali
   /** Notify all change listeners of a change. Notification performed in the event thread. */
   protected void notifyChangeListeners() {
     assert _parent.duringInit() || Utilities.TEST_MODE || EventQueue.isDispatchThread();
-//    Utilities.invokeLater(new Runnable() {
-//      public void run() { 
-      // Make a copy of _changeListeners to prevent potential ConcurrentModificationException
-      ChangeListener[] listeners = _changeListeners.toArray(new ChangeListener[_changeListeners.size()]);
+    // Make a copy of _changeListeners to prevent potential ConcurrentModificationException
+    ChangeListener[] listeners = _changeListeners.toArray(new ChangeListener[_changeListeners.size()]);
     for (ChangeListener l: listeners)  l.value(OptionComponent.this); 
-//      }
-//    });
   }
   
   /** List of change listeners.  A volatile Vector is used here because a race involving operations on this field was 

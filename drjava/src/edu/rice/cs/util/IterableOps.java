@@ -44,7 +44,7 @@ public abstract class IterableOps {
     * @param <T>  Parameterized type of the iterable.
     * @return     the array NOTE: at compile time the type of the array is Object[]; can cause ClassCastException.
     */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked","rawtypes"})
   public static <T> T[] toArray(Iterable<T> iter, Class<T> elemType) {
     ArrayList<T> al = (ArrayList<T>) new ArrayList();
 

@@ -67,6 +67,8 @@ import edu.rice.cs.plt.lambda.Thunk;
   * @version $Id$
   */
 public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends TabbedPanel {
+  
+  // static _log field inherited from TabbedPanel 
   protected volatile JPanel _leftPane;
   
   private volatile DefaultMutableTreeNode _rootNode;
@@ -90,24 +92,13 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
   protected volatile JButton _nextButton;
   /** the region that was last selected (may be null). */ 
   protected volatile R _lastSelectedRegion = null;
-  
-  
-//  /** Cached values from last region insertion. _cachedDoc is non-null iff the last added region occurred at the end of
-//    * the list of regions for its document. If _cachedDoc is null, the other cached values are invalid. */
-//  protected OpenDefinitionsDocument _cachedDoc = null;
-//  protected DefaultMutableTreeNode _cachedDocNode = null;
-//  protected int _cachedRegionIndex = 0;
-//  protected int _cachedStartOffset = 0;
-  
   /** State pattern to improve performance when rapid changes are made. */
   protected final IChangeState DEFAULT_STATE = new DefaultState();
 //  protected final IChangeState CHANGING_STATE = new ChangingState();
   protected volatile IChangeState _changeState = DEFAULT_STATE;
-  
   /** A table mapping each document entered in this panel to its corresponding MutableTreeNode in _regTreeModel. */
   protected volatile HashMap<OpenDefinitionsDocument, DefaultMutableTreeNode> _docToTreeNode = 
     new HashMap<OpenDefinitionsDocument, DefaultMutableTreeNode>();
-  
   /** A table mapping each region entered in this panel to its corresponding MutableTreeNode in _regTreeModel. */
   protected volatile IdentityHashMap<R, DefaultMutableTreeNode> _regionToTreeNode = 
     new IdentityHashMap<R, DefaultMutableTreeNode>();

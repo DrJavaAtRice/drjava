@@ -64,7 +64,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
   */
 public class PathClassLoader extends AbstractClassLoader {
   
-  private static final Log _log = new Log("JUnitTestManager.txt", false);
+  private static final Log _log = new Log("PathClassLoader.txt", true);
   
   /** Locate a resource in the given path.  Returns {@code null} if the resource is not found.
     * If multiple queries will be performed on the same path, a PathClassLoader instance
@@ -140,13 +140,14 @@ public class PathClassLoader extends AbstractClassLoader {
     _urlLoader = new URLClassLoader(urls.toArray(new URL[urls.size()]), EmptyClassLoader.INSTANCE);
   }
   
-  /** This override is defined solely to trace calls to this method; it immediately invokes the
-    * overridden code.
-    */
-  @Override protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-    _log.log("PathClassLoader.loadClass(" + name + ", " + resolve + ") called");
-    return super.loadClass(name, resolve);
-  }
+//  /** This override is defined solely to trace calls to this method; it immediately invokes the
+//    * overridden code.
+//    */
+//  @Override 
+//  protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+//    _log.log("PathClassLoader.loadClass(" + name + ", " + resolve + ") called");
+//    return super.loadClass(name, resolve);
+//  }
   
   @Override 
   protected Class<?> findClass(String name) throws ClassNotFoundException {
@@ -170,12 +171,14 @@ public class PathClassLoader extends AbstractClassLoader {
   
   @Override 
   protected URL findResource(String name) {
+    _log.log("findResource(" + name + ") called; _path is " + _path);
     if (!IterUtil.isEqual(_path, _urlLoaderPath)) { updateURLLoader(); }
     return _urlLoader.findResource(name);
   }
   
   @Override 
   protected Enumeration<URL> findResources(String name) throws IOException {
+    _log.log("findResources(" + name + ") called _path is " + _path);
     if (!IterUtil.isEqual(_path, _urlLoaderPath)) { updateURLLoader(); }
     return _urlLoader.findResources(name);
   }

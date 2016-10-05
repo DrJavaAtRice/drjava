@@ -53,7 +53,7 @@ import edu.rice.cs.util.FileOps;
 /** A GUI-toolkit agnostic interface to a console document.  This class assumes that the embedded document supports 
   * readers/writers locking and uses that locking protocol to ensure the integrity of the data added in this class
   * WHY is prompt considered part of a console document rather than an interactions document?
-  * @version $Id: ConsoleDocument.java 5236 2010-04-27 01:43:36Z mgricken $ */
+  * @version $Id$ */
 
 public class ConsoleDocument implements ConsoleDocumentInterface {
   
@@ -145,8 +145,8 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
   public void setBeep(Runnable beep) { _beep = beep; }
   
   /** Resets the document to a clean state. Only runs in the event thread. 
-   * @param banner the value to which to set the banner
-   */
+    * @param banner the value to which to set the banner
+    */
   public void reset(String banner) {
     assert EventQueue.isDispatchThread();
     try {
@@ -191,10 +191,10 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     catch (EditDocumentException e) { throw new UnexpectedException(e); }
   }
   
-  /** Gets the position immediately before the prompt, or the doc length if 
-   * there is no prompt.  Only runs in the event thread. 
-   * @return the position immediately before the prompt, or the doc length if there is no prompt
-   */
+  /** Gets the position immediately before the prompt, or the doc length if there is no prompt.  Only runs in the event 
+    * thread. 
+    * @return the position immediately before the prompt, or the doc length if there is no prompt
+    */
   private int _getPositionBeforePrompt() {
     int len = _document.getLength();
     if (_document.hasPrompt()) {
@@ -204,12 +204,13 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     return len;
   }
   
-  /** Inserts the given string with the given attributes just before the most recent prompt.
+  /** Inserts the given string with the given attributes just before the most recent prompt.  Only runs in event thread
+    * except for legacy test code.
     * @param text String to insert
     * @param style name of style to format the string
     */
   public void insertBeforeLastPrompt(String text, String style) {
-/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     try {
       int pos = _getPositionBeforePrompt();
 //      System.err.println("_promptPos before update = " + _promptPos);

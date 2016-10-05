@@ -129,7 +129,7 @@ public class ConfigDescriptions {
         "the Definitions Pane if Show All Line Numbers is enabled.<br>" +
         "Cannot be displayed larger than the Main Font.</html>");
     add(OptionConstants.FONT_DOCLIST, "Document List Font", "The font used in the list of open documents.");
-    add(OptionConstants.FONT_MENU, "MenuBar Font", "The font used in menus.");
+    add(OptionConstants.FONT_MENUBAR, "MenuBar Font", "The font used in menus and tabbed pane labels.");
     add(OptionConstants.FONT_TOOLBAR, "ToolBar Font", "The font used in the toolbar buttons.");
      
     add(OptionConstants.TEXT_ANTIALIAS, "Use anti-aliased text", "Whether to graphically smooth the text.");

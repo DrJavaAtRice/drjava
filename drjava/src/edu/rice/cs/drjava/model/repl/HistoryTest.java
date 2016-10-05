@@ -151,11 +151,11 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
 //    Utilities.clearEventQueue();
     
     assertEquals("History size should be 10", 10, _history.size());
-    _history.setMaxSize(100);
+    _history.setMaximumSize(100);
 
     assertEquals("History size should still be 10", 10, _history.size());
 
-    _history.setMaxSize(0);
+    _history.setMaximumSize(0);
     assertEquals("History size should be 0", 0, _history.size());
 
     Utilities.invokeAndWait(new Runnable() { 

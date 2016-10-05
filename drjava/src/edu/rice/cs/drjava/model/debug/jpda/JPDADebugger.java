@@ -1080,21 +1080,18 @@ public class JPDADebugger implements Debugger {
     }
   }
   
-  /** Returns a Vector with the loaded ReferenceTypes for the given class name
-   * (empty if the class could not be found).  Makes no attempt to load the
-   * class if it is not already loaded.  If the lineNumber is not
-   * DebugAction.ANY_LINE, this method ensures that the returned ReferenceTypes
-   * contain the given lineNumber, searching through inner classes if necessary.
-   * If no inner classes contain the line number, an empty Vector is returned.
-   * <p>
-   * If custom class loaders are in use, multiple copies of the class
-   * may be loaded, so all are returned.
-   * 
-   * @param className the class name 
-   * @param lineNumber the line number 
-   * @return a vector with the loaded ReferenceTypes for the given class name
-   */
-  /* synchronized */ Vector<ReferenceType> getReferenceTypes(String className, int lineNumber) {
+  /** Returns a Vector with the loaded ReferenceTypes for the given class name (empty if the class could not be found). 
+    * Makes no attempt to load the class if it is not already loaded.  If the lineNumber is not DebugAction.ANY_LINE, 
+    * this method ensures that the returned ReferenceTypes contain the given lineNumber, searching through inner classes
+    * if necessary.  If no inner classes contain the line number, an empty Vector is returned.
+    * <p>
+    * If custom class loaders are in use, multiple copies of the class may be loaded, so all are returned.
+    * 
+    * @param className the class name 
+    * @param lineNumber the line number 
+    * @return a vector with the loaded ReferenceTypes for the given class name
+    */
+  Vector<ReferenceType> getReferenceTypes(String className, int lineNumber) {
     assert EventQueue.isDispatchThread();
     // Get all classes that match this name
     List<ReferenceType> classes;

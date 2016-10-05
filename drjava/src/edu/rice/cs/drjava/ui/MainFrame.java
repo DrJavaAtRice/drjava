@@ -152,7 +152,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private volatile ModelListener _mainListener; 
   
   /** Maps an OpenDefDoc to its JScrollPane.  Why doesn't OpenDefDoc contain a defScrollPane field? */
-  private HashMap<OpenDefinitionsDocument, JScrollPane> _defScrollPanes;
+  private volatile HashMap<OpenDefinitionsDocument, JScrollPane> _defScrollPanes;
   
   /** The currently displayed DefinitionsPane. */
   private volatile DefinitionsPane _currentDefPane;
@@ -1725,68 +1725,70 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
   }
   
-  /** Initialize dialog if necessary.
-    * Should NOT be called in the event thread. ???*/
+  /** Initialize dialog if necessary.  Runs asynchronously so as not to block event handling thread. 
+    * Binds _openJavaDocDialog.  Should it be synchronized using a future? */
   void initOpenJavadocDialog() {
-//    assert (!EventQueue.isDispatchThread()); 
-    if (_openJavadocDialog == null) {
-      PredictiveInputFrame.InfoSupplier<JavaAPIListEntry> info = 
-        new PredictiveInputFrame.InfoSupplier<JavaAPIListEntry>() {
-        public String value(JavaAPIListEntry entry) {
-          return entry.getFullString();
+    Executors.newSingleThreadExecutor().submit(new Runnable() {
+      public void run() {
+        if (_openJavadocDialog == null) {
+          PredictiveInputFrame.InfoSupplier<JavaAPIListEntry> info = 
+            new PredictiveInputFrame.InfoSupplier<JavaAPIListEntry>() {
+            public String value(JavaAPIListEntry entry) { return entry.getFullString(); }
+          };
+          
+          PredictiveInputFrame.CloseAction<JavaAPIListEntry> okAction = 
+            new PredictiveInputFrame.CloseAction<JavaAPIListEntry>() {
+            public String getName() { return "OK"; }
+            public KeyStroke getKeyStroke() { return KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0); }
+            public String getToolTipText() { return null; }
+            public Object value(PredictiveInputFrame<JavaAPIListEntry> p) {
+              if (p.getItem() != null) PlatformFactory.ONLY.openURL(p.getItem().getURL());
+              hourglassOff();
+              return null;
+            }
+          };
+          PredictiveInputFrame.CloseAction<JavaAPIListEntry> cancelAction = 
+            new PredictiveInputFrame.CloseAction<JavaAPIListEntry>() {
+            public String getName() { return "Cancel"; }
+            public KeyStroke getKeyStroke() { return KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0); }
+            public String getToolTipText() { return null; }
+            public Object value(PredictiveInputFrame<JavaAPIListEntry> p) {
+              hourglassOff();
+              return null;
+            }
+          };
+          // Note: PredictiveInputModel.* is statically imported
+          ArrayList<MatchingStrategy<JavaAPIListEntry>> strategies = new ArrayList<MatchingStrategy<JavaAPIListEntry>>();
+          strategies.add(new FragmentStrategy<JavaAPIListEntry>());
+          strategies.add(new PrefixStrategy<JavaAPIListEntry>());
+          strategies.add(new RegExStrategy<JavaAPIListEntry>());
+          List<PredictiveInputFrame.CloseAction<JavaAPIListEntry>> actions
+            = new ArrayList<PredictiveInputFrame.CloseAction<JavaAPIListEntry>>();
+          actions.add(okAction);
+          actions.add(cancelAction);
+          _openJavadocDialog = 
+            new PredictiveInputFrame<JavaAPIListEntry>(MainFrame.this,
+                                                       "Open Java API Javadoc Webpage",
+                                                       true, // force
+                                                       true, // ignore case
+                                                       info,
+                                                       strategies,
+                                                       actions, 1, // cancel is action 1
+                                                       new JavaAPIListEntry("dummyJavadoc", "dummyJavadoc", null)) {
+            public void setOwnerEnabled(boolean b) { 
+              if (b) hourglassOff(); 
+              else hourglassOn();
+            }
+          }; 
+          // putting one dummy entry in the list; it will be changed later anyway
+          
+          if (DrJava.getConfig().getSetting(DIALOG_OPENJAVADOC_STORE_POSITION).booleanValue()) {
+            _openJavadocDialog.setFrameState(DrJava.getConfig().getSetting(DIALOG_OPENJAVADOC_STATE));
+          }
+          generateJavaAPISet();
         }
-      };
-      PredictiveInputFrame.CloseAction<JavaAPIListEntry> okAction = 
-        new PredictiveInputFrame.CloseAction<JavaAPIListEntry>() {
-        public String getName() { return "OK"; }
-        public KeyStroke getKeyStroke() { return KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0); }
-        public String getToolTipText() { return null; }
-        public Object value(PredictiveInputFrame<JavaAPIListEntry> p) {
-          if (p.getItem() != null) PlatformFactory.ONLY.openURL(p.getItem().getURL());
-          hourglassOff();
-          return null;
-        }
-      };
-      PredictiveInputFrame.CloseAction<JavaAPIListEntry> cancelAction = 
-        new PredictiveInputFrame.CloseAction<JavaAPIListEntry>() {
-        public String getName() { return "Cancel"; }
-        public KeyStroke getKeyStroke() { return KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0); }
-        public String getToolTipText() { return null; }
-        public Object value(PredictiveInputFrame<JavaAPIListEntry> p) {
-          hourglassOff();
-          return null;
-        }
-      };
-      // Note: PredictiveInputModel.* is statically imported
-      ArrayList<MatchingStrategy<JavaAPIListEntry>> strategies = new ArrayList<MatchingStrategy<JavaAPIListEntry>>();
-      strategies.add(new FragmentStrategy<JavaAPIListEntry>());
-      strategies.add(new PrefixStrategy<JavaAPIListEntry>());
-      strategies.add(new RegExStrategy<JavaAPIListEntry>());
-      List<PredictiveInputFrame.CloseAction<JavaAPIListEntry>> actions
-        = new ArrayList<PredictiveInputFrame.CloseAction<JavaAPIListEntry>>();
-      actions.add(okAction);
-      actions.add(cancelAction);
-      _openJavadocDialog = 
-        new PredictiveInputFrame<JavaAPIListEntry>(MainFrame.this,
-                                                   "Open Java API Javadoc Webpage",
-                                                   true, // force
-                                                   true, // ignore case
-                                                   info,
-                                                   strategies,
-                                                   actions, 1, // cancel is action 1
-                                                   new JavaAPIListEntry("dummyJavadoc", "dummyJavadoc", null)) {
-        public void setOwnerEnabled(boolean b) { 
-          if (b) hourglassOff(); 
-          else hourglassOn();
-        }
-      }; 
-      // putting one dummy entry in the list; it will be changed later anyway
-      
-      if (DrJava.getConfig().getSetting(DIALOG_OPENJAVADOC_STORE_POSITION).booleanValue()) {
-        _openJavadocDialog.setFrameState(DrJava.getConfig().getSetting(DIALOG_OPENJAVADOC_STATE));
       }
-      generateJavaAPISet();
-    }
+    });
   }
   
   /** Generate Java API class list. 
@@ -1871,8 +1873,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     return _javaAPISet;
   }
   
-  /** Generate Java API class list. */
-  public void generateJavaAPISet() {
+  /** Generate Java API class list.  Only called from an asynchronous thread. */
+  private void generateJavaAPISet() {
     // should NOT be called in the event thread
     // otherwise the processing frame will not work correctly and the event thread will block
     // assert (!EventQueue.isDispatchThread());  // Why is this commented out???
@@ -3138,7 +3140,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _djProjectIcon = MainFrame.getIcon("ProjectIcon.gif");
   }
   
-  
   /** This manager is meant to retrieve the correct icons for the given filename. The only files recognized 
     * are the files obviously listed below in the function (.java, .dj0, .dj1, .dj2, .dj). The icons that represent 
     * each filetype are given into the managers constructor upon instantiation.  This class is static since
@@ -3193,8 +3194,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     */
   private static class OddDisplayManager implements DisplayManager<OpenDefinitionsDocument> {
     private final Icon _star;
-//    private Icon _juPass;
-//    private Icon _juFail;
     private final FileDisplayManager _default;
     
     /** Standard constructor.
@@ -3205,8 +3204,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
      */
     public OddDisplayManager(FileDisplayManager fdm, Icon star, Icon junitPass, Icon junitFail) {
       _star = star;
-//      _juPass = junitPass;
-//      _juFail = junitFail;
       _default = fdm;
     }
     public Icon getIcon(OpenDefinitionsDocument odd) {
@@ -3659,7 +3656,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       config.addOptionListener(FONT_MAIN, new MainFontOptionListener());
       config.addOptionListener(FONT_LINE_NUMBERS, new LineNumbersFontOptionListener());
       config.addOptionListener(FONT_DOCLIST, new DoclistFontOptionListener());
-      config.addOptionListener(FONT_MENU, new MenuBarFontOptionListener());
+      config.addOptionListener(FONT_MENUBAR, new MenuBarFontOptionListener());
       config.addOptionListener(FONT_TOOLBAR, new ToolBarFontOptionListener());
       config.addOptionListener(TOOLBAR_ICONS_ENABLED, new ToolBarOptionListener());
       config.addOptionListener(TOOLBAR_TEXT_ENABLED, new ToolBarOptionListener());
@@ -4597,8 +4594,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     if (! fileName.equals(_fileTitle)) {
       _fileTitle = fileName;
       setTitle(fileName);
-      _tabbedPanesFrame.setTitle("Tabbed Panes - "+fileName);
-      if (_debugFrame!=null) _debugFrame.setTitle("Debugger - "+fileName);
+      _tabbedPanesFrame.setTitle("Tabbed Panes - " + fileName);
+      if (_debugFrame!=null) _debugFrame.setTitle("Debugger - " + fileName);
       _model.getDocCollectionWidget().repaint();
     }
     String path = doc.getCompletePath();
@@ -4731,10 +4728,16 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Changes the message text toward the right of the status bar
     * @param msg The message to place in the status bar
     */
-  public void setStatusMessage(String msg) { _statusReport.setText(msg); }
+  public void setStatusMessage(String msg) { 
+//    System.out.println("Setting status message to '" + msg + "'");
+    _statusReport.setText(msg); 
+  }
   
   /** Sets the message text in the status bar to the null string. */
-  public void clearStatusMessage() { _statusReport.setText(""); }
+  public void clearStatusMessage() {
+//    System.out.println("Clearing status message!");
+    _statusReport.setText(""); 
+  }
   
   /** Sets the font of the status bar message
     * @param f The new font of the status bar message
@@ -6678,7 +6681,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     * @return the added menu item
     */
   private JMenuItem _addMenuItem(JMenu menu, Action a, VectorOption<KeyStroke> opt, boolean updateKeyboardManager) {
-    final Font menuFont = DrJava.getConfig().getSetting(FONT_MENU);
+    final Font menuFont = DrJava.getConfig().getSetting(FONT_MENUBAR);
     JMenuItem item = menu.add(a);
     item.setFont(menuFont);
     _setMenuShortcut(item, a, opt, updateKeyboardManager);
@@ -6696,7 +6699,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     */
   private JMenuItem _addMenuItem(JMenu menu, Action a, VectorOption<KeyStroke> opt, int index,
                                  boolean updateKeyboardManager) {
-    final Font menuFont = DrJava.getConfig().getSetting(FONT_MENU);
+    final Font menuFont = DrJava.getConfig().getSetting(FONT_MENUBAR);
     JMenuItem item = menu.insert(a, index);
     item.setFont(menuFont);
     _setMenuShortcut(item, a, opt, updateKeyboardManager);
@@ -6724,7 +6727,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Creates a menu with specified name and appropriate font. */
   private JMenu _newJMenu(String name) {
-    final Font menuFont = DrJava.getConfig().getSetting(FONT_MENU);
+    final Font menuFont = DrJava.getConfig().getSetting(FONT_MENUBAR);
     JMenu m = new JMenu(name);
     m.setFont(menuFont);
     return m;
@@ -6893,9 +6896,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     return editMenu;
   }
   
-  /** Update the MainFrame and _tabbedPanes menu bars, following any change to FONT_MENU (name, style, text) */
+  /** Update the MainFrame and _tabbedPanes menu bars, following any change to FONT_MENUBAR (name, style, text) */
   private void _updateMenuBars() {
-    Font menuFont = DrJava.getConfig().getSetting(FONT_MENU);
+    Font menuFont = DrJava.getConfig().getSetting(FONT_MENUBAR);
     //    _menuBar.setFont(menuFont);  // does not work!  Why?
     _updateMenus(_menuBar.getComponents());
     
@@ -6922,7 +6925,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Update the fonts in the specified menus. */ 
   private static void _updateMenus(Component[] menus) {
-    final Font menuFont = DrJava.getConfig().getSetting(FONT_MENU);
+    final Font menuFont = DrJava.getConfig().getSetting(FONT_MENUBAR);
     for (int i = 0; i < menus.length; i++) {
       if (menus[i] instanceof JMenu) {  
         JMenu m = (JMenu) menus[i];
@@ -7774,7 +7777,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _tabbedPane.addChangeListener(new ChangeListener () {
       /* Only runs in the event thread. */
       public void stateChanged(ChangeEvent e) {
-//        System.err.println("_tabbedPane.stateChanged called with event " + e);
+//        System.out.println("_tabbedPane.stateChanged called with event " + e);
         clearStatusMessage();
         
         if (_tabbedPane.getSelectedIndex() == INTERACTIONS_TAB) {
@@ -8190,7 +8193,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       if (doc != null) {
         addToBrowserHistory();
         _model.setActiveDocument(doc);
-//        addToBrowserHistory();
       }
     }
   }
@@ -9159,14 +9161,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       new DJAsyncTaskLauncher().executeTask(task, param, showProgress, lockUI);
     }
     public void handleAlreadyOpenDocument(OpenDefinitionsDocument doc) {
-//     boolean docChanged = !doc.equals(_model.getActiveDocument());
-//     if (docChanged) { addToBrowserHistory(); }
       
       // Always switch to doc
       _model.setActiveDocument(doc);
-      
-//     // defer executing this code until after active document switch (if any) is complete
-//     EventQueue.invokeLater(new Runnable() { public void run() { addToBrowserHistory(); } });
       
       // Prompt to revert if modified
       if (doc.isModifiedSinceSave()) {
@@ -10371,7 +10368,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
   }
   
-  /** The OptionListener for FONT_MENU */
+  /** The OptionListener for FONT_MENUBAR */
   private class MenuBarFontOptionListener implements OptionListener<Font> {
     public void optionChanged(OptionEvent<Font> oce) { 
       _updateMenuBars();
@@ -10614,92 +10611,98 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
   }
   
-  /** Initialize dialog if necessary. */
+  /** Initialize dialog if necessary.  Runs asynchronously. */
   private void _initAutoImportDialog() {
-    if (_autoImportDialog == null) {
-      _autoImportPackageCheckbox = new JCheckBox("Import Package");
-      _autoImportPackageCheckbox.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) { _autoImportDialog.resetFocus(); }
-      });
-      PlatformFactory.ONLY.setMnemonic(_autoImportPackageCheckbox,'p');
-      PredictiveInputFrame.InfoSupplier<JavaAPIListEntry> info = 
-        new PredictiveInputFrame.InfoSupplier<JavaAPIListEntry>() {
-        public String value(JavaAPIListEntry entry) { // show full class name as information
-          return entry.getFullString();
-        }
-      };
-      PredictiveInputFrame.CloseAction<JavaAPIListEntry> okAction = 
-        new PredictiveInputFrame.CloseAction<JavaAPIListEntry>() {
-        public String getName() { return "OK"; }
-        public KeyStroke getKeyStroke() { return KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0); }
-        public String getToolTipText() { return null; }
-        public Object value(PredictiveInputFrame<JavaAPIListEntry> p) {
-          String text;
-          if (p.getItem() != null) { // if a class was selected...
-            text = p.getItem().getFullString();
-          }
-          else { // use the text that was entered
-            text = p.getText();
-          }
-          if (_autoImportPackageCheckbox.isSelected()) {
-            int lastDot = text.lastIndexOf('.');
-            if (lastDot > 0) text = text.substring(0, lastDot + 1) + "*";
-          }
-          final InteractionsModel im = _model.getInteractionsModel();
-          // Get the last line (the one that caused the error) and remove it from the history
-          String lastLine = im.removeLastFromHistory();
-          // Import the selected class...
-          String importLine = "import " + text + "; // auto-import";
-          // ... and try to do the last line again
-          final String code = importLine + ((lastLine != null)  ?  ("\n" + lastLine)  : "");
-          EventQueue.invokeLater(new Runnable() { 
-            public void run() { // interpret with the added import
-              try {
-                im.append(code, ConsoleDocument.DEFAULT_STYLE);
-                im.interpretCurrentInteraction();
-              }
-              finally { hourglassOff(); }
-            }
+    Executors.newSingleThreadExecutor().submit(new Runnable() {
+      public void run() {
+        if (_autoImportDialog == null) {
+          _autoImportPackageCheckbox = new JCheckBox("Import Package");
+          _autoImportPackageCheckbox.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) { _autoImportDialog.resetFocus(); }
           });
-          return null;
+          PlatformFactory.ONLY.setMnemonic(_autoImportPackageCheckbox,'p');
+          PredictiveInputFrame.InfoSupplier<JavaAPIListEntry> info = 
+            new PredictiveInputFrame.InfoSupplier<JavaAPIListEntry>() {
+            public String value(JavaAPIListEntry entry) { // show full class name as information
+              return entry.getFullString();
+            }
+          };
+          PredictiveInputFrame.CloseAction<JavaAPIListEntry> okAction = 
+            new PredictiveInputFrame.CloseAction<JavaAPIListEntry>() {
+            public String getName() { return "OK"; }
+            public KeyStroke getKeyStroke() { return KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0); }
+            public String getToolTipText() { return null; }
+            public Object value(PredictiveInputFrame<JavaAPIListEntry> p) {
+              String text;
+              if (p.getItem() != null) { // if a class was selected...
+                text = p.getItem().getFullString();
+              }
+              else { // use the text that was entered
+                text = p.getText();
+              }
+              if (_autoImportPackageCheckbox.isSelected()) {
+                int lastDot = text.lastIndexOf('.');
+                if (lastDot > 0) text = text.substring(0, lastDot + 1) + "*";
+              }
+              final InteractionsModel im = _model.getInteractionsModel();
+              // Get the last line (the one that caused the error) and remove it from the history
+              String lastLine = im.removeLastFromHistory();
+              // Import the selected class...
+              String importLine = "import " + text + "; // auto-import";
+              // ... and try to do the last line again
+              final String code = importLine + ((lastLine != null)  ?  ("\n" + lastLine)  : "");
+              EventQueue.invokeLater(new Runnable() { 
+                public void run() { // interpret with the added import
+                  try {
+                    im.append(code, ConsoleDocument.DEFAULT_STYLE);
+                    im.interpretCurrentInteraction();
+                  }
+                  finally { hourglassOff(); }
+                }
+              });
+              return null;
+            }
+          };
+          PredictiveInputFrame.CloseAction<JavaAPIListEntry> cancelAction = 
+            new PredictiveInputFrame.CloseAction<JavaAPIListEntry>() {
+            public String getName() { return "Cancel"; }
+            public KeyStroke getKeyStroke() { return KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0); }
+            public String getToolTipText() { return null; }
+            public Object value(PredictiveInputFrame<JavaAPIListEntry> p) {
+              // if no class was selected, just reset the error information so the dialog box works next time
+              _model.getInteractionsModel().resetLastErrors();
+              hourglassOff();
+              return null;
+            }
+          };
+          
+          ArrayList<MatchingStrategy<JavaAPIListEntry>> strategies =
+            new ArrayList<MatchingStrategy<JavaAPIListEntry>>();
+          strategies.add(new FragmentStrategy<JavaAPIListEntry>());
+          strategies.add(new PrefixStrategy<JavaAPIListEntry>());
+          strategies.add(new RegExStrategy<JavaAPIListEntry>());
+          List<PredictiveInputFrame.CloseAction<JavaAPIListEntry>> actions
+            = new ArrayList<PredictiveInputFrame.CloseAction<JavaAPIListEntry>>();
+          actions.add(okAction);
+          actions.add(cancelAction);
+          _autoImportDialog = 
+            new PredictiveInputFrame<JavaAPIListEntry>(MainFrame.this, "Auto Import Class", false, true, info, strategies,
+                                                       actions, 1, new JavaAPIListEntry("dummyImport", "dummyImport", null)) 
+          {
+            public void setOwnerEnabled(boolean b) { if (b) hourglassOff(); else hourglassOn(); }
+            protected JComponent[] makeOptions() { return new JComponent[] { _autoImportPackageCheckbox }; }
+          }; 
+          // Put one dummy entry in the list; it will be changed later anyway
+          if (DrJava.getConfig().getSetting(DIALOG_AUTOIMPORT_STORE_POSITION).booleanValue()) {
+            _autoImportDialog.setFrameState(DrJava.getConfig().getSetting(DIALOG_AUTOIMPORT_STATE));
+          }
+          generateJavaAPISet();
         }
-      };
-      PredictiveInputFrame.CloseAction<JavaAPIListEntry> cancelAction = 
-        new PredictiveInputFrame.CloseAction<JavaAPIListEntry>() {
-        public String getName() { return "Cancel"; }
-        public KeyStroke getKeyStroke() { return KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0); }
-        public String getToolTipText() { return null; }
-        public Object value(PredictiveInputFrame<JavaAPIListEntry> p) {
-          // if no class was selected, just reset the error information so the dialog box works next time
-          _model.getInteractionsModel().resetLastErrors();
-          hourglassOff();
-          return null;
-        }
-      };
-      
-      ArrayList<MatchingStrategy<JavaAPIListEntry>> strategies =
-        new ArrayList<MatchingStrategy<JavaAPIListEntry>>();
-      strategies.add(new FragmentStrategy<JavaAPIListEntry>());
-      strategies.add(new PrefixStrategy<JavaAPIListEntry>());
-      strategies.add(new RegExStrategy<JavaAPIListEntry>());
-      List<PredictiveInputFrame.CloseAction<JavaAPIListEntry>> actions
-        = new ArrayList<PredictiveInputFrame.CloseAction<JavaAPIListEntry>>();
-      actions.add(okAction);
-      actions.add(cancelAction);
-      _autoImportDialog = 
-        new PredictiveInputFrame<JavaAPIListEntry>(MainFrame.this, "Auto Import Class", false, true, info, strategies,
-                                                   actions, 1, new JavaAPIListEntry("dummyImport", "dummyImport", null)) 
-      {
-        public void setOwnerEnabled(boolean b) { if (b) hourglassOff(); else hourglassOn(); }
-        protected JComponent[] makeOptions() { return new JComponent[] { _autoImportPackageCheckbox }; }
-      }; 
-      // Put one dummy entry in the list; it will be changed later anyway
-      if (DrJava.getConfig().getSetting(DIALOG_AUTOIMPORT_STORE_POSITION).booleanValue()) {
-        _autoImportDialog.setFrameState(DrJava.getConfig().getSetting(DIALOG_AUTOIMPORT_STATE));
       }
-      generateJavaAPISet();
-    }
+    });
   }
+
+                                               
   
   /** The "Auto Import" dialog instance. */
   PredictiveInputFrame<JavaAPIListEntry> _autoImportDialog = null;

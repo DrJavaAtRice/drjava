@@ -470,7 +470,7 @@ public class DummyGlobalModel implements GlobalModel {
   public File getMainClassContainingFile() {
     throw new UnsupportedOperationException("Tried to call getMainClass on a Dummy");
   }
-  
+
   public Iterable<AbsRelFile> getExtraClassPath() {
     throw new UnsupportedOperationException("Tried to call getExtraClasspath on a Dummy");
   }

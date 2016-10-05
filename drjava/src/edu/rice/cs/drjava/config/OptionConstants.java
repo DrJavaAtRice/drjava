@@ -256,7 +256,7 @@ public interface OptionConstants {
   
   /** ToolBar buttons */
   public static final FontOption FONT_TOOLBAR = new FontOption("font.toolbar", Font.decode("dialog-12"));
-  public static final FontOption FONT_MENU = new FontOption("font.menu", Font.decode("dialog-12"));
+  public static final FontOption FONT_MENUBAR = new FontOption("font.menu", Font.decode("dialog-12"));
   
   /** Whether to draw anti-aliased text.  (Slightly slower.) */
   public static final BooleanOption TEXT_ANTIALIAS = new BooleanOption("text.antialias", Boolean.TRUE);
@@ -1672,10 +1672,9 @@ public interface OptionConstants {
   
   /** Number of entries in the browser history (0 for unlimited). */
   public static final NonNegativeIntegerOption BROWSER_HISTORY_MAX_SIZE =
-    new NonNegativeIntegerOption("browser.history.max.size", Integer.valueOf(50));
+    new NonNegativeIntegerOption("browser.history.max.size", Integer.valueOf(1000));
   
-  /** Whether to also list files with fully qualified paths.
-    */
+  /** Whether to also list files with fully qualified paths. */
   public static final BooleanOption DIALOG_GOTOFILE_FULLY_QUALIFIED =
     new BooleanOption("dialog.gotofile.fully.qualified", Boolean.FALSE);
   

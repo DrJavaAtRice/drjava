@@ -819,9 +819,9 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
             
             Position pos = errorModel.getPosition(error); // null if error has no Position
 //          Utilities.showDebug("The position of the error is: " + pos);
-            // switch to correct def pane and move caret to error position
+
 //          Utilities.showDebug("active document being set to " + doc + " in ErrorPanel.switchToError");
-            
+            // switch to correct def pane and move caret to error position
             if (! prevDoc.equals(doc)) {
               model.setActiveDocument(doc);
               EventQueue.invokeLater(new Runnable() { 

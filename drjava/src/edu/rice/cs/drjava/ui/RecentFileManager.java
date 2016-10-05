@@ -54,28 +54,28 @@ import edu.rice.cs.util.FileOpenSelector;
   */
 public class RecentFileManager implements OptionConstants {
   /** Position in the file menu where the entries start. */
-  protected int _initPos;
+  protected volatile int _initPos;
 
   /** Position in the file menu for the next insert. */
-  protected int _pos;
+  protected volatile int _pos;
   
   /** All of the recently used files in the list, in order. */
-  protected Vector<File> _recentFiles;
+  protected final Vector<File> _recentFiles;
   
   /** The maximum number of files to display in the list. */
-  protected int MAX = DrJava.getConfig().getSetting(RECENT_FILES_MAX_SIZE).intValue();
+  protected volatile int MAX = DrJava.getConfig().getSetting(RECENT_FILES_MAX_SIZE).intValue();
   
   /** The File menu containing the entries. */
-  protected JMenu _fileMenu;
+  protected final JMenu _fileMenu;
   
   /** Other File menus to be kept synchronized to the original File menu. */
-  protected HashSet<JMenu> _mirroredMenus = new HashSet<JMenu>();
+  protected final HashSet<JMenu> _mirroredMenus = new HashSet<JMenu>();
   
   /** The OptionConstant that should be used to retrieve the list of recent files. */
-  protected VectorOption<File> _settingConfigConstant;
+  protected final VectorOption<File> _settingConfigConstant;
   
   /** An action that will be invoked when the file is clicked. */
-  protected RecentFileAction _recentFileAction;
+  protected final RecentFileAction _recentFileAction;
   
   /** Creates a new RecentFileManager.
     * @param pos  Position in the file menu
@@ -106,7 +106,7 @@ public class RecentFileManager implements OptionConstants {
     if (_recentFiles.size()>0) {
       mirroredMenu.insertSeparator(_initPos);  //one at top
     }
-    for(int i = 0; i<_recentFiles.size(); ++i) {
+    for(int i = 0; i < _recentFiles.size(); ++i) {
       final File file = _recentFiles.get(i);
       final FileOpenSelector recentSelector = new FileOpenSelector() {
         public File[] getFiles() { return new File[] { file }; }
@@ -239,7 +239,7 @@ public class RecentFileManager implements OptionConstants {
         public void run(JMenu fileMenu) {
           JMenuItem currItem = fileMenu.getItem(_initPos+fi+1);
           currItem.setText((fi+1) + ". " + _recentFiles.get(fi).getName());
-          currItem.setFont(DrJava.getConfig().getSetting(FONT_MENU));
+          currItem.setFont(DrJava.getConfig().getSetting(FONT_MENUBAR));
         }
       });
     }
