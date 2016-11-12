@@ -80,13 +80,12 @@ public abstract class AbstractSlaveJVM implements SlaveRemote {
     }.start();
   }
   
-  /** Initializes the Slave JVM including starting background thread to 
-   * periodically poll the master JVM and automatically quit if it's dead.  
-   * Synchronized to prevent other method invocations from proceeding before
-   * startup is complete.
-   * @param master link to the master JVM
-   * @throws RemoteException if communication over RMI fails
-   */
+  /** Initializes the Slave JVM including starting background thread to periodically poll the master JVM and 
+    * automatically quit if it's dead.  Synchronized to prevent other method invocations from proceeding before
+    * startup is complete.
+    * @param master link to the master JVM
+    * @throws RemoteException if communication over RMI fails
+    */
   public final synchronized void start(final MasterRemote master) throws RemoteException {
     if (_started) { throw new IllegalArgumentException("start() has already been invoked"); }
     master.checkStillAlive(); // verify that two-way communication works; may throw RemoteException

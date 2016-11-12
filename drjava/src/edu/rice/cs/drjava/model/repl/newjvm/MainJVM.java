@@ -76,22 +76,22 @@ import edu.rice.cs.util.swing.Utilities;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
-/** * <p>Manages a remote JVM.  Includes methods for communication in both directions: MainJVMRemoteI
- * provides callbacks allowing the remote JVM to access the model, and a variety of delegating
- * methods wrap calls to the InterpreterJVMRemoteI methods, taking care of any RMI-related errors.
- * In the case of errors, these interpreter-delegating methods communicate the failure via the
- * return value.  (Note that it is impossible to guarantee success of these methods -- the remote
- * process may exit arbitrarily at any time -- and clients should behave gracefully when failures
- * occur.)</p>
- * 
- * <p>The current design is flawed: strictly speaking, two sequential interpreter-delegating calls to
- * this object may communicate with <em>different</em> JVMs if the remote JVM happens to reset in
- * the interim.  A better design would return a separate object for interfacing with each unique remote
- * JVM.  In this way, clients would know that all calls to a certain object would be forwarded to
- * the same remote JVM.</p>
- * 
- * @version $Id$
- */
+/** <p>Manages a remote JVM.  Includes methods for communication in both directions: MainJVMRemoteI
+  * provides callbacks allowing the remote JVM to access the model, and a variety of delegating
+  * methods wrap calls to the InterpreterJVMRemoteI methods, taking care of any RMI-related errors.
+  * In the case of errors, these interpreter-delegating methods communicate the failure via the
+  * return value.  (Note that it is impossible to guarantee success of these methods -- the remote
+  * process may exit arbitrarily at any time -- and clients should behave gracefully when failures
+  * occur.)</p>
+  * 
+  * <p>The current design is flawed: strictly speaking, two sequential interpreter-delegating calls to
+  * this object may communicate with <em>different</em> JVMs if the remote JVM happens to reset in
+  * the interim.  A better design would return a separate object for interfacing with each unique remote
+  * JVM.  In this way, clients would know that all calls to a certain object would be forwarded to
+  * the same remote JVM.</p>
+  * 
+  * @version $Id$
+  */
 public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   
   /** Number of slave startup failures allowed before aborting the startup process. */

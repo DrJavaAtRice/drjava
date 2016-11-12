@@ -53,7 +53,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Vector;
 import java.util.Date;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 /** Tests the Definitions Pane
   * @version $Id$

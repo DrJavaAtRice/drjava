@@ -1672,7 +1672,7 @@ public interface OptionConstants {
   
   /** Number of entries in the browser history (0 for unlimited). */
   public static final NonNegativeIntegerOption BROWSER_HISTORY_MAX_SIZE =
-    new NonNegativeIntegerOption("browser.history.max.size", Integer.valueOf(1000));
+    new NonNegativeIntegerOption("browser.history.max.size", 10000);  // exploting autoboxing
   
   /** Whether to also list files with fully qualified paths. */
   public static final BooleanOption DIALOG_GOTOFILE_FULLY_QUALIFIED =

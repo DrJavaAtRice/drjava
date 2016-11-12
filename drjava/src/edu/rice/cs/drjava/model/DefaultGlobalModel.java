@@ -102,7 +102,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
   * methods, and the GlobalModel responds via the GlobalModelListener interface. This removes the dependency on the 
   * UI for the logical flow of the program's features.  With the current implementation, we can finally test the compile
   * functionality of DrJava, along with many other things. <p>
-  * @version $Id: DefaultGlobalModel.java 5755 2013-08-30 12:00:36Z rcartwright $
+  * @version $Id$
   */
 public class DefaultGlobalModel extends AbstractGlobalModel {
   /* FIELDS */
@@ -458,7 +458,8 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   public void resetInteractions(File wd, boolean forceReset) {
     assert _interactionsModel._pane != null;
     
-    debug.logStart();
+    _log.log("DefaultGlobalModel.resetInteractions(" + wd + ", " + forceReset + ") called");
+//    debug.logStart();
     File workDir = _interactionsModel.getWorkingDirectory();
     if (wd == null) { wd = workDir; }
     forceReset |= isClassPathChanged();
@@ -467,8 +468,10 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     DrJava.getConfig().setSetting(LAST_INTERACTIONS_DIRECTORY, wd);
     
     getDebugger().setAutomaticTraceEnabled(false);
+//    log.log("_interactionsModel.resetInteractions(" + wd + ", " + forceReset + ") called");
     _interactionsModel.resetInterpreter(wd, forceReset);
-    debug.logEnd();
+    _log.log("DefaultGlobalModel.resetInteractions(" + wd + ", " + forceReset + ") complete");
+//    debug.logEnd();
   }
   
   /** Interprets the current given text at the prompt in the interactions pane. */

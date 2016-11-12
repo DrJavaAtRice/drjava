@@ -50,7 +50,7 @@ import edu.rice.cs.util.text.EditDocumentException;
   * @version $Id$
   */
 public final class GlobalModelCompileTest extends GlobalModelTestCase {
-  protected static final Log _log  = new Log("GlobalModelCompileTest.txt", false);
+  protected static final Log _log  = new Log("/home/cork/GlobalModelTest.txt", false);
   
   /** Tests calling compileAll with no source files works. Does not reset interactions. 
    * @throws BadLocationException if attempts to reference an invalid location
