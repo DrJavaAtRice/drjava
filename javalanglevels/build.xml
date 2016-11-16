@@ -30,7 +30,7 @@
   <property name="link-source" value="yes" />
   
   <property environment="env" />
-  <property name="java7-home"  value="${env.JAVA7_HOME}" />
+  <property name="drjava-jar" value="${env.DRJAVA_JAR}" />
   <property name="java8-home"  value="${env.JAVA8_HOME}" />
   <property name="javacc-home" value="${env.JAVACC_HOME}" />
   <property name="clover-jar"  value="${env.CLOVER_JAR}" />
@@ -72,8 +72,6 @@
     <echo message="variables may need to be defined (depending on the target invoked):" />
     <echo message="PATH: The 'javac' command is used for compilation;" />
     <echo message="      the 'java' command is used by default in testing/running; " />
-    <echo message="JAVA7_HOME: Home folder of the Java 7 JRE or JDK (required for" />
-    <echo message="            compiling and '-7' targets)" />
     <echo message="JAVA8_HOME: Home folder of the Java 8 JRE or JDK (required for" />
     <echo message="            '-8' targets)" />
     <echo message="JAVACC_HOME: Top-level directory of JavaCC (version 6.0+ is preferred)" />
@@ -223,6 +221,7 @@
         <fileset refid="libs" />
         <pathelement location="lib/buildlib/junit.jar" />
         <pathelement location="classes/base" />
+	<pathelement location="${drjava-jar}" />
       </classpath>
       <compilerarg value="-Xlint" />
       <!-- Ignore serial warnings, because they occur for every Throwable definition (among others) -->

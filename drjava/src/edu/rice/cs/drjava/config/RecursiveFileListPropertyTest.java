@@ -1,7 +1,7 @@
 package edu.rice.cs.drjava.config;
 
 import junit.framework.TestCase;
-import junit.framework.Assert;
+import org.junit.Assert;
 
 import java.io.File;
 import java.io.FileFilter;

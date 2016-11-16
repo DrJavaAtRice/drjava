@@ -1,7 +1,7 @@
 package edu.rice.cs.drjava.model;
 
 import junit.framework.TestCase;
-import junit.framework.Assert;
+import org.junit.Assert;
 
 import java.util.List;
 
