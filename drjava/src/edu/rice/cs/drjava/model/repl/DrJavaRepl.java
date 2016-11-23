@@ -75,5 +75,9 @@ public class DrJavaRepl {
 
         return false;
     }
+
+    public void dispose() {
+        process.get().destroy();
+    }
 }
 

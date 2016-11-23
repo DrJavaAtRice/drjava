@@ -416,5 +416,7 @@ public class DefaultInteractionsModel extends InteractionsModel {
     return new Pair<String,String>(var, "unimplemented");
   }
 
-
+  public void dispose() {
+    _drJavaRepl.dispose();
+  }
 }

@@ -36,23 +36,23 @@
 
 package edu.rice.cs.drjava.model;
 
+import edu.rice.cs.drjava.model.compiler.CompilerListener;
+import edu.rice.cs.drjava.model.junit.JUnitErrorModel;
+import edu.rice.cs.util.Log;
+import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.swing.Utilities;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-
-import edu.rice.cs.drjava.model.compiler.CompilerListener;
-import edu.rice.cs.drjava.model.junit.*;
-import edu.rice.cs.util.Log;
-import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.swing.Utilities;
 
 /** A test of Junit testing support in the GlobalModel.
   * @version $Id$
   */
 public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   
-  private static Log _log = new Log("/home/cork/GlobalModelJUnitTest.txt", true);
+  private static Log _log = new Log("GlobalModelJUnitTest.txt", true);
   
   /** Whether or not to print debugging output. */
   static final boolean printMessages = true;

@@ -418,6 +418,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   public void dispose() {
     ensureJVMStarterFinished();
     _jvm.dispose();
+    _interactionsModel.dispose();
     _notifier.removeAllListeners();  // removes the global model listeners!
   }
 
