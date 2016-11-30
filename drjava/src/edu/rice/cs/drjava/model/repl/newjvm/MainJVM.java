@@ -158,19 +158,17 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   /** Starts the interpreter if it's not running already. */
   public void startInterpreterJVM() { _state.value().start(); }
   
-  /**
-   * Stop the interpreter if it's current running.  (Note that, until {@link #startInterpreterJVM} is called
-   * again, all methods that delegate to the interpreter JVM will fail, returning "false" or "none".)
-   */
+  /** Stop the interpreter if it's current running.  (Note that, until {@link #startInterpreterJVM} is called
+    * again, all methods that delegate to the interpreter JVM will fail, returning "false" or "none".)
+    */
   public void stopInterpreterJVM() { _state.value().stop(); }
   
-  /** 
-   * Get a "fresh" interpreter JVM.  Has the same effect as 
-   * {@link #startInterpreterJVM} if no interpreter is running.  If a 
-   * currently-running JVM is already "fresh", it is still stopped and 
-   * restarted when {@code force} is true.
-   * @param force true if the restart should be forced
-   */
+  /** Get a "fresh" interpreter JVM.  Has the same effect as 
+    * {@link #startInterpreterJVM} if no interpreter is running.  If a 
+    * currently-running JVM is already "fresh", it is still stopped and 
+    * restarted when {@code force} is true.
+    * @param force true if the restart should be forced
+    */
   public void restartInterpreterJVM(boolean force) { _state.value().restart(force); }
     
   /** Stop the interpreter JVM, do not restart it, and terminate the RMI server associated with this object.
@@ -197,10 +195,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     _state.value().stopped(status);
   }
     
-  /**
-   * Callback for when the slave JVM fails to either run or respond to {@link SlaveRemote#start}.
-   * @param e  Exception that occurred during startup.
-   */
+  /** Callback for when the slave JVM fails to either run or respond to {@link SlaveRemote#start}.
+    * @param e  Exception that occurred during startup.
+    */
   protected void handleSlaveWontStart(Exception e) {
     debug.log("Slave won't start", e);
     _state.value().startFailed(e);
@@ -844,10 +841,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     /** Ensure that the interpreter is stopping or not running. Block if necessary. */
     public abstract void stop();
 
-    /**
-     * Ensure that the interpreter is stopping or not running, to be started again.  Block if necessary.
-     * @param force  Whether an unused, running JVM should be restarted
-     */
+    /** Ensure that the interpreter is stopping or not running, to be started again.  Block if necessary.
+      * @param force  Whether an unused, running JVM should be restarted
+      */
     public abstract void restart(boolean force);
     public abstract void dispose();
 
@@ -857,16 +853,14 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
      */
     public void started(InterpreterJVMRemoteI i) { throw new IllegalStateException("Unexpected started() call"); }
 
-    /** 
-     * React to a failed startup. 
-     * @param e the exception that occurred during startup
-     */
+    /** React to a failed startup. 
+      * @param e the exception that occurred during startup
+      */
     public void startFailed(Exception e) { throw new IllegalStateException("Unexpected startFailed() call"); }
 
-    /** 
-     * React to a completed shutdown (requested or spontaneous). 
-     * @param status the interpreter's status
-     */
+    /** React to a completed shutdown (requested or spontaneous). 
+      * @param status the interpreter's status
+      */
     public void stopped(int status) { throw new IllegalStateException("Unexpected stopped() call"); }
   }
   

@@ -49,7 +49,12 @@ import edu.rice.cs.plt.iter.*;
 import junit.framework.TestCase;
 
 /** Does Type Checking that is not dependent on the enclosing body.  Also does top level type checking.  Common
-  * to all langauge levels. */
+  * to all langauge levels. 
+  * Where is the symbol table??  It is buried in a static field of LanguageLevelConverter.  In an older version of
+  * this code, it was apparently passed to the constructor of this class as an argument (a much better design), but this
+  * design was abandoned when refactoring should have been performed instead.  There is no symbol table class and methods
+  * naturally belonging to this class were implemented as static methods (!!); these methods could not easily reach
+  * the symbol table unless it too was made static.  Horrible design. */
 public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implements JExpressionIFVisitor<TypeData> {
   
   public static final SourceInfo NONE = SourceInfo.NONE;
@@ -195,13 +200,15 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
   }
 
   /** Returns the SymbolData corresponding to the name className, assuming that className
-    * does not refer to an unqualified or partially-qualified inner class.
+    * does not refer to an unqualified or partially-qualified inner class.  What are the extra parameters for?  Should
+    * this be re-implemented as LanguageLevelConverter.symbolTable.get ??  It is UGLY but simple.
     * */
   public SymbolData getSymbolData(String className, JExpression jexpr, boolean giveException, boolean runnableNotOkay) {
     // Check qualified class name (which is no different at elementary level)
     SourceInfo si = jexpr.getSourceInfo();
     
     // Create a dummy LLV; this seems awkward.  TODO:  refactor
+    // This code is not awkward; it is OBSCENE. symbolTable is static in LanguageLevelConverter. A code stench.
     LanguageLevelVisitor llv = 
       new LanguageLevelVisitor(_file, 
                                _package,
@@ -872,6 +879,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
 //    System.err.println("Boxed Types are: " + s1 + ", " + s2);
 //    System.err.println("Boxed Types from symbolTable are: " + symbolTable.get("java.lang.Byte") + ", " + 
 //                       symbolTable.get("java.lang.Boolean"));
+
     sd = getCommonSuperType(s1.getSuperClass(), s2);
     if (sd != null) {
 //      System.err.println("CommonSuperType is " + sd);
@@ -1367,7 +1375,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       LanguageLevelConverter.loadSymbolTable();
 
       _btc = new TypeChecker(new File(""), "", new LinkedList<String>(), new LinkedList<String>());
-      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_6, EmptyIterable.<File>make());
+      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_8, EmptyIterable.<File>make());
       _btc._importedPackages.addFirst("java.lang");
       _errorAdded = false;
       
@@ -1895,7 +1903,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       assertTrue("Should be able to assign an array to an interface of java.io.Serializable", 
                  _btc._isAssignableFrom(symbolTable.get("java.io.Serializable"), integerArray));
 
-      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_6, EmptyIterable.<File>make());
+      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_8, EmptyIterable.<File>make());
       assertFalse("Should not be assignable.", 
                   _btc._isAssignableFrom(symbolTable.get("java.lang.Double"), SymbolData.INT_TYPE));
       assertFalse("Should not be assignable.", 

@@ -86,6 +86,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   /** The document used in the Interactions model. */
   protected final InteractionsDJDocument _interactionsDocument;
 
+  /* The Main JVM for this model. */
   final MainJVM _jvm;
 
   private final Thread _jvmStarter; // thread that invokes _jvm.startInterpreterJVM()
@@ -440,11 +441,11 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   public void resetInteractions(File wd) { resetInteractions(wd, false); }
 
   /** Clears and resets the slave JVM with working directory wd. Also clears the console if the option is indicated
-   * (on by default).  The reset operation is suppressed (as an optimization) if the existing slave JVM has not been
-   * used, {@code wd} matches its working directory, and forceReset is false.  {@code wd} may be {@code null} if a 
-   * valid directory cannot be determined.  In that case, the former working directory is used.  This method may run 
-   * outside the event thread.
-   */
+    * (on by default).  The reset operation is suppressed (as an optimization) if the existing slave JVM has not been
+    * used, {@code wd} matches its working directory, and forceReset is false.  {@code wd} may be {@code null} if a 
+    * valid directory cannot be determined.  In that case, the former working directory is used.  This method may run 
+    * outside the event thread.
+    */
   public void resetInteractions(File wd, boolean forceReset) {
     assert _interactionsModel._pane != null;
 

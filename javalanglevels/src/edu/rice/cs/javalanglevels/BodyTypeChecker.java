@@ -703,6 +703,7 @@ public class BodyTypeChecker extends SpecialTypeChecker {
     * Returns null if this try-catch statement doesn't necessarily return a value.  NOTE: null represents an
     * ill-formed type or VOID_TYPE, which is ambiguous.
     */
+
   protected InstanceData tryCatchLeastCommonType(InstanceData tryBlockRes, InstanceData[] catchBlocksRes, 
                                                  InstanceData finallyBlock_result) {
     // If tryBlockRes is ill-typed, then the finallyBlock must return a type that meets context constraints
@@ -1061,7 +1062,7 @@ public class BodyTypeChecker extends SpecialTypeChecker {
                             
       errors = new LinkedList<Pair<String, JExpressionIF>>();
       symbolTable.clear();
-      _newSDs.clear();  // Refers to LanguageLevelConverter Why OH Why are we doing this??????
+      _newSDs.clear();  // Refers to LanguageLevelConverter.  Why are we doing this?
       
       loadSymbolTable();
 //      System.err.println("Boolean Type is " + symbolTable.get("java.lang.Boolean"));
@@ -1070,7 +1071,7 @@ public class BodyTypeChecker extends SpecialTypeChecker {
       _bd2.addVars(((MethodData)_bd2).getParams());
       _bbtc = new BodyTypeChecker(_bd1, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), 
                                   new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData,JExpression>>());
-      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_6, EmptyIterable.<File>make());
+      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_8, EmptyIterable.<File>make());
       _bbtc._importedPackages.addFirst("java.lang");
     }
     

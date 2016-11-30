@@ -27,9 +27,8 @@ import static javarepl.completion.CompletionCandidate.functions.candidateValue;
 import static javarepl.completion.CompletionResult.methods.fromJson;
 import static javarepl.completion.CompletionResult.methods.toJson;
 import static javax.tools.ToolProvider.getSystemJavaCompiler;
-/**
- * Created by maladat on 1/21/16.
- */
+
+/** Created by maladat on 1/21/16 by Jimmy Newman. */
 public class DrJavaRepl {
 
     public JavaREPLClient client;

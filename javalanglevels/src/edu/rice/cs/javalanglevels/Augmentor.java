@@ -49,7 +49,7 @@ import edu.rice.cs.plt.iter.*;
 import static edu.rice.cs.javalanglevels.SourceInfo.NONE;
 
 public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
-//  public static final Log _log = new Log("Augmentor.txt", true);
+//  public static final Log _log = new Log("Augmentor.txt", false);
   
   private static final String newLine = System.getProperty("line.separator");
   private static final int indentWidth = 2; // TODO: get this from DrJava?
@@ -1658,7 +1658,7 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
       _a = new Augmentor(true, null, null, llv);
       LanguageLevelConverter.symbolTable.clear();
       Symboltable _s = LanguageLevelConverter.symbolTable;   
-      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_6, EmptyIterable.<File>make());
+      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_8, EmptyIterable.<File>make());
     }
 
     public void testFormalParameters2TypeDatas() {

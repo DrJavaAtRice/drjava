@@ -391,7 +391,7 @@ public class ClassBodyTypeChecker extends SpecialTypeChecker {
       _cbbtc = 
         new ClassBodyTypeChecker(_sd1, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), 
                                  new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData, JExpression>>());
-      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_6, EmptyIterable.<File>make());
+      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_8, EmptyIterable.<File>make());
       _cbbtc._importedPackages.addFirst("java.lang");
     }
     

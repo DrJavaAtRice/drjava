@@ -69,12 +69,10 @@ public abstract class MultiThreadedTestCase extends DrJavaTestCase {
     super.tearDown();
   }
 
-  /** 
-   * This method prints the failure message to System.out and kills the JVM.
-   * Just calling fail() doesn't always cause the test to fail, because the 
-   * listener is often called from another thread.
-   * @param s the failure message
-   */
+  /** This method prints the failure message to System.out and kills the JVM.  Just calling fail() doesn't always cause 
+    * the test to fail, because the listener is often called from another thread.
+    * @param s the failure message
+    */
   protected static void listenerFail(String s) {
 //    StackTraceElement[] trace = Thread.getAllStackTraces().get(Thread.currentThread());
 //    System.err.println("TEST FAILED in a listener thread");
@@ -84,19 +82,17 @@ public abstract class MultiThreadedTestCase extends DrJavaTestCase {
     fail(s);
   }
 
-  /** 
-   * This method prints the failure message to System.out and kills the JVM.  
-   * Just calling fail() doesn't always cause the test to fail, because the 
-   * listener is often called from another thread.
-   * @param t the exception whose trace should be printed
-   */
+  /** This method prints the failure message to System.out and kills the JVM.  Just calling fail() doesn't always cause 
+    * the test to fail, because the listener is often called from another thread.
+    * @param t the exception whose trace should be printed
+    */
   protected static void listenerFail(Throwable t) {
     java.io.StringWriter sw = new java.io.StringWriter();
     t.printStackTrace(new java.io.PrintWriter(sw));
     listenerFail(sw.toString());
   }
   
-  /** Join with a thread, i.e. continue only after that thread has terminated.  If the join is interrupted, an 
+  /** Join with a thread, i.e., continue only after that thread has terminated.  If the join is interrupted, an 
     * UnexpectedException is thrown.
     * @param t thread to join with
     */
@@ -174,10 +170,9 @@ public abstract class MultiThreadedTestCase extends DrJavaTestCase {
     
     public java.lang.Thread getThread() { return _t; }
     
-    /** 
-     * Set the thread that spawns the other threads. 
-     * @param mainThread the main thread to be set
-     */
+    /** Set the thread that spawns the other threads. 
+      * @param mainThread the main thread to be set
+      */
     public void setMainThread(java.lang.Thread mainThread) { _mainThread = mainThread; }
     
     /** Singleton constructor. */

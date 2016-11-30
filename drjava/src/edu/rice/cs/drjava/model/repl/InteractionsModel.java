@@ -330,13 +330,11 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     _autoImportSet.clear(); // clear list when interpreter is reset
     _resetInterpreter(wd, force);
   }
-  
-  /** 
-   * Resets the Java interpreter.  This should only be called from 
-   * resetInterpreter, never directly. 
-   * @param wd the working directory to be set
-   * @param force true if reset is to be forced
-   */
+  /** Resets the Java interpreter.  This should only be called from 
+    * resetInterpreter, never directly. 
+    * @param wd the working directory to be set
+    * @param force true if reset is to be forced
+    */
   protected abstract void _resetInterpreter(File wd, boolean force);
   
   /** @return the working directory for the current interpreter. */

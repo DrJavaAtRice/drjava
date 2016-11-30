@@ -178,7 +178,7 @@ public abstract class AbstractMasterJVM implements MasterRemote {
       debug.log(e);
       debug.logEnd("invoking remote JVM process (failed)");
       _monitor.set(State.FRESH);
-      //debug.log("Entered state " + State.FRESH);
+      debug.log("Entered state " + State.FRESH);
       handleSlaveWontStart(e);
     }
 
@@ -188,7 +188,7 @@ public abstract class AbstractMasterJVM implements MasterRemote {
         debug.log(e);
         attemptQuit(newSlave);
         _monitor.set(State.FRESH);
-        //debug.log("Entered state " + State.FRESH);
+        debug.log("Entered state " + State.FRESH);
         handleSlaveWontStart(e);
         return;
       }
@@ -196,7 +196,7 @@ public abstract class AbstractMasterJVM implements MasterRemote {
       handleSlaveConnected(newSlave);
       _slave = newSlave;
       _monitor.set(State.RUNNING);
-      //debug.log("Entered state " + State.RUNNING);
+      debug.log("Entered state " + State.RUNNING);
     }
   }
   
@@ -208,13 +208,12 @@ public abstract class AbstractMasterJVM implements MasterRemote {
     attemptQuit(_slave);
     _slave = null;
     _monitor.set(State.FRESH);
-    //debug.log("Entered state " + State.FRESH);
+    debug.log("Entered state " + State.FRESH);
   }
     
-  /** 
-   * Make a best attempt to invoke {@code slave.quit()}.  Log an error if it fails.
-   * @param slave link to the slave JVM
-   */
+  /** Make a best attempt to invoke {@code slave.quit()}.  Log an error if it fails.
+    * @param slave link to the slave JVM
+    */
   private static void attemptQuit(SlaveRemote slave) {
     try { slave.quit(); }
     catch (RemoteException e) { error.log("Unable to complete slave.quit()", e); }
@@ -249,7 +248,7 @@ public abstract class AbstractMasterJVM implements MasterRemote {
       try { s = _monitor.ensureNotState(s); }
       catch (InterruptedException e) { throw new UnexpectedException(e); }
     }
-    //debug.log("Entered state " + to);
+    debug.log("Entered state " + to);
   }
   
   protected boolean isDisposed() { return _monitor.value().equals(State.DISPOSED); }

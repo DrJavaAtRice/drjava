@@ -46,6 +46,7 @@ import edu.rice.cs.javalanglevels.*;
 import edu.rice.cs.javalanglevels.parser.*;
 import edu.rice.cs.javalanglevels.tree.*;
 import edu.rice.cs.javalanglevels.util.Log;
+import edu.rice.cs.javalanglevels.util.UnexpectedException;
 import edu.rice.cs.javalanglevels.util.Utilities;
 
 import edu.rice.cs.plt.iter.*;
@@ -150,28 +151,35 @@ public class LanguageLevelConverter {
     return new ModifiersAndVisibility(SourceInfo.NONE, strings.toArray(new String[strings.size()]));
   }
   
-  /** Defines library classes assuming they are available to the PathClassLoader. */
+  /** Defines library or already compiled classes assuming they are available to the PathClassLoader. */
   public static SymbolData _classFile2SymbolData(String qualifiedClassName) { 
     return _classFile2SymbolData(qualifiedClassName, null);
   }
   
   /** Uses the ASM class reader to read the class file corresponding to the class in the specified directory, and uses
     * the information from ASM to build a SymbolData corresponding to the class.  Ensures that the returned SymbolData
-    * (if any) is inserted in the symbolTable.
+    * (if any) is inserted in the symbolTable.  Silently fails returning null instead of throwing an exception.
+    * Relies on fact that a static variable, namely LanguageLevelConverter.symbolTable holds the symbol table. UGHH!!
+    * There should be a symbol table object and this method should be an instance method of that object!!
     * @param qualifiedClassName  The fully qualified class name of the class we are looking up
     * @param programRoot  The directory where the class is located.
     * @return The SymbolData for the class file if the class file was found; null otherwise.
     */
   public static SymbolData _classFile2SymbolData(final String qualifiedClassName, final String programRoot) {
- 
+    _log.log("***** _classFile2SymbolData(" + qualifiedClassName + ", " + programRoot + ") called");
+    
     ClassReader reader = null;
     try {
       String fileName = qualifiedClassName.replace('.', '/') + ".class";
+      _log.log("***** reading class file: " + fileName);
       InputStream stream = RESOURCES.value().getResourceAsStream(fileName);
       if (stream == null && programRoot != null) {
         stream = PathClassLoader.getResourceInPathAsStream(fileName, new File(programRoot));
       }
-      if (stream == null) { return null; }
+      if (stream == null) { 
+        _log.log("***** class file was empty! *****");
+        return null; 
+      }
       // Let IOUtil handle the stream here, because it closes it when it's done, unlike ASM.
       reader = new ClassReader(IOUtil.toByteArray(stream));
     }
@@ -243,6 +251,7 @@ public class LanguageLevelConverter {
       public FieldVisitor visitField(int access, String name, String desc, String sig, Object value) {
         /* Private fields cannot be ignored because they are used in code augmentation for generating constructors,
          * equals, and hashCode. */
+        _log.log("visitField(" + access + ", " + name + ", " + desc + ", " + sig + ", " + value + ") called");
         String typeString = org.objectweb.asm.Type.getType(desc).getClassName();
         SymbolData type = getSymbolDataForClassFile(typeString, programRoot);
         if (type != null) { sd.addVar(new VariableData(name, _createMav(access), type, true, sd)); }
@@ -291,7 +300,7 @@ public class LanguageLevelConverter {
       public void visitEnd() {}
       
     };
-//    System.err.println("####### Loading file system class " + qualifiedClassName + " and all of its unloaded supertypes");
+    _log.log("***** Loading member signatures for file system class " + qualifiedClassName + " and all of its unloaded supertypes");
     reader.accept(extractData, ClassReader.SKIP_CODE);
 //    System.err.println("####### Finished loading " + qualifiedClassName);
     
@@ -314,6 +323,7 @@ public class LanguageLevelConverter {
     */
   public static SymbolData getSymbolDataForClassFile(String className, String programRoot) {
  
+    _log.log("getSymbolDataForClassFile(" + className + ", " + programRoot + ") called");
     // Check for primitive types. 
     SymbolData sd = _getPrimitiveSymbolData(className);
     if (sd != null) { return sd; }
@@ -451,28 +461,35 @@ public class LanguageLevelConverter {
         
         if (isJavaFile(f)) {  /* a .dj0, .dj1, .dj2,, .dj, or .java file; all but .dj and .java are legacy */
           System.out.flush();
-          SourceFile sf;
+          SourceFile sf = null;
           JExprParser jep = new JExprParser(f);
           try { 
-//            System.err.println("Parsing " + f);
             _log.log("Parsing " + f);
-            sf = jep.SourceFile();  // Does the SourceFile method parse the file f embedded in jep?
-//            System.err.println("Completed parsing " + f);
+            sf = jep.SourceFile();  // Does the SourceFile method parse the file f embedded in jep?  NO!
+            // Parse the classes in sf
             final Set<String> topLevelClasses = new HashSet<String>();
+            final SourceFile fsf = sf;
             for (TypeDefBase t: sf.getTypes()) {
               t.visit(new JExpressionIFAbstractVisitor<Void>() {
-                public Void forClassDef(ClassDef that) { topLevelClasses.add(that.getName().getText()); return null; }
+                public Void forClassDef(ClassDef that) {
+                  String className = that.getName().getText();
+                  _log.log("Class '" + className + "' found in file " + fsf);
+                  topLevelClasses.add(className); 
+                  return null; 
+                }
                 public Void defaultCase(JExpressionIF that) { return null; }
               });
             }
             sourceToTopLevelClassMap.put(f, topLevelClasses);
+            _log.log("Completed parsing " + f);
           } 
           catch (ParseException pe) {
             // If there is a ParseException, go to next file.
             _addParseException(pe);
-            _log.log("GENERATED ParseException for file " + f);
+            _log.log("GENERATED (non-Parse) exception in parsing file " + sf);
             continue;
           }
+          catch (Exception pe) { throw new UnexpectedException(pe); }  // catch any other Exceptions thrown in parsing
           
           LinkedList<String> importedPackageBase = new LinkedList<String>();
           importedPackageBase.add("java.lang");
@@ -499,7 +516,7 @@ public class LanguageLevelConverter {
           
           // Conformance checking pass
           sf.visit(llv);
-          _log.log("\nDUMPING SYMBOLTABLE AFTER PHASE 1 PROCESSING OF " + f + "\n\n" + symbolTable + "\n");
+//          _log.log("\nDUMPING SYMBOLTABLE AFTER PHASE 1 PROCESSING OF " + f + "\n\n" + symbolTable + "\n");
           visited.add(new Triple<LanguageLevelVisitor, SourceFile, File>(llv, sf, f));
           _log.log("\nCONTINUATIONS AFTER PHASE 1 PROCESSING OF " + f + "\n\n" + llv.continuations + "\n");
           _log.log("\nERRORS AFTER PHASE 1 PROCESSING OF " + f + "\n\n" + llv.errors + "\n");
@@ -520,7 +537,7 @@ public class LanguageLevelConverter {
      * getSymbolData with a flag; create a new method for resolving continuations.  Use a common helper.  */
     LanguageLevelVisitor.errors = new LinkedList<Pair<String, JExpressionIF>>(); //clear out error list
     
-    _log.log("\nDUMPING SYMBOLTABLE BEFORE CONTINUATION RESOLUTION\n\n" + symbolTable + "\n");
+//    _log.log("\nDUMPING SYMBOLTABLE BEFORE CONTINUATION RESOLUTION\n\n" + symbolTable + "\n");  // redundant
 //    System.err.println("Resolving continuations " + continuations);
     _log.log("Resolving continuations: " + continuations + "\n");
     while (! continuations.isEmpty()) {
@@ -546,7 +563,7 @@ public class LanguageLevelConverter {
       }
     }
     
-    _log.log("\nDUMPING SYMBOLTABLE AFTER PASS 1\n\n" + symbolTable + "\n");
+//    _log.log("\nDUMPING SYMBOLTABLE AFTER PASS 1\n\n" + symbolTable + "\n");
     
         
     // Execute fixups; must be done before creating constructors because some symbols required for constructor
@@ -778,7 +795,7 @@ public class LanguageLevelConverter {
     }
     
     Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result = 
-      llc.convert(files, new Options(JavaVersion.JAVA_6,
+      llc.convert(files, new Options(JavaVersion.JAVA_8,
                                      IOUtil.parsePath(System.getProperty("java.class.path", ""))));
     System.out.println(result.getFirst().size() + result.getSecond().size() + " errors.");
     for(JExprParseException p : result.getFirst()) {

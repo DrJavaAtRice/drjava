@@ -30,10 +30,11 @@
   <property name="link-source" value="yes" />
   
   <property environment="env" />
-  <property name="java7-home" value="${env.JAVA7_HOME}" />
-  <property name="java6-home" value="${env.JAVA6_HOME}" />
-  <property name="javacc-home"  value="${env.JAVACC_HOME}" />
-  <property name="clover-jar" value="${env.CLOVER_JAR}" />
+  <property name="drjava-jar" value="${env.DRJAVA_JAR}" />
+  <echo message = "drjava-jar = ${drjava-jar}"/>
+  <property name="java8-home"  value="${env.JAVA8_HOME}" />
+  <property name="javacc-home" value="${env.JAVACC_HOME}" />
+  <property name="clover-jar"  value="${env.CLOVER_JAR}" />
   <property name="findbugs-home" value="${env.FINDBUGS_HOME}" />
   
   <property name="is-development" value="yes" /> <!-- Development or stable release -->
@@ -72,10 +73,8 @@
     <echo message="variables may need to be defined (depending on the target invoked):" />
     <echo message="PATH: The 'javac' command is used for compilation;" />
     <echo message="      the 'java' command is used by default in testing/running; " />
-    <echo message="JAVA6_HOME: Home folder of the Java 6 JRE or JDK (required for" />
-    <echo message="            '-6' targets)" />
-    <echo message="JAVA7_HOME: Home folder of the Java 7 JRE or JDK (required for" />
-    <echo message="            compiling and '-7' targets)" />
+    <echo message="JAVA8_HOME: Home folder of the Java 8 JRE or JDK (required for" />
+    <echo message="            '-8' targets)" />
     <echo message="JAVACC_HOME: Top-level directory of JavaCC (version 6.0+ is preferred)" />
     <echo message="CLOVER_JAR: Location of the Clover jar file" />
     <echo message="FINDBUGS_HOME: Location of the FindBugs installation" />
@@ -203,7 +202,7 @@
           description="Compile all source files (after generating the source)">
   </target>
   
-  <target name="do-compile" depends="resolve-java7-runtime">
+  <target name="do-compile" depends="resolve-java8-runtime">
   
     <echo message="Compiling src directory to classes/base and classes/test with command 'javac'" />
     
@@ -216,13 +215,14 @@
     </move>
     
     <javac srcdir="src" destdir="classes/base" source="1.6" target="1.6"
-           bootclasspath="${java7-runtime}" sourcepath="" includeAntRuntime="no"
+           bootclasspath="${java8-runtime}" sourcepath="" includeAntRuntime="no"
            executable="javac" fork="yes" memoryMaximumSize="512M"
            debug="on" optimize="off" deprecation="on"	>
       <classpath>
         <fileset refid="libs" />
         <pathelement location="lib/buildlib/junit.jar" />
         <pathelement location="classes/base" />
+	<pathelement location="${drjava-jar}" />
       </classpath>
       <compilerarg value="-Xlint" />
       <!-- Ignore serial warnings, because they occur for every Throwable definition (among others) -->
@@ -294,20 +294,12 @@
     </antcall>
   </target>
 
-  <target name="test-6" depends="compile, resolve-java6-exec" unless="skip-test"
-          description="Run all tests under Java 6 (after compiling); use -Dtest-spec=... to filter">
+  <target name="test-8" depends="compile, resolve-java8-exec" unless="skip-test"
+          description="Run all tests under Java 8 (after compiling); use -Dtest-spec=... to filter">
     <antcall target="iterate-tests">
-      <param name="test-jvm" value="${java6-exec}" />
+      <param name="test-jvm" value="${java8-exec}" />
     </antcall>
   </target>
-  
-  <target name="test-7" depends="compile, resolve-java7-exec" unless="skip-test"
-          description="Run all tests under Java 7 (after compiling); use -Dtest-spec=... to filter">
-    <antcall target="iterate-tests">
-      <param name="test-jvm" value="${java7-exec}" />
-    </antcall>
-  </target>
-  
   
   <target name="iterate-tests" depends="resolve-test-formatter-class">
     <!-- Calls do-test, unless that is overridden by the caller -->
@@ -409,6 +401,7 @@
       <classpath>
         <pathelement location="lib/buildlib/junit.jar" />
         <pathelement location="lib/buildlib/plt-ant.jar" /> <!-- required for custom formatter -->
+        <pathelement location="${drjava-jar}" />
         <pathelement location="${clover-jar}" />
         <pathelement location="classes/test" />
         <pathelement location="classes/base" />
@@ -489,7 +482,7 @@
         <fileset refid="libs" />
         <pathelement location="lib/buildlib/junit.jar" />
       </classpath>
-      <link href="http://java.sun.com/j2se/1.7/docs/api" />
+      <link href="http://java.sun.com/j2se/1.8/docs/api" />
       <link href="http://junit.org/junit/javadoc/3.8.1" />
       <link href="http://drjava.org/javadoc/plt" />
       <!-- Additional external library APIs may be listed here -->
@@ -500,11 +493,8 @@
   <target name="clover" depends="clean, setup-clover, test, report-clover" 
           description="Generate a Clover test coverage report" />
   
-  <target name="clover-6" depends="clean, setup-clover, test-6, report-clover" 
-          description="Generate a Clover test coverage report under Java 6" />
-  
-  <target name="clover-7" depends="clean, setup-clover, test-7, report-clover" 
-          description="Generate a Clover test coverage report under Java 7" />
+  <target name="clover-8" depends="clean, setup-clover, test-8, report-clover" 
+          description="Generate a Clover test coverage report under Java 8" />
   
   <target name="report-clover" depends="resolve-version-tag">
     <echo message="Generating Clover report" />
@@ -775,37 +765,37 @@
     <fail message="Can't find the java executable in the Java 6 home: ${java6-home}" unless="java6-exec" />
   </target>
   
-  <target name="resolve-java7-runtime">
+  <target name="resolve-java8-runtime">
     <!-- We rely on "location" to generate a platform-specific path; note that properties
-         are immutable and so java7-runtime will only be set the *first* time. -->
+         are immutable and so java8-runtime will only be set the *first* time. -->
 
-    <property name="java7-runtime-1" location="${java7-home}/lib/rt.jar" />
-    <available property="java7-runtime" value="${java7-runtime-1}" file="${java7-runtime-1}" />
+    <property name="java8-runtime-1" location="${java8-home}/lib/rt.jar" />
+    <available property="java8-runtime" value="${java8-runtime-1}" file="${java8-runtime-1}" />
 
-    <property name="java7-runtime-2" location="${java7-home}/jre/lib/rt.jar" />
-    <available property="java7-runtime" value="${java7-runtime-2}" file="${java7-runtime-2}" />
+    <property name="java8-runtime-2" location="${java8-home}/jre/lib/rt.jar" />
+    <available property="java8-runtime" value="${java8-runtime-2}" file="${java8-runtime-2}" />
 
-    <property name="java7-runtime-3" location="${java7-home}/../Classes/classes.jar" />
-    <available property="java7-runtime" value="${java7-runtime-3}" file="${java7-runtime-3}" />
+    <property name="java8-runtime-3" location="${java8-home}/../Classes/classes.jar" />
+    <available property="java8-runtime" value="${java8-runtime-3}" file="${java8-runtime-3}" />
 
-    <fail message="Can't find rt.jar in the Java 7 home: ${java7-home}" unless="java7-runtime" />
+    <fail message="Can't find rt.jar in the Java 8 home: ${java8-home}" unless="java8-runtime" />
   </target>
   
-  <target name="resolve-java7-exec">
+  <target name="resolve-java8-exec">
     <!-- We rely on "location" to generate a platform-specific path -->
 
-    <property name="java7-exec-1" location="${java7-home}/bin/java.exe" />
-    <condition property="java7-exec" value="${java7-exec-1}">
+    <property name="java8-exec-1" location="${java8-home}/bin/java.exe" />
+    <condition property="java8-exec" value="${java8-exec-1}">
       <and>
-        <available file="${java7-exec-1}" />
+        <available file="${java8-exec-1}" />
         <os family="windows" />
       </and>
     </condition>
     
-    <property name="java7-exec-2" location="${java7-home}/bin/java" />
-    <available property="java7-exec" value="${java7-exec-2}" file="${java7-exec-2}" />
+    <property name="java8-exec-2" location="${java8-home}/bin/java" />
+    <available property="java8-exec" value="${java8-exec-2}" file="${java8-exec-2}" />
 
-    <fail message="Can't find the java executable in the Java 7 home: ${java7-home}" unless="java7-exec" />
+    <fail message="Can't find the java executable in the Java 8 home: ${java8-home}" unless="java8-exec" />
   </target>
   
   
