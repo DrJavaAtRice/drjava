@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -56,8 +56,7 @@ public interface Debugger {
     */
   public void removeListener(DebugListener listener);
   
-  /** 
-   * Returns whether the debugger can be used in this copy of DrJava. This 
+  /** Returns whether the debugger can be used in this copy of DrJava. This 
    * does not indicate whether it is ready to be used, which is indicated 
    * by isReady().
    * @return true if the debugger is available; false otherwise
@@ -66,8 +65,7 @@ public interface Debugger {
   
   public DebugModelCallback callback();
   
-  /** 
-   * Attaches the debugger to the Interactions JVM to prepare for debugging. 
+  /** Attaches the debugger to the Interactions JVM to prepare for debugging. 
    * @throws DebugException if an error occurs during startup
    */
   public void startUp() throws DebugException;
@@ -84,15 +82,13 @@ public interface Debugger {
 //  /** Suspends all the threads in the VM the debugger is attached to. */
 //  public void suspendAll();
   
-  /** 
-   * Sets the current thread we are debugging to the thread referenced by d. 
+  /** Sets the current thread we are debugging to the thread referenced by d. 
    * @param d data on the new current thread
    * @throws DebugException if an error occurs
    */
   public void setCurrentThread(DebugThreadData d) throws DebugException;
   
-  /** 
-   * Enables or disables automatic trace. 
+  /** Enables or disables automatic trace. 
    * @param e true if automatic traces are to be enabled; false otherwise
    */
   public void setAutomaticTraceEnabled(boolean e);
@@ -100,56 +96,48 @@ public interface Debugger {
   /** @return whether automatic trace has been enabled within the debugger*/
   public boolean isAutomaticTraceEnabled(); 
   
-  /** 
-   * Resumes execution of the currently loaded document. 
+  /** Resumes execution of the currently loaded document. 
    * @throws DebugException if an error occurs 
    */
   public void resume() throws DebugException;
   
-  /** 
-   * Resumes execution of the given thread.
+  /** Resumes execution of the given thread.
    * @param data the DebugThreadData representing the thread to resume
    * @throws DebugException if an error occurs 
    */
   public void resume(DebugThreadData data) throws DebugException;
   
-  /** 
-   * Steps the execution of the currently loaded document. 
+  /** Steps the execution of the currently loaded document. 
    * @param type the type of step to take
    * @throws DebugException if an error occurs 
    */
   public void step(StepType type) throws DebugException;
   
-  /** 
-   * Adds a watch on the given field or variable.
+  /** Adds a watch on the given field or variable.
    * @param field the name of the field we will watch
    * @throws DebugException if an error occurs 
    */
   public void addWatch(String field) throws DebugException;
   
-  /** 
-   * Removes any watches on the given field or variable.
+  /** Removes any watches on the given field or variable.
    * @param field the name of the field we will watch
    * @throws DebugException if an error occurs 
    */
   public void removeWatch(String field) throws DebugException;
   
-  /** 
-   * Removes the watch at the given index.
+  /** Removes the watch at the given index.
    * @param index Index of the watch to remove
    * @throws DebugException if an error occurs 
    */
   public void removeWatch(int index) throws DebugException;
   
-  /** 
-   * Removes all watches on existing fields and variables.
+  /** Removes all watches on existing fields and variables.
    * @throws DebugException if an error occurs 
    */
   public void removeAllWatches() throws DebugException;
   
   
-  /** 
-   * Toggles whether a breakpoint is set at the given line in the given document.
+  /** Toggles whether a breakpoint is set at the given line in the given document.
    * @param doc  Document in which to set or remove the breakpoint
    * @param offset  Start offset on the line to set the breakpoint
    * @param isEnabled  {@code true} if this breakpoint should be enabled
@@ -158,72 +146,61 @@ public interface Debugger {
    */
   public boolean toggleBreakpoint(OpenDefinitionsDocument doc, int offset, boolean isEnabled) throws DebugException;
   
-  /** 
-   * Sets a breakpoint.
+  /** Sets a breakpoint.
    * @param breakpoint The new breakpoint to set
    * @throws DebugException if an error occurs 
    */
   public void setBreakpoint(final Breakpoint breakpoint) throws DebugException;
   
-  /** 
-   * Removes a breakpoint. Called from ToggleBreakpoint -- even with BPs that are not active.
+  /** Removes a breakpoint. Called from ToggleBreakpoint -- even with BPs that are not active.
    * @param breakpoint The breakpoint to remove.
    * @throws DebugException if an error occurs 
    */
   public void removeBreakpoint(final Breakpoint breakpoint) throws DebugException;
   
-  /** 
-   * @return all currently watched fields and variables.
-   * @throws DebugException if an error occurs 
-   */
+  /** @return all currently watched fields and variables.
+    * @throws DebugException if an error occurs 
+    */
   public ArrayList<DebugWatchData> getWatches() throws DebugException;
   
-  /**
-   * @return a Vector of ThreadData.
-   * @throws DebugException if an error occurs
-   */ 
+  /** @return a Vector of ThreadData.
+    * @throws DebugException if an error occurs
+    */ 
   public ArrayList<DebugThreadData> getCurrentThreadData() throws DebugException;
   
-  /** 
-   * @return a Vector of StackData for the current thread.
-   * @throws DebugException if an error occurs 
-   */
+  /** @return a Vector of StackData for the current thread.
+    * @throws DebugException if an error occurs 
+    */
   public ArrayList<DebugStackData> getCurrentStackFrameData() throws DebugException;
   
-  /** 
-   * @return true if there are any threads in the program currently being
-   * debugged which have been suspended (by the user or by hitting a breakpoint).
-   * @throws DebugException if an error occurs 
-   */
+  /** @return true if there are any threads in the program currently being
+    * debugged which have been suspended (by the user or by hitting a breakpoint).
+    * @throws DebugException if an error occurs 
+    */
   public boolean hasSuspendedThreads() throws DebugException;
   
-  /** 
-   * @return whether the thread the debugger is tracking is now running.
+  /** @return whether the thread the debugger is tracking is now running.
    * @throws DebugException if an error occurs 
    */
   public boolean hasRunningThread() throws DebugException;
   
-  /** 
-   * @return whether the debugger's current thread is suspended.
+  /** @return whether the debugger's current thread is suspended.
    * @throws DebugException if an error occurs 
    */
   public boolean isCurrentThreadSuspended() throws DebugException;
   
-  /** 
-   * Scrolls to the source indicated by the given DebugStackData
+  /** Scrolls to the source indicated by the given DebugStackData
    * @param data the DebugStackData representing the source location
    * @throws DebugException if an error occurs 
    */
   public void scrollToSource(DebugStackData data) throws DebugException;
   
-  /** 
-   * Scrolls to the source indicated by the given Breakpoint
+  /** Scrolls to the source indicated by the given Breakpoint
    * @param bp the Breakpoint representing the source location
    */
   public void scrollToSource(Breakpoint bp);
   
-  /** 
-   * Gets the Breakpoint object at the specified line in the given class.
+  /** Gets the Breakpoint object at the specified line in the given class.
    * If the given datThe name of the class the breakpoint's in
    * @param line the line at which to get the breakpoint
    * @param className the class within which to get the breakpoint

@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -74,8 +74,7 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
     super.tearDown();
   }
 
-  /** 
-   * Tests that the history doesn't overwrite files without prompting.
+  /** Tests that the history doesn't overwrite files without prompting.
    * @throws IOException if an IO operation fails 
    */
   public void testSaveAsExistsForOverwrite() throws IOException {
@@ -152,11 +151,11 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
 //    Utilities.clearEventQueue();
     
     assertEquals("History size should be 10", 10, _history.size());
-    _history.setMaxSize(100);
+    _history.setMaximumSize(100);
 
     assertEquals("History size should still be 10", 10, _history.size());
 
-    _history.setMaxSize(0);
+    _history.setMaximumSize(0);
     assertEquals("History size should be 0", 0, _history.size());
 
     Utilities.invokeAndWait(new Runnable() { 

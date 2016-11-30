@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -95,8 +95,8 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
       DJDocument doc = getDJDocument();
       try { 
         char prevChar = doc.getText(offset - 1, 1).charAt(0);
-        if (prevChar == '{' || prevChar == '(' ) matchUpdate(offset, true);       // forward match
-        else if (prevChar == '}' || prevChar == ')') matchUpdate(offset, false);  // backward match
+        if (prevChar == '{' || prevChar == '(' || prevChar == '[') matchUpdate(offset, true);       // forward match
+        else if (prevChar == '}' || prevChar == ')' || prevChar == ']') matchUpdate(offset, false);  // backward match
         else updateStatusField();  // update main frame status fields; a no-op for InteractionsPanes
         
       }
@@ -131,8 +131,7 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
   
   //--------- METHODS -----------
   
-  /** 
-   * Create a null default action for Cntl/Alt/Meta chars in the keymap for p. 
+  /** Create a null default action for Cntl/Alt/Meta chars in the keymap for p. 
    * @param p the component to update
    */
   public static void disableAltCntlMetaChars(JTextComponent p) {
@@ -180,8 +179,7 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
     }
   }
   
-  /** 
-   * A length checked version of setCaretPosition(int pos) that ensures pos 
+  /** A length checked version of setCaretPosition(int pos) that ensures pos 
    * is within the DJDocument. 
    * @param pos the position to be set
    */
@@ -254,8 +252,7 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
     */
   protected abstract void indentLines(int selStart, int selEnd, Indenter.IndentReason reason, ProgressMonitor pm);
      
-  /**
-   * @param selStart - the selection start
+  /** @param selStart - the selection start
    * @param selEnd - the selection end
    * @return true if the indent is to be performed.
    */
@@ -267,8 +264,7 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
   /** Drag and drop target. */
   volatile DropTarget dropTarget = new DropTarget(this, this);  
 
-  /** 
-   * User dragged something into the component. 
+  /** User dragged something into the component. 
    * @param dropTargetDragEvent the drag event
    */
   public void dragEnter(DropTargetDragEvent dropTargetDragEvent) {

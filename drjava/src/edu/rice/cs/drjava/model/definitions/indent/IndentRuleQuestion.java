@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -96,16 +96,14 @@ public abstract class IndentRuleQuestion extends IndentRuleWithTrace {
     }
   }
   
-  /** 
-   * Convenience method that wraps calls on applyRule in a read lock. Only used in testing. 
+  /** Convenience method that wraps calls on applyRule in a read lock. Only used in testing. 
    * @param doc AbstractDJDocument containing the line to be indented.
    * @param reason The reason that indentation was initiated, specified in Indenter
    * @return true if this node's rule holds.
    */
   boolean testApplyRule(AbstractDJDocument doc, Indenter.IndentReason reason) { return applyRule(doc, reason); }
   
-  /** 
-   * Convenience method that wraps calls on applyRule in a read lock. Only used in testing.
+  /** Convenience method that wraps calls on applyRule in a read lock. Only used in testing.
    * @param doc  The AbstractDJDocument containing the line to be indented.
    * @param pos  The Position within line to be indented.
    * @param reason  The reason that indentation was initiated, specified in Indenter
@@ -115,8 +113,7 @@ public abstract class IndentRuleQuestion extends IndentRuleWithTrace {
     return applyRule(doc, pos, reason); 
   }
   
-  /** 
-   * Convenience method that wraps calls on indentLine in a write lock. Only used in testing. 
+  /** Convenience method that wraps calls on indentLine in a write lock. Only used in testing. 
    * @param doc AbstractDJDocument containing the line to be indented.
    * @param reason The reason that indentation was initiated, specified in Indenter
    */

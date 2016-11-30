@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -75,8 +75,7 @@ public abstract class DebugAction<T extends EventRequest> {
   /** @return the line number this DebugAction occurs on */
   public int getLineNumber() { return _lineNumber; }
 
-  /** 
-   * Creates an EventRequest corresponding to this DebugAction, using the 
+  /** Creates an EventRequest corresponding to this DebugAction, using the 
    * given ReferenceType.  This is called either from the DebugAction 
    * constructor or the PendingRequestManager, depending on when the 
    * ReferenceType becomes available. This DebugAction must be an instance of 
@@ -93,8 +92,7 @@ public abstract class DebugAction<T extends EventRequest> {
     else return false;
   }
 
-  /** 
-   * This should always be called from the constructor of the subclass. 
+  /** This should always be called from the constructor of the subclass. 
    * Tries to create all applicable EventRequests
    * for this DebugAction.
    * @throws DebugException if something goes wrong
@@ -141,8 +139,7 @@ public abstract class DebugAction<T extends EventRequest> {
   public boolean isEnabled() { return _isEnabled; }
   
   
-  /** 
-   * Enable/disable the breakpoint. 
+  /** Enable/disable the breakpoint. 
    * @param isEnabled true if the breakpoint is to be set enabled; false for disabled
    */
   public void setEnabled(boolean isEnabled) { _isEnabled = isEnabled; }

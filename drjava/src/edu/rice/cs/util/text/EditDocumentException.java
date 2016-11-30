@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -42,8 +42,7 @@ package edu.rice.cs.util.text;
 public class EditDocumentException extends RuntimeException {
   private Throwable _value;
 
-   /** 
-    * Constructs an exception with
+   /** Constructs an exception with
     * <code>value.toString()</code> as it's message.
     * @param value Throwable from whcih to create the exception
     */
@@ -52,8 +51,7 @@ public class EditDocumentException extends RuntimeException {
     _value = value;
   }
 
-   /** 
-    * Constructs an exception with a custom message string in
+   /** Constructs an exception with a custom message string in
     * addition to <code>value.toString()</code>.
     * @param value Throwable from which to create the exception
     * @param msg message

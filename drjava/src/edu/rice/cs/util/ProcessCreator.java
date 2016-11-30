@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -43,8 +43,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-/**
- * This class abstracts out process creation, similar to ProcessCreator,
+/** * This class abstracts out process creation, similar to ProcessCreator,
  * which is only available in Java 1.5.
  * This ProcessCreator cannot deal with process sequences and chains.
  * It can only create one processes.

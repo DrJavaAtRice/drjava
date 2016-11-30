@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -65,8 +65,7 @@ public final class IndentTest extends DrJavaTestCase {
   private Integer indentLevel = Integer.valueOf(2);
   private GlobalEventNotifier _notifier;
   
-  /** 
-   * Standard constructor for IdentTest 
+  /** Standard constructor for IdentTest 
    * @param name test name
    */
   public IndentTest(String name) { super(name); }
@@ -85,16 +84,14 @@ public final class IndentTest extends DrJavaTestCase {
     */
   public static Test suite() { return  new TestSuite(IndentTest.class); }
   
-  /** 
-   * Convenience method that performs _doc._indentLine in the event thread. 
+  /** Convenience method that performs _doc._indentLine in the event thread. 
    * @param reason the reason for indenting
    */
   private void safeIndentLine(final Indenter.IndentReason reason) {
     Utilities.invokeAndWait(new Runnable() { public void run() { _doc._indentLine(reason); } });
   }
  
-  /** 
-   * Convenience method that performs _doc._indentLines in the event thread. 
+  /** Convenience method that performs _doc._indentLines in the event thread. 
    * @param startSel start of the selected region
    * @param endSel end of the selected region
    */
@@ -106,8 +103,7 @@ public final class IndentTest extends DrJavaTestCase {
     });
   }
   
-  /** 
-   * Regression test for comment portion of indent tree. 
+  /** Regression test for comment portion of indent tree. 
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testIndentComments() throws BadLocationException {
@@ -143,8 +139,7 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents(indented, _doc);
   }
   
-  /** 
-   * Test case for SourceForge bug# 681203. 
+  /** Test case for SourceForge bug# 681203. 
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testMultiLineStarInsertFirstLine() throws BadLocationException {
@@ -174,8 +169,7 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents(starAdded, _doc);
   }
   
-  /** 
-   * Test case for SourceForge bug# 681203. 
+  /** Test case for SourceForge bug# 681203. 
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testMultiLineStarInsertLaterLine() throws BadLocationException {
@@ -209,8 +203,7 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents(starAdded, _doc);
   }
   
-  /** 
-   * Regression test for paren phrases. 
+  /** Regression test for paren phrases. 
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testIndentParenPhrases() throws BadLocationException {
@@ -248,8 +241,7 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents(indented, _doc);
   }
   
-  /** 
-   * Regression test for braces. 
+  /** Regression test for braces. 
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testIndentBraces() throws BadLocationException {
@@ -294,8 +286,7 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents(indented, _doc);
   }
   
-  /** 
-   * Regression test for arrays. 
+  /** Regression test for arrays. 
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testIndentArray() throws BadLocationException {
@@ -327,8 +318,7 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents(indented, _doc);
   }
   
-  /** 
-   * Regression test for common cases. 
+  /** Regression test for common cases. 
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testIndentCommonCases() throws BadLocationException {
@@ -354,8 +344,7 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents(indented, _doc);
   }
   
-  /** 
-   * Regression test for switch statements.
+  /** Regression test for switch statements.
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testIndentSwitch() throws BadLocationException {
@@ -388,8 +377,7 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents(indented, _doc);
   }
   
-  /** 
-   * Regression test for ternary operators. 
+  /** Regression test for ternary operators. 
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testIndentTernary() throws BadLocationException {
@@ -428,8 +416,7 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents(indented, _doc);
   }
   
-  /** 
-   * Tests getLineEnclosingBrace, getEnclosingBrace
+  /** Tests getLineEnclosingBrace, getEnclosingBrace
    * @throws BadLocationException if attempts to reference an invalid position
    */
   public void testIndentInfoCurly() throws BadLocationException {
@@ -519,8 +506,7 @@ public final class IndentTest extends DrJavaTestCase {
     _assertBraceInfo(7, OPEN_CURLY);
   }
   
-  /** 
-   * Tests block comment indenting.
+  /** Tests block comment indenting.
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testEndOfBlockComment () throws BadLocationException {
@@ -529,8 +515,7 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents("\n{\n  hello;\n /*\n hello\n */", _doc);
   }
   
-  /** 
-   * Tests block comment indenting.
+  /** Tests block comment indenting.
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testAfterBlockComment () throws BadLocationException {
@@ -874,8 +859,7 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents("hello\n{\n  {\n    {", _doc);
   }
   
-  /** 
-   * Regression test for bug in drjava-20010802-1020:
+  /** Regression test for bug in drjava-20010802-1020:
    * Indent block on a file containing just "  x;\n  y;\n" would throw an
    * exception.
    * @throws BadLocationException if attempts to reference an invalid location
@@ -917,8 +901,7 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents("\n\n", _doc);
   }
   
-  /** 
-   * Regression test for arrays.
+  /** Regression test for arrays.
    * @throws BadLocationException if attempts to reference an invalid position 
    */
   public void testAnonymousInnerClass() throws BadLocationException {
@@ -1120,8 +1103,7 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents(indentedAfter, _doc);
   }
   
-  /** 
-   * tests that an if statment nested in a switch will be indented properly
+  /** tests that an if statment nested in a switch will be indented properly
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testNestedIfInSwitch() throws BadLocationException {
@@ -1228,8 +1210,7 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents(test2Correct, _doc);
   }
   
-  /** 
-   * Tests that annotations do not change the indent level of the lines following.
+  /** Tests that annotations do not change the indent level of the lines following.
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testAnnotationsAfterOpenCurly() throws BadLocationException {
@@ -1280,8 +1261,7 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents(textIndented, _doc);
   }
   
-  /** 
-   * Tests that annotations do not change the indent level of the lines following.
+  /** Tests that annotations do not change the indent level of the lines following.
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testAnnotationsAfterDefinition() throws BadLocationException {

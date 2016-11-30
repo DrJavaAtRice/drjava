@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -38,8 +38,7 @@ package edu.rice.cs.drjava.config;
 
 import java.awt.Font;
 
-/**
- * Class defining all configuration entries of type Font
+/** * Class defining all configuration entries of type Font
  * @version $Id$
  */
 public class FontOption extends Option<Font> {

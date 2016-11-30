@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -51,8 +51,7 @@ public class RecursiveFileListProperty extends FileListProperty {
   /** Start directory. */
   protected String _start;
 
-  /** 
-   * Create an recursive file list property. 
+  /** Create an recursive file list property. 
    * @param name the name of the property
    * @param sep the separating string
    * @param dir the relative directory

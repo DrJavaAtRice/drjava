@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (javaplt@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -43,8 +43,7 @@ import edu.rice.cs.util.*;
 
 import java.io.*;
 
-/**
- * Tests for the variables and language constructs that can be used in external processes.
+/** * Tests for the variables and language constructs that can be used in external processes.
  * @author Mathias Ricken
  */
 public class DrJavaPropertySetupTest extends MultiThreadedTestCase {

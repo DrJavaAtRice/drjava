@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -113,7 +113,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
 
   /** Maximum character width of the current main font. */
   private static volatile int _maxCharWidth = 0;
-  
+    
   /** Color of the right margin. */
   private volatile Color _rightMarginColor = Color.red;
   
@@ -384,8 +384,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     /** Whether to perform the indent if the caret is in a String or comment. */
     private final boolean _indentNonCode;
 
-    /** 
-     * Creates an IndentKeyAction which only invokes indent if the caret is 
+    /** Creates an IndentKeyAction which only invokes indent if the caret is 
      * in code, and not Strings or comments.
      * @param key the key
      * @param defaultAction the default action
@@ -405,8 +404,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       _indentNonCode = indentNonCode;
     }
 
-    /** 
-     * This method tells what the reason should be for spawning this indent event
+    /** This method tells what the reason should be for spawning this indent event
      * Defaults to Indenter.IndentReason.OTHER
      * @return the reason for spawning this indent event
      */
@@ -479,8 +477,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   /** Our keymap containing key bindings.  Takes precedence over the default map. */
   final Keymap ourMap;
   
-  /** 
-   * Standard Constructor.  Sets up all the defaults.
+  /** Standard Constructor.  Sets up all the defaults.
    * @param mf the parent window
    * @param doc the document
    */
@@ -772,17 +769,11 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
    */
   public static void setEditorKit(DefinitionsEditorKit editorKit) { EDITOR_KIT = editorKit; }
 
-  /** 
-   * Update the maximum character width of the current font. We can make this static, because DrJava
-   * only supports one font for all panes anyway. 
-   * @param metrics font widths
-   */
+  /** Update the maximum character width of the current font where "_" is used as the widest character.  In monospaced
+    * fonts, it spans the entire width of a character box.
+    */
   public static void updateMaxCharWidth(FontMetrics metrics) {
-    int[] widths = metrics.getWidths();
-    _maxCharWidth = 0;
-    for(int w: widths) {
-      if (w > _maxCharWidth) { _maxCharWidth = w; }
-    }
+    _maxCharWidth = metrics.stringWidth("_");
   }
   
   /** Enable anti-aliased text by overriding paintComponent. */
@@ -932,8 +923,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   /** @return the OpenDefinitionsDocument contained in this DefinitionsPane. */
   public OpenDefinitionsDocument getOpenDefDocument() { return _doc; }
   
-  /** 
-   * Get the DJDocument (OpenDefinitionsDocument) contained in this pane.
+  /** Get the DJDocument (OpenDefinitionsDocument) contained in this pane.
    * Required by the super class AbstractDJPane.
    * @return the document contained in this pane
    */
@@ -955,8 +945,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     catch (BadLocationException ble) { throw new UnexpectedException(ble); }
   }
 
-  /**
-   * Override JEditorPane's setDocument to make sure only the Document in our 
+  /** Override JEditorPane's setDocument to make sure only the Document in our 
    * final OpenDefinitionsDocument can be used.
    * @param d the document to be set
    */
@@ -973,8 +962,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     return testVariable;
   }
   
-  /** 
-   * Add a ErrorCaretListener to this pane, keeping it accessible so its error 
+  /** Add a ErrorCaretListener to this pane, keeping it accessible so its error 
    * model can be updated later. 
    * @param eListener the listener to be added
    */
@@ -986,8 +974,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   /** @return the ErrorCaretListener for this pane. */
   public ErrorCaretListener getErrorCaretListener() { return _errorListener; }
 
-  /** 
-   * Switches the location of the error highlight in the document if there was one. Otherwise adds the 
+  /** Switches the location of the error highlight in the document if there was one. Otherwise adds the 
    * highlight. The invariant is that there are zero or one error highlights at any time.
    * @param from start position for error highlighting
    * @param to end position for error highlighting
@@ -1133,8 +1120,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
 //    }
 //  }
 
-  /** 
-   * Determines current line using logic in DefinitionsDocument.  
+  /** Determines current line using logic in DefinitionsDocument.  
    * Does it differ from getCurrentLine()? 
    * @return the current line
    */
@@ -1150,8 +1136,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
 //  public void addSetSizeListener(ActionListener listener) { _setSizeListener = listener; }
 //  public void removeSetSizeListener() { _setSizeListener = null; }
 
-  /** 
-   * Centers the view (pane) on the specified offset. 
+  /** Centers the view (pane) on the specified offset. 
    * @param offset offset on which to center the view
    */
   public void centerViewOnOffset(int offset) {

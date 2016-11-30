@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,7 @@ import javax.swing.text.Position;
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.io.File;
 
-/** Class for document regions that totally ordered by allocation chronology.  They do not conform to the invariants
+/** Class for document regions that are totally ordered by allocation chronology.  They do not conform to the invariants
   * required for OrderedDocumentRegions.
   * Warning: this class defines compareTo which implicitly defines a coarser equality relation than equals
   * @version $Id$
@@ -54,9 +54,9 @@ public class BrowserDocumentRegion implements IDocumentRegion, Comparable<Browse
   private final int _index;                        // unique sequence number for this region
   protected final OpenDefinitionsDocument _doc;    // document for this region
   protected final File _file;                      // file for this region
-  protected Position _startPosition;               // start position for this region
-  protected Position _endPosition;                 // final position for this region
-  protected volatile DefaultMutableTreeNode _treeNode;
+  protected final Position _startPosition;         // start position for this region
+  protected final Position _endPosition;           // final position for this region
+//  protected volatile DefaultMutableTreeNode _treeNode;
   
   /** Create a new simple document region with a bona fide document.
     * @param doc document that contains this region
@@ -70,7 +70,7 @@ public class BrowserDocumentRegion implements IDocumentRegion, Comparable<Browse
     _file = doc.getRawFile();    // don't check the validity of _file here
     _startPosition = sp;
     _endPosition = ep;
-    _treeNode = null;
+//    _treeNode = null;
   }
   
   /* Relying on default equals operation. */
@@ -78,8 +78,19 @@ public class BrowserDocumentRegion implements IDocumentRegion, Comparable<Browse
   /** This hash function is consistent with equals. */
   public int hashCode() { return _index; }
   
-  /** This relation is coarset than equals. */
+  /** This relation is consistent with equals. */
   public int compareTo(BrowserDocumentRegion r) { return _index - r._index; }
+  
+  /** Override of equals that is consistent with hashCode. */
+  public boolean equals(Object o) { 
+    if (o.getClass() != BrowserDocumentRegion.class) return false;
+    BrowserDocumentRegion obdr = (BrowserDocumentRegion) o;  // cannot fail
+    return obdr.hashCode() == hashCode();
+  }
+  
+  public boolean equiv(BrowserDocumentRegion bdr) { 
+    return (_doc == bdr._doc) && (getStartOffset() == bdr.getStartOffset());
+  }
   
   public int getIndex() { return _index; }
   
@@ -95,17 +106,11 @@ public class BrowserDocumentRegion implements IDocumentRegion, Comparable<Browse
   /** @return the end offset */
   public int getEndOffset() { return _endPosition.getOffset(); }
   
-  /* The following are commented out because a Position object includes a reference to the corresponding object,
-   * preventing it from being garbage-collected.  We cannot retain any Position objects for documents that have
-   * been kicked out the document cache assuming we want such documents to be garbage-collected (which is the
-   * primary motivation for creating the document cache).
-   */
-  
-//  /** @return the start position */
-//  public Position getStartPosition() { return _startPosition; }
+  /** @return the start position */
+  public Position getStartPosition() { return _startPosition; }
 
-//  /** @return the end offset */
-//  public Position getEndPosition() { return _endPosition; }
+  /** @return the end offset */
+  public Position getEndPosition() { return _endPosition; }
 
   public String toString() {
     return _doc.toString() + "[" + getStartOffset() + "]";

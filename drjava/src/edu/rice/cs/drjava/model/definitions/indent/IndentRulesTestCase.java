@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -77,8 +77,7 @@ public abstract class IndentRulesTestCase extends DrJavaTestCase {
     super.tearDown();
   }
   
-  /** 
-   * Clears the text of the _doc field and sets it to the given string. 
+  /** Clears the text of the _doc field and sets it to the given string. 
    * @param text the text to be set
    * @throws BadLocationException if attempts to reference an invalid position
    */
@@ -95,7 +94,7 @@ public abstract class IndentRulesTestCase extends DrJavaTestCase {
    *
   protected final void _setIndentSize(int size) {
     _indent = "";
-    for (int i=0; i < size; i++) {
+    for (int i = 0; i < size; i++) {
       _indent = _indent + " ";
     }
   }*/
@@ -112,7 +111,7 @@ public abstract class IndentRulesTestCase extends DrJavaTestCase {
    *
   protected String _getIndentString(int numLevels) {
     String indent = "";
-    for (int i=0; i < numLevels; i++) {
+    for (int i = 0; i < numLevels; i++) {
       indent += _indent;
     }
     return indent;
@@ -131,8 +130,7 @@ public abstract class IndentRulesTestCase extends DrJavaTestCase {
     return start.concat(indent).concat(end);
   }*/
   
-  /** 
-   * Asserts that the document contains the expected text.
+  /** Asserts that the document contains the expected text.
    * @param expected what text of document should be
    * @throws BadLocationException if attempts to reference an invalid position
    */

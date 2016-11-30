@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -70,15 +70,13 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
     */
   void setBlockOffset(int offset) { _cursor.setBlockOffset(offset); }
   
-  /** 
-   * Absolute offset for testing purposes. We don't keep track of absolute 
+  /** Absolute offset for testing purposes. We don't keep track of absolute 
    * offset as it causes too much confusion and trouble.
    * @return the absolute offset of the cursor
    */
   public int absOffset() { return absOffset(_cursor); }
   
-  /** 
-   * Absolute offset of the specified iterator.  Inefficient so only used for testing purposes. 
+  /** Absolute offset of the specified iterator.  Inefficient so only used for testing purposes. 
    * @param cursor the cursor for which to get the offset
    * @return the absolute offset of the cursor
    */
@@ -111,8 +109,7 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
   /** @return the shadowing state of _cursor; only makes sense for ReducedModelComment. */
   public ReducedModelState getState() { return _cursor.getStateAtCurrent(); }
   
-  /** 
-   * A toString() replacement for testing - easier to read. 
+  /** A toString() replacement for testing - easier to read. 
    * @return string representation of this
    */
   public String simpleString() {
@@ -142,8 +139,7 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
     return val.toString();
   }
   
-  /** 
-   * Inserts a character into the reduced model. A method to be implemented in 
+  /** Inserts a character into the reduced model. A method to be implemented in 
    * each specific reduced sub-model. 
    * @param ch character to be inserted
    */
@@ -246,8 +242,7 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
     _cursor.setBlockOffset(0);
   }
   
-  /** 
-   * @param relLocation distance from walker to get state at.
+  /** @param relLocation distance from walker to get state at.
    * @return the state at the relLocation, where relLocation is the location relative to the walker.
    */
   protected abstract ReducedModelState moveWalkerGetState(int relLocation);

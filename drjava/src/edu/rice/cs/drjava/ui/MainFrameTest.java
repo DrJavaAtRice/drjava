@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -129,8 +129,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     _log.log("testCreateManualToobarButton completed");
   }
   
-  /** 
-   * Tests that the current location of a document is equal to the caret 
+  /** Tests that the current location of a document is equal to the caret 
    * Position after switching to another document and back. 
    * @throws BadLocationException if attempts to reference an invalid location
    */
@@ -180,8 +179,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   
   private String _data;
   
-  /** 
-   * Tests that the clipboard is unmodified after a "clear line" action.
+  /** Tests that the clipboard is unmodified after a "clear line" action.
    * @throws BadLocationException if attempts to reference an invalid location
    * @throws UnsupportedFlavorException if an invalid DataFlavor is used
    * @throws IOException if an IO operation fails
@@ -245,8 +243,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     _log.log("testClearLine completed");
   }
   
-  /** 
-   * Tests that the clipboard is modified after a "cut line" action.
+  /** Tests that the clipboard is modified after a "cut line" action.
    * NOTE: Commented out for commit because of failures, despite proper behavior in GUI.
    *       This may not work unless ActionEvents are dropped in the event queue
    * @throws BadLocationException if attempts to reference an invalid location
@@ -327,8 +324,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     _log.log("testCorrectInteractionsDocument completed");
   }
   
-  /** 
-   * Tests that undoing/redoing a multi-line indent will restore the caret position.
+  /** Tests that undoing/redoing a multi-line indent will restore the caret position.
    * @throws BadLocationException if attempts to reference an invalid location
    * @throws InterruptedException if execution is interrupted unexpectedly
    */
@@ -496,8 +492,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   }
   
   
-  /** 
-   * Tests that the save button does not set itself as enabled immediately after opening a file. 
+  /** Tests that the save button does not set itself as enabled immediately after opening a file. 
    * @throws IOException if an IO operation fails
    */
   public void testSaveButtonEnabled() throws IOException {
@@ -536,8 +531,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     _log.log("testSaveButtonEnabled completed");
   }
   
-  /** 
-   * A Test to guarantee that the Dancing UI bug will not rear its ugly head again.
+  /** A Test to guarantee that the Dancing UI bug will not rear its ugly head again.
    * Basically, add a component listener to the leftComponent of _docSplitPane and
    * make certain its size does not change while compiling a class which depends on
    * another class.
@@ -667,8 +661,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     _log.log("testDancingUIFileOpened completed");
   }
   
-  /** 
-   * A Test to guarantee that the Dancing UI bug will not rear its ugly head 
+  /** A Test to guarantee that the Dancing UI bug will not rear its ugly head 
    * again. Basically, add a component listener to the leftComponent of 
    * _docSplitPane and make certain its size does not change while closing an 
    * OpenDefinitionsDocument outside the event thread.
@@ -786,8 +779,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     @Override public void activeDocumentChanged(OpenDefinitionsDocument active) { }
   }
   
-  /** 
-   * Create a new temporary file in _tempDir. 
+  /** Create a new temporary file in _tempDir. 
    * @param fileName the name of the file to create
    * @return the newly-created file
    * @throws IOException if an IO operation fails
@@ -798,8 +790,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     return f;
   }
   
-  /** 
-   * Tests that "go to file under cursor" works if unique.
+  /** Tests that "go to file under cursor" works if unique.
    * @throws IOException if an IO operation fails
    */
   public void testGotoFileUnderCursor() throws IOException {
@@ -863,8 +854,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     _log.log("gotoFileUnderCursor completed");
   }
   
-  /** 
-   * Tests that "go to file under cursor" works if unique after appending ".java"
+  /** Tests that "go to file under cursor" works if unique after appending ".java"
    * @throws IOException if an IO operation fails
    */
   public void testGotoFileUnderCursorAppendJava() throws IOException {
@@ -932,8 +922,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     _log.log("gotoFileUnderCursorAppendJava completed");
   }
   
-  /** 
-   * Tests that "go to file under cursor" displays the dialog if choice is not unique
+  /** Tests that "go to file under cursor" displays the dialog if choice is not unique
    * @throws IOException if an IO operation fails
    */
   public void testGotoFileUnderCursorShowDialog() throws IOException {

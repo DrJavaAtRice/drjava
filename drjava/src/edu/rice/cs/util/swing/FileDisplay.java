@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -81,8 +81,7 @@ public class FileDisplay {
   
   public File getFile() { return _file; }
   
-  /** 
-   * If the representation of the file is different from the underlying
+  /** If the representation of the file is different from the underlying
    * child string of the path, then the node represented by this file display
    * cannot be edited. If the user edited the text by giving a new representation,
    * there is no way to determine what the new child string of the path should be.

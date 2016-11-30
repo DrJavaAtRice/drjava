@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -115,8 +115,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
     */
   public void move(int count) { _cursor.move(count); }
   
-  /** 
-   * Updates ReducedModelBrace to reflect text deletion. Negative values mean 
+  /** Updates ReducedModelBrace to reflect text deletion. Negative values mean 
    * text left of the cursor, positive values mean text to the right.  All 
    * functionality has been refactored into TokenList.  Assumes that count is 
    * with range.
@@ -128,8 +127,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
     return;
   }
   
-  /** 
-   * If the current brace is a /, a *, a // or a \n, it's not matchable. 
+  /** If the current brace is a /, a *, a // or a \n, it's not matchable. 
    * This means it is ignored on balancing and on next/prev brace finding. 
    * All other braces are matchable.
    * @return true if the current brace is matchable; false otherwise
@@ -138,8 +136,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
   
   public boolean isShadowed() { return _parent.isShadowed(); }
   
-  /** 
-   * Returns distance from current location of cursor to the location of the 
+  /** Returns distance from current location of cursor to the location of the 
    * previous significant brace including opening comment braces (but not 
    * closing ones since they are not "FREE").  For example, given "(...|)" 
    * where | signifies the cursor, previousBrace returns 4 because it goes to 
@@ -185,8 +182,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
     return -1;
   }
   
-  /** 
-   * Determines the distance to the location before the next open brace. For 
+  /** Determines the distance to the location before the next open brace. For 
    * example, |...( where | is the cursor, returns 3 since it is 3 moves to 
    * the position preceding the (.  NOTE: /|* returns the next brace. It does 
    * not return this brace because you are past it.
@@ -224,8 +220,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
     return -1;
   }
   
-  /** 
-   * If the current ReducedToken is an open significant brace and the offset 
+  /** If the current ReducedToken is an open significant brace and the offset 
    * is 0 (i.e., if we're immediately left of said brace), push the current 
    * Brace onto a Stack and iterate forwards, keeping track of the distance 
    * covered.
@@ -467,8 +462,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
   
   protected void resetWalkerLocationToCursor() { _parent.resetLocation(); }
   
-  /** 
-   * Determines the brace (type and distance) enclosing the beginning of the 
+  /** Determines the brace (type and distance) enclosing the beginning of the 
    * current line (except the first line). The matching brace obviously must 
    * appear on the preceding line or before.  To find the enclosing brace one 
    * must first move past this newline. If there is not a line enclosing 

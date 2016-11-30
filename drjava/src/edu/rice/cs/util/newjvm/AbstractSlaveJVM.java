@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -112,8 +112,7 @@ public abstract class AbstractSlaveJVM implements SlaveRemote {
   /** This method is called just before the JVM is quit.  It can be overridden to provide cleanup code, etc. */
   protected void beforeQuit() { }
   
-  /** 
-   * Called when the slave JVM has started running.  Subclasses must implement this method. 
+  /** Called when the slave JVM has started running.  Subclasses must implement this method. 
    * @param master link to the master JVM
    */
   protected abstract void handleStart(MasterRemote master);

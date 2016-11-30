@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -44,8 +44,7 @@ import edu.rice.cs.drjava.model.definitions.indent.IndentRulesTestCase;
   */
 public final class IndentHelperTest extends IndentRulesTestCase {
   
-  /** 
-   * Convenience method that wraps _doc.findPrevDelimiter calls in a read lock. 
+  /** Convenience method that wraps _doc.findPrevDelimiter calls in a read lock. 
    * @param delimiters array of delimiters to search for
    * @param pos position to begin searching from
    * @return location of the previous delimiter
@@ -55,8 +54,7 @@ public final class IndentHelperTest extends IndentRulesTestCase {
     return _doc.findPrevDelimiter(pos, delimiters); 
   }
   
-  /** 
-   * Convenience method that wraps _doc.inParenPhrase calls in a read lock. 
+  /** Convenience method that wraps _doc.inParenPhrase calls in a read lock. 
    * @param pos position to begin searching from
    * @return true if pos is within parentheses; false otherwise
    * @throws BadLocationException if attempts to reference an invalid location
@@ -65,8 +63,7 @@ public final class IndentHelperTest extends IndentRulesTestCase {
     return _doc._inParenPhrase(pos); 
   }
   
-  /** 
-   * Convenience method that wraps _doc.getIndentOfCurrStmt calls in a read lock. 
+  /** Convenience method that wraps _doc.getIndentOfCurrStmt calls in a read lock. 
    * @param pos position to begin searching from
    * @return indentation of the current statement
    * @throws BadLocationException if attempts to reference an invalid location
@@ -75,8 +72,7 @@ public final class IndentHelperTest extends IndentRulesTestCase {
     return _doc._getIndentOfCurrStmt(pos); 
   }
 
-  /** 
-   * Convenience method that wraps _doc.getLineStartPos calls in a read lock. 
+  /** Convenience method that wraps _doc.getLineStartPos calls in a read lock. 
    * @param pos position to begin searching from
    * @return location of the line start
    * @throws BadLocationException if attempts to reference an invalid location
@@ -85,8 +81,7 @@ public final class IndentHelperTest extends IndentRulesTestCase {
     return _doc._getLineStartPos(pos); 
   }
   
-  /** 
-   * Convenience method that wraps _doc.getLineEndPos calls in a read lock. 
+  /** Convenience method that wraps _doc.getLineEndPos calls in a read lock. 
    * @param pos position to begin searching from
    * @return location of the line end 
    * @throws BadLocationException if attempts to reference an invalid location
@@ -95,8 +90,7 @@ public final class IndentHelperTest extends IndentRulesTestCase {
     return _doc._getLineEndPos(pos); 
   }
   
-  /** 
-   * Convenience method that wraps _doc.getLineFirstCharPos calls in a read lock. 
+  /** Convenience method that wraps _doc.getLineFirstCharPos calls in a read lock. 
    * @param pos position to begin searching from
    * @return location of the first character
    * @throws BadLocationException if attempts to reference an invalid location
@@ -105,8 +99,7 @@ public final class IndentHelperTest extends IndentRulesTestCase {
     return _doc._getLineFirstCharPos(pos); 
   }
   
-  /** 
-   * Convenience method that wraps _doc.getFirstNonWSCharPos calls in a read lock. 
+  /** Convenience method that wraps _doc.getFirstNonWSCharPos calls in a read lock. 
    * @param pos position to begin searching from
    * @return location of the first non-whitespace character
    * @throws BadLocationException if attempts to reference an invalid location
@@ -115,8 +108,7 @@ public final class IndentHelperTest extends IndentRulesTestCase {
     return _doc.getFirstNonWSCharPos(pos); 
   }
   
-  /** 
-   * Tests findPrevDelimiter() 
+  /** Tests findPrevDelimiter() 
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testFindPrevDelimiter() throws BadLocationException {
@@ -415,8 +407,7 @@ public final class IndentHelperTest extends IndentRulesTestCase {
                  _doc.getReduced().absOffset());
   }
   
-  /** 
-   * Tests that the "intelligent" beginning of line can be found, given
+  /** Tests that the "intelligent" beginning of line can be found, given
    * a position on the line.  Very similar to getFirstNonWSCharPos, except
    * that comments are treated as non-whitespace, and less parsing needs
    * to be done.

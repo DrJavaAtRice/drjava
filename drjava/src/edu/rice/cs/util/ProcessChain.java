@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -43,8 +43,7 @@ import java.util.HashSet;
 import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
 import edu.rice.cs.util.JoinInputStream;
 
-/**
- * This class represents a piping chain of processes, in which the output of the first
+/** * This class represents a piping chain of processes, in which the output of the first
  * process is piped into the input of the second process, and so on. The class allows
  * the entire chain to be treated as if it were just one process.
  * The constructor also sets up the input and output streams of the individual processes
@@ -195,8 +194,7 @@ public class ProcessChain extends Process {
 //    _debugOutput.flush();
   }
   
-//  /**
-//   * Gets the output stream of the process chain, i.e. the output
+//  /**//   * Gets the output stream of the process chain, i.e. the output
 //   * stream of the first process in the chain.
 //   *
 //   * @return  the output stream of the process chain.
@@ -210,8 +208,7 @@ public class ProcessChain extends Process {
 //    return _processes[0].getOutputStream();
 //  }
 //  
-//  /**
-//   * Gets the error stream of the process chain, i.e. the error
+//  /**//   * Gets the error stream of the process chain, i.e. the error
 //   * stream of the last process in the chain.
 //   *
 //   * @return  the error stream of the process chain.
@@ -225,8 +222,7 @@ public class ProcessChain extends Process {
 //    return _processes[_processes.length-1].getErrorStream();
 //  }
 //  
-//  /**
-//   * Gets the input stream of the process chain, i.e. the input
+//  /**//   * Gets the input stream of the process chain, i.e. the input
 //   * stream of the first process in the chain.
 //   *
 //   * @return  the input stream of the process chain
@@ -240,8 +236,7 @@ public class ProcessChain extends Process {
 //    return _processes[_processes.length-1].getInputStream();
 //  }
   
-  /**
-   * Gets the output stream of the process sequence, i.e. the combined
+  /** Gets the output stream of the process sequence, i.e. the combined
    * output stream of all the processes in the sequence.
    *
    * @return  the output stream of the process sequence.
@@ -257,8 +252,7 @@ public class ProcessChain extends Process {
     }
   }
   
-  /**
-   * Gets the error stream of the process sequence, i.e. the combined
+  /** Gets the error stream of the process sequence, i.e. the combined
    * error stream of all the processes in the sequence.
    *
    * @return  the error stream of the process sequence.
@@ -267,8 +261,7 @@ public class ProcessChain extends Process {
     return _combinedErrorStream;
   }
   
-  /**
-   * Gets the input stream of the process sequence,  i.e. the combined
+  /** Gets the input stream of the process sequence,  i.e. the combined
    * input stream of all the processes in the sequence.
    *
    * @return  the input stream of the process chain
@@ -277,8 +270,7 @@ public class ProcessChain extends Process {
     return _combinedInputJoinedWithDebugStream;
   }
   
-  /**
-   * Causes the current thread to wait, if necessary, until the 
+  /** Causes the current thread to wait, if necessary, until the 
    * process chain has terminated, i.e. until all processes in the
    * chain have terminated. This method returns immediately if
    * all subprocesses have already terminated. If any of the
@@ -314,8 +306,7 @@ public class ProcessChain extends Process {
     return exitCode;
   }
   
-  /**
-   * Returns the exit value for the subprocess.
+  /** Returns the exit value for the subprocess.
    *
    * @return  the exit value of the subprocess represented by this 
    *          <code>Process</code> object. by convention, the value 
@@ -336,8 +327,7 @@ public class ProcessChain extends Process {
     return exitCode;
   }
   
-  /**
-   * Kills all subprocesses. The subprocesses represented by this 
+  /** Kills all subprocesses. The subprocesses represented by this 
    * <code>ProcessChain</code> object is forcibly terminated.
    */
   public void destroy() {

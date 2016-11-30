@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -119,8 +119,7 @@ public class FileSelectorStringComponent extends JPanel {
   /** @return the file chooser. */
   public FileChooser getFileChooser() { return _chooser; }
   
-  /** 
-   * Converts a string representation from the text field into a File. 
+  /** Converts a string representation from the text field into a File. 
    * @param s the string to be converted
    * @return the newly-created file
    */
@@ -130,8 +129,7 @@ public class FileSelectorStringComponent extends JPanel {
     return new File(s);
   }
   
-  /** 
-   * Converts a file to the string representation of the text field. 
+  /** Converts a file to the string representation of the text field. 
    * @param f the file to be converted
    * @return the newly-created string representation of f
    */
@@ -158,8 +156,7 @@ public class FileSelectorStringComponent extends JPanel {
   /** @return the string in the text field. */
   public String getText() { return _textField.getText(); }
   
-  /** 
-   * Sets the string in the text field. 
+  /** Sets the string in the text field. 
    * @param s string to set
    */
   public void setText(String s) { _textField.setText(s); }
@@ -187,16 +184,14 @@ public class FileSelectorStringComponent extends JPanel {
     _chooserButton.setToolTipText(text);
   }
   
-  /** 
-   * Adds a filter to decide if a directory can be chosen. 
+  /** Adds a filter to decide if a directory can be chosen. 
    * @param filter filter to be added
    */
   public void addChoosableFileFilter(FileFilter filter) {
     _chooser.addChoosableFileFilter(filter);
   }
   
-  /** 
-   * Removes the given filefilter from the chooser
+  /** Removes the given filefilter from the chooser
    * @param filter filter to be removed
    */
   public void removeChoosableFileFilter(FileFilter filter) {

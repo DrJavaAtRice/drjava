@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -109,8 +109,7 @@ public abstract class OptionComponent<T,C extends JComponent> implements Seriali
    */
   public abstract void setDescription(String description);
 
-  /** 
-   * @param entireColumn whether the component should occupy the entire column.
+  /** @param entireColumn whether the component should occupy the entire column.
    * @return this
    */
   public OptionComponent<T,C> setEntireColumn(boolean entireColumn) { 
@@ -141,8 +140,7 @@ public abstract class OptionComponent<T,C extends JComponent> implements Seriali
     }
   }
   
-  /** 
-   * Sets the value that is currently displayed by this component. 
+  /** Sets the value that is currently displayed by this component. 
    * @param value the value to set
    */
   public abstract void setValue(T value);
@@ -175,13 +173,9 @@ public abstract class OptionComponent<T,C extends JComponent> implements Seriali
   /** Notify all change listeners of a change. Notification performed in the event thread. */
   protected void notifyChangeListeners() {
     assert _parent.duringInit() || Utilities.TEST_MODE || EventQueue.isDispatchThread();
-//    Utilities.invokeLater(new Runnable() {
-//      public void run() { 
-      // Make a copy of _changeListeners to prevent potential ConcurrentModificationException
-      ChangeListener[] listeners = _changeListeners.toArray(new ChangeListener[_changeListeners.size()]);
+    // Make a copy of _changeListeners to prevent potential ConcurrentModificationException
+    ChangeListener[] listeners = _changeListeners.toArray(new ChangeListener[_changeListeners.size()]);
     for (ChangeListener l: listeners)  l.value(OptionComponent.this); 
-//      }
-//    });
   }
   
   /** List of change listeners.  A volatile Vector is used here because a race involving operations on this field was 

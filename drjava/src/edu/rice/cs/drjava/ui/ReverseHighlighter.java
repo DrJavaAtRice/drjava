@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -321,8 +321,7 @@ public class ReverseHighlighter extends DefaultHighlighter {
     }
   }
   
-  /** 
-   * Queues damageRange() call into event dispatch thread to be sure that 
+  /** Queues damageRange() call into event dispatch thread to be sure that 
    * views are in consistent state. 
    * @param p0 first position
    * @param p1 second position
@@ -331,8 +330,7 @@ public class ReverseHighlighter extends DefaultHighlighter {
     safeDamager.damageRange(p0, p1);
   }
   
-  /** 
-   * Queues damageRange() call into event dispatch thread to be sure that 
+  /** Queues damageRange() call into event dispatch thread to be sure that 
    * views are in consistent state. 
    * @param a0 integer representation of first position
    * @param a1 integer representation of second position
@@ -634,8 +632,7 @@ public class ReverseHighlighter extends DefaultHighlighter {
       }
     }
     
-    /** 
-     * Restricts the region based on the receivers offsets and messages the 
+    /** Restricts the region based on the receivers offsets and messages the 
      * painter to paint the region.
      * @param g the Graphics objet to use to paint
      * @param p0 lower bound on region
@@ -689,8 +686,7 @@ public class ReverseHighlighter extends DefaultHighlighter {
       lastDoc = null;
     }
     
-    /** 
-     * Adds range to be damaged to the range queue. If the range queue is 
+    /** Adds range to be damaged to the range queue. If the range queue is 
      * empty (the first call or run() was already invoked) then adds this 
      * class instance into EventDispatch queue. The method also tracks if the 
      * current document changed or component is null. In this case it removes 

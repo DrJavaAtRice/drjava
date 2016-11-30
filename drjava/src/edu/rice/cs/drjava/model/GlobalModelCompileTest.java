@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -50,10 +50,9 @@ import edu.rice.cs.util.text.EditDocumentException;
   * @version $Id$
   */
 public final class GlobalModelCompileTest extends GlobalModelTestCase {
-  protected static final Log _log  = new Log("GlobalModelCompileTest.txt", false);
+  protected static final Log _log  = new Log("/home/cork/GlobalModelTest.txt", false);
   
-  /** 
-   * Tests calling compileAll with no source files works. Does not reset interactions. 
+  /** Tests calling compileAll with no source files works. Does not reset interactions. 
    * @throws BadLocationException if attempts to reference an invalid location
    * @throws IOException if an IO operation fails
    * @throws InterruptedException if execution is interrupted unexpectedly
@@ -71,17 +70,16 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
       }
     });
     listener.waitCompileDone();
-    if (_model.getCompilerModel().getNumErrors() > 0) {
-      fail("compile failed: " + getCompilerErrorString());
+    if (_model.getCompilerModel().getNumErrors() != 1) {
+      fail("Compilation Failure should generate one error: " + getCompilerErrorString());
     }
-    assertCompileErrorsPresent("compile should succeed", false);
+    assertCompileErrorsPresent("compile should succeed", true);
     listener.checkCompileOccurred();
     _model.removeListener(listener);
     _log.log("testCompileAllWithNoFiles complete");
   }
   
-  /** 
-   * Tests that the interactions pane is reset after a successful compile. 
+  /** Tests that the interactions pane is reset after a successful compile. 
    * @throws BadLocationException if attempts to reference an invalid location
    * @throws IOException if an IO operation fails
    * @throws InterruptedException if execution is interrupted unexpectedly
@@ -90,13 +88,14 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
   public void testCompileResetsInteractions() throws BadLocationException, IOException, InterruptedException,
     EditDocumentException {
     
-//    System.err.println("Starting testCompileResetsInteractions");
+    _log.log("Starting testCompileResetsInteractions");
     
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file = new File(_tempDir, "DrJavaTestFoo.java");
     saveFile(doc, new FileSelector(file));
     
     // Use the interpreter so resetInteractions is not optimized to a no-op
+    _log.log("Interpreting 0");
     interpret("0");
     
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
@@ -109,6 +108,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
       }
     });
     listener.waitCompileDone();
+    _log.log("Compilation complete");
     
     if (_model.getCompilerModel().getNumErrors() > 0) {
 //        System.err.println("Compile failed");
@@ -151,8 +151,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     _log.log("testCompileAbortsIfUnsaved complete");
   }
   
-  /** 
-   * If we try to compile while any files are unsaved, and if we don't save when asked to saveAllBeforeProceeding,
+  /** If we try to compile while any files are unsaved, and if we don't save when asked to saveAllBeforeProceeding,
    * it should not do the compile or any other actions.
    * @throws Exception if something goes wrong
    */
@@ -247,8 +246,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     _log.log("testCompileAnyUnsavedButSaveWhenAsked complete");
   }
   
-  /** 
-   * If we try to compile while any files (but not the active file) are unsaved but we do save it from within 
+  /** If we try to compile while any files (but not the active file) are unsaved but we do save it from within 
    * saveAllBeforeProceeding, the compile should occur happily.  Does not reset interactions.
    * @throws BadLocationException if attempts to reference an invalid location
    * @throws IOException if an IO operation fails

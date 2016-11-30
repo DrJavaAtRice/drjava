@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -150,14 +150,12 @@ public interface IDocumentNavigator<ItemT extends INavigatorItem> extends IAWTCo
     */
   public void removeNavigationListener(INavigationListener<? super ItemT> listener);
   
-  /** 
-   * Add FocusListener to navigator. 
+  /** Add FocusListener to navigator. 
    * @param e the listener to be added
    */
   public void addFocusListener(FocusListener e);
   
-  /** 
-   * Remove FocusListener from navigator. 
+  /** Remove FocusListener from navigator. 
    * @param e the listener to be removed
    */
   public void removeFocusListener(FocusListener e);
@@ -170,8 +168,7 @@ public interface IDocumentNavigator<ItemT extends INavigatorItem> extends IAWTCo
     */
   public Collection<INavigationListener<? super ItemT>> getNavigatorListeners();
   
-  /** 
-   * Selects the document at the x,y coordinates of the navigator pane and makes it the active document.
+  /** Selects the document at the x,y coordinates of the navigator pane and makes it the active document.
    * @param x the x coordinate of the navigator pane
    * @param y the y coordinate of the navigator pane
    * @return boolean status
@@ -218,15 +215,13 @@ public interface IDocumentNavigator<ItemT extends INavigatorItem> extends IAWTCo
   /** @return true if the root is selected. Only runs in event thread. */
   public boolean isRootSelected();
   
-  /** 
-   * @param i item to check
+  /** @param i item to check
    * @return true if the INavigatorItem is in a selected group, if
    * at least one group is selected. 
    */
   public boolean isSelectedInGroup(ItemT i);
   
-  /** 
-   * Adds the top level group with the specified name and filter. 
+  /** Adds the top level group with the specified name and filter. 
    * @param name name
    * @param f filter 
    */
@@ -252,8 +247,7 @@ public interface IDocumentNavigator<ItemT extends INavigatorItem> extends IAWTCo
   /** The standard swing repaint() method. */
   public void repaint();
   
-  /** 
-   * Marks the next selection change as model-initiated (true) or user-initiated (false; default). 
+  /** Marks the next selection change as model-initiated (true) or user-initiated (false; default). 
    * @param b value to set
    */
   public void setNextChangeModelInitiated(boolean b);

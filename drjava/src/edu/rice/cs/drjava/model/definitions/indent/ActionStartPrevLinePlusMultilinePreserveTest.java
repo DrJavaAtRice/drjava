@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -38,8 +38,7 @@ package edu.rice.cs.drjava.model.definitions.indent;
 
 import javax.swing.text.BadLocationException;
 
-/**
- * Tests ActionStartPrevLinePlusMultilinePreserve(String,int,int,int,int).
+/** * Tests ActionStartPrevLinePlusMultilinePreserve(String,int,int,int,int).
  * It specifically tests the behavior of the auto-closing comments feature.
  * This means it tests cases where the user has just hit ENTER somewhere
  * on the opening line of a block comment.
@@ -48,28 +47,26 @@ import javax.swing.text.BadLocationException;
  */
 public class ActionStartPrevLinePlusMultilinePreserveTest extends IndentRulesTestCase {
   
-  /** 
-   * A factory method that constructs the specified instance of IndentRuleAction. 
-   * @param suffices the new lines to be added
-   * @param cursorLine the line on which to place the cursor
-   * @param cursorPos the position at which to place the cursor
-   * @param psrvLine the line in suffices on which to place the preserved text
-   * @param psrvPos the position at which to place the preserved text
-   * @return a new ActinoStartPrevLinePlusMultilinePreserve object
-   * @see ActionStartPrevLinePlusMultilinePreserve#ActionStartPrevLinePlusMultilinePreserve(String[], int, int, int, int)
-   */
+  /** A factory method that constructs the specified instance of IndentRuleAction. 
+    * @param suffices the new lines to be added
+    * @param cursorLine the line on which to place the cursor
+    * @param cursorPos the position at which to place the cursor
+    * @param psrvLine the line in suffices on which to place the preserved text
+    * @param psrvPos the position at which to place the preserved text
+    * @return a new ActinoStartPrevLinePlusMultilinePreserve object
+    * @see ActionStartPrevLinePlusMultilinePreserve#ActionStartPrevLinePlusMultilinePreserve(String[], int, int, int, int)
+    */
   private IndentRuleAction makeAction(String[] suffices, int cursorLine, int cursorPos, int psrvLine, int psrvPos) {
     return new ActionStartPrevLinePlusMultilinePreserve(suffices, cursorLine, cursorPos, psrvLine, psrvPos);
   }
   
-  /** 
-   * This method abstracts the common behavior in subsequent tests.
-   * @param start The text that should be in the document at time rule is called
-   * @param loc the location of the cursor when rule is called
-   * @param endLoc the expected final size of the document
-   * @param finish the text string that remaining after the rule is called
-   * @throws BadLocationException if attempts to reference an invalid location
-   */
+  /** This method abstracts the common behavior in subsequent tests.
+    * @param start The text that should be in the document at time rule is called
+    * @param loc the location of the cursor when rule is called
+    * @param endLoc the expected final size of the document
+    * @param finish the text string that remaining after the rule is called
+    * @throws BadLocationException if attempts to reference an invalid location
+    */
   public void helperCommentTest(String start, int loc, int endLoc, String finish) throws BadLocationException {
       _setDocText(start);
       _doc.setCurrentLocation(loc);
@@ -162,18 +159,18 @@ public class ActionStartPrevLinePlusMultilinePreserveTest extends IndentRulesTes
                       "/* ABC \n *  */\n */");
   }
   
+  // This test has been excluded because it breaks and it is unintelligible.
   public void xtest9() throws BadLocationException {
 ///**|
 // * Text
 // */
 //---------------------------------
-///**
-// * |
-// * Text
-// */
-    helperCommentTest("/**\n * Text\n */",
+///**// * |
+//  * Text
+//  */
+    helperCommentTest("/**\n * Text\n  */",
                       4, 7,
-                      "/**\n * \n * Text\n */");
+                      "/**\n  * Text\n  */");
   }
   
   public void test10() throws BadLocationException {

@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -39,20 +39,16 @@ package edu.rice.cs.drjava.model.coverage;
 import java.io.Serializable;
 
 public class CoverageMetadata implements Serializable {
-
-    private boolean doCoverage;
-    private String outputDirectory;
-
-    public CoverageMetadata(boolean doCoverage, String outputDirectory) {
-        this.doCoverage = doCoverage;
-        this.outputDirectory = outputDirectory;  
-    }
-
-    public boolean getFlag() {
-        return this.doCoverage;
-    }
-
-    public String getOutdirPath() {
-        return this.outputDirectory;
-    }
+  
+  private boolean doCoverage;
+  private String outputDirectory;
+  
+  public CoverageMetadata(boolean doCoverage, String outputDirectory) {
+    this.doCoverage = doCoverage;
+    this.outputDirectory = outputDirectory;  
+  }
+  
+  public boolean getFlag() { return this.doCoverage; }
+  
+  public String getOutdirPath() { return this.outputDirectory; }
 }

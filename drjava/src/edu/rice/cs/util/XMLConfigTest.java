@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (javaplt@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -36,17 +36,16 @@
 
 package edu.rice.cs.util;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import junit.framework.TestCase;
 import org.w3c.dom.*;
 
 import java.io.*;
 import java.util.*;
 
-/**
- * XML configuration management tests.
- * @author Mathias Ricken
- */
+/** * XML configuration management tests.
+  * @author Mathias Ricken
+  */
 public class XMLConfigTest extends TestCase {
   /** Newline string.
     */
@@ -385,20 +384,20 @@ public class XMLConfigTest extends TestCase {
     XMLConfig xc = 
       new XMLConfig(new StringReader(
                                      "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><concutest>\n"
-                                        + "  <threadcheck:def>\n"
-                                        + "    <invariant>\n"
-                                        + "      <name type=\"only\" value=\"childclass1\"/>\n"
-                                        + "    </invariant>\n"
-                                        + "    <class name=\"sample.threadCheck.ThreadCheckSample4\"/>\n"
-                                        + "  </threadcheck:def>\n"
-                                        + "  <threadcheck:def>\n"
-                                        + "    <invariant>\n"
-                                        + "      <name type=\"only\" value=\"childclass-method1\"/>\n"
-                                        + "    </invariant>\n"
-                                        + "    <method name=\"sample.threadCheck.ThreadCheckSample4\" sig=\"run()V\"/>\n"
-                                        + "    <method name=\"sample.threadCheck.ThreadCheckSample4\" sig=\"run2()V\"/>\n"
-                                        + "  </threadcheck:def>\n"
-                                        + "</concutest>"));
+                                       + "  <threadcheck:def>\n"
+                                       + "    <invariant>\n"
+                                       + "      <name type=\"only\" value=\"childclass1\"/>\n"
+                                       + "    </invariant>\n"
+                                       + "    <class name=\"sample.threadCheck.ThreadCheckSample4\"/>\n"
+                                       + "  </threadcheck:def>\n"
+                                       + "  <threadcheck:def>\n"
+                                       + "    <invariant>\n"
+                                       + "      <name type=\"only\" value=\"childclass-method1\"/>\n"
+                                       + "    </invariant>\n"
+                                       + "    <method name=\"sample.threadCheck.ThreadCheckSample4\" sig=\"run()V\"/>\n"
+                                       + "    <method name=\"sample.threadCheck.ThreadCheckSample4\" sig=\"run2()V\"/>\n"
+                                       + "  </threadcheck:def>\n"
+                                       + "</concutest>"));
     assertEquals("Path of null is wrong", "", XMLConfig.getNodePath(null));
     
     List<Node> roots = xc.getNodes("concutest");
@@ -779,20 +778,20 @@ public class XMLConfigTest extends TestCase {
     XMLConfig xcParent = 
       new XMLConfig(new StringReader(
                                      "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><foo><concutest>\n"
-                                        + "  <threadcheck:def>\n"
-                                        + "    <invariant>\n"
-                                        + "      <name type=\"only\" value=\"childclass1\"/>\n"
-                                        + "    </invariant>\n"
-                                        + "    <class name=\"sample.threadCheck.ThreadCheckSample4\"/>\n"
-                                        + "  </threadcheck:def>\n"
-                                        + "  <threadcheck:def>\n"
-                                        + "    <invariant>\n"
-                                        + "      <name type=\"only\" value=\"childclass-method1\"/>\n"
-                                        + "    </invariant>\n"
-                                        + "    <method name=\"sample.threadCheck.ThreadCheckSample4\" sig=\"run()V\"/>\n"
-                                        + "    <method name=\"sample.threadCheck.ThreadCheckSample4\" sig=\"run2()V\"/>\n"
-                                        + "  </threadcheck:def>\n"
-                                        + "</concutest></foo>"));
+                                       + "  <threadcheck:def>\n"
+                                       + "    <invariant>\n"
+                                       + "      <name type=\"only\" value=\"childclass1\"/>\n"
+                                       + "    </invariant>\n"
+                                       + "    <class name=\"sample.threadCheck.ThreadCheckSample4\"/>\n"
+                                       + "  </threadcheck:def>\n"
+                                       + "  <threadcheck:def>\n"
+                                       + "    <invariant>\n"
+                                       + "      <name type=\"only\" value=\"childclass-method1\"/>\n"
+                                       + "    </invariant>\n"
+                                       + "    <method name=\"sample.threadCheck.ThreadCheckSample4\" sig=\"run()V\"/>\n"
+                                       + "    <method name=\"sample.threadCheck.ThreadCheckSample4\" sig=\"run2()V\"/>\n"
+                                       + "  </threadcheck:def>\n"
+                                       + "</concutest></foo>"));
     XMLConfig xc = new XMLConfig(xcParent, xcParent.getNodes("foo").get(0));
     assertEquals("Path of null is wrong", "", XMLConfig.getNodePath(null));
     
@@ -835,20 +834,20 @@ public class XMLConfigTest extends TestCase {
     XMLConfig xc = 
       new XMLConfig(new StringReader(
                                      "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><concutest>\n"
-                                        + "  <threadcheck:def>\n"
-                                        + "    <invariant>\n"
-                                        + "      <name type=\"only\" value=\"childclass1\"/>\n"
-                                        + "    </invariant>\n"
-                                        + "    <class name=\"sample.threadCheck.ThreadCheckSample4\"/>\n"
-                                        + "  </threadcheck:def>\n"
-                                        + "  <threadcheck:def>\n"
-                                        + "    <invariant>\n"
-                                        + "      <name type=\"only\" value=\"childclass-method1\"/>\n"
-                                        + "    </invariant>\n"
-                                        + "    <method name=\"sample.threadCheck.ThreadCheckSample4\" sig=\"run()V\"/>\n"
-                                        + "    <method name=\"sample.threadCheck.ThreadCheckSample4\" sig=\"run2()V\"/>\n"
-                                        + "  </threadcheck:def>\n"
-                                        + "</concutest>"));    
+                                       + "  <threadcheck:def>\n"
+                                       + "    <invariant>\n"
+                                       + "      <name type=\"only\" value=\"childclass1\"/>\n"
+                                       + "    </invariant>\n"
+                                       + "    <class name=\"sample.threadCheck.ThreadCheckSample4\"/>\n"
+                                       + "  </threadcheck:def>\n"
+                                       + "  <threadcheck:def>\n"
+                                       + "    <invariant>\n"
+                                       + "      <name type=\"only\" value=\"childclass-method1\"/>\n"
+                                       + "    </invariant>\n"
+                                       + "    <method name=\"sample.threadCheck.ThreadCheckSample4\" sig=\"run()V\"/>\n"
+                                       + "    <method name=\"sample.threadCheck.ThreadCheckSample4\" sig=\"run2()V\"/>\n"
+                                       + "  </threadcheck:def>\n"
+                                       + "</concutest>"));    
     
     subTestGet("arbitraryPath", xc);
     subTestGet("path1/path2", xc);
@@ -856,12 +855,11 @@ public class XMLConfigTest extends TestCase {
     subTestGet("path1/path2.prop2", xc);
   }
   
-  /**
-   * Expectes "concutest" to be the root node of passed XMLConfig.
-   * @param pathToTest the path to test
-   * @param xc an XMLConfig object
-   * @throws Exception if something goes wrong
-   */
+  /** Expectes "concutest" to be the root node of passed XMLConfig.
+    * @param pathToTest the path to test
+    * @param xc an XMLConfig object
+    * @throws Exception if something goes wrong
+    */
   private void subTestGet(String pathToTest, XMLConfig xc) throws Exception{
     String ret = xc.get(pathToTest, xc.getNodes("concutest").get(0), "arbitraryDefaultValue");
     
@@ -885,9 +883,9 @@ public class XMLConfigTest extends TestCase {
     XMLConfig xc = 
       new XMLConfig(new StringReader(
                                      "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><concutest>\n"
-                                        + " <name type=\"only\" value=\"5\"/>\n"
-                                        + " <class name=\"sample.threadCheck.ThreadCheckSample4\"/>\n"
-                                        + "</concutest>"));    
+                                       + " <name type=\"only\" value=\"5\"/>\n"
+                                       + " <class name=\"sample.threadCheck.ThreadCheckSample4\"/>\n"
+                                       + "</concutest>"));    
     
     //Test for getInt(String path)
     int n = xc.getInt("concutest/name.value");
@@ -934,9 +932,9 @@ public class XMLConfigTest extends TestCase {
     XMLConfig xc = 
       new XMLConfig(new StringReader(
                                      "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><concutest>\n"
-                                        + " Some text to actually fetch.\n"
-                                        + " <!-- A comment to ignore -->\n"
-                                        + "</concutest>"));
+                                       + " Some text to actually fetch.\n"
+                                       + " <!-- A comment to ignore -->\n"
+                                       + "</concutest>"));
     
     List<String> ret = xc.getMultiple("concutest");
     
@@ -944,20 +942,19 @@ public class XMLConfigTest extends TestCase {
     Assert.assertEquals("Fetched correct text item", " Some text to actually fetch.\n".trim(), ret.get(0).trim());
   }
   
-  /**
-   * Tests for exceptions thrown when getNodes() is passed malformed paths
-   * @throws Exception if something goes wrong
-   */
+  /** Tests for exceptions thrown when getNodes() is passed malformed paths
+    * @throws Exception if something goes wrong
+    */
   public void testGetNodesExceptions() throws Exception{
     XMLConfig xc = 
       new XMLConfig(new StringReader(
                                      "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><concutest>\n"
-                                        + " <name type=\"only\" value=\"true\"/>\n"
-                                        + " <thread value=\"false\" />\n"
-                                        + " <node value=\"on\" /> \n"
-                                        + " <dot value=\"off\" /> \n"
-                                        + " <class name=\"sample.threadCheck.ThreadCheckSample4\"/>\n"
-                                        + "</concutest>"));
+                                       + " <name type=\"only\" value=\"true\"/>\n"
+                                       + " <thread value=\"false\" />\n"
+                                       + " <node value=\"on\" /> \n"
+                                       + " <dot value=\"off\" /> \n"
+                                       + " <class name=\"sample.threadCheck.ThreadCheckSample4\"/>\n"
+                                       + "</concutest>"));
     
     try{
       xc.getNodes("somePath.attr.subAttr");
@@ -985,12 +982,12 @@ public class XMLConfigTest extends TestCase {
     XMLConfig xc = 
       new XMLConfig(new StringReader(
                                      "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><concutest>\n"
-                                        + " <name type=\"only\" value=\"true\"/>\n"
-                                        + " <thread value=\"false\" />\n"
-                                        + " <node value=\"on\" /> \n"
-                                        + " <dot value=\"off\" /> \n"
-                                        + " <class name=\"sample.threadCheck.ThreadCheckSample4\"/>\n"
-                                        + "</concutest>")); 
+                                       + " <name type=\"only\" value=\"true\"/>\n"
+                                       + " <thread value=\"false\" />\n"
+                                       + " <node value=\"on\" /> \n"
+                                       + " <dot value=\"off\" /> \n"
+                                       + " <class name=\"sample.threadCheck.ThreadCheckSample4\"/>\n"
+                                       + "</concutest>")); 
     Boolean b = xc.getBool("concutest/name.value") && !xc.getBool("concutest/thread.value") && xc.getBool("concutest/node.value") && !xc.getBool("concutest/dot.value");
     Assert.assertTrue("Should be true",b);
     
@@ -1028,20 +1025,19 @@ public class XMLConfigTest extends TestCase {
     Assert.assertTrue("Do Not Want to get default value", b);
   }
   
-  /**
-   * Test getNodePath(Node n)
-   * @throws Exception if something goes wrong
-   */
+  /** Test getNodePath(Node n)
+    * @throws Exception if something goes wrong
+    */
   public void testGetNodePath() throws Exception{
     XMLConfig xc = 
       new XMLConfig(new StringReader(
                                      "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><concutest>\n"
-                                        + " <name type=\"only\" value=\"true\"/>\n"
-                                        + " <thread value=\"false\" />\n"
-                                        + " <node value=\"on\" /> \n"
-                                        + " <dot value=\"off\" /> \n"
-                                        + " <class name=\"sample.threadCheck.ThreadCheckSample4\"/>\n"
-                                        + "</concutest>")); 
+                                       + " <name type=\"only\" value=\"true\"/>\n"
+                                       + " <thread value=\"false\" />\n"
+                                       + " <node value=\"on\" /> \n"
+                                       + " <dot value=\"off\" /> \n"
+                                       + " <class name=\"sample.threadCheck.ThreadCheckSample4\"/>\n"
+                                       + "</concutest>")); 
     
     Assert.assertEquals("Null does not return empty string", "", XMLConfig.getNodePath(null));
     
@@ -1055,31 +1051,29 @@ public class XMLConfigTest extends TestCase {
     Assert.assertEquals("Path to name is not concutest/name", "concutest/name", XMLConfig.getNodePath(name));
   }
   
-  /**
-   * Test that construction of XMLConfigException's will succeed
-   * Kind of pointless really.
-   * @throws Exception if something goes wrong
-   */
+  /** Test that construction of XMLConfigException's will succeed
+    * Kind of pointless really.
+    * @throws Exception if something goes wrong
+    */
   public void testXMLConfigException() throws Exception{
     new XMLConfig.XMLConfigException();
     new XMLConfig.XMLConfigException("dummy message", null);
     new XMLConfig.XMLConfigException((Throwable)null);
   }
   
-  /**
-   * Test save(File f)
-   * @throws Exception if something goes wrong
-   */
+  /** Test save(File f)
+    * @throws Exception if something goes wrong
+    */
   public void testSaveAndLoadConstructors() throws Exception{
     XMLConfig xc = 
       new XMLConfig(new StringReader(
                                      "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><concutest>\n"
-                                        + " <name type=\"only\" value=\"true\"/>\n"
-                                        + " <thread value=\"false\" />\n"
-                                        + " <node value=\"on\" /> \n"
-                                        + " <dot value=\"off\" /> \n"
-                                        + " <class name=\"sample.threadCheck.ThreadCheckSample4\"/>\n"
-                                        + "</concutest>")); 
+                                       + " <name type=\"only\" value=\"true\"/>\n"
+                                       + " <thread value=\"false\" />\n"
+                                       + " <node value=\"on\" /> \n"
+                                       + " <dot value=\"off\" /> \n"
+                                       + " <class name=\"sample.threadCheck.ThreadCheckSample4\"/>\n"
+                                       + "</concutest>")); 
     
     try{
       char c = File.separatorChar;
@@ -1097,31 +1091,29 @@ public class XMLConfigTest extends TestCase {
       char c = File.separatorChar;
       new XMLConfig("." + c + "does" + c + "not" + c + "exist" + c + "file.xml");
       Assert.fail("Should not succeed in load from non-existant file");
-    }catch(XMLConfig.XMLConfigException e){ }
-    
-    try{
+    }
+    catch (XMLConfig.XMLConfigException e){ }
+    try {
       char c = File.separatorChar;
       new XMLConfig(new File("." + c + "does" + c + "not" + c + "exist" + c + "file.xml"));
       Assert.fail("Should not succeed in load from non-existant file");
-    }catch(XMLConfig.XMLConfigException e){ }
-    
+    } 
+    catch(XMLConfig.XMLConfigException e) { }
     saveTo.delete();
   }
   
-  /**
-   * Tests is XMLConfig constructor rejects null as parameters
-   * @throws Exception if something goes wrong
-   */
+  /** Tests is XMLConfig constructor rejects null as parameters
+    * @throws Exception if something goes wrong
+    */
   public void testNullParamsinConstructor() throws Exception{
     XMLConfig xc = 
-      new XMLConfig(new StringReader(
-                                     "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><concutest>\n"
-                                        + " <name type=\"only\" value=\"true\"/>\n"
-                                        + " <thread value=\"false\" />\n"
-                                        + " <node value=\"on\" /> \n"
-                                        + " <dot value=\"off\" /> \n"
-                                        + " <class name=\"sample.threadCheck.ThreadCheckSample4\"/>\n"
-                                        + "</concutest>")); 
+      new XMLConfig(new StringReader("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><concutest>\n"
+                                       + " <name type=\"only\" value=\"true\"/>\n"
+                                       + " <thread value=\"false\" />\n"
+                                       + " <node value=\"on\" /> \n"
+                                       + " <dot value=\"off\" /> \n"
+                                       + " <class name=\"sample.threadCheck.ThreadCheckSample4\"/>\n"
+                                       + "</concutest>")); 
     
     Node nd = xc.getNodes("concutest").get(0);
     
@@ -1139,21 +1131,20 @@ public class XMLConfigTest extends TestCase {
   }
   
   
-  /**
-   * Tests XMLConfig(String filename)
-   * @throws Exception if something goes wrong
-   */
+  /** Tests XMLConfig(String filename)
+    * @throws Exception if something goes wrong
+    */
   public void testConstructorWithFileName() throws Exception{
     
     XMLConfig xc = 
       new XMLConfig(new StringReader(
                                      "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><concutest>\n"
-                                        + " <name type=\"only\" value=\"true\"/>\n"
-                                        + " <thread value=\"false\" />\n"
-                                        + " <node value=\"on\" /> \n"
-                                        + " <dot value=\"off\" /> \n"
-                                        + " <class name=\"sample.threadCheck.ThreadCheckSample4\"/>\n"
-                                        + "</concutest>")); 
+                                       + " <name type=\"only\" value=\"true\"/>\n"
+                                       + " <thread value=\"false\" />\n"
+                                       + " <node value=\"on\" /> \n"
+                                       + " <dot value=\"off\" /> \n"
+                                       + " <class name=\"sample.threadCheck.ThreadCheckSample4\"/>\n"
+                                       + "</concutest>")); 
     
     File saveTo = File.createTempFile("drjava_test", "xml");
     xc.save(saveTo);

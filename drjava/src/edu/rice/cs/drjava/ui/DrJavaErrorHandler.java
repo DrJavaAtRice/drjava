@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -69,8 +69,7 @@ public class DrJavaErrorHandler implements Thread.UncaughtExceptionHandler {
   /** the button to show */
   private static volatile JButton _errorsButton;
   
-  /** 
-   * Sets the button to show. 
+  /** Sets the button to show. 
    * @param b the button to be set
    */
   public static void setButton(JButton b) { _errorsButton = b; }  
@@ -81,8 +80,7 @@ public class DrJavaErrorHandler implements Thread.UncaughtExceptionHandler {
   /** @return the size of the error list. */
   public static int getErrorCount() { return _errors.size(); }
   
-  /** 
-   * @param index the index of the error 
+  /** @param index the index of the error 
    * @return the error with the given index. 
    */
   public static Throwable getError(int index) {
@@ -94,8 +92,7 @@ public class DrJavaErrorHandler implements Thread.UncaughtExceptionHandler {
   /** Clears the list of errors. */
   public static void clearErrors() { _errors.clear(); }
 
-  /**
-   * Record the throwable in the errors list. 
+  /** Record the throwable in the errors list. 
    * @param thrown the throwable to be recorded
    */
   public static void record(final Throwable thrown) {
@@ -139,8 +136,7 @@ public class DrJavaErrorHandler implements Thread.UncaughtExceptionHandler {
     });
   }
 
-  /** 
-   * Return true if this is an exception thrown because of the Swing bug:
+  /** Return true if this is an exception thrown because of the Swing bug:
    * {@literal https://sourceforge.net/tracker/?func=detail&atid=438935&aid=2831821&group_id=44253}
    * @param thrown the throwable to check
    * @return true if this is the Swing bug 
@@ -178,14 +174,14 @@ public class DrJavaErrorHandler implements Thread.UncaughtExceptionHandler {
 
     StackTraceElement[] tst = thrown.getStackTrace();
     
-    if (tst.length<stes.length+stesBottom.length) return false;
+    if (tst.length < stes.length+stesBottom.length) return false;
     
-    for(int i=0; i<stes.length; ++i) {
+    for(int i = 0; i < stes.length; ++i) {
       if (!stes[i].equals(tst[i])) return false;
     }
 
-    for(int i=0; i<stesBottom.length; ++i) {
-      if (!stesBottom[stesBottom.length-i-1].equals(tst[tst.length-i-1])) return false;
+    for(int i = 0; i < stesBottom.length; ++i) {
+      if (!stesBottom[stesBottom.length - i - 1].equals(tst[tst.length - i - 1])) return false;
     }
     
     return true;
@@ -219,8 +215,7 @@ public class DrJavaErrorHandler implements Thread.UncaughtExceptionHandler {
     throw t;     
   }
 
-  /** 
-   * Log an unexpected situation. 
+  /** Log an unexpected situation. 
    * @param message the message to be logged
    */
   public static void log(String message) { record(new LoggedCondition(message)); }

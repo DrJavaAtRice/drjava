@@ -29,6 +29,7 @@ import static javarepl.completion.CompletionResult.methods.toJson;
 import static javax.tools.ToolProvider.getSystemJavaCompiler;
 
 /** Created by maladat on 1/21/16 by Jimmy Newman. */
+
 public class DrJavaRepl {
 
     public JavaREPLClient client;
@@ -73,6 +74,10 @@ public class DrJavaRepl {
         }
 
         return false;
+    }
+
+    public void dispose() {
+        process.get().destroy();
     }
 }
 

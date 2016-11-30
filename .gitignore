@@ -4,3 +4,8 @@
 *.drjava
 *~
 drjava/classes
+drjava/drjava.jar
+drjava/jacoco.exec
+drjava/lib/javalanglevels-base.jar.old
+drjava/drjava-base.jar
+out/

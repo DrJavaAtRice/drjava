@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -105,14 +105,12 @@ public interface CompilerModel {
   
   //-------------------------- Compiler Management --------------------------//
   
-  /** 
-   * @return all registered compilers that are actually available.  If there are none,
+  /** @return all registered compilers that are actually available.  If there are none,
    * the result is {@link NoCompilerAvailable#ONLY}.
    */
   public Iterable<CompilerInterface> getAvailableCompilers();
   
-  /** 
-   * @return the compiler that is the "active" compiler.
+  /** @return the compiler that is the "active" compiler.
    * @see #setActiveCompiler
    */
   public CompilerInterface getActiveCompiler(); 

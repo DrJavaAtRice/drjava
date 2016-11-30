@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -53,7 +53,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Vector;
 import java.util.Date;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 /** Tests the Definitions Pane
   * @version $Id$
@@ -106,8 +106,7 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     super.tearDown();
   }
   
-  /** 
-   * Tests that shift backspace works the same as backspace. (Ease of use 
+  /** Tests that shift backspace works the same as backspace. (Ease of use 
    * issue 693253).  Ideally, this test should be lighter weight, and not 
    * require the creation of an entire MainFrame+GlobalModel.  Refactor?
    * NOTE: This test doesn't work yet, since we can't currently bind two 
@@ -158,8 +157,7 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
   }
 
   
-  /** 
-   * Tests that typing a brace in a string/comment does not cause an indent.
+  /** Tests that typing a brace in a string/comment does not cause an indent.
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testTypeBraceNotInCode() throws BadLocationException {
@@ -181,7 +179,11 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     _log.log("testTypeBraceNotInCode completed");
   }
   
-  /** Tests that typing Enter in a string/comment does cause an indent. 
+  /** Tests that typing Enter in a string/comment does cause an indent.  
+    * This behavior works in practice, but I can't get the test to work.  
+    * If we use definitions.processKeyEvent, the caret position is not 
+    * updated, so the " * " is not inserted.  If we try to dispatchEvent 
+    * from the EventDispatchingThread, it hangs...?
     * @throws BadLocationException if attempts to reference an invalid location
     * @throws InterruptedException if execution is interrupted unexpectedly
     * @throws InvocationTargetException if the invocation target is invalid
@@ -577,8 +579,7 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     });
   }
       
-  /** 
-   * This testcase checks that we do no longer discard Alt keys that would be 
+  /** This testcase checks that we do no longer discard Alt keys that would be 
    * used to make the {,},[,] chars that the French keyboards has.  
    * Using the Locale did not work, and checking if the key was consumed by 
    * the document would only pass on the specific keyboards.  It was 

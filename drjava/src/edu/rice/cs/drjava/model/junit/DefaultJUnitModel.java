@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -11,7 +11,7 @@
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
  *    * Neither the names of DrJava, the JavaPLT group, Rice University, nor the
- *      names of its contributors may be used to endorse or promote products
+h *      names of its contributors may be used to endorse or promote products
  *      derived from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -142,7 +142,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   //------------------------ Simple Predicates ------------------------------//
   
   public boolean isTestInProgress() { return _testInProgress;  }
-  public JUnitResultTuple getLastResult() { 
+  public JUnitResultTuple getFinalResult() { 
     return new JUnitResultTuple(false, null);
     // @rebecca TODO: why does this result in not finding any test classes?
     //return this._jvm.getLastJUnitResult(); 
@@ -248,8 +248,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     debug.logEnd("junit(doc)");
   }
   
-  /** 
-   * Ensures that all documents have been compiled since their last 
+  /** Ensures that all documents have been compiled since their last 
    * modification and then delegates the actual testing to 
    * _rawJUnitOpenTestDocs. 
    * @param lod list of open documents
@@ -316,8 +315,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     else _rawJUnitOpenDefDocs(lod, allTests);
   }
   
-  /** 
-   * Runs all TestCases in the document list lod; assumes all documents have 
+  /** Runs all TestCases in the document list lod; assumes all documents have 
    * been compiled. It finds the TestCase classes by searching the build 
    * directories for the documents.  Note: caller must respond to thrown 
    * exceptions by invoking _junitUnitInterrupted (to run hourglassOff() and 
@@ -501,8 +499,8 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
         synchronized(_compilerModel.getCompilerLock()) {
           // synchronized over _compilerModel to ensure that compilation and junit testing are mutually exclusive.
           /** Set up junit test suite on slave JVM; get TestCase classes forming that suite */
-          List<String> tests = _jvm.findTestClasses(classNames, files, 
-              coverageMetadata).unwrap(null);
+          _log.log("Calling findTestClasses(" + classNames + ", " + files + " ... )");
+          List<String> tests = _jvm.findTestClasses(classNames, files, coverageMetadata).unwrap(null);
 
           if (tests == null || tests.isEmpty()) {
             nonTestCase(allTests, false);
@@ -541,8 +539,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     EventQueue.invokeLater(new Runnable() { public void run() { _notifier.junitEnded(); } });
   }
   
-  /** 
-   * Helper method to notify JUnitModel listeners that all open files must be 
+  /** Helper method to notify JUnitModel listeners that all open files must be 
    * compiled before JUnit is run. 
    * @param testAfterCompile a CompilerListener
    * @param outOfSync list of out-of-sync documents
@@ -554,8 +551,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     });
   }
   
-  /** 
-   * Helper method to notify JUnitModel listeners that JUnit aborted before 
+  /** Helper method to notify JUnitModel listeners that JUnit aborted before 
    * any tests could be run.
    * @param testAll true if all tests are to be run
    * @param didCompileFail true if compilation failed
@@ -632,7 +628,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
       List<File> files = new ArrayList<File>();
       for(OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()) { files.add(odd.getRawFile()); }
 //    Utilities.show("errors.length = " + errors.length + " files = " + files);
-      for(JUnitError e: errors){
+      for(JUnitError e: errors) {
         try {
           e.setStackTrace(_compilerModel.getLLSTM().replaceStackTrace(e.stackTrace(),files));
         } catch(Exception ex) { DrJavaErrorHandler.record(ex); }

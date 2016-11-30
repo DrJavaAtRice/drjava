@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -76,23 +76,22 @@ import edu.rice.cs.util.swing.Utilities;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
-/**
- * <p>Manages a remote JVM.  Includes methods for communication in both directions: MainJVMRemoteI
- * provides callbacks allowing the remote JVM to access the model, and a variety of delegating
- * methods wrap calls to the InterpreterJVMRemoteI methods, taking care of any RMI-related errors.
- * In the case of errors, these interpreter-delegating methods communicate the failure via the
- * return value.  (Note that it is impossible to guarantee success of these methods -- the remote
- * process may exit arbitrarily at any time -- and clients should behave gracefully when failures
- * occur.)</p>
- * 
- * <p>The current design is flawed: strictly speaking, two sequential interpreter-delegating calls to
- * this object may communicate with <em>different</em> JVMs if the remote JVM happens to reset in
- * the interim.  A better design would return a separate object for interfacing with each unique remote
- * JVM.  In this way, clients would know that all calls to a certain object would be forwarded to
- * the same remote JVM.</p>
- * 
- * @version $Id$
- */
+/** <p>Manages a remote JVM.  Includes methods for communication in both directions: MainJVMRemoteI
+  * provides callbacks allowing the remote JVM to access the model, and a variety of delegating
+  * methods wrap calls to the InterpreterJVMRemoteI methods, taking care of any RMI-related errors.
+  * In the case of errors, these interpreter-delegating methods communicate the failure via the
+  * return value.  (Note that it is impossible to guarantee success of these methods -- the remote
+  * process may exit arbitrarily at any time -- and clients should behave gracefully when failures
+  * occur.)</p>
+  * 
+  * <p>The current design is flawed: strictly speaking, two sequential interpreter-delegating calls to
+  * this object may communicate with <em>different</em> JVMs if the remote JVM happens to reset in
+  * the interim.  A better design would return a separate object for interfacing with each unique remote
+  * JVM.  In this way, clients would know that all calls to a certain object would be forwarded to
+  * the same remote JVM.</p>
+  * 
+  * @version $Id$
+  */
 public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   
   /** Number of slave startup failures allowed before aborting the startup process. */
@@ -128,8 +127,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   /** Working directory for slave JVM */
   private volatile File _workingDir;
   
-  /** 
-   * Creates a new MainJVM to interface to another JVM;  the MainJVM has a 
+  /** Creates a new MainJVM to interface to another JVM;  the MainJVM has a 
    * link to the partially initialized global model.  The MainJVM but does 
    * not automatically start the Interpreter JVM.  Callers must set the
    * InteractionsModel and JUnitModel and then call startInterpreterJVM().
@@ -311,14 +309,12 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    * === Local getters and setters ===
    */
   
-  /** 
-   * Provides an object to listen to interactions-related events. 
+  /** Provides an object to listen to interactions-related events. 
    * @param model the interactions model to be set
    */
   public void setInteractionsModel(InteractionsModelCallback model) { _interactionsModel = model; }
   
-  /** 
-   * Provides an object to listen to test-related events
+  /** Provides an object to listen to test-related events
    * @param model the JUnit model to be set
    */
   public void setJUnitModel(JUnitModelCallback model) { _junitModel = model; }
@@ -328,30 +324,26 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     */
   public void setDebugModel(DebugModelCallback model) { _debugModel = model; }
   
-  /** 
-   * Sets whether the remote JVM will run "assert" statements after the next restart. 
+  /** Sets whether the remote JVM will run "assert" statements after the next restart. 
    * @param allow true if the JVM will allow assertions after the next restart; false otherwise
    */
   public void setAllowAssertions(boolean allow) { _allowAssertions = allow; }
   
-  /**
-   * Sets the class path to use for starting the interpreter JVM. Must include the classes for the interpreter.
-   * @param classPath Class path for the interpreter JVM
-   */
+  /** Sets the class path to use for starting the interpreter JVM. Must include the classes for the interpreter.
+    * @param classPath Class path for the interpreter JVM
+    */
   public void setStartupClassPath(String classPath) {
     _startupClassPath = IOUtil.parsePath(classPath);
   }
   
-  /** 
-   * Sets the working directory for the interpreter (takes effect on next startup). 
-   * @param dir working directory to be set
-   */
+  /** Sets the working directory for the interpreter (takes effect on next startup). 
+    * @param dir working directory to be set
+    */
   public void setWorkingDirectory(File dir) {
     _workingDir = dir;
   }
   
-  /** 
-   * Declared as a getter in order to allow subclasses to override the standard behavior. 
+  /** Declared as a getter in order to allow subclasses to override the standard behavior. 
    * @return a visitor for the interpreter's results
    */
   protected InterpretResult.Visitor<Void> resultHandler() { return _handler; }
@@ -359,8 +351,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   
   /* === Wrappers for InterpreterJVMRemoteI methods === */
 
-  /** 
-   * Interprets string s in the remote JVM.  Blocks until the interpreter 
+  /** Interprets string s in the remote JVM.  Blocks until the interpreter 
    * is connected and evaluation completes.
    * @param s the string to be interpreted
    * @return  {@code true} if successful; {@code false} if the subprocess is 
@@ -380,12 +371,11 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     catch (RemoteException e) { debug.logEnd(); _handleRemoteException(e); return false; }
   }
   
-  /**
-   * Gets the string representation of the value of a variable in the current interpreter, or "none"
-   * if the remote JVM is unavailable or an error occurs.  Blocks until the interpreter is connected.
-   * @param var the name of the variable
-   * @return string representation of var
-   */
+  /** Gets the string representation of the value of a variable in the current interpreter, or "none"
+    * if the remote JVM is unavailable or an error occurs.  Blocks until the interpreter is connected.
+    * @param var the name of the variable
+    * @return string representation of var
+    */
   public Option<Pair<String,String>> getVariableToString(String var) {
     InterpreterJVMRemoteI remote = _state.value().interpreter(false);
     if (remote == null) { return Option.none(); }
@@ -393,11 +383,10 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     catch (RemoteException e) { _handleRemoteException(e); return Option.none(); }
   }
   
-  /**
-   * Blocks until the interpreter is connected. 
-   * @param f file to be added to the class path
-   * @return {@code true} if the change was successfully passed to the remote JVM.
-   */
+  /** Blocks until the interpreter is connected. 
+    * @param f file to be added to the class path
+    * @return {@code true} if the change was successfully passed to the remote JVM.
+    */
   public boolean addProjectClassPath(File f) {
     InterpreterJVMRemoteI remote = _state.value().interpreter(false);
     if (remote == null) { return false; }
@@ -405,11 +394,10 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     catch (RemoteException e) { _handleRemoteException(e); return false; }
   }
   
-  /**
-   * Blocks until the interpreter is connected. 
-   * @param f file to be added to the build directory class path
-   * @return {@code true} if the change was successfully passed to the remote JVM.
-   */
+  /** Blocks until the interpreter is connected. 
+    * @param f file to be added to the build directory class path
+    * @return {@code true} if the change was successfully passed to the remote JVM.
+    */
   public boolean addBuildDirectoryClassPath(File f) {
     InterpreterJVMRemoteI remote = _state.value().interpreter(false);
     if (remote == null) { return false; }
@@ -417,11 +405,10 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     catch (RemoteException e) { _handleRemoteException(e); return false; }
   }
   
-  /**
-   * Blocks until the interpreter is connected. 
-   * @param f file to be added to the class path
-   * @return {@code true} if the change was successfully passed to the remote JVM.
-   */
+  /** Blocks until the interpreter is connected. 
+    * @param f file to be added to the class path
+    * @return {@code true} if the change was successfully passed to the remote JVM.
+    */
   public boolean addProjectFilesClassPath(File f) {
     InterpreterJVMRemoteI remote = _state.value().interpreter(false);
     if (remote == null) { return false; }
@@ -429,11 +416,10 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     catch (RemoteException e) { _handleRemoteException(e); return false; }
   }
   
-  /**
-   * Blocks until the interpreter is connected.  
-   * @param f file to be added to the class path
-   * @return {@code true} if the change was successfully passed to the remote JVM.
-   */
+  /** Blocks until the interpreter is connected.  
+    * @param f file to be added to the class path
+    * @return {@code true} if the change was successfully passed to the remote JVM.
+    */
   public boolean addExternalFilesClassPath(File f) {
     InterpreterJVMRemoteI remote = _state.value().interpreter(false);
     if (remote == null) { return false; }
@@ -441,11 +427,10 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     catch (RemoteException e) { _handleRemoteException(e); return false; }
   }
   
-  /**
-   * Blocks until the interpreter is connected.
-   * @param f file to be added to the class path
-   * @return {@code true} if the change was successfully passed to the remote JVM.
-   */
+  /** Blocks until the interpreter is connected.
+    * @param f file to be added to the class path
+    * @return {@code true} if the change was successfully passed to the remote JVM.
+    */
   public boolean addExtraClassPath(File f) {
     InterpreterJVMRemoteI remote = _state.value().interpreter(false);
     if (remote == null) { return false; }
@@ -453,8 +438,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     catch (RemoteException e) { _handleRemoteException(e); return false; }
   }
   
-  /** 
-   * Returns the current class path of the interpreter as a list of unique entries.  
+  /** Returns the current class path of the interpreter as a list of unique entries.  
    * The result is "none" if the remote JVM is unavailable or if an exception occurs. 
    * Blocks until the interpreter is connected.
    * @return the class path
@@ -466,8 +450,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     catch (RemoteException e) { _handleRemoteException(e); return Option.none(); }
   }
   
-  /** 
-   * Sets the Interpreter to be in the given package.  Blocks until the interpreter is connected.
+  /** Sets the Interpreter to be in the given package.  Blocks until the interpreter is connected.
    * @param packageName Name of the package to enter.
    * @return true if successfully changed the package scope; false otherwise
    */
@@ -478,8 +461,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     catch (RemoteException e) { _handleRemoteException(e); return false; }
   }
   
-  /** 
-   * Sets up a JUnit test suite in the Interpreter JVM and finds which classes are really TestCase
+  /** Sets up a JUnit test suite in the Interpreter JVM and finds which classes are really TestCase
    * classes (by loading them).  Blocks until the interpreter is connected and the operation completes.
    * @param classNames the class names to run in a test
    * @param files the associated file
@@ -494,12 +476,11 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     catch (RemoteException e) { _handleRemoteException(e); return Option.none(); }
   }
   
-  /**
-   * Runs the JUnit test suite already cached in the Interpreter JVM.  
-   * Blocks until the remote JVM is available.
-   * @return {@code false} if no test suite is cached, the remote JVM is 
-   *         unavailable, or an error occurs; true otherwise.
-   */
+  /** Runs the JUnit test suite already cached in the Interpreter JVM.  
+    * Blocks until the remote JVM is available.
+    * @return {@code false} if no test suite is cached, the remote JVM is 
+    *         unavailable, or an error occurs; true otherwise.
+    */
   public boolean runTestSuite() { 
     InterpreterJVMRemoteI remote = _state.value().interpreter(true);
     if (remote == null) { return false; }
@@ -518,13 +499,12 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
 //  }
   
   
-  /**
-   * Adds a named interpreter to the list.  
-   * Blocks until the interpreter is connected.
-   * @param name the unique name for the interpreter
-   * @return {@code false} if the remote JVM is unavailable or an exception occurs; true otherwise.  
-   * @throws IllegalArgumentException if the name is not unique
-   */
+  /** Adds a named interpreter to the list.  
+    * Blocks until the interpreter is connected.
+    * @param name the unique name for the interpreter
+    * @return {@code false} if the remote JVM is unavailable or an exception occurs; true otherwise.  
+    * @throws IllegalArgumentException if the name is not unique
+    */
   public boolean addInterpreter(String name) {
     InterpreterJVMRemoteI remote = _state.value().interpreter(false);
     if (remote == null) { return false; }
@@ -532,8 +512,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     catch (RemoteException e) { _handleRemoteException(e); return false; }
   }
   
-  /** 
-   * Removes the interpreter with the given name, if it exists.  
+  /** Removes the interpreter with the given name, if it exists.  
    * Blocks until the interpreter is connected.
    * @param name Name of the interpreter to remove
    * @return {@code false} if the remote JVM is unavailable or if an exception occurs; true otherwise.  
@@ -568,8 +547,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     catch (RemoteException e) { _handleRemoteException(e); return Option.none(); }
   }
 
-  /** 
-   * Sets the interpreter to enforce access to all members.  
+  /** Sets the interpreter to enforce access to all members.  
    * Blocks until the interpreter is connected.
    * @param enforce value to be set
    * @return {@code false} if the remote JVM is unavailable or if an exception occurs; true otherwise.
@@ -581,8 +559,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     catch (RemoteException e) { _handleRemoteException(e); return false; }
   }
 
-  /** 
-   * Sets the interpreter to enforce access to private members.  
+  /** Sets the interpreter to enforce access to private members.  
    * Blocks until the interpreter is connected.
    * @param enforce value to be set
    * @return {@code false} if the remote JVM is unavailable or if an exception occurs; true otherwise.
@@ -594,8 +571,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     catch (RemoteException e) { _handleRemoteException(e); return false; }
   }
   
-  /** 
-   * Require a semicolon at the end of statements. 
+  /** Require a semicolon at the end of statements. 
    * Blocks until the interpreter is connected.
    * @param require value to be set
    * @return {@code false} if the remote JVM is unavailable or if an exception occurs; true otherwise.
@@ -607,8 +583,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     catch (RemoteException e) { _handleRemoteException(e); return false; }
   }
   
-  /** 
-   * Require variable declarations to include an explicit type. 
+  /** Require variable declarations to include an explicit type. 
    * Blocks until the interpreter is connected.
    * @param require value to be set
    * @return {@code false} if the remote JVM is unavailable or if an exception occurs; true otherwise.
@@ -805,8 +780,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     return port;
   }
   
-  /** 
-   * Lets the model know if any exceptions occur while communicating with the Interpreter JVM. 
+  /** Lets the model know if any exceptions occur while communicating with the Interpreter JVM. 
    * @param e exception to be handled
    */
   private void _handleRemoteException(RemoteException e) {
@@ -828,8 +802,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   /** State-based implementation of the starting/stopping functionality. */
   private abstract class State {
 
-    /**
-     * Get the current interpreter -- null if unavailable.  Block if necessary.
+    /** Get the current interpreter -- null if unavailable.  Block if necessary.
      * @param used  Whether this access will lead to a used JVM -- one that should be reset even when not forced 
      * @return the current interpreter
      */
@@ -847,8 +820,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     public abstract void restart(boolean force);
     public abstract void dispose();
 
-    /** 
-     * React to a completed startup.
+    /** React to a completed startup.
      * @param i a remote interpreter
      */
     public void started(InterpreterJVMRemoteI i) { throw new IllegalStateException("Unexpected started() call"); }
@@ -861,6 +833,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     /** React to a completed shutdown (requested or spontaneous). 
       * @param status the interpreter's status
       */
+
     public void stopped(int status) { throw new IllegalStateException("Unexpected stopped() call"); }
   }
   

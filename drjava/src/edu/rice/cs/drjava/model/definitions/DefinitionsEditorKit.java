@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -95,8 +95,7 @@ public class DefinitionsEditorKit extends StyledEditorKit {
     }
   };
   
-  /** 
-   * Creates a new DefinitionsDocument.  Formerly named createDefaultDocument() 
+  /** Creates a new DefinitionsDocument.  Formerly named createDefaultDocument() 
    * because the view (DefinitionsPane) would create a DefinitionsDocument by 
    * default when it was constructed.  However, this default document was  
    * immediately discarded because a DefinitionsDocument for the constructed 

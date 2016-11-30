@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -47,15 +47,13 @@ public interface CompilerListener {
   /** Called after a compile is started by the GlobalModel. */
   public void compileStarted();
 
-  /** 
-   * Called when a compile has finished running. 
+  /** Called when a compile has finished running. 
    * @param workDir the working directory
    * @param excludedFiles the files that were excluded
    */
   public void compileEnded(File workDir, List<? extends File> excludedFiles);
   
-  /** 
-   * Called if a compilation is aborted. 
+  /** Called if a compilation is aborted. 
    * @param e the exception with which the compilation terminated
    */
   public void compileAborted(Exception e);

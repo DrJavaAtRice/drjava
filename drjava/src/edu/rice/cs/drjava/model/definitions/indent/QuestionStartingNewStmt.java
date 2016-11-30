@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -41,8 +41,7 @@ import javax.swing.text.BadLocationException;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 
-/**
- * Determines if the current line is starting a new statement by
+/** * Determines if the current line is starting a new statement by
  * searching backwards to see if the previous line was the end
  * of a statement. Specifically,  checks if the previous
  * non-whitespace character not on this line is one of the

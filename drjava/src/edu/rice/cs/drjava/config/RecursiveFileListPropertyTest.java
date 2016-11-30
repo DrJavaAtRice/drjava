@@ -1,13 +1,12 @@
 package edu.rice.cs.drjava.config;
 
 import junit.framework.TestCase;
-import junit.framework.Assert;
+import org.junit.Assert;
 
 import java.io.File;
 import java.io.FileFilter;
 
-/**
- * A JUnit test case class.
+/** * A JUnit test case class.
  * Every method starting with the word "test" will be called when running
  * the test with JUnit.
  */

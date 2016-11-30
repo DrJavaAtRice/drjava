@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -73,8 +73,7 @@ public class LanguageLevelStackTraceMapper {
     return new StackTraceElement(s.getClassName(), s.getMethodName(), d.getName(), lll);
   }
   
-  /** 
-   * Converts java file and line number to corresponding dj* file name and 
+  /** Converts java file and line number to corresponding dj* file name and 
    * line number in a given stacktrace element.
    * @param s the StackTraceElement to do be converted
    * @param d the dj* file whose name and line numbers are required in the StackTraceElement
@@ -103,8 +102,7 @@ public class LanguageLevelStackTraceMapper {
     return replaceStackTraceElement(s, d, djToJavaMap);
   }
 
-  /** 
-   * Replaces the dj* file name and line numbers in a given stacktrace element.
+  /** Replaces the dj* file name and line numbers in a given stacktrace element.
    * @param s the StackTraceElement to do the replacing in
    * @param ds a list of the dj* file whose names and line numbers need replacing in the StackTraceElement
    * @return the newly-converted stack trace element
@@ -118,8 +116,7 @@ public class LanguageLevelStackTraceMapper {
 // Call replaceStackTraceElement(s, f.get(i), cache) for all i to replace the
 // file name and map the numbers for all files
   
-  /** 
-   * Replaces the dj* file names and line numbers in the given stacktrace elements.
+  /** Replaces the dj* file names and line numbers in the given stacktrace elements.
    * @param ss an array of StackTraceElement to do the replacing in
    * @param ds a list of the dj* file whose names and line numbers need replacing in the StackTraceElement
    * @return the newly-converted stack trace element
@@ -139,8 +136,7 @@ public class LanguageLevelStackTraceMapper {
     cache = new HashMap<String,TreeMap<Integer,Integer>>();
   }
   
-  /** 
-   * Ensures the given file and StackTraceElement match.  The extension on 
+  /** Ensures the given file and StackTraceElement match.  The extension on 
    * the file f may be a LL extension while the extension in the 
    * StackTraceElement is the corresponding .java file. 
    * @param f the file
@@ -200,8 +196,7 @@ public class LanguageLevelStackTraceMapper {
     return oneToOne;
   }
     
-  /** 
-   * Reads the LanguageLevel header from a LL file and pulls the line number conversion map out.
+  /** Reads the LanguageLevel header from a LL file and pulls the line number conversion map out.
    * @param LLFile the language-level file to be read
    * @return {@literal <java line, dj* line>}
    */
@@ -257,8 +252,7 @@ public class LanguageLevelStackTraceMapper {
   
   
   
-  /** 
-   * Reads the LanguageLevel header from a LL file and pulls the line number conversion map out.
+  /** Reads the LanguageLevel header from a LL file and pulls the line number conversion map out.
    * @param LLFile the language-level file to be read
    * @return {@literal <dj* line, java line>}
    */
@@ -308,8 +302,7 @@ public class LanguageLevelStackTraceMapper {
     return map;
   }
   
-  /** 
-   * Helper method to read the next comment line in a file.  Returns null if 
+  /** Helper method to read the next comment line in a file.  Returns null if 
    * no new comment line exists. 
    * Line is trimmed and padded by a single blank on the end. 
    * @param br buffer from which to read the next comment line

@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -60,8 +60,7 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
   protected JButton _removeAllButton;
   protected final Debugger _debugger;
   
-  /** 
-   * Constructs a new breakpoints panel.
+  /** Constructs a new breakpoints panel.
    * This is swing view class and hence should only be accessed from the event-handling thread.
    * @param frame the MainFrame
    * @param breakpointManager the breakpoint manager

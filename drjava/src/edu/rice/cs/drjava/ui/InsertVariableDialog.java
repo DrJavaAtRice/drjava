@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (javaplt@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -53,8 +53,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 
-/**
- * Dialog allowing the user to select a variable.
+/** * Dialog allowing the user to select a variable.
  */
 public class InsertVariableDialog extends SwingFrame implements OptionConstants {
   /** Tab pane. */
@@ -92,8 +91,7 @@ public class InsertVariableDialog extends SwingFrame implements OptionConstants 
   /** Completion monitor to tell the calling dialog that we're done. */
   private CompletionMonitor _cm;
   
-  /** 
-   * Create a dialog.
+  /** Create a dialog.
    * @param mf the instance of mainframe to query into the project
    * @param cm a CompletionMonitor
    */
@@ -198,8 +196,7 @@ public class InsertVariableDialog extends SwingFrame implements OptionConstants 
     super.setResizable(false);
   }
   
-  /** 
-   * Create a scroll pane for the specified category with the properties provided in the map.
+  /** Create a scroll pane for the specified category with the properties provided in the map.
    * @param category category name
    * @param props map from property names to actual properties in this category 
    * @return newly-created scroll pane

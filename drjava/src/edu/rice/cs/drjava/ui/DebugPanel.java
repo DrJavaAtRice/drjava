@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -51,8 +51,7 @@ import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.swing.RightClickMouseAdapter;
 
-/**
- * Panel for displaying the debugger input and output in MainFrame.  This
+/** * Panel for displaying the debugger input and output in MainFrame.  This
  * class is a swing view class and hence should only be accessed from the 
  * event-handling thread.
  * @version $Id$
@@ -95,8 +94,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
   /* The following field is commented out because it was never written (and hence always null). */
 //  private DefaultTreeCellRenderer dtcr;
 
-  /** 
-   * Constructs a new panel to display debugging information when the Debugger 
+  /** Constructs a new panel to display debugging information when the Debugger 
    * is active.  This is swing view class and hence should only
    * be accessed from the event-handling thread.
    * @param frame reference to the main frame
@@ -143,8 +141,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
     _setColors(_threadTable);
   }
 
-  /** 
-   * Quick helper for setting up color listeners. 
+  /** Quick helper for setting up color listeners. 
    * @param c component for which to set up listeners
    */
   private static void _setColors(Component c) {
@@ -240,8 +237,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
         return renderer;
       }
 
-      /**
-       * Sets the font for a cell in the thread table.
+      /**       * Sets the font for a cell in the thread table.
        * @param row the current row
        */
       private void _setThreadCellFont(int row) {
@@ -261,8 +257,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
 
     WatchEditor() { super(new JTextField()); }
 
-    /**
-     * Overrides the default editor component to use proper coloring.
+    /** Overrides the default editor component to use proper coloring.
      */
     public Component getTableCellEditorComponent
         (JTable table, Object value, boolean isSelected, int row, int column) {
@@ -276,8 +271,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
   /** Adds config color support to DefaultTableCellRenderer. */
   private class WatchRenderer extends DefaultTableCellRenderer {
 
-    /**
-     * Overrides the default rederer component to use proper coloring.
+    /** Overrides the default rederer component to use proper coloring.
      */
     public Component getTableCellRendererComponent
         (JTable table, Object value, boolean isSelected, boolean hasFocus,
@@ -289,8 +283,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
       return renderer;
     }
 
-    /**
-     * Sets the font for a cell in the watch table.
+    /** Sets the font for a cell in the watch table.
      * @param row the current row
      */
     private void _setWatchCellFont(int row) {
@@ -577,8 +570,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
     });
   }
 
-  /**
-   */
+  /**/
   private void _selectCurrentThread() {
     if (_threadInPopup.isSuspended()) {
       try { _debugger.setCurrentThread(_threadInPopup); }

@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -92,8 +92,7 @@ public class ProjectPropertiesFrame extends SwingFrame {
   private volatile VectorFileOptionComponent _excludedFilesList;
   private final Map<OptionParser<?>,String> _storedPreferences = new HashMap<OptionParser<?>,String>();
   
-  /** 
-   * Constructs project properties frame for a new project and displays it.  
+  /** Constructs project properties frame for a new project and displays it.  
    * Assumes that a project is active. 
    * @param mf reference to the main frame
    */
@@ -234,8 +233,7 @@ public class ProjectPropertiesFrame extends SwingFrame {
     _applyButton.setEnabled(false);
   }
 
-  /** 
-   * Caches the settings in the global model 
+  /** Caches the settings in the global model 
    * @return true always
    */
   public boolean saveSettings() {//throws IOException {

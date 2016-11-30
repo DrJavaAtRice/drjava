@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -43,8 +43,7 @@ import java.io.File;
 import java.io.IOException;
 import edu.rice.cs.util.StringOps;
 
-/** 
- * Class representing file lists that are not evaluated until necessary.
+/** * Class representing file lists that are not evaluated until necessary.
  * @version $Id$
  */
 public abstract class FileListProperty extends DrJavaProperty {
@@ -55,8 +54,7 @@ public abstract class FileListProperty extends DrJavaProperty {
   /** Relative directory. */
   protected String _dir;
 
-  /** 
-   * Create an lazy file list property. 
+  /** Create an lazy file list property. 
    * @param name the name of the property
    * @param sep the separating string for this property
    * @param dir the relative directory for this property
@@ -78,15 +76,13 @@ public abstract class FileListProperty extends DrJavaProperty {
   /** Return true if the value is current. */
   public boolean isCurrent() { return false; }
 
-  /** 
-   * Abstract factory method specifying the list.PropertyMaps pm
+  /** Abstract factory method specifying the list.PropertyMaps pm
    * @param pm PropertyMaps used for substitution when replacing variables 
    * @return the list
    */
   protected abstract List<File> getList(PropertyMaps pm);
   
-  /** 
-   * Update the value by concatenating the list of documents.
+  /** Update the value by concatenating the list of documents.
    * @param pm PropertyMaps used for substitution when replacing variables 
    */
   public void update(PropertyMaps pm) {

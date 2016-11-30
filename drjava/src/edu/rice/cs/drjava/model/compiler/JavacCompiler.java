@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -56,7 +56,7 @@ import java.lang.reflect.Constructor;
 /** An abstract parent for all javac-based compiler interfaces.  Manages the auxiliary naming methods.
   * To support loading via reflection, all subclasses are assumed to have a public constructor with
   * a matching signature.
-  *  @version $Id: JavacCompiler.java 5611 2012-07-25 15:03:33Z rcartwright $
+  *  @version $Id$
   */
 public abstract class JavacCompiler implements CompilerInterface {
   
@@ -135,8 +135,7 @@ public abstract class JavacCompiler implements CompilerInterface {
     return _transformCommand(s,"edu.rice.cs.plt.swing.SwingUtil.showApplet(new {0}({1}), 400, 300);");
   }
   
-  /** 
-   * This method performs the "smart run". Unfortunately, we don't get the right static error messages.
+  /** This method performs the "smart run". Unfortunately, we don't get the right static error messages.
    * @param s full command line, i.e. "run MyClass 1 2 3"
    * @param c class to be run, i.e. MyClass.class
    * @throws Throwable if something goes wrong
@@ -173,7 +172,7 @@ public abstract class JavacCompiler implements CompilerInterface {
         if (!m.getReturnType().equals(void.class)) { m = null; }
       }
       catch (java.lang.NoSuchMethodException e) { m = null; }
-      if (m==null) {
+      if (m == null) {
         java.applet.Applet instance = null;
         if (args.length == 0) {
           try {
@@ -192,7 +191,7 @@ public abstract class JavacCompiler implements CompilerInterface {
               System.err.println("Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.");
             }
           }
-          if (instance==null) {
+          if (instance == null) {
             try {
               // try String[] constructor next
               Constructor<?> ctor = c.getConstructor(String[].class);
@@ -211,7 +210,7 @@ public abstract class JavacCompiler implements CompilerInterface {
               }
             }
           }
-          if (instance==null) {
+          if (instance == null) {
             System.err.println("Static Error: This applet does not have a default constructor or a constructor "+
                                "accepting String[].");
             return;
@@ -235,7 +234,7 @@ public abstract class JavacCompiler implements CompilerInterface {
               return;
             }
           }
-          if (instance==null) {
+          if (instance == null) {
             System.err.println("Static Error: This applet does not have a constructor accepting String[].");
             return;
           }
@@ -284,8 +283,7 @@ public abstract class JavacCompiler implements CompilerInterface {
     }
   }
   
-  /** 
-   * This is a method that automatically detects if
+  /** This is a method that automatically detects if
    * a) the class is an ACM Java Task Force program (subclass of acm.program.Program)
    * b) an applet
    * c) a class with a static main method
@@ -310,8 +308,7 @@ public abstract class JavacCompiler implements CompilerInterface {
     return ret;
   }
 
-  /** 
-   * Assumes a trimmed String. Returns a string of the call that the interpreter can use.
+  /** Assumes a trimmed String. Returns a string of the call that the interpreter can use.
    * The arguments get formatted as comma-separated list of strings enclosed in quotes.
    * Example: _transformCommand("java MyClass arg1 arg2 arg3", "{0}.main(new String[]'{'{1}'}');")
    * returns "MyClass.main(new String[]{\"arg1\",\"arg2\",\"arg3\"});"
@@ -451,7 +448,7 @@ public abstract class JavacCompiler implements CompilerInterface {
 //       "    if (!m.getReturnType().equals(void.class)) { m = null; }\n" +
 //       "  }\n" +
 //       "  catch (java.lang.NoSuchMethodException e) { m = null; }\n" +
-//       "  if (m==null) {\n" +
+//       "  if (m == null) {\n" +
 //       "    java.applet.Applet instance = null;\n" +
 //       "    boolean fail = false;\n");
 //    if (args.length == 0) {
@@ -472,7 +469,7 @@ public abstract class JavacCompiler implements CompilerInterface {
 //       "        System.err.println(\"Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.\");\n" +
 //       "      }\n" +
 //       "    }\n" +
-//       "    if (instance==null) {\n" +
+//       "    if (instance == null) {\n" +
 //       "      try {\n" +
 //       "        // try String[] constructor next\n" +
 //       "        java.lang.reflect.Constructor ctor = c.getConstructor(String[].class);\n" +
@@ -491,7 +488,7 @@ public abstract class JavacCompiler implements CompilerInterface {
 //       "        }\n" +
 //       "      }\n" +
 //       "    }\n" +
-//       "    if (!fail && (instance==null)) {\n" +
+//       "    if (!fail && (instance == null)) {\n" +
 //       "      System.err.println(\"Error: This applet does not have a default constructor or a constructor \"+\n" +
 //       "                         \"accepting String[].\");\n" +
 //       "      fail = true;\n" +
@@ -516,14 +513,14 @@ public abstract class JavacCompiler implements CompilerInterface {
 //       "        fail = true;\n" +
 //       "      }\n" +
 //       "    }\n" +
-//       "    if (!fail && (instance==null)) {\n" +
+//       "    if (!fail && (instance == null)) {\n" +
 //       "      System.err.println(\"Error: This applet does not have a constructor accepting String[].\");\n" +
 //       "      fail = true;\n" +
 //       "    }\n");
 //    }
 //    command.append(
 //       "    if (!fail) { edu.rice.cs.plt.swing.SwingUtil.showApplet(instance, 400, 300); }\n" +
-//       "  } // if (m==null)\n" +
+//       "  } // if (m == null)\n" +
 //       "} // if (isApplet)\n" +
 //       "else {\n" +
 //       "  try {\n" +

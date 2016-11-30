@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -108,8 +108,7 @@ public final class KeyStrokeOptionTest extends DrJavaTestCase {
     assertEquals(ks, io.parse(io.format(ks)));
   }
   
-  /** 
-   * Tests that key strokes are output in a parseable format even in foreign 
+  /** Tests that key strokes are output in a parseable format even in foreign 
    * locales.  The test must be run in a separate JVM, because once the locale 
    * is changed, it cannot be restored.  (If someone can figure out how
    * to effectively set it back, feel free to remove this hack!)
@@ -123,8 +122,7 @@ public final class KeyStrokeOptionTest extends DrJavaTestCase {
     assertEquals("Local specific keystroke test failed!", 0, status);
   }
   
-  /** 
-   * Main method called by testLocalSpecificFormat.  Runs in new JVM to avoid 
+  /** Main method called by testLocalSpecificFormat.  Runs in new JVM to avoid 
    * corrupting the locale of other tests. 
    * @param args command-line args
    */

@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (javaplt@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -691,8 +691,7 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     return panel;
   }
   
-  /** 
-   * Color properties as variables.
+  /** Color properties as variables.
    * @param pane the pane that contains the text
    * @param props the properties to color 
    * @param dl a DocumentListener
@@ -983,8 +982,7 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     xc.save(f);
   }
   
-  /** 
-   * Save the settings for this dialog. 
+  /** Save the settings for this dialog. 
    * @return true always
    */
   private boolean _saveSettings() {
@@ -1054,8 +1052,7 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     super.setVisible(vis);
   }
   
-  /** 
-   * Opens the file chooser to select a directory, putting the result in the file field. 
+  /** Opens the file chooser to select a directory, putting the result in the file field. 
    * @param pane a JTextPane
    */
   protected void chooseDir(JTextPane pane) {
@@ -1077,8 +1074,7 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     }
   }
   
-  /** 
-   * Opens the file chooser to select a file, putting the result in the file field.
+  /** Opens the file chooser to select a file, putting the result in the file field.
    * @param pane a JTextPane
    */
   protected void chooseFile(JTextPane pane) {

@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -50,8 +50,7 @@ public class VectorStringOptionComponent extends VectorOptionComponent<String> i
     this(opt, text, parent, null);
   }
   
-  /** 
-   * Constructor that allows for a tooltip description. 
+  /** Constructor that allows for a tooltip description. 
    * @param opt the option
    * @param text the label to display
    * @param parent the parent frame
@@ -61,8 +60,7 @@ public class VectorStringOptionComponent extends VectorOptionComponent<String> i
     this(opt, text, parent, description, false);
   }
 
-  /** 
-   * Constructor with flag for move buttons. 
+  /** Constructor with flag for move buttons. 
    * @param opt the option
    * @param text the label to display
    * @param parent the parent frame

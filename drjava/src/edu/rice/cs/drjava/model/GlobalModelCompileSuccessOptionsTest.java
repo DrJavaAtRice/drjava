@@ -1,6 +1,6 @@
  /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -43,8 +43,7 @@ import javax.swing.text.BadLocationException;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 
-/**
- * Tests to ensure that compilation succeeds when expected.
+/** * Tests to ensure that compilation succeeds when expected.
  * 
  * Every test in this class is run for *each* of the compilers that is available.
  *
@@ -52,8 +51,7 @@ import edu.rice.cs.drjava.config.OptionConstants;
  */
 public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompileSuccessTestCase {
 
-  /** 
-   * Tests a compile on a file that references a non-public class defined in
+  /** Tests a compile on a file that references a non-public class defined in
    * another class with a name different than the non-public class.
    * Doesn't reset interactions because no interpretations are performed.
    * @throws BadLocationException if attempts to reference an invalid location

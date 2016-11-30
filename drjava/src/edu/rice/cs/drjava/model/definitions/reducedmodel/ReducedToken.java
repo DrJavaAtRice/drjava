@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -78,8 +78,7 @@ public abstract class ReducedToken implements ReducedModelStates {
     */
   public ReducedModelState getState() { return  _state; }
   
-  /** 
-   * Returns whether the current char is highlighted. 
+  /** Returns whether the current char is highlighted. 
    * / / beginning a comment would be highlighted but free, so its not
    * the same as getState.
    * @return true iff the current char is highlighted

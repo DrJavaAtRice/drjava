@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -111,8 +111,7 @@ public class FileOpsTest extends DrJavaTestCase {
   }
   
   
-  /** 
-   * This method checks that backups are made correctly, that when a save fails,
+  /** This method checks that backups are made correctly, that when a save fails,
    * no data is lost, and that when a save is attempted on a write-protected file,
    * the save fails (bug #782963).
    * @throws IOException if an IO operation fails

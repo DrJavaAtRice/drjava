@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -36,8 +36,7 @@
 
 package edu.rice.cs.util;
 
-/**
- * Indicates that a GUI operation has been canceled, e.g., choosing
+/** * Indicates that a GUI operation has been canceled, e.g., choosing
  * a file to save to from a file selection dialog.
  * @version $Id$
  */

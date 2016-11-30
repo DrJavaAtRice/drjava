@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -159,8 +159,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     });
   }
   
-  /** 
-   * Sets the _pane field and initializes the caret position in the pane.  
+  /** Sets the _pane field and initializes the caret position in the pane.  
    * Called in the InteractionsController. 
    * @param pane the pane to set up
    */
@@ -193,8 +192,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     _notifyInteractionIncomplete();
   }
   
-  /** 
-   * Sets this model's notion of whether it is waiting for the first 
+  /** Sets this model's notion of whether it is waiting for the first 
    * interpreter to connect.  The interactionsReady event is not fired for 
    * the first interpreter.
    * @param waiting true if waiting for the first interpreter to connect; false otherwise
@@ -282,8 +280,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     }
   }
   
-  /** 
-   * Performs pre-interpretation preparation of the interactions document and 
+  /** Performs pre-interpretation preparation of the interactions document and 
    * notifies the view.  Must run in the event thread for newline to be 
    * inserted at proper time.  Assumes that Write Lock is already held. 
    * @param text text to be added to history
@@ -320,8 +317,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     */
   public abstract Pair<String,String> getVariableToString(String var);
   
-  /** 
-   * Resets the Java interpreter with working directory wd. 
+  /** Resets the Java interpreter with working directory wd. 
    * @param wd the working directory to be set
    * @param force true if reset is to be forced
    */
@@ -330,6 +326,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     _autoImportSet.clear(); // clear list when interpreter is reset
     _resetInterpreter(wd, force);
   }
+
   /** Resets the Java interpreter.  This should only be called from 
     * resetInterpreter, never directly. 
     * @param wd the working directory to be set
@@ -372,8 +369,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   protected abstract void _notifySyntaxErrorOccurred(int offset, int length);
   
  
-  /** 
-   * Interprets the files selected in the FileOpenSelector. Assumes all 
+  /** Interprets the files selected in the FileOpenSelector. Assumes all 
    * strings have no trailing whitespace.
    * Interprets the array all at once so if there are any errors, none of the 
    * statements after the first erroneous one are processed.  Only runs in 
@@ -408,8 +404,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     
   }
   
-   /** 
-   * Opens the files chosen in the given file selector, and returns an 
+   /** Opens the files chosen in the given file selector, and returns an 
    * ArrayList with one history string for each selected file.
    * @param selector A file selector supporting multiple file selection
    * @return a list of histories (one for each selected file)
@@ -668,19 +663,15 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     _interactionIsOver();
   }
   
-  /**
-   * Default behavior set to return what it's given. 
-   * Used to replace line number and file name in a throwable when the error
-   * occurs in a Language Level file.
-   * Overriden in DefaultInteractionModel when a GlobalModel is available
-   * to make a LanguageLevelStackTraceMapper.
-   * @param sT the stackTrace to replace line number and file name
-   * @return the same stackTrace.
-   */
-  public StackTraceElement[] replaceLLException(StackTraceElement[] sT) {
-    return sT;
-    
-  }
+  /** Default behavior set to return what it's given. 
+    * Used to replace line number and file name in a throwable when the error
+    * occurs in a Language Level file.
+    * Overriden in DefaultInteractionModel when a GlobalModel is available
+    * to make a LanguageLevelStackTraceMapper.
+    * @param sT the stackTrace to replace line number and file name
+    * @return the same stackTrace.
+    */
+  public StackTraceElement[] replaceLLException(StackTraceElement[] sT) { return sT; }
   
   /** Signifies that the most recent interpretation was ended due to an exception being thrown. */
   public void replThrewException(String message, StackTraceElement[] stackTrace) {
@@ -888,8 +879,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     }
   }
   
-  /** 
-   * Notifies listeners that the interpreter is ready. (Subclasses must maintain listeners.) 
+  /** Notifies listeners that the interpreter is ready. (Subclasses must maintain listeners.) 
    * @param wd working directory
    */
   public abstract void _notifyInterpreterReady(File wd);

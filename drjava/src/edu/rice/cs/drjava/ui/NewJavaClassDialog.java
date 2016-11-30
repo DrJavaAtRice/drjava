@@ -2,7 +2,7 @@ package edu.rice.cs.drjava.ui;
 
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -102,8 +102,7 @@ public class NewJavaClassDialog extends SwingFrame {
     }
   };
   
-  /** 
-   * Constructs New Java Class frame and displays it. 
+  /** Constructs New Java Class frame and displays it. 
    * @param mf reference to the main frame
    */
   public NewJavaClassDialog(MainFrame mf) {

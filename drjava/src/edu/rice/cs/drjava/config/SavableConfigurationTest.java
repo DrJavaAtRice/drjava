@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -60,10 +60,9 @@ public class SavableConfigurationTest extends DrJavaTestCase {
     outputBytes = new ByteArrayOutputStream();
   }
   
-  /**
-   * Tests the saveConfiguration method with no configuration data
-   * @throws IOException if an IO operation fails
-   */
+  /** Tests the saveConfiguration method with no configuration data
+    * @throws IOException if an IO operation fails
+    */
   public void testEmptyConfiguration() throws IOException {  
     SavableConfiguration emptyConfig = new SavableConfiguration(new DefaultOptionMap());
     
@@ -87,8 +86,7 @@ public class SavableConfigurationTest extends DrJavaTestCase {
     }
   }
   
-  /** 
-   * Tests the saveConfiguration method with some configuration data.
+  /** Tests the saveConfiguration method with some configuration data.
    * @throws IOException if an IO operation fails
    */
   public void testNonEmptyConfiguration() throws IOException {

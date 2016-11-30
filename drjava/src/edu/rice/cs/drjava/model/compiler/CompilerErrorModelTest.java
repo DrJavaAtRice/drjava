@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -294,8 +294,7 @@ public final class CompilerErrorModelTest extends DrJavaTestCase {
     assertEquals("Incorrect error Position.", 38, pos.getOffset());
   }
   
-  /** 
-   * Tests CompilerErrorModel.getErrorAtOffset(int). 
+  /** Tests CompilerErrorModel.getErrorAtOffset(int). 
    * @throws IOException if an IO operation fails
    * @throws OperationCanceledException if an operation is canceled unexpectedly
    */
@@ -310,8 +309,7 @@ public final class CompilerErrorModelTest extends DrJavaTestCase {
                  model.getErrorAtOffset(doc, 38));
   }
   
-  /** 
-   * Tests CompilerErrorModel.hasErrorsWithPositions(OpenDefinitionsDocument). 
+  /** Tests CompilerErrorModel.hasErrorsWithPositions(OpenDefinitionsDocument). 
    * @throws IOException if an IO operation fails
    * @throws OperationCanceledException if an operation is canceled unexpectedly
    */

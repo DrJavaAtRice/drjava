@@ -1,6 +1,6 @@
    /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -42,8 +42,7 @@ import java.io.Serializable;
 import edu.rice.cs.dynamicjava.interpreter.InterpreterException;
 import edu.rice.cs.dynamicjava.interpreter.EvaluatorException;
 
-/**
- * Super class for any type of result that can occur from a call to interpret.
+/** * Super class for any type of result that can occur from a call to interpret.
  * 
  * @version $Id$
  */

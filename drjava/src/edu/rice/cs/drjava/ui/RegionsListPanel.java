@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -105,8 +105,7 @@ public abstract class RegionsListPanel<R extends IDocumentRegion> extends Tabbed
     _list.addMouseListener(new RegionMouseAdapter());
   }
   
-  /** 
-   * Quick helper for setting up color listeners. 
+  /** Quick helper for setting up color listeners. 
    * @param c the component for which to set up the listeners
    */
   private static void _setColors(Component c) {
@@ -185,8 +184,7 @@ public abstract class RegionsListPanel<R extends IDocumentRegion> extends Tabbed
   protected void performDefaultAction() {
   }
   
-  /** 
-   * Creates the buttons for controlling the regions. Should be overridden. 
+  /** Creates the buttons for controlling the regions. Should be overridden. 
    * @return the newly-created button
    */
   protected JComponent[] makeButtons() {        
@@ -252,8 +250,7 @@ public abstract class RegionsListPanel<R extends IDocumentRegion> extends Tabbed
     }
   }
   
-  /** 
-   * @param r the region for which to get the object
+  /** @param r the region for which to get the object
    * @return the usser object in the list associated with the region, or null if not found 
    */
   protected RegionListUserObj<R> getUserObjForRegion(R r) {
@@ -346,8 +343,7 @@ public abstract class RegionsListPanel<R extends IDocumentRegion> extends Tabbed
 //    Utilities.invokeLater(doCommand);
 //  }
   
-  /** 
-   * Factory method to create user objects put in the list.
+  /** Factory method to create user objects put in the list.
    * If subclasses extend RegionListUserObj, they need to override this method. 
    * @param r object to put in the RegionListUserObj
    * @return a RegionListUserObj

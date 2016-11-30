@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -69,7 +69,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.error;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /** Main class for DrJava.
-  * @version $Id: DrJavaRoot.java 5611 2012-07-25 15:03:33Z rcartwright $
+  * @version $Id$
   */
 public class DrJavaRoot {  
   /** Class to probe to see if the debugger is available */
@@ -202,8 +202,7 @@ public class DrJavaRoot {
     }
   }
   
-  /** 
-   * Handle the list of files specified on the command line.  Feature request #509701.
+  /** Handle the list of files specified on the command line.  Feature request #509701.
    * If file exists, open it in DrJava.  Otherwise, ignore it.
    * Is there a better way to handle nonexistent files?  Dialog box, maybe?
    *
@@ -215,8 +214,7 @@ public class DrJavaRoot {
     openCommandLineFiles(mf, filesToOpen, filesToOpen.length, jump);
   }
   
-  /** 
-   * Handle the list of files specified on the command line.  Feature request #509701. 
+  /** Handle the list of files specified on the command line.  Feature request #509701. 
    * If the final element in filesToOpen is a pathSeparator, it opens the 
    * debug console. If file exists, open it in DrJava.  Otherwise, ignore
    * it.  Is there a better way to handle nonexistent files?  Dialog box, maybe?
@@ -231,8 +229,7 @@ public class DrJavaRoot {
     Utilities.invokeAndWait(new Runnable() { public void run() { _openCommandLineFiles(mf, filesToOpen, len, jump); }});
   }
 
-  /** 
-   * Handle the list of files specified on the command line.  Feature request #509701. 
+  /** Handle the list of files specified on the command line.  Feature request #509701. 
    *
    * @param mf main frame in which to open files
    * @param filesToOpen files to open
@@ -336,16 +333,14 @@ public class DrJavaRoot {
     */
   public static PrintStream consoleOut() { return  _consoleOut; }
   
-  /** 
-   * User dragged something into the component. 
+  /** User dragged something into the component. 
    * @param dropTargetDragEvent drag event
    */
   public static void dragEnter(DropTargetDragEvent dropTargetDragEvent) {
     _mainFrame.dragEnter(dropTargetDragEvent);
   }
   
-  /** 
-   * User dropped something on the component. Only runs in the event thread. 
+  /** User dropped something on the component. Only runs in the event thread. 
    * @param dropTargetDropEvent drop event
    */
   public static void drop(DropTargetDropEvent dropTargetDropEvent) {

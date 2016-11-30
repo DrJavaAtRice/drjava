@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -61,25 +61,25 @@ public class ExternalProcessPanel extends AbortablePanel {
   public final int BUFFER_SIZE = 10240;
   /** Number of buffer reads before the event thread is allowed to do something else. */
   public final int BUFFER_READS_PER_TIMER = 5;
-  protected JTextArea _textArea;
-  protected ProcessCreator _pc = null;
-  protected Process _p = null;
-  protected InputStreamReader _is = null;
-  protected InputStreamReader _erris = null;
-  protected JButton _updateNowButton;
-  protected JButton _runAgainButton;
-  protected Thread _updateThread;
-  protected Thread _readThread;
-  protected Thread _deathThread;
-  protected StringBuilder _sb = new StringBuilder();
+  protected volatile JTextArea _textArea;
+  protected volatile ProcessCreator _pc = null;
+  protected volatile Process _p = null;
+  protected volatile InputStreamReader _is = null;
+  protected volatile InputStreamReader _erris = null;
+  protected volatile JButton _updateNowButton;
+  protected volatile JButton _runAgainButton;
+  protected volatile Thread _updateThread;
+  protected volatile Thread _readThread;
+  protected volatile Thread _deathThread;
+  protected volatile StringBuilder _sb = new StringBuilder();
   protected volatile int _changeCount = 0;
-  private char[] _buf = new char[BUFFER_SIZE];
-  private int _red = -1;
+  private volatile char[] _buf = new char[BUFFER_SIZE];
+  private volatile int _red = -1;
   private char[] _errbuf = new char[BUFFER_SIZE];
-  private int _errred = -1;
-  private int _retVal;
-  private String _header;
-  protected CompletionMonitor _abortMonitor = new CompletionMonitor();
+  private volatile int _errred = -1;
+  private volatile int _retVal;
+  private volatile String _header;
+  protected volatile CompletionMonitor _abortMonitor = new CompletionMonitor();
 
   /** Constructs a new "process" panel to watch process output.
     * This is swing view class and hence should only be accessed from the event thread.
@@ -261,8 +261,7 @@ public class ExternalProcessPanel extends AbortablePanel {
   
   // public static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("external.txt",true);
   
-  /** 
-   * Called when the user double-clicks on the text pane. 
+  /** Called when the user double-clicks on the text pane. 
    * @param e the double-click event
    */
   public void doubleClicked(MouseEvent e) {

@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -99,8 +99,7 @@ public class JUnitError extends DJError implements Serializable {
   /** @return the array of stack trace elements. */
   public StackTraceElement[] stackTrace() { return _stackTrace; }
   
-  /** 
-   * Set the array of stack trace elements. 
+  /** Set the array of stack trace elements. 
    * @param stes the stack trace elements
    */
   public void setStackTrace(StackTraceElement[] stes) { _stackTrace = stes; }

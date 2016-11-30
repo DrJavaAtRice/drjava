@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -42,9 +42,7 @@ import edu.rice.cs.util.newjvm.*;
 import edu.rice.cs.drjava.model.junit.JUnitError;
 import edu.rice.cs.util.classloader.ClassFileError;
 
-/**
- * This interface specifies the methods that the Main JVM exposes
- * for the InterpreterJVM to call.
+/** * This interface specifies the methods that the Main JVM exposes for the InterpreterJVM to call.
  *
  * @version $Id$
  */

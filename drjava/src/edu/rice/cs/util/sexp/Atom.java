@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2015, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -36,8 +36,7 @@
 
 package edu.rice.cs.util.sexp;
 
-/**
- * There are different kinds of atoms: text, boolean, number.
+/** * There are different kinds of atoms: text, boolean, number.
  * Therefore they should have a visitor interface to support 
  * algorithms on them.
  */

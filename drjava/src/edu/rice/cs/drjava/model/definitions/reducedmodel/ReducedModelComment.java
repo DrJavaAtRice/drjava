@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -140,8 +140,7 @@ public class ReducedModelComment extends AbstractReducedModel {
     else _checkPreviousInsertSpecial(special);
   }
   
-  /** 
-   * Checks before point of insertion to make sure we don't need to combine.
+  /** Checks before point of insertion to make sure we don't need to combine.
    * Delegates work to _checkPreviousInsertBackSlash and _checkPreviousInsertCommentChar,
    * depending on what's being inserted into the document.
    * @param special the character to be inserted
@@ -174,8 +173,7 @@ public class ReducedModelComment extends AbstractReducedModel {
     else _cursor.next();
   }
   
-  /** 
-   * Checks before the place of insert to make sure there are no preceding 
+  /** Checks before the place of insert to make sure there are no preceding 
    * slashes with which the inserted slash must combine.  It then performs 
    * the insert of either (/), (/ /), (/ *) or (* /).
    * @param special the character to be inserted
@@ -484,8 +482,7 @@ public class ReducedModelComment extends AbstractReducedModel {
 //    return;
 //  }
   
-  /** 
-   * @return the distance to the previous newline character (not including 
+  /** @return the distance to the previous newline character (not including 
    *         newline char); returns -1 if no newline exists, so it fails 
    *         find start of first line. 
    */
@@ -495,8 +492,7 @@ public class ReducedModelComment extends AbstractReducedModel {
     return _getDistToStart(_cursor.copy()); 
   }
   
-  /** 
-   * @param copyCursor copy of the cursor
+  /** @param copyCursor copy of the cursor
    * @return distance to previous newline (not including the newline itself). 
    */
   private int _getDistToStart(TokenList.Iterator copyCursor) {
@@ -525,8 +521,7 @@ public class ReducedModelComment extends AbstractReducedModel {
     return walkcount;
   }
   
-  /** 
-   * Computes the distance to the beginning of the line (except first) containing the brace enclosing
+  /** Computes the distance to the beginning of the line (except first) containing the brace enclosing
    * the current location given the distnace to this brace.
    * @param distToEnclosingBrace distance to the brace enclosing the current location
    * @return the distance to the beginning of the line containing the brace 
@@ -545,8 +540,7 @@ public class ReducedModelComment extends AbstractReducedModel {
     else return walkcount + distToEnclosingBrace;
   }
   
-  /** 
-   * @param relLoc the distance back from the cursor to start searching
+  /** @param relLoc the distance back from the cursor to start searching
    * @return distance to previous newline 
    */
   public int getDistToStart(int relLoc) {

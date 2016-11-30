@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -255,8 +255,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     super.tearDown();
   }
   
-  /** 
-   * Ensures that the given object will wait for n notifications. Callers must 
+  /** Ensures that the given object will wait for n notifications. Callers must 
    * call o.wait() AFTER this is called.  Use _notifyLock instead of 
    * o.notify() when using this method. Only one object (o) can use this 
    * synchronization protocol at a time, since it uses a field to store the 
@@ -284,8 +283,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     }
   }
   
-  /** 
-   * Cleanly starts the debugger with a newly compiled file saved in a 
+  /** Cleanly starts the debugger with a newly compiled file saved in a 
    * temporary directory.  Assumes that the file will compile successfully.
    * @param fileName Name of the file to save in a temp directory
    * @param classText String containing the code for the class to compile
@@ -298,8 +296,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     return _startupDebugger(file, classText);
   }
   
-  /** 
-   * Cleanly starts the debugger with a newly compiled file saved in a 
+  /** Cleanly starts the debugger with a newly compiled file saved in a 
    * temporary directory.  Assumes that the file will compile successfully.
    * @param file File to save the class in
    * @param classText String containing the code for the class to compile
@@ -321,8 +318,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     return doc;
   }
   
-  /** 
-   * Cleanly shuts down the debugger, without having to wait for a suspended 
+  /** Cleanly shuts down the debugger, without having to wait for a suspended 
    * interaction to complete.
    * @throws Exception if something goes wrong
    */
@@ -341,8 +337,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     _log.log("Completed debugger shutdown for " + this);
   }
   
-  /** 
-   * Cleanly shuts down the debugger, waiting for a suspended interaction 
+  /** Cleanly shuts down the debugger, waiting for a suspended interaction 
    * to complete.
    * @throws Exception if something goes wrong
    */
@@ -372,8 +367,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     _log.log("Completed debugger shutdown for " + this);
   }
   
-  /** 
-   * Sets the current debugger thread to the specified thread t.
+  /** Sets the current debugger thread to the specified thread t.
    * @param t the thread to set
    * @throws DebugException if something goes wrong
    */
@@ -386,8 +380,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     });
   }
   
-  /** 
-   * Resumes the debugger asynchronously so as to avoid getting notified 
+  /** Resumes the debugger asynchronously so as to avoid getting notified 
    * before we start waiting for notifies. 
    * @param type the type of step to take
    */
@@ -403,8 +396,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     }.start();
   }
   
-  /** 
-   * Resumes the debugger asynchronously so as to aovid
+  /** Resumes the debugger asynchronously so as to aovid
    * getting notified before we start waiting for notifies
    */
   protected void _asyncResume() {
@@ -419,8 +411,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     }.start();
   }
   
-  /** 
-   * Sets the current thread in a new thread to avoid being notified of events 
+  /** Sets the current thread in a new thread to avoid being notified of events 
    * before we start waiting for them. 
    * @param th data about the thread to be set
    */

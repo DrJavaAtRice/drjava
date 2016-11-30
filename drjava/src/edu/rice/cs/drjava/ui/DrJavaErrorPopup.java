@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -67,8 +67,7 @@ public class DrJavaErrorPopup extends JDialog {
 //  /** the parent frame */
 //  private JFrame _parentFrame = new JFrame();
   
-  /** 
-   * Creates a window to graphically display the current error that has 
+  /** Creates a window to graphically display the current error that has 
    * occurred in the code of DrJava. 
    * @param parent the parent frame
    * @param error the error to be displayed

@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -75,8 +75,7 @@ public final class InteractionsDJDocumentTest extends DrJavaTestCase {
     catch(Throwable t) { t.printStackTrace(); }
   }
   
-  /** 
-   * Tests that the styles list is updated and reset properly 
+  /** Tests that the styles list is updated and reset properly 
    * @throws EditDocumentException if an error occurs during editing
    * @throws InterruptedException if execution is interrupted unexpectedly
    */

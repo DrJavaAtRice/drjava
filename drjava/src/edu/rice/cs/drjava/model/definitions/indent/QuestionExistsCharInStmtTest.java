@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -38,8 +38,7 @@ package edu.rice.cs.drjava.model.definitions.indent;
 
 import javax.swing.text.BadLocationException;
 
-/**
- * Tests the question rule which determines if the given findChar
+/** * Tests the question rule which determines if the given findChar
  * is found between the start of the statement and the endChar,
  * which must exist on the current line.
  * <p>

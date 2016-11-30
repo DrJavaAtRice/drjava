@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,7 @@ import java.awt.print.PrinterException;
   * interface cannot be safely implemented using the primitives in the Swing Document interface.  Write locking is
   * required to safely implement the append method.
   *
-  * @version $Id: EditDocumentInterface.java 5544 2012-04-27 15:22:12Z rcartwright $
+  * @version $Id$
   */
 public interface EditDocumentInterface {
   
@@ -103,8 +103,7 @@ public interface EditDocumentInterface {
   /** @return the length of the document. */
   public int getLength();
   
-  /** 
-   * Returns a portion of the document. Differs from getText in 
+  /** Returns a portion of the document. Differs from getText in 
    * AbstractDocumentInterface by throwing EditDocumentException instead of 
    * BadLocationException.  (Why bother? It avoids referencing a Swing class.)
    * @param offs First offset of the desired text
@@ -129,8 +128,7 @@ public interface EditDocumentInterface {
     */
   public Pageable getPageable() throws IllegalStateException;
   
-  /** 
-   * Prints the given console document 
+  /** Prints the given console document 
    * @throws PrinterException if printing fails
    */
   public void print() throws PrinterException;

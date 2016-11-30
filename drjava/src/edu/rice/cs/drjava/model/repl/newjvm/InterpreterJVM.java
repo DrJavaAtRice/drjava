@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2015, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -90,7 +90,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   /** Singleton instance of this class. */
   public static final InterpreterJVM ONLY = new InterpreterJVM();
   
-  // As RMI can lead to parallel threads, all fields must be thread-safe.  Collections are wrapped
+  // As RMI can lead to concurrent threads, all fields must be thread-safe.  Collections are wrapped
   // in synchronized versions.
   
   private final InteractionsPaneOptions _interpreterOptions;
@@ -117,8 +117,9 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   private InterpreterJVM() {
     super("Reset Interactions Thread", "Poll DrJava Thread");
     
+    /* Important singleton objects embedded in an InterpreterJVM */
     _classPathManager = new ClassPathManager(ReflectUtil.SYSTEM_CLASS_PATH);
-    _interpreterLoader = _classPathManager.makeClassLoader(null);
+    _interpreterLoader = _classPathManager.makeClassLoader(InterpreterJVM.class.getClassLoader());
     _junitTestManager = new JUnitTestManager(this, _classPathManager);
 
     // set the thread context class loader, this way NextGen and Mint can use the interpreter's class loader
@@ -294,11 +295,10 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   }
   
   //public JUnitResultTuple getLastJUnitResult() {
-  //  return this._junitTestManager.getLastResult();
+  //  return this._junitTestManager.getFinalResult();
   //}
 
-  /** 
-   * Gets the value and type string of the variable with the given name in the current interpreter.
+  /** Gets the value and type string of the variable with the given name in the current interpreter.
    * Invoked reflectively by the debugger.  To simplify the inter-process exchange,
    * an array here is used as the return type rather than an {@code Option<Object>} --
    * an empty array corresponds to "none," and a singleton array corresponds to a "some."
@@ -348,8 +348,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     }
   }
 
-  /** 
-   * @param c the class to get the name of
+  /** @param c the class to get the name of
    * @return the name of the class, with the right number of array suffixes 
    *         "[]" and while being ambiguous about boxed and primitive types. 
    */

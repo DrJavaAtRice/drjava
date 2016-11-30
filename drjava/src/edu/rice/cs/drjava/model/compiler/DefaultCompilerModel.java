@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -232,16 +232,16 @@ public class DefaultCompilerModel implements CompilerModel {
     return ! _model.hasModifiedDocuments();
   }
   
-  /** 
-   * Compile the given documents. 
-   * @param docs the documents to be compiled
-   * @throws IOException if an IO operation fails
-   */
+  /** Compile the given documents. 
+    * @param docs the documents to be compiled
+    * @throws IOException if an IO operation fails
+    */
   private void _doCompile(List<OpenDefinitionsDocument> docs) throws IOException {
     _LLSTM.clearCache();
     final ArrayList<File> filesToCompile = new ArrayList<File>();
     final ArrayList<File> excludedFiles = new ArrayList<File>();
     final ArrayList<DJError> packageErrors = new ArrayList<DJError>();
+    
     for (OpenDefinitionsDocument doc : docs) {
       if (doc.isSourceFile()) {
         File f = doc.getFile();
@@ -257,30 +257,24 @@ public class DefaultCompilerModel implements CompilerModel {
       else excludedFiles.add(doc.getFile());
     }
     
+    if (filesToCompile.size() == 0) 
+      packageErrors.add(new DJError("None of the documents in " + docs + " is a valid source file!", false));
+        
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.compileStarted(); } });
     
     try {
       if (! packageErrors.isEmpty()) { _distributeErrors(packageErrors); }
-      else {
-        try {
-          File buildDir = _model.getBuildDirectory();
-          if (buildDir != null && buildDir != FileOps.NULL_FILE && ! buildDir.exists() && ! buildDir.mkdirs()) {
-            throw new IOException("Could not create build directory: " + buildDir);
-          }
-          
-//          File workDir = _model.getWorkingDirectory();
-//          if (workDir == FileOps.NULL_FILE) workDir = null;
-//          if (workDir != null && ! workDir.exists() && ! workDir.mkdirs()) {
-//            throw new IOException("Could not create working directory: " + workDir);
-//          }
-          
-          _compileFiles(filesToCompile, buildDir);
-        }
-        catch (Throwable t) {
-          DJError err = new DJError(t.toString(), false);
-          _distributeErrors(Arrays.asList(err));
-          throw new UnexpectedException(t);
-        }
+      else try {
+        File buildDir = _model.getBuildDirectory();
+        if (buildDir != null && buildDir != FileOps.NULL_FILE && ! buildDir.exists() && ! buildDir.mkdirs())
+          throw new IOException("Could not create build directory: " + buildDir);
+        
+        _compileFiles(filesToCompile, buildDir);
+      }
+      catch (Throwable t) {
+        DJError err = new DJError(t.toString(), false);
+        _distributeErrors(Arrays.asList(err));
+        throw new UnexpectedException(t);
       }
     }
     finally {
@@ -293,8 +287,7 @@ public class DefaultCompilerModel implements CompilerModel {
   
   //-------------------------------- Helpers --------------------------------//
   
-  /** 
-   * Converts JExprParseExceptions thrown by the JExprParser in language levels to CompilerErrors. 
+  /** Converts JExprParseExceptions thrown by the JExprParser in language levels to CompilerErrors. 
    * @param pes list of exceptions to be converted
    * @return list of converted exceptions
    */
@@ -309,8 +302,7 @@ public class DefaultCompilerModel implements CompilerModel {
     return errors;
   }
   
-  /** 
-   * Converts errors thrown by the language level visitors to CompilerErrors. 
+  /** Converts errors thrown by the language level visitors to CompilerErrors. 
    * @param visitorErrors list of exceptions to be converted
    * @return list of converted exceptions
    */
@@ -385,8 +377,7 @@ public class DefaultCompilerModel implements CompilerModel {
     }
   }
   
-  /** 
-   * Reorders files so that all file names containing "Test" are at the end.  
+  /** Reorders files so that all file names containing "Test" are at the end.  
    * @param files the files to be sorted
    * @return the sorted list of files
    */
@@ -589,8 +580,7 @@ public class DefaultCompilerModel implements CompilerModel {
     else { return null; }
   }
   
-  /** 
-   * Sorts the given array of CompilerErrors and divides it into groups based 
+  /** Sorts the given array of CompilerErrors and divides it into groups based 
    * on the file, giving each group to the appropriate OpenDefinitionsDocument, 
    * opening files if necessary.  Called immediately after compilations finishes.
    * @param errors the list of errors to be sorted

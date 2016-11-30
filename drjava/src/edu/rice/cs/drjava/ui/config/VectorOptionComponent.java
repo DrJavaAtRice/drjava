@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -96,8 +96,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
     this(opt, text, parent, colNames, null, false);
   }
 
-  /** 
-   * Constructor that allows for a tooltip description.
+  /** Constructor that allows for a tooltip description.
    * @param opt the option to display
    * @param text descriptive text to put in label
    * @param parent the parent frame
@@ -109,8 +108,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
     this(opt, text, parent, colNames, description, false);
   }
   
-  /** 
-   * Builds a new VectorOptionComponent.
+  /** Builds a new VectorOptionComponent.
    * @param opt the option
    * @param text the label to display
    * @param parent the parent frame
@@ -243,8 +241,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
     setComponent(_panel);
   }
 
-  /**
-   * Adds another column to the decorated table model with remove buttons.
+  /** Adds another column to the decorated table model with remove buttons.
    * @param other an AbstractTableModel
    * @return the decorated table model 
    */
@@ -476,8 +473,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
     }
   }
   
-  /** 
-   * Add the value to the table, update and resize it. 
+  /** Add the value to the table, update and resize it. 
    * @param value the value to be added
    */
   protected void _addValue(T value) {
@@ -488,8 +484,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
     resizeTable();
   }
 
-  /** 
-   * Remove the value at index i, update the table and resize it. 
+  /** Remove the value at index i, update the table and resize it. 
    * @param i the index at which to remove
    */
   protected void _removeIndex(int i) {
@@ -558,8 +553,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
     return new Vector<T>(_data);
   }
 
-  /** 
-   * Displays the given value. 
+  /** Displays the given value. 
    * @param value the value to display
    */
   public void setValue(Vector<T> value) {
@@ -568,8 +562,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
     resizeTable();
   }
 
-  /** 
-   * Displays the given value. 
+  /** Displays the given value. 
    * @param value the value to display
    */
   public void setValue(ArrayList<T> value) {
@@ -578,8 +571,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
     resizeTable();
   }
   
-  /** 
-   * Set the minimum and maximum number of rows to display before using a 
+  /** Set the minimum and maximum number of rows to display before using a 
    * scrollbar, or 0 for arbitrarily many. 
    * @param minRows the minimum number of rows to display
    * @param maxRows the maximum number of rows to display=

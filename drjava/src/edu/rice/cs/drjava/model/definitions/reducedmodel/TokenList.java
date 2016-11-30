@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -92,8 +92,7 @@ public class TokenList extends ModelList<ReducedToken> implements /*imports*/ Re
     }
     
     
-    /** 
-     * Handles the details of the case where a brace is inserted into a gap. 
+    /** Handles the details of the case where a brace is inserted into a gap. 
      * Assumes the current token is a gap! Assumes that read lock and reduced 
      * locks are already held. 
      * @param text text
@@ -111,8 +110,7 @@ public class TokenList extends ModelList<ReducedToken> implements /*imports*/ Re
       setBlockOffset(0);
     }
     
-    /** 
-     * Helper function to _insertBrace. Handles the details of the case where 
+    /** Helper function to _insertBrace. Handles the details of the case where 
      * brace is inserted between two reduced tokens.  No destructive action is 
      * taken.  Assume that read lock and reduced lock are already held.
      * @param text text
@@ -123,8 +121,7 @@ public class TokenList extends ModelList<ReducedToken> implements /*imports*/ Re
       setBlockOffset(0);
     }
     
-    /** 
-     * Splits the current brace if it is a multiple character brace and 
+    /** Splits the current brace if it is a multiple character brace and 
      * fulfills certain conditions.  If the current brace is a // or /*, 
      * split it into two braces.  Do the same for star-slash (end comment 
      * block) if the parameter splitClose is true.  Do the same for \\ and 
@@ -192,8 +189,7 @@ public class TokenList extends ModelList<ReducedToken> implements /*imports*/ Re
       return it._moveLeft(- count, currentOffset);  // count < 0
     }
     
-    /** 
-     * Helper function that moves cursor ([iterator pos, count]) forward by 
+    /** Helper function that moves cursor ([iterator pos, count]) forward by 
      * count chars.  Assumes that count {@literal >} 0 and
      * is in range.  Returns the new count.
      * <ol>
@@ -234,8 +230,7 @@ public class TokenList extends ModelList<ReducedToken> implements /*imports*/ Re
       return count; // returns the offset in the current token
     }
     
-    /** 
-     * Helper function that moves cursor ([iterator pos, count]) backward by 
+    /** Helper function that moves cursor ([iterator pos, count]) backward by 
      * count chars.  Assumes that count {@literal >} 0 and
      * is in range.  Returns the new count.
      * <ol>
@@ -343,8 +338,7 @@ public class TokenList extends ModelList<ReducedToken> implements /*imports*/ Re
       else throw new IllegalArgumentException("Cannot clip left.");
     }
     
-    /** 
-     * Deletes from offset in this to endOffset in delTo. 
+    /** Deletes from offset in this to endOffset in delTo. 
      * Uses ModelList.collapse to perform quick deletion. 
      * @param delTo iterator whose endpoint is the last character to delete
      * @return new offset
@@ -401,8 +395,7 @@ public class TokenList extends ModelList<ReducedToken> implements /*imports*/ Re
     }
     
     
-    /** 
-     * By comparing the delTo token after the walk to what it was before the 
+    /** By comparing the delTo token after the walk to what it was before the 
      * walk we can see how it has changed and where the offset should go.
      * Prev is the item previous to the current cursor. Curr is the current 
      * token. delTo is where current is pointing at this moment in time.

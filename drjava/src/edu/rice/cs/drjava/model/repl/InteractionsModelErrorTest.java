@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -56,7 +56,7 @@ import java.io.IOException;
 import edu.rice.cs.drjava.model.GlobalModelTestCase;
 
 /** Tests errors in an InteractionsModel.
-  * @version $Id: InteractionsModelErrorTest.java 5236 2010-04-27 01:43:36Z mgricken $
+  * @version $Id$
   */
 public final class InteractionsModelErrorTest extends GlobalModelTestCase {
   protected static final String UNARY_FUN_NON_PUBLIC_INTERFACE_TEXT = 
@@ -93,15 +93,14 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
     super();
 
     _classPathManager = new ClassPathManager(ReflectUtil.SYSTEM_CLASS_PATH);
-    _interpreterLoader = _classPathManager.makeClassLoader(null);
+    _interpreterLoader = _classPathManager.makeClassLoader(InterpreterJVM.class.getClassLoader());
     
     // _interpreterOptions = Options.DEFAULT;
     _interpreterOptions = new InteractionsPaneOptions();
     _interpreter = new Interpreter(_interpreterOptions, _interpreterLoader);
   }
   
-  /** 
-   * Asserts that the results of interpreting the first of each
+  /** Asserts that the results of interpreting the first of each
    * Pair is equal to the second.
    * @param cases an array of Pairs
    * @throws InterpreterException if something goes wrong during interpretation
@@ -124,8 +123,7 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
     return "compiler=" + _model.getCompilerModel().getActiveCompiler().getName() + ": ";
   }
 
-  /** 
-   * Tests that we get the correct 'cannot access its superinterface' error for non-public classes. 
+  /** Tests that we get the correct 'cannot access its superinterface' error for non-public classes. 
    * @throws BadLocationException if attempts to reference an invalid location
    * @throws IOException if an IO operation fails
    * @throws InterruptedException if execution if interrupted unexpectedly

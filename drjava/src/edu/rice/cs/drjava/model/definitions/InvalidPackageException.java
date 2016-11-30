@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -36,8 +36,7 @@
 
 package edu.rice.cs.drjava.model.definitions;
 
-/**
- * An exception thrown by DefinitionsDocument.getPackageName() when the
+/** * An exception thrown by DefinitionsDocument.getPackageName() when the
  * document contains an invalid package statement.
  * This can happen if there is nothing between "package" and ";", or if there
  * is no terminating semicolon ever.

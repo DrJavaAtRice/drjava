@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -303,8 +303,7 @@ public class FindReplaceMachineTest extends DrJavaTestCase {
 //    System.err.println("testFindMatchWithCaretInMiddleBackwards completed");
   }
   
-  /** 
-   * This tests that a replace all where the replacement action creates a new match
+  /** This tests that a replace all where the replacement action creates a new match
    * does not replace this new match
    * @throws BadLocationException if attempts to reference an invalid location
    */
@@ -320,8 +319,7 @@ public class FindReplaceMachineTest extends DrJavaTestCase {
 //    System.err.println("testReplaceCreatesMatch completed");
   }
   
-  /** 
-   * This tests that a replace all backwards where the replacement action creates a new match
+  /** This tests that a replace all backwards where the replacement action creates a new match
    * does not replace this new match
    * @throws BadLocationException if attempts to reference an invalid location
    */
@@ -337,8 +335,7 @@ public class FindReplaceMachineTest extends DrJavaTestCase {
 //    System.err.println("testReplaceCreatesMatchBackwards completed");
   }
   
-  /** 
-   * This test checks that replacing a word with itself will halt on replace all. 
+  /** This test checks that replacing a word with itself will halt on replace all. 
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testReplaceAllSameWord() throws BadLocationException {
@@ -357,8 +354,7 @@ public class FindReplaceMachineTest extends DrJavaTestCase {
 //    System.err.println("testReplaceAllSameWord completed");
   }
   
-  /** 
-   * This test checks that a findNext won't find two matches that partially overlap.
+  /** This test checks that a findNext won't find two matches that partially overlap.
    * This is the current behavior of the FindReplaceMachine, though at some time
    * in the future someone may want to change it.
    * @throws BadLocationException if attempts to reference an invalid location
@@ -379,8 +375,7 @@ public class FindReplaceMachineTest extends DrJavaTestCase {
 //    System.err.println("testFindPartialSubstrings completed");
   }
   
-  /** 
-   * This test addresses bug #745714 Searches Repeat When Changing Direction.
+  /** This test addresses bug #745714 Searches Repeat When Changing Direction.
    * The word that was just found should not be found again after toggling
    * the search backwards flag.
    * @throws BadLocationException if attempts to reference an invalid location
@@ -409,8 +404,7 @@ public class FindReplaceMachineTest extends DrJavaTestCase {
 //    System.err.println("testSearchesDoNotRepeatWhenChangingDirection completed");
   }
   
-  /** 
-   * This test addresses feature request #784514 Find/Replace in all Open Files. 
+  /** This test addresses feature request #784514 Find/Replace in all Open Files. 
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testFindReplaceInAllOpenFiles() throws BadLocationException {

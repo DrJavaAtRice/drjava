@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,7 @@ package edu.rice.cs.drjava.model.junit;
 import junit.runner.*;
 import junit.framework.*;
 
+import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 
 /** DrJava's own testrunner. It updates the document in the JUnit pane as error and failure events are fired.  
@@ -46,6 +47,8 @@ import edu.rice.cs.util.UnexpectedException;
   *  @version $Id$
   */
 public class JUnitTestRunner extends BaseTestRunner {
+  
+  protected static final Log _log = new Log("JUnitTestManager.txt", false);
   
   /** Receives updates on the test suite's progress. */
   private JUnitModelCallback _jmc;
@@ -61,9 +64,10 @@ public class JUnitTestRunner extends BaseTestRunner {
 
   /** The current number of failures in the result. */
   private int _failureCount;
+  
+  
 
-  /** 
-   * Standard constructor. 
+  /** Standard constructor. 
    * @param jmc a JUnitModelCallback
    * @param loader class loader to use during testing
    */
@@ -90,7 +94,9 @@ public class JUnitTestRunner extends BaseTestRunner {
   }
   
   public Class<?> loadPossibleTest(String className) throws ClassNotFoundException {
-    return _loader.loadClass(className);
+    Class<?> c =_loader.loadClass(className);
+    _log.log("Test class " + c + " loaded");
+    return c;
   }
   
   @Override protected Class<? extends TestCase> loadSuiteClass(String className) throws ClassNotFoundException {

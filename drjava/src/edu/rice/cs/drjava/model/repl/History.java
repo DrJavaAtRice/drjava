@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -82,7 +82,7 @@ public class History implements OptionConstants, Serializable {
     public void optionChanged (OptionEvent<Integer> oce) {
       int newSize = oce.value;
 //      System.err.println("optionChanged called for historyOptionListener; newSize = " + newSize);
-      setMaxSize(newSize);
+      setMaximumSize(newSize);
     }
     public String toString() { return "HISTORY_MAX_SIZE OptionListener #" + hashCode(); }
   };
@@ -113,8 +113,7 @@ public class History implements OptionConstants, Serializable {
     if (! entry.equals(getCurrent())) _editedEntries.put(Integer.valueOf(_cursor), entry);
   }
 
-  /** 
-   * Adds an item to the history and moves the cursor to point to the place after it.
+  /** Adds an item to the history and moves the cursor to point to the place after it.
    * Note: Items are not inserted if they are empty. (This is in accordance with
    * bug #522123, but in divergence from feature #522213 which originally excluded
    * sequential duplicate entries from ever being stored.)
@@ -189,8 +188,7 @@ public class History implements OptionConstants, Serializable {
   /** Clears the vector */
   public void clear() { _history.clear(); }
 
-  /** 
-   * Returns the history as a string by concatenating each string in the 
+  /** Returns the history as a string by concatenating each string in the 
    * vector separated by the delimiting character. A semicolon is added 
    * to the end of every statement that didn't already end with one.
    * @return the history as a string
@@ -260,7 +258,7 @@ public class History implements OptionConstants, Serializable {
   /** Changes the maximum number of interactions remembered by this History.
     * @param newSize New number of interactions to remember.
     */
-  public void setMaxSize(int newSize) {
+  public void setMaximumSize(int newSize) {
     if (newSize < 0) newSize = 0;    // Sanity check
 
     // Remove old elements if the new size is less than current size

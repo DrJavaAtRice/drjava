@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -40,13 +40,11 @@ package edu.rice.cs.util.newjvm;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
-/**
- * The remote interface for a slave JVM.
+/** * The remote interface for a slave JVM.
  * @version $Id$
  */
 public interface SlaveRemote extends Remote {
-  /**
-   * This method is called when the slave JVM is initialized.
+  /** This method is called when the slave JVM is initialized.
    * @param master  The remote link to the master JVM. Note that the implementation of the slave class will have to 
    *                downcast this reference to the correct master remote interface.
    * @throws RemoteException if communication over RMI fails

@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -102,8 +102,7 @@ public abstract class JDKDescriptor {
     return getAdapterForDebugger(); // ignore version
   }
   
-  /** 
-   * Return true if the file (jar file or directory) contains the compiler.
+  /** Return true if the file (jar file or directory) contains the compiler.
    * @param f the file to search within
    * @return true if the file contains the compiler 
    */
@@ -124,8 +123,7 @@ public abstract class JDKDescriptor {
     * @return minimum version */
   public abstract JavaVersion getMinimumMajorVersion();
   
-  /** 
-   * Return the list of additional files required to use the compiler.
+  /** Return the list of additional files required to use the compiler.
    * The compiler was found in the specified file. This method may have to search the user's hard drive, e.g.
    * by looking relative to compiler.getParentFile(), by checking environment variables, or by looking in
    * certain OS-specific directories.
@@ -147,8 +145,7 @@ public abstract class JDKDescriptor {
    */
   public abstract Iterable<File> getAdditionalCompilerFiles(File compiler) throws FileNotFoundException;
 
-  /** 
-   * Return a description of this JDK.
+  /** Return a description of this JDK.
    * @param version the specific version of the compiler
    * @return description 
    */
@@ -210,7 +207,7 @@ public abstract class JDKDescriptor {
           JarFile jf = new JarFile(jarOrDir);
           for (String fn: fileNames) {
 
-            if (jf.getJarEntry(fn)==null) {
+            if (jf.getJarEntry(fn) == null) {
               jf.close();
               return false;
             }

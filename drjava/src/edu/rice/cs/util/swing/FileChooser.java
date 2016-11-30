@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -57,8 +57,7 @@ public class FileChooser extends JFileChooser {
   
   /*---------- INITIALIZATION METHODS ----------*/
   
-  /** 
-   * Sets up the GUI components of the dialog 
+  /** Sets up the GUI components of the dialog 
    * @param root root directory
    */
   private void _init(final File root) {

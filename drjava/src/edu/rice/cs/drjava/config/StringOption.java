@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -41,8 +41,7 @@ package edu.rice.cs.drjava.config;
   */
 public class StringOption extends Option<String> {
 
-  /** 
-   * @param key The name of this Option. 
+  /** @param key The name of this Option. 
    * @param def The definition of this Option.
    */
   public StringOption(String key, String def) { super(key, def); }

@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -71,8 +71,7 @@ class Lexer extends StreamTokenizer {
     buffer = null;  // buffer initially empty
   }
   
-  /** 
-   * Skips through the input stream until an EOL is encountered 
+  /** Skips through the input stream until an EOL is encountered 
    * @throws IOException if an IO operation fails
    */
   public void flush() throws IOException {
@@ -81,8 +80,7 @@ class Lexer extends StreamTokenizer {
     eolIsSignificant(false);
   }
   
-  /** 
-   * Performs a nextToken() operation from StreamTokenizer except for throwing 
+  /** Performs a nextToken() operation from StreamTokenizer except for throwing 
    * an unchecked LexingException instead of a checked IOException 
    * @return the token type
    */

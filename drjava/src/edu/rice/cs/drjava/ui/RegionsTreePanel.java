@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -67,6 +67,8 @@ import edu.rice.cs.plt.lambda.Thunk;
   * @version $Id$
   */
 public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends TabbedPanel {
+  
+  // static _log field inherited from TabbedPanel 
   protected volatile JPanel _leftPane;
   
   private volatile DefaultMutableTreeNode _rootNode;
@@ -90,25 +92,13 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
   protected volatile JButton _nextButton;
   /** the region that was last selected (may be null). */ 
   protected volatile R _lastSelectedRegion = null;
-  
-  /* _ */
-  
-//  /** Cached values from last region insertion. _cachedDoc is non-null iff the last added region occurred at the end of
-//    * the list of regions for its document. If _cachedDoc is null, the other cached values are invalid. */
-//  protected OpenDefinitionsDocument _cachedDoc = null;
-//  protected DefaultMutableTreeNode _cachedDocNode = null;
-//  protected int _cachedRegionIndex = 0;
-//  protected int _cachedStartOffset = 0;
-  
   /** State pattern to improve performance when rapid changes are made. */
   protected final IChangeState DEFAULT_STATE = new DefaultState();
 //  protected final IChangeState CHANGING_STATE = new ChangingState();
   protected volatile IChangeState _changeState = DEFAULT_STATE;
-  
   /** A table mapping each document entered in this panel to its corresponding MutableTreeNode in _regTreeModel. */
   protected volatile HashMap<OpenDefinitionsDocument, DefaultMutableTreeNode> _docToTreeNode = 
     new HashMap<OpenDefinitionsDocument, DefaultMutableTreeNode>();
-  
   /** A table mapping each region entered in this panel to its corresponding MutableTreeNode in _regTreeModel. */
   protected volatile IdentityHashMap<R, DefaultMutableTreeNode> _regionToTreeNode = 
     new IdentityHashMap<R, DefaultMutableTreeNode>();
@@ -174,10 +164,9 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
     _setColors(_regTree);
   }
   
-  /** 
-   * Quick helper for setting up color listeners. 
-   * @param c the component for which to set up listeners
-   */
+  /** Quick helper for setting up color listeners. 
+    * @param c the component for which to set up listeners
+    */
   private static void _setColors(Component c) {
     new ForegroundColorListener(c);
     new BackgroundColorListener(c);
@@ -256,8 +245,7 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
     repaint();
   }
   
-  /** 
-   * Forces the panel to be updated and requests focus in this panel. 
+  /** Forces the panel to be updated and requests focus in this panel. 
    * @return result 
    */
   protected boolean _requestFocusInWindow() {
@@ -457,8 +445,7 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
       return /* renderer */ this;
     }
     
-    /** 
-     * Alternative version of setToolTipText that accepts a thunk. 
+    /** Alternative version of setToolTipText that accepts a thunk. 
      * @param text value to set as tooltip text
      */
     public void setToolTipText(Thunk<String> text) {
@@ -490,8 +477,7 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
   /** Action performed when the Enter key is pressed. Should be overridden. */
   protected void performDefaultAction() { }
   
-  /** 
-   * Creates the buttons for controlling the regions. Should be overridden. 
+  /** Creates the buttons for controlling the regions. Should be overridden. 
    * @return the newly-created buttons
    */
   protected JComponent[] makeButtons() {  return new JComponent[0];  }
@@ -547,8 +533,7 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
     _buttonPanel.add(closeButtonPanel, BorderLayout.EAST);
   }
   
-  /** 
-   * Makes the popup menu actions. Should be overridden. 
+  /** Makes the popup menu actions. Should be overridden. 
    * @return the popup menu actions
    */
   protected AbstractAction[] makePopupMenuActions() { return null; }
@@ -565,14 +550,12 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
     }
   }
   
-  /** 
-   * @param doc the document for which to get the tree node
+  /** @param doc the document for which to get the tree node
    * @return the tree node for the given document. 
    */
   DefaultMutableTreeNode getNode(OpenDefinitionsDocument doc) { return _docToTreeNode.get(doc); }
   
-  /** 
-   * @param region the region for which to get the tree node 
+  /** @param region the region for which to get the tree node 
    * @return the tree node for the given region. 
    */
   DefaultMutableTreeNode getNode(R region) { return _regionToTreeNode.get(region); }
@@ -621,7 +604,7 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
     if (_hasNextPrevButtons) {
       int count = _regionManager.getRegionCount();
       if (count>0) {
-        if (_lastSelectedRegion==null) {
+        if (_lastSelectedRegion == null) {
           // nothing selected, but we have at least one region
           _prevButton.setEnabled(false); // no "prev"
           _nextButton.setEnabled(true); // "next" will go to the first region
@@ -660,8 +643,7 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
     }
   }
   
-  /** 
-   * @param r the region for which to find the previous
+  /** @param r the region for which to find the previous
    * @return the region preceding r in the tree, or null if there isn't one. 
    */
   protected R getPrevRegionInTree(R r) {
@@ -732,8 +714,7 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
     }
   }
   
-  /**
-   * @param r the region for which to find the previous
+  /** @param r the region for which to find the previous
    * @return the region following r in the tree, or null if there isn't one. 
    */
   protected R getNextRegionInTree(R r) {
@@ -892,7 +873,7 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
     if ((_lastSelectedRegion!=null) && (_lastSelectedRegion.equals(r))) {
       // we need to change the _lastSelectedRegion
       R newLast = getPrevRegionInTree(_lastSelectedRegion);
-      if (newLast==null) newLast = getNextRegionInTree(_lastSelectedRegion);
+      if (newLast == null) newLast = getNextRegionInTree(_lastSelectedRegion);
       _lastSelectedRegion = newLast;
       if (_lastSelectedRegion!=null) {
         selectRegion(_lastSelectedRegion);
@@ -993,8 +974,7 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
     }
   }
   
-  /** 
-   * Factory method to create user objects put in the tree.
+  /** Factory method to create user objects put in the tree.
    * If subclasses extend RegionTreeUserObj, they need to override this method. 
    * @param r value to put in the tree
    * @return a new user object to put in the tree

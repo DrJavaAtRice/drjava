@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -167,8 +167,7 @@ public class DetachedFrame extends SwingFrame {
     validate();
   }
   
-  /** 
-   * Recursively process the MenuElement and add entries to the InputMap and ActionMap so that the
+  /** Recursively process the MenuElement and add entries to the InputMap and ActionMap so that the
    * menu element's accelerator will invoke the menu element's action even if the MenuElement is
    * not present in another frame.
    * Note that this will only use the first key stroke configured for an action, because a menu item
@@ -198,8 +197,7 @@ public class DetachedFrame extends SwingFrame {
     }
   }
   
-  /**
-   * Recursively copy the first menu bar's accelerators into the second menu bar.
+  /** Recursively copy the first menu bar's accelerators into the second menu bar.
    * Installs listeners to keep the accelerators updated. 
    * @param source source to copy accelerators from
    * @param dest destination to copy accelerators to
@@ -221,8 +219,7 @@ public class DetachedFrame extends SwingFrame {
     }
   }
   
-  /** 
-   * Recursively copy the first menu's accelerators into the second menu.
+  /** Recursively copy the first menu's accelerators into the second menu.
    * Installs listeners to keep the accelerators updated.
    * @param source source to copy accelerators from
    * @param dest destination to copy accelerators to
@@ -352,7 +349,7 @@ public class DetachedFrame extends SwingFrame {
   
   public void setUpMenuBar() {
     // Mac only
-    if (PlatformFactory.ONLY.isMacPlatform() && (getJMenuBar()==null)) {
+    if (PlatformFactory.ONLY.isMacPlatform() && (getJMenuBar() == null)) {
       JMenuBar menuBar = new MainFrame.MenuBar(_mainFrame);
       _mainFrame._setUpMenuBar(menuBar);
       _mainFrame.addMenuBarInOtherFrame(menuBar);

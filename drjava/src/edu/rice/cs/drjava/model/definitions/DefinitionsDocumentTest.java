@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -77,8 +77,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
    */
   public static Test suite() { return  new TestSuite(DefinitionsDocumentTest.class); }
   
-  /** 
-   * Convenience method that wraps _doc.indentLines calls in a write lock. 
+  /** Convenience method that wraps _doc.indentLines calls in a write lock. 
    * @param selStart start of selected region
    * @param selEnd end of selected region
    */
@@ -86,8 +85,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     _doc.indentLines(selStart, selEnd); 
   }
   
-  /** 
-   * Test insertion. 
+  /** Test insertion. 
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void textInsertToDoc() throws BadLocationException {
@@ -140,8 +138,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("2.93", ")", _reduced.currentToken().getType());
   }
   
-  /** 
-   * Test inserting a star between a star-slash combo.
+  /** Test inserting a star between a star-slash combo.
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void textInsertStarIntoStarSlash() throws BadLocationException {
@@ -160,8 +157,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("6", ReducedModelStates.FREE, _reduced.currentToken().getState());
   }
   
-  /** 
-   * Test inserting a slash between a star-slash combo.
+  /** Test inserting a slash between a star-slash combo.
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void textInsertSlashIntoStarSlash() throws BadLocationException {
@@ -180,8 +176,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("6", ReducedModelStates.FREE, _reduced.currentToken().getState());
   }
   
-  /** 
-   * Test inserting a star between a slash-star combo.
+  /** Test inserting a star between a slash-star combo.
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void textInsertStarIntoSlashStar() throws BadLocationException {
@@ -200,8 +195,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("6", ReducedModelStates.FREE, _reduced.currentToken().getState());
   }
   
-  /** 
-   * Test removal of text.
+  /** Test removal of text.
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void textDeleteDoc() throws BadLocationException {
@@ -219,8 +213,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("1.3", ReducedModelStates.INSIDE_BLOCK_COMMENT, _reduced.getStateAtCurrent());
   }
   
-  /** 
-   * Make sure the vector is consistent: all elements immediately adjoin one 
+  /** Make sure the vector is consistent: all elements immediately adjoin one 
    * another (no overlap), and make sure all indices between start and end are 
    * in the vector. Vector is guaranteed to not have size zero.
    * @param v vector of HighlightStatus objects
@@ -240,8 +233,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("Location after walking highlight vector", end, walk);
   }
   
-  /** 
-   * Test that keywords are highlighted properly.
+  /** Test that keywords are highlighted properly.
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void textHighlightKeywords1() throws BadLocationException {
@@ -269,8 +261,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals(HighlightStatus.NORMAL, v.get(11).getState());
   }
   
-  /** 
-   * This test case simulates what happens when some text is selected and there 
+  /** This test case simulates what happens when some text is selected and there 
    * is a keyword around too. In drjava-20010720-1712 there is a bug that if 
    * you enter "int Y" and then try to select "t Y", it throws an
    * exception. This is a test for that bug.  The important thing about the 
@@ -299,8 +290,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals(2, v.get(0).getLength());
   }
   
-  /** 
-   * Test going to the second line in a two-line document.
+  /** Test going to the second line in a two-line document.
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void textGotoLine1() throws BadLocationException {
@@ -310,8 +300,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("#0.0", 2, _doc.getCurrentLocation());
   }
   
-  /** 
-   * Test going to a specific line.
+  /** Test going to a specific line.
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void textGotoLine2() throws BadLocationException {
@@ -321,8 +310,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("#0.0", 5, _doc.getCurrentLocation());
   }
   
-  /** 
-   * Test going to the fourth line in a four line document.
+  /** Test going to the fourth line in a four line document.
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void textGotoLine3() throws BadLocationException {
@@ -332,8 +320,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("#0.0", 6, _doc.getCurrentLocation());
   }
   
-  /** 
-   * Test going to a line beyond the number of lines in a document
+  /** Test going to a line beyond the number of lines in a document
    * just goes to the end of the file.
    * @throws BadLocationException if attempts to reference an invalid location
    */
@@ -361,8 +348,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("#0.0", 0, _doc.getCurrentLocation());
   }
   
-  /** 
-   * Test that going to a line within the document's line count
+  /** Test that going to a line within the document's line count
    * sets the current position to the first character of the line.
    * @throws BadLocationException if attempts to reference an invalid location
    */
@@ -395,8 +381,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("#0.0", 5, _doc.getCurrentCol() );
   }
   
-  /** 
-   * Test returning second line in a two-line document.
+  /** Test returning second line in a two-line document.
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void textGetLine1() throws BadLocationException {
@@ -406,8 +391,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("#0.0", 2, _doc.getCurrentLine());
   }
   
-  /** 
-   * Test going to a specific line.
+  /** Test going to a specific line.
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void textGetLine2() throws BadLocationException {
@@ -419,8 +403,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("#0.1", 2, _doc.getCurrentLine());
   }
   
-  /** 
-   * Test going to the fourth line in a four line document.
+  /** Test going to the fourth line in a four line document.
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void textGetLine3() throws BadLocationException {
@@ -430,8 +413,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("#0.0", 4, _doc.getCurrentLine());
   }
   
-  /** 
-   * Test going to a line beyond the number of lines in a document
+  /** Test going to a line beyond the number of lines in a document
    * just goes to the end of the file.
    * @throws BadLocationException if attempts to reference an invalid location
    */
@@ -459,8 +441,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("#0.0", 1, _doc.getCurrentLine());
   }
   
-  /** 
-   * Test that going to a line within the document's line count
+  /** Test that going to a line within the document's line count
    * sets the current position to the first character of the line.
    * @throws BadLocationException if attempts to reference an invalid location
    */
@@ -475,8 +456,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("#0.2", 4, _doc.getCurrentLine());
   }
   
-  /** 
-   * Tests line numbering output after deletion of a block
+  /** Tests line numbering output after deletion of a block
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void textGetLineDeleteText() throws BadLocationException{
@@ -489,8 +469,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("After delete", 1, _doc.getCurrentLine() );
   }
   
-  /** 
-   * Tests line numbering output after deletion of a block
+  /** Tests line numbering output after deletion of a block
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void textGetLineDeleteText2() throws BadLocationException {
@@ -538,8 +517,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals(bigExp.toString(), result);
   }
   
-  /** 
-   * Test whether tabs are removed as appropriate on call to insertString.
+  /** Test whether tabs are removed as appropriate on call to insertString.
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void textTabRemovalOnInsertString2() throws BadLocationException {
@@ -561,8 +539,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals(expected, _getAllText());
   }
   
-  /** 
-   * Test whether tabs are removed as appropriate on call to insertString.
+  /** Test whether tabs are removed as appropriate on call to insertString.
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void textTabRemovalOnInsertString() throws BadLocationException {
@@ -578,16 +555,14 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     }
   }
   
-  /** 
-   * Test package-finding on empty document. 
+  /** Test package-finding on empty document. 
    * @throws InvalidPackageException if the package is invalid
    */
   public void textPackageNameEmpty() throws InvalidPackageException {
     assertEquals("Package name for empty document", "", _doc.getPackageName());
   }
   
-  /** 
-   * Test package-finding on simple document, with no funny comments. 
+  /** Test package-finding on simple document, with no funny comments. 
    * @throws Exception if something goes wrong
    */
   public void textPackageNameSimple()
@@ -613,8 +588,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     }
   }
   
-  /** 
-   * Test package-finding on document with a block comment between parts of package.
+  /** Test package-finding on document with a block comment between parts of package.
    * @throws BadLocationException if attempts to reference an invalid location
    * @throws InvalidPackageException if the package is invalid
    */
@@ -626,8 +600,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("Package name for weird: '" + weird + "'", normal, _doc.getPackageName());
   }
   
-  /** 
-   * Test package-finding on document with a line comment between parts of package.
+  /** Test package-finding on document with a line comment between parts of package.
    * @throws BadLocationException if attempts to reference an invalid location
    * @throws InvalidPackageException if the package is invalid
    */
@@ -639,8 +612,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("Package name for weird: '" + weird + "'", normal, _doc.getPackageName());
   }
   
-  /** 
-   * Puts an otherwise valid package statement after a valid import 
+  /** Puts an otherwise valid package statement after a valid import 
    * declaration. This should result in seeing no 
    * package statement (for the purposes of getSourceRoot), so the resulting package name should be "".
    * @throws BadLocationException if attempts to reference an invalid location
@@ -654,8 +626,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
   
   private String _getAllText() throws BadLocationException { return _doc.getText(); }
   
-  /** 
-   * Tests class name-finding on document.
+  /** Tests class name-finding on document.
    * @throws BadLocationException if attempts to reference an invalid location
    * @throws ClassNameNotFoundException if the class cannot be found
    */
@@ -667,8 +638,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("class name for weird: '" + weird + "'", result, _doc.getFirstTopLevelClassName());
   }
   
-  /** 
-   * Test interface name-finding on document
+  /** Test interface name-finding on document
    * @throws BadLocationException if attempts to reference an invalid location
    * @throws ClassNameNotFoundException if the class cannot be found
    */
@@ -681,8 +651,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("class name for interface: '" + weird + "'", result, _doc.getFirstTopLevelClassName());
   }
   
-  /** 
-   * Test class name-finding on document.
+  /** Test class name-finding on document.
    * @throws BadLocationException if attempts to reference an invalid location
    * @throws ClassNameNotFoundException if the class cannot be found
    */
@@ -702,8 +671,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("class name for class: '" + weird + "'", result, _doc.getFirstTopLevelClassName());
   }
   
-  /** 
-   * Tests that a keyword with no space following it does not cause a 
+  /** Tests that a keyword with no space following it does not cause a 
    * StringOutOfBoundsException (bug 742226).
    * @throws BadLocationException if attempts to reference an invalid location
    */
@@ -719,8 +687,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     }
   }
   
-  /** 
-   * Tests that the word class is not recognized if it is not followed
+  /** Tests that the word class is not recognized if it is not followed
    * by whitespace.
    * @throws BadLocationException if attempts to reference an invalid location
    * @throws ClassNameNotFoundException if the class cannot be found
@@ -735,8 +702,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("class name for weird: '" + weird + "'", result, _doc.getFirstTopLevelClassName());
   }
   
-  /** 
-   * Tests class name-finding on document.
+  /** Tests class name-finding on document.
    * @throws BadLocationException if attempts to reference an invalid location
    * @throws ClassNameNotFoundException if the class cannot be found
    */
@@ -753,8 +719,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
                  _doc.getFirstTopLevelClassName());
   }
   
-  /** 
-   * Tests class name-finding on document
+  /** Tests class name-finding on document
    * @throws BadLocationException if attempts to reference an invalid location
    * @throws ClassNameNotFoundException if the class cannot be found
    */
@@ -767,8 +732,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("class name for user interface: '" + weird + "'", result, _doc.getFirstTopLevelClassName());
   }
   
-  /** 
-   * Tests class name-finding on document
+  /** Tests class name-finding on document
    * @throws BadLocationException if attempts to reference an invalid location
    * @throws ClassNameNotFoundException if the class cannot be found
    */
@@ -781,8 +745,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("class name for user interface: '" + weird + "'", result, _doc.getFirstTopLevelClassName());
   }
   
-  /** 
-   * Tests class name-finding on document.
+  /** Tests class name-finding on document.
    * @throws BadLocationException if attempts to reference an invalid location
    * @throws ClassNameNotFoundException if the class cannot be found
    */
@@ -802,8 +765,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
                  _doc.getFirstTopLevelClassName());
   }
   
-  /** 
-   * Tests class name-finding on document.
+  /** Tests class name-finding on document.
    * @throws BadLocationException if attempts to reference an invalid location
    * @throws ClassNameNotFoundException if the class cannot be found
    */
@@ -821,8 +783,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("underscores should remain: '" + weird1 + "'", result2, _doc.getFirstTopLevelClassName());
   }
   
-  /** 
-   * Tests that the name of a top level enclosing class can be found.
+  /** Tests that the name of a top level enclosing class can be found.
    * @throws BadLocationException if attempts to reference an invalid location
    * @throws ClassNameNotFoundException if the class cannot be found
    */
@@ -904,8 +865,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     }
   }
   
-  /** 
-   * Tests that the correct qualified class name is returned with a package. 
+  /** Tests that the correct qualified class name is returned with a package. 
    * @throws BadLocationException if attempts to reference an invalid location
    * @throws ClassNameNotFoundException if the class cannot be found
    */
@@ -931,8 +891,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     }
   }
   
-  /** 
-   * Tests that the correct qualified class name is returned without a package.
+  /** Tests that the correct qualified class name is returned without a package.
    * @throws BadLocationException if attempts to reference an invalid location
    * @throws ClassNameNotFoundException if the class cannot be found
    */
@@ -1039,8 +998,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     }
     }*/
   
-  /** 
-   * Verify that undoing a multiple-line indent will be a single undo action
+  /** Verify that undoing a multiple-line indent will be a single undo action
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void textUndoAndRedoAfterMultipleLineIndent() throws BadLocationException {  //this fails
@@ -1081,8 +1039,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("redo",indented, _doc.getText());
   }
   
-  /** 
-   * Verify that undoing a multiple-line indent will be a single undo action
+  /** Verify that undoing a multiple-line indent will be a single undo action
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void textUndoAndRedoAfterMultipleLineCommentAndUncomment()
@@ -1128,8 +1085,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("redo uncommenting",text, _doc.getText());
   }
   
-  /** 
-   * Verify that uncommenting an empty document does not crash
+  /** Verify that uncommenting an empty document does not crash
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testUncommentEmpty()
@@ -1140,8 +1096,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("uncommenting",text, _doc.getText());
   }
   
-  /** 
-   * Test method for CompoundUndoManager.  Tests that the nested compound edit 
+  /** Test method for CompoundUndoManager.  Tests that the nested compound edit 
    * functionality works correctly.
    * @throws BadLocationException if attempts to reference an invalid location
    */
@@ -1283,8 +1238,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("Should have undone the indenting and inserting.", "", _doc.getText());
   }
   
-  /** 
-   * Verifies that the undo manager correctly determines if the document has
+  /** Verifies that the undo manager correctly determines if the document has
    * been modified since the last save.
    * @throws BadLocationException if attempts to reference an invalid location
    */
@@ -1548,8 +1502,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     "  }" + NEWLINE +
     "}/*eof*/" + NEWLINE;
   
-  /** 
-   * Test finding anonymous class index on document.
+  /** Test finding anonymous class index on document.
    * @throws BadLocationException if attempts to reference an invalid location
    * @throws ClassNameNotFoundException if the class cannot be found
    */
@@ -1593,8 +1546,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     });
   }
   
-  /** 
-   * Test exact class name-finding on document.
+  /** Test exact class name-finding on document.
    * @throws BadLocationException if attempts to reference an invalid location
    * @throws ClassNameNotFoundException if the class cannot be found
    */
@@ -2484,8 +2436,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     "class C { }" + NEWLINE +
     "}" + NEWLINE;
 
-  /** 
-   * Test getMainClassName.
+  /** Test getMainClassName.
    * @throws BadLocationException if attempts to reference an invalid location
    * @throws ClassNameNotFoundException if the class cannot be found
    */
@@ -2565,8 +2516,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     _doc.remove(0, EIC_TEXT.length());
   }
   
-  /** 
-   * Test containsClassOrInterfaceOrEnum.
+  /** Test containsClassOrInterfaceOrEnum.
    * @throws BadLocationException if attempts to reference an invalid location
    */
   public void testContainsClassOrInterfaceOrEnum() throws BadLocationException {

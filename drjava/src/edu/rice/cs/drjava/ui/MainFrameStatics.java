@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -88,8 +88,7 @@ public class MainFrameStatics {
     return input;
   }
 
-  /** 
-   * Confirms with the user that the file should be overwritten.
+  /** Confirms with the user that the file should be overwritten.
    * @param parent the parent component
    * @param f file to overwrite
    * @return <code>true</code> iff the user accepts overwriting.

@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -36,8 +36,7 @@
 
 package edu.rice.cs.drjava.model.definitions.indent;
 
-/**
- * A leaf node in the decision tree for the indentation system.
+/** * A leaf node in the decision tree for the indentation system.
  * Performs the update to the document, based on the context provided
  * by its position in the decision tree.
  * @version $Id$

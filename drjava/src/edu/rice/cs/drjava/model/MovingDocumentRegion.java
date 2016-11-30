@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -47,10 +47,10 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.plt.lambda.Thunk;
 
 /** Class for a document region that moves with changes in the document; it also includes a lazy tool-tip and line
-  * boundaries.  TODO: convert _startPos and _endPos to _cachedStart and _cachedEnd which are updated by updateLines
+  * boundaries.
   * @version $Id$Regiong
   */
-public class MovingDocumentRegion extends DocumentRegion {
+public class MovingDocumentRegion extends StaticDocumentRegion {
   
 //  /** Offset of end of last line of this region as recorded in last call on updateLines (or <init>). */
 //  protected volatile int _cachedLineEnd;
@@ -65,7 +65,7 @@ public class MovingDocumentRegion extends DocumentRegion {
   /** Update _lineStartPos and _lineEndPos after line has been edited. */
   public void update() {
 
-    try {  // _doc is inherited from DocumentRegion
+    try {  // _doc is inherited from StaticDocumentRegion
       _lineStartPos = _doc.createPosition(_doc._getLineStartPos(getStartOffset()));
       _lineEndPos = _doc.createPosition(_doc._getLineEndPos(getEndOffset()));
     } 
@@ -76,8 +76,7 @@ public class MovingDocumentRegion extends DocumentRegion {
 
   }
     
-  /** 
-   * Create a new moving document region. 
+  /** Create a new moving document region. 
    * @param doc the document within which to create the new region
    * @param start the start offset
    * @param end the end offset
@@ -174,11 +173,10 @@ public class MovingDocumentRegion extends DocumentRegion {
   /** @return the string it was assigned */
   public String getString() { return _stringSuspension.value(); }
   
-  /** 
-   * @param a first object to compare
-   * @param b second object to compare
-   * @return true if objects a and b are equal; null values are handled correctly. 
-   */
+  /** @param a first object to compare
+    * @param b second object to compare
+    * @return true if objects a and b are equal; null values are handled correctly. 
+    */
   public static boolean equals(Object a, Object b) {
     if (a == null) return (b == null);
     return a.equals(b);

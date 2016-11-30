@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -47,8 +47,7 @@ public class ConfigProperty extends EagerProperty {
   /** True if this is a list of values. This allows the sep="..." attribute. */
   protected boolean _isList = false;
   
-  /** 
-   * Create a configuration property. 
+  /** Create a configuration property. 
    * @param name the name of the property
    */
   public ConfigProperty(String name) {

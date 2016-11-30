@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -78,8 +78,7 @@ public class LogTest extends MultiThreadedTestCase {
 
   
   
-  /** 
-   * @param s base date 
+  /** @param s base date 
    * @return the string after the date; returns null if there is no date. 
    */
   private static String getStringAfterDate(String s) {
@@ -88,8 +87,7 @@ public class LogTest extends MultiThreadedTestCase {
     return s.substring(pos + 5);
   }
   
-  /** 
-   * This is necessary because when we parse dates back, the millisecond part gets
+  /** This is necessary because when we parse dates back, the millisecond part gets
    * dropped, so a date later during the same second interval might appear earlier.
    * @param earlier (lower bound + 5000)
    * @param time0 time to check

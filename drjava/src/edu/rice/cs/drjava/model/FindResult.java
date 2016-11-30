@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -36,10 +36,8 @@
 
 package edu.rice.cs.drjava.model;
 
-/** Returned to FindMachineDialog with the location of the found string
-  * (or -1 if the string was not found) as well as a flag indicating
-  * whether the machine wrapped around the end of the document.
-  *
+/** A tuple returns by search methods indicating the location of the found string(or -1 if the string was not found) as 
+  * well as a flag indicating whether the machine wrapped around the end of the document.
   * @version $Id$
   */
 public class FindResult {
@@ -49,11 +47,11 @@ public class FindResult {
   private final boolean _allWrapped;
   
   /** Constructor for a FindResult.
-   * @param document the document where the found instance is located
-   * @param foundoffset the offset of the instance found
-   * @param wrapped {@code true} if the search wrapped to the beginning (or end) of the document
-   * @param allWrapped {@code true} if the search wrapped to the start document
-   */
+    * @param document the document where the found instance is located
+    * @param foundoffset the offset of the instance found
+    * @param wrapped {@code true} if the search wrapped to the beginning (or end) of the document
+    * @param allWrapped {@code true} if the search wrapped to the start document
+    */
   public FindResult(OpenDefinitionsDocument document, int foundoffset, boolean wrapped, boolean allWrapped) {
     _document = document;
     _foundoffset = foundoffset;
@@ -73,7 +71,7 @@ public class FindResult {
   public int getFoundOffset() { return _foundoffset; }
   
   /** @return true if the search wrapped to the beginning (or end) of the document */
-  public boolean getWrapped() { return _wrapped; }
+  public boolean isWrapped() { return _wrapped; }
   
   /** @return true if the search wrapped to the start document. */
   public boolean getAllWrapped() { return _allWrapped; }

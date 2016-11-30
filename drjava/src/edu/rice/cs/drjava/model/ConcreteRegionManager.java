@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,9 @@ import java.awt.EventQueue;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
+import java.util.IdentityHashMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -55,28 +57,24 @@ import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.UnexpectedException;
 
-/** Simple region manager for the entire model.  Follows readers/writers locking protocol of EventNotifier. 
-  * TODO: fix the typing of regions.  In many (all?) places, R should be OrderedDocumentRegion. 
-  */
+/** Simple region manager for the entire model.  Follows readers/writers locking protocol of EventNotifier. */
 public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends 
   EventNotifier<RegionManagerListener<R>> implements RegionManager<R> {
 
-  /** 
-   * Whether or not this manager should be notified if the underlying 
-   * RegionSet detects a change in the underlying document. 
-   */
+  /** Whether or not this manager should be notified if the underlying 
+    * RegionSet detects a change in the underlying document. 
+    */
   private boolean _notifyOnSetChange = false;
-
+  
   /** Mapping of documents to collections of regions.  Primitive operations are thread safe. */
-  private volatile HashMap<OpenDefinitionsDocument, RegionSet<R>> _regions = 
-    new HashMap<OpenDefinitionsDocument, RegionSet<R>>();
-
-  /** 
-   * The domain of the _regions.  This field can be extracted from _regions 
-   * so it is provided to improve performance,
-   * Primitive operations are thread-safe. 
-   */
-  private volatile Set<OpenDefinitionsDocument> _documents = new HashSet<OpenDefinitionsDocument>();
+  private volatile IdentityHashMap<OpenDefinitionsDocument, RegionSet<R>> _regions = 
+    new IdentityHashMap<OpenDefinitionsDocument, RegionSet<R>>();
+  
+  /** The domain of the _regions.  This field can be extracted from _regions so it is provided to improve performance,
+    * Primitive operations are thread-safe.  Why?
+    */
+  private volatile Set<OpenDefinitionsDocument> _documents = 
+    Collections.newSetFromMap(new IdentityHashMap<OpenDefinitionsDocument,Boolean>());
   
   /* Depending on default constructor */
   
@@ -89,35 +87,31 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends
   @SuppressWarnings("unchecked")
   private <T> T emptySet() { return (T) EMPTY_SET; }
   
-  /** 
-   * Convinces the type checker to accept a DocumentRegion as an R. 
-   * This works when you need an R object only for use with compareTo 
-   * because all implementations of OrderedDocumentRegion inherit from 
-   * DocumentRegion and compareTo is defined in DocumentRegion. 
-   * @param <T> the type of document region to create
-   * @param odd the document within which to create the region
-   * @param start the start offset
-   * @param end the end offset
-   * @return the newly-created document region
-   */
+  /** Convinces the type checker to accept a StaticDocumentRegion as an R. This works when you need an R object only for use 
+    * with compareTo because all implementations of OrderedDocumentRegion inherit from StaticDocumentRegion and compareTo is
+    * defined in StaticDocumentRegion. 
+    * @param <T> the type of document region to create
+    * @param odd the document within which to create the region
+    * @param start the start offset
+    * @param end the end offset
+    * @return the newly-created document region
+    */
   @SuppressWarnings("unchecked")
   private <T> T newDocumentRegion(OpenDefinitionsDocument odd, int start, int end) { 
-    return (T) new DocumentRegion(odd, start, end);
+    return (T) new StaticDocumentRegion(odd, start, end);
   }
   
-  /**
-   * Gets the sorted set of regions less than r. 
-   * @param r the upper bound on the regions
-   * @return the sorted set of regions less than r
-   */
+  /** Gets the sorted set of regions less than r. 
+    * @param r the upper bound on the regions
+    * @return the sorted set of regions less than r
+    */
   public SortedSet<R> getHeadSet(R r) {
     RegionSet<R> oddRegions = _regions.get(r.getDocument());
     if (oddRegions == null || oddRegions.isEmpty()) return emptySet();
     return oddRegions.headSet(r);
   }
   
-  /** 
-   * Gets the sorted set of regions greater than or equal to r. 
+  /** Gets the sorted set of regions greater than or equal to r. 
    * @param r the lower bound on the regions
    * @return the sorted set of regions greater than or equal to r
    */
@@ -126,6 +120,7 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends
     if (oddRegions == null || oddRegions.isEmpty()) return emptySet();
     return oddRegions.tailSet(r);
   }
+  
   
 //  private static <R extends OrderedDocumentRegion> SortedSet<R> reverse(SortedSet<R> inputSet) {
 //    if (inputSet.isEmpty()) return inputSet;
@@ -137,27 +132,21 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends
 //    return outputSet;
 //  }
   
-  /** 
-   * Returns the region [start, end) containing offset.  Since regions can 
-   * never overlap, there is at most one such region in the given document.  
-   * (Degenerate regions can coalesce but they are empty implying that
-   * they are never returned by this method.)  Only runs in the event thread.
-   * @param odd the document
-   * @param offset the offset in the document
-   * @return the DocumentRegion at the given offset, or null if it does not exist.
-   */
+  /** Returns the region [start, end) containing offset.  Since regions can never overlap, there is at most one such 
+    * region in the given document.  (Degenerate regions can coalesce but they are empty implying that they are 
+    * never returned by this method.)  Only runs in the event thread.
+    * @param odd the document
+    * @param offset the offset in the document
+    * @return the StaticDocumentRegion at the given offset, or null if it does not exist.
+    */
   public R getRegionAt(OpenDefinitionsDocument odd, int offset) { 
     assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
-    /* 
-     * Get the tailSet consisting of the ordered set of regions [start, end) 
-     * such that end > offset. 
-     */
+    /* Get the tailSet consisting of the ordered set of regions [start, end) such that end > offset. */
     @SuppressWarnings("unchecked")
     SortedSet<R> tail = getTailSet((R) newDocumentRegion(odd, 0, offset + 1));
     
-    /* 
-     * If tail contains a match, it must be the first region, since all 
+    /*  If tail contains a match, it must be the first region, since all 
      * regions in a document are disjoint and no degenerate region in tail 
      * can contain offset. (Every degenerate region is disjoint from every 
      * other region because it is empty.) tail is sorted by [endOffset, 
@@ -170,38 +159,25 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends
     else return null;
   }
   
-  /** 
-   * Finds the interval of regions in odd such that the line label (excerpt) 
-   * for the region contains offset. 
-   */
+  /** Finds the interval of regions in odd such that the line label (excerpt) for the region contains offset. */
   public Pair<R, R> getRegionInterval(OpenDefinitionsDocument odd, int offset) {
     assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
 //    System.err.println("getRegionsNear(" + odd + ", " + offset + ") called");
     
-    /* 
-     * Get the interval of regions whose line label (excerpts) contain 
-     * offset. The maximium size of the excerpt enclosing a region is 120 
-     * characters; it begins at the start of the line containing the start of 
-     * the region. 
-     * Since empty regions are ignored (and deleted as soon as they are 
-     * found), the end of a containing region must be less than 120 
-     * characters from offset. Find the tail set of all regions [start, end) 
-     * where offset - 120 < end.
+    /* Get the interval of regions whose line label (excerpts) contain offset. The maximium size of the excerpt
+     * enclosing a region is 120 characters; it begins at the start of the line containing the start of the region. 
+     * Since empty regions are ignored (and deleted as soon as they are found), the end of a containing region must
+     * be less than 120 characters from offset. Find the tail set of all regions [start, end) where offset - 120 < end.
      */
     @SuppressWarnings("unchecked") // max operator inserted to ensure that [start,end) interval is non-degenerate.
-    SortedSet<R> tail = getTailSet((R) new DocumentRegion(odd, 0, Math.max(0, offset - 119)));  
+    SortedSet<R> tail = getTailSet((R) new StaticDocumentRegion(odd, 0, Math.max(0, offset - 119)));  
     
-    
-    /* 
-     * Search tail, selecting first and last regions r such that 
-     * r.getLineEnd() >= offset and r.getLineStart <= offset.
-     * The tail is totally order on BOTH getLineStart() and getLineEnd() 
-     * because the functions mapping start to lineStart and end to lineEnd 
-     * are monotonic and the tail is totally ordered on BOTH start and end 
-     * (since regions do not overlap).  Hence, we can abandon the search as 
-     * soon as we reach a region r such that r.getLineStart() > offset.  
-     * tail may be empty. 
+    /* Search tail, selecting first and last regions r such that r.getLineEnd() >= offset and r.getLineStart <= offset.
+     * The tail is totally ordered on BOTH getLineStart() and getLineEnd() because the functions mapping start to 
+     * lineStart and end to lineEnd are monotonic and the tail is totally ordered on BOTH start and end (since regions
+     * do not overlap).  Hence, we can abandon the search as soon as we reach a region r such that 
+     * r.getLineStart() > offset.  tail may be empty. 
      */
     // TODO: this comment is not true?
     if (tail.size() == 0) return null;
@@ -243,14 +219,14 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends
 //    System.err.println("Found last region in getRegionInterval = '" + last +  "'");
     return new Pair<R, R>(first, last);
   }
-    
+  
 //  /** Returns the rightmost region in the given document that contains [startOffset, endOffset], or null if one does
 //    * not exist.  Only executes in the event thread.  Otherwise offset args could be invalid.
 //    * Note: this method could be implemented  more cleanly using a revserseIterator on the headSet containing all
 //    * regions preceding or equal to the selection. but this functionality was not added to TreeSet until Java 6.0.
 //    * @param odd the document
 //    * @param offset the offset in the document
-//    * @return the DocumentRegion at the given offset, or null if it does not exist.
+//    * @return the StaticDocumentRegion at the given offset, or null if it does not exist.
 //    */
 //  public Collection<R> getOverlappingRegions(OpenDefinitionsDocument odd, int startOffset, int endOffset) {
 //    
@@ -296,9 +272,8 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends
 //
 //    return match;  // last region in revHead was the best match
 //  }
-
-  /** 
-   * Returns the set of regions in the given document that overlap the 
+  
+  /** Returns the set of regions in the given document that overlap the 
    * specified interval [startOffset, endOffset), including degenerate 
    * regions [offset, offset) where [offset, offset] is a subset of 
    * (startOffset, endOffset).
@@ -315,12 +290,12 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends
    * @param odd the document
    * @param startOffset  the left end of the specified interval
    * @param endOffset  the right end of the specified interval
-   * @return the {@code Collection<DocumentRegion>} of regions overlapping the interval.
+   * @return the {@code Collection<StaticDocumentRegion>} of regions overlapping the interval.
    */
   public Collection<R> getRegionsOverlapping(OpenDefinitionsDocument odd, 
-    int startOffset, int endOffset) {
+                                             int startOffset, int endOffset) {
     
-/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     LinkedList<R> result = new LinkedList<R>();
     if (startOffset == endOffset) return result;
     
@@ -330,7 +305,7 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends
     SortedSet<R> tail = getTailSet((R) newDocumentRegion(odd, 0, startOffset + 1));
     
     // tail is sorted by <startOffset, endOffset>; tail may be empty
-
+    
     for (R r: tail) {
       if (r.getStartOffset() >= endOffset) break;
       else result.add(r);
@@ -338,10 +313,9 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends
     return result;
   }
   
-  /** 
-   * Add the supplied DocumentRegion to the manager.  Only runs in event 
+  /** Add the supplied StaticDocumentRegion to the manager.  Only runs in event 
    * thread after initialization?
-   * @param region the DocumentRegion to be inserted into the manager
+   * @param region the StaticDocumentRegion to be inserted into the manager
    */
   public void addRegion(final R region) {
     final OpenDefinitionsDocument odd = region.getDocument();
@@ -385,8 +359,7 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends
     }
   }
   
-  /** 
-   * Remove the given IDocumentRegion from the manager.  If any document's 
+  /** Remove the given IDocumentRegion from the manager.  If any document's 
    * regions are emptied, remove the document from the keys in _regions.  
    * Notification removes the panel node for the region.
    * @param region the IDocumentRegion to be removed.
@@ -402,7 +375,7 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends
       _documents.remove(doc);
       _regions.remove(doc);
     }
-
+    
     // only notify if the region was actually removed
     if (wasRemoved) _notifyRegionRemoved(region);
   }
@@ -417,9 +390,8 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends
     try { for (RegionManagerListener<R> l: _listeners) { l.regionRemoved(region); } } 
     finally { _lock.endRead(); }
   }
-    
-  /** 
-   * Remove the specified document from _documents and _regions (removing all 
+  
+  /** Remove the specified document from _documents and _regions (removing all 
    * of its contained regions). 
    */
   public void removeRegions(final OpenDefinitionsDocument doc) {
@@ -441,14 +413,13 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends
     }
   }
   
-  /** 
-   * @return a {@code Vector<R>} containing the DocumentRegion objects for 
+  /** @return a {@code Vector<R>} containing the StaticDocumentRegion objects for 
    *                             document odd in this mangager. 
    */
   public RegionSet<R> getRegions(OpenDefinitionsDocument odd) { return _regions.get(odd); }
   
   public void setRegions(OpenDefinitionsDocument odd, RegionSet<R> rs) { _regions.put(odd, rs); }
-
+  
   public int getRegionCount() {
     int regions = 0;
     for (OpenDefinitionsDocument odd: _documents) regions += _regions.get(odd).size();
@@ -461,9 +432,7 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends
     return regions;
   }
   
-  /**
-   * @return all regions, in the form of DummyDocumentRegions
-   */
+  /** @return all regions, in the form of DummyDocumentRegions */
   public ArrayList<IRegion> getFileRegions() {
     ArrayList<IRegion> regions = new ArrayList<IRegion>();
     for (OpenDefinitionsDocument odd: _documents) {
@@ -471,8 +440,8 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends
       for (R r: _regions.get(odd)) {
         try {
           regions.add(new DocumentFileRegion(f, 
-            odd.createPosition(r.getStartOffset()), 
-            odd.createPosition(r.getEndOffset())));
+                                             odd.createPosition(r.getStartOffset()), 
+                                             odd.createPosition(r.getEndOffset())));
         } catch (BadLocationException e) {
           /* Should never get here */
           throw new UnexpectedException(e);
@@ -481,7 +450,7 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends
     }
     return regions;
   }
-      
+  
   
   public boolean contains(R region) {
     for (OpenDefinitionsDocument doc: _documents) {
@@ -505,40 +474,37 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends
 //  /** Set the current region. 
 //    * @param region new current region */
 //  public void setCurrentRegion(final R region) { throw new UnsupportedOperationException(); }
-  
-  /** 
-   * Apply the given command to the specified region to change it.
-   * @param region the region to find and change
-   * @param cmd command that mutates the region. 
-   */
+
+  /** Apply the given command to the specified region to change it.
+    * @param region the region to find and change
+    * @param cmd command that mutates the region. 
+    */
   public void changeRegion(final R region, Lambda<R,Object> cmd) {
     cmd.value(region);
     notifyChangedRegion(region);
   }
-
-  /**
-   * Tell all listeners that the given region has changed.
-   * @param region the region that changed
-   */
+  
+  /** Tell all listeners that the given region has changed.
+    * @param region the region that changed
+    */
   public void notifyChangedRegion(final R region) {
     _lock.startRead();
     try { for (RegionManagerListener<R> l: _listeners) { l.regionChanged(region); } } 
     finally { _lock.endRead(); }
   }
   
-  /** 
-   * Updates _lineStartPos, _lineEndPos of regions in the interval 
-   * [firstRegion, lastRegion] using total ordering on regions. Removes empty 
-   * regions. firstRegion and lastRegion are not necessarily regions in this 
-   * manager.  
-   */
+  /** Updates _lineStartPos, _lineEndPos of regions in the interval 
+    * [firstRegion, lastRegion] using total ordering on regions. Removes empty 
+    * regions. firstRegion and lastRegion are not necessarily regions in this 
+    * manager.  
+    */
   public void updateLines(R firstRegion, R lastRegion) { 
     assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
     /* Get the tailSet consisting of the ordered set of regions >= firstRegion. */
     SortedSet<R> tail = getTailSet(firstRegion);
-    if (tail.size() == 0) return; // tail can be empty if firstRegion is a constructed DocumentRegion
-
+    if (tail.size() == 0) return; // tail can be empty if firstRegion is a constructed StaticDocumentRegion
+    
     List<R> toBeRemoved = new ArrayList<R>();  // nonsense to avoid concurrent modification exception
     for (R region: tail) {
       if (region.compareTo(lastRegion) > 0) break;
@@ -547,12 +513,9 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends
     removeRegions(toBeRemoved);
   }
 
-  /** 
-   * Sets _notifyOnSetChange to true. 
-   * Should either be called before any RegionSets are created, or never. 
-   */
+  
+  /** Sets _notifyOnSetChange to true. Should either be called before any RegionSets are created, or never.  */
   public void requireNotification() { 
     this._notifyOnSetChange = true;
   }
-
 } 

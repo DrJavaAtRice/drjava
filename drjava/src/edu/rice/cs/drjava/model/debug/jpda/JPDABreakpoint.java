@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -67,8 +67,7 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
   /** Note that _position, which records the breakpoint position, is inherited from DocumentDebugAction. */
   private volatile OpenDefinitionsDocument _doc;
   
-  /** 
-   * @param doc the document within which to create the breakpoint
+  /** @param doc the document within which to create the breakpoint
    * @param offset offset within the document at which to set the breakpoint
    * @param isEnabled true if the breakpoint is enabled; false for disabled
    * @param manager manager
@@ -179,7 +178,7 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
   
   /** Update _startPos, _endPos and _lineNumber from the position that moves with the document. */
   public void update() {
-    try {  // _doc is inherited from DocumentRegion
+    try {  // _doc is inherited from StaticDocumentRegion
       int offset = _position.getOffset();
       _startPos = _doc.createPosition(_doc._getLineStartPos(offset));
       _endPos = _doc.createPosition(_doc._getLineEndPos(offset));
@@ -218,11 +217,10 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
   @Override
   public final int hashCode() { return super.hashCode(); }
   
-  /** 
-   * Totally orders regions lexicographically based on (_doc, endOffset, 
-   * startOffset, _position). This method is typically applied to
-   * regions within the same document. It is consistent with equals.
-   */
+  /** Totally orders regions lexicographically based on (_doc, endOffset, 
+    * startOffset, _position). This method is typically applied to
+    * regions within the same document. It is consistent with equals.
+    */
   public int compareTo(OrderedDocumentRegion r) {
     int docRel = getDocument().compareTo(r.getDocument());
     if (docRel != 0) return docRel;

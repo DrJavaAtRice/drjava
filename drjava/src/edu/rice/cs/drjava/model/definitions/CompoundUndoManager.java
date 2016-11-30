@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -72,8 +72,7 @@ public class CompoundUndoManager extends UndoManager {
   /** Keeps track of the listeners to this undo manager. */
   private final GlobalEventNotifier _notifier;
   
-  /** 
-   * Standard constructor. 
+  /** Standard constructor. 
    * @param notifier a GlobalEventNotifier
    */
   public CompoundUndoManager(GlobalEventNotifier notifier) {
@@ -131,8 +130,7 @@ public class CompoundUndoManager extends UndoManager {
     else throw new IllegalStateException("Improperly nested compound edits.");
   }
   
-  /** 
-   * Gets the last Compound Edit entered into the list. 
+  /** Gets the last Compound Edit entered into the list. 
    * Used in making a Compound edit for granular undo. 
    * @return the last Compound edit entered into the list
    */

@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -153,8 +153,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
 //    });
 //  }
     
-  /** 
-   * Tests that the errors array contains all encountered failures and error in the right order. 
+  /** Tests that the errors array contains all encountered failures and error in the right order. 
    * @throws Exception if something goes wrong
    */
   public void testErrorsArrayInOrder_NOJOIN() throws Exception {

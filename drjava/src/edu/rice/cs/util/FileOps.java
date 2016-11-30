@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -110,8 +110,7 @@ public abstract class FileOps {
   /** Special sentinal file used in FileOption and test classes among others. */
   public static final File NULL_FILE = NullFile.ONLY;
   
-  /** 
-   * @param path path at which to create file
+  /** @param path path at which to create file
    * @return newly-created file
    * @deprecated For a best-attempt canonical file, use 
    *             {@link edu.rice.cs.plt.io.IOUtil#attemptCanonicalFile} instead.
@@ -123,8 +122,7 @@ public abstract class FileOps {
     catch(IOException e) { return f; }
   }
   
-  /** 
-   * @param parentDir directory in which to create file
+  /** @param parentDir directory in which to create file
    * @param child name for child file
    * @return newly-created file
    * @deprecated For a best-attempt canonical file, use 
@@ -137,8 +135,7 @@ public abstract class FileOps {
     catch(IOException e) { return f; }
   }
   
-  /** 
-   * Determines whether the specified file in within the specified file tree. 
+  /** Determines whether the specified file in within the specified file tree. 
    * @param f the file to check
    * @param root the root directory in which to search
    * @return whether f is found in the tree rooted in root
@@ -333,8 +330,7 @@ public abstract class FileOps {
     }      
   }
   
-  /** 
-    * @param f the file to get the canonical equivalent of
+  /** @param f the file to get the canonical equivalent of
     * @return the canonical file equivalent to f.  Identical to f.getCanonicalFile() except it does not throw an 
     * exception when the file path syntax is incorrect (or an IOException or SecurityException occurs for any
     * other reason).  It returns the absolute File intead.
@@ -348,8 +344,7 @@ public abstract class FileOps {
     return f.getAbsoluteFile();
   }
   
-  /** 
-    * @param f the file to get the canonical equivalent of
+  /** @param f the file to get the canonical equivalent of
     * @return the canonical path for f.  Identical to f.getCanonicalPath() except it does not throw an 
     * exception when the file path syntax is incorrect; it returns the absolute path instead.
     * @deprecated  Use {@link edu.rice.cs.plt.io.IOUtil#attemptCanonicalFile} instead.  (The result will be a 
@@ -357,8 +352,7 @@ public abstract class FileOps {
     */
   @Deprecated public static String getCanonicalPath(File f) { return getCanonicalFile(f).getPath(); }
   
-  /** 
-   * @param f the file to validate
+  /** @param f the file to validate
    * @return the file f unchanged if f exists; otherwise returns NULL_FILE. 
    */
   public static File validate(File f) {
@@ -414,8 +408,7 @@ public abstract class FileOps {
     return out.toByteArray();
   }
   
-  /** 
-   * Reads the entire contents of a file and return them as canonicalized 
+  /** Reads the entire contents of a file and return them as canonicalized 
    * Swing Document text. All newLine sequences, including "\n", "\r", and 
    * "\r\n" are converted to "\n". Characters below 32, except for newlines, 
    * are changed to spaces. 
@@ -445,8 +438,7 @@ public abstract class FileOps {
     finally { if (reader != null) reader.close(); }
   }
   
-  /** 
-   * Reads the entire contents of a file and return them as a String.
+  /** Reads the entire contents of a file and return them as a String.
    * @param file the file to read
    * @return contents of the file 
    * @throws IOException if an IO operation fails
@@ -467,9 +459,8 @@ public abstract class FileOps {
     }
     finally { if (reader != null) reader.close(); }
   }
-  
-  /** 
-   * Copies the text of one file into another.
+    
+  /** Copies the text of one file into another.
    * @param source the file to be copied
    * @param dest the file to be copied to
    * @throws IOException if an IO operation fails
@@ -480,8 +471,7 @@ public abstract class FileOps {
     writeStringToFile(dest, text);
   }
   
-  /** 
-   * Creates a new temporary file and writes the given text to it. The file will be deleted on exit.
+  /** Creates a new temporary file and writes the given text to it. The file will be deleted on exit.
    * @param prefix Beginning part of file name, before unique number
    * @param suffix Ending part of file name, after unique number
    * @param text Text to write to file
@@ -499,8 +489,7 @@ public abstract class FileOps {
     return file;
   }
   
-  /** 
-   * Writes text to the file overwriting whatever was there.
+  /** Writes text to the file overwriting whatever was there.
    * @param file File to write to
    * @param text Test to write
    * @throws IOException if an IO operation fails
@@ -510,8 +499,7 @@ public abstract class FileOps {
     writeStringToFile(file, text, false);
   }
   
-  /** 
-   * Writes text to the file.
+  /** Writes text to the file.
    * @param file File to write to
    * @param text Text to write
    * @param append whether to append. (false=overwrite)
@@ -527,8 +515,7 @@ public abstract class FileOps {
     finally { if (writer != null) writer.close(); }
   }
   
-  /** 
-   * Writes text to the given file returning true if it succeeded and false if 
+  /** Writes text to the given file returning true if it succeeded and false if 
    * not.  This is a simple wrapper for writeStringToFile that doesn't throw 
    * an IOException.
    * @param file  File to write to
@@ -545,8 +532,7 @@ public abstract class FileOps {
     catch(IOException e) { return false; }
   }
   
-  /** 
-   * Create a new temporary directory. The directory will be deleted on exit, if empty.
+  /** Create a new temporary directory. The directory will be deleted on exit, if empty.
    * (To delete it recursively on exit, use deleteDirectoryOnExit.)
    * @param name Non-unique portion of the name of the directory to create.
    * @return File representing the directory that was created.
@@ -559,8 +545,7 @@ public abstract class FileOps {
     return createTempDirectory(name, null);
   }
   
-  /** 
-   * Create a new temporary directory. The directory will be deleted on exit, 
+  /** Create a new temporary directory. The directory will be deleted on exit, 
    * if it only contains temp files and temp directories created after it.  
    * (To delete it on exit regardless of contents, call deleteDirectoryOnExit 
    * after constructing the file tree rooted at this directory.  Note that 
@@ -815,8 +800,7 @@ public abstract class FileOps {
   
   public interface FileSaver {
     
-    /** 
-     * This method tells what to name the backup file, if a backup is made.  
+    /** This method tells what to name the backup file, if a backup is made.  
      * It may depend on getTargetFile(), so it can throw an IOException.
      * @return the backup file
      * @throws IOException if an IO operation fails
@@ -830,8 +814,7 @@ public abstract class FileOps {
      */
     public abstract boolean shouldBackup() throws IOException;
     
-    /** 
-     * This method specifies if the saving process should continue trying to 
+    /** This method specifies if the saving process should continue trying to 
      * save the file if the temp file that is written initially cannot be 
      * created.  Continue saving in this case is dangerous because the 
      * original file may be lost if saving fails.
@@ -842,8 +825,7 @@ public abstract class FileOps {
     /** This method is called to tell the file saver that a backup was successfully made. */
     public abstract void backupDone();
     
-    /**
-     * This method actually writes info to a file.  NOTE: It is important that this
+    /** This method actually writes info to a file.  NOTE: It is important that this
      * method write to the stream it is passed, not the target file.  If you write
      * directly to the target file, the target file will be destroyed if saving fails.
      * Also, it is important that when saving fails this method throw an IOException
@@ -852,8 +834,7 @@ public abstract class FileOps {
      */
     public abstract void saveTo(OutputStream os) throws IOException;
     
-    /** 
-     * This method specifies the file for saving.  It should return the 
+    /** This method specifies the file for saving.  It should return the 
      * canonical name of the file, resolving symlinks. Otherwise, the saver 
      * cannot deal correctly with symlinks.  Resolving symlinks may cause an 
      * IOException, so this method declares that it may throw an IOException.
@@ -869,17 +850,17 @@ public abstract class FileOps {
     */
   public abstract static class DefaultFileSaver implements FileSaver {
     
-    private File outputFile = FileOps.NULL_FILE;
-    private static Set<File> filesNotNeedingBackup = new HashSet<File>();
-    private boolean backupsEnabled = DrJava.getConfig().getSetting(BACKUP_FILES);  // uses the config default
+    private volatile File outputFile = FileOps.NULL_FILE;
+    private static volatile Set<File> filesNotNeedingBackup = new HashSet<File>();
+    private volatile boolean backupsEnabled = DrJava.getConfig().getSetting(BACKUP_FILES);  // uses the config default
     
     /** This field keeps track of whether or not outputFile has been resolved to its canonical name. */
-    private boolean isCanonical = false;
+    private volatile boolean isCanonical = false;
     
 ///** Globally enables backups for any DefaultFileSaver that does not override the shouldBackup method. */
 //    public static void setBackupsEnabled(boolean isEnabled) { backupsEnabled = isEnabled; }
     
-    public DefaultFileSaver(File file){ outputFile = file.getAbsoluteFile(); }
+    public DefaultFileSaver(File file) { outputFile = file.getAbsoluteFile(); }
     
     public boolean continueWhenTempFileCreationFails() { return true; }
     
@@ -947,8 +928,7 @@ public abstract class FileOps {
     return reconstructedPath;
   }
   
-  /** 
-   * Return a valid directory for use, i.e. one that exists and is as "close" 
+  /** Return a valid directory for use, i.e. one that exists and is as "close" 
    * to the file specified. It is
    * 1) origFile, if file is a directory and exists
    * 2) the closest parent of origFile, if file is not a directory or does not exist
@@ -1000,8 +980,7 @@ public abstract class FileOps {
                                                     + "Check your configuration."));
   }
   
-  /** 
-   * Converts the abstract pathname for f into a URL.  This method is included 
+  /** Converts the abstract pathname for f into a URL.  This method is included 
    * in class java.io.File as f.toURL(), but has been deprecated in Java 6.0 
    * because escape characters on some systems are not handled correctly.  The 
    * workaround, f.toURI().toURL(), is unsatisfactory because we rely on the 
@@ -1350,5 +1329,9 @@ public abstract class FileOps {
       }
     }
     return found.getAbsoluteFile();
+  }
+  
+  public static String classNameToClassFilename(String className) {
+    return className.replace('.', '/') + ".class";
   }
 }

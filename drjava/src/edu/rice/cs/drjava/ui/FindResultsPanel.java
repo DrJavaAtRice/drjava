@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (javaplt@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -91,8 +91,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   private final LinkedList<Pair<Option<Color>, OptionListener<Color>>> _colorOptionListeners = 
     new LinkedList<Pair<Option<Color>, OptionListener<Color>>>();
   
-  /** 
-   * Constructs a new find results panel. This is swing class which should 
+  /** Constructs a new find results panel. This is swing class which should 
    * only be accessed from the event thread.
    * @param frame the MainFrame
    * @param regionManager the region manager associated with this panel
@@ -171,7 +170,8 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   }
   
   class ColorComboRenderer extends JPanel implements ListCellRenderer<Color> {
-    private volatile Color _color = DrJava.getConfig().getSetting(OptionConstants.FIND_RESULTS_COLORS[_colorBox.getSelectedIndex()]);
+    private volatile Color _color = 
+      DrJava.getConfig().getSetting(OptionConstants.FIND_RESULTS_COLORS[_colorBox.getSelectedIndex()]);
     private final DefaultListCellRenderer _defaultRenderer = new DefaultListCellRenderer();
     private final Dimension _size = new Dimension(0, 20);  
     private final CompoundBorder _compoundBorder = 
@@ -301,9 +301,9 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
       getRegTreeModel().nodeStructureChanged(getRootNode());
       _lastSelectedRegion = null;
 //      _requestFocusInWindow();
-//      System.err.println("Root has been cleared; child count = " + getRootNode().getChildCount());
-      _findReplace.findAll(_searchString, _searchAll, _searchSelectionOnly, _matchCase, _wholeWord, _noComments, _noTestCases, odd, 
-                           getRegionManager(), _region, this);
+      _log.log("Root has been cleared; child count = " + getRootNode().getChildCount());
+      _findReplace.findAll(_searchString, _searchAll, _searchSelectionOnly, _matchCase, _wholeWord, _noComments, 
+                           _noTestCases, odd, getRegionManager(), _region, this);
       getRegTree().scrollRowToVisible(0);  // Scroll to the first line in the new panel
       _requestFocusInWindow();
     }
@@ -361,12 +361,11 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     }
   }
 
-  /** 
-   * Receives the set of documents that have been closed and removes all of 
-   * their regions; also updates the first document, in case it was one of 
-   * the closed files. 
-   * @param docs the documents that were closed 
-   */
+  /** Receives the set of documents that have been closed and removes all of 
+    * their regions; also updates the first document, in case it was one of 
+    * the closed files. 
+    * @param docs the documents that were closed 
+    */
   public void updateOnClose(List<OpenDefinitionsDocument> docs) {
     for (OpenDefinitionsDocument odd : docs) {
       this.getRegionManager().removeRegions(odd);

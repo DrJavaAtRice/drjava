@@ -59,19 +59,17 @@ import edu.rice.cs.plt.text.TextUtil;
 
 import static edu.rice.cs.plt.debug.DebugUtil.error;
 
-/**
- * Provides additional operations on {@link File}s, {@link InputStream}s, {@link OutputStream}s,
- * {@link Reader}s, and {@link Writer}s not defined in the {@code java.io} package.
- */
+/** Provides additional operations on {@link File}s, {@link InputStream}s, {@link OutputStream}s, {@link Reader}s, and 
+  * {@link Writer}s not defined in the {@code java.io} package.
+  */
 public final class IOUtil {
   
   /** Prevents instance creation */
   private IOUtil() {}
   
-  /**
-   * The current working directory, used as the base for relative paths.  Based on System property {@code user.dir},
-   * if defined, converted to an absolute path.
-   */
+  /** The current working directory, used as the base for relative paths.  Based on System property {@code user.dir},
+    * if defined, converted to an absolute path.
+    */
   public static final File WORKING_DIRECTORY = IOUtil.attemptAbsoluteFile(new File(System.getProperty("user.dir", "")));
   
   /** A factory for Files based on a String filename. */
@@ -633,11 +631,10 @@ public final class IOUtil {
     return result;
   }
   
-  /**
-   * Reads the entire contents of a file and return it as a byte array.
-   * @throws  IOException  If the file does not exist or cannot be opened, or if an error occurs during reading
-   * @throws  SecurityException  If read access to the file is denied
-   */
+  /** Reads the entire contents of a file and return it as a byte array.
+    * @throws  IOException  If the file does not exist or cannot be opened, or if an error occurs during reading
+    * @throws  SecurityException  If read access to the file is denied
+    */
   public static byte[] toByteArray(File file) throws IOException {
     FileInputStream input = new FileInputStream(file);
     try { return toByteArray(input); }

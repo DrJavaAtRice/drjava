@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -50,10 +50,9 @@ public class ClipboardHistoryModel {
   /** Singleton instance. */
   private static ClipboardHistoryModel ONLY = null;
   
-  /** 
-   * Singleton accessor. 
-   * @return singleton
-   */
+  /** Singleton accessor. 
+    * @return singleton
+    */
   public static synchronized ClipboardHistoryModel singleton() {
     if (ONLY == null) ONLY = new ClipboardHistoryModel(10);
     return ONLY;
@@ -61,28 +60,24 @@ public class ClipboardHistoryModel {
   
   /** Create a new clipboard history model.
     * @param maxSize maximum size of history */
-  private ClipboardHistoryModel(int maxSize) {
-    _maxSize = maxSize;
-  }
+  private ClipboardHistoryModel(int maxSize) { _maxSize = maxSize; }
   
-  /** 
-   * Sets the maximum size. May kick old strings out. 
-   * @param maxSize the new value for the maximum size
-   */
+  /** Sets the maximum size. May kick old strings out. 
+    * @param maxSize the new value for the maximum size
+    */
   public void resize(int maxSize) {
     _maxSize = maxSize;
-    while (_history.size()>_maxSize) { _history.removeFirst(); }
+    while (_history.size()>_maxSize) _history.removeFirst();
   }
   
-  /** 
-   * Add a string to the history. If it is already in the history, it will get
-   * moved to the end, making it the most recent string. 
-   * @param s the string to be added to the history
-   */
+  /** Add a string to the history. If it is already in the history, it will get
+    * moved to the end, making it the most recent string. 
+    * @param s the string to be added to the history
+    */
   public synchronized void put(String s) {
     _history.remove(s);
     _history.add(s);
-    while (_history.size()>_maxSize) { _history.removeFirst(); }
+    while (_history.size()>_maxSize) _history.removeFirst();
   }
   
   /** @return a copy of the history of strings. */
@@ -92,7 +87,7 @@ public class ClipboardHistoryModel {
   
   /** @return the most recent string, or null if nothing is in the history. */
   public synchronized String getMostRecent() {
-    if (_history.size() == 0) { return null; }
-    else { return _history.getLast(); }
+    if (_history.size() == 0) return null;
+    else return _history.getLast();
   }
 }

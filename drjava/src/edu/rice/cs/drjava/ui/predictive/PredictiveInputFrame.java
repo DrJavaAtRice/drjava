@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -241,7 +241,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     * @param cancelIndex cancel index
     * @param items varargs/array of items
     */
-  @SafeVarargs
+  @SuppressWarnings({"unchecked", "varargs"}) // @SafeVarargs does not work here
   public PredictiveInputFrame(SwingFrame owner, String title, boolean force, boolean ignoreCase, InfoSupplier<? super T> info, 
                               List<PredictiveInputModel.MatchingStrategy<T>> strategies,
                               java.util.List<CloseAction<T>> actions, int cancelIndex, T... items) {
@@ -349,7 +349,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     * @param ignoreCase true if case should be ignored
     * @param items varargs/array of items
     */
-  @SafeVarargs
+  @SuppressWarnings({"unchecked", "varargs"})  // @SafeVarargs does not work here
   public final void setItems(boolean ignoreCase, T... items) {
 //    Utilities.show("matching items in PIM set to: " + items);
     _pim = new PredictiveInputModel<T>(ignoreCase, _currentStrategy, items);
@@ -657,16 +657,14 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     updateList();
   }
   
-  /** 
-   * Creates the optional components. Should be overridden. 
+  /** Creates the optional components. Should be overridden. 
    * @return the optional components
    */
   protected JComponent[] makeOptions() {        
     return new JComponent[0];    
   }
   
-  /** 
-   * Creates the panel with the optional components. 
+  /** Creates the panel with the optional components. 
    * @param components the optional components
    */
   private void _setupOptionsPanel(JComponent[] components) {
@@ -787,8 +785,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     buttonPressed(_actions.get(_cancelIndex));
   }
   
-  /** 
-   * Handle button pressed. 
+  /** Handle button pressed. 
    * @param a the button press action being handled
    */
   private void buttonPressed(CloseAction<T> a) {

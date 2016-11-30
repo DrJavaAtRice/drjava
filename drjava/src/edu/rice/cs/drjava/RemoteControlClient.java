@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -40,8 +40,7 @@ import java.io.*;
 import java.net.*;
 import edu.rice.cs.drjava.config.OptionConstants;
 
-/**
- * Client class to remote control an already running instance of DrJava.
+/** * Client class to remote control an already running instance of DrJava.
  */
 public class RemoteControlClient {
   /** true if a DrJava remote control server is running.
@@ -70,8 +69,7 @@ public class RemoteControlClient {
     */
   public static String getServerUser() { return _serverUser; }
   
-  /** 
-   * Tell the existing DrJava instance to open a file.
+  /** Tell the existing DrJava instance to open a file.
    * @param f file, or null to just test if a server is running.
    * @return true if file could be opened
    * @throws IOException if an IO operation fails
@@ -118,8 +116,7 @@ public class RemoteControlClient {
     }
   }
   
-  /** 
-   * Main method for test purposes.
+  /** Main method for test purposes.
    * @param args command-line args
    */
   public static void main(String[] args) {

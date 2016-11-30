@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -113,8 +113,7 @@ public class ProjectAdvancedPropertiesFrame extends SwingFrame {
   //  private JButton _saveSettingsButton;
   private JPanel _mainPanel;
   
-  /** 
-   * Constructs project properties frame for a new project and displays it.  
+  /** Constructs project properties frame for a new project and displays it.  
    * Assumes that a project is active. 
    * @param mf reference to the main frame
    * @param parentFrame reference to the parent frame

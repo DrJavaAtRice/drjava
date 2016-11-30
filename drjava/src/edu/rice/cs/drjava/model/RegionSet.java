@@ -44,13 +44,19 @@ import javax.swing.event.DocumentListener;
 
 import edu.rice.cs.util.swing.Utilities;
 
+/** A set designed to store IDocumentRegions; extends TreeSet by automatically re-balancing when the underlying
+  * document changes in such a way that the relative order of a pair of regions may flip.
+  * 
+  * Also optionally contains a reference to the ConcreteRegionManager that uses this region set, and notifies 
+  * the manager on changes. Note that RegionSets can be used broadly by all types of RegionManagers; however, 
+  * notification will only ever be requested by ConcreteRegionManagers.
+  */
 public class RegionSet<R extends IDocumentRegion> extends TreeSet<R> {
 
     /* Assumes that this RegionSet will only have regions from one document */
     private DocumentListener _docListener = null;
 
-    /* 
-     * Assumes that this RegionSet will belong to only one RegionManager.
+    /* Assumes that this RegionSet will belong to only one RegionManager.
      * Also assumes the manager is Concrete; in reality, it need not be, but 
      * we will only ever set the _manager field if it is (since this is only
      * used for find/replace). 
@@ -61,15 +67,12 @@ public class RegionSet<R extends IDocumentRegion> extends TreeSet<R> {
       this._manager = manager; 
     }
 
-    /** 
-     * Set _docListener to listen on region.getDocument(), if not already set. 
-     * @param region the region whose document should be listened on
-     */
+    /** Set _docListener to listen on region.getDocument(), if not already set. 
+      * @param region the region whose document should be listened on
+      */
     private void _setDocListener(R region) {
 
-      if (this._docListener != null) {
-          return;
-      }
+      if (this._docListener != null) return;
 
       OpenDefinitionsDocument odd = region.getDocument();
 
@@ -94,9 +97,8 @@ public class RegionSet<R extends IDocumentRegion> extends TreeSet<R> {
 
             public void run() {
 
-              /* 
-               * Removal can cause positions to flip, but only need to worry if 
-               * the removed portion is within the bounds of one or more regions. 
+              /* Removal can cause positions to flip, but only need to worry if the removed portion is within the bounds
+               * of one or more regions. 
                */
               boolean requireRebalance = false;
               for (R region : thisRef) {
@@ -107,6 +109,10 @@ public class RegionSet<R extends IDocumentRegion> extends TreeSet<R> {
                 }
               }
 
+              /* Brute-force re-balance; can be relatively expensive if there are many regions, but in practice runs
+               * infrequently enough so as to be unnoticeable. Note: this code can probably be made ore efficient 
+               * because the region set to be rebalanced is almost in balance already.  Not worth the complication.
+               */
               if (requireRebalance) {
                 @SuppressWarnings("unchecked")
                 RegionSet<R> thisCopy = (RegionSet<R>)thisRef.clone();
@@ -132,21 +138,22 @@ public class RegionSet<R extends IDocumentRegion> extends TreeSet<R> {
       odd.addDocumentListener(_docListener);
     }
 
-    /** 
-     * Adds an input region to the set.
-     * @param region the region to add
-     * @return indication of success
-     */
+    /** Adds an input region to the set. Also sets up a listener on the document to which the region belongs, if this
+      * is the first time an add method is being called.
+      * @param region the region to add
+      * @return indication of success
+      */
     public boolean add(R region) {
-        this._setDocListener(region);
-        return super.add(region);
+      this._setDocListener(region);
+      return super.add(region);
     }
 
-    /** 
-     * Adds all input regions to the set.
-     * @param regions the regions to add
-     * @return indication of success
-     */
+    /** Adds all input regions to the set. Also sets up a listener on the document to which the regions belong, if this
+      * is the first time an add
+      * method is being called.
+      * @param regions the regions to add
+      * @return indication of success
+      */
     public boolean addAll(Collection<? extends R> regions) {
         for (R region : regions) {
             this._setDocListener(region);
@@ -154,4 +161,4 @@ public class RegionSet<R extends IDocumentRegion> extends TreeSet<R> {
         return super.addAll(regions);
     }
 }
-  
+

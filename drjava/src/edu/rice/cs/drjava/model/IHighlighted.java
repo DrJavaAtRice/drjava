@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -53,14 +53,12 @@ public interface IHighlighted {
     * @return the tag associated with the newly added painter */
   public PainterTag addPainter(Highlighter.HighlightPainter p);
   
-  /** 
-   * Remove the painter with the specified tag. 
+  /** Remove the painter with the specified tag. 
    * @param t the tag to be removed 
    */
   public void removePainter(PainterTag t);
   
-  /** 
-   * Move the painter with the specified tag to the front. 
+  /** Move the painter with the specified tag to the front. 
    * @param t the tag to be moved to front
    */
   public void movePainterToFront(PainterTag t);  

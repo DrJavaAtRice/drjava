@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -59,27 +59,17 @@ public class ConcJUnitUtils {
     * @param checkFilesInJar file names that should be in the jar file
     * @return true if f is a jar file and the files are in the jar */
   protected static boolean isValidJarFile(final File f, String... checkFilesInJar) {
-    if ((f==null) || (FileOps.NULL_FILE.equals(f)) || (!f.exists())) return false;
+    if ((f == null) || (FileOps.NULL_FILE.equals(f)) || (!f.exists())) return false;
       JarFile jf = null;
       try {
         jf = new JarFile(f);
         for(String s: checkFilesInJar) {
           JarEntry je = jf.getJarEntry(s);
-          if (je==null) return false;
+          if (je == null) return false;
         }
         return true;
-        // we already have a JUnit version 4.4 as junit.jar
-        // running junit.runner.Version to get the version string
-        // isn't a valid criterion for compatibility
-//        JVMBuilder jvmb = JVMBuilder.DEFAULT.classPath(f);
-//        Process p = jvmb.start("junit.runner.Version");
-//        BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
-//        String line = br.readLine();
-//        try {
-//          p.waitFor();
-//        }
-//        catch(InterruptedException ie) { return false; }
-//        return "3.8.2".equals(line);
+        // we already have JUnit version 4.4+ as junit.jar.  Running junit.runner.Version to get the version string
+        // isn't a valid criterion for compatibility;
       }
       catch(IOException ioe) { return false; }
       finally {
@@ -94,9 +84,7 @@ public class ConcJUnitUtils {
     * @param f file to check
     * @return true if f is a valid junit.jar file */
   public static boolean isValidJUnitFile(final File f) {
-    return isValidJarFile(f,
-                          "junit/framework/Test.class",
-                          "junit/runner/Version.class");
+    return isValidJarFile(f, "junit/framework/Test.class", "junit/runner/Version.class");
   }
 
   /** Check if the file is a valid concutest-junit-xxx-withrt.jar file.
@@ -133,10 +121,10 @@ public class ConcJUnitUtils {
       JarFile jf = new JarFile(f);
       try {
         Manifest mf = jf.getManifest();
-        if (mf==null) return false;
+        if (mf == null) return false;
         String vendor = mf.getMainAttributes().getValue("Edu-Rice-Cs-CUnit-JavaVersion-Vendor");
         String version = mf.getMainAttributes().getValue("Edu-Rice-Cs-CUnit-JavaVersion");
-        if ((vendor==null) || (version==null)) return false;
+        if ((vendor == null) || (version == null)) return false;
         return (vendor.equals(edu.rice.cs.plt.reflect.JavaVersion.CURRENT_FULL.vendor().toString()) &&
             version.equals(edu.rice.cs.plt.reflect.JavaVersion.CURRENT_FULL.toString()));
       }
@@ -207,14 +195,13 @@ public class ConcJUnitUtils {
     }
   }
   
-  /**
-   * Show the "Generate ConcJUnit Runtime" dialog (ask for file name, etc.).
-   * @param parentFrame parent frame
-   * @param rtFile suggestion of where we should generate the runtime
-   * @param concJUnitJarFile the concutest-junit-....-withrt.jar file that does the generation
-   * @param successRunnable command to execute after successful generation, parameter is the file
-   * @param failureRunnable command to execute if generation fails
-   */
+  /** Show the "Generate ConcJUnit Runtime" dialog (ask for file name, etc.).
+    * @param parentFrame parent frame
+    * @param rtFile suggestion of where we should generate the runtime
+    * @param concJUnitJarFile the concutest-junit-....-withrt.jar file that does the generation
+    * @param successRunnable command to execute after successful generation, parameter is the file
+    * @param failureRunnable command to execute if generation fails
+    */
   public static void showGenerateRTConcJUnitJarFileDialog(final Frame parentFrame,
                                                           File rtFile,
                                                           final File concJUnitJarFile,

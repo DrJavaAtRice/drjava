@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -50,16 +50,14 @@ public interface DirectorySelector {
     */
   public File getDirectory(File start) throws OperationCanceledException;
   
-  /** 
-   * Asks the user a yes/no question.
+  /** Asks the user a yes/no question.
    * @param message message to be displayed
    * @param title title 
    * @return true if the user responded affirmatively, false if negatively
    */
   public boolean askUser(String message, String title);
   
-  /** 
-   * Warns the user about an error condition. 
+  /** Warns the user about an error condition. 
    * @param message message to be displayed
    * @param title title 
    */

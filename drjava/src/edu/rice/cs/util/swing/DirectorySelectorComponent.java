@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -187,14 +187,12 @@ public class DirectorySelectorComponent extends JPanel {
     _chooserButton.setToolTipText(text);
   }
   
-  /** 
-   * Adds a filter to decide if a directory can be chosen. 
+  /** Adds a filter to decide if a directory can be chosen. 
    * @param filter filter to be added
    */
   public void addChoosableFileFilter(FileFilter filter) { _chooser.addChoosableFileFilter(filter); }
   
-  /** 
-   * Removes the given filefilter from the chooser.
+  /** Removes the given filefilter from the chooser.
    * @param filter filter to be removed
    */
   public void removeChoosableFileFilter(FileFilter filter) { _chooser.removeChoosableFileFilter(filter); }

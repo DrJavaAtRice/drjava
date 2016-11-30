@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -53,7 +53,7 @@ import edu.rice.cs.util.FileOps;
 /** A GUI-toolkit agnostic interface to a console document.  This class assumes that the embedded document supports 
   * readers/writers locking and uses that locking protocol to ensure the integrity of the data added in this class
   * WHY is prompt considered part of a console document rather than an interactions document?
-  * @version $Id: ConsoleDocument.java 5236 2010-04-27 01:43:36Z mgricken $ */
+  * @version $Id$ */
 
 public class ConsoleDocument implements ConsoleDocumentInterface {
   
@@ -144,10 +144,9 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     */
   public void setBeep(Runnable beep) { _beep = beep; }
   
-  /** 
-   * Resets the document to a clean state. Only runs in the event thread. 
-   * @param banner the value to which to set the banner
-   */
+  /** Resets the document to a clean state. Only runs in the event thread. 
+    * @param banner the value to which to set the banner
+    */
   public void reset(String banner) {
     assert EventQueue.isDispatchThread();
     try {
@@ -192,11 +191,10 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     catch (EditDocumentException e) { throw new UnexpectedException(e); }
   }
   
-  /** 
-   * Gets the position immediately before the prompt, or the doc length if 
-   * there is no prompt.  Only runs in the event thread. 
-   * @return the position immediately before the prompt, or the doc length if there is no prompt
-   */
+  /** Gets the position immediately before the prompt, or the doc length if there is no prompt.  Only runs in the event 
+    * thread. 
+    * @return the position immediately before the prompt, or the doc length if there is no prompt
+    */
   private int _getPositionBeforePrompt() {
     int len = _document.getLength();
     if (_document.hasPrompt()) {
@@ -206,12 +204,13 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     return len;
   }
   
-  /** Inserts the given string with the given attributes just before the most recent prompt.
+  /** Inserts the given string with the given attributes just before the most recent prompt.  Only runs in event thread
+    * except for legacy test code.
     * @param text String to insert
     * @param style name of style to format the string
     */
   public void insertBeforeLastPrompt(String text, String style) {
-/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     try {
       int pos = _getPositionBeforePrompt();
 //      System.err.println("_promptPos before update = " + _promptPos);
@@ -259,8 +258,7 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     _document.forceInsertText(offs, str, style);
   }
   
-  /** 
-   * Adds style specifier to _stylelists. Only runs in event thread. 
+  /** Adds style specifier to _stylelists. Only runs in event thread. 
    * @param offs offset
    * @param str string
    * @param style style
@@ -292,8 +290,7 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
   /** Returns the length of the document. */
   public int getLength() { return _document.getLength(); }
   
-  /** 
-   * Returns a portion of the document.
+  /** Returns a portion of the document.
    * @param offs First offset of the desired text
    * @param len Number of characters to return
    * @return a portion of the document 
@@ -303,8 +300,7 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     return _document.getDocText(offs, len);
   }
   
-  /** 
-   * Returns the entire text of the document.  Identical to getText() in AbstractDocumentInterface.
+  /** Returns the entire text of the document.  Identical to getText() in AbstractDocumentInterface.
    * @return the entire text of the document
    * @throws EditDocumentException if the offset or length are illegal
    */
@@ -366,8 +362,7 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     }
   }
   
-  /** 
-   * Saves the contents of the document to a file.
+  /** Saves the contents of the document to a file.
    * @param selector File to save to
    * @throws IOException if an IO operation fails
    */

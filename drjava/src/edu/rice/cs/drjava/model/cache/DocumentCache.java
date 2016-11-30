@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -113,8 +113,7 @@ public class DocumentCache {
     return mgr;
   }
   
-  /** 
-   * Changes the number of <b>unmodified</b> documents allowed in the cache at 
+  /** Changes the number of <b>unmodified</b> documents allowed in the cache at 
    * one time. <b> 
    * Note: modified documents are not managed in the cache except in 
    * transitional situations when a queue document becomes modified.  Only
@@ -164,8 +163,7 @@ public class DocumentCache {
     private volatile int _stat; // I know, this is not very OO
     private volatile DefinitionsDocument _doc;
     
-    /** 
-     * Instantiates a manager for the documents that are produced by the given document reconstructor.
+    /** Instantiates a manager for the documents that are produced by the given document reconstructor.
      * @param rec The reconstructor used to create the document
      * @param isUntitled true if the document is untitled; false otherwise
      */
@@ -181,8 +179,7 @@ public class DocumentCache {
     /** Adds DocumentListener to the reconstructor. */
     public void addDocumentListener(DocumentListener l) { _rec.addDocumentListener(l); }
     
-    /** 
-     * Makes this document; assumes that cacheLock is already held. 
+    /** Makes this document; assumes that cacheLock is already held. 
      * @return the newly-created document
      */
     private DefinitionsDocument makeDocument() {
@@ -316,8 +313,7 @@ public class DocumentCache {
       */
     void closingKickOut() { kickOut(true); }
     
-    /** 
-     * Performs the actual kickOut operation.  Assumes cacheLock is already held. 
+    /** Performs the actual kickOut operation.  Assumes cacheLock is already held. 
      * @param isClosing true if the document is being closed; false otherwise
      */
     private void kickOut(boolean isClosing) {

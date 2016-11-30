@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -47,8 +47,7 @@ import javax.swing.JOptionPane;
   * @version $Id$
   */
 public class DrJavaRestart {
-  /**
-   * Number of attempts to delete or rename files. This is necessary since an OS,
+  /** Number of attempts to delete or rename files. This is necessary since an OS,
    * particularly Windows, may still have a write lock on a file.
    * Currently, we pause up to 5*1000 ms per operation. */
   public static final int ATTEMPTS = 5;

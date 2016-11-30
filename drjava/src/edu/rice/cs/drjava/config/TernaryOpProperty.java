@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -66,8 +66,7 @@ public class TernaryOpProperty<O,P,Q,R> extends EagerProperty {
   /** Lambda to format the result. */
   protected Lambda<R,String> _format;
   
-  /** 
-   * Create an eager property. 
+  /** Create an eager property. 
    *
    * @param name the name of the property
    * @param help the help page for this property
@@ -111,8 +110,7 @@ public class TernaryOpProperty<O,P,Q,R> extends EagerProperty {
     resetAttributes();
   }
 
-  /** 
-   * Create an eager property. 
+  /** Create an eager property. 
    *
    * @param name the name of the property
    * @param help the help page for this property

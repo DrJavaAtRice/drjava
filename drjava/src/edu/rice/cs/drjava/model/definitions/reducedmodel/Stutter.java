@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -36,8 +36,7 @@
 
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
-/**
- * This class represents a special state, passed by some methods that return
+/** * This class represents a special state, passed by some methods that return
  * states, to indicate that it is necessary to back up one position before
  * continuing in an iteration over a TokenList. It probably shouldn't exist,
  * and, hopefully, it would go away if the underlying logic of the reduced

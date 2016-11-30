@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -57,26 +57,22 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
 
   //public JUnitResultTuple getLastJUnitResult();
 
-  /** 
-   * @param enforce true if all access of class members is to be permitted 
+  /** @param enforce true if all access of class members is to be permitted 
    * @throws RemoteException if communication over RMI fails
    */
   public void setEnforceAllAccess(boolean enforce) throws RemoteException;
   
-  /** 
-   * @param enforce true if access of private class members is to be permitted 
+  /** @param enforce true if access of private class members is to be permitted 
    * @throws RemoteException if communication over RMI fails
    */
   public void setEnforcePrivateAccess(boolean enforce) throws RemoteException;
 
-  /** 
-   * @param require true if the interpreter requires a semicolon at the end of statements. 
+  /** @param require true if the interpreter requires a semicolon at the end of statements. 
    * @throws RemoteException if communication over RMI fails
    */
   public void setRequireSemicolon(boolean require) throws RemoteException;
   
-  /** 
-   * @param require true if the interpreter requires variable declarations to 
+  /** @param require true if the interpreter requires variable declarations to 
    *                include an explicit type. 
    * @throws RemoteException if communication over RMI fails
    */
@@ -109,8 +105,7 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
    */
   public Pair<Boolean, Boolean> setToDefaultInterpreter() throws RemoteException;
   
-  /** 
-   * Interprets the given string of source code in the active interpreter. 
+  /** Interprets the given string of source code in the active interpreter. 
    * The result is returned to MainJVMRemoteI via the interpretResult method.
    * @param s Source code to interpret.
    * @return the result of interpretation
@@ -118,8 +113,7 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
    */
   public InterpretResult interpret(String s) throws RemoteException;
   
-  /** 
-   * Gets the string representation of the value of a variable in the current interpreter.
+  /** Gets the string representation of the value of a variable in the current interpreter.
    * @param var the name of the variable
    * @return null if the variable is not defined, "null" if the value is null; otherwise,
    *         its string representation
@@ -127,46 +121,40 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
    */
   public Pair<String,String> getVariableToString(String var) throws RemoteException;
   
-  /** 
-   * @return the current class path.
+  /** @return the current class path.
    * @throws RemoteException if communication over RMI fails
    */
   public Iterable<File> getClassPath() throws RemoteException;  
   
-  /** 
-   * Adds the given path to the class path shared by ALL Java interpreters.  
+  /** Adds the given path to the class path shared by ALL Java interpreters.  
    * Only unique paths are added.
    * @param f Entry to add to the accumulated class path
    * @throws RemoteException if communication over RMI fails
    */
   public void addProjectClassPath(File f) throws RemoteException;
   
-  /** 
-   * Adds the given path to the class path shared by ALL Java interpreters. 
+  /** Adds the given path to the class path shared by ALL Java interpreters. 
    * Only unique paths are added.
    * @param f Entry to add to the accumulated class path
    * @throws RemoteException if communication over RMI fails
    */
   public void addBuildDirectoryClassPath(File f) throws RemoteException;
   
-  /** 
-   * Adds the given path to the class path shared by ALL Java interpreters. 
+  /** Adds the given path to the class path shared by ALL Java interpreters. 
    * Only unique paths are added.
    * @param f Entry to add to the accumulated class path
    * @throws RemoteException if communication over RMI fails
    */
   public void addProjectFilesClassPath(File f) throws RemoteException;
   
-  /** 
-   * Adds the given path to the class path shared by ALL Java interpreters. 
+  /** Adds the given path to the class path shared by ALL Java interpreters. 
    * Only unique paths are added.
    * @param f Entry to add to the accumulated class path
    * @throws RemoteException if communication over RMI fails
    */
   public void addExternalFilesClassPath(File f) throws RemoteException;
   
-  /** 
-   * Adds the given path to the class path shared by ALL Java interpreters.  
+  /** Adds the given path to the class path shared by ALL Java interpreters.  
    * Only unique paths are added.
    * @param f Entry to add to the accumulated class path
    * @throws RemoteException if communication over RMI fails

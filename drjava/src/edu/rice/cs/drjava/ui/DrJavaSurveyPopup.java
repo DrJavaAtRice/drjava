@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -74,8 +74,7 @@ public class DrJavaSurveyPopup extends JDialog {
   /** don't ask user again */
   private JCheckBox _neverAskAgain;
   
-  /** 
-   * Creates a window to display whether a new version of DrJava is available. 
+  /** Creates a window to display whether a new version of DrJava is available. 
    * @param parent the parent frame
    */
   public DrJavaSurveyPopup(MainFrame parent) {
@@ -173,8 +172,7 @@ public class DrJavaSurveyPopup extends JDialog {
     return sb.toString().replaceAll(" ","%20");
   }
   
-  /** 
-   * @return true if the user may participate in the survey, i.e. either the configuration
+  /** @return true if the user may participate in the survey, i.e. either the configuration
    * string has changed from the last time, or enough days have passed since the last test (3 months) 
    */
   public static boolean maySubmitSurvey() {

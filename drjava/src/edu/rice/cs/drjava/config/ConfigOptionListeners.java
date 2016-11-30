@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -239,8 +239,7 @@ public class ConfigOptionListeners implements OptionConstants {
     }
   }
   
-  /** 
-   * @param heapSizeMB the size of the heap, in MB
+  /** @param heapSizeMB the size of the heap, in MB
    * @return the next bigger heap size setting. 
    */
   static String getNextBiggerHeapSize(long heapSizeMB) {
@@ -429,10 +428,9 @@ public class ConfigOptionListeners implements OptionConstants {
     }
   }
   
-  /**
-   * @param heapSize the size of the heap (in MB)
-   * @return true if a JVM can be created with the specified heap size
-   */
+  /** @param heapSize the size of the heap (in MB)
+    * @return true if a JVM can be created with the specified heap size
+    */
   public static boolean checkHeapSize(long heapSize) {
     int exitValue = 1;
     try {

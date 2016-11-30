@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -43,9 +43,8 @@ import javax.swing.event.HyperlinkEvent;
 import java.net.URL;
 import java.net.MalformedURLException;
 
-/**
- * The frame for displaying the HTML help files.
- * @version $Id: HelpFrame.java 5175 2010-01-20 08:46:32Z mgricken $
+/** * The frame for displaying the HTML help files.
+ * @version $Id$
  */
 public class HelpFrame extends HTMLFrame {
   private static final String HELP_PATH =  "/edu/rice/cs/drjava/docs/user/";
@@ -59,8 +58,7 @@ public class HelpFrame extends HTMLFrame {
     addHyperlinkListener(_linkListener);
   }
   
-  /** 
-   * Used by subclass QuickStartFrame to instantiate fields of frame.
+  /** Used by subclass QuickStartFrame to instantiate fields of frame.
    * @param frameName name of the frame
    * @param introUrl intro URL
    * @param indexUrl index URL

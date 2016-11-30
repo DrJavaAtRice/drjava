@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -175,8 +175,7 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
     return _metrics.getDescent();
   }
   
-  /** 
-   * Only runs in event thread. 
+  /** Only runs in event thread. 
    * @param v the view
    * @param pos position
    * @param bias bias
@@ -258,8 +257,7 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
     return end;
   }
   
-  /** 
-   * Only runs in event thread. 
+  /** Only runs in event thread. 
    * @param v the view to sync
    */
   void sync(GlyphView v) {

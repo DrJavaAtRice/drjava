@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -63,8 +63,7 @@ public interface AbstractDocumentInterface {
   /* Removes the substring of specified length at the specified offset. */
   public void remove(int offset, int length) throws BadLocationException;
   
-  /** 
-   * Creates a "sticky" position within a document 
+  /** Creates a "sticky" position within a document 
    * @param offs the offset at which to create the sticky position
    * @return the newly-created position
    * @throws BadLocationException if attempts to reference an invalid location
@@ -73,8 +72,7 @@ public interface AbstractDocumentInterface {
   
   /* Methods not in swing Document interface. */
     
-  /** 
-   * Appends given string with specified attributes to end of this document. 
+  /** Appends given string with specified attributes to end of this document. 
    * @param str the string to be appended
    * @param set the set of attributes for str
    */

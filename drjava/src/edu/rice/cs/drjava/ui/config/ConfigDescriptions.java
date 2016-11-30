@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -123,24 +123,22 @@ public class ConfigDescriptions {
         "Right Margin Position",
         "The number of columns after which the right margin is displayed.");
     
-    add(OptionConstants.FONT_MAIN, "Main Font", 
-        "The font used for most text in DrJava.");
+    add(OptionConstants.FONT_MAIN, "Main Font", "The font used for most text in DrJava.");
     add(OptionConstants.FONT_LINE_NUMBERS, "Line Numbers Font",
         "<html>The font for displaying line numbers on the left side of<br>" +
         "the Definitions Pane if Show All Line Numbers is enabled.<br>" +
         "Cannot be displayed larger than the Main Font.</html>");
-    add(OptionConstants.FONT_DOCLIST, "Document List Font",
-        "The font used in the list of open documents.");
-    add(OptionConstants.FONT_TOOLBAR, "ToolBar Font",
-        "The font used in the toolbar buttons.");
-    add(OptionConstants.TEXT_ANTIALIAS, "Use anti-aliased text",
-        "Whether to graphically smooth the text.");
+    add(OptionConstants.FONT_DOCLIST, "Document List Font", "The font used in the list of open documents.");
+    add(OptionConstants.FONT_MENUBAR, "MenuBar Font", "The font used in menus and tabbed pane labels.");
+    add(OptionConstants.FONT_TOOLBAR, "ToolBar Font", "The font used in the toolbar buttons.");
+     
+    add(OptionConstants.TEXT_ANTIALIAS, "Use anti-aliased text", "Whether to graphically smooth the text.");
     
-    add(OptionConstants.DEFINITIONS_NORMAL_COLOR, "Normal Color",
+    add(OptionConstants.DEFINITIONS_NORMAL_COLOR, "Normal Color", 
         "The default color for text in the Definitions Pane.");
     add(OptionConstants.DEFINITIONS_KEYWORD_COLOR, "Keyword Color",
         "The color for Java keywords in the Definitions Pane.");
-    add(OptionConstants.DEFINITIONS_TYPE_COLOR, "Type Color",
+    add(OptionConstants.DEFINITIONS_TYPE_COLOR, "Type Color", 
         "The color for classes and types in the Definitions Pane.");
     add(OptionConstants.DEFINITIONS_COMMENT_COLOR, "Comment Color",
         "The color for comments in the Definitions Pane.");
@@ -353,7 +351,7 @@ public class ConfigDescriptions {
     // Prompt to change the language level extensions (.dj0/.dj1->.dj, .dj2->.java)
     add(OptionConstants.PROMPT_RENAME_LL_FILES, "Prompt to Rename Old Language Level Files When Saving",
         "<html>Whether DrJava should prompt the user to rename old language level files.<br>"+
-        "DrJava suggests to rename .dj0 and .dj1 files to .dj, and .dj2 files to .java.</html>");
+        "DrJava suggests renaming .dj0 and .dj1 files as .dj files, and .dj2 files as .java files.</html>");
     
     
     

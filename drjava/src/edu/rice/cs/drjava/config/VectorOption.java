@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -41,8 +41,7 @@ import java.io.StreamTokenizer;
 import java.io.StringReader;
 import java.io.IOException;
 
-/**
- * Abstract class defining behavior shared by all
+/** * Abstract class defining behavior shared by all
  * configuration options with values of type
  * {@code Vector<T>}.
  * {@code VectorOption<String>} now allows empty strings, i.e. "[,]" is a vector of two empty strings.
@@ -57,8 +56,7 @@ public class VectorOption<T> extends Option<Vector<T>> {
   public final char delim;
   public final String footer;
 
-  /** 
-   * @param key The name of this option.
+  /** @param key The name of this option.
    * @param parser the parsing strategy for an element in this option
    * @param formatter the formatting strategy for an element in this option
    * @param header the header for this option
@@ -81,8 +79,7 @@ public class VectorOption<T> extends Option<Vector<T>> {
     this(key, strategy, strategy, header, delim, footer,def);
   }
 
-  /** 
-   * Defaults the "header", "footer", and "delim" fields
+  /** Defaults the "header", "footer", and "delim" fields
    * to open bracket, close bracket, and comma, repsectively.
    * @param key The name of this option.
    * @param option The object that knows how to parse and format

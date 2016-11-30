@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -49,8 +49,7 @@ import java.util.ArrayList;
 
 import edu.rice.cs.plt.lambda.Lambda;
 
-/**
- * A tokenizer that splits a stream into string tokens while balancing quoting characters.
+/** * A tokenizer that splits a stream into string tokens while balancing quoting characters.
  * @author Mathias Ricken
  * @version $Id$
  */
@@ -82,8 +81,7 @@ public class BalancingStreamTokenizer {
     /** Default constructor. */
     public State() { }
     
-    /** 
-     * Copy constructor. 
+    /** Copy constructor. 
      * @param o state to be copied
      */
     public State(State o) {

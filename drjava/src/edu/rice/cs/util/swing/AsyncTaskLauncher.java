@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -58,8 +58,7 @@ public abstract class AsyncTaskLauncher {
     */
   protected abstract void setParentContainerEnabled(boolean enabled);
   
-  /** 
-   * Creates a progress monitor that can be used to provide feedback to the 
+  /** Creates a progress monitor that can be used to provide feedback to the 
    * user during the asynchronous task. This progress monitor can also be used 
    * to allow the user to request the task to be canceled. <p>
    * <i>This method only executes in the event-handling thread.</i> 
@@ -70,8 +69,7 @@ public abstract class AsyncTaskLauncher {
    */
   protected abstract IAsyncProgress createProgressMonitor(String description, int min, int max);
   
-  /** 
-   * Executes the AsyncTask in its own thread after performing any needed 
+  /** Executes the AsyncTask in its own thread after performing any needed 
    * steps to prepare the UI for its execution.
    * 
    * @param <P> The type of parameter to pass to the task

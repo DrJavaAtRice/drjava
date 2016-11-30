@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -40,8 +40,7 @@ import javax.swing.text.*;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 
-/**
- * Indents the current line in the document to the indent level of the
+/** * Indents the current line in the document to the indent level of the
  * start of the previous line, adds several lines of text at that indent level,
  * and moves the cursor to a particular line and position.
  * @version $Id$

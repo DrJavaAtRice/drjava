@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -49,8 +49,7 @@ import edu.rice.cs.util.FileOps;
 
 import java.io.File;
 
-/**
- * Tests the functionality provided by an implementation of JavadocModel.
+/** * Tests the functionality provided by an implementation of JavadocModel.
  * For now, this class is hard-coded to test DefaultJavadocModel, but it can be
  * extended to test any implementation of the interface.
  * @version $Id$

@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -83,7 +83,6 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
     _notifier = new GlobalEventNotifier(); // so this isn't null
   } 
    
-
   public InteractionsDJDocument(GlobalEventNotifier notifier){
    super();
    _hasPrompt = false;
@@ -192,8 +191,7 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
   //-------------end Undo/Redo Functionality---------------------// 
   
   
-  /** 
-   * @param indentLevel indentation level
+  /** @param indentLevel indentation level
    * @return a new indenter. Eventually to be used to return an interactions indenter 
    */
   protected Indenter makeNewIndenter(int indentLevel) { return new Indenter(indentLevel); }
@@ -223,8 +221,7 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
 //    }
   }
   
-  /** 
-   * Accessor method used to copy contents of _stylesList to an array.  Used in test cases. 
+  /** Accessor method used to copy contents of _stylesList to an array.  Used in test cases. 
    * @return a copy of the contents of _styleList
    */
   public Pair<Pair<Integer, Integer>, String>[] getStyles() { 
@@ -237,13 +234,12 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
     }
   }
   
-  /** 
-   * Attempts to set the coloring on the graphics based upon the content of the styles list
-   * returns false if the point is not in the list.  Only runs in event thread.
-   * @param point point
-   * @param g Graphics object
-   * @return true if coloring was set; false otherwise (e.g. if point was not in the list)
-   */
+  /** Attempts to set the coloring on the graphics based upon the content of the styles list
+    * returns false if the point is not in the list.  Only runs in event thread.
+    * @param point point
+    * @param g Graphics object
+    * @return true if coloring was set; false otherwise (e.g. if point was not in the list)
+    */
   public boolean setColoring(int point, Graphics g) {
     synchronized(_stylesList) {
       for(Pair<Pair<Integer,Integer>,String> p :  _stylesList) {
@@ -300,12 +296,11 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
     }
   }
   
-  /** 
-   * Attempts to set the font on the graphics context based upon the styles 
-   * held in the styles list. Only runs in event thread. 
-   * @param point point
-   * @param g Graphics object
-   */
+  /** Attempts to set the font on the graphics context based upon the styles 
+    * held in the styles list. Only runs in event thread. 
+    * @param point point
+    * @param g Graphics object
+    */
   public void setBoldFonts(int point, Graphics g) {
     synchronized(_stylesList) {
       for(Pair<Pair<Integer,Integer>,String> p :  _stylesList) {

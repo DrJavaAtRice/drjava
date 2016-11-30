@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -40,8 +40,7 @@ import java.util.ArrayList;
 
 import javax.swing.text.BadLocationException;
 
-/**
- * This class does almost all the work for keeping an indent tree trace.  IndentRuleQuestion
+/** * This class does almost all the work for keeping an indent tree trace.  IndentRuleQuestion
  * also does some of the work, and any subclass may substitute its own version of getRuleName()
  * @version $Id$
  */
