@@ -794,31 +794,28 @@
   </target>
 
   <target name="mac-app" depends="jar, assert-jar-exists, resolve-version-tag">
-    <echo message="Creating ${version-tag}-osx.tar.gz" />
+    <echo message="Creating ${version-tag}-osx.zip" />
+    <taskdef name="bundleapp"
+             classname="com.oracle.appbundler.AppBundlerTask"   
+             classpath="lib/buildlib/appbundler-1.0.jar" />
     <property name="mac-app-dir" value="${version-tag}/osx" />
     <mkdir dir="${mac-app-dir}" />
-    <copy todir="${mac-app-dir}/${readable-project-name}.app" >
-      <fileset dir="packaging/mac/${readable-project-name}.app" excludes="**/*jar-goes-here" />
-    </copy>
-    <copy todir="${mac-app-dir}/${readable-project-name}.app" overwrite="yes" >
-      <fileset dir="packaging/mac/${readable-project-name}.app">
-        <include name="**/*.plist" />
-        <include name="**/*.xml" />
-      </fileset>
-      <filterset>
-        <filter token="VERSION" value="${version-tag}" />
-      </filterset>
-    </copy>
-    <copy file="${ant.project.name}.jar" 
-          todir="${mac-app-dir}/${readable-project-name}.app/Contents/Resources/Java" />
-    <!-- A .zip file would be more convenient, because it unzips in one step.  Unfortunately,
-         permissions in .zip files don't seem to be supported before OS X 10.5. -->
-    <tar tarfile="${version-tag}-osx.tar.gz" compression="gzip">
-      <tarfileset dir="${mac-app-dir}" includes="${readable-project-name}.app/**"
-                  excludes="${readable-project-name}.app/Contents/MacOS/${readable-project-name}" />
-      <tarfileset dir="${mac-app-dir}" mode="755"
-                  includes="${readable-project-name}.app/Contents/MacOS/${readable-project-name}" />
-    </tar>
+    <bundleapp outputdirectory="${mac-app-dir}"
+        name="DrJava"
+        displayname="DrJava"
+        icon="packaging/mac/DrJava.icns"
+        signature="DrJa"
+        shortversion="${version-tag}"
+        identifier="edu.rice.cs.drjava.DrJava"
+        mainclassname="edu.rice.cs.drjava.DrJava">
+      <classpath file="drjava.jar" />
+    </bundleapp>
+    <zip destfile="${version-tag}-osx.zip">
+      <zipfileset dir="${mac-app-dir}" 
+                  excludes="${readable-project-name}.app/Contents/MacOS/JavaAppLauncher" />
+      <zipfileset dir="${mac-app-dir}" filemode="755"
+                  includes="${readable-project-name}.app/Contents/MacOS/JavaAppLauncher" />
+    </zip>
   </target>
   
   <target name="windows-app" depends="assert-launch4j-exists, jar, assert-jar-exists, resolve-version-tag">
