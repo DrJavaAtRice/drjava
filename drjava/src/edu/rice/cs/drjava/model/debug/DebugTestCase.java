@@ -107,7 +107,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     /* 3 */    "\n" +
     /* 4 */    "    Thread t = new Thread(){\n" +
     /* 5 */    "      public void run(){\n" +
-    /* 6 */    "       try{\n" +
+    /* 6 */    "       try {\n" +
     /* 7 */    "         Thread.sleep(1000);\n" +
     /* 8 */    "       }\n" +
     /* 9 */    "       catch(InterruptedException e){\n" +
@@ -115,12 +115,12 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     /* 11 */    "      System.out.println(\"I\'m a thread! Yeah!\");\n" +
     /* 12 */    "      }\n" +
     /* 13 */    "    };\n" +
-    /* 14 */    "    try{\n" +
+    /* 14 */    "    try {\n" +
     /* 15 */    "      t.start();\n" +
     /* 16 */    "      System.out.println(\"I just woke up.  I\'m a big boy now.\");\n" +
     /* 17 */    "      System.out.println(\"James likes bananas!\");\n" +
     /* 18 */    "      System.out.println(\"Yes they do.\");\n" +
-    /* 19 */    "    }catch(Exception e){\n" +
+    /* 19 */    "    } catch(Exception e){\n" +
     /* 20 */    "      e.printStackTrace();\n" +
     /* 21 */    "    }\n" +
     /* 22 */    "  }\n" +

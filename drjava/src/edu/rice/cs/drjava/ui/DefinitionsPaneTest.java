@@ -180,14 +180,10 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
   }
   
   /** Tests that typing Enter in a string/comment does cause an indent.  
-   * This behavior works in practice, but I can't get the test to work.  
-   * If we use definitions.processKeyEvent, the caret position is not 
-   * updated, so the " * " is not inserted.  If we try to dispatchEvent 
-   * from the EventDispatchingThread, it hangs...?
-   * @throws BadLocationException if attempts to reference an invalid location
-   * @throws InterruptedException if execution is interrupted unexpectedly
-   * @throws InvocationTargetException if the invocation target is invalid
-   */
+    * @throws BadLocationException if attempts to reference an invalid location
+    * @throws InterruptedException if execution is interrupted unexpectedly
+    * @throws InvocationTargetException if the invocation target is invalid
+    */
   public void testTypeEnterNotInCode() throws BadLocationException, InterruptedException, InvocationTargetException {
     
     Utilities.invokeAndWait(new Runnable() {

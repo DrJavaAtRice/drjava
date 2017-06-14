@@ -37,6 +37,7 @@
 package edu.rice.cs.drjava.model;
 
 import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.UnexpectedException;
@@ -701,17 +702,22 @@ public class FindReplaceMachineTest extends DrJavaTestCase {
   }
   
   private void replaceAll() {
-    Utilities.invokeAndWait(new Runnable() { public void run() { _frm.replaceAll(); } });
-  }
-  
-//  /** A thunk returning boolean. */
-//  private interface ContinueCommand {
-//    public boolean shouldContinue();
-//  }
-  
-//  private static ContinueCommand CONTINUE = new ContinueCommand() {
-//    public boolean shouldContinue() {
-//      return true;
-//    }
-//  };
+    Utilities.invokeAndWait(new Runnable() {  
+    /* code adapted from FindReplacePanel.replaceAll.  Assumes _findWord,_replaceWord, _isForward (using
+     * setSearchBackwards) in _frm have already been set */
+      public void run() {
+//        _frm._updateMachine();    // _frm should already be up to date.
+        int count = 0;
+        Runnable1<FindResult> replaceMatchingString =   // replaces current (found) string 
+          new Runnable1<FindResult>() { 
+            public void run(FindResult fr) { 
+              if (fr.getFoundOffset() >= 0) /* matching string found */ _frm.replaceCurrent();
+            }};
+        try {
+          /* Replace all matching strings in region (which may be entire project). */
+          count = _frm.processAll(replaceMatchingString);
+        }
+        finally { _model.refreshActiveDocument(); } 
+      }});
+  }                                                                           
 }

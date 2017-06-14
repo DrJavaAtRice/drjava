@@ -88,7 +88,7 @@ public class ManifestWriter {
     final StringBuilder sbuf = new StringBuilder();
     sbuf.append(Attributes.Name.MANIFEST_VERSION.toString());
     sbuf.append(": 1.0" + StringOps.EOL);
-    if( !_classPaths.isEmpty() ) {
+    if ( !_classPaths.isEmpty() ) {
       Iterator<String> iter = _classPaths.iterator();
       sbuf.append(Attributes.Name.CLASS_PATH.toString());
       sbuf.append(":");
@@ -98,17 +98,17 @@ public class ManifestWriter {
       }
       sbuf.append(StringOps.EOL);
     }
-    if( _mainClass != null ) {
+    if ( _mainClass != null ) {
       sbuf.append(Attributes.Name.MAIN_CLASS.toString());
       sbuf.append(": ");
       sbuf.append(_mainClass);
       sbuf.append(StringOps.EOL);
     }
     
-    if(_rawManifest != null) {
+    if (_rawManifest != null) {
       sbuf.append(_rawManifest); 
       
-      if(!_rawManifest.endsWith(StringOps.EOL))
+      if (!_rawManifest.endsWith(StringOps.EOL))
         sbuf.append(StringOps.EOL);
     }
     

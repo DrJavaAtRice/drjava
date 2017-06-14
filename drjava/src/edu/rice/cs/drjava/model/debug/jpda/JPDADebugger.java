@@ -327,7 +327,7 @@ public class JPDADebugger implements Debugger {
       throw new IllegalArgumentException("Given thread must be suspended.");
 //       threadRef.suspend();
 //
-//       try{
+//       try {
 //         if ( threadRef.frameCount() <= 0 ) {
 //           printMessage(threadRef.name() + " could not be suspended. It had no stackframes.");
 //           _suspendedThreads.push(threadRef);
@@ -1450,14 +1450,14 @@ public class JPDADebugger implements Debugger {
       String type = "";
 //      ArrayList<Integer> arr_index = new ArrayList<Integer>();
 //      
-//      if(name.indexOf("[") != -1 && name.indexOf("]") != -1) {
+//      if (name.indexOf("[") != -1 && name.indexOf("]") != -1) {
 //        name = name.substring(0, name.indexOf("["));
 //        arr_index.add(Integer.parseInt(w.getName().substring(w.getName().indexOf("[")+1, w.getName().indexOf("]"))));      
-//        if(w.getName().indexOf("]")<(w.getName().length()-1)) {
+//        if (w.getName().indexOf("]")<(w.getName().length()-1)) {
 //          String iter = w.getName().substring(w.getName().indexOf("]")+1, w.getName().length());
 //          while(iter.indexOf("[") != -1 && iter.indexOf("]") != -1) {
 //            arr_index.add(Integer.parseInt(iter.substring(iter.indexOf("[")+1, iter.indexOf("]"))));      
-//            if(iter.indexOf("]")<(iter.length()-1))
+//            if (iter.indexOf("]")<(iter.length()-1))
 //              iter = iter.substring(iter.indexOf("]")+1, iter.length());
 //            else 
 //              iter = "";
@@ -1822,9 +1822,16 @@ public class JPDADebugger implements Debugger {
             }
 
             if ((val != null) && (!oldVal.equals(val))) {
-              try { _runningThread.frame(0).setValue(var, val); }
-              catch (InvalidTypeException e) { error.log("Can't set variable", e); }
-              catch (ClassNotLoadedException e) { error.log("Can't set variable", e); }
+              /* The following test was added after a NullPointerException was thrown with line coordinate = 1833 (after
+               * compensating for additonal comment lines). */
+              if (_runningThread != null) {
+                try { _runningThread.frame(0).setValue(var, val); }
+                /* The (error != null) tests were added to work around NullPointerExceptions when either _runningThread
+                 * or error is null.  The latter appears impossible based on the static initialization block in DebugUtil 
+                 * and the definition of VoidLog.INSTANCE, so _runningThread is presumably null. */
+                catch (InvalidTypeException e) { if (error != null) error.log("Can't set variable", e); }
+                catch (ClassNotLoadedException e) { if (error != null) error.log("Can't set variable", e); }
+              }
             }
           }
           catch (ClassNotLoadedException e) { /* just ignore -- val must be null anyway */ }

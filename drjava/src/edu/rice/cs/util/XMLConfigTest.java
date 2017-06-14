@@ -890,30 +890,30 @@ public class XMLConfigTest extends TestCase {
     //Test for getInt(String path)
     int n = xc.getInt("concutest/name.value");
     Assert.assertEquals("Found expected value", 5, n);
-    try{
+    try {
       xc.getInt("concutest/class.name");
       Assert.fail("Should have thrown exception");
     }
     catch(IllegalArgumentException e){ }
     
-    try{
+    try {
       xc.getInt("doesNotExitPath/subPath");
       Assert.fail("Should have thrown exception");
-    }catch(XMLConfig.XMLConfigException e){ }
+    } catch(XMLConfig.XMLConfigException e){ }
     
     //Test for getInt(String path, Node root)
     n = xc.getInt("name.value", xc.getNodes("concutest").get(0));
     Assert.assertEquals("Found expected value", 5, n);
-    try{
+    try {
       xc.getInt("class.name", xc.getNodes("concutest").get(0));
       Assert.fail("Should have thrown exception");
     }
     catch(IllegalArgumentException e){ }
     
-    try{
+    try {
       xc.getInt("doesNotExitPath/subPath", xc.getNodes("concutest").get(0));
       Assert.fail("Should have thrown exception");
-    }catch(XMLConfig.XMLConfigException e){ }
+    } catch(XMLConfig.XMLConfigException e){ }
     
     //Test for getInt(String path, int default)
     n = xc.getInt("concutest/name.value", 10);
@@ -956,20 +956,20 @@ public class XMLConfigTest extends TestCase {
                                        + " <class name=\"sample.threadCheck.ThreadCheckSample4\"/>\n"
                                        + "</concutest>"));
     
-    try{
+    try {
       xc.getNodes("somePath.attr.subAttr");
       Assert.fail("Shouldn't be able to refer to sub attributes");
-    }catch(XMLConfig.XMLConfigException e){
+    } catch(XMLConfig.XMLConfigException e){
       //Needs to be kept in sync with exception message on ~496:XMLConfig
       Assert.assertEquals("Didn't get expected exception message",
                           "An attribute cannot have subparts (foo.bar.fum and foo.bar/fum not allowed)",
                           e.getMessage());
     }
     
-    try{
+    try {
       xc.getNodes("somePath.attr/subAttr");
       Assert.fail("Shouldn't be able to refer to a path relative to an attribute");
-    }catch(XMLConfig.XMLConfigException e){
+    } catch(XMLConfig.XMLConfigException e){
       //Needs to be kept in sync with exception message on ~496:XMLConfig
       Assert.assertEquals("Didn't get expected exception message",
                           "An attribute cannot have subparts (foo.bar.fum and foo.bar/fum not allowed)",
@@ -991,7 +991,7 @@ public class XMLConfigTest extends TestCase {
     Boolean b = xc.getBool("concutest/name.value") && !xc.getBool("concutest/thread.value") && xc.getBool("concutest/node.value") && !xc.getBool("concutest/dot.value");
     Assert.assertTrue("Should be true",b);
     
-    try{
+    try {
       xc.getBool("concutest/class.name");
       Assert.fail("Should have thrown exception");
     }
@@ -1003,7 +1003,7 @@ public class XMLConfigTest extends TestCase {
     b = xc.getBool("name.value",root) && !xc.getBool("thread.value", root) && xc.getBool("node.value", root) && !xc.getBool("dot.value", root);
     Assert.assertTrue("Should be true",b);
     
-    try{
+    try {
       xc.getBool("class.name", root);
       Assert.fail("Should have thrown exception");
     }
@@ -1075,11 +1075,11 @@ public class XMLConfigTest extends TestCase {
                                        + " <class name=\"sample.threadCheck.ThreadCheckSample4\"/>\n"
                                        + "</concutest>")); 
     
-    try{
+    try {
       char c = File.separatorChar;
       xc.save(new File("." + c + "does" + c + "not" + c + "exist" + c + "file.xml"));
       Assert.fail("Should not have succeeded in saving to non-existant path");
-    }catch(XMLConfig.XMLConfigException e){ }
+    } catch(XMLConfig.XMLConfigException e){ }
     
     File saveTo = File.createTempFile("drjava_test", "xml");
     xc.save(saveTo);
@@ -1087,7 +1087,7 @@ public class XMLConfigTest extends TestCase {
     
     new XMLConfig(saveTo.getAbsolutePath());
     
-    try{
+    try {
       char c = File.separatorChar;
       new XMLConfig("." + c + "does" + c + "not" + c + "exist" + c + "file.xml");
       Assert.fail("Should not succeed in load from non-existant file");
@@ -1117,13 +1117,13 @@ public class XMLConfigTest extends TestCase {
     
     Node nd = xc.getNodes("concutest").get(0);
     
-    try{
+    try {
       new XMLConfig(null, nd);
       Assert.fail("Should not have been able to make new XMLConfig with null parent");
     }
     catch(XMLConfig.XMLConfigException e){ }
     
-    try{
+    try {
       new XMLConfig(xc, null);
       Assert.fail("Should not have been able to make ne XMLConfig with null node");
     }
@@ -1149,7 +1149,7 @@ public class XMLConfigTest extends TestCase {
     File saveTo = File.createTempFile("drjava_test", "xml");
     xc.save(saveTo);
     
-    try{
+    try {
       new XMLConfig("badfileName");
     }
     catch(XMLConfig.XMLConfigException e){ }

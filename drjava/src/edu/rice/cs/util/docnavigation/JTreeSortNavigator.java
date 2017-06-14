@@ -223,7 +223,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
       int i;
       for (i = 0; i < num; i++) {
         TreeNode n = (TreeNode)_model.getChild(_model.getRoot(), i);
-        if(_roots.indexOf(n) > indexInRoots) break;
+        if (_roots.indexOf(n) > indexInRoots) break;
       }
       _model.insertNodeInto(parent, (MutableTreeNode)_model.getRoot(), i);
     }
@@ -249,7 +249,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
       parentsKid = ((DefaultMutableTreeNode) parent.getChildAt(i));
       if (parentsKid instanceof InnerNode<?,?>) {
         // do nothing, it's a folder
-      } else if(parentsKid instanceof LeafNode<?>) {
+      } else if (parentsKid instanceof LeafNode<?>) {
         oldName = ((LeafNode<?>)parentsKid).getData().getName();
         if ((newName.toUpperCase().compareTo(oldName.toUpperCase()) < 0)) break;
       } else throw new IllegalStateException("found a node in navigator that is not an InnerNode or LeafNode");
@@ -854,7 +854,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
       if (n == _model.getRoot()) return true;
       
       while (l.getParent() != _model.getRoot()) {
-        if(l.getParent() == n) return true;
+        if (l.getParent() == n) return true;
         l = l.getParent();
       }
     }

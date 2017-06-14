@@ -276,7 +276,7 @@ public class LanguageLevelStackTraceMapper {
     
     try { rdLine = bufReader.readLine(); } catch(java.io.IOException e){ }
     
-    if(rdLine.indexOf("//") != 0) mapSize = 0;  // Kills the for loop if read line is not of correct format
+    if (rdLine.indexOf("//") != 0) mapSize = 0;  // Kills the for loop if read line is not of correct format
 
     TreeMap<Integer,Integer> map = new TreeMap<Integer,Integer>();
     

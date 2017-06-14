@@ -51,6 +51,7 @@ import javax.swing.tree.*;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.*;
+import edu.rice.cs.drjava.model.junit.ConcJUnitUtils;
 import edu.rice.cs.drjava.ui.*;
 import edu.rice.cs.drjava.ui.KeyBindingManager.KeyStrokeData;
 import edu.rice.cs.drjava.platform.PlatformFactory;
@@ -1242,7 +1243,7 @@ public class ConfigFrame extends SwingFrame {
      */
     ActionListener CPCActionListener = new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        if(!edu.rice.cs.drjava.DrJava.getConfig().getSetting(OptionConstants.DEFAULT_COMPILER_PREFERENCE).equals(CPC.getCurrentComboBoxValue())) {
+        if (!edu.rice.cs.drjava.DrJava.getConfig().getSetting(OptionConstants.DEFAULT_COMPILER_PREFERENCE).equals(CPC.getCurrentComboBoxValue())) {
           edu.rice.cs.drjava.DrJava.getConfig().setSetting(OptionConstants.DEFAULT_COMPILER_PREFERENCE,CPC.getCurrentComboBoxValue());
         }
       }
@@ -1348,8 +1349,7 @@ public class ConfigFrame extends SwingFrame {
       newFileOptionComponent(OptionConstants.JUNIT_LOCATION,
                               new FileSelectorComponent(this, _jarChooser, 30, 10f) {
       public void setFileField(File file) {
-        if (edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidJUnitFile(file) ||
-            edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidConcJUnitFile(file)) {
+        if (ConcJUnitUtils.isValidJUnitFile(file) || ConcJUnitUtils.isValidConcJUnitFile(file)) {
           super.setFileField(file);
         }
         else if (file.exists()) { // invalid JUnit/ConcJUnit file, but exists
@@ -1376,8 +1376,7 @@ public class ConfigFrame extends SwingFrame {
           return false;
         }
         else {
-          if (edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidJUnitFile(newFile) ||
-              edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidConcJUnitFile(newFile) ||
+          if (ConcJUnitUtils.isValidJUnitFile(newFile) || ConcJUnitUtils.isValidConcJUnitFile(newFile) ||
               FileOps.NULL_FILE.equals(newFile)) {
             setFileField(newFile);
             return true;
@@ -1411,9 +1410,7 @@ public class ConfigFrame extends SwingFrame {
         newFileOptionComponent(OptionConstants.RT_CONCJUNIT_LOCATION,
                                new FileSelectorComponent(this, _jarChooser, 30, 10f) {
         public void setFileField(File file) {
-          if (edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidRTConcJUnitFile(file)) {
-            super.setFileField(file);
-          }
+          if (ConcJUnitUtils.isValidRTConcJUnitFile(file)) { super.setFileField(file); }
           else if (file.exists()) { // invalid but exists
             JOptionPane.showMessageDialog(_parent, "The file '"+ file.getName() + "'\nis not a valid ConcJUnit Runtime file.",
                                           "Invalid ConcJUnit Runtime File", JOptionPane.ERROR_MESSAGE);
@@ -1436,8 +1433,7 @@ public class ConfigFrame extends SwingFrame {
             return false;
           }
           else {
-            if (edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidRTConcJUnitFile(newFile) ||
-                FileOps.NULL_FILE.equals(newFile)) {
+            if (ConcJUnitUtils.isValidRTConcJUnitFile(newFile) || FileOps.NULL_FILE.equals(newFile)) {
               setFileField(newFile);
               return true;
             }
@@ -1459,17 +1455,15 @@ public class ConfigFrame extends SwingFrame {
           if (junitLocEnabled.getComponent().isSelected()) {
             concJUnitJarFile = junitLoc.getComponent().getFileFromField();
           }
-          File rtFile = rtConcJUnitLoc.getComponent().getFileFromField();
-          edu.rice.cs.drjava.model.junit.ConcJUnitUtils.
-            showGenerateRTConcJUnitJarFileDialog(ConfigFrame.this,
-                                                 rtFile,
-                                                 concJUnitJarFile,
-                                                 new Runnable1<File>() {
-            public void run(File targetFile) {
-              rtConcJUnitLoc.getComponent().setFileField(targetFile);
-            }
-          },
-                                                 new Runnable() { public void run() { } });
+          final File rtFile = rtConcJUnitLoc.getComponent().getFileFromField();
+          final Runnable1<File> setFileField = new Runnable1<File>() { 
+            public void run(File targetFile) { rtConcJUnitLoc.getComponent().setFileField(targetFile); }
+          };
+          ConcJUnitUtils.showGenerateRTConcJUnitJarFileDialog(ConfigFrame.this,
+                                                              rtFile,
+                                                              concJUnitJarFile,
+                                                              setFileField,
+                                                              new Runnable() { public void run() { } });
         }
       };
       final ButtonComponent processRT =
@@ -1480,8 +1474,7 @@ public class ConfigFrame extends SwingFrame {
       OptionComponent.ChangeListener rtConcJUnitListener = new OptionComponent.ChangeListener() {
         public Object value(Object oc) {
           File f = junitLoc.getComponent().getFileFromField();
-          boolean enabled = (!junitLocEnabled.getComponent().isSelected()) ||
-            edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidConcJUnitFile(f);
+          boolean enabled = (!junitLocEnabled.getComponent().isSelected()) || ConcJUnitUtils.isValidConcJUnitFile(f);
           rtConcJUnitLoc.getComponent().setEnabled(enabled);
           processRT.getComponent().setEnabled(enabled);
           concJUnitChecksEnabledComponent.getComponent().setEnabled(enabled);
@@ -1517,7 +1510,7 @@ public class ConfigFrame extends SwingFrame {
           }
           else {
             String type = "ConcJUnit";
-            if (!edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidConcJUnitFile(f)) {
+            if (! ConcJUnitUtils.isValidConcJUnitFile(f)) {
               type = "JUnit";
               isConcJUnit = false;
             }
@@ -1542,8 +1535,8 @@ public class ConfigFrame extends SwingFrame {
                 if (concJUnitChecksEnabledComponent.getCurrentComboBoxValue().
                       equals(OptionConstants.ConcJUnitCheckChoices.ALL)) {
                   File rtf = rtConcJUnitLoc.getComponent().getFileFromField();
-                  if ((rtf!=null) && !FileOps.NULL_FILE.equals(rtf) && rtf.exists() &&
-                      edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidRTConcJUnitFile(rtf)) {
+                  if ((rtf!=null) && !FileOps.NULL_FILE.equals(rtf) && rtf.exists() && 
+                      ConcJUnitUtils.isValidRTConcJUnitFile(rtf)) {
                     s[3] = "Lucky checks are enabled.";
                   }
                 }

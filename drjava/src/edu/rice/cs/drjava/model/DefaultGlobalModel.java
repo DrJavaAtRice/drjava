@@ -617,7 +617,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       
       String tempClassName = null;
       
-      if(qualifiedClassName == null)
+      if (qualifiedClassName == null)
         tempClassName = getDocument().getQualifiedClassName();
       else
         tempClassName = qualifiedClassName;

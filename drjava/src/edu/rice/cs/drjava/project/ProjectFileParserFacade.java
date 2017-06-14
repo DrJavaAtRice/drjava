@@ -99,19 +99,19 @@ public class ProjectFileParserFacade {
     
     String version = pfir.getDrJavaVersion();
     
-    if(version.equals("unknown"))
+    if (version.equals("unknown"))
       doFixup = true;
     
-    if(!doFixup){
+    if (!doFixup){
       int i = version.indexOf("-r");
       
-      if(i == -1){
+      if (i == -1){
         doFixup = true;
-      }else{
-        try{
-          if(Integer.parseInt(version.substring(i+2).trim()) < 4782)
+      } else {
+        try {
+          if (Integer.parseInt(version.substring(i+2).trim()) < 4782)
             doFixup = true;
-        }catch(NumberFormatException e){
+        } catch(NumberFormatException e){
           doFixup = true;
         }
       }
@@ -119,7 +119,7 @@ public class ProjectFileParserFacade {
     
     LOG.log("DoFixup? " + doFixup);
     
-    if(!doFixup || pfir.getMainClass() == null) return pfir;
+    if (!doFixup || pfir.getMainClass() == null) return pfir;
     
     String mainClass = pfir.getMainClass();
     
@@ -128,11 +128,11 @@ public class ProjectFileParserFacade {
     String qualifiedName = mainClass;
     
     //Strip off any leading slashes
-    if(qualifiedName.startsWith("" + File.separatorChar))
+    if (qualifiedName.startsWith("" + File.separatorChar))
       qualifiedName = qualifiedName.substring(1);
     
     //Remove the .java extension if it exists
-    if(qualifiedName.toLowerCase().endsWith(OptionConstants.JAVA_FILE_EXTENSION))
+    if (qualifiedName.toLowerCase().endsWith(OptionConstants.JAVA_FILE_EXTENSION))
       qualifiedName = qualifiedName.substring(0, qualifiedName.length() -
                                               OptionConstants.JAVA_FILE_EXTENSION.length());
     

@@ -284,8 +284,7 @@ public class ConcJUnitUtils {
             });
             public Object construct() {
               _processIncrementer.start();
-              _success = edu.rice.cs.drjava.model.junit.ConcJUnitUtils.
-                generateRTConcJUnitJarFile(targetFile, concJUnitJarFile, tmpDir);
+              _success = generateRTConcJUnitJarFile(targetFile, concJUnitJarFile, tmpDir);
               return null;
             }
             

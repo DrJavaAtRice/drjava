@@ -129,8 +129,8 @@ public abstract class AbstractMasterJVM implements MasterRemote {
   protected abstract void handleSlaveQuit(int status);
   
   /** Callback for when the slave JVM fails to either run or respond to {@link SlaveRemote#start}.
-   * @param e  Exception that occurred during startup.
-   */
+    * @param e  Exception that occurred during startup.
+    */
   protected abstract void handleSlaveWontStart(Exception e);
   
   /** Creates and starts the slave JVM.  If the the slave is currently running, waits until it completes.

@@ -199,7 +199,7 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList<ItemT> implemen
     synchronized(_model) {
       // System.err.println("removing from old list " + doc);
       int i = _model.indexOf(doc);
-      if( i == -1 )
+      if ( i == -1 )
         throw new IllegalArgumentException("Document " + doc + " not found in Document Navigator");
       ItemT result = getFromModel(i);
       _model.remove(i);

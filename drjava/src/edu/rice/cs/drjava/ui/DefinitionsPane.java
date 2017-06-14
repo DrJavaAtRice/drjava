@@ -819,7 +819,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     commentLinesItem.addActionListener(new AbstractAction() {
       public void actionPerformed( ActionEvent ae) {
         _mainFrame.hourglassOn();
-        try{
+        try {
           updateCurrentLocationInDoc();
           _commentLines();
         }

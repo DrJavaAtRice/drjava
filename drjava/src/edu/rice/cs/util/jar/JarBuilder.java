@@ -86,7 +86,7 @@ public class JarBuilder {
    */
   private String makeName(String parent, String name) {
     String sep = "/"; // NOTE: This can be a '/' since it is a path in the jar file itself
-    if( parent.equals("") )
+    if ( parent.equals("") )
       return name;
     if (parent.endsWith(sep))
       return parent + name;
@@ -149,10 +149,10 @@ public class JarBuilder {
       File[] files = dir.listFiles(filter);
       BufferedInputStream origin = null;
       
-      if( files == null ) // listFiles may return null if there's an IO error
+      if ( files == null ) // listFiles may return null if there's an IO error
         return true;
       for (int i = 0; i < files.length; i++) {
-        if( files[i].isFile() ) {
+        if ( files[i].isFile() ) {
           origin = new BufferedInputStream(new FileInputStream(files[i]), 2048);
           
           JarEntry entry = new JarEntry(makeName(parent, files[i].getName()));
@@ -164,7 +164,7 @@ public class JarBuilder {
           }
           origin.close();
         }
-        else if( files[i].isDirectory() ) {
+        else if ( files[i].isDirectory() ) {
           addDirectoryRecursiveHelper(files[i], makeName(parent, files[i].getName()),buffer,filter);
         }
       }

@@ -111,6 +111,8 @@ public interface OptionConstants {
   public static final int INTERMEDIATE_LEVEL = 2;
   public static final int ADVANCED_LEVEL = 3;
   public static final int FUNCTIONAL_JAVA_LEVEL = 4;
+  
+  /** LANGUAGE_LEVEL_EXTENSIONS includes legacy support for .dj0, .dj1, .dj2 files */
   public static final String[] LANGUAGE_LEVEL_EXTENSIONS = new String[] {
     JAVA_FILE_EXTENSION, // = .java, do not include the dot
       OLD_DJ0_FILE_EXTENSION, // = .dj0
@@ -326,7 +328,7 @@ public interface OptionConstants {
       * @return the list of available look-and-feel classnames
       */
     public static ArrayList<String> getLookAndFeels() {
-      if(! _registered && ! PlatformFactory.ONLY.isMacPlatform()) {
+      if (! _registered && ! PlatformFactory.ONLY.isMacPlatform()) {
         for(String[] newLaf : _registerLAFs) {
           try {
             Class.forName(newLaf[1]);

@@ -511,7 +511,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
 //     JMenuItem threadRunningSuspend = new JMenuItem();
 //     Action suspendAction = new AbstractAction("Suspend Thread") {
 //       public void actionPerformed(ActionEvent e) {
-//         try{
+//         try {
 //           _debugger.suspend(getSelectedThread());
 //         }
 //         catch(DebugException exception) {
@@ -652,7 +652,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
 
   /**Sets the AutomaticTraceButton text as well as the Automatic Trace check box menu item under Debugger based on whether automatic trace is enabled or not*/
   public void setAutomaticTraceButtonText() {
-    if(_model.getDebugger().isAutomaticTraceEnabled()) {
+    if (_model.getDebugger().isAutomaticTraceEnabled()) {
       _automaticTraceButton.setText("Disable Trace"); 
     }
     else { 

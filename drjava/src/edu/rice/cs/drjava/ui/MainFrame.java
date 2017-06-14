@@ -103,7 +103,12 @@ import edu.rice.cs.drjava.project.*;
 import edu.rice.cs.plt.concurrent.JVMBuilder;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.iter.IterUtil;
-import edu.rice.cs.plt.lambda.*;
+//import edu.rice.cs.plt.lambda.*;
+import edu.rice.cs.plt.lambda.DelayedThunk;
+import edu.rice.cs.plt.lambda.Predicate;
+import edu.rice.cs.plt.lambda.Runnable1;  // variant on Runnable with unary run method
+import edu.rice.cs.plt.lambda.Runnable3;  // variant on Runnable with ternary run method
+import edu.rice.cs.plt.lambda.Thunk;
 import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.util.classloader.ClassFileError;
@@ -1234,7 +1239,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         _currentDefPane.endCompoundEdit(); // replaced line below for French keyboard fix
 //        undoMan.endCompoundEdit(key);                                              // French keyboard fix
       }
-      else if(_interactionsPane.hasFocus()){
+      else if (_interactionsPane.hasFocus()){
        _interactionsPane.endCompoundEdit();
        super.actionPerformed(e);
        _interactionsPane.endCompoundEdit();
@@ -2193,7 +2198,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private final Action _commentLinesAction = new AbstractAction("Comment Line(s)") {
     public void actionPerformed(ActionEvent ae) {
       hourglassOn();
-      try{ commentLines(); }
+      try { commentLines(); }
       finally{ hourglassOff(); }
     }
   };
@@ -2202,7 +2207,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private final Action _uncommentLinesAction = new AbstractAction("Uncomment Line(s)") {
     public void actionPerformed(ActionEvent ae){
       hourglassOn();
-      try{ uncommentLines(); }
+      try { uncommentLines(); }
       finally{ hourglassOff(); }
     }
   };
@@ -3285,8 +3290,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       
       // add listeners to activate/deactivate the find/replace actions in MainFrame together with
       // those in the Find/Replace panel
-      Utilities.enableDisableWith(_findReplace._findNextAction, _findNextAction);
-      Utilities.enableDisableWith(_findReplace._findPreviousAction, _findPrevAction);
+      Utilities.enableDisableWith(_findReplace.getFindNextAction(), _findNextAction);
+      Utilities.enableDisableWith(_findReplace.getFindPreviousAction(), _findPrevAction);
       
       if (_showDebugger) {
         _debugPanel = new DebugPanel(MainFrame.this);
@@ -6009,7 +6014,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   void debuggerAutomaticTrace() {
     _log.log("debuggerAutomaticTrace(): isDebuggerReady() = "+isDebuggerReady()); 
     if (isDebuggerReady())  {
-      if(!_model.getDebugger().isAutomaticTraceEnabled()) {
+      if (!_model.getDebugger().isAutomaticTraceEnabled()) {
         enableAutomaticTrace();
       }
       else {
@@ -7511,7 +7516,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _fixToolBarHeights();
     
     // Plastic-specific style hints
-    if(Utilities.isPlasticLaf()) {
+    if (Utilities.isPlasticLaf()) {
       _toolBar.putClientProperty("JToolBar.isRollover", Boolean.FALSE);
       _toolBar.putClientProperty(com.jgoodies.looks.Options.HEADER_STYLE_KEY,
                                  com.jgoodies.looks.HeaderStyle.BOTH);
@@ -8987,7 +8992,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _disableStepTimer();
       _setThreadDependentDebugMenuItems(true);
       _model.getInteractionsModel().autoImport();               
-      if(_model.getDebugger().isAutomaticTraceEnabled()) {
+      if (_model.getDebugger().isAutomaticTraceEnabled()) {
         //System.out.println("new _automaticTraceTimer AUTO_STEP_RATE=" + AUTO_STEP_RATE + ", " + 
         //                   System.identityHashCode(_automaticTraceTimer);                                
         if ((_automaticTraceTimer != null) && (! _automaticTraceTimer.isRunning())) _automaticTraceTimer.start();

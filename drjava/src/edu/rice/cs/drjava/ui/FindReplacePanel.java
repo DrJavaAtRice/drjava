@@ -56,7 +56,7 @@ import edu.rice.cs.drjava.model.FindResult;
 import edu.rice.cs.drjava.model.ClipboardHistoryModel;
 import edu.rice.cs.drjava.model.MovingDocumentRegion;
 import edu.rice.cs.drjava.model.RegionManager;
-import edu.rice.cs.plt.lambda.Runnable1;
+import edu.rice.cs.plt.lambda.Runnable1;  // variant on Runnable with unary run method
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.BorderlessScrollPane;
 import edu.rice.cs.util.text.SwingDocument;
@@ -130,13 +130,17 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
   };
   
   /** The action performed when searching forwards */
-  Action _findNextAction = new AbstractAction("Find Next") {
+  private Action _findNextAction = new AbstractAction("Find Next") {
     public void actionPerformed(ActionEvent e) { findNext(); }
   };
   
-  Action _findPreviousAction =  new AbstractAction("Find Previous") {
+  public Action getFindNextAction() { return _findNextAction; }
+  
+  private Action _findPreviousAction =  new AbstractAction("Find Previous") {
     public void actionPerformed(ActionEvent e) { findPrevious(); }
   };
+  
+  public Action getFindPreviousAction() { return _findPreviousAction; }
   
   private Action _findAllAction =  new AbstractAction("Find All") {
     public void actionPerformed(final ActionEvent e) { _isFindReplaceActive = true; _findAll(); _isFindReplaceActive = false;}
@@ -146,15 +150,15 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     public void actionPerformed(ActionEvent e) { _doFind(); }
   };
   
-  Action _replaceAction = new AbstractAction("Replace") {
+  private Action _replaceAction = new AbstractAction("Replace") {
     public void actionPerformed(ActionEvent e) { _replace(); }
   };
   
-  Action _replaceFindNextAction = new AbstractAction("Replace/Find Next") {
+  private Action _replaceFindNextAction = new AbstractAction("Replace/Find Next") {
     public void actionPerformed(ActionEvent e) { _replaceFindNext(); }
   };
   
-  Action _replaceFindPreviousAction = new AbstractAction("Replace/Find Previous") {
+  private Action _replaceFindPreviousAction = new AbstractAction("Replace/Find Previous") {
     public void actionPerformed(ActionEvent e) { _replaceFindPrevious(); };
   };
   
@@ -198,7 +202,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     super(frame, "Find/Replace");
     _model = model;
     _machine = new FindReplaceMachine(_model, _model.getDocumentIterator(), frame);
-//    _updateMachine();
+    _updateMachine();
     
     
     /********* Button Initialization ********/
@@ -340,7 +344,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     _searchAllDocuments.addItemListener(new ItemListener() {
       public void itemStateChanged(ItemEvent e) {
         boolean isSelected = (e.getStateChange() == ItemEvent.SELECTED);
-        if(isSelected)
+        if (isSelected)
           _searchSelectionOnly.setSelected(false);
         _machine.setSearchAllDocuments(isSelected);
         DrJava.getConfig().setSetting(OptionConstants.FIND_ALL_DOCUMENTS, isSelected);
@@ -408,7 +412,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     _ignoreTestCases.addItemListener(new ItemListener() {
       public void itemStateChanged(ItemEvent e) {
         boolean isSelected = (e.getStateChange() == ItemEvent.SELECTED);
-        if(isSelected) 
+        if (isSelected) 
           _searchSelectionOnly.setSelected(false);
         _machine.setIgnoreTestCases(isSelected);
         DrJava.getConfig().setSetting(OptionConstants.FIND_NO_TEST_CASES, isSelected);
@@ -620,7 +624,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     final boolean oldNoTestCases = _machine.getIgnoreTestCases();
     final int oldPosition = _machine.getCurrentOffset();
     
-//    _updateMachine();
+    _updateMachine();
     _machine.setDocument(startDoc);
     if (_machine.getFirstDoc() == null) _machine.setFirstDoc(startDoc);
     _machine.setSearchAllDocuments(searchAll);
@@ -703,7 +707,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
   /** Performs the "replace all" command. */
   private void _replaceAll() {
     _frame.updateStatusField("Replacing All");
-//    _updateMachine();
+    _updateMachine();
     _machine.setFindWord(_findField.getText());
     _machine.setReplaceWord(_replaceField.getText());
     _machine.setSearchBackwards(false);
@@ -716,13 +720,31 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
 
     _machine.setSelection(region);
     _frame.clearStatusMessage();
-    final int count = _machine.replaceAll();
+    
+    _frame.hourglassOn();
+    int count = 0;
+    Runnable1<FindResult> replaceMatchingString =   // replaces current (found) string 
+      new Runnable1<FindResult>() { 
+        public void run(FindResult fr) { 
+          if (fr.getFoundOffset() >= 0) /* matching string found */ _machine.replaceCurrent();
+        }};
+    try {
+      /* Replace all matching strings in region (which may be entire project). */
+      count = _machine.processAll(replaceMatchingString, region);
+    }
+    finally { 
+      _frame.hourglassOff(); 
+      
+      // extracted from run() above because findAll occasionally left active document in inconsistent state 
+      _model.refreshActiveDocument();
+    } 
+    
     Toolkit.getDefaultToolkit().beep();
     _frame.setStatusMessage("Replaced " + count + " occurrence" + ((count == 1) ? "" : "s") + ".");
     _replaceAction.setEnabled(false);
     _replaceFindNextAction.setEnabled(false);
     _replaceFindPreviousAction.setEnabled(false);
-    _model.refreshActiveDocument();  // Rationale: a giant replaceAll left the definitions pane is a strange state
+//    _model.refreshActiveDocument();  // Rationale: a giant replaceAll left the definitions pane is a strange state
   }
   
   private void _replaceFindNext() {
@@ -807,7 +829,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
   
   private void _replace() {
     _frame.updateStatusField("Replacing");
-//    _updateMachine();
+    _updateMachine();
     _machine.setFindWord(_findField.getText());
     final String replaceWord = _replaceField.getText();
     _machine.setReplaceWord(replaceWord);

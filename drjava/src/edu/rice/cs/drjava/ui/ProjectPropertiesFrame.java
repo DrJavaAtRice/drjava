@@ -256,7 +256,7 @@ public class ProjectPropertiesFrame extends SwingFrame {
     _model.setWorkingDirectory(wd);
 
     String mc = _mainDocumentSelector.getText();
-    if(mc == null) mc = "";
+    if (mc == null) mc = "";
     _model.setMainClass(mc);
 
     Vector<AbsRelFile> extras = _extraClassPathList.getValue();  // Vector mandated by interface to VectorFileOptionComponent
@@ -308,7 +308,7 @@ public class ProjectPropertiesFrame extends SwingFrame {
   /** @return the fully-qualified name of the main class in the project profile ("" if none is set) */
   private String _getMainClass(){
     String mainClass = _model.getMainClass();
-    if(mainClass == null) return "";
+    if (mainClass == null) return "";
     
     return mainClass;
   }
@@ -631,17 +631,17 @@ public class ProjectPropertiesFrame extends SwingFrame {
       public void actionPerformed(ActionEvent e){
         int ret = chooser.showOpenDialog(ProjectPropertiesFrame.this);
         
-        if(ret != JFileChooser.APPROVE_OPTION)
+        if (ret != JFileChooser.APPROVE_OPTION)
           return;
         
         File mainClass = chooser.getSelectedFile();
         
         File sourceRoot = new File(_projRootSelector.getFileField().getText());
         
-        if(sourceRoot == null || mainClass == null)
+        if (sourceRoot == null || mainClass == null)
           return;
         
-        if(!mainClass.getAbsolutePath().startsWith(sourceRoot.getAbsolutePath())){
+        if (!mainClass.getAbsolutePath().startsWith(sourceRoot.getAbsolutePath())){
           JOptionPane.showMessageDialog(ProjectPropertiesFrame.this,
                                         "Main Class must be in either Project Root or one of its sub-directories.", 
                                         "Unable to set Main Class", JOptionPane.ERROR_MESSAGE);
@@ -654,12 +654,12 @@ public class ProjectPropertiesFrame extends SwingFrame {
         String qualifiedName = mainClass.getAbsolutePath().substring(sourceRoot.getAbsolutePath().length());
         
         //Strip off any leading slashes
-        if(qualifiedName.startsWith("" + File.separatorChar))
+        if (qualifiedName.startsWith("" + File.separatorChar))
           qualifiedName = qualifiedName.substring(1);
         
         //Remove the .java extension if it exists
         // TODO: What about language level file extensions? What about Habanero Java extension?
-        if(qualifiedName.toLowerCase().endsWith(OptionConstants.JAVA_FILE_EXTENSION))
+        if (qualifiedName.toLowerCase().endsWith(OptionConstants.JAVA_FILE_EXTENSION))
           qualifiedName = qualifiedName.substring(0, qualifiedName.length() - 5);
           
         //Replace path seperators with java standard '.' package seperators.

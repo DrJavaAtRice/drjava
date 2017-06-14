@@ -677,7 +677,7 @@ public class BalancingStreamTokenizerTest extends TestCase {
   public void testAddNewQuotes() throws IOException{
     BalancingStreamTokenizer tok = make("abc ${def ghi 'abc#} 123\n456 ${abc def \"xxx '111# yyy\"} 789");
     tok.defaultThreeQuoteDollarCurlySetup();
-    try{
+    try {
       tok.addQuotes("'","#");
     } catch (Exception e) { }
     

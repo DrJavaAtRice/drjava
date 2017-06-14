@@ -79,13 +79,12 @@ public final class DebugUtil {
   
   static { initializeLogs(); }
   
-  /**
-   * Initialize {@link #debug} and {@link #error} based on the descriptors appearing in system properties
-   * {@code plt.debug.log} and {@code plt.error.log}.  This method is run automatically when the
-   * {@code DebugUtil} class is loaded.  If desired, it may be re-invoked at any time.
-   * @see #makeLog
-   * @see #makeLogSink
-   */
+  /** Initialize {@link #debug} and {@link #error} based on the descriptors appearing in system properties
+    * {@code plt.debug.log} and {@code plt.error.log}.  This method is run automatically when the
+    * {@code DebugUtil} class is loaded.  If desired, it may be re-invoked at any time.
+    * @see #makeLog
+    * @see #makeLogSink
+    */
   public static void initializeLogs() {
     String debugProp = System.getProperty("plt.debug.log");
     debug = (debugProp == null) ? VoidLog.INSTANCE : makeLog(debugProp, "Debug");

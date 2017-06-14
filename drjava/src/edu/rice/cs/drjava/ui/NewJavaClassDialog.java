@@ -203,7 +203,7 @@ public class NewJavaClassDialog extends SwingFrame {
     }
     
     if (_superClass.getText().length() != 0) {
-      if(!checkSuperClassName(_superClass.getText())) {
+      if (!checkSuperClassName(_superClass.getText())) {
         _errorMessage.setForeground(Color.RED);
         _errorMessage.setText("Enter correct superclass.");
         invalidate();
@@ -211,8 +211,8 @@ public class NewJavaClassDialog extends SwingFrame {
       }
     }
     
-    if(_interfaces.getText().length() != 0) {
-      if(!checkInterfaceNames(_interfaces.getText())) {
+    if (_interfaces.getText().length() != 0) {
+      if (!checkInterfaceNames(_interfaces.getText())) {
         _errorMessage.setForeground(Color.RED);
         _errorMessage.setText("Enter correct interface names.");
         invalidate();
@@ -481,7 +481,7 @@ public class NewJavaClassDialog extends SwingFrame {
   static boolean checkInterfaceNames(String name) {
     if (name == null) return false;
     name = name.trim();
-    if(name.length() != 0 && name.matches("([A-Za-z_][A-Za-z0-9_, \\.]*)")) {
+    if (name.length() != 0 && name.matches("([A-Za-z_][A-Za-z0-9_, \\.]*)")) {
       return iterateListOfClassNames(name);
     }
     else return false;
@@ -498,9 +498,9 @@ public class NewJavaClassDialog extends SwingFrame {
   }
   
   static String getModifier(String modifier){
-    if(modifier == null)
+    if (modifier == null)
       return ""; //return blank modifier
-    else if(modifier.equals("public") || modifier.equals("final") || modifier.equals("abstract"))
+    else if (modifier.equals("public") || modifier.equals("final") || modifier.equals("abstract"))
       return modifier+ " ";
     else
       return ""; //return blank modifier
@@ -515,15 +515,15 @@ public class NewJavaClassDialog extends SwingFrame {
       sb.append(getModifier(modifier));
     }
     sb.append("class");
-    if(name != null) {
+    if (name != null) {
       sb.append(' ');
       sb.append(getCapitalizedClassName(name)); 
     }
-    if(superclass.length() != 0) {
+    if (superclass.length() != 0) {
       sb.append(" extends ");
       sb.append(getCapitalizedSuperClassName(superclass));
     }
-    if(interfaces.length() != 0) {
+    if (interfaces.length() != 0) {
       sb.append(" implements ");
       sb.append(getCapitalizedInterfacesNames(interfaces));
     }
@@ -549,13 +549,13 @@ public class NewJavaClassDialog extends SwingFrame {
     sb.append(" {\n");
     sb.append("\n");
     
-    if(classConstructor && !elementaryOrFunctionalJava) {
+    if (classConstructor && !elementaryOrFunctionalJava) {
       sb.append("public " + getCapitalizedClassName(className) + "() { \n");
       sb.append("/* YOUR CONSTRUCTOR CODE HERE*/");
       sb.append("\n}\n");
     }
     
-    if(mainMethod && !elementaryOrFunctionalJava) {
+    if (mainMethod && !elementaryOrFunctionalJava) {
       sb.append("\n public static void main(String[] args) { \n\n");
       sb.append("}\n\n");
     }

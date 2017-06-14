@@ -179,7 +179,7 @@ public class ProjectProfile implements ProjectFileIR {
       toMatch = toMatch.substring(0, toMatch.lastIndexOf(OptionConstants.JAVA_FILE_EXTENSION));
       toMatch = toMatch.replace(File.separatorChar,'.');
       
-      if(toMatch.endsWith(main))
+      if (toMatch.endsWith(main))
         return possibleContainers[i];
     }
     
@@ -309,7 +309,7 @@ public class ProjectProfile implements ProjectFileIR {
     path = replace(path, File.separator, "/");
     xc.set("drjava/project.work", path);
     
-    if(_manifest != null) {
+    if (_manifest != null) {
       String cleanManifest = TextUtil.xmlEscape(_manifest);
       xc.set("drjava/project.manifest", cleanManifest);
       
@@ -342,7 +342,7 @@ public class ProjectProfile implements ProjectFileIR {
     DocFile active = null;
     if (!_sourceFiles.isEmpty()) {
       for(DocFile df: _sourceFiles) {
-        if(df.isActive()) {
+        if (df.isActive()) {
           active = df;
           break; //Assert that there is only one active document in the project
         }
@@ -372,7 +372,7 @@ public class ProjectProfile implements ProjectFileIR {
     if (!_auxiliaryFiles.isEmpty()) {
       if (active == null) {
         for(DocFile df: _auxiliaryFiles) {
-          if(df.isActive()) {
+          if (df.isActive()) {
             active = df;
             break; //Assert that there is only one active document in the project
           }
@@ -405,7 +405,7 @@ public class ProjectProfile implements ProjectFileIR {
     if (!_excludedFiles.isEmpty()) {
       if (active == null) {
         for(DocFile df: _excludedFiles) {
-          if(df.isActive()) {
+          if (df.isActive()) {
             active = df;
             break; //Assert that there is only one active document in the project
           }
@@ -531,7 +531,7 @@ public class ProjectProfile implements ProjectFileIR {
     fw.write(")");
 
     //write the project manifest
-    if(_manifest != null){
+    if (_manifest != null){
       fw.write("\n(proj-manifest");
       fw.write("\n" + _manifest);
       fw.write(")");
@@ -545,14 +545,14 @@ public class ProjectProfile implements ProjectFileIR {
       fw.write("\n(source-files");
       DocFile active = null;
       for(DocFile df: _sourceFiles) {
-        if(df.isActive()) {
+        if (df.isActive()) {
           active = df;
           fw.write("\n" + encodeDocFileRelative(df, "  "));
           break; //Assert that there is only one active document in the project
         }
       }
       for(DocFile df: _sourceFiles) { 
-        if(df != active)
+        if (df != active)
           fw.write("\n" + encodeDocFileRelative(df, "  "));
       }
       fw.write(")"); // close the source expression

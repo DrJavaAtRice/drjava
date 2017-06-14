@@ -34,7 +34,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package edu.rice.cs.plt.debug;
 
-/** A log that ignores all logging requests.  All method invocations return immediately. */
+/** A log that ignores all logging requests.  All method invocations return immediately. This is a singleton class. */
 public class VoidLog implements Log {
   
   public static final VoidLog INSTANCE = new VoidLog();

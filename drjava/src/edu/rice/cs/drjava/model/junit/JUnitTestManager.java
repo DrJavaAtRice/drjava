@@ -477,7 +477,7 @@ public class JUnitTestManager {
         !classNameAndTest.equals("junit.framework.TestSuite$1.warning");
     
 //    for debugging    
-//    try{
+//    try {
 //      File temp = File.createTempFile("asdf", "java", new File("/home/awulf"));
 //      FileWriter writer = new FileWriter(temp);
 //      writer.write("testString: " + testString + "\n");

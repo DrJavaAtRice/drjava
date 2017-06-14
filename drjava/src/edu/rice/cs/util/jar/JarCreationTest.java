@@ -241,7 +241,7 @@ public class JarCreationTest extends DrJavaTestCase {
     catch (IOException e) {
       fail("couldn't open file");
     } finally {
-      if( jarStream != null)
+      if ( jarStream != null)
         try {
           jarStream.close();
         }

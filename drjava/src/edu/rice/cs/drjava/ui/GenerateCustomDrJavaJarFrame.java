@@ -51,7 +51,7 @@ import edu.rice.cs.util.swing.SwingFrame;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.drjava.config.OptionConstants;
 
-import edu.rice.cs.plt.lambda.Runnable1;
+import edu.rice.cs.plt.lambda.Runnable1;  // variant on Runnable with unary run method
 import edu.rice.cs.plt.lambda.LambdaUtil;
 import edu.rice.cs.plt.lambda.Predicate;
 import edu.rice.cs.plt.io.IOUtil;

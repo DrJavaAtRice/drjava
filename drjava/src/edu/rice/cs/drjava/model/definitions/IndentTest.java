@@ -1111,7 +1111,7 @@ public final class IndentTest extends DrJavaTestCase {
       "switch(cond) {\n" +
       "case 1:\n" +
       "object.doStuff();\n" +
-      "if(object.hasDoneStuff()) {\n" +
+      "if (object.hasDoneStuff()) {\n" +
       "thingy.doOtherStuff();\n" +
       "lion.roar(\"raaargh\");\n" +
       "}\n" +
@@ -1122,7 +1122,7 @@ public final class IndentTest extends DrJavaTestCase {
       "switch(cond) {\n" +
       "  case 1:\n" +
       "    object.doStuff();\n" +
-      "    if(object.hasDoneStuff()) {\n" +
+      "    if (object.hasDoneStuff()) {\n" +
       "      thingy.doOtherStuff();\n" +
       "      lion.roar(\"raaargh\");\n" +
       "    }\n" +
@@ -1325,7 +1325,7 @@ public final class IndentTest extends DrJavaTestCase {
 //      "case 2:\n" +
 //      "break;\n" +
 //      "case 3:\n" +
-//      "if(owner.command() == ROLL_OVER) {\n" +
+//      "if (owner.command() == ROLL_OVER) {\n" +
 //      "dog.rollOver();\n" +
 //      "}\n" +
 //      "break;\n" +
@@ -1336,7 +1336,7 @@ public final class IndentTest extends DrJavaTestCase {
 //      "  case 2:\n" +
 //      "    break;\n" +
 //      "  case 3:\n" +
-//      "    if(owner.command() == ROLL_OVER) {\n" +
+//      "    if (owner.command() == ROLL_OVER) {\n" +
 //      "      dog.rollOver();\n" +
 //      "    }\n" +
 //      "    break;\n" +

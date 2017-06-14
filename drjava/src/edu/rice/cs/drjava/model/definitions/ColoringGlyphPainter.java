@@ -191,7 +191,7 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
     TabExpander expander = v.getTabExpander();
     Segment text;
     
-    if(pos == end) {
+    if (pos == end) {
       // The caller of this is left to right and borders a right to
       // left view, return our end location.
       return new Rectangle(alloc.x + alloc.width, alloc.y, 0,
@@ -227,7 +227,7 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
     int offs = Utilities.getTabbedTextOffset(text, _metrics, 
                                              alloc.x, (int) x, expander, start);
     int retValue = start + offs;
-    if(retValue == end) {
+    if (retValue == end) {
       // No need to return backward bias as GlyphPainter1 is used for
       // ltr text only.
       retValue--;

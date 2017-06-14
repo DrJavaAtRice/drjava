@@ -138,11 +138,11 @@ public class XMLProjectFileParser extends ProjectFileParserFacade {
       }
       catch(XMLConfigException e) { /* not present is ok too */ }
       
-      try{
+      try {
         s = _xc.get(".manifest");
         LOG.log("manifest = '" + s + "'");
         pfir.setCustomManifest(TextUtil.xmlUnescape(s));
-      }catch(XMLConfigException e) { /* not present is fine */ }
+      } catch(XMLConfigException e) { /* not present is fine */ }
       
       // read build dir
       try {

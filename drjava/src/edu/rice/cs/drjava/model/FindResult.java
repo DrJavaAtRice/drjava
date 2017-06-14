@@ -36,8 +36,10 @@
 
 package edu.rice.cs.drjava.model;
 
-/** A tuple returns by search methods indicating the location of the found string(or -1 if the string was not found) as 
-  * well as a flag indicating whether the machine wrapped around the end of the document.
+/** This class implements a findResults tuple conttaining the location of the found string (or -1 if the string was not
+  * found), the current document, the offset of the matching string, a flag indicating whether the machine wrapped 
+  * around the end of the document (local search), and a flag indicating whether the search wrapped back to the start 
+  * document (global search)
   * @version $Id$
   */
 public class FindResult {

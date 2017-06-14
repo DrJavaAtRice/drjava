@@ -35,7 +35,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package edu.rice.cs.plt.lambda;
 
 /**
- * A binary lambda that doesn't have a return value (relying instead on side effects).
+ * A lambda of two arguments that doesn't have a return value (relying instead on side effects).
  * 
  * @param <T1>  the first argument type
  * @param <T2>  the second argument type

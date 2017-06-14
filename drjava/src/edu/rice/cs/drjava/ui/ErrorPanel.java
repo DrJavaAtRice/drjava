@@ -807,13 +807,13 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
         try {          
           boolean open = false;
           for(OpenDefinitionsDocument doc : model.getOpenDefinitionsDocuments()) {
-            if((doc.getFile() != null) && (doc.getFile().equals(error.file()))) {
+            if ((doc.getFile() != null) && (doc.getFile().equals(error.file()))) {
               open = true;
               break;
             }
           }
           
-          if(open) {
+          if (open) {
             OpenDefinitionsDocument doc = model.getDocumentForFile(error.file());
             CompilerErrorModel errorModel = getErrorModel();
             

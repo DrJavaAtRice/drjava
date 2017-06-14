@@ -136,17 +136,17 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
                compiled.exists());
     _model.removeListener(listener2);
   }
-
+  
   /** Test that one compiled file can depend on the other.
-   * We compile a.DrJavaTestFoo and then b.DrJavaTestFoo2 (which extends
-   * DrJavaTestFoo). This shows that the compiler successfully found
-   * DrJavaTestFoo2 when compiling DrJavaTestFoo.
-   * Doesn't reset interactions because no interpretations are performed.
-   * @throws BadLocationException if attempts to reference an invalid location
-   * @throws IOException if an IO operation fails
-   * @throws InterruptedException if execution is interrupted unexpectedly
-   * @throws InvalidPackageException if the package is invalid
-   */
+    * We compile a.DrJavaTestFoo and then b.DrJavaTestFoo2 (which extends
+    * DrJavaTestFoo). This shows that the compiler successfully found
+    * DrJavaTestFoo2 when compiling DrJavaTestFoo.
+    * Doesn't reset interactions because no interpretations are performed.
+    * @throws BadLocationException if attempts to reference an invalid location
+    * @throws IOException if an IO operation fails
+    * @throws InterruptedException if execution is interrupted unexpectedly
+    * @throws InvalidPackageException if the package is invalid
+    */
   public void testCompileClassPathOKDifferentPackages() throws BadLocationException, IOException, InterruptedException,
     InvalidPackageException {
 //    System.out.println("testCompileClasspathOKDifferentPackages()");
@@ -161,8 +161,8 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
     final File fooFile = new File(aDir, "DrJavaTestFoo.java");
 //    System.err.println("fooFile = " + fooFile.getCanonicalPath());
     saveFile(doc1, new FileSelector(fooFile));
-    // _packageName must be updated on save
-    assertEquals("Check package name of doc1", "a", ((AbstractGlobalModel.ConcreteOpenDefDoc) doc1)._packageName); 
+    // package name must be updated on save
+    assertEquals("Check package name of doc1", "a", ((AbstractGlobalModel.ConcreteOpenDefDoc) doc1).getPackageName()); 
 //    System.err.println("doc1 = " + doc1);
 //    System.err.println("doc1 has source root " + doc1.getSourceRoot());
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
@@ -182,8 +182,8 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
     final File foo2File = new File(bDir, "DrJavaTestFoo2.java");
 //    System.err.println("foo2File = " + foo2File.getCanonicalPath());
     saveFile(doc2, new FileSelector(foo2File));
-    // _packageName must be updated on save
-    assertEquals("Check packangeName of doc2", "b", ((AbstractGlobalModel.ConcreteOpenDefDoc) doc2)._packageName); 
+    // package name must be updated on save
+    assertEquals("Check packangeName of doc2", "b", ((AbstractGlobalModel.ConcreteOpenDefDoc) doc2).getPackageName()); 
 //    System.err.println("doc2 = " + doc2);
 
     CompileShouldSucceedListener listener2 = new CompileShouldSucceedListener();

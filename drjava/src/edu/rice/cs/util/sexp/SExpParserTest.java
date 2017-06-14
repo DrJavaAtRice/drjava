@@ -135,7 +135,7 @@ public class SExpParserTest extends DrJavaTestCase {
     try {
       SExpParser.parse(text).get(0);
       fail("Didn't throw a parse exception");
-    }catch(SExpParseException e) {
+    } catch(SExpParseException e) {
       assertEquals("Incorrect exception message", 
                    "A top-level s-expression must be a list. " + 
                    "Invalid start of list: true",
@@ -145,7 +145,7 @@ public class SExpParserTest extends DrJavaTestCase {
     try {
       SExpParser.parse(text).get(0);
       fail("Didn't throw a parse exception");
-    }catch(SExpParseException e) {
+    } catch(SExpParseException e) {
       assertEquals("Incorrect exception message", 
                    "A top-level s-expression must be a list. " + 
                    "Invalid start of list: 123",
@@ -155,7 +155,7 @@ public class SExpParserTest extends DrJavaTestCase {
     try {
       SExpParser.parse(text).get(0);
       fail("Didn't throw a parse exception");
-    }catch(SExpParseException e) {
+    } catch(SExpParseException e) {
       assertEquals("Incorrect exception message", 
                    "A top-level s-expression must be a list. " + 
                    "Invalid start of list: [help",
@@ -169,7 +169,7 @@ public class SExpParserTest extends DrJavaTestCase {
     try {
       SExpParser.parse(text).get(0);
       fail("Didn't throw a parse exception");
-    }catch(SExpParseException e) {
+    } catch(SExpParseException e) {
       assertEquals("Incorrect exception message", 
                    "Unexpected <EOF> at line 1",
                    e.getMessage());
@@ -179,7 +179,7 @@ public class SExpParserTest extends DrJavaTestCase {
     try {
       SExpParser.parse(text).get(0);
       fail("Didn't throw a parse exception");
-    }catch(SExpParseException e) {
+    } catch(SExpParseException e) {
       assertEquals("Incorrect exception message", 
                    "Unexpected <EOF> at line 2",
                    e.getMessage());
@@ -189,7 +189,7 @@ public class SExpParserTest extends DrJavaTestCase {
     try {
       SExpParser.parse(text).get(0);
       fail("Didn't throw a parse exception");
-    }catch(SExpParseException e) {
+    } catch(SExpParseException e) {
       assertEquals("Incorrect exception message", 
                    "A top-level s-expression must be a list. " + 
                    "Invalid start of list: )",
@@ -200,7 +200,7 @@ public class SExpParserTest extends DrJavaTestCase {
     try {
       SExpParser.parse(text).get(0);
       fail("Didn't throw a parse exception");
-    }catch(SExpParseException e) {
+    } catch(SExpParseException e) {
       assertEquals("Incorrect exception message", 
                    "Unexpected <EOF> at line 1",
                    e.getMessage());
@@ -211,7 +211,7 @@ public class SExpParserTest extends DrJavaTestCase {
     try {
       SExpParser.parse(text).get(0);
       fail("Didn't throw a parse exception");
-    }catch(SExpParseException e) {
+    } catch(SExpParseException e) {
       assertEquals("Incorrect exception message", 
                    "Unexpected <EOF> at line 1",
                    e.getMessage());

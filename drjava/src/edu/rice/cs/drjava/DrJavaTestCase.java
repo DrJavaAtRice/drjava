@@ -52,7 +52,9 @@ import edu.rice.cs.util.Log;
   */
 public class DrJavaTestCase extends TestCase {
   /** Create a new DrJava test case. */
-  public DrJavaTestCase() { super(); }
+  
+  /** Normal default constructor; required because unary constructor is declared below. */
+  public DrJavaTestCase() { super(); }   
   
   /** Create a new DrJava test case.
     * @param name name of the test case

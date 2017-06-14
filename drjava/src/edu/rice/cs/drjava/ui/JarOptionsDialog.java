@@ -40,7 +40,7 @@ import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.plt.concurrent.ConcurrentUtil;
 import edu.rice.cs.plt.concurrent.JVMBuilder;
-import edu.rice.cs.plt.lambda.Runnable1;
+import edu.rice.cs.plt.lambda.Runnable1;  // variant on Runnable with unary run method
 import edu.rice.cs.plt.lambda.LambdaUtil;
 import edu.rice.cs.util.jar.JarBuilder;
 import edu.rice.cs.util.jar.ManifestWriter;
@@ -197,7 +197,7 @@ public class JarOptionsDialog extends SwingFrame {
     LOG.log("_customManifestText set off of " + _model);
     _customManifestText = _model.getCustomManifest();
     LOG.log("\tto: " + _customManifestText);
-    if(_customManifestText == null)
+    if (_customManifestText == null)
       _customManifestText = "";
     
     boolean outOfSync = true;
@@ -534,7 +534,7 @@ public class JarOptionsDialog extends SwingFrame {
         }
         super._chooseFile();
         File chosen = getFileChooser().getSelectedFile(); // getSelectedFile() may return null
-        if((chosen != null) && !chosen.getAbsolutePath().startsWith(_rootFile.getAbsolutePath())) {
+        if ((chosen != null) && !chosen.getAbsolutePath().startsWith(_rootFile.getAbsolutePath())) {
           JOptionPane.showMessageDialog(JarOptionsDialog.this,
                                         "Main Class must be in Build Directory or one of its sub-directories.", 
                                         "Unable to set Main Class", JOptionPane.ERROR_MESSAGE);
@@ -703,7 +703,7 @@ public class JarOptionsDialog extends SwingFrame {
         
         File[] files = dir.listFiles(allFilter);
         
-        if(files != null) {
+        if (files != null) {
           for(int i = 0; i < files.length; i++) {
             try {
               if (files[i].isDirectory()) {
@@ -745,7 +745,7 @@ public class JarOptionsDialog extends SwingFrame {
           for (int i = 0; i < files.length; i++) {
             LOG.log("\t\tfiles[" + i + "] = " + files[i]);
             
-            if(files[i] == null || !files[i].exists()) continue;
+            if (files[i] == null || !files[i].exists()) continue;
             
             try {
               if (files[i].isDirectory()) {
@@ -807,7 +807,7 @@ public class JarOptionsDialog extends SwingFrame {
             if (_makeExecutable.isSelected() || _customManifest.isSelected()) {
               ManifestWriter mw = new ManifestWriter();
               
-              if(_makeExecutable.isSelected())
+              if (_makeExecutable.isSelected())
                 mw.setMainClass(_mainClassField.getText());
               else
                 mw.setManifestContents(_customManifestText);
@@ -821,29 +821,29 @@ public class JarOptionsDialog extends SwingFrame {
             //If the project has a set build directory, start there.
             //Otherwise, start at project root
             File binRoot = _model.getBuildDirectory();
-            if(binRoot == null || binRoot == FileOps.NULL_FILE || binRoot.toString().trim().length() == 0)
+            if (binRoot == null || binRoot == FileOps.NULL_FILE || binRoot.toString().trim().length() == 0)
               binRoot = _model.getProjectRoot();
             
-            if(!_jarAll.isSelected())
+            if (!_jarAll.isSelected())
               jarBuildDirectory(binRoot, mainJar);
             
             //File.createTempFile will fail if the prefix provided is less than 3 characters long.
             //Not sure why we're using the build directory name here in the first place
             //But would rather not change it in the general case; just in case.
             String prefix = _model.getBuildDirectory().getName();
-            if(prefix.length() < 3)
+            if (prefix.length() < 3)
               prefix = "drjava_tempSourceJar";
             
             File sourceJarFile = File.createTempFile(prefix, ".jar");
             
-            if(!_jarAll.isSelected()) {
+            if (!_jarAll.isSelected()) {
               JarBuilder sourceJar = new JarBuilder(sourceJarFile);
               jarSources(_model, sourceJar);
               sourceJar.close();
               mainJar.addFile(sourceJarFile, "", "source.jar");
             }
             
-            if(_jarAll.isSelected()) {
+            if (_jarAll.isSelected()) {
               LOG.log("jarAll");
               LOG.log("binRoot=" + binRoot);
               LOG.log("root=" + _model.getProjectRoot());
@@ -851,7 +851,7 @@ public class JarOptionsDialog extends SwingFrame {
               LOG.log("mainJar=" + mainJar);
               LOG.log("jarOut=" + jarOut);
               jarAll(_model.getProjectRoot(), mainJar, jarOut);
-              if(!_model.getProjectRoot().equals(binRoot))
+              if (!_model.getProjectRoot().equals(binRoot))
                 LOG.log("jarBuildDirectory");
                 jarBuildDirectory(binRoot, mainJar);
             }
@@ -863,14 +863,14 @@ public class JarOptionsDialog extends SwingFrame {
             JarBuilder jb;
             if (_makeExecutable.isSelected() || _customManifest.isSelected()) {
               ManifestWriter mw = new ManifestWriter();
-              if(_makeExecutable.isSelected())
+              if (_makeExecutable.isSelected())
                 mw.setMainClass(_mainClassField.getText());
               else
                 mw.setManifestContents(_customManifestText);
               
               Manifest m = mw.getManifest();
               
-              if(m != null)
+              if (m != null)
                 jb = new JarBuilder(jarOut, m);
               else
                 throw new IOException("Manifest is malformed");
@@ -881,7 +881,7 @@ public class JarOptionsDialog extends SwingFrame {
             //If the project has a set build directory, start there.
             //Otherwise, start at project root
             File binRoot = _model.getBuildDirectory();
-            if(binRoot == null || binRoot == FileOps.NULL_FILE || binRoot.toString().trim().length() == 0)
+            if (binRoot == null || binRoot == FileOps.NULL_FILE || binRoot.toString().trim().length() == 0)
               binRoot = _model.getProjectRoot();
             
             jarBuildDirectory(binRoot, jb);
@@ -957,14 +957,14 @@ public class JarOptionsDialog extends SwingFrame {
         }
         else {
           ManifestWriter mw = new ManifestWriter();
-          if(_makeExecutable.isSelected())
+          if (_makeExecutable.isSelected())
                 mw.setMainClass(_mainClassField.getText());
               else
                 mw.setManifestContents(_customManifestText);
               
           Manifest m = mw.getManifest();
           
-          if(m != null){
+          if (m != null){
             if (_exceptions.size() > 0) {
               ScrollableListDialog<String> dialog = new ScrollableListDialog.Builder<String>()
                 .setOwner(JarOptionsDialog.this)
@@ -1035,7 +1035,7 @@ public class JarOptionsDialog extends SwingFrame {
     
     String currentManifest = _model.getCustomManifest();
     
-    if(currentManifest == null || !(currentManifest.equals(_customManifestText))){
+    if (currentManifest == null || !(currentManifest.equals(_customManifestText))){
       LOG.log("Updated Manifest on: " + _model);
       _model.setCustomManifest(_customManifestText);
     }

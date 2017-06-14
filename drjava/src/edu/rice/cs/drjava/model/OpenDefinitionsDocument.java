@@ -71,6 +71,7 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
 
   /** @return the associated DefinitionsDocument which may force materializing it. */
   public DefinitionsDocument getDocument();
+  
   public boolean getClassFileInSync();
   public void setClassFileInSync(boolean val);
   public int getCurrentLine();

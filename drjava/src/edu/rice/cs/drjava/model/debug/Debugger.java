@@ -57,17 +57,17 @@ public interface Debugger {
   public void removeListener(DebugListener listener);
   
   /** Returns whether the debugger can be used in this copy of DrJava. This 
-   * does not indicate whether it is ready to be used, which is indicated 
-   * by isReady().
-   * @return true if the debugger is available; false otherwise
-   */
+    * does not indicate whether it is ready to be used, which is indicated 
+    * by isReady().
+    * @return true if the debugger is available; false otherwise
+    */
   public boolean isAvailable();
   
   public DebugModelCallback callback();
   
   /** Attaches the debugger to the Interactions JVM to prepare for debugging. 
-   * @throws DebugException if an error occurs during startup
-   */
+    * @throws DebugException if an error occurs during startup
+    */
   public void startUp() throws DebugException;
   
   /** Disconnects the debugger from the Interactions JVM and cleans up any state. */

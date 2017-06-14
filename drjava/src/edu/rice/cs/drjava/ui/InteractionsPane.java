@@ -160,11 +160,11 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
   public void processKeyEvent(KeyEvent e) { 
     
     //Fixes bug ID:2898576 - Backspace undo/redo issues
-    if(e.getKeyCode() == KeyEvent.VK_BACK_SPACE && deleteCEBool){
+    if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE && deleteCEBool){
       endCompoundEdit(); 
       deleteCEBool=false;
     }
-    else if(e.getID()==KeyEvent.KEY_PRESSED && e.getKeyCode() != KeyEvent.VK_BACK_SPACE){
+    else if (e.getID()==KeyEvent.KEY_PRESSED && e.getKeyCode() != KeyEvent.VK_BACK_SPACE){
       deleteCEBool = true;
     }
     

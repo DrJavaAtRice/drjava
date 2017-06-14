@@ -112,7 +112,7 @@ public class DocumentCacheTest extends DrJavaTestCase {
   }
   
   protected OpenDefinitionsDocument openFile(final File f) throws IOException {
-    try{
+    try {
       OpenDefinitionsDocument doc = _model.openFile(new FileOpenSelector() {        
         public File[] getFiles() { return new File[] {f}; }
       });

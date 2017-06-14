@@ -138,8 +138,8 @@ public class ProjectFileParser extends ProjectFileParserFacade {
       _srcFileBase = root.getCanonicalPath();
     }else if (name.compareToIgnoreCase("proj-manifest") == 0) {
       List<String> sList = exp.getRest().accept(PathListVisitor.ONLY);
-      if(sList.size() > 1) throw new PrivateProjectException("Cannot have multiple manifests");
-      if(sList.size() > 0)
+      if (sList.size() > 1) throw new PrivateProjectException("Cannot have multiple manifests");
+      if (sList.size() > 0)
         pfir.setCustomManifest(sList.get(0));
     }
     else if (name.compareToIgnoreCase("auxiliary") == 0) {
@@ -168,16 +168,16 @@ public class ProjectFileParser extends ProjectFileParserFacade {
       pfir.setClassPaths(fList);
     }
     else if (name.compareToIgnoreCase("main-class") == 0) {
-      try{
+      try {
         List<DocFile> fList = exp.getRest().accept(flv);
-        if(fList.size() == 1){
+        if (fList.size() == 1){
           String main = fList.get(0).getAbsolutePath();
           
           pfir.setMainClass(main);
           
           return;
         }
-      }catch(Exception exc){ }
+      } catch(Exception exc){ }
       
       String mainClass = exp.getRest().accept(NameVisitor.ONLY);
       pfir.setMainClass(mainClass);

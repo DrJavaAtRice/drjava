@@ -39,7 +39,7 @@ package edu.rice.cs.drjava.ui;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.PropertyMaps;
 import edu.rice.cs.drjava.config.DrJavaProperty;
-import edu.rice.cs.plt.lambda.Runnable1;
+import edu.rice.cs.plt.lambda.Runnable1;  // variant on Runnable with unary run method
 import edu.rice.cs.plt.lambda.LambdaUtil;
 import edu.rice.cs.plt.concurrent.CompletionMonitor;
 import edu.rice.cs.plt.tuple.Pair;

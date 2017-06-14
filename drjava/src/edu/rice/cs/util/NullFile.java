@@ -54,7 +54,7 @@ public class NullFile extends File implements Serializable {
     super(lexiName);
   }
   
-  /* The following two method hide the fact that the name field of this file has the form "*NullFile<ct>".  They can
+  /* The following two methods hide the fact that the name field of this file has the form "*NullFile<ct>".  They can
    * be commented out for debugging purposes. */
   public String toString() { return "(Untitled)"; }
   public String getName() { return "(Untitled)"; }

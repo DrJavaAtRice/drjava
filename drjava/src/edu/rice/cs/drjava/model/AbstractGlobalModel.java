@@ -742,7 +742,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
     
     public void addExcludedFile(File f) {
-      if(f == null) return;
+      if (f == null) return;
       if (isAlreadyOpen(f)) return;  // can't add files to the black list that are currently open
       synchronized(_exclFiles) {
         if (_exclFiles.add(f)) setProjectChanged(true);
@@ -753,7 +753,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       synchronized(_exclFiles) {
         for(int i = 0;i < _exclFiles.size();i++) {
           try {
-            if(_exclFiles.get(i).getCanonicalPath().equals(f.getCanonicalPath())) {
+            if (_exclFiles.get(i).getCanonicalPath().equals(f.getCanonicalPath())) {
               _exclFiles.remove(i);
               setProjectChanged(true);
             }
@@ -766,7 +766,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public File[] getExclFiles() { return _exclFiles.toArray(new File[_exclFiles.size()]); }
     
     public void setExcludedFiles(File[] fs) {
-      if(fs == null) return;
+      if (fs == null) return;
       synchronized(_exclFiles) {
         _exclFiles.clear();
         for(File f: fs) { addExcludedFile(f); }
@@ -1408,7 +1408,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         //always return last opened Doc
         retDocs.add(d);
         filesOpened.add(d);
-        if(_state.isExcludedFile(f))
+        if (_state.isExcludedFile(f))
           _state.removeExcludedFile(f);
       }
       catch (AlreadyOpenException aoe) {
@@ -1447,7 +1447,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     debug.logStart();
     
     final File[] sfiles =  getFilesInFolder(dir, rec, ext); 
-    if(sfiles == null) return;
+    if (sfiles == null) return;
     openFiles(new FileOpenSelector() { public File[] getFiles() { return sfiles; } });
     
     if (sfiles.length > 0 && _state.inProjectPath(dir)) setProjectChanged(true);
@@ -1506,7 +1506,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     ArrayList<File> files = new ArrayList<File>();
     File projRoot = _state.getProjectRoot();
-    if(projRoot == null)
+    if (projRoot == null)
       return null;
     File[] allFiles;
     try {
@@ -1516,7 +1516,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     catch(AlreadyOpenException e) { return null; }
     
     for(File f : allFiles) {
-      if(!isAlreadyOpen(f) && !_state.isExcludedFile(f)) {
+      if (!isAlreadyOpen(f) && !_state.isExcludedFile(f)) {
         files.add(f);
       }
     }
@@ -2323,7 +2323,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     // Note: verifyExists prompts user for location of the file if it is not found
     int rc = JOptionPane.showConfirmDialog(frame, "Files not found, continue to next document?", "Continue?",
                                            JOptionPane.YES_NO_OPTION); 
-    if(rc==JOptionPane.NO_OPTION)
+    if (rc==JOptionPane.NO_OPTION)
       return null;
     // cannot find nextdoc; move on to next document
     return getNextDocument(nextdoc, frame);
@@ -2753,10 +2753,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       * project, this information is extracted from the project file eliminating the need to read every document file.  
       * For non-project files, it is extracted from the text of the file.  If there is an error, it is left as "".
       */
-    protected volatile String _packageName = "";
+    private volatile String _packageName = "";
     
     /** The fully qualified name of the class with '.' converted to ' ' so that alphabetic ordering works properly. */
-    protected volatile String _lexiName = "";
+    private volatile String _lexiName = "";
     
     private volatile DCacheAdapter _cacheAdapter;
     
