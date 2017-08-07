@@ -167,7 +167,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     // example format of REPL result: res0: java.lang.String = DrScalaTestFoo
     String pattern = "\\s*res[0-9]+: String = DrScalaTestFoo\\s*";
     String result = interpret("new DrScalaTestFoo().getClass().getName()");
-    System.err.println("result = '" + result + "'");
+//    System.err.println("result = '" + result + "'");
     assertTrue("interactions result matches pattern", result.matches(pattern));
     
     // Add directory 1 to extra classpath and close doc1
@@ -492,7 +492,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     File tempDir = makeCanonical(new File(tempPath));
     tempDir.renameTo(makeCanonical(new File(tempPath + "a")));
     tempDir.deleteOnExit();
-    System.err.println("Renamed directory = '" + tempDir + "'");
+//    System.err.println("Renamed directory = '" + tempDir + "'");
     
     String result = interpret("new DrScalaTestFoo().getClass().getName()");
     
@@ -501,7 +501,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     assertFalse("interactions should have an error, not the correct answer", "\"DrScalaTestFoo\"".equals(result));
 //    System.err.println("Result1 is: " + result);
     
-    System.err.println("Classpath before extension = '" + _model.getClassPath() + "'");
+//    System.err.println("Classpath before extension = '" + _model.getClassPath() + "'");
     
     // Add new directory to classpath through Config
     ArrayList<File> cp = new ArrayList<File>();
@@ -511,25 +511,25 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     /* renamedDir is NOT the same as tempDir which was NOT mutated by renameTo method */
 //    assertEquals("File.renameTo modifies its receiver", tempDir, renamedDir);
     cp.add(renamedDir);
-    System.err.println("Extra Classpath = '" + cp + "'");
+//    System.err.println("Extra Classpath = '" + cp + "'");
     DrScala.getConfig().setSetting(EXTRA_CLASSPATH, cp);
     
     Utilities.clearEventQueue();
     _model.updateInteractionsClassPath();
     
     Iterable<File> newCp = _model.getClassPath();
-    System.err.println("New class path is:\n" + IterUtil.multilineToString(newCp));
-    System.err.println("Classpath after extension = '" + _model.getClassPath() + "'");
+//    System.err.println("New class path is:\n" + IterUtil.multilineToString(newCp));
+//    System.err.println("Classpath after extension = '" + _model.getClassPath() + "'");
 //    Utilities.show("Pause to inspect class path including " + cp);
     
     // example format of REPL result: res0: String = DrScalaTestFoo
     String pattern = "\\s*res[0-9]+: String = DrScalaTestFoo\\s*";
     result = interpret("new DrScalaTestFoo().getClass().getName()");
-    System.err.println("result = '" + result + "'; pattern = '" + pattern + "'");
+//    System.err.println("result = '" + result + "'; pattern = '" + pattern + "'");
     
     // Now it should be on the classpath
     assertTrue("interactions result matches pattern", result.matches(pattern));
-    System.err.println("result = '" + result + "'");
+//    System.err.println("result = '" + result + "'");
     // Rename directory back to clean up
     tempDir = makeCanonical(new File(tempPath + "a"));
     tempDir.renameTo(makeCanonical(new File(tempPath)));
@@ -541,7 +541,6 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
   /** Tests that the appropriate event is fired when the model's interpreter changes.*/
   // Need to patch code to replace interpreter
   public void xtestReplaceInterpreter() {
-//    debug.logStart();
     
     _log.log("Starting testReplaceInterpreters");
     TestListener listener = new TestListener() {

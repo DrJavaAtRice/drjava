@@ -861,17 +861,22 @@ public final class IOUtil {
     return result;
   }
   
-  /** Parse a path string -- a list of file names separated by the system-dependent
-    * path separator character (':' in Unix, ';' in Windows).  Filename strings in the path
-    * are interpreted according to the {@code File} constructor.
+  /** Parse a path string -- a list of file names separated by the system-dependent path separator character (':' 
+    * in Unix, ';' in Windows), deleting textual duplicates.  Filename strings in the pathare interpreted according to the 
+    * {@code File} constructor.
     */
   public static List<File> parsePath(String path) {
-    Utilities.show("parsePath(" + path + ") called");
     String[] filenames = path.split(File.pathSeparator);
-    /** Much cleaner in Java 8, but I recently learned that Java 8 is not source compatible with Java 6 */
+    /** Much cleaner in Java 8, but I recently learned that Java 8 is not source compatible with Java 6, so I am
+      * sticking with Java 6 for now. */
     List<File> files = new ArrayList<File>();
-    for (String s: filenames) files.add(new File(s));
-    Utilities.show("In IOUtil, parsePath(" + path + ") = " + files);
+    List<String> names = new ArrayList<String>();
+    for (String s: filenames) {
+      if (! names.contains(s)) {
+        names.add(s);
+        files.add(new File(s));
+      }
+    }
     return files;
   }
 

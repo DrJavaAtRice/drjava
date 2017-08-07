@@ -2451,7 +2451,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       }
     }
     List<File> result = new ArrayList<File>(roots);
-    Utilities.show("getSourceRootSet() returning " + result);
+    _log.log("getSourceRootSet() returning " + result);
     return result;
   }
   
@@ -3336,7 +3336,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         if ((classFile == FileOps.NULL_FILE) || (! classFile.exists())) {
           // couldn't find the class file
           _log.log(this + ": Could not find class file");
-          System.err.println(this + ": Could not find class file");
           setClassFileInSync(false);
           return false;
         }

@@ -72,7 +72,9 @@ public final class ReflectUtil {
   public static final List<File> SYSTEM_CLASS_PATH = 
     CollectUtil.makeList(IOUtil.parsePath(System.getProperty("java.class.path", "")));
   
-//  static { Utilities.show("SYSTEM_CLASS_PATH bound to " + SYSTEM_CLASS_PATH); }
+//  static { Utilities.show("SYSTEM_CLASS_PATH bound to " + SYSTEM_CLASS_PATH + 
+//                          "\n java.class.path bound to " + System.getProperty("java.class.path")); }
+  
   
   /** Produce the simple name of the given class, as specified by {@link Class#getSimpleName},
     * with an improved scheme for anonymous classes.  The simple name of a class is generally

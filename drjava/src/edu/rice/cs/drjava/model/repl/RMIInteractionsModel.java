@@ -131,7 +131,6 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
     EventQueue.invokeLater(new Runnable() {
       public void run() {
         _log.log("RMIInteractionsModel.setUpNewInterpreter called");
-        System.err.println("RMIInteractionsModel.setUpNewInterpreter called");
         _jvm.restartInterpreterJVM();
         _notifyInterpreterReplaced();
         EventQueue.invokeLater(new Runnable() { public void run() { documentReset(); } });

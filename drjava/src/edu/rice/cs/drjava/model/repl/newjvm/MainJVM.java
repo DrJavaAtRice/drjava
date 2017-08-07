@@ -397,7 +397,6 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     */
   public boolean resetInterpreter() {
     _log.log("In MainJVM, resetInterpeter in MainJVM called; _busy = " + _busy);
-    System.err.println("resetInterpeter in MainJVM called; _busy = " + _busy);
     if (_busy)
       throw new InterpreterBusyException("Attempt to resetInterpreter failed because the interpreter was busy");
     
@@ -405,13 +404,11 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     
     if (remote == null) {
       _log.log("In MainJVM, no interpreter is available; _stateMonitor is in state " + _stateMonitor.value());
-      System.err.println("No interpreter is available; _stateMonitor is in state " + _stateMonitor.value());
       return false;
     }
     else { /* remote is the available interpreter */
       try { 
         _log.log("In MainJVM, calling internal reset on remote from MainJVM");
-        System.err.println("Calling internal reset on remote from MainJVM");
         remote.reset(); 
       }
       catch(RemoteException e) { 
@@ -478,7 +475,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   public boolean addInteractionsClassPath(List<File> cp) {
     InterpreterJVMRemoteI remote = _stateMonitor.value().interpreter();
     if (remote == null || _busy) { return false; }
-        Utilities.show("In MainJVM, adding '" + cp + "' to interactions class path");
+        _log.log("In MainJVM, adding '" + cp + "' to interactions class path");
     try { remote.addInteractionsClassPath(cp); return true; }
     catch (RemoteException e) { _handleRemoteException(e); return false; }
   }
@@ -490,8 +487,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     if (remote == null) return false;
     HashSet<File> cpmClassPath = new HashSet<File>(getInteractionsClassPath());
     HashSet<File> curClassPath = new HashSet<File>(getCurrentClassPath());                          
-//    _log.log("classPathUnchanged() called; cpmClassPath = " + cpmClassPath + "; curClassPath = " + curClassPath);
-    Utilities.show("In classPathUnchanged: cpmClassPath = " + cpmClassPath + "; curClassPath = " + curClassPath);
+    _log.log("In classPathUnchanged: cpmClassPath = " + cpmClassPath + "; curClassPath = " + curClassPath);
     return cpmClassPath.equals(curClassPath); 
   }
   

@@ -90,7 +90,7 @@ public class ClassPathManager implements Lambda<ClassLoader, ClassLoader> {
     boolean isPresent = _interactionsClassPath.contains(f);
     if (! isPresent) { 
       _interactionsClassPath.add(0,f); // Terrible notation for cons(f, _interactionsClassPath)
-      Utilities.show("In ClassPathManger, " + f + " added to interactions class path");
+      _log.log("In ClassPathManger, " + f + " added to interactions class path");
     }
     return isPresent;
   }

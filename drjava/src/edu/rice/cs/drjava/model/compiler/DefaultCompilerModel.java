@@ -242,7 +242,6 @@ public class DefaultCompilerModel implements CompilerModel {
   /** Compile the given documents. All compile commands invoke this private method! */
   private void _doCompile(List<OpenDefinitionsDocument> docs) throws IOException {
 //    _LLSTM.clearCache();
-    Utilities.show("doCompile(" + docs + ") called");
     _log.log("_doCompile(" + docs + ") called");
     final ArrayList<File> filesToCompile = new ArrayList<File>();
 //    final ArrayList<OpenDefinitionsDocument> validDocs = new ArrayList<OpenDefinitionsDocument>();
@@ -362,10 +361,9 @@ public class DefaultCompilerModel implements CompilerModel {
     
     // Temporary hack to allow a boot class path to be specified
     List<File> bootClassPath = null;
-//    String bootProp = System.getProperty("drscala.bootclasspath");
-//    if (bootProp != null) { bootClassPath = CollectUtil.makeList(IOUtil.parsePath(bootProp)); }
     
     final LinkedList<DJError> errors = new LinkedList<DJError>();
+    
     // Mutual exclusion with JUnit code that finds all test classes (in DefaultJUnitModel)
     synchronized(_compilerLock) {
       _log.log("Calling the compiler adapter on: \n  files = " + files + "\n classPath = '" + classPath +

@@ -157,7 +157,7 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
 
     // Make sure .class files exist for the first file in expected place
     File compiled = classForScala(file2, "DrScalaTestBar");
-    System.err.println("Class file for DrScalaTestBar = " + compiled);
+//    System.err.println("Class file for DrScalaTestBar = " + compiled);
     assertTrue(_name() + "Bar Class file exists after compile", compiled.exists());
     // Scalac does not respond to null destination by placing each class file in corresponding source file's folder
 //    File compiled2 = classForScala(file2, "DrSclaTestFoo");

@@ -316,7 +316,6 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   
   /** Tests that a JUnit file with an error is reported to have an error. */
   public void xtestOneJUnitError_NOJOIN() throws Exception {
-    if (printMessages) System.err.println("----testOneJUnitError-----");
     _log.log("Starting testOneJUnitError_NOJOIN");
     
     final OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_FAIL_TEXT);
@@ -340,7 +339,6 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   
   /** Tests that a JUnit file with an error is reported to have an error. */
   public void xtestElspethOneJUnitError_NOJOIN() throws Exception {
-    if (printMessages) System.err.println("----testElspethOneJUnitError-----");
     _log.log("Starting testElspethOneJunitError_NOJOIN");
     
     OpenDefinitionsDocument doc = setupDocument(ELSPETH_ERROR_TEXT);
@@ -365,7 +363,6 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   
   /** Tests that a test class which throws a *real* Error (not an Exception) is handled correctly. */
   public void xtestRealError_NOJOIN() throws Exception {
-    if (printMessages) System.err.println("----testRealError-----");
     _log.log("Startinging testRealError_NOJOIN");
     
     OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_ERROR_TEXT);

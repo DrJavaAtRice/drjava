@@ -84,7 +84,7 @@ public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
     listener.checkCompileOccurred();
 
     assertTrue("should be in sync after compile", doc.checkIfClassFileInSync());
-    System.err.println(_model.getOpenDefinitionsDocuments());
+//    System.err.println(_model.getOpenDefinitionsDocuments());
     assertTrue("The state of all open documents should be in sync", ! _model.hasOutOfSyncDocuments());
     
     // Make sure .class exists

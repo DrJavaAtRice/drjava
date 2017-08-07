@@ -342,7 +342,6 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   
   /** Sets the build directory for a project. */
   public void setBuildDirectory(File f) {
-    Utilities.show("setBuildDirectory(" + f + ") called");
     _state.setBuildDirectory(f);
     if (f != FileOps.NULL_FILE) {
       // This transaction appears redundant since the information is passed to the slave JVM after each compilation. */
@@ -709,7 +708,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   protected void addDocToClassPath(OpenDefinitionsDocument doc) {
     try {
       File sourceRoot = doc.getSourceRoot();
-      Utilities.show("In DefaultGlobalModel.addDocToClassPath, adding '" + sourceRoot + "'to interactions class path");
+      _log.log("In DefaultGlobalModel.addDocToClassPath, adding '" + sourceRoot + "'to interactions class path");
       _interactionsModel.addInteractionsClassPath(sourceRoot);
 //      setClassPathChanged(true);
     }
@@ -727,7 +726,6 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     if (isProjectActive()) {
       File buildDir = getBuildDirectory();
       if (buildDir != null && buildDir != FileOps.NULL_FILE) { 
-        Utilities.show("Build Directory is " + buildDir);
         result.add(buildDir); 
       }
       
@@ -740,13 +738,13 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       File projRoot = getProjectRoot();
       if (projRoot != null && projRoot != FileOps.NULL_FILE) { 
         result.add(projRoot);
-        Utilities.show("Project root is " + projRoot);
+        _log.log("Project root is " + projRoot);
       }
       
       List<AbsRelFile> projectExtras = getExtraProjectClassPath();
       if (projectExtras != null && projectExtras != FileOps.NULL_FILE) { 
         result.addAll(projectExtras); 
-        Utilities.show("Project Extras " + projectExtras + " added to accumlated result in getClassPath()");
+        _log.log("Project Extras " + projectExtras + " added to accumlated result in getClassPath()");
       }
     }
     else { result.addAll(getSourceRootSet()); }
@@ -754,7 +752,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     ArrayList<File> globalExtras = DrScala.getConfig().getSetting(EXTRA_CLASSPATH);
     if (globalExtras != null) { 
       result.addAll(globalExtras); 
-      Utilities.show("Global Extras " + globalExtras + " added to class path");
+      _log.log("Global Extras " + globalExtras + " added to class path");
     }
     
     /* We must add JUnit to the class path.  We do so by including the current JVM's class path (fixed on startup).
@@ -763,9 +761,9 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
      * want to continue bundling JUnit with DrJava.
      */
     result.addAll(ReflectUtil.SYSTEM_CLASS_PATH);
-    Utilities.show("SYSTEM_CLASS_PATH = " + ReflectUtil.SYSTEM_CLASS_PATH);
+    _log.log("SYSTEM_CLASS_PATH = " + ReflectUtil.SYSTEM_CLASS_PATH);
     
-    Utilities.show("getClassPath() is returning '" + result + "'");
+    _log.log("getClassPath() is returning '" + result + "'");
     
     return result;
   }
@@ -780,7 +778,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     * outside the event handling thread. */
   public void updateInteractionsClassPath() {
     List<File> icp = getClassPath();
-    Utilities.show("In DefaultGlobalModel, updating interactions class path '" + icp + "'");
+    _log.log("In DefaultGlobalModel, updating interactions class path '" + icp + "'");
     _interactionsModel.addInteractionsClassPath(icp);
   }
 }
