@@ -29,13 +29,14 @@
 package edu.rice.cs.drjava.model.repl.newjvm;
 
 import java.io.File;
+import java.util.List;
 
 /** Definition of the basic interface which any DrXXX interpreter must implement. */
 public interface Interpreter {
   String interpret(String input);
   void start();
 //  void addInteractionsClassPath(File f);  // deprecated because Scala interpreter no longer supports :require
-//  void addInteractionsClassPath(Iterable<File> path);
+//  void addInteractionsClassPath(List<File> path);
   void reset();
   // (void | boolean) cd();  (future extension)
 }

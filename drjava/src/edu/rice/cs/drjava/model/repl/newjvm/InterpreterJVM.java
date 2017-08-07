@@ -39,6 +39,8 @@ package edu.rice.cs.drjava.model.repl.newjvm;
 import java.lang.reflect.*;
 import java.io.*;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.concurrent.ConcurrentHashMap;
 
 import java.rmi.*;
@@ -82,15 +84,17 @@ import static edu.rice.cs.plt.debug.DebugUtil.error;
   * use synchronizazion on _stateLock (unless synchronization has no effect).  The class is not ready for remote
   * calls until handleStart has been executed.  This class is loaded in the Interpreter JVM, not the Main JVM. 
   * (Do not use DrScala's config framework here.)
+  * Note that this class extends AbstractSlaveJVM which contains critical methods such as ??.
   * <p>
   * Note that this class is specific to the Scala interpreter. It must be refactored to accommodate other interpreters.
   * @version $Id: InterpreterJVM.java 5723 2012-09-29 19:38:35Z wdforson $
   */
 public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRemoteI, JUnitModelCallback {
   
-    
   /** Debugging log. Note this statement must appear before the binding of ONLY! */
   public static final Log _log  = DrScala._log;
+  
+  public static final String PATH_SEPARATOR = System.getProperty("path.separator");
   
   /** Singleton instance of this class. */
   public static final InterpreterJVM ONLY = new InterpreterJVM();
@@ -145,19 +149,6 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     }
       
     _junitTestManager = new JUnitTestManager(this, _classPathManager);
-
-//    // set the thread context class loader, this way NextGen and Mint can use the interpreter's class loader
-//    Thread.currentThread().setContextClassLoader(_interpreterLoader);
-    
-//    try {
-//      _defaultInterpreter = (Interpreter) _interpreterClass.newInstance();  // The unique constructor for DrScalaInterpreter is 0-ary
-//      _log.log("_defaultInterpreter = " + _defaultInterpreter);
-//      _log.log("Interpreter Loader = " +  _defaultInterpreter.getClass().getClassLoader());
-//    }
-//    catch(ReflectException e) { 
-//      _log.log("loadObject(" + _interpreterLoader + ", " + "edu.rice.cs.drjava.model.repl.newjvm.DrScalaInterpreter failed");
-//      throw new UnexpectedException(e); 
-//    }
   }
  
   /** Actions to perform when this JVM is started (through its superclass, AbstractSlaveJVM). Not synchronized
@@ -200,9 +191,6 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     }));
     
     /* _defaultInterpreter is final bound to an instance of DrScalaInterpreter, so it can NEVER be null once initialized. */ 
-//    if (_defaultInterpreter == null)
-//      System.out.println("_defaultInterpreter is not yet fully initialized when handleStart is called in the InterpreterJVM instance?");
-//    else 
     _defaultInterpreter.start();
 
     /* On Windows, any frame or dialog opened from Interactions pane will appear *behind* DrScala's frame, unless a 
@@ -217,8 +205,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     }
     //_dialog("interpreter JVM started");
   }
-  
-  
+   
   /** Interprets the given string of source code in the Scala interpreter. The result is returned to MainJVM via 
     * the interpretResult method.  No synchronization necessary; the code only contains a single read of
     * local state.  This method should not be called if the interpreter (as recorded in the MainJVM) is busy.
@@ -327,62 +314,39 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
       c = c.getComponentType();
     }
     
-    if (!isArray) {
+    if (! isArray) {
       // we can't distinguish primitive types from their boxed types right now
-      if (c.equals(Byte.class))      { return "byte"+sb.toString()+" or "+c.getSimpleName()+sb.toString(); } 
-      if (c.equals(Short.class))     { return "short"+sb.toString()+" or "+c.getSimpleName()+sb.toString(); }
-      if (c.equals(Integer.class))   { return "int"+sb.toString()+" or "+c.getSimpleName()+sb.toString(); }
-      if (c.equals(Long.class))      { return "long"+sb.toString()+" or "+c.getSimpleName()+sb.toString(); }
-      if (c.equals(Float.class))     { return "float"+sb.toString()+" or "+c.getSimpleName()+sb.toString(); }
-      if (c.equals(Double.class))    { return "double"+sb.toString()+" or "+c.getSimpleName()+sb.toString(); }
-      if (c.equals(Boolean.class))   { return "boolean"+sb.toString()+" or "+c.getSimpleName()+sb.toString(); }
-      if (c.equals(Character.class)) { return "char"+sb.toString()+" or "+c.getSimpleName()+sb.toString(); }
-      else return c.getName()+sb.toString();
+      if (c.equals(Byte.class))      { return "byte" + sb.toString() + " or " + c.getSimpleName() + sb.toString(); } 
+      if (c.equals(Short.class))     { return "short" + sb.toString() + " or " + c.getSimpleName() + sb.toString(); }
+      if (c.equals(Integer.class))   { return "int" + sb.toString() + " or " + c.getSimpleName() + sb.toString(); }
+      if (c.equals(Long.class))      { return "long" + sb.toString() + " or " + c.getSimpleName() + sb.toString(); }
+      if (c.equals(Float.class))     { return "float" + sb.toString() + " or " + c.getSimpleName() + sb.toString(); }
+      if (c.equals(Double.class))    { return "double" + sb.toString() + " or " + c.getSimpleName() + sb.toString(); }
+      if (c.equals(Boolean.class))   { return "boolean" + sb.toString() + " or " + c.getSimpleName() + sb.toString(); }
+      if (c.equals(Character.class)) { return "char" + sb.toString() + " or " + c.getSimpleName() + sb.toString(); }
+      else return c.getName() + sb.toString();
     }
     else {
       // if it's an array, we can distinguish boxed types and primitive types
-      return c.getName()+sb.toString();
+      return c.getName() + sb.toString();
     }
   }
   
-  /* DrScala only has one interpreter. */
-  
-//  /** Check that all access of class members is permitted by accessibility controls. */
-//  public void setEnforceAllAccess(boolean enforce) {
-//    synchronized(_stateLock) {
-//      _interpreterOptions.setEnforceAllAccess(enforce);
-//    }
-//  }
-  
-//  /** Check that access of private class members is permitted (irrelevant if setEnforceAllAccess() is set to true). */
-//  public void setEnforcePrivateAccess(boolean enforce) {
-//    synchronized(_stateLock) {
-//      _interpreterOptions.setEnforcePrivateAccess(enforce);
-//    }
-//  }
-
-//  /** Require a semicolon at the end of statements. */
-//  public void setRequireSemicolon(boolean require) {
-//    synchronized(_stateLock) {
-//      _interpreterOptions.setRequireSemicolon(require);
-//    }
-//  }
-  
-//  /** Require variable declarations to include an explicit type. */
-//  public void setRequireVariableType(boolean require) {
-//    synchronized(_stateLock) {
-//      _interpreterOptions.setRequireVariableType(require);
-//    }
-//  }
-  
-  /** Gets the default interpreter */
+  /** Gets the default interpreter (the ONLY interpreter). */
   public Interpreter getInterpreter() throws RemoteException { return _defaultInterpreter; }
   
-  /** Gets the actual class path maintained by the ClassPathManager. */
-  public Iterable<File> getInteractionsClassPath() {
-    // need to make a serializable snapshot
-    return IterUtil.snapshot(_classPathManager.getInteractionsClassPath());
+  /** Gets the class path maintained by the ClassPathManager. */
+  public List<File> getInteractionsClassPath() {
+    return _classPathManager.getInteractionsClassPath();
   }
+  
+  /** Gets the class path for the current interpreter [slave] JVM. */
+  public List<File> getCurrentClassPath() {
+    String cp = System.getProperty("java.class.path");
+    List<String> cpAsList = Arrays.asList(cp.split(PATH_SEPARATOR));
+    Stream<String> cpAsStream = cpAsList.stream();
+    return cpAsStream.map(File::new).collect(Collectors.toList());
+  } 
   
   // ---------- JUnit methods ----------
   /** Sets up a JUnit test suite in the Interpreter JVM and finds which classes are really TestCases classes (by 
@@ -392,7 +356,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     * @return the class names that are actually test cases
     */
   public List<String> findTestClasses(List<String> classNames, List<File> files) throws RemoteException {
-//    Utilities.show("InterpreterJVM.findTestClaseClasses(" + classNames + ", " + files + ") called");
+//    Utilities.show("InterpreterJVM.findTestClasses(" + classNames + ", " + files + ") called");
     _log.log("InterpreterJVM.findTestClaseClasses(" + classNames + ", " + files + ") called");
     return _junitTestManager.findTestClasses(classNames, files);
   }
@@ -472,15 +436,13 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   public void junitJVMReady() { }
   
   // --------- Class path methods ----------
-  public void addInteractionsClassPath(File f) { 
-    boolean alreadyPresent = _classPathManager.addInteractionsClassPath(f); 
-//    if (! alreadyPresent) _defaultInterpreter.addInteractionsClassPath(f);  // omitted since Scala dropped :require
-  }
+  public void addInteractionsClassPath(File f) { _classPathManager.addInteractionsClassPath(f);  }
+  
   /** Traverses cp in reverse order adding the elements of cp to the interactions class path.  As a result, the elements
     * of cp will appear in order at the front of the interactions class path. */
-  public void addInteractionsClassPath(Iterable<File> cp) {
-    List<File> cpl = CollectUtil.makeArrayList(cp);
-    ListIterator<File> li = cpl.listIterator(cpl.size());
+  public void addInteractionsClassPath(List<File> cp) {
+//    List<File> cpl = CollectUtil.makeArrayList(cp);
+    ListIterator<File> li = cp.listIterator(cp.size());
     while (li.hasPrevious()) addInteractionsClassPath(li.previous());
   }
 }

@@ -49,10 +49,9 @@ public class CompletionMonitor implements Condition {
   /** Create an unsignaled completion monitor. */
   public CompletionMonitor() { _signal = false; }
   
-  /**
-   * Create a completion monitor in the given initial state.  If signaled is {@code true}, invocations of
-   * {@link #ensureSignaled} will not block until {@link #reset} is invoked.
-   */
+  /** Create a completion monitor in the given initial state.  If signaled is {@code true}, invocations of
+    * {@link #ensureSignaled} will not block until {@link #reset} is invoked.
+    */
   public CompletionMonitor(boolean signaled) { _signal = signaled; }
   
   /** Returns whether the flag is currently set */
@@ -85,17 +84,15 @@ public class CompletionMonitor implements Condition {
     }
   }
   
-  /**
-   * Ensures that the monitor has been signaled before continuing.  Blocks if necessary; fails if the
-   * the timeout is reached.
-   * @param timeout  Maximum wait time, in milliseconds.
-   */
+  /** Ensures that the monitor has been signaled before continuing.  Blocks if necessary; fails if the
+    * the timeout is reached.
+    * @param timeout  Maximum wait time, in milliseconds.
+    */
   public void ensureSignaled(long timeout) throws InterruptedException, TimeoutException {
     ensureSignaled(timeout, TimeUnit.MILLISECONDS);
   }
   
-  /**
-   * Ensures that the monitor has been signaled before continuing.  Blocks if necessary; fails if the
+  /** Ensures that the monitor has been signaled before continuing.  Blocks if necessary; fails if the
    * the timeout is reached.
    * @param timeout  Maximum wait time, in {@code unit} units.
    * @param unit  Units for {@code timeout}.
@@ -109,20 +106,18 @@ public class CompletionMonitor implements Condition {
     }
   }
   
-  /**
-   * Tries to ensure that the monitor has been signaled before continuing.  Blocks if necessary.  If the wait
-   * is interrupted, returns {@code false}.
-   */
+  /** Tries to ensure that the monitor has been signaled before continuing.  Blocks if necessary.  If the wait
+    * is interrupted, returns {@code false}.
+    */
   public boolean attemptEnsureSignaled() {
     try { ensureSignaled(); return true; }
     catch (InterruptedException e) { return _signal; }
   }
   
-  /**
-   * Tries to ensure that the monitor has been signaled before continuing.  Blocks if necessary.  If the wait
-   * is interrupted or the timeout is reached, returns {@code false}.
-   * @param timeout  Maximum wait time, in milliseconds.
-   */
+  /** Tries to ensure that the monitor has been signaled before continuing.  Blocks if necessary.  If the wait
+    * is interrupted or the timeout is reached, returns {@code false}.
+    * @param timeout  Maximum wait time, in milliseconds.
+    */
   public boolean attemptEnsureSignaled(long timeout) {
     try { ensureSignaled(timeout, TimeUnit.MILLISECONDS); return true; }
     catch (InterruptedException e) { return _signal; }
@@ -140,5 +135,4 @@ public class CompletionMonitor implements Condition {
     catch (InterruptedException e) { return _signal; }
     catch (TimeoutException e) { return _signal; }
   }
-  
 }

@@ -71,8 +71,8 @@ import scala.reflect.io.AbstractFile;
 import scala.reflect.io.Path;
 import scala.tools.nsc.reporters.ConsoleReporter;
 
-/** An implementation of JavacCompiler that supports compiling with the Scala 2.11.x compiler based on Java 1.7.0.
-  * Must be compiled using javac 1.7.0 and with Scala compiler jar on the boot classpath.  The class 
+/** An implementation of JavacCompiler that supports compiling with the Scala 2.12.x compiler based on Java 1.8.0.
+  * Must be compiled using javac 1.8.0 and with Scala compiler jar on the boot classpath.  The class 
   * Javac160FilteringCompiler filters .exe filters out of the class path because the JVM does not recognize such files
   * on its classpath after early builds of Java 6.
   *
@@ -81,7 +81,7 @@ import scala.tools.nsc.reporters.ConsoleReporter;
 public class ScalaCompiler extends Javac160FilteringCompiler implements /* Scala */ CompilerInterface {
   
 //  _log is also defined in a superclass
-  public static final Log _log = new Log("jdk8.txt", false);
+  public static final Log _log = new Log("jdk8.txt", true);
   
   private File _outputDir = null;
     
@@ -278,6 +278,7 @@ public class ScalaCompiler extends Javac160FilteringCompiler implements /* Scala
     System.err.println("In ScalaCompiler, dest = '" + dest + "'");
     if (dest != null) {
       _log.log("Passing argument string '" + "-d " + '"' + dest + '"' + "to the scala compiler (Global)");
+      System.err.println("Passing argument string '" + "-d " + '"' + dest + '"' + "to the scala compiler (Global)");
 //      Utilities.show("Passing argument string '" + "-d " + '"' + dest + '"' + "to the scala compiler (Global)");
       settings.processArgumentString("-d " + '"' + dest + '"');
     }

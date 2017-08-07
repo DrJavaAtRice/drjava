@@ -59,7 +59,7 @@ public final class OptionMapLoaderTest extends DrScalaTestCase implements Option
     "extra.classpath = bam\n\n";
   
   public void testProperConfigSet() throws IOException {
-    checkSet(OPTION_DOC, Integer.valueOf(1), new File("foo"), 1);
+    checkSet(OPTION_DOC, Integer.valueOf(1), new File("foo"), 0);
   }
   
   private void checkSet(String set, Integer indent, File javac, int size) throws IOException {
@@ -67,7 +67,7 @@ public final class OptionMapLoaderTest extends DrScalaTestCase implements Option
     OptionMapLoader loader = new OptionMapLoader(is);
     DefaultOptionMap map = new DefaultOptionMap();
     loader.loadInto(map);
-    assertEquals("indent (integer) option",  map.getOption(INDENT_INC),indent);
+    assertEquals("indent (integer) option", map.getOption(INDENT_INC), indent);
     assertEquals("JAVAC", map.getOption(JAVAC_LOCATION),javac.getAbsoluteFile());
     assertEquals("size of extra-classpath vector", Integer.valueOf(size), 
                  Integer.valueOf(map.getOption(EXTRA_CLASSPATH).size()));

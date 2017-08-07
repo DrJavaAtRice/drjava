@@ -41,6 +41,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.event.*;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.config.*;
@@ -271,7 +272,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     
     _log.log("Starting testGetSourceRootDefaultPackage");
     // Get source root (current directory only)
-    Iterable<File> roots = _model.getSourceRootSet();
+    List<File> roots = _model.getSourceRootSet();
     assertEquals("number of source roots", 0, IterUtil.sizeOf(roots));
     
     // Create temp directory
@@ -323,7 +324,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     _model.addListener(new TestListener());
     
     // Since we had the package statement the source root should be base dir
-    Iterable<File> roots = _model.getSourceRootSet();
+    List<File> roots = _model.getSourceRootSet();
     assertEquals("number of source roots", 1, IterUtil.sizeOf(roots));
     assertEquals("source root", baseTempDir.getCanonicalFile(), IterUtil.first(roots).getCanonicalFile());
     
@@ -356,7 +357,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     _model.addListener(new TestListener());
     
     // Since we had the package statement the source root should be base dir
-    Iterable<File> roots = _model.getSourceRootSet();
+    List<File> roots = _model.getSourceRootSet();
     assertEquals("number of source roots", 1, IterUtil.sizeOf(roots));
     assertEquals("source root", baseTempDir.getCanonicalFile(), IterUtil.first(roots).getCanonicalFile());
     
@@ -386,7 +387,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     _model.addListener(new TestListener());
     
     // The package name is wrong so this should return only currDir
-    Iterable<File> roots = _model.getSourceRootSet();
+    List<File> roots = _model.getSourceRootSet();
     assertEquals("number of source roots", 0, IterUtil.sizeOf(roots));
     
     _log.log("testGetSourceRootPackageThreeDeepInvalid completed");
@@ -413,7 +414,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     _model.addListener(new TestListener());
     
     // Since we had the package statement the source root should be base dir
-    Iterable<File> roots = _model.getSourceRootSet();
+    List<File> roots = _model.getSourceRootSet();
     assertEquals("number of source roots", 1, IterUtil.sizeOf(roots));
     assertEquals("source root", baseTempDir.getCanonicalFile(), IterUtil.first(roots).getCanonicalFile());
     
@@ -457,7 +458,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     _model.addListener(new TestListener());
     
     // Get source roots (should be 2: no duplicates)
-    Iterable<File> roots = _model.getSourceRootSet();
+    List<File> roots = _model.getSourceRootSet();
     assertEquals("number of source roots", 2, IterUtil.sizeOf(roots));
     Iterator<File> i = roots.iterator();
     File root1 = i.next();
@@ -514,7 +515,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     DrScala.getConfig().setSetting(EXTRA_CLASSPATH, cp);
     
     Utilities.clearEventQueue();
-    _model.resetInteractionsClassPath();
+    _model.updateInteractionsClassPath();
     
     Iterable<File> newCp = _model.getClassPath();
     System.err.println("New class path is:\n" + IterUtil.multilineToString(newCp));
@@ -544,8 +545,8 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     
     _log.log("Starting testReplaceInterpreters");
     TestListener listener = new TestListener() {
-      public void interpreterReplaced(boolean inProgress) {
-        assertTrue("should not be in progress", !inProgress);
+      public void interpreterReplaced() {
+//        assertTrue("should not be in progress", !inProgress);
         interpreterReplacedCount++;
       }
     };

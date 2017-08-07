@@ -86,8 +86,11 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
     */
   public Pair<String,String> getVariableToString(String var) throws RemoteException;
   
-  /** Returns the current class path in the interactions pane. */
-  public Iterable<File> getInteractionsClassPath() throws RemoteException;  
+  /** Returns the class path stored in the ClassPathManager. */
+  public List<File> getInteractionsClassPath() throws RemoteException;  
+  
+  /** Returns the class path for the current interpreter [slave] JVM. */
+  public List<File> getCurrentClassPath() throws RemoteException;  
   
   /** Adds the given file to the class path used in the Scala interpreter.
     * @param f Entry to add to the accumulated class path
@@ -97,5 +100,5 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
   /** Adds the given path to the class path used in the Scala interpreter.
     * @param cp Entry to add to the accumulated class path
     */
-  public void addInteractionsClassPath(Iterable<File> cp) throws RemoteException;
+  public void addInteractionsClassPath(List<File> cp) throws RemoteException;
 }

@@ -55,21 +55,6 @@ public abstract class GlobalModelCompileSuccessTestCase extends GlobalModelTestC
     "class DrScalaTestFoo { def foo() { assert(true, \"a vacuous assert failed!\") } }";
   protected static final String FOO_WITH_GENERICS = "class DrScalaTestFooGenerics[T] {}";
 
-//  /** Overrides {@link TestCase#runBare} to interactively run this test case for each compiler, without resetting the 
-//    * interactions JVM.  This method is called once per test method, and it magically invokes the method.
-//    */
-//  public void runBare() throws Throwable {
-//    CompilerInterface[] compilers = CompilerRegistry.ONLY.getAvailableCompilers();
-//    for (int i = 0; i < compilers.length; i++) {
-//      //System.out.println("Run " + i + ": " + compilers[i]);
-//      setUp();
-//      _model.getCompilerModel().setActiveCompiler(compilers[i]);
-//
-//      try { runTest(); }
-//      finally { tearDown(); }
-//    }
-//  }
-
   protected String _name() { return "compiler = " + _model.getCompilerModel().getActiveCompiler().getName() + ": "; }
 
   /** Returns whether the currently active compiler supports generics. */

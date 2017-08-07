@@ -369,12 +369,19 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener> impl
     finally { _lock.endRead(); }
   }
   
-  /** Called when the interactions window is reset. */
-  public void interpreterReady(File wd) {
+  /** Called when the interactions window is softly reset. */
+  public void interpreterReady() {
     _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.interpreterReady(wd); } }
+    try { for (GlobalModelListener l : _listeners) { l.interpreterReady(); } }
     finally { _lock.endRead(); }
   }
+  
+//  /** Called when the interactions window is reset. */
+//  public void interpreterReady(File wd) {
+//    _lock.startRead();
+//    try { for (GlobalModelListener l : _listeners) { l.interpreterReady(wd); } }
+//    finally { _lock.endRead(); }
+//  }
   
   /** Called if the interpreter reset failed.
     * @param t Throwable explaining why the reset failed.
@@ -400,9 +407,9 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener> impl
     * @param inProgress Whether the new interpreter is processing an interaction (i.e,. whether an interactionEnded
     *        event will be fired)
     */
-  public void interpreterReplaced(boolean inProgress) {
+  public void interpreterReplaced() {
     _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.interpreterReplaced(inProgress); } }
+    try { for (GlobalModelListener l : _listeners) { l.interpreterReplaced(); } }
     finally { _lock.endRead(); }
   }
   
@@ -442,13 +449,6 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener> impl
   public void saveUntitled() {
     _lock.startRead();
     try { for (GlobalModelListener l : _listeners) { l.saveUntitled(); } }
-    finally { _lock.endRead(); }
-  }
-  
-  /** Called after the active compiler has been changed. */
-  public void activeCompilerChanged() {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.activeCompilerChanged(); } }
     finally { _lock.endRead(); }
   }
   

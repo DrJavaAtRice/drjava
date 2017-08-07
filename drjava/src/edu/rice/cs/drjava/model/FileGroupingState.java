@@ -149,10 +149,10 @@ public interface FileGroupingState {
   /** Returns a collection of classpath entries specific to the current project.
     * @return the project's extra classpath
     */
-  public Iterable<AbsRelFile> getExtraProjectClassPath();
+  public List<AbsRelFile> getExtraProjectClassPath();
   
    /** Sets the list of project-specific classpath entries. */
-  public void setExtraProjectClassPath(Iterable<AbsRelFile> cp);
+  public void setExtraProjectClassPath(List<AbsRelFile> cp);
   
   /** Return an array of the files excluded from the current project */
   public File[] getExcludedFiles();

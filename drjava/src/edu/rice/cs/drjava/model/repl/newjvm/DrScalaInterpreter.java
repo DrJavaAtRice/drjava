@@ -153,14 +153,6 @@ public class DrScalaInterpreter implements Interpreter {
 
   /* Relying on Default Constructor. */
 
-//  /** method for adding a classpath element to the REPL classpath. */
-//  public synchronized void addInteractionsClassPath(File f) {
-//    _log.log("In DrScalaInterpreter, adding '" + f + "' to interactions class path");
-//    String res = this._interpret(":require " + f.getAbsolutePath(), true);
-//    if (res.contains("doesn't seem to exist"))
-//      System.err.println("ERROR: unable to add file '" + f+ "' to the Scala interpreter class path");
-//  }
-
   public synchronized void reset() { _interpret(":reset", true); }
   
   /** Initialize the interpreter for use in the interactions pane. */
@@ -206,7 +198,7 @@ public class DrScalaInterpreter implements Interpreter {
 
   /** Public interface for the interpretation; this is separated from the internal 
     * implementation ('_interpret') because 'colon commands' are passed to that
-    * method in order to augment the REPL classpath and to reset the interpreter.
+    * method in order to augment the REPL classpath (deprecated) and to reset the interpreter.
     */
   public String interpret(String input) {
     

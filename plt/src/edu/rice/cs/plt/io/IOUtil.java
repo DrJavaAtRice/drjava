@@ -37,7 +37,9 @@ package edu.rice.cs.plt.io;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -863,21 +865,25 @@ public final class IOUtil {
     * path separator character (':' in Unix, ';' in Windows).  Filename strings in the path
     * are interpreted according to the {@code File} constructor.
     */
-  public static SizedIterable<File> parsePath(String path) {
-//    Utilities.show("parsePath(" + path + ") called");
-    String[] filenames = path.split(TextUtil.regexEscape(File.pathSeparator));
-    SizedIterable<File> result = IterUtil.mapSnapshot(IterUtil.asIterable(filenames), FILE_FACTORY);
-//    Utilities.show("In IOUtil, parsePath(" + path + ") = " + result);
-    return result;
+  public static List<File> parsePath(String path) {
+    Utilities.show("parsePath(" + path + ") called");
+    String[] filenames = path.split(File.pathSeparator);
+    /** Much cleaner in Java 8, but I recently learned that Java 8 is not source compatible with Java 6 */
+    List<File> files = new ArrayList<File>();
+    for (String s: filenames) files.add(new File(s));
+    Utilities.show("In IOUtil, parsePath(" + path + ") = " + files);
+    return files;
   }
-      
+
   /** Produce a path string from a list of files.  Filenames in the result are delimited
     * by the system-dependent path separator character (':' in Unix, ';' in Windows).
     */
   public static String pathToString(Iterable<? extends File> path) {
     return IterUtil.toString(path, "", File.pathSeparator, "");
   }
-
+  public static String pathToString(List<? extends File> path) {
+    return IterUtil.toString(path, "", File.pathSeparator, "");
+  }
   
   
   /**

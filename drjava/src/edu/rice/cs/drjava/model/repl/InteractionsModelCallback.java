@@ -146,10 +146,13 @@ public interface InteractionsModelCallback {
     * Is sometimes preceded by a call to {@code interpreterResetting()}, but not when the interpreter is
     * first starting or is already fresh.
     */
-  public void interpreterReady(File wd);
+//  public void interpreterReady(File wd);
+  public void interpreterReady();
   
   /** Called to signal that the interpreter is now read (after a reset). */  // TODO: consolidate with preceding method
-  public void _notifyInterpreterReady(File wd);
+  public void _notifyInterpreterReady();
+//  /** Called to signal that the interpreter is now read (after a reset). */  // TODO: consolidate with preceding method
+//  public void _notifyInterpreterReady(File wd);
   
   /** A compiler can instruct DrScala to include additional elements for the boot
     * class path of the Interactions JVM. */

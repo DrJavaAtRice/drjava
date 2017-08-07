@@ -124,13 +124,8 @@ public class InteractionsScriptModel /* implements Serializable */ {
     */
   public void executeInteraction() {
     _passedCurrent = true;
-    /* The following must use EventQueue rather than Utilities because this task must be placed at the end of the
-     * event queue, running the interpretCurrentInteraction call apart from this write locked section. In 
-     * SimpleInteractionModel, the interpret method is called SYNCHRONOUSLY.  There is a faint chance of a race with
-     * regard to the sequenceing of operations in the event queue.  There could already be operations that affect
-     * the determination of the current interaction on the event queue. If we forced the interpret method to run 
-     * asynchronously in SimpleInteractionsModel, then we could determine the current interaction within this write
-     * locked section avoiding the race. */
+    /* The following must use EventQueue rather than Utilities because this task is placed at the end of the
+     * event queue, running the interpretCurrentInteraction call apart from this write locked section. */
     EventQueue.invokeLater(new Runnable() { public void run() { _model.interpretCurrentInteraction(); } });
   }
 

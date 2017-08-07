@@ -59,7 +59,8 @@ public interface InteractionsListener {
   public void interpreterResetting();
   
   /** Called when the interpreter is ready to use. */
-  public void interpreterReady(File wd);
+  public void interpreterReady();         // working directory unchanged
+//  public void interpreterReady(File wd);  // working directory may have changed
   
   /** Called if the interpreter could not be reset.
     * @param t Throwable explaining why the reset failed.
@@ -71,11 +72,11 @@ public interface InteractionsListener {
     */
   public void interpreterExited(int status);
   
-  /** Called when the active interpreter is changed.
+  /** Called when the slave JVM is restarted
     * @param inProgress Whether the new interpreter is currently in processing an interaction (i.e., whether an 
     * interactionEnded event is pending.)
     */
-  public void interpreterReplaced(boolean inProgress);
+  public void interpreterReplaced();
   
   /** Called when enter was typed in the interactions pane but the interaction was incomplete. */
   public void interactionIncomplete();

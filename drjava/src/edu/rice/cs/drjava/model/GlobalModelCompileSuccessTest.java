@@ -51,61 +51,17 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
     
   private static Log _log = new Log("GlobalModel.txt", false);
 
-  /** Tests calling compileAll with different source roots works.  
-    * NOTE: this "feature" is no longer supported; multiple source roots is flagged as a compilation error.  This test 
-    * has been revised to expect an error.*/
-  public void testCompileAllDifferentSourceRoots() throws BadLocationException, IOException, InterruptedException {
-    _log.log("Starting testCompileAllDifferentSourceRoots");
-//    System.err.println("testCompileAllDifferentSourceRoots() compiler =" + _name());
-    File aDir = new File(_tempDir, "a");
-    File bDir = new File(_tempDir, "b");
-    aDir.mkdir();
-    bDir.mkdir();
-    OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
-    final File file1 = new File(aDir, "DrScalaTestFoo.scala");
-    saveFile(doc, new FileSelector(file1));
-    _log.log("Saved document as file DrScalaTestFoo.scala");
-    OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
-    final File file2 = new File(bDir, "DrScalaTestBar.scala");
-    saveFile(doc2, new FileSelector(file2));
-    _log.log("Saved document as file DrScalaTestBar.scala");
-    
-    _log.log("Creating CompilerShouldSucceedListener");
-    CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
-    _model.addListener(listener);
-    _log.log("Compiling DrScalaTestFoo and DrScalaTestBar");
-    _model.getCompilerModel().compileAll();
-    
-    Utilities.clearEventQueue();
-    
-    // Compile should succeed with multiple source roots
-    assertEquals("compile succeeded despite multiple source roots", 0, _model.getCompilerModel().getNumErrors());
-    assertCompileErrorsPresent(_name(), false);
-    listener.checkCompileOccurred();
-
-    // Make sure .class files exist for the first file in expected place
-    File compiled = classForScala(file2, "DrScalaTestBar");
-    System.err.println("Class file for DrScalaTestBar = " + compiled);
-    assertTrue(_name() + "Bar Class file exists after compile", compiled.exists());
-    // Scalac does not respond to null destination by placing each class file in corresponding source file's folder
-//    File compiled2 = classForScala(file2, "DrSclaTestFoo");
-//    assertTrue(_name() + "Foo Class file doesn't exist after compile", ! compiled2.exists());
-    _model.removeListener(listener);
-  }
-
-  /** Test that one compiled file can depend on the other and that when a keyword
-    * is part of a field name, the file will compile.
-    * We compile DrScalaTestFoo and then DrScalaTestFoo2 (which extends
-    * DrScalaTestFoo). This shows that the compiler successfully found
-    * DrScalaTestFoo2 when compiling DrScalaTestFoo.
-    * Doesn't reset interactions because no interpretations are performed.
+  /** Test that one compiled file can depend on the other and that when a keyword is part of a field name, the file will
+    * compile.  We compile DrScalaTestFoo and then DrScalaTestFoo2 (which extends DrScalaTestFoo). This shows that the 
+    * compiler successfully found DrScalaTestFoo2 when compiling DrScalaTestFoo.  Doesn't reset interactions because no
+    * interpretations are performed.
     */
-  public void testCompileClassPathOKDefaultPackage() throws BadLocationException, IOException, InterruptedException {
-    _log.log("Starting testCompileClassPathOKDefaultPackage");
+  public void testCompileClassPathOKDefaultPackage1() throws BadLocationException, IOException, InterruptedException {
+    _log.log("Starting testCompileClassPathOKDefaultPackage1");
 //    System.out.println("testCompileClasspathOKDefaultPackage()");
     // Create/compile foo, assuming it works
     OpenDefinitionsDocument doc1 = setupDocument(FOO_PACKAGE_AS_PART_OF_FIELD);
-    final File fooFile = new File(_tempDir, "DrScalaTestFoo.scala");
+    final File fooFile = new File(_tempDir, "DrScalaTestFoo1.scala");
     _log.log("Saving doc1 as file " + fooFile);
     saveFile(doc1, new FileSelector(fooFile));
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
@@ -113,17 +69,21 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
     _log.log("Compiling doc1");
     testStartCompile(doc1);
     listener.waitCompileDone();
-    if (_model.getCompilerModel().getNumErrors() > 0) {
-      fail("compile failed: " + getCompilerErrorString());
-    }
+    if (_model.getCompilerModel().getNumErrors() > 0) { fail("compile failed: " + getCompilerErrorString()); }
     listener.checkCompileOccurred();
+    
     _model.removeListener(listener);
-
-    OpenDefinitionsDocument doc2 = setupDocument(FOO2_EXTENDS_FOO_TEXT);
-    final File foo2File = new File(_tempDir, "DrScalaTestFoo2.scala");
-     _log.log("Saving doc2 as file " + foo2File);
-    saveFile(doc2, new FileSelector(foo2File));
-
+    _log.log("Ending testCompileClassPathOKDefaultPackage1");
+  }
+    
+  public void testCompileClassPathOKDefaultPackage2() throws BadLocationException, IOException, InterruptedException {
+    _log.log("Starting testCompileClassPathOKDefaultPackage2");
+    
+    OpenDefinitionsDocument doc2 = setupDocument(FOO_PACKAGE_AS_PART_OF_FIELD + "\n" + FOO2_EXTENDS_FOO_TEXT);
+    final File fooFile = new File(_tempDir, "DrScalaTestFoo2.scala");
+    _log.log("Saving doc2 as file " + fooFile);
+    saveFile(doc2, new FileSelector(fooFile));
+    
     CompileShouldSucceedListener listener2 = new CompileShouldSucceedListener();
     _model.addListener(listener2);
     _log.log("Compiling doc2");
@@ -134,20 +94,15 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
     }
     assertCompileErrorsPresent(_name(), false);
     listener2.checkCompileOccurred();
-
-    // Make sure .class exists
-    File compiled = classForScala(foo2File, "DrScalaTestFoo2");
-    assertTrue(_name() + "Class file doesn't exist after compile",
-               compiled.exists());
+    
     _model.removeListener(listener2);
+    _log.log("Ending testCompileClassPathOKDefaultPackage2");
   }
 
-  /** Test that one compiled file can depend on the other.
-   * We compile a.DrScalaTestFoo and then b.DrScalaTestFoo2 (which extends
-   * DrScalaTestFoo). This shows that the compiler successfully found
-   * DrScalaTestFoo2 when compiling DrScalaTestFoo.
-   * Doesn't reset interactions because no interpretations are performed.
-   */
+  /** Test that one compiled file can depend on the other. We compile a.DrScalaTestFoo and then b.DrScalaTestFoo2 (which
+    * extends DrScalaTestFoo). This shows that the compiler successfully found DrScalaTestFoo2 when compiling 
+    * DrScalaTestFoo.  Doesn't reset interactions because no interpretations are performed.
+    */
   public void xtestCompileClassPathOKDifferentPackages() throws BadLocationException, IOException, InterruptedException,
     InvalidPackageException {
     _log.log("Starting testCompileClassPathOKDifferentPackages");

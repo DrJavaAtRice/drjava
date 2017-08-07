@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2015, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -10,7 +10,7 @@
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the names of DrJava, DrScala, the JavaPLT group, Rice University, nor the
+ *    * Neither the names of DrJava, the JavaPLT group, Rice University, nor the
  *      names of its contributors may be used to endorse or promote products
  *      derived from this software without specific prior written permission.
  * 
@@ -29,14 +29,15 @@
  * This software is Open Source Initiative approved Open Source Software.
  * Open Source Initative Approved is a trademark of the Open Source Initiative.
  * 
- * This file is part of DrScala.  Download the current version of this project
- * from http://www.drscala.org/.
+ * This file is part of DrJava.  Download the current version of this project
+ * from http://www.drjava.org/ or http://sourceforge.net/projects/drjava/
  * 
  * END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model;
 
 import edu.rice.cs.drjava.DrScalaTestCase;
+import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.UnexpectedException;
@@ -46,7 +47,7 @@ import javax.swing.text.BadLocationException;
 import java.io.File;
 
 /** Tests the FindReplaceMachine.
-  * @version $Id: FindReplaceMachineTest.java 5727 2012-09-30 03:58:32Z rcartwright $
+  * @version $Id$
   */
 public class FindReplaceMachineTest extends DrScalaTestCase {
   private volatile OpenDefinitionsDocument _doc;  // working document accessible across threads
@@ -101,7 +102,7 @@ public class FindReplaceMachineTest extends DrScalaTestCase {
   public void setUp() throws Exception {
     super.setUp();
     String user = System.getProperty("user.name");
-    _tempDir = IOUtil.createAndMarkTempDirectory("DrScala-test-" + user, "");
+    _tempDir = IOUtil.createAndMarkTempDirectory("DrJava-test-" + user, "");
     _docPrev = _model.newFile(_tempDir);;
     _doc = _model.newFile(_tempDir);
     _docNext = _model.newFile(_tempDir);
@@ -127,7 +128,7 @@ public class FindReplaceMachineTest extends DrScalaTestCase {
   }
   
 //  public void testCreateMachineFail() {
-//    // before 0
+//// before 0
 //    try {
 //      _initFrm(-2);
 //      System.err.println(_frm.getStartOffset() + " " +
@@ -138,7 +139,7 @@ public class FindReplaceMachineTest extends DrScalaTestCase {
 //      // expected: -2 is not a valid offset.
 //    }
 //
-//    // after doc.getLength()
+//// after doc.getLength()
 //    try {
 //      _initFrm(5);
 //      System.out.println(_frm.getStartOffset() + " " +
@@ -304,8 +305,9 @@ public class FindReplaceMachineTest extends DrScalaTestCase {
   }
   
   /** This tests that a replace all where the replacement action creates a new match
-    * does not replace this new match
-    */
+   * does not replace this new match
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testReplaceCreatesMatch() throws BadLocationException {
     _doc.insertString(0, "hhelloello", null);
     _initFrm(1);
@@ -319,8 +321,9 @@ public class FindReplaceMachineTest extends DrScalaTestCase {
   }
   
   /** This tests that a replace all backwards where the replacement action creates a new match
-    * does not replace this new match
-    */
+   * does not replace this new match
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testReplaceCreatesMatchBackwards() throws BadLocationException {
     _doc.insertString(0, "hhelloello", null);
     _initFrm(1);
@@ -333,7 +336,9 @@ public class FindReplaceMachineTest extends DrScalaTestCase {
 //    System.err.println("testReplaceCreatesMatchBackwards completed");
   }
   
-  /** This test checks that replacing a word with itself will halt on replace all. */
+  /** This test checks that replacing a word with itself will halt on replace all. 
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testReplaceAllSameWord() throws BadLocationException {
     _doc.insertString(0, "cool cool", null);
     _initFrm(3);
@@ -351,9 +356,10 @@ public class FindReplaceMachineTest extends DrScalaTestCase {
   }
   
   /** This test checks that a findNext won't find two matches that partially overlap.
-    * This is the current behavior of the FindReplaceMachine, though at some time
-    * in the future someone may want to change it.
-    */
+   * This is the current behavior of the FindReplaceMachine, though at some time
+   * in the future someone may want to change it.
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testFindPartialSubstrings() throws BadLocationException {
     _doc.insertString(0, "ooAooAoo", null);
     _initFrm(0);
@@ -371,9 +377,10 @@ public class FindReplaceMachineTest extends DrScalaTestCase {
   }
   
   /** This test addresses bug #745714 Searches Repeat When Changing Direction.
-    * The word that was just found should not be found again after toggling
-    * the search backwards flag.
-    */
+   * The word that was just found should not be found again after toggling
+   * the search backwards flag.
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testSearchesDoNotRepeatWhenChangingDirection() throws BadLocationException {
     _doc.insertString(0, "int int int", null);
     _initFrm(0);
@@ -398,7 +405,9 @@ public class FindReplaceMachineTest extends DrScalaTestCase {
 //    System.err.println("testSearchesDoNotRepeatWhenChangingDirection completed");
   }
   
-  /** This test addresses feature request #784514 Find/Replace in all Open Files. */
+  /** This test addresses feature request #784514 Find/Replace in all Open Files. 
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testFindReplaceInAllOpenFiles() throws BadLocationException {
     _doc.insertString(0, EVIL_TEXT, null);
     _docPrev.insertString(0, EVIL_TEXT_PREV, null);
@@ -693,17 +702,22 @@ public class FindReplaceMachineTest extends DrScalaTestCase {
   }
   
   private void replaceAll() {
-    Utilities.invokeAndWait(new Runnable() { public void run() { _frm.replaceAll(); } });
-  }
-  
-//  /** A thunk returning boolean. */
-//  private interface ContinueCommand {
-//    public boolean shouldContinue();
-//  }
-  
-//  private static ContinueCommand CONTINUE = new ContinueCommand() {
-//    public boolean shouldContinue() {
-//      return true;
-//    }
-//  };
+    Utilities.invokeAndWait(new Runnable() {  
+    /* code adapted from FindReplacePanel.replaceAll.  Assumes _findWord,_replaceWord, _isForward (using
+     * setSearchBackwards) in _frm have already been set */
+      public void run() {
+//        _frm._updateMachine();    // _frm should already be up to date.
+        int count = 0;
+        Runnable1<FindResult> replaceMatchingString =   // replaces current (found) string 
+          new Runnable1<FindResult>() { 
+            public void run(FindResult fr) { 
+              if (fr.getFoundOffset() >= 0) /* matching string found */ _frm.replaceCurrent();
+            }};
+        try {
+          /* Replace all matching strings in region (which may be entire project). */
+          count = _frm.processAll(replaceMatchingString);
+        }
+        finally { _model.refreshActiveDocument(); } 
+      }});
+  }                                                                           
 }

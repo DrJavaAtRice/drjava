@@ -2128,23 +2128,22 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
   };
   
+  /** Resets the interactions pane, initially trying to reset the existing interpreter. */
   private void _doResetInteractions() {
     _tabbedPane.setSelectedIndex(INTERACTIONS_TAB);
     updateStatusField("Resetting Interactions");
-    // Lots of work, so use another thread.  NOT!
     _interactionsPane.discardUndoEdits();
-    /* Relying on lightweight internal reset in Scala interpreter */
     MainJVM._log.log("MainFrame invoking DefaultGlobalModel.resetInteractions");
-    _model.resetInteractions(_model.getWorkingDirectory());
+    _model.resetInteractions();
     MainJVM._log.log("DefaultGlobalModel.resetInteractions complete");
     _closeSystemInAction.setEnabled(true);
     _enableInteractionsPane();
   }
   
-    private void _doHardResetInteractions() {
+  /** Resets the interactions pane by starting a new slave JVM */
+  private void _doHardResetInteractions() {
     _tabbedPane.setSelectedIndex(INTERACTIONS_TAB);
     updateStatusField("Hard Resetting Interactions");
-    // Lots of work, so use another thread.  NOT!
     _interactionsPane.discardUndoEdits();
     _log.log("MainFrame invoking DefaultGlobalModel.hardResetInteractions");
     _model.hardResetInteractions(_model.getWorkingDirectory());
@@ -3044,8 +3043,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       
       // add listeners to activate/deactivate the find/replace actions in MainFrame together with
       // those in the Find/Replace panel
-      Utilities.enableDisableWith(_findReplace._findNextAction, _findNextAction);
-      Utilities.enableDisableWith(_findReplace._findPreviousAction, _findPrevAction);
+      Utilities.enableDisableWith(_findReplace.getFindNextAction(), _findNextAction);
+      Utilities.enableDisableWith(_findReplace.getFindPreviousAction(), _findPrevAction);
      
       _compilerErrorPanel = new CompilerErrorPanel(_model, MainFrame.this);
       _consoleController = new ConsoleController(_model.getConsoleDocument(), _model.getSwingConsoleDocument());
@@ -3944,7 +3943,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                        "\tdquote=\"<true to enclose file in double quotes>\"") {
       protected List<File> getList(PropertyMaps pm) {
         ArrayList<File> l = new ArrayList<File>();
-        for(File f: _model.getExtraProjectClassPath()) { l.add(f); }
+        for(File f: _model.getExtraProjectClassPath()) { if (! l.contains(f)) l.add(f); }
         return l;
       }
       public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
@@ -8413,6 +8412,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Inner class to listen to all events in the model. */
   private class ModelListener implements GlobalModelListener {
     
+    /** Called when the interpreter is replaced a new interpreter. */
+    public void interpreterReplaced() {
+      _guiNotifier.availabilityChanged(GUIAvailabilityListener.ComponentType.INTERACTIONS, true);
+      _enableInteractionsPane();
+    }
+    
     public <P,R> void executeAsyncTask(AsyncTask<P,R> task, P param, boolean showProgress, boolean lockUI) {
       new DJAsyncTaskLauncher().executeTask(task, param, showProgress, lockUI);
     }
@@ -8742,16 +8747,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _interactionsPane.highlightError(offset, length); 
     }
     
-    /** Called when the interpreter is replaced a new interpreter.
-      * @param inProgress Whether the new interpreter is currently in progress with an interaction (i.e., whether an 
-      *        interactionEnded event may be fired)
-      */
-    public void interpreterReplaced(final boolean inProgress) {
-      _guiNotifier.availabilityChanged(GUIAvailabilityListener.ComponentType.INTERACTIONS, !inProgress);
-      if (inProgress) _disableInteractionsPane();
-      else _enableInteractionsPane();
-    }
-    
     public void compileStarted() {
       assert EventQueue.isDispatchThread();
       _guiNotifier.unavailable(GUIAvailabilityListener.ComponentType.COMPILER);      
@@ -8789,18 +8784,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public void compileAborted(Exception e) {
       /* Should probably display a simple popup */
       _guiNotifier.available(GUIAvailabilityListener.ComponentType.COMPILER);      
-    }
-    
-    /** Called after the active compiler has been changed. */
-    public void activeCompilerChanged() {
-      // NOTE: Does not run in the event thread!
-      String linkVersion = DrScala.getConfig().getSetting(SCALADOC_API_REF_VERSION);
-      if (linkVersion.equals(SCALADOC_AUTO_TEXT)) {
-        // The Java API Scaladoc version must match the compiler.  Since compiler was changed, we rebuild the API list
-        clearJavaAPISet();
-      }
-      // update syntax highlighting for all documents
-      _model.updateSyntaxHighlighting();
     }
     
     public void prepareForRun(final OpenDefinitionsDocument doc) {
@@ -8951,8 +8934,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
     
     public void interpreterResetFailed(Throwable t) {
-      MainJVM._log.log("interpreterReady(" + FileOps.NULL_FILE + ") called in MainFrame.interpreterResetFailed");
-      interpreterReady(FileOps.NULL_FILE); 
+      MainJVM._log.log("interpreterReady() called in MainFrame.interpreterResetFailed");
+      interpreterReady(); 
     }
     
     public void interpreterResetting() {
@@ -8963,7 +8946,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
     }
     
-    public void interpreterReady(File wd) {
+//    public void interpreterReady(File wd) { interpreterReady(); }
+    public void interpreterReady() {
       assert duringInit() || EventQueue.isDispatchThread();
       
       interactionEnded();

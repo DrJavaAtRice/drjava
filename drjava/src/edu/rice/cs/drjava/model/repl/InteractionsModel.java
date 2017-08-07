@@ -171,7 +171,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     */
   public void addListener(InteractionsListener listener) { _notifier.addListener(listener); }
   
-  /** Removea an InteractionsListener from the model.  If the listener is not currently listening to this model, this 
+  /** Remove an InteractionsListener from the model.  If the listener is not currently listening to this model, this 
     * method has no effect.
     * @param listener a listener that reacts to Interactions events
     */
@@ -188,12 +188,6 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     _notifyInteractionEnded();
     _notifyInteractionIncomplete();
   }
-  
-  /* DrScala does not have more than one interpreter. */
-//  /** Sets this model's notion of whether it is waiting for the first interpreter to connect.  The interactionsReady
-//    * event is not fired for the first interpreter.
-//    */
-//  public void setWaitingForFirstInterpreter(boolean waiting) { _waitingForFirstInterpreter = waiting; }
  
   /** Interprets the current given text at the prompt in the interactions doc. May run outside the event thread. */
   public void interpretCurrentInteraction() {
@@ -209,34 +203,6 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
 //        if (toEval.startsWith("java ")) toEval = _transformJavaCommand(toEval);
 //        else if (toEval.startsWith("applet ")) toEval = _transformAppletCommand(toEval);
         toEval = transformCommands(toEval);
-        
-        /* Debugger deactivated in DrScala */
-//        if (DrScala.getConfig().getSetting(OptionConstants.DEBUG_AUTO_IMPORT).booleanValue() &&
-//            toEval.startsWith("import ")) {
-//          // add the class or package after the import to the set of auto-imports
-//          // NOTE: this only processes import statements until the first non-import statement or comment is reached
-//          // Example: import java.io.File; import java.io.IOException // imports both File and IOException
-//          // Example: import java.io.File; /* comment */ import java.io.IOException // imports only File
-//          // Example: import java.io.File; File f; import java.io.IOException // imports only File
-//          String line = toEval;
-//          do {
-//            line = line.substring("import ".length());
-//            String substr = line;
-//            int endPos = 0;
-//            while((endPos<substr.length()) &&
-//                  ((Character.isJavaIdentifierPart(substr.charAt(endPos))) ||
-//                   (substr.charAt(endPos) == '.') ||
-//                   (substr.charAt(endPos) == '*'))) ++endPos;
-//            substr = substr.substring(0,endPos);
-//            _autoImportSet.add(substr);
-//            
-//            // remove substr from line
-//            line = line.substring(substr.length()).trim();
-//            if (!line.startsWith(";")) break;
-//            line = line.substring(1).trim();
-//          } while(line.startsWith("import "));
-//        }
-//          System.err.println("Preparing to interpret '" + toEval  + "'");
         
         final String evalText = toEval;
 
@@ -262,15 +228,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
         sb.append(s.trim());
         sb.append("; ");
       }
-    } 
-    /* Debugger deactivated in DrScala */
-//    if (DrScala.getConfig().getSetting(OptionConstants.DEBUG_AUTO_IMPORT).booleanValue()) {
-//      for(String s: _autoImportSet) {
-//        sb.append("import ");
-//        sb.append(s);
-//        sb.append("; ");
-//      }
-//    }
+    }
 
     if (sb.length() > 0) {
       interpretCommand(sb.toString());
@@ -319,9 +277,14 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
      _guiNotifier.available(GUIAvailabilityListener.ComponentType.INTERACTIONS);
   }
   
+    /** Resets the Java interpreter without changing the working directory or clearing auto imports. */
+  public final boolean softResetInterpreter() {
+    interpreterResetting();
+    return _softResetInterpreter();
+  }
+  
   /** Resets the Java interpreter with working directory wd. */
   public final boolean resetInterpreter(File wd) {
-//    assert EventQueue.isDispatchThread();
     _workingDir = wd;
     _autoImportSet.clear(); // clear list when interpreter is reset
     interpreterResetting();
@@ -330,9 +293,8 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     return _resetInterpreter(wd);
   }
   
-  /** Resets the interpreter and resets the embedded Interactions document.  This should only be called from 
-    * resetInterpreter, never directly. */
   protected abstract boolean _resetInterpreter(File wd);
+  protected abstract boolean _softResetInterpreter();
   
   /** Returns the working directory for the current interpreter. */
   public File getWorkingDirectory() { return _workingDir; }
@@ -667,19 +629,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
 //    _document.insertBeforeLastPrompt(" Restarting the Scala interpreter, which is a SLOW process ...\n", 
 //                                     InteractionsDocument.ERROR_STYLE);
 //  }
-  
-//  /** Default behavior set to return what it's given.  Used to replace line number and file name in a throwable when
-//    * the error
-//    * occurs in a Language Level file.
-//    * Overriden in DefaultInteractionModel when a GlobalModel is available
-//    * to make a LanguageLevelStackTraceMapper.
-//    * @param sT the stackTrace to replace line number and file name
-//    * @return the same stackTrace.
-//    */
-//  public StackTraceElement[] replaceLLException(StackTraceElement[] sT) {
-//    return sT;
-//  }
-  
+
   /** Signifies that the most recent interpretation was ended due to an exception being thrown. */
   public void replThrewException(String message, StackTraceElement[] stackTrace) {
 //    stackTrace = replaceLLException(stackTrace);
@@ -691,7 +641,6 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     replThrewException(sb.toString().trim());
   }
   
-
   /** Signifies that the most recent interpretation was ended due to an exception being thrown. */
   public void replThrewException(final String message) {
     if (message.endsWith("<EOF>\"")) {
@@ -772,7 +721,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    /** Notifies listeners that the interpreter has been replaced.
     * @param inProgress Whether the new interpreter is currently in progress.
     */
-  protected abstract void _notifyInterpreterReplaced(final boolean inProgress);
+  protected abstract void _notifyInterpreterReplaced();
   
   /** This method is called by the Main JVM if the Interpreter JVM cannot be exited
     * @param t The Throwable thrown by System.exit
@@ -840,16 +789,20 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
       }
     });
   }
+                                                    
+//  /** Called when a new Java interpreter has registered and is ready for use. */
+//  public void interpreterReady(final File wd) { interpreterReady(); }
   
-  /** Called when a new Java interpreter has registered and is ready for use. */
-  public void interpreterReady(final File wd) {
-    _log.log("interpreterReady(" + wd + ") called in InteractionsModel");
+  /** Directly called when a new Java interpreter has registered and is ready for use. 
+    * Indirectly called by interpreterReady(final File wd). */
+  public void interpreterReady() {
+    _log.log("interpreterReady() called in InteractionsModel");
     Utilities.invokeLater(new Runnable() {
       public void run() {
         _document.setInProgress(false);
         if (_pane != null) _pane.setCaretPosition(_document.getLength());  
         performDefaultImports();
-        _notifyInterpreterReady(wd);
+        _notifyInterpreterReady();
       }
     });
   }
@@ -873,8 +826,8 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     }
   }
   
-  /** Notifies listeners that the interpreter is ready. (Subclasses must maintain listeners.) */
-  public abstract void _notifyInterpreterReady(File wd);
+//  /** Notifies listeners that the interpreter is ready. (Subclasses must maintain listeners.) */
+//  public abstract void _notifyInterpreterReady(File wd);
   
   /** Singleton InputListener which should never be asked for input. */
   private static class NoInputListener implements InputListener {

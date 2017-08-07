@@ -36,6 +36,8 @@
 
 package edu.rice.cs.drjava.model.repl;
 
+import java.awt.EventQueue;
+
 import java.io.File;
 import java.util.List;
 import java.util.ArrayList;
@@ -46,7 +48,6 @@ import edu.rice.cs.drjava.config.OptionListener;
 import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.model.DefaultGlobalModel;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
-//import edu.rice.cs.drjava.model.compiler.LanguageLevelStackTraceMapper;
 import edu.rice.cs.drjava.model.repl.newjvm.MainJVM;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.StringOps;
@@ -151,11 +152,10 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   /** Called when the Java interpreter is ready to use.  This method body adds actions that involve the global model. 
     * This method may run outside the event thread. 
     */
-  public void interpreterReady(File wd) {
-    _log.log("Resetting interactions class path in DefaultInteractions.interpreterReady method");
-    _model.resetInteractionsClassPath();  // Done here rather than in the superclass because _model is available here.
-    super.interpreterReady(wd);  // invokes interpreterReady(wd) in abstract class InteractionsModel.
-    _log.log("In InteractionsModel, Event: interpreterReady(" + wd +") called");
+  public void interpreterReady() {
+    // Transmit the class path (corresponding to opened documents) to the _classPathMan
+    super.interpreterReady();  // invokes interpreterReady() in abstract class InteractionsModel.
+    _log.log("In InteractionsModel, Event: interpreterReady() called");
   }
   
   /** In the event thread, notifies listeners that an interaction has started. */
@@ -183,13 +183,12 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   }
   
   /** In the event thread, notifies listeners that the interpreter has been replaced. Only runs in event thread.
-    * @param inProgress Whether the new interpreter is currently in progress.
+    * @param inProgress Whether the new interpreter is currently in progress.  Only runs in event thread.
     */
-  protected void _notifyInterpreterReplaced(final boolean inProgress) {
-//    Utilities.invokeLater(new Runnable() { public void run() { 
-      _notifier.interpreterReplaced(inProgress);
-      _log.log("In InteractionsModel, Event: the interpreter was changed; inProgess = " + inProgress);
-//    } });
+  protected void _notifyInterpreterReplaced() {
+    assert EventQueue.isDispatchThread();
+    _notifier.interpreterReplaced();
+    _log.log("In InteractionsModel, the interpreter was replaced by a hard interactions reset");
   }
   
   /** Notifies listeners that the interpreter is resetting. Only runs in the event thread */
@@ -200,14 +199,28 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
 //    } });
   }
   
+//  /** In the event thread, notifies listeners that the interpreter is ready. Sometimes called from outside the event
+//    * thread. */
+//  public void _notifyInterpreterReady(final File wd) {   /* TODO  rename this method */
+//    _log.log("Asynchronously notifying interpreterReady event listeners");  // DEBUG
+//    Utilities.invokeLater(new Runnable() { 
+//      public void run() { 
+////        _notifier.interpreterReady(wd);
+//        _notifier.interpreterReady();
+//        _log.log("In InteractionsModel, Event: the interpreter is ready with wd " + wd);
+//        _document.clearColoring();  // _document is inherited from the abstract superclass InteractionsModel
+//      } 
+//    });
+//  }
+  
   /** In the event thread, notifies listeners that the interpreter is ready. Sometimes called from outside the event
     * thread. */
-  public void _notifyInterpreterReady(final File wd) {   /* TODO  rename this method */
-//    System.out.println("Asynchronously notifying interpreterReady event listeners");  // DEBUG
+  public void _notifyInterpreterReady() {   /* TODO  rename this method */
+    _log.log("Asynchronously notifying interpreterReady event listeners");  // DEBUG
     Utilities.invokeLater(new Runnable() { 
       public void run() { 
-        _notifier.interpreterReady(wd); 
-        _log.log("In InteractionsModel, Event: the interpreter is ready with wd " + wd);
+        _notifier.interpreterReady(); 
+        _log.log("In InteractionsModel, Event: the interpreter is ready with existing working directory");
         _document.clearColoring();  // _document is inherited from the abstract superclass InteractionsModel
       } 
     });
@@ -238,21 +251,7 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.interactionIncomplete(); } });
   }
   
-  public ConsoleDocument getConsoleDocument() { return _model.getConsoleDocument(); }
-  
-//  /** overides method in InteractionModel.java and changes stackTrace for a
-//    * throwable if LL files are present
-//    * @param stackTrace the stack trace to change files name and line number in
-//    * @return stack trace with replaced file name and line number (if throwable occured in a .dj* file)
-//    */
-//  public StackTraceElement[] replaceLLException(StackTraceElement[] stackTrace) {
-//    // use LLSTM from compiler model.
-//    LanguageLevelStackTraceMapper LLSTM = _model.getCompilerModel().getLLSTM();
-//    final List<File> files = new ArrayList<File>();
-//    for(OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()) { files.add(odd.getRawFile()); }
-//    
-//   return (LLSTM.replaceStackTrace(stackTrace,files));
-//  }  
+  public ConsoleDocument getConsoleDocument() { return _model.getConsoleDocument(); } 
   
   /** A compiler can instruct DrScala to include additional elements for the boot
     * class path of the Interactions JVM. */

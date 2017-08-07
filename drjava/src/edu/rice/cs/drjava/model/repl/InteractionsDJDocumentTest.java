@@ -79,6 +79,7 @@ public final class InteractionsDJDocumentTest extends DrScalaTestCase {
     catch(Throwable t) { t.printStackTrace(); }
   }
   
+//  Rewrite this test to use the Completion Monitor in DummyInteractionsListener instead of _restartLock
   /** Tests that the styles list is updated and reset properly */
   public void helpTestStylesListContentAndReset() throws EditDocumentException, InterruptedException {
 //    System.err.println("testStylesList started");
@@ -129,14 +130,24 @@ public final class InteractionsDJDocumentTest extends DrScalaTestCase {
     
     /* Reset interactions and wait until it completes */
 
-//    System.err.println("reset interactions test reached");
     InteractionsListener restartCommand = new DummyInteractionsListener() {
-      public void interpreterReady(File wd) {
+      public void interpreterReady() {
+        super.interpreterReady();
         synchronized(_restartLock) {
           _interpreterRestarted = true;
           _restartLock.notify();
         }
-      }};
+      }
+        
+//      public void interpreterReady(File wd) {
+//        super.interpreterReady(wd);
+//        synchronized(_restartLock) {
+//          _interpreterRestarted = true;
+//          _restartLock.notify();
+//        }
+//      }
+    };
+    
     _model.addListener(restartCommand);
                                    
 //    // Reset should clear
@@ -144,9 +155,8 @@ public final class InteractionsDJDocumentTest extends DrScalaTestCase {
     
     synchronized(_restartLock) { _interpreterRestarted = false; }
       
-    // Reset the interactions pane, restarting the interpreter
-    File f = _model.getWorkingDirectory();
-    _globalModel.resetInteractions(f);
+    // Reset the interactions pane, restarting the interpreter with no changes to working directory and class path
+    _globalModel.resetInteractions();
     
 //    System.err.println("Interpreter reset");
 

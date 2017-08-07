@@ -47,6 +47,7 @@ import edu.rice.cs.util.text.ConsoleDocumentInterface;
 
 import java.io.File;
 import java.awt.EventQueue;
+import java.util.List;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
@@ -56,7 +57,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
   */
 public abstract class RMIInteractionsModel extends InteractionsModel {
   
-  static final Log _log = new Log("GlobalModel.txt", false);
+  static final Log _log = new Log("GlobalModel.txt", true);
   
   /** RMI interface to the remote Java interpreter.*/
   protected final MainJVM _jvm;
@@ -91,9 +92,7 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
     System.out.println("\tretval: " + retval);
     return retval;
   }
-  
 
-  
   /** Adds the given path to the interactions class path used in the interpreter.
     * @param f  the path to add
     */
@@ -102,31 +101,39 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
   /** Adds the given path(s) to the interactions class path used in the interpreter.
     * @param cp the path to add
     */
-  public void addInteractionsClassPath(Iterable<File> cp) { _jvm.addInteractionsClassPath(cp); }
+  public void addInteractionsClassPath(List<File> cp) { _jvm.addInteractionsClassPath(cp); }
+  
+  /** Attempts to reset the Scala interpreter in the slave JVM without changing working directory or auto imports.  */
+  protected boolean _softResetInterpreter() {
+    /* Try to reset the interpreter using the internal scala interpreter reset command.  If this fails restart the
+     * slave JVM. */
+    _log.log("_softResetInterpreter() in RMIInteractions model has been called");
+    boolean success = _jvm.resetInterpreter();  //  attempt an interpreter reset
+    _log.log("_softResetInterpreter returned " + success);
+    if (success) EventQueue.invokeLater(new Runnable() { public void run() { documentReset(); }});
+    return success;
+  }
   
   /** Attempts to reset the Scala interpreter in the slave JVM.  */
   protected boolean _resetInterpreter(final File wd) {
-
-    _jvm.setWorkingDirectory(wd);
+//    _jvm.setWorkingDirectory(wd);  // already done
     /* Try to reset the interpreter using the internal scala interpreter reset command.  If this fails restart the
      * slave JVM. */
     _log.log("_resetInterpreter in RMIInteractions model has been called");
-    System.err.println("_resetInterpreter in RMIInteractions model has been called");
-    boolean success = _jvm.resetInterpreter();  // 
+    boolean success = _jvm.resetInterpreter();  // attempt an interpreter reset
     _log.log("_resetInterpreter returned " + success);
-    System.err.println("_resetInterpreter returned " + success);
     if (success) documentReset();
     return success;
   }
   
   /** Sets the new interpreter to be the current one. */
-  public void setUpNewInterpreter(final boolean inProgress) {
+  public void setUpNewInterpreter() {
     EventQueue.invokeLater(new Runnable() {
       public void run() {
         _log.log("RMIInteractionsModel.setUpNewInterpreter called");
         System.err.println("RMIInteractionsModel.setUpNewInterpreter called");
         _jvm.restartInterpreterJVM();
-        _notifyInterpreterReplaced(inProgress);
+        _notifyInterpreterReplaced();
         EventQueue.invokeLater(new Runnable() { public void run() { documentReset(); } });
 //        _updateDocument(InteractionsDocument.DEFAULT_PROMPT); // Redundant?
       }
@@ -158,12 +165,4 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
 //  
 //  /** Require variable declarations to include an explicit type. */
 //  public void setRequireVariableType(boolean require) { _jvm.setRequireVariableType(require); }
-  
-//  /** Gets the interpreter class path from the interpreter jvm.
-//    * @return a list of class path elements
-//    */
-//  public Iterable<File> getInteractionsClassPath() { 
-//    Option<Iterable<File>> result = _jvm.getInteractionsClassPath();
-//    return result.unwrap(IterUtil.<File>empty());
-//  }
 }

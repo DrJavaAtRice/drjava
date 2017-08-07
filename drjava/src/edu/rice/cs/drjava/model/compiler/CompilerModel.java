@@ -128,11 +128,4 @@ public interface CompilerModel {
   
   /** Gets the current build directory. */
   public File getBuildDir();
-
-  /* The following method is no longer used. */
-//  /** Add a compiler to the active list */
-//  public void addCompiler(CompilerInterface compiler);
-  
-//  /** Gets the LanguageLevelStackTraceMapper from the model */
-//  public LanguageLevelStackTraceMapper getLLSTM();
 }

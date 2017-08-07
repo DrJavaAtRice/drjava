@@ -279,7 +279,7 @@ public interface GlobalModel extends ILoadDocuments {
   public File findFileInPaths(String fileName, Iterable<File> paths);
   
   /** Gets a list of all sourceRoots for the open definitions documents, without duplicates. */
-  public Iterable<File> getSourceRootSet();
+  public List<File> getSourceRootSet();
   
 //  /** Return the absolute path of the file with the given index, or "(untitled)" if no file exists. */
 //  public String getDisplayFullPath(int index);
@@ -332,9 +332,13 @@ public interface GlobalModel extends ILoadDocuments {
     /** Returns the actual classpath in use by the Interpreter JVM. */
   public Iterable<File> getInteractionsClassPath();
   
-  /** Clears and resets the interactions pane in the specified working directory, provided that the operation has some effect.
-    * Invoked by "Reset interactions" command (in MainFrame) and as part of other actions such as the run, project loading, 
-    * compilation and unit testing commands.*/
+  /** Clears and resets the interactions pane using the existing working directory. Invoked by "Reset interactions" 
+    * command (in MainFrame) and as part of other actions such as run, project loading, compilation and unit 
+    * testing commands.*/
+  public void resetInteractions();
+  
+  /** Clears and resets the interactions pane in the specified working directory. Invoked by actions such as the run, 
+    * project loading, compilation and unit testing commands.*/
   public void resetInteractions(File wd);
   
   /** Interprets the current given text at the prompt in the interactions pane. */
@@ -490,12 +494,12 @@ public interface GlobalModel extends ILoadDocuments {
   /** Returns only the project's extra classpaths.
     * @return The classpath entries loaded along with the project
     */
-  public Iterable<AbsRelFile> getExtraProjectClassPath();
+  public List<AbsRelFile> getExtraProjectClassPath();
    
   /** Sets the set of classpath entries to use as the projects set of classpath entries.  This is normally used by the
     * project preferences.
     */
-  public void setExtraProjectClassPath(Iterable<AbsRelFile> cp);
+  public void setExtraProjectClassPath(List<AbsRelFile> cp);
   
   /** Sets the create jar file of the project. */
   public void setCreateJarFile(File f);

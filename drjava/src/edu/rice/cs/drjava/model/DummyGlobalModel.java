@@ -264,7 +264,7 @@ public class DummyGlobalModel implements GlobalModel {
     throw new UnsupportedOperationException("Tried to call getSourceFileFromPaths on a Dummy");
   }
   
-  public Iterable<File> getSourceRootSet() {
+  public List<File> getSourceRootSet() {
     throw new UnsupportedOperationException("Tried to call getSourceRootSet on a Dummy");
   } 
   
@@ -316,6 +316,10 @@ public class DummyGlobalModel implements GlobalModel {
     throw new UnsupportedOperationException("Tried to call getSwingInteractionsDocument on a Dummy");
   }
   
+  public void resetInteractions() {
+    throw new UnsupportedOperationException("Tried to call resetInteractions on a Dummy");
+  }
+  
   public void resetInteractions(File wd) {
     throw new UnsupportedOperationException("Tried to call resetInteractions on a Dummy");
   }
@@ -324,14 +328,9 @@ public class DummyGlobalModel implements GlobalModel {
     throw new UnsupportedOperationException("Tried to call getInteractionsClasspath on a Dummy");
   }
   
-  public void resetInteractions(File wd, boolean forceReset) { 
-    throw new UnsupportedOperationException("Tried to call resetInteractions on a Dummy");
-  }
-  
   public void interpretCurrentInteraction() {
     throw new UnsupportedOperationException("Tried to call interpretCurrentInteraction on a Dummy");
   }
-
   
   public void loadHistory(FileOpenSelector selector) throws IOException {
     throw new UnsupportedOperationException("Tried to call loadHistory on a Dummy");
@@ -473,11 +472,11 @@ public class DummyGlobalModel implements GlobalModel {
     throw new UnsupportedOperationException("Tried to call getMainClass on a Dummy");
   }
   
-  public Iterable<AbsRelFile> getExtraProjectClassPath() {
+  public List<AbsRelFile> getExtraProjectClassPath() {
     throw new UnsupportedOperationException("Tried to call getExtraClasspath on a Dummy");
   }
   
-  public void setExtraProjectClassPath(Iterable<AbsRelFile> cp) {
+  public void setExtraProjectClassPath(List<AbsRelFile> cp) {
     throw new UnsupportedOperationException("Tried to call setExtraClasspath on a Dummy");
   }
   

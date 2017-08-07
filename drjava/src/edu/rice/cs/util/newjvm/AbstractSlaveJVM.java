@@ -48,7 +48,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
   * @version $Id: AbstractSlaveJVM.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public abstract class AbstractSlaveJVM implements SlaveRemote {
-  public static final int CHECK_MAIN_VM_ALIVE_SECONDS = 1;
+  public static final int CHECK_MAIN_VM_ALIVE_SECONDS = 3;
   
   /** Name of the thread to quit the slave. */
   private final String _quitSlaveThreadName;

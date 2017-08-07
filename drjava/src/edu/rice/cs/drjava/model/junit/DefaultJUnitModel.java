@@ -624,10 +624,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     return _model.getSourceFile(className + OptionConstants.JAVA_FILE_EXTENSION);
   }
   
-//  /** Returns the current classpath in use by the JUnit JVM. */
-//  public Iterable<File> getClassPath() {  return _jvm.getClassPath().unwrap(IterUtil.<File>empty()); }
-  
-  /** Called when the JVM used for unit tests has registered.  Does not necessarily run in even thread. */
+  /** Called when the JVM used for unit tests has registered.  Does not necessarily run in event thread. */
   public void junitJVMReady() {
     Utilities.invokeLater(new Runnable() { public void run() { 
       if (! _testInProgress) return;

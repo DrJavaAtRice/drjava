@@ -43,24 +43,22 @@ import javax.swing.text.BadLocationException;
 import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.config.OptionConstants;
 
+import edu.rice.cs.util.Log;
 import edu.rice.cs.util.swing.Utilities;
 
-/**
- * Tests to ensure that compilation succeeds when expected.
- * 
- * Every test in this class is run for *each* of the compilers that is available.
- *
- * @version $Id: GlobalModelCompileSuccessOptionsTest.java 5708 2012-08-29 23:52:35Z rcartwright $
- */
+/** Tests to ensure that compilation succeeds when expected.
+  * @version $Id: GlobalModelCompileSuccessOptionsTest.java 5708 2012-08-29 23:52:35Z rcartwright $
+  */
 public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompileSuccessTestCase {
+  
+  public static final Log _log  = new Log("GlobalModel.txt", false);
 
   /** Tests a compile on a file that references a "non-public" class defined in another class with a name different 
-    * than the "non-public" class. Doesn't reset interactions because no interpretations are performed.  
+    * than the "non-public" class. Doesn't reset interactions because no interpretation is performed.  
     * NOTE: this is the DrScala conversion of a legacy DrJava test.  All top level classes in Scala are public.
     */
-  public void testCompileReferenceToNonPublicClass() 
-    throws BadLocationException, IOException, InterruptedException {
-//    System.out.println("testCompileReferenceToNonPublicClass()");
+  public void testCompileReferenceToNonPublicClass() throws BadLocationException, IOException, InterruptedException {
+    _log.log("Starting testCompileReferenceToNonPublicClass()");
     OpenDefinitionsDocument doc = setupDocument(FOO_NON_PUBLIC_CLASS_TEXT);
     OpenDefinitionsDocument doc2 = setupDocument(FOO2_REFERENCES_NON_PUBLIC_CLASS_TEXT);
     final File file = tempFile();
@@ -70,20 +68,19 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
     _model.addListener(listener);
     listener.compile(doc);
-    if (_model.getCompilerModel().getNumErrors() > 0) {
-      fail("compile failed: " + getCompilerErrorString());
-    }
+    if (_model.getCompilerModel().getNumErrors() > 0) { fail("compile failed: " + getCompilerErrorString()); }
     listener.checkCompileOccurred();
     _model.removeListener(listener);
+    
     CompileShouldSucceedListener listener2 = new CompileShouldSucceedListener();
     _model.addListener(listener2);
     listener2.compile(doc2);
-    if (_model.getCompilerModel().getNumErrors() > 0) {
-      fail("compile failed: " + getCompilerErrorString());
-    }    
-    
+    if (_model.getCompilerModel().getNumErrors() > 0) { fail("compile failed: " + getCompilerErrorString()); }    
     listener2.checkCompileOccurred();
     _model.removeListener(listener2);
+    
+    Utilities.clearEventQueue();
+    
     assertCompileErrorsPresent(_name(), false);
     
     // Make sure .class exists
@@ -91,57 +88,7 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
     File compiled2 = classForScala(file, "DrScalaTestFoo2");
     assertTrue(_name() + "Class file should exist after compile", compiled.exists());
     assertTrue(_name() + "Class file should exist after compile", compiled2.exists());
-  }
-  
-  /** Test support for assert keyword if enabled.
-   * Note that this test only runs in Java 1.4 or higher.
-   * Doesn't reset interactions because no interpretations are performed.
-   */
-  public void testCompileWithJavaAssert()
-    throws BadLocationException, IOException, InterruptedException {
-//    System.out.println("testCompileWithJavaAssert()");
-    // No assert support by default (or in 1.3)
-    if (Float.valueOf(System.getProperty("java.specification.version")) < 1.5) {
-      OpenDefinitionsDocument doc = setupDocument(FOO_WITH_ASSERT);
-      final File file = tempFile();
-      saveFile(doc, new FileSelector(file));
-      CompileShouldFailListener listener = new CompileShouldFailListener();
-      _model.addListener(listener);
-      
-      // This is a CompileShouldFailListener, so we don't need to wait.
-      listener.compile(doc);
-      
-      assertCompileErrorsPresent(_name(), true);
-      listener.checkCompileOccurred();
-      File compiled = classForScala(file, "DrScalaTestFoo");
-      assertTrue(_name() + "Class file exists after compile?!", ! compiled.exists());
-      _model.removeListener(listener);
-      
-
-      // not releant to DrScala
-//      // Only run assertions test in 1.4
-//      String version = System.getProperty("java.version");
-//      if ((version != null) && ("1.4.0".compareTo(version) <= 0)) {
-//        // Turn on assert support
-//        DrJava.getConfig().setSetting(OptionConstants.RUN_WITH_ASSERT,
-//                                      Boolean.TRUE);
-//        
-//        CompileShouldSucceedListener listener2 = new CompileShouldSucceedListener();
-//        _model.addListener(listener2);
-//        listener2.compile(doc);
-//        if (_model.getCompilerModel().getNumErrors() > 0) {
-//          fail("compile failed: " + getCompilerErrorString());
-//        }
-//        _model.removeListener(listener2);
-//        assertCompileErrorsPresent(_name(), false);
-//        listener2.checkCompileOccurred();
-//        
-//        // Make sure .class exists
-//        compiled = classForJava(file, "DrScalaTestFoo");
-//        assertTrue(_name() + "Class file doesn't exist after compile",
-//                   compiled.exists());
-//      }
-    }
+    _log.log("Ending testCompileReferenceToNonPublicClass()");
   }
 
   /** Tests compiling a file with generics works with generic compilers.
@@ -151,7 +98,7 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
    * is -- the lib directory -- but how can we get a URL for that?)
    */
   public void testCompileWithGenerics()throws BadLocationException, IOException, InterruptedException {
-//    System.out.println("testCompileWithGenerics()");
+    _log.log("Starting testCompileWithGenerics()");
     // Only run this test if using a compiler with generics
     if (_isGenericCompiler()) {
       
@@ -173,7 +120,49 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
       
       // Make sure .class exists
       File compiled = classForScala(file, "DrScalaTestFooGenerics");
-      assertTrue(_name() + "FooGenerics Class file doesn't exist after compile", compiled.exists());
+      assertTrue(_name() + " FooGenerics Class file doesn't exist after compile", compiled.exists());
+      _log.log("Ending testCompileWithGenerics()");
     }
+  }
+  
+  /** Confirms that calling compileAll with different source roots succeeds. */
+  public void testCompileAllDifferentSourceRoots() throws BadLocationException, IOException, InterruptedException {
+    _log.log("Starting testCompileAllDifferentSourceRoots");
+//    System.err.println("testCompileAllDifferentSourceRoots() compiler =" + _name());
+    File aDir = new File(_tempDir, "a");
+    File bDir = new File(_tempDir, "b");
+    aDir.mkdir();
+    bDir.mkdir();
+    OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
+    final File file1 = new File(aDir, "DrScalaTestFoo.scala");
+    saveFile(doc, new FileSelector(file1));
+    _log.log("Saved document as file DrScalaTestFoo.scala");
+    OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
+    final File file2 = new File(bDir, "DrScalaTestBar.scala");
+    saveFile(doc2, new FileSelector(file2));
+    _log.log("Saved document as file DrScalaTestBar.scala");
+    
+    _log.log("Creating CompilerShouldSucceedListener");
+    CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
+    _model.addListener(listener);
+    _log.log("Compiling DrScalaTestFoo and DrScalaTestBar");
+    _model.getCompilerModel().compileAll();
+    
+    Utilities.clearEventQueue();
+    
+    // Compile should succeed with multiple source roots
+    assertEquals("compile succeeded despite multiple source roots", 0, _model.getCompilerModel().getNumErrors());
+    assertCompileErrorsPresent(_name(), false);
+    listener.checkCompileOccurred();
+
+    // Make sure .class files exist for the first file in expected place
+    File compiled = classForScala(file2, "DrScalaTestBar");
+    System.err.println("Class file for DrScalaTestBar = " + compiled);
+    assertTrue(_name() + "Bar Class file exists after compile", compiled.exists());
+    // Scalac does not respond to null destination by placing each class file in corresponding source file's folder
+//    File compiled2 = classForScala(file2, "DrSclaTestFoo");
+//    assertTrue(_name() + "Foo Class file doesn't exist after compile", ! compiled2.exists());
+    _model.removeListener(listener);
+    _log.log("Ending testCompileAllDifferentSourceRoots");
   }
 }

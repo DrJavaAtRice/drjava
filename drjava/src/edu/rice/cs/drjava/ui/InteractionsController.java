@@ -268,12 +268,13 @@ public class InteractionsController extends AbstractConsoleController {
       _endOfStream = false;
     }
     
-    public void interpreterReady(File wd) { 
+//    public void interpreterReady(File wd) { interpreterReady(); }
+    public void interpreterReady() { 
       _interactionsDJDocument.clearColoring();  // probably redundant
     }
     public void interpreterResetFailed(Throwable t) { }
     public void interpreterExited(int status) { }
-    public void interpreterReplaced(boolean inProgress) { }
+    public void interpreterReplaced() { }
     public void interactionIncomplete() { }
   };
   

@@ -48,5 +48,4 @@ public class DummyCompilerListener implements CompilerListener {
   public void compileAborted(Exception e) { }
   public void saveBeforeCompile() { }
   public void saveUntitled() { }
-  public void activeCompilerChanged() { }
 }

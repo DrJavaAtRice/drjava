@@ -38,10 +38,18 @@ package edu.rice.cs.drjava.model.repl;
 
 import java.io.File;
 
-/** A dummy InteractionsListener that does nothing.
- *  @version $Id: DummyInteractionsListener.java 5594 2012-06-21 11:23:40Z rcartwright $
- */
+import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.plt.concurrent.CompletionMonitor;
+
+//TODO: this class should be renamed NullInteractionsListener as should all of the other "dummy" classes.  
+/** An InteractionsListener that does nothing other than support a waitUntilDone method that blocks until
+  * interpreterReady is called.
+  *  @version $Id: DummyInteractionsListener.java 5594 2012-06-21 11:23:40Z rcartwright $
+  */
 public class DummyInteractionsListener implements InteractionsListener {
+  
+  private static final int WAIT_TIMEOUT = 10000; // time to wait for _interactionDone or _resetDone 
+  public CompletionMonitor _resetDone = new CompletionMonitor();
   
   /** Called after an interaction is started by the GlobalModel.  */
   public void interactionStarted() { }
@@ -59,13 +67,13 @@ public class DummyInteractionsListener implements InteractionsListener {
   public void interpreterResetting() { }
   
   /** Called when the interactions window is reset. */
-  public void interpreterReady(File wd) { }
-
-  /** Called when the interactions JVM was closed by System.exit
-   * or by being aborted. Immediately after this the interactions
-   * will be reset.
-   * @param status the exit code
-   */
+//  public void interpreterReady(File wd) { interpreterReady(); }
+  public void interpreterReady() { _resetDone.signal(); } 
+  
+  /** Called when the interactions JVM was closed by System.exit or by being aborted. Immediately after this the 
+    * interactions pane typically is reset.
+    * @param status the exit code
+    */
   public void interpreterExited(int status) { }
   
   /** Called if the interpreter reset failed. (Subclasses must maintain listeners.) */
@@ -75,10 +83,17 @@ public class DummyInteractionsListener implements InteractionsListener {
    * @param inProgress Whether the new interpreter is currently processing an interaction (i.e. whether an 
    * interactionEnded event will be fired)
    */
-  public void interpreterReplaced(boolean inProgress) { }
+  public void interpreterReplaced() { }
 
   /** Called when enter was typed in the interactions pane but the interaction was incomplete. */
   public void interactionIncomplete() { }
   
+  /* Waits until interpreterReady has been called and resets the completion monitor when that event happens. */
+  public void waitResetDone() {
+    boolean wasDone = _resetDone.attemptEnsureSignaled(WAIT_TIMEOUT);
+    if (! wasDone) 
+      throw new UnexpectedException("Interactions pane failed to reset within " + WAIT_TIMEOUT + " milliseconds");
+    _resetDone.reset();  // 
+  }
 }
 

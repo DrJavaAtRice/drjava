@@ -114,7 +114,7 @@ public class DrScala {
     * pass along files to open that arrived too late. */
   static volatile boolean _restartedDrScalaUsesRemoteControl = true;
   
-  /** Time in millisecond before restarting DrScala to change the heap size, etc. is deemed a success. */
+  /** Time in milliseconds before restarting DrScala to change the heap size, etc. is deemed a success. */
   private static final int WAIT_BEFORE_DECLARING_SUCCESS = 10000;
 
   /** Number of times we retry opening with the remote control. */

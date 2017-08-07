@@ -6,6 +6,7 @@
 
 rm -rf drScalaILoop_bin
 mkdir drScalaILoop_bin
-scalac -cp classes/base -d drScalaILoop_bin src/edu/rice/cs/drjava/model/repl/newjvm/DrScalaILoop.scala
+export SCALA_HOME=/usr/share/scala-2.12.0
+/usr/share/scala-2.12.0/bin/scalac -cp classes/base -d drScalaILoop_bin src/edu/rice/cs/drjava/model/repl/newjvm/DrScalaILoop.scala
 jar -cvf lib/drScalaILoop.jar -C drScalaILoop_bin edu
 rm -rf drScalaILoop_bin

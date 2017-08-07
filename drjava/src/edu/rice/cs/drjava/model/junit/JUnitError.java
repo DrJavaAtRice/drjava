@@ -101,7 +101,8 @@ public class JUnitError extends DJError implements Serializable {
   
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append(_exception);
+    sb.append("exception: " + _exception);
+    sb.append("  with message: " + message());
     
     for(StackTraceElement s: _stackTrace) {
       sb.append('\n');

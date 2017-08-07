@@ -74,7 +74,7 @@ public interface ProjectFileIR {
   public String[] getCollapsedPaths();
     
   /** @return an array full of all the classpath path elements in the classpath for this project file */
-  public Iterable<AbsRelFile> getClassPaths();
+  public List<AbsRelFile> getClassPaths();
   
   /** @return the fully qualified name of the class that holds the Jar main class associated with this project */
   public String getMainClass();
@@ -106,7 +106,7 @@ public interface ProjectFileIR {
   public void setAuxiliaryFiles(List<DocFile> aux);
   public void setExcludedFiles(List<DocFile> ef);
   public void setCollapsedPaths(List<String> paths);
-  public void setClassPaths(Iterable<? extends AbsRelFile> cp);
+  public void setClassPaths(List<? extends AbsRelFile> cp);
   public void setBuildDirectory(File dir);
   public void setWorkingDirectory(File dir);
   public void setMainClass(String main);

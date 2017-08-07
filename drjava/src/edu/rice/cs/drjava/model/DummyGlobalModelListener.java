@@ -90,9 +90,6 @@ public class DummyGlobalModelListener extends DummyInteractionsListener implemen
   /** Called if a compile is aborted. */
   public void compileAborted(Exception e) { }
 
-  /** Called after the active compiler has been changed. */
-  public void activeCompilerChanged() { }
-
   /** Called when a file's main method is about to be run. */
   public void prepareForRun(OpenDefinitionsDocument doc) { }
   

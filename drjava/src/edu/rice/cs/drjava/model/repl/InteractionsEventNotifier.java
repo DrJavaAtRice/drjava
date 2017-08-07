@@ -101,15 +101,25 @@ public class InteractionsEventNotifier extends EventNotifier<InteractionsListene
     finally { _lock.endRead(); }
   }
   
-  /** Called when the interactions window is reset. */
-  public void interpreterReady(File wd) {
+  /** Called when the interactions window is softly reset. */
+  public void interpreterReady() {
     _lock.startRead();
     try {
       int size = _listeners.size();
-      for (int i = 0; i < size; i++) _listeners.get(i).interpreterReady(wd);
+      for (int i = 0; i < size; i++) _listeners.get(i).interpreterReady();
     }
     finally { _lock.endRead(); }
   }
+  
+//  /** Called when the interactions window is reset. */
+//  public void interpreterReady(File wd) {
+//    _lock.startRead();
+//    try {
+//      int size = _listeners.size();
+//      for (int i = 0; i < size; i++) _listeners.get(i).interpreterReady(wd);
+//    }
+//    finally { _lock.endRead(); }
+//  }
   
   /** Called if the interpreter reset failed.
     * @param t Throwable explaining why the reset failed. (Subclasses must maintain listeners.)
@@ -136,15 +146,12 @@ public class InteractionsEventNotifier extends EventNotifier<InteractionsListene
     finally { _lock.endRead(); }
   }
   
-  /** Called when the active interpreter is changed.
-    * @param inProgress Whether the new interpreter is currently in progress with an interaction (ie. whether an 
-    * interactionEnded event will be fired)
-    */
-  public void interpreterReplaced(boolean inProgress) {
+  /** Called when the active interpreter is changed. */
+  public void interpreterReplaced() {
     _lock.startRead();
     try {
       int size = _listeners.size();
-      for (int i = 0; i < size; i++)  _listeners.get(i).interpreterReplaced(inProgress);
+      for (int i = 0; i < size; i++)  _listeners.get(i).interpreterReplaced();
     }
     finally { _lock.endRead(); }
   }

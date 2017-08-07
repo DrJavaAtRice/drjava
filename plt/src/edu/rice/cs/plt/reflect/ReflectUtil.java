@@ -40,6 +40,10 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.io.File;
 import java.io.Serializable;
+
+import java.util.List;
+
+import edu.rice.cs.plt.collect.CollectUtil;
 import edu.rice.cs.plt.lambda.*;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.io.IOUtil;
@@ -65,7 +69,8 @@ public final class ReflectUtil {
   /** The value of system property "java.class.path", parsed as a list of files.  Consistent with most
     * other uses of JVM properties in Java libraries, does not reflect subsequent changes to the property.
     */
-  public static final Iterable<File> SYSTEM_CLASS_PATH = IOUtil.parsePath(System.getProperty("java.class.path", ""));
+  public static final List<File> SYSTEM_CLASS_PATH = 
+    CollectUtil.makeList(IOUtil.parsePath(System.getProperty("java.class.path", "")));
   
 //  static { Utilities.show("SYSTEM_CLASS_PATH bound to " + SYSTEM_CLASS_PATH); }
   

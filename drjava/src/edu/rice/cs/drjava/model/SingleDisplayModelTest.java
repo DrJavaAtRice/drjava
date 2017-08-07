@@ -232,7 +232,8 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
       public synchronized void newFileCreated(OpenDefinitionsDocument doc) { newCount++; }
       public synchronized void fileClosed(OpenDefinitionsDocument doc) { closeCount++; }
       public synchronized void activeDocumentChanged(OpenDefinitionsDocument doc) { switchCount++; }
-      public synchronized void interpreterReady(File wd) { interpreterReadyCount++; }
+//      public synchronized void interpreterReady(File wd) { interpreterReady(); }
+      public synchronized void interpreterReady() { interpreterReadyCount++; }
     };
     _model.addListener(listener);
     

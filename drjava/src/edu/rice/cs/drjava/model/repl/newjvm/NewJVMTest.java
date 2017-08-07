@@ -42,6 +42,7 @@ import edu.rice.cs.plt.concurrent.CompletionMonitor;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.swing.Utilities;
 
 import junit.extensions.TestSetup;
 import junit.framework.Test;
@@ -174,26 +175,25 @@ public final class NewJVMTest extends DrScalaTestCase {
   }
 
   public void testWorksAfterRestartConstant() throws Throwable {
-//    debug.logStart();
     _log.log("NewJVMTest.testWorksAfterRestartConstant executing");
-
-    // Check that a constant is returned
-    _jvm.resetState();
-
-    assertTrue(_jvm.interpret("val x = 5"));
+    Utilities.invokeLater(new Runnable() {
+      public void run() {
+        // Check that a constant is returned
+        _jvm.resetState();
+        
+        assertTrue(_jvm.interpret("val x = 5"));
 //    String banner = _jvm.returnBuffer();
 //    _log.log("Returned banner = ' + " + banner + "'");
-    assertEquals("result", "x: Int = 5\n", _jvm.returnBuffer());
-    
-    // Now restart interpreter
-    _jvm.restartInterpreterJVM();
-       
-    // Now evaluate another constant
-    _jvm.resetState();
-    assertTrue(_jvm.interpret("val x = 4"));
-    assertEquals("result", "x: Int = 4\n", _jvm.returnBuffer());
-    
-//    debug.logEnd();
+        assertEquals("result", "x: Int = 5\n", _jvm.returnBuffer());
+        
+        // Now restart interpreter
+        _jvm.restartInterpreterJVM();
+        
+        // Now evaluate another constant
+        _jvm.resetState();
+        assertTrue(_jvm.interpret("val x = 4"));
+        assertEquals("result", "x: Int = 4\n", _jvm.returnBuffer());
+      }}); 
   }
 
 

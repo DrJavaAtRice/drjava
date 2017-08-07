@@ -76,10 +76,10 @@ public class DefaultCompilerModel implements CompilerModel {
   /** for logging debug info */
   private static edu.rice.cs.util.Log _log = new edu.rice.cs.util.Log("GlobalModel.txt", false);
   
-  /** The available compilers */
+  /** The available compilers; degenerate in Scala since there is only one compiler available */
   private final List<CompilerInterface> _compilers;
   
-  /** Current compiler -- one of _compilers, or a NoCompilerAvailable */
+  /** Current compiler or NoCompilerAvailable.  The latter should NEVER happen */
   private volatile CompilerInterface _activeCompiler;
   
   /** Manages listeners to this model. */
@@ -97,10 +97,6 @@ public class DefaultCompilerModel implements CompilerModel {
   /** The lock providing mutual exclustion between compilation and unit testing */
   private Object _compilerLock = new Object();
   
-//  /** The LanguageLevelStackTraceMapper that helps translate .java line 
-//    * numbers to .dj* line numbers when an error is thrown */
-//  public LanguageLevelStackTraceMapper _LLSTM;
-  
   /** Main constructor.  
     * @param m the GlobalModel that is the source of documents for this CompilerModel
     * @param compilers  The compilers to use.  The first will be made active; all are assumed
@@ -117,7 +113,7 @@ public class DefaultCompilerModel implements CompilerModel {
     
     String dCompName = DrScala.getConfig().getSetting(OptionConstants.DEFAULT_COMPILER_PREFERENCE);
     
-    if (_compilers.size() > 0) {
+    if (_compilers.size() > 0) {  // should always be 1 in DrScala
       if (! dCompName.equals(OptionConstants.COMPILER_PREFERENCE_CONTROL.NO_PREFERENCE) &&
            compilerNames.contains(dCompName)) 
         _activeCompiler = _compilers.get(compilerNames.indexOf(dCompName));
@@ -128,11 +124,10 @@ public class DefaultCompilerModel implements CompilerModel {
     else
       _activeCompiler = NoCompilerAvailable.ONLY;
     
-//    System.err.println("Setting _activeCompiler to " + _activeCompiler);
+    _log.log("Setting _activeCompiler to " + _activeCompiler);
     
     _model = m;
     _compilerErrorModel = new CompilerErrorModel(new DJError[0], _model);
-//    _LLSTM = new LanguageLevelStackTraceMapper(_model);
   }
    
   //--------------------------------- Locking -------------------------------//
@@ -247,6 +242,7 @@ public class DefaultCompilerModel implements CompilerModel {
   /** Compile the given documents. All compile commands invoke this private method! */
   private void _doCompile(List<OpenDefinitionsDocument> docs) throws IOException {
 //    _LLSTM.clearCache();
+    Utilities.show("doCompile(" + docs + ") called");
     _log.log("_doCompile(" + docs + ") called");
     final ArrayList<File> filesToCompile = new ArrayList<File>();
 //    final ArrayList<OpenDefinitionsDocument> validDocs = new ArrayList<OpenDefinitionsDocument>();
@@ -433,7 +429,7 @@ public class DefaultCompilerModel implements CompilerModel {
     else { return IterUtil.snapshot(_compilers); }
   }
   
-  /** Gets the compiler that is the "active" compiler.
+  /** Gets the compiler that is the "active" compiler.  Degenerate because only one compiler is available in DrScala.
     *
     * @see #setActiveCompiler
     */
@@ -448,12 +444,9 @@ public class DefaultCompilerModel implements CompilerModel {
     */
   public void setActiveCompiler(CompilerInterface compiler) {
     _log.log("In DefaultGlobalModel, setActiveCompiler(" + compiler + ") called.");
-    if (_compilers.isEmpty() && compiler.equals(NoCompilerAvailable.ONLY)) {
-      // _activeCompiler should be set correctly already
-    }
+    if (_compilers.isEmpty() && compiler.equals(NoCompilerAvailable.ONLY)) return;
     else if (_compilers.contains(compiler)) {
       _activeCompiler = compiler;
-      _notifier.activeCompilerChanged();
     }
     else {
       throw new IllegalArgumentException("Compiler is not in the list of available compilers: " + compiler);
@@ -462,14 +455,6 @@ public class DefaultCompilerModel implements CompilerModel {
   
   /** Returns the current build directory. */
   public File getBuildDir() { return _buildDir; }
-  
-//  /** Add a compiler to the active list */
-//  public void addCompiler(CompilerInterface compiler) {
-//    if (_compilers.isEmpty()) {
-//      _activeCompiler = compiler;
-//    }
-//    _compilers.add(compiler);
-//  }
   
   /** Delete the .class files that match the following pattern:
     * XXX.dj? --> XXX.class

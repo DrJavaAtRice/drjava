@@ -207,7 +207,7 @@
            executable="${java8-home}/bin/javac" fork="yes" memoryMaximumSize="512M"
            debug="on" optimize="off" deprecation="on"	>
     -->
-    <javac srcdir="src" destdir="classes/base" source="1.6" target="1.6"
+    <javac srcdir="src" destdir="classes/base" source="1.8" target="1.8"
            bootclasspath="${java8-runtime}" sourcepath="" includeAntRuntime="no"
            executable="${java8-home}/bin/javac" fork="yes" memoryMaximumSize="512M"
            debug="on" optimize="off" deprecation="on"	>

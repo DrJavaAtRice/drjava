@@ -150,7 +150,7 @@ public class ProjectProfile implements ProjectFileIR {
   public String[] getCollapsedPaths() { return _collapsedPaths.toArray(new String[_collapsedPaths.size()]); }
     
   /** @return an array full of all the classpath path elements in the classpath for this project file */
-  public Iterable<AbsRelFile> getClassPaths() { return _classPathFiles; }
+  public List<AbsRelFile> getClassPaths() { return _classPathFiles; }
   
   /** @return the name of the file that holds the Jar main class associated with this project */
   public String getMainClass() { return _mainClass; }
@@ -241,16 +241,16 @@ public class ProjectProfile implements ProjectFileIR {
   }
   public void addCollapsedPath(String cp) { if (cp != null) _collapsedPaths.add(cp); }
   public void setBuildDirectory(File dir) { 
-//    System.err.println("setBuildDirectory(" + dir + ") called");
-// removed call to validate to allow build directory that doesn't exist:
-// it will be created when necessary
+// Removed call to validate to allow build directory that doesn't exist: it will be created when necessary
     _buildDir = dir; // FileOps.validate(dir); 
-//    System.err.println("Vaidated form is: " + _buildDir);
   }
-  public void setWorkingDirectory(File dir) { _workDir = FileOps.validate(dir); }
+  public void setWorkingDirectory(File dir) {
+    File newWorkDir = FileOps.validate(dir);
+    if (newWorkDir != FileOps.NULL_FILE) _workDir = newWorkDir;
+  }
   public void setMainClass(String main) { _mainClass = main;  }
   public void setSourceFiles(List<DocFile> sf) { _sourceFiles = new LinkedList<DocFile>(sf); }
-  public void setClassPaths(Iterable<? extends AbsRelFile> cpf) {
+  public void setClassPaths(List<? extends AbsRelFile> cpf) {
     _classPathFiles = new ArrayList<AbsRelFile>();
     for (AbsRelFile f : cpf) { _classPathFiles.add(f); }
   }
@@ -353,10 +353,10 @@ public class ProjectProfile implements ProjectFileIR {
         xc.set(".timestamp", s, f, true);
         String pkg = df.getPackage();
         xc.set(".package", (pkg != null)?pkg:"", f, true);
-        xc.set("select.from",   String.valueOf((pSel != null) ? pSel.first() : 0),  f, true);
-        xc.set("select.to",     String.valueOf((pSel != null) ? pSel.second() : 0), f, true);
-        xc.set("scroll.column", String.valueOf((pScr != null) ? pScr.first() : 0),  f, true);
-        xc.set("scroll.row",    String.valueOf((pScr != null) ? pScr.second() : 0), f, true);
+        xc.set("select.from",   String.valueOf((pSel != null) ? pSel.first().intValue() : 0),  f, true);
+        xc.set("select.to",     String.valueOf((pSel != null) ? pSel.second().intValue() : 0), f, true);
+        xc.set("scroll.column", String.valueOf((pScr != null) ? pScr.first().intValue() : 0),  f, true);
+        xc.set("scroll.row",    String.valueOf((pScr != null) ? pScr.second().intValue() : 0), f, true);
         if (df==active) xc.set(".active", "true", f, true);
       }
     }
@@ -384,10 +384,10 @@ public class ProjectProfile implements ProjectFileIR {
         xc.set(".timestamp", s, f, true);
         String pkg = df.getPackage();
         xc.set(".package", (pkg != null)?pkg:"", f, true);
-        xc.set("select.from",   String.valueOf((pSel != null) ? pSel.first() : 0),  f, true);
-        xc.set("select.to",     String.valueOf((pSel != null) ? pSel.second() : 0), f, true);
-        xc.set("scroll.column", String.valueOf((pScr != null) ? pScr.first() : 0),  f, true);
-        xc.set("scroll.row",    String.valueOf((pScr != null) ? pScr.second() : 0), f, true);
+        xc.set("select.from",   String.valueOf((pSel != null) ? pSel.first().intValue() : 0),  f, true);
+        xc.set("select.to",     String.valueOf((pSel != null) ? pSel.second().intValue() : 0), f, true);
+        xc.set("scroll.column", String.valueOf((pScr != null) ? pScr.first().intValue() : 0),  f, true);
+        xc.set("scroll.row",    String.valueOf((pScr != null) ? pScr.second().intValue() : 0), f, true);
         if (df == active) { xc.set(".active", "true", f, true);
         }
       }
@@ -417,10 +417,10 @@ public class ProjectProfile implements ProjectFileIR {
         xc.set(".timestamp", s, f, true);
         String pkg = df.getPackage();
         xc.set(".package", (pkg != null)?pkg:"", f, true);
-        xc.set("select.from",   String.valueOf((pSel != null) ? pSel.first() : 0),  f, true);
-        xc.set("select.to",     String.valueOf((pSel != null) ? pSel.second() : 0), f, true);
-        xc.set("scroll.column", String.valueOf((pScr != null) ? pScr.first() : 0),  f, true);
-        xc.set("scroll.row",    String.valueOf((pScr != null) ? pScr.second() : 0), f, true);
+        xc.set("select.from",   String.valueOf((pSel != null) ? pSel.first().intValue() : 0),  f, true);
+        xc.set("select.to",     String.valueOf((pSel != null) ? pSel.second().intValue() : 0), f, true);
+        xc.set("scroll.column", String.valueOf((pScr != null) ? pScr.first().intValue() : 0),  f, true);
+        xc.set("scroll.row",    String.valueOf((pScr != null) ? pScr.second().intValue() : 0), f, true);
         if (df==active) { xc.set(".active", "true", f, true);
         }
       }

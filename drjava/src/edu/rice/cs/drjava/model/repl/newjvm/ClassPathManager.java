@@ -40,6 +40,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+
 import java.lang.ClassLoader;
 
 import edu.rice.cs.drjava.DrScala;
@@ -50,14 +51,14 @@ import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.plt.reflect.PathClassLoader;
 import edu.rice.cs.util.Log;
+import edu.rice.cs.util.swing.Utilities;
 
 //import static edu.rice.cs.plt.debug.DebugUtil.error;
 //import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /** Maintains a dynamic class path, allowing entries to be incrementally added in the appropriate
   * place in the list.  In normal DrScala sessions, this class is used in the interpreter JVM, and 
-  * may be accessed concurrently.  In some tests and debugging runs,  a single JVM is used 
-  * (SimpleInteractionsModel). In this case, the ClassPathManager runs in the main JVM.
+  * may be accessed concurrently.
   */
 public class ClassPathManager implements Lambda<ClassLoader, ClassLoader> {
   
@@ -87,14 +88,17 @@ public class ClassPathManager implements Lambda<ClassLoader, ClassLoader> {
   public synchronized boolean addInteractionsClassPath(File f) {
     _log.log("In ClassPathManager, addInteractionsClassPath(" + f + ") called");
     boolean isPresent = _interactionsClassPath.contains(f);
-    if (! isPresent) _interactionsClassPath.add(0,f); // Terrible notation for cons(f, _interactionsClassPath)
+    if (! isPresent) { 
+      _interactionsClassPath.add(0,f); // Terrible notation for cons(f, _interactionsClassPath)
+      Utilities.show("In ClassPathManger, " + f + " added to interactions class path");
+    }
     return isPresent;
   }
+
+  /** Returns a copy of _interactionsClassPath. */
+  public synchronized List<File> getInteractionsClassPath() { return _interactionsClassPath; }
   
-  /** returns a copy of _interactionsClassPath. */
-  public synchronized Iterable<File> getInteractionsClassPath() { return new ArrayList<File>(_interactionsClassPath); }
-  
-   /** Create a new class loader based on the given path.  The loader's path is dynamically updated as changes are made 
+  /** Create a new class loader based on the given path.  The loader's path is dynamically updated as changes are made 
     * in the ClassPathManager.  Each loader returned by this method will have its own set of loaded classes, and will 
     * only share those classes that are loaded by a common parent.
     * @param parent  The parent class loader.  May be {@code null}, signifying the bootstrap class loader.

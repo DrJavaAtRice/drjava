@@ -118,12 +118,4 @@ class CompilerEventNotifier extends EventNotifier<CompilerListener> implements C
     try { for (CompilerListener cl : _listeners) { cl.saveUntitled(); } }
     finally { _lock.endRead(); }
   }
-  
-  /** Called after the active compiler has been changed. */
-  public void activeCompilerChanged() {
-//    new ScrollableDialog(null, "CompilerEventNotifier.compileStarted() called for listeners " + _listeners, "", "").show();
-    _lock.startRead();
-    try { for (CompilerListener cl : _listeners) { cl.activeCompilerChanged(); } }
-    finally { _lock.endRead(); }
-  }
 }

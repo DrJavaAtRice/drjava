@@ -61,8 +61,6 @@ import java.lang.reflect.Modifier;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 import static edu.rice.cs.plt.debug.DebugUtil.error;
 
-//import edu.rice.cs.drjava.model.compiler.LanguageLevelStackTraceMapper;
-
 /** Runs in the InterpreterJVM. Runs tests given a classname and formats the results into a (serializable) array of 
   * JUnitError that can be passed back to the MainJVM.
   * @version $Id: JUnitTestManager.java 5594 2012-06-21 11:23:40Z rcartwright $

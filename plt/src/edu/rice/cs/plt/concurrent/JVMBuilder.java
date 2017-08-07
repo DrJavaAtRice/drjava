@@ -58,24 +58,23 @@ import static edu.rice.cs.plt.iter.IterUtil.snapshot;
 import static edu.rice.cs.plt.collect.CollectUtil.snapshot;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
-/**
- * Creates Java subprocesses via an interface similar to that of {@link ProcessBuilder}.  Each JVMBuilder
- * object is immutable, but can be used as a template for creating other JVMBuilder with altered parameters.
- * (Unlike ProcessBuilder, there is no implicit mutation via mutable maps returned by getters.)  The following
- * parameters are supported:<ul>
- * <li>{@code javaCommand}: Command, file, or directory used to invoke the JVM.  If a directory is given,
- *     the relative directories {@code bin} and {@code ../bin} are also searched for a {@code java} executable.
- *     Default: the {@code java.home} property.</li>
- * <li>{@code jvmArgs}: Arguments to pass to the {@code java} executable.  These are passed <em>before</em> all
- *      standard arguments supported here (e.g. {@code "-classpath"}).  Default: empty.</li>
- * <li>{@code classPath}: Class path to use in the JVM.  Default: {@code ReflectUtil.SYSTEM_CLASS_PATH}.</li>
- * <li>{@code dir}: Working directory of the new process.  Default: {@code System.getProperty("user.dir", "")}.</li>
- * <li>{@code properties}: Java properties to define in the new JVM (passed to the {@code java} executable with
- *     arguments of the form {@code "-D<key>=<value>"}); non-string entries are converted to strings via
- *     {@code toString}.  Default: empty.</li>
- * <li>{@code environment}: System environment variables to define in the new JVM, or {@code null} signifying that
- *     the current environment should be duplicated.  Default: {@code null}.
- * </ul>
+/** Creates Java subprocesses via an interface similar to that of {@link ProcessBuilder}.  Each JVMBuilder
+  * object is immutable, but can be used as a template for creating other JVMBuilder objects with altered parameters.
+  * (Unlike ProcessBuilder, there is no implicit mutation via mutable maps returned by getters.)  The following
+  * parameters are supported:<ul>
+  * <li>{@code javaCommand}: Command, file, or directory used to invoke the JVM.  If a directory is given,
+  *     the relative directories {@code bin} and {@code ../bin} are also searched for a {@code java} executable.
+  *     Default: the {@code java.home} property.</li>
+  * <li>{@code jvmArgs}: Arguments to pass to the {@code java} executable.  These are passed <em>before</em> all
+  *      standard arguments supported here (e.g. {@code "-classpath"}).  Default: empty.</li>
+  * <li>{@code classPath}: Class path to use in the JVM.  Default: {@code ReflectUtil.SYSTEM_CLASS_PATH}.</li>
+  * <li>{@code dir}: Working directory of the new process.  Default: {@code System.getProperty("user.dir", "")}.</li>
+  * <li>{@code properties}: Java properties to define in the new JVM (passed to the {@code java} executable with
+  *     arguments of the form {@code "-D<key>=<value>"}); non-string entries are converted to strings via
+  *     {@code toString}.  Default: empty.</li>
+  * <li>{@code environment}: System environment variables to define in the new JVM, or {@code null} signifying that
+  *     the current environment should be duplicated.  Default: {@code null}.
+  * </ul>
  */
 public class JVMBuilder implements Lambda2<String, Iterable<? extends String>, Process> {
   
@@ -127,10 +126,9 @@ public class JVMBuilder implements Lambda2<String, Iterable<? extends String>, P
          snapshot(properties), (environment == null) ? null : snapshot(environment), true);
   }
   
-  /**
-   * Private constructor.  Preprocessing of arguments has already happened; no arguments will be externally
-   * mutated.  dummy parameter is to distinguish this constructor from other overloads.
-   */
+  /** Private constructor.  Preprocessing of arguments has already happened; no arguments will be externally
+    * mutated.  dummy parameter is to distinguish this constructor from other overloads.
+    */
   private JVMBuilder(String javaCommand, SizedIterable<String> jvmArgs, SizedIterable<File> classPath,
                      File dir, Map<String, String> properties, Map<String, String> environment, boolean dummy) {
     _javaCommand = javaCommand;
@@ -193,16 +191,14 @@ public class JVMBuilder implements Lambda2<String, Iterable<? extends String>, P
   /** Get an immutable view of the properties. */
   public Map<String, String> properties() { return CollectUtil.immutable(_properties); }
   
-  /**
-   * Return a mutable copy of the properties.  Changes to the result do not affect this JVMBuilder,
-   * but a modified map can be used to create another JVMBuilder.
-   */
+  /** Return a mutable copy of the properties.  Changes to the result do not affect this JVMBuilder,
+    * but a modified map can be used to create another JVMBuilder.
+    */
   public Map<String, String> propertiesCopy() { return snapshot(_properties); }
   
-  /**
-   * Produce a JVMBuilder setting the JVM properties to the given mapping (including keys that appear
-   * only as defaults in the Properties object).
-   */
+  /** Produce a JVMBuilder setting the JVM properties to the given mapping (including keys that appear
+    * only as defaults in the Properties object).
+    */
   public JVMBuilder properties(Properties ps) {
     return new JVMBuilder(_javaCommand, _jvmArgs, _classPath, _dir, copyProps(ps), _environment, true);
   }
@@ -219,11 +215,10 @@ public class JVMBuilder implements Lambda2<String, Iterable<? extends String>, P
     return properties(newProps);
   }
   
-  /**
-   * Produce a JVMBuilder where, for each key in the given Properties object (including those designated in
-   * the Properties object as defaults), if the property is undefined in this JVMBuilder, it will map to
-   * the given value.  All current property mappings remain identical in the result.
-   */
+  /** Produce a JVMBuilder where, for each key in the given Properties object (including those designated in
+    * the Properties object as defaults), if the property is undefined in this JVMBuilder, it will map to
+    * the given value.  All current property mappings remain identical in the result.
+    */
   public JVMBuilder addDefaultProperties(Properties ps) { return addDefaultProperties(copyProps(ps)); }
   
   /**
@@ -241,10 +236,9 @@ public class JVMBuilder implements Lambda2<String, Iterable<? extends String>, P
     }
   }
   
-  /**
-   * If the current JVM properties do not contain {@code key}, produce a new JVMBuilder including the
-   * mapping, in addition to those currently set.  Otherwise, return {@code this}.
-   */
+  /** If the current JVM properties do not contain {@code key}, produce a new JVMBuilder including the
+    * mapping, in addition to those currently set.  Otherwise, return {@code this}.
+    */
   public JVMBuilder addDefaultProperty(String key, String value) {
     return _properties.containsKey(key) ? this : addProperty(key, value);
   }
@@ -254,20 +248,18 @@ public class JVMBuilder implements Lambda2<String, Iterable<? extends String>, P
     return (_environment == null) ? null : CollectUtil.immutable(_environment);
   }
   
-  /**
-   * Get a mutable copy of the environment.  If the environment is {@code null} (meaning the the current
-   * process's environment should be used), the result is a copy of {@link System#getenv()}. Changes
-   * to the result do not affect this JVMBuilder, but a modified environment map can be used to create
-   * another JVMBuilder.
-   */
+  /** Get a mutable copy of the environment.  If the environment is {@code null} (meaning the the current
+    * process's environment should be used), the result is a copy of {@link System#getenv()}. Changes
+    * to the result do not affect this JVMBuilder, but a modified environment map can be used to create
+    * another JVMBuilder.
+    */
   public Map<String, String> environmentCopy() {
     return snapshot((_environment == null) ? System.getenv() : _environment);
   }
   
-  /**
-   * Produce a JVMBuilder setting the environment to the given mapping (may be {@code null}, meaning
-   * the current process's environment will be duplicated.
-   */
+  /** Produce a JVMBuilder setting the environment to the given mapping (may be {@code null}, meaning
+    * the current process's environment will be duplicated.
+    */
   public JVMBuilder environment(Map<? extends String, ? extends String> env) {
     return new JVMBuilder(_javaCommand, _jvmArgs, _classPath, _dir, _properties,
                           (_environment == null) ? null : snapshot(env), true);
@@ -280,10 +272,9 @@ public class JVMBuilder implements Lambda2<String, Iterable<? extends String>, P
     return environment(newEnv);
   }
   
-  /**
-   * Produce a JVMBuilder where, for each key in the given Map, if the environment variable is undefined in this
-   * JVMBuilder, it will map to the given value.  All current environment mappings remain identical in the result.
-   */
+  /** Produce a JVMBuilder where, for each key in the given Map, if the environment variable is undefined in this
+    * JVMBuilder, it will map to the given value.  All current environment mappings remain identical in the result.
+    */
   public JVMBuilder addDefaultEnvironmentVars(Map<? extends String, ? extends String> env) {
     if (_environment != null && _environment.keySet().containsAll(env.keySet())) { return this; }
     else {
@@ -295,34 +286,28 @@ public class JVMBuilder implements Lambda2<String, Iterable<? extends String>, P
     }
   }
   
-  /**
-   * If the current environment mappings do not contain {@code key}, produce a new JVMBuilder including the
-   * mapping, in addition to those currently set.  Otherwise, return {@code this}.
-   */
+  /** If the current environment mappings do not contain {@code key}, produce a new JVMBuilder including the
+    * mapping, in addition to those currently set.  Otherwise, return {@code this}.
+    */
   public JVMBuilder AddDefaultEnvironmentVar(String key, String value) {
     if (_environment != null && _environment.containsKey(key)) { return this; }
     else { return addEnvironmentVar(key, value); }
   }
-  
-  
-  /**
-   * Start a JVM process via {@link Runtime#exec(String[], String[], File)}. Varargs shortcut for
-   * {@link #start(String, Iterable)}.
-   */
+    
+  /** Start a JVM process via {@link Runtime#exec(String[], String[], File)}. Varargs shortcut for
+    * {@link #start(String, Iterable)}.
+    */
   public Process start(String mainClass, String... mainParams) throws IOException {
     return start(mainClass, IterUtil.asIterable(mainParams));
   }
-
-
-
-  /**
-   * Start a JVM process via {@link Runtime#exec(String[], String[], File)}. The array of command strings
-   * contains, in order: the java command, the JVM args, {@code "-classpath"} followed by the class path, each
-   * property using {@code "-D<key>=<value>"} notation, the name of the given main class, and the main
-   * parameters.
-   * @throws IOException  Per {@link Runtime#exec(String[], String[], File)}.
-   * @throws SecurityException  Per {@link Runtime#exec(String[], String[], File)}.
-   */
+  
+  /** Start a JVM process via {@link Runtime#exec(String[], String[], File)}. The array of command strings
+    * contains, in order: the java command, the JVM args, {@code "-classpath"} followed by the class path, each
+    * property using {@code "-D<key>=<value>"} notation, the name of the given main class, and the main
+    * parameters.
+    * @throws IOException  Per {@link Runtime#exec(String[], String[], File)}.
+    * @throws SecurityException  Per {@link Runtime#exec(String[], String[], File)}.
+    */
   public Process start(String mainClass, Iterable<? extends String> mainParams) throws IOException {
 
     List<String> commandL = new LinkedList<String>();
@@ -352,9 +337,7 @@ public class JVMBuilder implements Lambda2<String, Iterable<? extends String>, P
     return Runtime.getRuntime().exec(command, env, _dir);
   }
 
-  /**
-   * Start a Scala process
-   */
+  /** Start a Scala process */
   public Process startScalaProcess(String mainClass, Iterable<? extends String> mainParams) throws IOException {
     List<String> commandL = new LinkedList<String>();
     commandL.add("scala");
@@ -424,11 +407,10 @@ public class JVMBuilder implements Lambda2<String, Iterable<? extends String>, P
   }
   
   
-  /**
-   * Copy the give Properties into a properly-typed Map.  Guarantees that all entries are strings
-   * (an exception should occur in the Properties API otherwise).  Includes both defined and default
-   * values appearing in the Properties objecty (see {@link Properties#Properties(Properties)}). 
-   */
+  /** Copy the give Properties into a properly-typed Map.  Guarantees that all entries are strings
+    * (an exception should occur in the Properties API otherwise).  Includes both defined and default
+    * values appearing in the Properties objecty (see {@link Properties#Properties(Properties)}). 
+    */
   private static Map<String, String> copyProps(Properties p) {
     Map<String, String> result = new HashMap<String, String>();
     @SuppressWarnings("unchecked") Enumeration<String> names = (Enumeration<String>) p.propertyNames();
@@ -438,5 +420,4 @@ public class JVMBuilder implements Lambda2<String, Iterable<? extends String>, P
     }
     return result;
   }
-  
 }
