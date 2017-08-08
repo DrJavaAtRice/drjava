@@ -43,7 +43,8 @@ import edu.rice.cs.drjava.DrScalaTestCase;
 import edu.rice.cs.drjava.project.ProjectFileParserFacade;
 import edu.rice.cs.drjava.project.ProjectFileIR;
 
-/** Test for XMLProjectFileParser. */
+/** Test for XMLProjectFileParser. 
+  * Disabled.  Must be revised for DrScala. */
 public class XMLProjectFileParserTest extends DrScalaTestCase {
   public void xtestXMLParse() throws IOException, MalformedProjectFileException, java.text.ParseException {
     String xml = 

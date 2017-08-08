@@ -282,7 +282,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
 //  public static Test suite() { return  new TestSuite(GlobalModelJUnitTest.class); }
   
   /** Tests that a JUnit file with no errors is reported to have no errors. */
-  public void testNoJUnitErrors_NOJOIN() throws Exception {
+  public void xtestNoJUnitErrors_NOJOIN() throws Exception {
     _log.log("Starting testNoJUnitErrors_NOJOIN");
     
     final OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_PASS_TEXT);

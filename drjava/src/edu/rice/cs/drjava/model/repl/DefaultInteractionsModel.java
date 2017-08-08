@@ -64,7 +64,7 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
 //  public static final String INPUT_REQUIRED_MESSAGE =
 //    "Please enter input in the Console tab." + _newLine;
   
-  public static final Log _log = DrScala._log;
+  /* static final Log _log inherited from InteractionsModel */
   
   /** Model that contains the interpreter to use. */
   protected final DefaultGlobalModel _model;
@@ -180,23 +180,6 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
       _notifier.interactionErrorOccurred(offset,length);
       _log.log("In InteractionsModel, Event: a syntax error occurred in the interactions model");
     } });
-  }
-  
-  /** In the event thread, notifies listeners that the interpreter has been replaced. Only runs in event thread.
-    * @param inProgress Whether the new interpreter is currently in progress.  Only runs in event thread.
-    */
-  protected void _notifyInterpreterReplaced() {
-    assert EventQueue.isDispatchThread();
-    _notifier.interpreterReplaced();
-    _log.log("In InteractionsModel, the interpreter was replaced by a hard interactions reset");
-  }
-  
-  /** Notifies listeners that the interpreter is resetting. Only runs in the event thread */
-  protected void _notifyInterpreterResetting() { 
-//    Utilities.invokeLater(new Runnable() { public void run() { 
-    _notifier.interpreterResetting();
-    _log.log("In InteractionsModel, Event: the interpreter is resetting");
-//    } });
   }
   
 //  /** In the event thread, notifies listeners that the interpreter is ready. Sometimes called from outside the event

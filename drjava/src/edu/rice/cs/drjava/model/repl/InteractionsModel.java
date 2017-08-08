@@ -81,8 +81,8 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   /** GUI component availability notifier.  An identical copy is heavily used in MainFrame. */
   final DefaultGUIAvailabilityNotifier _guiNotifier = DefaultGUIAvailabilityNotifier.ONLY;
   
-  public static final Log _log = new Log("MasterJVM.txt", false);
-  
+  public static final Log _log = new Log("GlobalModel.txt", false);
+ 
 //  public static final String _newLine = "\n"; // was StringOps.EOL; but Swing uses '\n' for newLine
   
   /** Keeps track of any listeners to the model. */
@@ -271,8 +271,10 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   public abstract Pair<String,String> getVariableToString(String var);
   
   public void documentReset() { 
+    assert EventQueue.isDispatchThread();
     _log.log("invoking documentReset()");
-    _document.reset(generateBanner(_workingDir)); 
+    _document.reset(generateBanner(_workingDir));
+    _log.log("documentReset() returned");
     _document.clearColoring();
      _guiNotifier.available(GUIAvailabilityListener.ComponentType.INTERACTIONS);
   }
@@ -287,9 +289,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   public final boolean resetInterpreter(File wd) {
     _workingDir = wd;
     _autoImportSet.clear(); // clear list when interpreter is reset
-    interpreterResetting();
-//    _notifyInterpreterResetting();
-//    _log.log("Called _notifyInterpreterResetting");  // performed asynchronously in event thread
+    interpreterResetting(); // performed asynchronously in event thread
     return _resetInterpreter(wd);
   }
   
@@ -322,10 +322,13 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     
     _document.clearCurrentInteraction();
     
+    _log.log("In InteractionsModel.loadHistory(...), interactions document cleared");
+    
     // Insert into the document and interpret
     final StringBuilder buf = new StringBuilder();
     for (String hist: _histories) {
       ArrayList<String> interactions = _removeSeparators(hist);
+      _log.log("interactions array = " + interactions);
       for (String curr: interactions) {
         int len = curr.length();
         buf.append(curr);
@@ -334,11 +337,10 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
       }
     }
     String text = buf.toString().trim();
-//          System.err.println("Histtory is: '" + text + "'");
+    _log.log("Loaded history is: '" + text + "'");
     append(text, InteractionsDocument.DEFAULT_STYLE);
-    interpretCurrentInteraction();  
-//    System.err.println("Interpreting loaded history");
-    
+    _log.log("Interpreting current interaction");
+    interpretCurrentInteraction();     
   }
   
    /** Opens the files chosen in the given file selector, and returns an ArrayList with one history string 
@@ -557,6 +559,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   }
 
   public void _intermediateInteractionIsOver() {
+    _log.log("InteractionsModel._intermediateInteractionsIsOver() called");
     Utilities.invokeLater(new Runnable() {
       public void run() {
         _document.addToHistory(_toAddToHistory);
@@ -601,15 +604,15 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   
   /** Appends the returned result to the interactions document, inserts a prompt in the interactions document, and 
     * advances the caret in the interactions pane.
-    * @param result The .toString-ed version of the value that was returned by the interpretation. We must return the 
+    * @param result The String returned by the interpretation which in Scala begins "<varname> :".  We always use
+    *        String representations because they are serializable (and easy to debug).
     *        String form because returning the Object directly would require the data type to be serializable.
     */
   public void replReturnedResult(String result, String style) {
-//    Utilities.show("InteractionsModel.replReturned(...) passed '" + result + "'");
-    _log.log("InteractionsModel.replReturned(...) passed '" + result + "'");
+    _log.log("InteractionsModel.replReturned(...) given '" + result + "'");
     _secondToLastError = _lastError;
     _lastError = null;
-    if (result.equals("     | ")) {
+    if (result.equals("     | ")) {  // I don't understand the encoding here; a funny terminator -- Corky
       append("", style);
       _intermediateInteractionIsOver();
     }
@@ -709,19 +712,9 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
       public void run() {
         _document.insertBeforeLastPrompt(" Resetting interactions by killing and restarting the interactions JVM.  Be patient ...\n", InteractionsDocument.ERROR_STYLE);
         _document.setInProgress(true);
-        _notifyInterpreterResetting();
       }
     });
   }
-  
-  /** Notifies listeners that the interpreter is resetting. (Subclasses must maintain listeners.) 
-    * Only runs in event thread. */
-  protected abstract void _notifyInterpreterResetting();
-  
-   /** Notifies listeners that the interpreter has been replaced.
-    * @param inProgress Whether the new interpreter is currently in progress.
-    */
-  protected abstract void _notifyInterpreterReplaced();
   
   /** This method is called by the Main JVM if the Interpreter JVM cannot be exited
     * @param t The Throwable thrown by System.exit

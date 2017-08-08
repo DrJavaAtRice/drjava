@@ -740,8 +740,6 @@ public final class InteractionsModelTest extends DrScalaTestCase {
     public void _notifyInteractionStarted() { }
     protected void _notifySyntaxErrorOccurred(int offset, int length) { }
     protected void _notifyInterpreterExited(int status) { }
-    protected void _notifyInterpreterResetting() { }
-    protected void _notifyInterpreterReplaced() { }
     protected void _notifyInterpreterResetFailed(Throwable t) { }
 //    public void _notifyInterpreterReady(File wd) { }
     public void _notifyInterpreterReady() { }
@@ -814,14 +812,12 @@ public final class InteractionsModelTest extends DrScalaTestCase {
     }
     protected void _notifySyntaxErrorOccurred(int offset, int length) { }
     protected void _notifyInterpreterExited(int status) { }
-    protected void _notifyInterpreterResetting() { }
     protected void _notifyInterpreterResetFailed(Throwable t) { }
 //    public void _notifyInterpreterReady(File wd) { }
     public void _notifyInterpreterReady() { }
     protected void _interpreterResetFailed(Throwable t) { }
     protected void _interpreterWontStart(Exception e) { }
     protected void _notifyInteractionIncomplete() { _notifyInteractionEnded(); }
-    protected void _notifyInterpreterReplaced() { }
     
     public void dispose() throws RemoteException { _jvm.dispose(); }
     

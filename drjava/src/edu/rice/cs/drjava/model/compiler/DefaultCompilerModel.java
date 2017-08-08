@@ -75,7 +75,7 @@ public class DefaultCompilerModel implements CompilerModel {
   
   /** for logging debug info */
   private static edu.rice.cs.util.Log _log = new edu.rice.cs.util.Log("GlobalModel.txt", false);
-  
+ 
   /** The available compilers; degenerate in Scala since there is only one compiler available */
   private final List<CompilerInterface> _compilers;
   
@@ -122,7 +122,7 @@ public class DefaultCompilerModel implements CompilerModel {
       }
     }
     else
-      _activeCompiler = NoCompilerAvailable.ONLY;
+      _activeCompiler = NoCompilerAvailable.ONLY;  // should never happen in DrScala
     
     _log.log("Setting _activeCompiler to " + _activeCompiler);
     
@@ -289,7 +289,9 @@ public class DefaultCompilerModel implements CompilerModel {
       });
     }
     catch (Throwable t) {
+      _log.log("Catching Throwable: " + t);
       DJError err = new DJError(t.toString(), false);
+      _log.log("Distributing errors in catch clause");
       _distributeErrors(Arrays.asList(err));
       throw new UnexpectedException(t);
     }
@@ -366,10 +368,11 @@ public class DefaultCompilerModel implements CompilerModel {
     
     // Mutual exclusion with JUnit code that finds all test classes (in DefaultJUnitModel)
     synchronized(_compilerLock) {
-      _log.log("Calling the compiler adapter on: \n  files = " + files + "\n classPath = '" + classPath +
+      _log.log("Grabbing _compilerLocak and compiling: \n  files = " + files + "\n classPath = '" + classPath +
                "'\n buildDir = '" + buildDir + "'\n  bootClassPath = '" + bootClassPath + "'");
       errors.addAll(compiler.compile(files, classPath, null, buildDir, bootClassPath, null, true));
       _distributeErrors(errors);
+      _log.log("Releasing _compilerLock");
     }
   }
   
@@ -391,10 +394,9 @@ public class DefaultCompilerModel implements CompilerModel {
   private void _distributeErrors(List<? extends DJError> errors) throws IOException {
 //    resetCompilerErrors();  // Why is this done?
     _log.log("Preparing to construct CompilerErrorModel for errors: " + errors);
-//    System.err.println("Preparing to construct CompilerErrorModel for errors: " + errors);
-//    System.err.println("Creating error model with " + errors.size() + " errors");
     _compilerErrorModel = new CompilerErrorModel(errors.toArray(new DJError[0]), _model);
     _model.setNumCompilerErrors(_compilerErrorModel.getNumCompilerErrors());  // cache number of compiler errors in global model
+    _log.log("Errors distributed");
   }
   
   //----------------------------- Error Results -----------------------------//

@@ -57,8 +57,10 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
   */
 public abstract class RMIInteractionsModel extends InteractionsModel {
   
-  static final Log _log = new Log("GlobalModel.txt", true);
+  /* static final Log _log inherited from InteractionsModel */
   
+//  static final Log _log = new Log("GlobalModel.txt", false);
+ 
   /** RMI interface to the remote Java interpreter.*/
   protected final MainJVM _jvm;
   
@@ -122,19 +124,19 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
     _log.log("_resetInterpreter in RMIInteractions model has been called");
     boolean success = _jvm.resetInterpreter();  // attempt an interpreter reset
     _log.log("_resetInterpreter returned " + success);
-    if (success) documentReset();
+    if (success) EventQueue.invokeLater(new Runnable() { public void run() { documentReset(); }});
     return success;
   }
   
   /** Sets the new interpreter to be the current one. */
   public void setUpNewInterpreter() {
-    EventQueue.invokeLater(new Runnable() {
+    Utilities.invokeLater(new Runnable() {
       public void run() {
         _log.log("RMIInteractionsModel.setUpNewInterpreter called");
         _jvm.restartInterpreterJVM();
-        _notifyInterpreterReplaced();
-        EventQueue.invokeLater(new Runnable() { public void run() { documentReset(); } });
-//        _updateDocument(InteractionsDocument.DEFAULT_PROMPT); // Redundant?
+        _log.log("Interpreter JVM replaced");
+        _notifier.interpreterReplaced();
+        EventQueue.invokeLater(new Runnable() { public void run() { documentReset(); }});
       }
     });
   }

@@ -66,9 +66,12 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
   
   // _log normally is inherited from GlobalModelTestCase
   public static final Log _log  = new Log("GlobalModel.txt", false);
-  
+ 
   /** Creates a new document, modifies it, and then does the same with a second document, checking for inteference. */
   public void MultipleFiles() throws BadLocationException {
+    
+    _log.log("+++Starting testMultipleFiles()");
+        
     assertNumOpenDocs(1);
     
     OpenDefinitionsDocument doc1 = setupDocument(FOO_TEXT);
@@ -88,11 +91,14 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     assertContents(FOO_TEXT, doc1);
     assertContents(BAR_TEXT, doc2);
     
-    _log.log(this + ".testMultipleFiles() completed");
+    _log.log("+++Completing testMultipleFiles()");
   }
   
   /** Opens several documents and ensures that the array returned by the model is correct and in the right order. */
-  public void testMultipleFilesArray() throws BadLocationException {
+  public void xtestMultipleFilesArray() throws BadLocationException {
+    
+    _log.log("+++Starting testMultipleFilesArray");
+
     OpenDefinitionsDocument doc1, doc2, doc3;
     doc1 = setupDocument(FOO_TEXT);
     doc2 = setupDocument(BAR_TEXT);
@@ -106,12 +112,15 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     assertEquals("document 2", doc2, docs.get(2));
     assertEquals("document 3", doc3, docs.get(3));
     
-    _log.log(this + ".testMultipleFilesArray() completed");
+    _log.log("+++Completing testMultipleFilesArray");
     Utilities.clearEventQueue();
   }
   
   /** Ensures closing documents works correctly. */
-  public void testCloseMultipleFiles() throws BadLocationException {
+  public void xtestCloseMultipleFiles() throws BadLocationException {
+    
+    _log.log("+++Starting testCloseMultipleFiles()");
+        
     assertNumOpenDocs(1);
     OpenDefinitionsDocument doc1 = setupDocument(FOO_TEXT);
     assertNumOpenDocs(2);
@@ -130,12 +139,15 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     docs = _model.getOpenDefinitionsDocuments();
     assertEquals("size of document array", 1, docs.size());
     
-    _log.log(this + ".testCloseMultipleFiles() completed");
+    _log.log("+++Completing testCloseMultipleFiles()");
   }
   
   
   /** Creates a new document, modifies it, then allows it to be closed, ignoring the changes made. */
-  public void testCloseFileAllowAbandon() throws BadLocationException {
+  public void xtestCloseFileAllowAbandon() throws BadLocationException {
+    
+    _log.log("+++Starting testCloseFileDisallowAbandon");
+    
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     
     // Try to close and check for proper events
@@ -152,11 +164,11 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     listener.assertCloseCount(1);  // closed one document
     listener.assertOpenCount(0);
     
-    _log.log("testCloseFileAllowAbandon completed");
+    _log.log("+++Completing testCloseFileAllowAbandon");
   }
   
   /** Creates a new document, modifies it, but disallows a call to close it without saving changes. */
-  public void testCloseFileDisallowAbandon() throws BadLocationException {
+  public void xtestCloseFileDisallowAbandon() throws BadLocationException {
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     
     TestListener listener = new TestIOListener() {
@@ -172,14 +184,16 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     listener.assertCloseCount(0);
     listener.assertOpenCount(0);
     
-    _log.log("testCloseFileDisallowAbandon completed");
+    _log.log("+++Completing testCloseFileDisallowAbandon");
   }
   
   /** Opens a file. */
-  public void testOpenRealFile() throws BadLocationException, IOException {
-    final File tempFile = writeToNewTempFile(BAR_TEXT);
+  public void xtestOpenRealFile() throws BadLocationException, IOException {
     
-    final TestListener listener = new TestFileIOListener(tempFile); 
+    final File tempFile = writeToNewTempFile(BAR_TEXT);
+    final TestListener listener = new TestFileIOListener(tempFile);
+    
+    _log.log("+++Starting testOpenRealFile");
     
     _model.addListener(listener);
     Utilities.invokeAndWait(new Runnable() {
@@ -201,16 +215,18 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
         }
         catch(Exception e) { 
           // Should never happen
-          fail("Exception thrown invoid testOpenRealFile.  Traceback: " + e);
+          fail("Exception thrown in testOpenRealFile.  Traceback: " + e);
         }
       }
     });
     
-    _log.log("testOpenRealFile completed");
+    _log.log("+++Completing testOpenRealFile");
   }
   
   /** Initiates a file open, but cancels. */
-  public void testCancelOpenFile() throws BadLocationException, IOException {
+  public void xtestCancelOpenFile() throws BadLocationException, IOException {
+    
+    _log.log("+++Starting testCancelOpenFile");
     
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     assertNumOpenDocs(2);
@@ -249,17 +265,20 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
           assertModified(true, doc);
           try { assertContents(FOO_TEXT, doc); }
           catch(BadLocationException e) { 
-            fail("BadLocation in assertContentsvoid test. Traceback: " + e);
+            fail("BadLocation in assertContents test. Traceback: " + e);
           }
         }
       }
     });
     
-    _log.log("testCancelOpenFile completed");
+    _log.log("+++Completing testCancelOpenFile");
   }
   
   /** Attempts to open a non-existent file. */
-  public void testOpenNonexistentFile() throws IOException {
+  public void xtestOpenNonexistentFile() throws IOException {
+    
+    _log.log("+++Starting testOpenNonexistentFile");
+    
     _model.addListener(new TestListener());
     
     OpenDefinitionsDocument doc = null;
@@ -282,14 +301,16 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     
     assertEquals("doc file should be non-existent", doc, null);
     
-    _log.log("testOpenNonexistentFile completed");
+    _log.log("+++Completing testOpenNonexistentFile");
   }
   
   /** Attempts to reopen an already open file. */
-  public void testReopenFile() throws BadLocationException, IOException {
+  public void xtestReopenFile() throws BadLocationException, IOException {
+  
     final File tempFile = writeToNewTempFile(BAR_TEXT);
-    
     final TestListener listener = new TestFileIOListener(tempFile);
+    
+    _log.log("+++Starting testReopenFile");
     
     _model.addListener(listener);
     Utilities.invokeAndWait(new Runnable() {
@@ -311,7 +332,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
         }
         catch (Exception e) {
           // Should not happen
-          fail("Exception thrown invoid testReopenFile().  Traceback: " + e);
+          fail("Exception thrown in testReopenFile().  Traceback: " + e);
         }
       }
     });
@@ -335,7 +356,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
         }
         catch (Exception e) {
           // Should not happen
-          fail("Exception thrown invoid testReopenFile().  Traceback: " + e);
+          fail("Exception thrown in testReopenFile().  Traceback: " + e);
         }
       }
     });
@@ -363,15 +384,17 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
         }
         catch (Exception e) {
           // Should not happen
-          fail("Exception thrown invoid testReopenFile().  Traceback: " + e);
+          fail("Exception thrown in testReopenFile().  Traceback: " + e);
         }
       }
     });
-    _log.log("testReopenFile completed");
+    _log.log("+++Completing testReopenFile");
   }
   
   /** Opens multiple files. */
-  public void testOpenMultipleFiles() throws BadLocationException, IOException {
+  public void xtestOpenMultipleFiles() throws BadLocationException, IOException {
+    
+    _log.log("+++Starting testOpenMultipleFiles");
     final File tempFile1 = writeToNewTempFile(FOO_TEXT);
     final File tempFile2 = writeToNewTempFile(BAR_TEXT);
     
@@ -412,11 +435,13 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     assertContents(FOO_TEXT, docs.get(0));
     assertContents(BAR_TEXT, docs.get(1));
     
-    _log.log("testOpenMultipleFiles completed");
+    _log.log("+++Completing testOpenMultipleFiles");
   }
   
   /** Initiates a file open, but cancels. */
-  public void testCancelOpenMultipleFiles() throws BadLocationException, IOException {
+  public void xtestCancelOpenMultipleFiles() throws BadLocationException, IOException {
+    
+    _log.log("+++Starting CancelMultipleOpenFiles");
     
     OpenDefinitionsDocument doc1 = setupDocument(FOO_TEXT);
     OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
@@ -461,16 +486,18 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
         }
         catch (Exception e) {
           // should never happen
-          fail("Exception thrown invoid testCancelOpenMultipleFiles.  Traceback: \n" + e);
+          fail("Exception thrown in testCancelOpenMultipleFiles.  Traceback: \n" + e);
         }
       }
     });
     
-    _log.log("testCancelOpenMultipleFiles completed");
+    _log.log("+++Completing testCancelOpenMultipleFiles");
   }
   
   /** Attempts to open a non-existent file. */
-  public void testOpenMultipleNonexistentFiles() throws IOException {
+  public void xtestOpenMultipleNonexistentFiles() throws IOException {
+    
+    _log.log("+++Starting testOpenMultipleNonexistentFiles");
     
     final File tempFile1 = writeToNewTempFile(FOO_TEXT);
     
@@ -491,11 +518,13 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     listener.assertCloseCount(1);  // closed Untitled document
     listener.assertFileNotFoundCount(1);
     
-    _log.log("testOpenMultipleNonexistentFiles completed");
+    _log.log("+++Completing testOpenMultipleNonexistentFiles");
   }
   
   /** Error checking for openening multiple files checks for null and an array w/null. */
-  public void testOpenMultipleFilesError() {
+  public void xtestOpenMultipleFilesError() {
+    
+    _log.log("+++Starting testOpenMultipleFilesError");
     
     OpenDefinitionsDocument[] docs = null;
     //final File tempFile1 = writeToNewTempFile(FOO_TEXT);
@@ -521,13 +550,15 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     
     assertEquals("no doc files should be open", null, docs);
     
-    _log.log("testOpenMultipleFilesError completed");
+    _log.log("+++Completed OpenMultipleFilesError");
   }
   
   /** Force a file to be opened with getDocumentforFile. */
-  public void testForceFileOpen() throws BadLocationException, IOException, OperationCanceledException,
+  public void xtestForceFileOpen() throws BadLocationException, IOException, OperationCanceledException,
     AlreadyOpenException {
     
+       _log.log("+++Starting testForceFileOpen");
+       
     final File tempFile1 = writeToNewTempFile(FOO_TEXT);
     final File tempFile2 = writeToNewTempFile(BAR_TEXT);
     // don't catch and fail!
@@ -560,30 +591,37 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
         }
         catch (Exception e) {
           // should never happen
-          fail("Exception thrown invoid testForceFileOpen. Traceback: \n" + e);
+          fail("Exception thrown in testForceFileOpen. Traceback: \n" + e);
         }
       }
     });
+    _log.log("+++Completing testForceFileOpen");
   }
   
   /** Attempts to make the first save of a document, but cancels instead. */
-  public void testCancelFirstSave() throws BadLocationException, IOException {
+  public void xtestCancelFirstSave() throws BadLocationException, IOException {
+    
+    _log.log("+++Starting testCancelFirstSave");
+ 
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     
     // No need to override methods since no events should be fired
     _model.addListener(new TestListener());
     
 //    boolean saved = 
-      saveFile(doc, new CancelingSelector());
+    saveFile(doc, new CancelingSelector());
 //    assertTrue("doc should not have been saved", ! saved);
     assertModified(true, doc);
     assertContents(FOO_TEXT, doc);
     
-    _log.log("testForceFileOpen completed");
+    _log.log("+++Completing testCancelFirstSave");
   }
   
   /** Makes a first save of the current document. */
-  public void testRealSaveFirstSave() throws BadLocationException, IOException {
+  public void xtestRealSaveFirstSave() throws BadLocationException, IOException {
+    
+    _log.log("+++Starting testRealSaveFirstSave");
+    
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file = tempFile();
     
@@ -608,11 +646,12 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     
     assertEquals("contents of saved file", FOO_TEXT, IOUtil.toString(file));
     
-    _log.log("testRealSaveFirstSave completed");
+    _log.log("+++Completing testRealSaveFirstSave");
   }
   
   /** Makes a first save-copy of the current document, ensures that it's still modified. */
-  public void testRealSaveFirstSaveCopy() throws BadLocationException, IOException {
+  public void xtestRealSaveFirstSaveCopy() throws BadLocationException, IOException {
+    _log.log("+++Starting testRealSaveFirstSaveCopy");
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file = tempFile();
     
@@ -637,11 +676,13 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     
     assertEquals("contents of saved file", FOO_TEXT, IOUtil.toString(file));
     
-    _log.log("testRealSaveFirstSaveCopy completed");
+    _log.log("+++Completing testRealSaveFirstSaveCopy");
   }
   
   /** Saves a file already saved and overwrites its contents. */
-  public void testSaveAlreadySavedAndOverwrite() throws Exception {
+  public void xtestSaveAlreadySavedAndOverwrite() throws Exception {
+    _log.log("+++Starting testSaveAlreadySavedAndOverwrite");
+    
     //disable file backups, remember original setting
     Boolean backupStatus = DrScala.getConfig().getSetting(BACKUP_FILES);
     DrScala.getConfig().setSetting(BACKUP_FILES, Boolean.FALSE);
@@ -650,7 +691,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file = tempFile();
     
-    // No listeners here -- othervoid tests ensure the first save works
+    // No listeners here -- other tests ensure the first save works
     assertFalse("Confirm that backup status is initially false", DrScala.getConfig().getSetting(BACKUP_FILES));
     saveFile(doc, new FileSelector(file));
     assertModified(false, doc);
@@ -675,8 +716,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     };
     
     final File backup = new File(file.getPath() + "~");
-//    System.err.println("fileName = " + file);
-//    System.err.println("backupName = " + backup);
+    _log.log("fileName = " + file + " backupName = " + backup);
     backup.delete();
     
     assertFalse("Confirm that backup has been deleted if it already existed", backup.exists());
@@ -687,7 +727,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     changeDocumentText(BAR_TEXT, doc);
     Utilities.clearEventQueue();
     
-//    System.err.println("Document text = '" + doc.getText() + "'");
+    _log.log("Document text = '" + doc.getText() + "'");
     
     // Save over top of the previous file
     saveFile(doc, new FileSelector(file)); 
@@ -696,7 +736,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     listener.assertSaveCount(1);
     assertEquals("Contents of saved file 2nd write", BAR_TEXT, IOUtil.toString(file));
     assertFalse("No backup was made", backup.exists());
-//    System.err.println("Confirm that " + backup + " does not exist: " + backup.exists());
+    _log.log("Confirm that " + backup + " does not exist: " + backup.exists());
     //enable file backups
     
     DrScala.getConfig().setSetting(BACKUP_FILES, Boolean.TRUE);
@@ -705,53 +745,56 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     // Muck up the document
     changeDocumentText(FOO_TEXT, doc);
 
-//    System.err.println("Backup status = " + DrJava.getConfig().getSetting(BACKUP_FILES) + " for backup file " + backup);
-//    System.err.println("Before saving to '" + file + "', confirm " + backup + " does not exist: " + backup.exists());
+    _log.log("Backup status = " + DrScala.getConfig().getSetting(BACKUP_FILES) + " for backup file " + backup + 
+             " backup.exists() = " +  backup.exists());
     
     assertTrue("Confirm that BACKUP_FILES is true", DrScala.getConfig().getSetting(BACKUP_FILES));
     assertFalse("Confirm that backup file " + backup + " does not yet exist", backup.exists());
     assertEquals("Confirm that file " + file + " was modified properly", BAR_TEXT, IOUtil.toString(file));
-//    System.err.println("Old contents of file " + file + " = '" + IOUtil.toString(file) + "'");
+    _log.log("Old contents of file " + file + " = '" + IOUtil.toString(file) + "'");
+    
      // Save over top of the previous file
     saveFile(doc, new FileSelector(file));
     Utilities.clearEventQueue();
     
     assertTrue("Confirm that backup file " + backup + " was created", backup.exists());
     
-//    System.err.println("After saving, confirm " + backup + " exists: " + backup.exists());
-//    System.err.println("Backup has contents '" + IOUtil.toString(backup) + "'");
-//    System.err.println("New file has contents '" + IOUtil.toString(file) + "'");
+    _log.log("After saving, confirm " + backup + " exists: " + backup.exists());
+    _log.log("Backup has contents '" + IOUtil.toString(backup) + "'");
+    _log.log("New file has contents '" + IOUtil.toString(file) + "'");
 
     listener.assertSaveCount(2);
-//    System.err.println("After checking save count, confirm " + backup + " exists: " + backup.exists());
+    _log.log("After checking save count, confirm " + backup + " exists: " + backup.exists());
     assertEquals("contents of saved file 3rd write", FOO_TEXT, IOUtil.toString(file));
     assertEquals("contents of backup file 3rd write", BAR_TEXT, IOUtil.toString(backup));
     
     /* Set the config back to the original option */
     DrScala.getConfig().setSetting(BACKUP_FILES, backupStatus);
     
-    _log.log("testSaveAlreadySavedAndOverwrite completed");
+    _log.log("+++Completing testSaveAlreadySavedAndOverwrite");
   }
   
   /** Saves the document with FOO_TEXT and then saves over the old text, passing in a CancelingSelector
     * to cancel if we are asked for a new file name.  Confirms that no cancellation happens (since the
     * file is already saved.
     */
-  public void testSaveAlreadySaved() throws BadLocationException, IOException {
+  public void xtestSaveAlreadySaved() throws BadLocationException, IOException {
     
-    {/* Bracket formervoid testSaveAlreadySaved */
+    _log.log("+++Starting testCancelSaveAlreadySaved");
+    
+    {/* Bracket former testSaveAlreadySaved */
       
       OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
       final File file = tempFile();
       
-      // No listeners here -- othervoid tests ensure the first save works
+      // No listeners here -- other tests ensure the first save works
       saveFile(doc, new FileSelector(file));
       assertModified(false, doc);
-//      System.err.println("original file saved");
+      _log.log("original file saved");
       assertContents(FOO_TEXT, doc);
       assertEquals("contents of saved file", FOO_TEXT, IOUtil.toString(file));
       
-//      System.err.println("Creating listener");
+      _log.log("Creating listener");
       
       TestListener listener = new TestListener() {
         public void fileSaved(OpenDefinitionsDocument doc) {
@@ -788,39 +831,39 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
       
       assertEquals("contents of saved file", BAR_TEXT, IOUtil.toString(file));
       
-//      System.err.println("testCancelSaveAlreadySaved completed");
-      
-      _log.log("testCancelSaveAlreadySaved completed");
+      _log.log("+++Completing testCancelSaveAlreadySaved");
     }
   }
       
-//    /* Consolidation ofvoid testCancelSaveAsAlreadySaved */
+//    /* Consolidation of testCancelSaveAsAlreadySaved */
   
   /** Make sure that saveAs doesn't save if we cancel! */
-  public void testCancelSaveAsAlreadySaved() throws BadLocationException, IOException {
+  public void xtestCancelSaveAsAlreadySaved() throws BadLocationException, IOException {
     
-    { /* Bracket formervoid testCancelSaveAsAlreadySaved */
+    _log.log("+++Starting testCancelSaveAsAlreadySaved");
+     
+    { /* Bracket former testCancelSaveAsAlreadySaved */
    
       final OpenDefinitionsDocument fooDoc = setupDocument(FOO_TEXT);
       final File fooFile = tempFile();
       
-      // No listeners here -- othervoid tests ensure the first save works
+      // No listeners here -- other tests ensure the first save works
       saveFile(fooDoc, new FileSelector(fooFile));
-//      System.err.println("saveFile(...) executed");
+      _log.log("saveFile(...) executed");
       assertModified(false, fooDoc);
       assertContents(FOO_TEXT, fooDoc);
       assertEquals("contents of saved file", FOO_TEXT, IOUtil.toString(fooFile));
       
       // No events better be fired!
       _model.addListener(new TestListener());
-//      System.err.println("Listener added");
+      _log.log("TestListener added");
       
       // Muck up the document
       Utilities.invokeAndWait(new Runnable() {
         public void run() { changeDocumentText(BAR_TEXT, fooDoc); }
       });
       
-//      System.err.println("Document text changed");
+      _log.log("Document text changed");
       
       saveFileAs(fooDoc, new CancelingSelector());
       
@@ -828,21 +871,23 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
       
       assertEquals("contents of saved file", FOO_TEXT, IOUtil.toString(fooFile));
       
-      _log.log("testCancelSaveAsAlreadySaved completed");
+      _log.log("+++Completing testCancelSaveAsAlreadySaved");
     }
   }
 
-  /** Comprehensivevoid test of the "Save As" command */
-  public void testSaveAs() throws BadLocationException, IOException {
+  /** Comprehensive test of the "Save As" command */
+  public void xtestSaveAs() throws BadLocationException, IOException {
     
-    { /* Bracket formervoid testSaveAsAlreadySaved */
+    _log.log("+++Starting testSaveAs");
+    
+    { /* Bracket former testSaveAsAlreadySaved */
       /** Ensures that saveAs saves to a different file. */
       
       OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
       final File file1 = tempFile();
       final File file2 = tempFile();
       
-      // No listeners here -- othervoid tests ensure the first save works
+      // No listeners here -- other tests ensure the first save works
       saveFile(doc, new FileSelector(file1));
       assertModified(false, doc);
       assertContents(FOO_TEXT, doc);
@@ -873,15 +918,17 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
       
       assertEquals("contents of saved file2", BAR_TEXT, IOUtil.toString(file2));
       
-      _log.log("testSaveAsAlreadySaved completed");
+      _log.log("+++Completing testSaveAs");
     }
   }
     
     /* Consolidatingvoid testSaveAsExistsAndOverwrite */
   
-  public void testSaveAsExistsAndOverwrite() throws BadLocationException, IOException {
+  public void xtestSaveAsExists() throws BadLocationException, IOException {
     
-    { /* Bracket formervoid testSaveAsExistsAndOverwrite() */
+    { /* Bracket former testSaveAsExists() */
+      
+      _log.log("+++Starting testSaveAsExistsAndOverwrite");
       
       Utilities.invokeAndWait(new Runnable() {
         public void run() { 
@@ -895,12 +942,15 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
         }
       });
       
-      _log.log("testSaveAsExistsForOverwrite completed");  
+      _log.log("testSaveAsExistsAndOverwrite completed");  
     }
   
-    /* Consolidating formervoid testSaveAsExistsAndOpen */
+    /* Consolidating former testSaveAsExistsAndOpen */
     
-    { /* Bracketvoid testSaveAsExistsAndOpen */
+    { /* Bracket testSaveAsExistsAndOpen */
+      
+      _log.log("+++Starting testSaveAsExistsAndOpen");
+      
       Utilities.invokeAndWait(new Runnable() {
         public void run() { 
           try {
@@ -925,20 +975,22 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
           }
           catch (Exception e) {
             // should never happen
-            fail("Exception thrown invoid testSaveAsExistsAndOpen.  Traceback: \n" + e);
+            fail("Exception thrown in testSaveAsExistsAndOpen.  Traceback: \n" + e);
           }
         }
       });
       
-      _log.log("testSaveAsExistsAndOpen completed");
+      _log.log("+++Completing testSaveAsExistsAndOpen");
     }
   
-    /* Consolidation of formervoid testSaveAllSaveCorrectFiles() */
+    /* Consolidation of former testSaveAllSaveCorrectFiles() */
 
     /* Ensures that all open files are saved in appropriate order, i.e., even with BAR file as active document, save all
      * should first prompt to save FOO, then BAR. */
     
-    { /* Bracket formervoid testSaveAllSaveCorrectFiles */
+    { /* Bracket former testSaveAllSaveCorrectFiles */
+      
+      _log.log("+++Starting testSaveAllSaveCorrectFiles");
       OpenDefinitionsDocument fooDoc = setupDocument(FOO_TEXT);
       OpenDefinitionsDocument barDoc = setupDocument(BAR_TEXT);
       OpenDefinitionsDocument trdDoc = setupDocument("third document contents");
@@ -964,14 +1016,16 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
       _model.closeFile(barDoc);
       _model.closeFile(trdDoc);
       
-      _log.log("testSaveAllSaveCorrectFiles completed");
+      _log.log("+++Completing testSaveAllSaveCorrectFiles");
     }
   }
 
   
   /** Forces a file to be opened with getDocumentforFile. */
-  public void testRevertFile() throws BadLocationException, IOException, OperationCanceledException,
+  public void xtestRevertFile() throws BadLocationException, IOException, OperationCanceledException,
     AlreadyOpenException {
+    
+    _log.log("+++Starting testRevertFile");
     
     final File tempFile1 = writeToNewTempFile(FOO_TEXT);
     // don't catch and fail!
@@ -1000,12 +1054,14 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     assertEquals("doc NOT reverted",doc.isModifiedSinceSave(), true);
     assertContents(BAR_TEXT, doc);
     
-    _log.log("testRevertFile completed");
+    _log.log("+++Completing testRevertFile");
   }
   
   
-  public void testModifiedByOther() throws BadLocationException, IOException, OperationCanceledException,
+  public void xtestModifiedByOther() throws BadLocationException, IOException, OperationCanceledException,
     AlreadyOpenException, InterruptedException {
+    
+    _log.log("+++Starting testModifiedByOther");
     
     final File tempFile1 = writeToNewTempFile(FOO_TEXT);
     // don't catch and fail!
@@ -1046,11 +1102,13 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     listener.assertFileRevertedCount(1);
     assertContents(s,doc);
     
-    _log.log("testModifiedByOther completed");
+    _log.log("+++Completing testModifiedByOther");
   }
   
-  public void testModifiedByOtherFalse() throws BadLocationException, IOException, OperationCanceledException,
+  public void xtestModifiedByOtherFalse() throws BadLocationException, IOException, OperationCanceledException,
     AlreadyOpenException, InterruptedException {
+    
+    _log.log("+++Starting testModifiedByOtherFalse");
     final File tempFile1 = writeToNewTempFile(FOO_TEXT);
     // don't catch and fail!
     
@@ -1086,12 +1144,13 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     listener.assertFileRevertedCount(0);
     assertContents(FOO_TEXT, doc);
     
-    _log.log("testModifiedByOtherFalse completed");
+    _log.log("+++Completing testModifiedByOtherFalse");
   }
   
   /** Interprets some statements, saves the history, clears the history, then loads the history. */
   public void testSaveClearAndLoadHistory() throws EditDocumentException, IOException, InterruptedException {
-    _log.log("Startingvoid testSaveClearAndLoadHistory");
+    
+    _log.log("+++Starting testSaveClearAndLoadHistory+++");
     String newLine = StringOps.EOL;
     final InteractionListener listener = new InteractionListener();
     
@@ -1137,6 +1196,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     safeSaveHistory(fs);
     
     // check that the file contains the correct value
+    _log.log("contents of saved file = '" + IOUtil.toString(f) + "'");
     assertEquals("contents of saved file", History.HISTORY_FORMAT_VERSION_2 + s1 + delim + s2 + delim + s3 + delim,
                  IOUtil.toString(f));
     
@@ -1147,7 +1207,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     
     _log.log("Resetting interactions in testSaveClearAndLoadHistory");
     Utilities.invokeLater(new Runnable() { 
-      public void run() { 
+      public void run() {
         _model.resetInteractions(_model.getWorkingDirectory());
         _log.log("Interactions reset is complete.");
         _model.resetConsole();
@@ -1155,22 +1215,25 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     });
     _log.log("Waiting for ResetDone");
     listener.waitResetDone();
+    Utilities.clearEventQueue();
     
     listener.logInteractionStart();
+    _log.log("Loading history");
     safeLoadHistory(fs);
+    _log.log("Waiting for InteractionDone");
     listener.waitInteractionDone();
         
     // check that output of loaded history is correct
     _log.log("Checking output of loaded history");
     ConsoleDocument con = _model.getConsoleDocument();
     debug.log(con.getDocText(0, con.getLength()).trim());
-//    System.out.println("Output text is '" + con.getDocText(0, con.getLength()).trim() + "'");
+    _log.log("Output text is '" + con.getDocText(0, con.getLength()).trim() + "'");
     assertEquals("Output of loaded history is not correct", "x = 5", con.getDocText(0, con.getLength()).trim());
     listener.assertInteractionStartCount(4);
     listener.assertInteractionEndCount(4);
     _model.removeListener(listener);
 
-    _log.log("testSaveClearAndLoadHistory completed");
+    _log.log("+++Completing testSaveClearAndLoadHistory+++");
   }
   
   /** Loads two history files, one whose statements end in semicolons, and one whose statements do not.
@@ -1178,6 +1241,8 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     */
   public void testLoadHistoryWithAndWithoutSemicolons() throws IOException, EditDocumentException, 
     InterruptedException {
+    
+    _log.log("+++Starting testLoadHistoryWithAndWithoutSemicolons");
     
     final InteractionListener listener = new InteractionListener();
     _model.addListener(listener);
@@ -1215,16 +1280,18 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
                  "x = 5" + StringOps.EOL + "x = 5",
                  con.getDocText(0, con.getLength()).trim());
 
-    _log.log("testLoadHistoryWithAndWithoutSemicolons completed");
+    _log.log("+++Completing testLoadHistoryWithAndWithoutSemicolons");
   }
   
   /** Test for the possibility that the file has been moved or deleted
     * since it was last referenced
     */
-  public void testFileMovedWhenTriedToSave() throws BadLocationException, IOException {
+  public void xtestFileMovedWhenTriedToSave() throws BadLocationException, IOException {
     
     final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file = tempFile();
+    
+    _log.log("+++Starting testFileMovedWhenTriedToSave+++");
     
     saveFile(doc, new FileSelector(file));
     
@@ -1248,12 +1315,12 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     assertModified(true, doc);
     assertContents(BAR_TEXT, doc);
    
-    _log.log("testFileMovedWhenTriedToSave completed");
+    _log.log("+++Completing testFileMovedWhenTriedToSave+++");
   }
   
   /** Tests that input can be written to and read from the console correctly. */
-  public void testConsoleInput() throws EditDocumentException {
-//    System.err.println("***Startingvoid testConsoleInput***");
+  public void xtestConsoleInput() throws EditDocumentException {
+    _log.log("+++Starting testConsoleInput+++");
     _model.getInteractionsModel().setInputListener(new InputListener() {
       int n = 0;
       public String getConsoleInput() {
@@ -1262,10 +1329,9 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
         return "input\n";  // '\n' is used because this input is generated by Swing processing of keystrokes
       }
     });
-//    System.err.println("ClassPath = '" + IterUtil.multilineToString(_model.getClassPath()) + "'");
+    _log.log("ClassPath = '" + IterUtil.multilineToString(_model.getClassPath()) + "'");
     String result = interpret("val z = System.in.read()");
-//    System.err.println("result = " + result);
-//    System.err.println("ClassPath = '" + IterUtil.multilineToString(_model.getClassPath()) + "'");
+    _log.log("interpretation result = " + result);
     String expected = "z: Int = " + String.valueOf((int)'i');
     assertEquals("read() should prompt for input and return the first byte of \"input\"", expected, result);
     
@@ -1274,7 +1340,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     result = interpret("val text = br.readLine()");
     assertEquals("readLine() should return the rest of \"input\" without prompting for input",
                  "text: String = nput", result);
-    _log.log("testConsoleInput completed");
+    _log.log("+++Completing testConsoleInput+++");
   }
   
   class TestIOListener extends TestListener {
@@ -1286,9 +1352,9 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     File _expected;
     TestFileIOListener(File f) { _expected = f; }
     public void fileOpened(OpenDefinitionsDocument doc) {
-//      System.err.println("TestIOListener.fileOpened called.  openCount = " + openCount);
+      _log.log("TestIOListener.fileOpened called.  openCount = " + openCount);
       super.fileOpened(doc);
-//      System.err.println("After super.fileOpened called, openCount = " + openCount);
+      _log.log("After super.fileOpened called, openCount = " + openCount);
       File file = FileOps.NULL_FILE;
       try { file = doc.getFile(); }
       catch (FileMovedException fme) { fail("file does not exist"); }     // We know file should exist

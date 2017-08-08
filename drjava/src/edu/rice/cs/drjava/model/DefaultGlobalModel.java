@@ -410,8 +410,6 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     File workDir = _interactionsModel.getWorkingDirectory();
   
     if (wd == null) wd = workDir;
-    
-    /* This optimization is not working. Commented out for now. */
 
     if ((wd == workDir) && _mainJVM.classPathUnchanged()) {
       _log.log("Attempting to reset interpreter in resetInteractions"); 
@@ -434,6 +432,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     else {
       _log.log("reset interpreter failed, forcing a hard reset");
       hardResetInteractions(wd);
+      _interactionsModel._notifyInterpreterReady();  // _notifyInterpreterReady invokes the event thread
     }
   
     final InteractionsDocument iDoc = _interactionsModel.getDocument();

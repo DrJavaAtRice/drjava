@@ -58,7 +58,7 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
     * NOTE: this is the DrScala conversion of a legacy DrJava test.  All top level classes in Scala are public.
     */
   public void testCompileReferenceToNonPublicClass() throws BadLocationException, IOException, InterruptedException {
-    _log.log("Starting testCompileReferenceToNonPublicClass()");
+    _log.log("+++Starting testCompileReferenceToNonPublicClass()");
     OpenDefinitionsDocument doc = setupDocument(FOO_NON_PUBLIC_CLASS_TEXT);
     OpenDefinitionsDocument doc2 = setupDocument(FOO2_REFERENCES_NON_PUBLIC_CLASS_TEXT);
     final File file = tempFile();
@@ -68,13 +68,16 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
     _model.addListener(listener);
     listener.compile(doc);
+    _log.log("doc compiled");
     if (_model.getCompilerModel().getNumErrors() > 0) { fail("compile failed: " + getCompilerErrorString()); }
     listener.checkCompileOccurred();
     _model.removeListener(listener);
+    _log.log("listener removed");
     
     CompileShouldSucceedListener listener2 = new CompileShouldSucceedListener();
     _model.addListener(listener2);
     listener2.compile(doc2);
+    _log.log("doc2 compiled");
     if (_model.getCompilerModel().getNumErrors() > 0) { fail("compile failed: " + getCompilerErrorString()); }    
     listener2.checkCompileOccurred();
     _model.removeListener(listener2);
@@ -88,7 +91,7 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
     File compiled2 = classForScala(file, "DrScalaTestFoo2");
     assertTrue(_name() + "Class file should exist after compile", compiled.exists());
     assertTrue(_name() + "Class file should exist after compile", compiled2.exists());
-    _log.log("Ending testCompileReferenceToNonPublicClass()");
+    _log.log("+++Ending testCompileReferenceToNonPublicClass()");
   }
 
   /** Tests compiling a file with generics works with generic compilers.
@@ -98,7 +101,7 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
    * is -- the lib directory -- but how can we get a URL for that?)
    */
   public void testCompileWithGenerics()throws BadLocationException, IOException, InterruptedException {
-    _log.log("Starting testCompileWithGenerics()");
+    _log.log("+++Starting testCompileWithGenerics()");
     // Only run this test if using a compiler with generics
     if (_isGenericCompiler()) {
       
@@ -121,13 +124,13 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
       // Make sure .class exists
       File compiled = classForScala(file, "DrScalaTestFooGenerics");
       assertTrue(_name() + " FooGenerics Class file doesn't exist after compile", compiled.exists());
-      _log.log("Ending testCompileWithGenerics()");
+      _log.log("+++Ending testCompileWithGenerics()");
     }
   }
   
   /** Confirms that calling compileAll with different source roots succeeds. */
   public void testCompileAllDifferentSourceRoots() throws BadLocationException, IOException, InterruptedException {
-    _log.log("Starting testCompileAllDifferentSourceRoots");
+    _log.log("+++Starting testCompileAllDifferentSourceRoots");
 //    System.err.println("testCompileAllDifferentSourceRoots() compiler =" + _name());
     File aDir = new File(_tempDir, "a");
     File bDir = new File(_tempDir, "b");
@@ -163,6 +166,6 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
 //    File compiled2 = classForScala(file2, "DrSclaTestFoo");
 //    assertTrue(_name() + "Foo Class file doesn't exist after compile", ! compiled2.exists());
     _model.removeListener(listener);
-    _log.log("Ending testCompileAllDifferentSourceRoots");
+    _log.log("+++Ending testCompileAllDifferentSourceRoots");
   }
 }

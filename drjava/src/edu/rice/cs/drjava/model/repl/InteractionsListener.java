@@ -59,8 +59,7 @@ public interface InteractionsListener {
   public void interpreterResetting();
   
   /** Called when the interpreter is ready to use. */
-  public void interpreterReady();         // working directory unchanged
-//  public void interpreterReady(File wd);  // working directory may have changed
+  public void interpreterReady();
   
   /** Called if the interpreter could not be reset.
     * @param t Throwable explaining why the reset failed.

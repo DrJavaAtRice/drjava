@@ -279,7 +279,10 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   }
   
   protected void safeLoadHistory(final FileSelector fs) {
-    Utilities.invokeAndWait(new Runnable() { public void run() { _model.loadHistory(fs); } });
+    Utilities.invokeAndWait(new Runnable() { public void run() {
+      _log.log("Loading history using fileSelector " + fs);
+      _model.loadHistory(fs); 
+    } });
   }
   
   protected void safeSaveHistory(final FileSelector fs) {
@@ -992,7 +995,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     }
     
     public void interpreterExited(int status) {
-//        Utilities.showDebug("GlobalModelOtherTest: interpreterExited");
+      _log.log("GlobalModelTestCase: interpreterExited");
 //        assertInteractionStartCount(1);
 //        assertInterpreterResettingCount(0);
       synchronized(this) { 
@@ -1012,7 +1015,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 //    public void interpreterReady(File wd) { interpreterReady(); }
     
     public void interpreterReady() {
-//        Utilities.showDebug("GlobalModelOtherTest: interpreterReady");
+      _log.log("GlobalModelTestCase: interpreterReady");
       synchronized(this) { interpreterReadyCount++; }
       _resetDone.signal();
     }
@@ -1082,19 +1085,19 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     @Override public void newFileCreated(OpenDefinitionsDocument doc) { /* ingore this operation */ }
     
     @Override public void compileStarted() {
-//      Utilities.showDebug("compileStarted called in CSSListener");
+      _log.log("compileStarted called in CSSListener");
       assert EventQueue.isDispatchThread();
       assertCompileStartCount(0);
       assertCompileEndCount(0);
       
-      assertInterpreterResettingCount(0);
+//      assertInterpreterResettingCount(0);
       assertInterpreterReadyCount(0);
       assertConsoleResetCount(0);
       synchronized(this) { compileStartCount++; }
     }
     
     @Override public void compileEnded(File workDir, List<? extends File> excludedFiles) {
-//      Utilities.showDebug("compileEnded called in CSSListener");
+      _log.log("compileEnded called in CSSListener");
       
       assertCompileEndCount(0);
       
@@ -1298,7 +1301,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     public void nonTestCase(boolean isTestAll, boolean didCompileFail) {
       synchronized(this) { nonTestCaseCount++; }
       assertEquals("Non test case heard the wrong value for test current/test all", _shouldBeTestAll, isTestAll);
-//      Utilities.show("synchronizing on _junitLock");
+      _log.log("synchronizing on _junitLock");
       _notifyJUnitDone();
     }
   }
