@@ -627,7 +627,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     protected volatile int interpreterReadyCount;
     protected volatile int interpreterExitedCount;
     protected volatile int interpreterResetFailedCount;
-    protected volatile int interpreterReplacedCount;
+//    protected volatile int interpreterReplacedCount;
     //protected int interactionCaretPositionChangedCount;
     protected volatile int consoleResetCount;
     protected volatile int saveBeforeCompileCount;
@@ -670,7 +670,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       interactionStartCount = 0;
       interactionEndCount = 0;
       interactionErrorCount = 0;
-      interpreterReplacedCount = 0;
+//      interpreterReplacedCount = 0;
       //interactionCaretPositionChangedCount = 0;
       consoleResetCount = 0;
       interpreterResettingCount = 0;
@@ -771,9 +771,9 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       assertEquals("number of times interactionError fired", i, interactionErrorCount );
     }
 
-    public void assertInterpreterChangedCount(int i) {
-      assertEquals("number of times interpreterReplaced fired", i, interpreterReplacedCount);
-    }
+//    public void assertInterpreterChangedCount(int i) {
+//      assertEquals("number of times interpreterReplaced fired", i, interpreterReplacedCount);
+//    }
 
 //    /** Not used */
 //    public void assertInteractionCaretPositionChangedCount(int i) {
@@ -921,7 +921,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       listenerFail("interpreterResetting fired unexpectedly");
     }
     
-    public void interpreterReplaced() { listenerFail("interpreterReplaced fired unexpectedly"); }
+//    public void interpreterReplaced() { listenerFail("interpreterReplaced fired unexpectedly"); }
     public void interpreterReady() { listenerFail("interpreterReady() fired unexpectedly");  }
 //    public void interpreterReady(File wd) { listenerFail("interpreterReady(File wd) fired unexpectedly");  }
     public void interpreterExited(int status) {
@@ -1120,7 +1120,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     }
     
     /* These overrides were added in DrScala to address the fact that the Scala interpreter reset function is broken. */
-    public void interpreterReplaced() { /* DrScala uses replace instead of reset */ }
+//    public void interpreterReplaced() { /* DrScala uses replace instead of reset */ }
     public void interpreterReady() { /* DrScala may use replace instead of hard reset */ }
   }
     
@@ -1186,7 +1186,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     }
     
     /* These overrides were added in DrScala to address the fact that the Scala interpreter reset function is broken. */
-    public void interpreterReplaced() { /* DrScala may use replace instead of reset */ }
+//    public void interpreterReplaced() { /* DrScala may use replace instead of reset */ }
     public void interpreterReady() { /* DrScala may use replace instead of hard reset */ }
 
   }

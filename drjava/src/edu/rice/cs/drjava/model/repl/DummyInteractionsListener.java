@@ -79,11 +79,11 @@ public class DummyInteractionsListener implements InteractionsListener {
   /** Called if the interpreter reset failed. (Subclasses must maintain listeners.) */
   public void interpreterResetFailed(Throwable t) { }
   
-  /** Called when the active interpreter is changed.
-   * @param inProgress Whether the new interpreter is currently processing an interaction (i.e. whether an 
-   * interactionEnded event will be fired)
-   */
-  public void interpreterReplaced() { }
+//  /** Called when the active interpreter is changed.
+//   * @param inProgress Whether the new interpreter is currently processing an interaction (i.e. whether an 
+//   * interactionEnded event will be fired)
+//   */
+//  public void interpreterReplaced() { }
 
   /** Called when enter was typed in the interactions pane but the interaction was incomplete. */
   public void interactionIncomplete() { }

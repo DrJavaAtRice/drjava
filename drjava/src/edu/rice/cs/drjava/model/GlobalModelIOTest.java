@@ -95,7 +95,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
   }
   
   /** Opens several documents and ensures that the array returned by the model is correct and in the right order. */
-  public void xtestMultipleFilesArray() throws BadLocationException {
+  public void testMultipleFilesArray() throws BadLocationException {
     
     _log.log("+++Starting testMultipleFilesArray");
 
@@ -117,7 +117,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
   }
   
   /** Ensures closing documents works correctly. */
-  public void xtestCloseMultipleFiles() throws BadLocationException {
+  public void testCloseMultipleFiles() throws BadLocationException {
     
     _log.log("+++Starting testCloseMultipleFiles()");
         
@@ -144,7 +144,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
   
   
   /** Creates a new document, modifies it, then allows it to be closed, ignoring the changes made. */
-  public void xtestCloseFileAllowAbandon() throws BadLocationException {
+  public void testCloseFileAllowAbandon() throws BadLocationException {
     
     _log.log("+++Starting testCloseFileDisallowAbandon");
     
@@ -168,7 +168,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
   }
   
   /** Creates a new document, modifies it, but disallows a call to close it without saving changes. */
-  public void xtestCloseFileDisallowAbandon() throws BadLocationException {
+  public void testCloseFileDisallowAbandon() throws BadLocationException {
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     
     TestListener listener = new TestIOListener() {
@@ -188,7 +188,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
   }
   
   /** Opens a file. */
-  public void xtestOpenRealFile() throws BadLocationException, IOException {
+  public void testOpenRealFile() throws BadLocationException, IOException {
     
     final File tempFile = writeToNewTempFile(BAR_TEXT);
     final TestListener listener = new TestFileIOListener(tempFile);
@@ -224,7 +224,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
   }
   
   /** Initiates a file open, but cancels. */
-  public void xtestCancelOpenFile() throws BadLocationException, IOException {
+  public void testCancelOpenFile() throws BadLocationException, IOException {
     
     _log.log("+++Starting testCancelOpenFile");
     
@@ -275,7 +275,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
   }
   
   /** Attempts to open a non-existent file. */
-  public void xtestOpenNonexistentFile() throws IOException {
+  public void testOpenNonexistentFile() throws IOException {
     
     _log.log("+++Starting testOpenNonexistentFile");
     
@@ -305,7 +305,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
   }
   
   /** Attempts to reopen an already open file. */
-  public void xtestReopenFile() throws BadLocationException, IOException {
+  public void testReopenFile() throws BadLocationException, IOException {
   
     final File tempFile = writeToNewTempFile(BAR_TEXT);
     final TestListener listener = new TestFileIOListener(tempFile);
@@ -392,7 +392,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
   }
   
   /** Opens multiple files. */
-  public void xtestOpenMultipleFiles() throws BadLocationException, IOException {
+  public void testOpenMultipleFiles() throws BadLocationException, IOException {
     
     _log.log("+++Starting testOpenMultipleFiles");
     final File tempFile1 = writeToNewTempFile(FOO_TEXT);
@@ -439,7 +439,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
   }
   
   /** Initiates a file open, but cancels. */
-  public void xtestCancelOpenMultipleFiles() throws BadLocationException, IOException {
+  public void testCancelOpenMultipleFiles() throws BadLocationException, IOException {
     
     _log.log("+++Starting CancelMultipleOpenFiles");
     
@@ -495,7 +495,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
   }
   
   /** Attempts to open a non-existent file. */
-  public void xtestOpenMultipleNonexistentFiles() throws IOException {
+  public void testOpenMultipleNonexistentFiles() throws IOException {
     
     _log.log("+++Starting testOpenMultipleNonexistentFiles");
     
@@ -522,7 +522,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
   }
   
   /** Error checking for openening multiple files checks for null and an array w/null. */
-  public void xtestOpenMultipleFilesError() {
+  public void testOpenMultipleFilesError() {
     
     _log.log("+++Starting testOpenMultipleFilesError");
     
@@ -554,7 +554,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
   }
   
   /** Force a file to be opened with getDocumentforFile. */
-  public void xtestForceFileOpen() throws BadLocationException, IOException, OperationCanceledException,
+  public void testForceFileOpen() throws BadLocationException, IOException, OperationCanceledException,
     AlreadyOpenException {
     
        _log.log("+++Starting testForceFileOpen");
@@ -599,7 +599,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
   }
   
   /** Attempts to make the first save of a document, but cancels instead. */
-  public void xtestCancelFirstSave() throws BadLocationException, IOException {
+  public void testCancelFirstSave() throws BadLocationException, IOException {
     
     _log.log("+++Starting testCancelFirstSave");
  
@@ -618,7 +618,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
   }
   
   /** Makes a first save of the current document. */
-  public void xtestRealSaveFirstSave() throws BadLocationException, IOException {
+  public void testRealSaveFirstSave() throws BadLocationException, IOException {
     
     _log.log("+++Starting testRealSaveFirstSave");
     
@@ -650,7 +650,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
   }
   
   /** Makes a first save-copy of the current document, ensures that it's still modified. */
-  public void xtestRealSaveFirstSaveCopy() throws BadLocationException, IOException {
+  public void testRealSaveFirstSaveCopy() throws BadLocationException, IOException {
     _log.log("+++Starting testRealSaveFirstSaveCopy");
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file = tempFile();
@@ -680,7 +680,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
   }
   
   /** Saves a file already saved and overwrites its contents. */
-  public void xtestSaveAlreadySavedAndOverwrite() throws Exception {
+  public void testSaveAlreadySavedAndOverwrite() throws Exception {
     _log.log("+++Starting testSaveAlreadySavedAndOverwrite");
     
     //disable file backups, remember original setting
@@ -778,7 +778,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     * to cancel if we are asked for a new file name.  Confirms that no cancellation happens (since the
     * file is already saved.
     */
-  public void xtestSaveAlreadySaved() throws BadLocationException, IOException {
+  public void testSaveAlreadySaved() throws BadLocationException, IOException {
     
     _log.log("+++Starting testCancelSaveAlreadySaved");
     
@@ -838,7 +838,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
 //    /* Consolidation of testCancelSaveAsAlreadySaved */
   
   /** Make sure that saveAs doesn't save if we cancel! */
-  public void xtestCancelSaveAsAlreadySaved() throws BadLocationException, IOException {
+  public void testCancelSaveAsAlreadySaved() throws BadLocationException, IOException {
     
     _log.log("+++Starting testCancelSaveAsAlreadySaved");
      
@@ -876,7 +876,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
   }
 
   /** Comprehensive test of the "Save As" command */
-  public void xtestSaveAs() throws BadLocationException, IOException {
+  public void testSaveAs() throws BadLocationException, IOException {
     
     _log.log("+++Starting testSaveAs");
     
@@ -924,7 +924,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     
     /* Consolidatingvoid testSaveAsExistsAndOverwrite */
   
-  public void xtestSaveAsExists() throws BadLocationException, IOException {
+  public void testSaveAsExists() throws BadLocationException, IOException {
     
     { /* Bracket former testSaveAsExists() */
       
@@ -1022,7 +1022,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
 
   
   /** Forces a file to be opened with getDocumentforFile. */
-  public void xtestRevertFile() throws BadLocationException, IOException, OperationCanceledException,
+  public void testRevertFile() throws BadLocationException, IOException, OperationCanceledException,
     AlreadyOpenException {
     
     _log.log("+++Starting testRevertFile");
@@ -1058,7 +1058,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
   }
   
   
-  public void xtestModifiedByOther() throws BadLocationException, IOException, OperationCanceledException,
+  public void testModifiedByOther() throws BadLocationException, IOException, OperationCanceledException,
     AlreadyOpenException, InterruptedException {
     
     _log.log("+++Starting testModifiedByOther");
@@ -1105,7 +1105,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     _log.log("+++Completing testModifiedByOther");
   }
   
-  public void xtestModifiedByOtherFalse() throws BadLocationException, IOException, OperationCanceledException,
+  public void testModifiedByOtherFalse() throws BadLocationException, IOException, OperationCanceledException,
     AlreadyOpenException, InterruptedException {
     
     _log.log("+++Starting testModifiedByOtherFalse");
@@ -1286,7 +1286,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
   /** Test for the possibility that the file has been moved or deleted
     * since it was last referenced
     */
-  public void xtestFileMovedWhenTriedToSave() throws BadLocationException, IOException {
+  public void testFileMovedWhenTriedToSave() throws BadLocationException, IOException {
     
     final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file = tempFile();
@@ -1319,7 +1319,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
   }
   
   /** Tests that input can be written to and read from the console correctly. */
-  public void xtestConsoleInput() throws EditDocumentException {
+  public void testConsoleInput() throws EditDocumentException {
     _log.log("+++Starting testConsoleInput+++");
     _model.getInteractionsModel().setInputListener(new InputListener() {
       int n = 0;

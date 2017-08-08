@@ -8118,7 +8118,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     if (_interactionsScriptController != null) _interactionsScriptController.setActionsDisabled();
   }
   
-  /** Ensures that the interactions pane is editable after an interaction completes. */
+  /** Ensures that the interactions pane is editable after an interaction completes or the interpreter resets. */
   protected void _enableInteractionsPane() {
     _log.log("_enableInteractionsPane() called");
     assert EventQueue.isDispatchThread();
@@ -8412,11 +8412,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Inner class to listen to all events in the model. */
   private class ModelListener implements GlobalModelListener {
     
-    /** Called when the interpreter is replaced a new interpreter. */
-    public void interpreterReplaced() {
-      _guiNotifier.availabilityChanged(GUIAvailabilityListener.ComponentType.INTERACTIONS, true);
-      _enableInteractionsPane();
-    }
+//    /** Called when the interpreter is replaced a new interpreter. */
+//    public void interpreterReplaced() {
+//      _guiNotifier.availabilityChanged(GUIAvailabilityListener.ComponentType.INTERACTIONS, true);
+//      _enableInteractionsPane();
+//    }
     
     public <P,R> void executeAsyncTask(AsyncTask<P,R> task, P param, boolean showProgress, boolean lockUI) {
       new DJAsyncTaskLauncher().executeTask(task, param, showProgress, lockUI);
@@ -8951,7 +8951,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       assert duringInit() || EventQueue.isDispatchThread();
       
       interactionEnded();
-      _guiNotifier.available(GUIAvailabilityListener.ComponentType.INTERACTIONS);   // enable Interactions pane
+      //enable interactions pane
+      _guiNotifier.available(GUIAvailabilityListener.ComponentType.INTERACTIONS);
+      _enableInteractionsPane();
       
       /* This line was moved here from interpreterResetting because it was possible to get an InputBox in 
        * InteractionsController between interpreterResetting and interpreterReady. Fixes bug #917054 

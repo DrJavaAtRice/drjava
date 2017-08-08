@@ -403,15 +403,15 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener> impl
     finally { _lock.endRead(); }
   }
   
-  /** Called when the active interpreter is changed.
-    * @param inProgress Whether the new interpreter is processing an interaction (i.e,. whether an interactionEnded
-    *        event will be fired)
-    */
-  public void interpreterReplaced() {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.interpreterReplaced(); } }
-    finally { _lock.endRead(); }
-  }
+//  /** Called when the active interpreter is changed.
+//    * @param inProgress Whether the new interpreter is processing an interaction (i.e,. whether an interactionEnded
+//    *        event will be fired)
+//    */
+//  public void interpreterReplaced() {
+//    _lock.startRead();
+//    try { for (GlobalModelListener l : _listeners) { l.interpreterReplaced(); } }
+//    finally { _lock.endRead(); }
+//  }
   
   //-------------------------------- Compiler --------------------------------//
   

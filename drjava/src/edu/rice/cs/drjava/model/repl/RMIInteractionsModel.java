@@ -135,7 +135,7 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
         _log.log("RMIInteractionsModel.setUpNewInterpreter called");
         _jvm.restartInterpreterJVM();
         _log.log("Interpreter JVM replaced");
-        _notifier.interpreterReplaced();
+        _notifier.interpreterReady();
         EventQueue.invokeLater(new Runnable() { public void run() { documentReset(); }});
       }
     });

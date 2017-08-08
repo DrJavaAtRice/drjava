@@ -71,11 +71,11 @@ public interface InteractionsListener {
     */
   public void interpreterExited(int status);
   
-  /** Called when the slave JVM is restarted
-    * @param inProgress Whether the new interpreter is currently in processing an interaction (i.e., whether an 
-    * interactionEnded event is pending.)
-    */
-  public void interpreterReplaced();
+//  /** Called when the slave JVM is restarted
+//    * @param inProgress Whether the new interpreter is currently in processing an interaction (i.e., whether an 
+//    * interactionEnded event is pending.)
+//    */
+//  public void interpreterReplaced();
   
   /** Called when enter was typed in the interactions pane but the interaction was incomplete. */
   public void interactionIncomplete();

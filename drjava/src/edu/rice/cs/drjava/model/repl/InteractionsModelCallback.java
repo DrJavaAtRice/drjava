@@ -139,7 +139,7 @@ public interface InteractionsModelCallback {
   /** Called when the interpreter starts to reset. */
   public void interpreterResetting();
   
-  /** Called to reset the contents of the interactoins document, including generating a banner. */
+  /** Called to reset the contents of the interactions document, including generating a banner. */
   public void documentReset();
   
   /** Called to assert that a fresh Java interpreter is ready for use either after a start or a restart.

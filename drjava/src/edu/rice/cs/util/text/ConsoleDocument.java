@@ -154,7 +154,7 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     */
   public void setBeep(Runnable beep) { _beep = beep; }
   
-  /** Resets the document to a clean state. Only runs in the event thread. */
+  /** Resets the document to a clean state. Only runs in the event thread. Used for the console and interactions pane */
   public void reset(String banner) {
     assert EventQueue.isDispatchThread();
     try {

@@ -542,13 +542,13 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
   // Need to patch code to replace interpreter
   public void xtestReplaceInterpreter() {
     
-    _log.log("Starting testReplaceInterpreters");
-    TestListener listener = new TestListener() {
-      public void interpreterReplaced() {
-//        assertTrue("should not be in progress", !inProgress);
-        interpreterReplacedCount++;
-      }
-    };
+    _log.log("Starting testReplaceInterpreter");
+    TestListener listener = new TestListener(); // {
+//      public void interpreterReplaced() {
+////        assertTrue("should not be in progress", !inProgress);
+//        interpreterReplacedCount++;
+//      }
+//    };
     _model.addListener(listener);
     
     final DefaultInteractionsModel dim = _model.getInteractionsModel();
@@ -564,7 +564,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     });
     
 //    Utilities.clearEventQueue();
-    listener.assertInterpreterChangedCount(1);
+//    listener.assertInterpreterChangedCount(1);
     _model.removeListener(listener);
     
     _log.log("testReplaceInterpreter completed");
@@ -572,7 +572,6 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
   }
   
   public void testRunMainMethod() throws Exception {
-//    debug.logStart();
     
     _log.log("Starting testRunMainMethod");
     File dir = makeCanonical(new File(_tempDir, "bar"));
@@ -603,7 +602,6 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     // Killing time here; Slave JVM may not have released Foo.class so that the file can be deleted on Windows.
     
     _log.log("Starting testRunMainMethod completed");
-//    debug.logEnd();
   }
   
   public void testBookmark() throws Exception {
