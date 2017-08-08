@@ -34,41 +34,43 @@
  * 
  * END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model.definitions.indent;
+/* This class is not currently used. */
 
-import javax.swing.text.*;
-import edu.rice.cs.util.UnexpectedException;
-
-import edu.rice.cs.drjava.model.AbstractDJDocument;
-
-/** Question rule in the indentation decision tree.  Determines if the 
-  * next non-whitespace character is a star '*'.  This is useful for determining
-  * if we are at the beginning of a previously ill-formed block comment.
-  * <p>
-  * <b>Does not work if character being searched for is a '/' or a '*'</b>
-  *
-  * @version $Id$
-  */
-public class QuestionFollowedByStar extends IndentRuleQuestion {
-  
-  /** Constructs a new rule which determines if the current position is
-    * immediately followed by a star '*'.
-    * @param yesRule Rule to use if this rule holds
-    * @param noRule Rule to use if this rule does not hold
-    */
-  public QuestionFollowedByStar(IndentRule yesRule, IndentRule noRule) { super(yesRule, noRule); }
-  
-  /** Determines if the next non WS character is '*'. Does not search in quotes or comments. <p>
-    * <b>Does not work if character being searched for is a '/' or a '*'</b>
-    * @param doc AbstractDJDocument containing the line to be indented.
-    * @return true if this node's rule holds.
-    */
-  boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason) {
-    try {
-      int charPos = doc.getFirstNonWSCharPos(doc.getCurrentLocation(), true);
-      return (charPos != -1) && doc.getText(charPos, 1).equals("*");
-    }
-    catch (BadLocationException ble) { throw new UnexpectedException(ble); }
-  }
-}
-
+//package edu.rice.cs.drjava.model.definitions.indent;
+//
+//import javax.swing.text.*;
+//import edu.rice.cs.util.UnexpectedException;
+//
+//import edu.rice.cs.drjava.model.AbstractDJDocument;
+//
+///** Question rule in the indentation decision tree.  Determines if the 
+//  * next non-whitespace character is a star '*'.  This is useful for determining
+//  * if we are at the beginning of a previously ill-formed block comment.
+//  * <p>
+//  * <b>Does not work if character being searched for is a '/' or a '*'</b>
+//  *
+//  * @version $Id$
+//  */
+//public class QuestionFollowedByStar extends IndentRuleQuestion {
+//  
+//  /** Constructs a new rule which determines if the current position is
+//    * immediately followed by a star '*'.
+//    * @param yesRule Rule to use if this rule holds
+//    * @param noRule Rule to use if this rule does not hold
+//    */
+//  public QuestionFollowedByStar(IndentRule yesRule, IndentRule noRule) { super(yesRule, noRule); }
+//  
+//  /** Determines if the next non WS character is '*'. Does not search in quotes or comments. <p>
+//    * <b>Does not work if character being searched for is a '/' or a '*'</b>
+//    * @param doc AbstractDJDocument containing the line to be indented.
+//    * @return true if this node's rule holds.
+//    */
+//  boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason) {
+//    try {
+//      int charPos = doc.getFirstNonWSCharPos(doc.getCurrentLocation(), true);
+//      return (charPos != -1) && doc.getText(charPos, 1).equals("*");
+//    }
+//    catch (BadLocationException ble) { throw new UnexpectedException(ble); }
+//  }
+//}
+//

@@ -75,24 +75,24 @@ public class Configuration {
   }
   
   /** Gets the current value of the given Option. 
-   * @param <T> type of the option
-   * @param op option to get
-   * @return the value for the option
-   */
+    * @param <T> type of the option
+    * @param op option to get
+    * @return the value for the option
+    */
   public <T> T getSetting(Option<T> op) { return map.getOption(op); }
   
   /** By default, all options are editable. 
-   * @param <T> type of the option
-   * @param op option to check editability of
-   * @return true if op is editable, false otherwise
-   */
+    * @param <T> type of the option
+    * @param op option to check editability of
+    * @return true if op is editable, false otherwise
+    */
   public <T> boolean isEditable(Option<T> op) { return true; }
   
   /** Adds an OptionListener to the given Option, to be notified each time the option changes.
-   * @param <T> type of the option
-   * @param op Option to listen for changes on
-   * @param l OptionListener wishing to listen
-   */
+    * @param <T> type of the option
+    * @param op Option to listen for changes on
+    * @param l OptionListener wishing to listen
+    */
   public <T> void addOptionListener(Option<T> op, OptionListener<T> l) { op.addListener(this,l); }
   
   /** Removes an OptionListener from an Option to which it was listening. 

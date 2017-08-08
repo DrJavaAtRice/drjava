@@ -41,7 +41,7 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 
 /** Singleton class to construct and use the indentation decision tree.
-  * @version $Id: Indenter.java 5677 2012-08-17 11:09:48Z rcartwright $
+  * @version $Id$
   */
 public class Indenter {
   
@@ -77,16 +77,19 @@ public class Indenter {
     char[] indent = new char[indentLevel];
     java.util.Arrays.fill(indent,' ');
     
-    boolean autoCloseComments = false;
-    try { autoCloseComments = DrJava.getConfig().getSetting(OptionConstants.AUTO_CLOSE_COMMENTS).booleanValue(); }
-    catch(Exception e) { /* ignore */ }  // some unit tests produce NullPointer exceptions in preceding line
+    /* The following block of text was revised on 19 Jun 2017 to eliminate the (blanket) catching of exceptions
+     * in the binding of autoCloseComments.  All unit tests currently pass at this point. */
+//    boolean autoCloseComments = false;
+    boolean autoCloseComments = DrJava.getConfig().getSetting(OptionConstants.AUTO_CLOSE_COMMENTS).booleanValue();
+//    try { autoCloseComments = DrJava.getConfig().getSetting(OptionConstants.AUTO_CLOSE_COMMENTS).booleanValue(); }
+//    catch(Exception e) { /* ignore */ }  // some unit tests produce NullPointer exceptions in preceding line
     
     IndentRule
       // Main tree
       rule60 = new ActionStartPrevLinePlus(""),
       rule37 = new ActionStartCurrStmtPlus(indentLevel),
       rule36 = new ActionStartStmtOfBracePlus(indentLevel),
-      // the following two rules should be inserted after the instantiated classed have been implemented
+      // the following two rules should be inserted after the instantiated classes have been implemented
 //      rule40 = new ActionStartOfAnonInnerClass(indentLevel),
 //      rule35 = new QuestionAnonInnerClassPrefix(rule40, rule36);
       rule34 = new QuestionExistsCharInStmt('?', ':', rule37, rule36),
