@@ -1204,10 +1204,11 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       WeakHashMap<WrappedPosition, Integer> ret = new WeakHashMap<WrappedPosition, Integer>(_wrappedPosList.size());
       
       for (WeakReference<WrappedPosition> wr: _wrappedPosList) {
-        if (wr.get() != null)  {
+        WrappedPosition ref = wr.get();
+        if (ref != null)  {
           // hasn't been garbage-collected yet
           newList.add(wr);
-          ret.put(wr.get(), wr.get().getOffset());
+          ret.put(ref, ref.getOffset());
         }
       }
       _wrappedPosList.clear();
