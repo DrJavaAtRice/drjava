@@ -1267,7 +1267,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       WeakHashMap<WrappedPosition, Integer> ret = new WeakHashMap<WrappedPosition, Integer>(_wrappedPosList.size());
       
       for (WeakReference<WrappedPosition> wr: _wrappedPosList) {
-        Position ref = wr.get();  // factored out of loop body that was unsafe because GC could happen!
+        WrappedPosition ref = wr.get();  // factored out of loop body that was unsafe because GC could happen!
         if (ref != null)  {
           // hasn't been garbage-collected yet
           newList.add(wr);
