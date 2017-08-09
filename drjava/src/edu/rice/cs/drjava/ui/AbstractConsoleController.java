@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2017, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -56,7 +56,7 @@ import edu.rice.cs.util.text.EditDocumentInterface;
 
 /** Abstract class that hooks a Swing console/interactions document with its Swing pane.
   * TODO: move interactions specific functionality to InteractionsController by creating ConsoleDJDocument class
-  * @version $Id: AbstractConsoleController.java 5360 2010-08-13 22:36:42Z mgricken $
+  * @version $Id$
   */
 public abstract class AbstractConsoleController /* implements Serializable */ {
   

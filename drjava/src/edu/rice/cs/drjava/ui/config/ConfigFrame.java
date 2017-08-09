@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2017, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -724,11 +724,11 @@ public class ConfigFrame extends SwingFrame {
     }, "Reset \"Open Javadoc\" Dialog Position and Size", this, "This resets the dialog position and size to its default values."));
     
     addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
-    addOptionComponent(panel, newBooleanOptionComponent(OptionConstants.DIALOG_AUTOIMPORT_STORE_POSITION, false)
-                         .setEntireColumn(true));
-    addOptionComponent(panel, new ButtonComponent(new ActionListener() {
-      public void actionPerformed(ActionEvent e) { _mainFrame.resetAutoImportDialogPosition(); }
-    }, "Reset \"Auto Import\" Dialog Position and Size", this, "This resets the dialog position and size to its default values."));
+//    addOptionComponent(panel, newBooleanOptionComponent(OptionConstants.DIALOG_AUTOIMPORT_STORE_POSITION, false)
+//                         .setEntireColumn(true));
+//    addOptionComponent(panel, new ButtonComponent(new ActionListener() {
+//      public void actionPerformed(ActionEvent e) { _mainFrame.resetAutoImportDialogPosition(); }
+//    }, "Reset \"Auto Import\" Dialog Position and Size", this, "This resets the dialog position and size to its default values."));
     
     addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
     addOptionComponent(panel, 
@@ -1298,33 +1298,6 @@ public class ConfigFrame extends SwingFrame {
     addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
       
     addOptionComponent(panel, newIntegerOptionComponent(OptionConstants.HISTORY_MAX_SIZE));
-    addOptionComponent(panel, newBooleanOptionComponent(OptionConstants.DIALOG_AUTOIMPORT_ENABLED));
-    VectorStringOptionComponent autoImportClasses =
-      new VectorStringOptionComponent(OptionConstants.INTERACTIONS_AUTO_IMPORT_CLASSES,
-                                      CONFIG_DESCRIPTIONS.get(OptionConstants.INTERACTIONS_AUTO_IMPORT_CLASSES),
-                                      this,
-                                      CONFIG_LONG_DESCRIPTIONS.get(OptionConstants.INTERACTIONS_AUTO_IMPORT_CLASSES)) {
-      protected boolean verify(String s) {
-        boolean result = true;
-        // verify that the string contains only Java identifier characters, dots and stars
-        for(int i = 0; i < s.length(); ++i) {
-          char ch = s.charAt(i);
-          if ((ch!='.') && (ch!='*') && (!Character.isJavaIdentifierPart(ch))) {
-            result = false;
-            break;
-          }
-        }
-        if (!result) {
-          JOptionPane.showMessageDialog(ConfigFrame.this,
-                                        "This is not a valid class name:\n"+
-                                        s,
-                                        "Error Adding Class Name",
-                                        JOptionPane.ERROR_MESSAGE); 
-        }
-        return result;
-      }
-    };
-    addOptionComponent(panel, autoImportClasses);
 
     addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
     addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));

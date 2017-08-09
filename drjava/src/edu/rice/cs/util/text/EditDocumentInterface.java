@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2017, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,7 @@ import java.awt.print.PrinterException;
   * interface cannot be safely implemented using the primitives in the Swing Document interface.  Write locking is
   * required to safely implement the append method.
   *
-  * @version $Id: EditDocumentInterface.java 5544 2012-04-27 15:22:12Z rcartwright $
+  * @version $Id$
   */
 public interface EditDocumentInterface {
   

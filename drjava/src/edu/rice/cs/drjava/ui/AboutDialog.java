@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2016, JavaPLT group at Rice University (javaplt@rice.edu)
+ * Copyright (c) 2001-2017, JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -331,7 +331,7 @@ public class AboutDialog extends JDialog implements ActionListener {
   }
 
   public static final String COPYRIGHT =
-    "Copyright (c) 2001-2016, JavaPLT group at Rice University (javaplt@rice.edu)\n" + 
+    "Copyright (c) 2001-2017, JavaPLT group at Rice University (javaplt@rice.edu)\n" + 
     "All rights reserved.\n\n" + 
     "Redistribution and use in source and binary forms, with or without " + 
     "modification, are permitted provided that the following conditions are met:\n" + 

@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2017, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -724,39 +724,28 @@ public abstract class FileOps {
     if (makeBackup) {
       backup = fileSaver.getBackupFile();
       if (! renameFile(file, backup)) {
-        throw new IOException("Save failed. Could not create backup file "
-                                + backup.getAbsolutePath() +
+        throw new IOException("Save failed. Could not create backup file " + backup.getAbsolutePath() +
                               "\nIt may be possible to save by disabling file backups\n");
       }
-//      System.err.println("saveFile renamed " + file + " as " + backup);
+      _log.log("saveFile renamed " + file + " as " + backup);
       fileSaver.backupDone();  // Why? This action may have to be reversed if writing new file fails!
 //      System.err.println("Contents: '" + IOUtil.toString(backup) + "'");
     }
     
-//    ScrollableDialog sd2 = new ScrollableDialog(null, "backup done in FileOps.saveFile", "", "");
-//    sd2.show();
-    
-    // Create a temp file in the same directory as the file to be saved.
-    // From this point forward, enclose in try...finally so that we can clean
-    // up the temp file and restore the file from its backup.
+    /* Create a temp file in the same directory as the file to be saved.  From this point forward, enclose in 
+     * try ... finally ... construction so that we can clean up the temp file and restore the file from its backup. */
     File parent = file.getParentFile();
     File tempFile = File.createTempFile("drjava", ".temp", parent);
-//    System.err.println("tempfileName = " + tempFile + " for backup file " + backup);
-    
-//    ScrollableDialog sd3 = new ScrollableDialog(null, "temp file " + tempFile + "created in FileOps.saveFile", "", "");
-//    sd3.show();
+    _log.log("tempfileName = " + tempFile + " for backup file " + backup);
     
     try {
-      /* Now, write your output to the temp file, then rename it to the correct
-       name.  This way, if writing fails in the middle, the old file is not
-       lost. */
+      /* Now, write your output to the temp file, then rename it to the correct name.  This way, if writing fails in the
+       * middle, the old file is not lost. */
       FileOutputStream fos;
       try {
-        /* The next line will fail if we can't create the temp file.  This may mean that
-         * the user does not have write permission on the directory the file they
-         * are editing is in.  We may want to go ahead and try writing directly
-         * to the target file in this case
-         */
+        /* The next line will fail if we can't create the temp file.  This may mean that the user does not have write 
+         * permission on the directory the file they are editing is in.  We may want to go ahead and try writing directly
+         * to the target file in this case. */
         fos = new FileOutputStream(tempFile);
       } 
       catch (FileNotFoundException fnfe) {
@@ -768,8 +757,8 @@ public abstract class FileOps {
       }
       BufferedOutputStream bos = new BufferedOutputStream(fos);
       fileSaver.saveTo(bos);
-//      System.err.println(bos + " written");
-//      System.err.println("Closing " + bos + " and " + fos);
+      _log.log(bos + " written");
+      _log.log("Closing " + bos + " and " + fos);
       bos.close();
 //      fos.close();
       

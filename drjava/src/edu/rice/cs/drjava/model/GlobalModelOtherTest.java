@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2017, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -55,7 +55,7 @@ import edu.rice.cs.plt.iter.IterUtil;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /** A test on the GlobalModel that does deals with everything outside of simple file operations, e.g., compile, quit.
-  * @version $Id: GlobalModelOtherTest.java 5444 2011-08-17 07:54:58Z rcartwright $
+  * @version $Id$
   */
 public final class GlobalModelOtherTest extends GlobalModelTestCase implements OptionConstants {
   

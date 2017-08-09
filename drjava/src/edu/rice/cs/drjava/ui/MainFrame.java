@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2017, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -1797,9 +1797,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   /** Generate Java API class list. 
-   * @param suffix the suffix to append to the API path
-   * @return the Java API class list
-   */
+    * @param suffix the suffix to append to the API path
+    * @return the Java API class list
+    */
   public static Set<JavaAPIListEntry> _generateJavaAPISet(String suffix) {
     URL url = MainFrame.class.getResource("/edu/rice/cs/drjava/docs/javaapi" + suffix);
     return _generateJavaAPISet(url);
@@ -4952,7 +4952,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     // TODO: in some cases, it is possible to see the documents being removed in the navigation pane
     //       this can cause errors. fix this.
     clearCompleteClassSet(); // reset auto-completion list
-    _autoImportClassSet = new HashSet<JavaAPIListEntry>(); // reset auto-import list
+//    _autoImportClassSet = new HashSet<JavaAPIListEntry>(); // reset auto-import list
     
     if (_checkProjectClose()) {
 
@@ -5797,8 +5797,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** List with entries for the complete dialog. */
   HashSet<GoToFileListEntry> _completeClassSet = new HashSet<GoToFileListEntry>();
   
-  /** List with entries for the auto-import dialog. */
-  HashSet<JavaAPIListEntry> _autoImportClassSet = new HashSet<JavaAPIListEntry>();
+//  /** List with entries for the auto-import dialog. */
+//  HashSet<JavaAPIListEntry> _autoImportClassSet = new HashSet<JavaAPIListEntry>();
   
   /** Scan the build directory for class files and update the auto-completion list. */
   private void _scanClassFiles() {
@@ -5852,7 +5852,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         }
         clearCompleteClassSet();
         _completeClassSet.addAll(hs);
-        _autoImportClassSet = new HashSet<JavaAPIListEntry>(hs2);
+//        _autoImportClassSet = new HashSet<JavaAPIListEntry>(hs2);
       }
     });
     t.setPriority(Thread.MIN_PRIORITY);
@@ -6880,7 +6880,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _detachTabbedPanesMenuItem.addItemListener(new ItemListener() {
         public void itemStateChanged(ItemEvent e) {
           JMenuItem temp = weakRef.get();
-          if (temp!=null) {
+          if (temp != null) {
             temp.setSelected(_detachTabbedPanesMenuItem.isSelected());
           }
           else {
@@ -7168,7 +7168,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _debuggerEnabledMenuItem.addItemListener(new ItemListener() {
         public void itemStateChanged(ItemEvent e) {
           JMenuItem temp = weakRef.get();
-          if (temp!=null) {
+          if (temp != null) {
             temp.setSelected(_debuggerEnabledMenuItem.isSelected());
           }
           else {
@@ -7208,7 +7208,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _automaticTraceMenuItem.addItemListener(new ItemListener() {
         public void itemStateChanged(ItemEvent e) {
           JMenuItem temp = weakRef.get();
-          if (temp!=null) {
+          if (temp != null) {
             temp.setSelected(_automaticTraceMenuItem.isSelected());
           }
           else {
@@ -7234,7 +7234,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _detachDebugFrameMenuItem.addItemListener(new ItemListener() {
         public void itemStateChanged(ItemEvent e) {
           JMenuItem temp = weakRef.get();
-          if (temp!=null) {
+          if (temp != null) {
             temp.setSelected(_detachDebugFrameMenuItem.isSelected());
           }
           else {
@@ -8991,7 +8991,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       assert EventQueue.isDispatchThread();
       _disableStepTimer();
       _setThreadDependentDebugMenuItems(true);
-      _model.getInteractionsModel().autoImport();               
+//      _model.getInteractionsModel().autoImport();               
       if (_model.getDebugger().isAutomaticTraceEnabled()) {
         //System.out.println("new _automaticTraceTimer AUTO_STEP_RATE=" + AUTO_STEP_RATE + ", " + 
         //                   System.identityHashCode(_automaticTraceTimer);                                
@@ -9439,42 +9439,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       final InteractionsModel im = _model.getInteractionsModel();
       final String lastError = im.getLastError();
       final FileConfiguration config = DrJava.getConfig();
-      /* check for auto-import */
-      if (config != null && config.getSetting(OptionConstants.DIALOG_AUTOIMPORT_ENABLED)) {
-        if (lastError != null) {
-          // the interaction ended and there was an error
-          // check that this error is different than the last one (second to last may be null):
-          final String secondToLastError = im.getSecondToLastError();
-          if (secondToLastError != null || ! lastError.equals(secondToLastError)) {
-            // the preceding test aborts auto-importing if the same class comes up twice in a row
-            if (lastError.startsWith("Static Error: Undefined class '") && lastError.endsWith("'")) {
-              // it was an "undefined class" exception
-              // show auto-import dialog
-              String undefinedClassName = lastError.substring(lastError.indexOf('\'') + 1, lastError.lastIndexOf('\''));
-//              _log.log("**** Showing Import Dialog for " + undefinedClassName);
-              _showAutoImportDialog(undefinedClassName);
-            }
-            else if (lastError.startsWith("Static Error: Undefined name '") && lastError.endsWith("'")) {
-              // it was an "undefined name" exception
-              String undefinedName = lastError.substring(lastError.indexOf('\'') + 1, lastError.lastIndexOf('\''));
-              
-              if ((undefinedName.length() > 0) &&
-                  (Character.isUpperCase(undefinedName.charAt(0))) &&
-                  (undefinedName.indexOf('.') >= 0)) {
-                // the undefined name starts with a capital letter and contains a dot
-                // show auto-import dialog
-                String undefinedClassName = undefinedName.substring(0, undefinedName.indexOf('.'));
-//                 _log.log("***** Showing Import Dialog for " + undefinedClassName);
-                _showAutoImportDialog(undefinedClassName);
-              }
-            }
-            else if (lastError.startsWith("java.lang.OutOfMemoryError")) {
-              askToIncreaseSlaveMaxHeap();
-            }
-          }
-        }
-      }
-      else im.resetLastErrors(); // reset the last errors, so the dialog works again if it is re-enabled
+      
+
+      im.resetLastErrors(); // reset the last errors, so the dialog works again if it is re-enabled
       _enableInteractionsPane();
       _guiAvailabilityNotifier.available(GUIAvailabilityListener.ComponentType.INTERACTIONS);
       _interactionsPane.discardUndoEdits();
@@ -10102,8 +10069,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           // Interpret cancelled as "NO"
         }
       }
-// The following line was commented out because it breaks when a user want to close but not save a deleted file      
-//      else throw new DocumentClosedException(d,"Document in " + f + "closed unexpectedly");  // misnamed exception
     }
     
     public void browserChanged() { _configureBrowsing(); }
@@ -10605,180 +10570,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         });
       }
     }
-  }
-  
-  /** Reset the position of the "Open Javadoc" dialog. */
-  public void resetAutoImportDialogPosition() {
-    _initAutoImportDialog();
-    _autoImportDialog.setFrameState("default");
-    if (DrJava.getConfig().getSetting(DIALOG_AUTOIMPORT_STORE_POSITION).booleanValue()) {
-      DrJava.getConfig().setSetting(DIALOG_AUTOIMPORT_STATE, "default");
-    }
-  }
-  
-  /** Initialize dialog if necessary.  Runs asynchronously. */
-  private void _initAutoImportDialog() {
-    Executors.newSingleThreadExecutor().submit(new Runnable() {
-      public void run() {
-        if (_autoImportDialog == null) {
-          _autoImportPackageCheckbox = new JCheckBox("Import Package");
-          _autoImportPackageCheckbox.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) { _autoImportDialog.resetFocus(); }
-          });
-          PlatformFactory.ONLY.setMnemonic(_autoImportPackageCheckbox,'p');
-          PredictiveInputFrame.InfoSupplier<JavaAPIListEntry> info = 
-            new PredictiveInputFrame.InfoSupplier<JavaAPIListEntry>() {
-            public String value(JavaAPIListEntry entry) { // show full class name as information
-              return entry.getFullString();
-            }
-          };
-          PredictiveInputFrame.CloseAction<JavaAPIListEntry> okAction = 
-            new PredictiveInputFrame.CloseAction<JavaAPIListEntry>() {
-            public String getName() { return "OK"; }
-            public KeyStroke getKeyStroke() { return KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0); }
-            public String getToolTipText() { return null; }
-            public Object value(PredictiveInputFrame<JavaAPIListEntry> p) {
-              String text;
-              if (p.getItem() != null) { // if a class was selected...
-                text = p.getItem().getFullString();
-              }
-              else { // use the text that was entered
-                text = p.getText();
-              }
-              if (_autoImportPackageCheckbox.isSelected()) {
-                int lastDot = text.lastIndexOf('.');
-                if (lastDot > 0) text = text.substring(0, lastDot + 1) + "*";
-              }
-              final InteractionsModel im = _model.getInteractionsModel();
-              // Get the last line (the one that caused the error) and remove it from the history
-              String lastLine = im.removeLastFromHistory();
-              // Import the selected class...
-              String importLine = "import " + text + "; // auto-import";
-              // ... and try to do the last line again
-              final String code = importLine + ((lastLine != null)  ?  ("\n" + lastLine)  : "");
-              EventQueue.invokeLater(new Runnable() { 
-                public void run() { // interpret with the added import
-                  try {
-                    im.append(code, ConsoleDocument.DEFAULT_STYLE);
-                    im.interpretCurrentInteraction();
-                  }
-                  finally { hourglassOff(); }
-                }
-              });
-              return null;
-            }
-          };
-          PredictiveInputFrame.CloseAction<JavaAPIListEntry> cancelAction = 
-            new PredictiveInputFrame.CloseAction<JavaAPIListEntry>() {
-            public String getName() { return "Cancel"; }
-            public KeyStroke getKeyStroke() { return KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0); }
-            public String getToolTipText() { return null; }
-            public Object value(PredictiveInputFrame<JavaAPIListEntry> p) {
-              // if no class was selected, just reset the error information so the dialog box works next time
-              _model.getInteractionsModel().resetLastErrors();
-              hourglassOff();
-              return null;
-            }
-          };
-          
-          ArrayList<MatchingStrategy<JavaAPIListEntry>> strategies =
-            new ArrayList<MatchingStrategy<JavaAPIListEntry>>();
-          strategies.add(new FragmentStrategy<JavaAPIListEntry>());
-          strategies.add(new PrefixStrategy<JavaAPIListEntry>());
-          strategies.add(new RegExStrategy<JavaAPIListEntry>());
-          List<PredictiveInputFrame.CloseAction<JavaAPIListEntry>> actions
-            = new ArrayList<PredictiveInputFrame.CloseAction<JavaAPIListEntry>>();
-          actions.add(okAction);
-          actions.add(cancelAction);
-          _autoImportDialog = 
-            new PredictiveInputFrame<JavaAPIListEntry>(MainFrame.this, "Auto Import Class", false, true, info, strategies,
-                                                       actions, 1, new JavaAPIListEntry("dummyImport", "dummyImport", null)) 
-          {
-            public void setOwnerEnabled(boolean b) { if (b) hourglassOff(); else hourglassOn(); }
-            protected JComponent[] makeOptions() { return new JComponent[] { _autoImportPackageCheckbox }; }
-          }; 
-          // Put one dummy entry in the list; it will be changed later anyway
-          if (DrJava.getConfig().getSetting(DIALOG_AUTOIMPORT_STORE_POSITION).booleanValue()) {
-            _autoImportDialog.setFrameState(DrJava.getConfig().getSetting(DIALOG_AUTOIMPORT_STATE));
-          }
-          generateJavaAPISet();
-        }
-      }
-    });
-  }
-
-                                               
-  
-  /** The "Auto Import" dialog instance. */
-  PredictiveInputFrame<JavaAPIListEntry> _autoImportDialog = null;
-  JCheckBox _autoImportPackageCheckbox;
-  
-  /** Auto-imports a class selected by the user using this dialog 
-    * @param s the string to show
-    */
-  private void _showAutoImportDialog(final String s) {
-    hourglassOn();
-    new Thread() {
-      public void run() {
-        // run this in a thread other than the main thread        
-        final Set<JavaAPIListEntry> apiSet = getJavaAPISet();
-//        _log.log("**** Initial API Set for Auto-import Dialog is: " + apiSet);
-        if (apiSet == null) {
-          hourglassOff();
-          return;
-        }
-//        _log.log("***** apiSet has length " + apiSet.size());
-        Utilities.invokeLater(new Runnable() {
-          public void run() {
-            // but now run this in the event thread again
-            List<JavaAPIListEntry> autoImportList = new ArrayList<JavaAPIListEntry>(apiSet);
-            if (DrJava.getConfig().getSetting(DIALOG_COMPLETE_SCAN_CLASS_FILES).booleanValue() &&
-                _autoImportClassSet.size() > 0) {
-//              _log.log("Auto-import class set = " + _autoImportClassSet);
-              autoImportList.addAll(_autoImportClassSet);
-            }
-            else {
-              File projectRoot = _model.getProjectRoot();
-              List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
-              if (docs != null) {
-                for (OpenDefinitionsDocument d: docs) {
-                  if (d.isUntitled()) continue;
-                  try {
-                    String rel = FileOps.stringMakeRelativeTo(d.getRawFile(), projectRoot);
-                    String full = rel.replace(File.separatorChar, '.');
-                    
-                    // TODO: What about Habanero Java extension?
-                    for (String ext: DrJavaFileUtils.getSourceFileExtensions()) {
-                      if (full.endsWith(ext)) {
-                        full = full.substring(0, full.lastIndexOf(ext));
-                        break;
-                      }
-                    }
-                    String simple = full;
-                    if (simple.lastIndexOf('.') >= 0) simple = simple.substring(simple.lastIndexOf('.') + 1);
-                    
-//                    _log.log("**** Creating new JavaAPIEntry with simple name = " + simple + " and full name = " + full);
-                    JavaAPIListEntry entry = new JavaAPIListEntry(simple, full, null);
-                    if (! autoImportList.contains(entry)) { autoImportList.add(entry); }
-                  }
-                  catch(IOException ioe) { /* ignore, just don't add this one */ }
-                  catch(SecurityException se) { /* ignore, just don't add this one */ }
-                }
-              }
-            }
-            PredictiveInputModel<JavaAPIListEntry> pim =
-              new PredictiveInputModel<JavaAPIListEntry>(true, new PrefixStrategy<JavaAPIListEntry>(), autoImportList);
-            pim.setMask(s);
-            _initAutoImportDialog();
-//            int size = (autoImportList == null) ? -1 : autoImportList.size();
-//            _log.log("***** Adding an autoImportList list of size: " + size);
-            _autoImportDialog.setModel(true, pim); // ignore case
-            _autoImportPackageCheckbox.setSelected(false);
-            _autoImportDialog.setVisible(true);
-          }
-        });
-      }
-    }.start();
   }
   
   /** Follow a file. */

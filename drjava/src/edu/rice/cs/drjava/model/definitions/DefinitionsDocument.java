@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2017, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -1256,7 +1256,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     return wp;
   }
   
-  /** Remove all positions that have been garbage-collected from the list of positions, then return a weakly-linked
+  /** Remove all positions that have been garbage-collected from the list of positions, then returns  a weakly-linked
     * hashmap with positions and their current offsets.
     * @return list of weak references to all positions that have been created and that have not been garbage-collected yet.
     */
@@ -1267,10 +1267,11 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       WeakHashMap<WrappedPosition, Integer> ret = new WeakHashMap<WrappedPosition, Integer>(_wrappedPosList.size());
       
       for (WeakReference<WrappedPosition> wr: _wrappedPosList) {
-        if (wr.get() != null)  {
+        Position ref = wr.get();  // factored out of loop body that was unsafe because GC could happen!
+        if (ref != null)  {
           // hasn't been garbage-collected yet
           newList.add(wr);
-          ret.put(wr.get(), wr.get().getOffset());
+          ret.put(ref, ref.getOffset());
         }
       }
       _wrappedPosList.clear();
@@ -1279,11 +1280,10 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     }
   }
   
-  /** Re-create the wrapped positions in the hashmap, update the wrapped 
-   * position, and add them to the list.
-   * @param whm weakly-linked hashmap of wrapped positions and their offsets
-   * @throws BadLocationException if attempts to reference an invalid location
-   */
+  /** Re-create the wrapped positions in the hashmap, update the wrapped position, and add them to the list.
+    * @param whm weakly-linked hashmap of wrapped positions and their offsets
+    * @throws BadLocationException if attempts to reference an invalid location
+    */
   public void setWrappedPositionOffsets(WeakHashMap<WrappedPosition, Integer> whm) throws BadLocationException {
     synchronized(_wrappedPosListLock) {
       if (_wrappedPosList == null) { _wrappedPosList = new LinkedList<WeakReference<WrappedPosition>>(); }

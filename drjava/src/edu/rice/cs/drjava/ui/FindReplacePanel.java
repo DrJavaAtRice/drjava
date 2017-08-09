@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2017, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -624,7 +624,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     final boolean oldNoTestCases = _machine.getIgnoreTestCases();
     final int oldPosition = _machine.getCurrentOffset();
     
-    _updateMachine();
+//    _updateMachine();  // in this method call, _defPane returned null in actual usage
     _machine.setDocument(startDoc);
     if (_machine.getFirstDoc() == null) _machine.setFirstDoc(startDoc);
     _machine.setSearchAllDocuments(searchAll);
@@ -707,7 +707,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
   /** Performs the "replace all" command. */
   private void _replaceAll() {
     _frame.updateStatusField("Replacing All");
-    _updateMachine();
+//    _updateMachine(); // at the beginning of _findAll, this call encountered _defPane = null, blowing up
     _machine.setFindWord(_findField.getText());
     _machine.setReplaceWord(_replaceField.getText());
     _machine.setSearchBackwards(false);
@@ -1055,9 +1055,10 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
       final OpenDefinitionsDocument doc = _model.getActiveDocument();
       _machine.setDocument(doc);
       if (_machine.getFirstDoc() == null) _machine.setFirstDoc(doc);
-//      _machine.setStart(_defPane.getCaretPosition());
-      _machine.setPosition(_defPane.getCaretPosition());
-      _caretChanged = false;
+      if (_defPane != null) {
+        _machine.setPosition(_defPane.getCaretPosition());
+        _caretChanged = false;
+      }
     }
   }
   

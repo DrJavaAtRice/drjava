@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2017, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -1553,14 +1553,14 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     boolean isProjActive = isProjectActive();
     
     List<OpenDefinitionsDocument> docsToWrite = getOpenDefinitionsDocuments();
-    while(docsToWrite.size() > 0) {
+    while (docsToWrite.size() > 0) {
       ArrayList<OpenDefinitionsDocument> readOnlyDocs = new ArrayList<OpenDefinitionsDocument>();
       for (final OpenDefinitionsDocument doc: docsToWrite) {  // getOpen... makes a copy
         // do not force Untitled document to be saved if projectActive() or unmodified
         if (doc.isUntitled() && (isProjActive || ! doc.isModifiedSinceSave())) continue;
         try {
           final File docFile = doc.getFile();
-          if (docFile == null || !docFile.exists() || docFile.canWrite()) {
+          if (docFile == null || ! docFile.exists() || docFile.canWrite()) {
             // file is writable, save
             aboutToSaveFromSaveAll(doc);
             doc.saveFile(com);
@@ -1687,11 +1687,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     // add build directory
     File bd = getBuildDirectory();
-    if (bd != FileOps.NULL_FILE) builder.setBuildDirectory(bd);
+    if (bd != FileOps.NULL_FILE && bd != null) builder.setBuildDirectory(bd);
     
     // add working directory
     File wd = getWorkingDirectory();  // the value of the working directory to be stored in the project
-    if (wd != FileOps.NULL_FILE) builder.setWorkingDirectory(wd);
+    if (wd != FileOps.NULL_FILE && wd != null) builder.setWorkingDirectory(wd);
     
     // add jar main class
     String mainClass = getMainClass();
@@ -1740,7 +1740,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     */
   public void saveProject(File file, HashMap<OpenDefinitionsDocument, DocumentInfoGetter> info) throws IOException {
     // if file is read-only, ask if it should be made writable
-    if (file.exists() && !file.canWrite()) {
+    if (file.exists() && ! file.canWrite()) {
       File[] res = _notifier.filesReadOnly(new File[] {file});
       for(File roFile: res) {
         FileOps.makeWritable(roFile);
@@ -1751,11 +1751,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     ProjectProfile builder = _makeProjectProfile(file, info);
     // write to disk
     builder.write();
-    
-//    synchronized(_auxiliaryFiles) {
-//      _auxiliaryFiles = new LinkedList<File>();
-//      for (File f: builder.getAuxiliaryFiles()) { _auxiliaryFiles.add(f); }
-//    }
     
     setFileGroupingState(makeProjectFileGroupingState(builder.getProjectRoot(), builder.getMainClass(), 
                                                       builder.getBuildDirectory(), builder.getWorkingDirectory(), file,

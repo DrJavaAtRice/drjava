@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2017, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -133,9 +133,6 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   protected volatile String _lastError = null;
   protected volatile String _secondToLastError = null;
   
-  /** Set of classes or packages to import again when a breakpoint is hit. */
-  protected final HashSet<String> _autoImportSet = new HashSet<String>();
-  
   /** Constructs an InteractionsModel.  The InteractionsPane is created later by the InteractionsController.
     * As a result, the posting of a banner at the top of InteractionsDocument must be deferred
     * until after the InteracationsPane has been set up.
@@ -211,35 +208,9 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
         String text = _document.getCurrentInteraction();
         String toEval = text.trim();
         _prepareToInterpret(toEval);  // Writes a newLine
-//        if (toEval.startsWith("java ")) toEval = _transformJavaCommand(toEval);
-//        else if (toEval.startsWith("applet ")) toEval = _transformAppletCommand(toEval);
-        
+                
         toEval = transformCommands(toEval);
-        if (DrJava.getConfig().getSetting(OptionConstants.DEBUG_AUTO_IMPORT).booleanValue() &&
-            toEval.startsWith("import ")) {
-          // add the class or package after the import to the set of auto-imports
-          // NOTE: this only processes import statements until the first non-import statement or comment is reached
-          // Example: import java.io.File; import java.io.IOException // imports both File and IOException
-          // Example: import java.io.File; /* comment */ import java.io.IOException // imports only File
-          // Example: import java.io.File; File f; import java.io.IOException // imports only File
-          String line = toEval;
-          do {
-            line = line.substring("import ".length());
-            String substr = line;
-            int endPos = 0;
-            while((endPos < substr.length()) &&
-                  ((Character.isJavaIdentifierPart(substr.charAt(endPos))) ||
-                   (substr.charAt(endPos) == '.') ||
-                   (substr.charAt(endPos) == '*'))) ++endPos;
-            substr = substr.substring(0,endPos);
-            _autoImportSet.add(substr);
-            
-            // remove substr from line
-            line = line.substring(substr.length()).trim();
-            if (!line.startsWith(";")) break;
-            line = line.substring(1).trim();
-          } while(line.startsWith("import "));
-        }
+        
         _log.log("Preparing to interpret '" + toEval  + "'");
         final String evalText = toEval;
 
@@ -252,32 +223,6 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
         }).start(); 
       }
     });
-  }
-  
-  /** Executes import statements for the classes and packages in the auto-import set. */
-  public void autoImport() {
-    java.util.Vector<String> classes = DrJava.getConfig().getSetting(OptionConstants.INTERACTIONS_AUTO_IMPORT_CLASSES);
-    final StringBuilder sb = new StringBuilder();
-    
-    for(String s: classes) {
-      if (s.length() > 0) {
-        sb.append("import ");
-        sb.append(s.trim());
-        sb.append("; ");
-      }
-    }    
-    if (DrJava.getConfig().getSetting(OptionConstants.DEBUG_AUTO_IMPORT).booleanValue()) {
-      for(String s: _autoImportSet) {
-        sb.append("import ");
-        sb.append(s);
-        sb.append("; ");
-      }
-    }
-
-    if (sb.length() > 0) {
-      interpret(sb.toString());
-      _document.insertBeforeLastPrompt("Auto-import: " + sb.toString() + "\n", InteractionsDocument.DEBUGGER_STYLE);
-    }
   }
   
   /** Performs pre-interpretation preparation of the interactions document and 
@@ -318,20 +263,18 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   public abstract Pair<String,String> getVariableToString(String var);
   
   /** Resets the Java interpreter with working directory wd. 
-   * @param wd the working directory to be set
-   * @param force true if reset is to be forced
-   */
+    * @param wd the working directory to be set
+    * @param force true if reset is to be forced (restarting the slave JVM)
+    */
   public final void resetInterpreter(File wd, boolean force) {
     _workingDirectory = wd;
-    _autoImportSet.clear(); // clear list when interpreter is reset
     _resetInterpreter(wd, force);
   }
   
-  /** Resets the Java interpreter.  This should only be called from 
-   * resetInterpreter, never directly. 
-   * @param wd the working directory to be set
-   * @param force true if reset is to be forced
-   */
+  /** Resets the Java interpreter.  This should only be called from resetInterpreter, never directly. 
+    * @param wd the working directory to be set
+    * @param force true if reset is to be forced
+    */
   protected abstract void _resetInterpreter(File wd, boolean force);
   
   /** @return the working directory for the current interpreter. */

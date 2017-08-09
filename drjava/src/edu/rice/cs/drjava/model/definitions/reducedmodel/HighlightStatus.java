@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2017, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,7 @@
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
 /** A block that represents information about the highlighting status of a particular section in the document.
-  * @version $Id: HighlightStatus.java 5175 2010-01-20 08:46:32Z mgricken $
+  * @version $Id$
   */
 public class HighlightStatus {
   public static final int NORMAL = 0;

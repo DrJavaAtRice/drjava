@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2017, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -103,10 +103,10 @@ public class ConfigDescriptions {
     add(OptionConstants.DIALOG_COMPLETE_SCAN_CLASS_FILES,
         "<html><p align=\"right\">" + 
         StringOps.
-          splitStringAtWordBoundaries("Scan Class Files After Each Compile for Auto-Completion and Auto-Import",
+          splitStringAtWordBoundaries("Scan Class Files After Each Compile for Auto-Completion",
                                       40, "<br>", SEPS)+"</p></html>",
         "<html>Whether to scan the class files after a compile to generate class names<br>"+
-        "used for auto-completion and auto-import.<br>"+
+        "used for auto-completion.<br>"+
         "Enabling this option will slow compiles down.</html>");
     
     add(OptionConstants.DIALOG_COMPLETE_JAVAAPI,
@@ -205,9 +205,6 @@ public class ConfigDescriptions {
     add(OptionConstants.DIALOG_OPENJAVADOC_STORE_POSITION,
         "Save \"Open Javadoc\" Dialog Position",
         "Whether to save and restore the size and position of the \"Open Javadoc\" dialog.");
-    add(OptionConstants.DIALOG_AUTOIMPORT_STORE_POSITION,
-        "Save \"Auto Import\" Dialog Position",
-        "Whether to save and restore the size and position of the \"Auto Import\" dialog.");
     
     add(OptionConstants.DIALOG_EXTERNALPROCESS_STORE_POSITION,
         "Save \"Execute External Process\" Dialog Position",
@@ -258,10 +255,6 @@ public class ConfigDescriptions {
         "<html>Any classes that the debuggger should not step into.<br>" +
         "Should be a list of fully-qualified class names.<br>" +
         "To exclude a package, add <code>packagename.*</code> to the list.</html>");
-    add(OptionConstants.DEBUG_AUTO_IMPORT,
-        "Auto-Import after Breakpoint/Step",
-        "<html>Whether the Debugger should automatically import packages<br>"+
-        "and classes again after a breakpoint or step.</html>");
     
     add(OptionConstants.AUTO_STEP_RATE,
         "Auto-Step Rate in ms",
@@ -587,15 +580,6 @@ public class ConfigDescriptions {
     
     add(OptionConstants.HISTORY_MAX_SIZE, "Size of Interactions History",
         "The number of interactions to remember in the history.");
-    add(OptionConstants.DIALOG_AUTOIMPORT_ENABLED, 
-        "Enable the \"Auto Import\" Dialog",
-        "<html>Whether DrJava should open the \"Auto Import\" dialog when<br>"+
-        "an undefined class is encountered in the Interactions Pane.</html>");
-    add(OptionConstants.INTERACTIONS_AUTO_IMPORT_CLASSES, "Classes to Auto-Import",
-        "<html>List of classes to auto-import every time the<br>"+
-        "Interaction Pane is reset or started. Examples:<br><br>"+
-        "java.io.File<br>"+
-        "java.util.*</html>");
     
     add(OptionConstants.DYNAMICJAVA_ACCESS_CONTROL,
         "Enforce access control", 

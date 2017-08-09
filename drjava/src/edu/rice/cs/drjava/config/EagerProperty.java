@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2017, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -37,23 +37,23 @@
 package edu.rice.cs.drjava.config;
 
 /** Class representing values that are eagerly computed, so they are never stale.
- *  @version $Id$
- */
+  *  @version $Id$
+  */
 public abstract class EagerProperty extends DrJavaProperty {
 
   /** Create a property. 
-   * @param name the name of the property
-   * @param help the help page for this property
-   */
+    * @param name the name of the property
+    * @param help the help page for this property
+    */
   public EagerProperty(String name, String help) {
     super(name, help);
   }
 
   /** Create a property. 
-   * @param name the name of the property
-   * @param value the value of the property
-   * @param help the help page for this property
-   */
+    * @param name the name of the property
+    * @param value the value of the property
+    * @param help the help page for this property
+    */
   public EagerProperty(String name, String value, String help) {
     super(name, value, help);
   }
