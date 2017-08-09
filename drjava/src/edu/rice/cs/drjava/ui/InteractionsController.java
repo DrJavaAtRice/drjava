@@ -413,15 +413,8 @@ public class InteractionsController extends AbstractConsoleController {
     
     // Debug (used in non-debug code!)
     _debugStyle.addAttributes(_defaultStyle);
-    _debugStyle.addAttribute(StyleConstants.Foreground, 
-                             DrScala.getConfig().getSetting(OptionConstants.DEBUG_MESSAGE_COLOR));
     _debugStyle.addAttribute(StyleConstants.Bold, Boolean.TRUE);
     _interactionsDJDocument.setDocStyle(InteractionsDocument.DEBUGGER_STYLE, _debugStyle);
-    DrScala.getConfig().addOptionListener(OptionConstants.DEBUG_MESSAGE_COLOR, new OptionListener<Color>() {
-      public void optionChanged(OptionEvent<Color> oe) {
-        _debugStyle.addAttribute(StyleConstants.Foreground, oe.value);
-      }
-    });
   }
   
   /** Adds listeners to the model. */

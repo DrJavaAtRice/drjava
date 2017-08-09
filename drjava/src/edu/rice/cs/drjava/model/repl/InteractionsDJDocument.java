@@ -255,8 +255,6 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
           
           /* Used in non-debug code? */
           else if (p.second().equals(InteractionsDocument.DEBUGGER_STYLE)) {
-            //DrJava.consoleErr().println("Debugger Style");
-            g.setColor(DEBUGGER_COLOR);
             g.setFont(g.getFont().deriveFont(Font.BOLD));
           }
           

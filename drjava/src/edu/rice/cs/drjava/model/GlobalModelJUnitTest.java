@@ -282,7 +282,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
 //  public static Test suite() { return  new TestSuite(GlobalModelJUnitTest.class); }
   
   /** Tests that a JUnit file with no errors is reported to have no errors. */
-  public void xtestNoJUnitErrors_NOJOIN() throws Exception {
+  public void testNoJUnitErrors_NOJOIN() throws Exception {
     _log.log("Starting testNoJUnitErrors_NOJOIN");
     
     final OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_PASS_TEXT);
@@ -311,18 +311,21 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
                  _model.getJUnitModel().getJUnitErrorModel().getNumErrors());
     
     _model.removeListener(listener);
-    _log.log("testNoJUnitErrors_NOJOIN completed");
+    _log.log("Completing testNoJUnitErrors_NOJOIN");
   }
   
   /** Tests that a JUnit file with an error is reported to have an error. */
-  public void xtestOneJUnitError_NOJOIN() throws Exception {
+  public void testOneJUnitError_NOJOIN() throws Exception {
     _log.log("Starting testOneJUnitError_NOJOIN");
     
     final OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_FAIL_TEXT);
     final File file = new File(_tempDir, "MonkeyTestFail.scala");
+    _log.log(doc + " set up");
     saveFile(doc, new FileSelector(file));
+    _log.log(doc + " saved");
     JUnitTestListener listener = new JUnitTestListener();
     _model.addListener(listener);
+    _log.log("JUnitTestListener installed");
     
     listener.compile(doc);
     listener.checkCompileOccurred();
@@ -334,11 +337,11 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     assertEquals("test case has one error reported", 1, _model.getJUnitModel().getJUnitErrorModel().getNumErrors());
     _model.removeListener(listener);
     
-    _log.log("testOneJUnitError completed");
+    _log.log("Completing testOneJUnitError");
   }
   
   /** Tests that a JUnit file with an error is reported to have an error. */
-  public void xtestElspethOneJUnitError_NOJOIN() throws Exception {
+  public void testElspethOneJUnitError_NOJOIN() throws Exception {
     _log.log("Starting testElspethOneJunitError_NOJOIN");
     
     OpenDefinitionsDocument doc = setupDocument(ELSPETH_ERROR_TEXT);
@@ -358,11 +361,11 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
 //    assertTrue("first error should be an error not a warning", !jem.getError(0).isWarning());
     _model.removeListener(listener);
     
-    _log.log("testElspethOneJUnitError completed");
+    _log.log("Completing testElspethOneJUnitError");
   }
   
   /** Tests that a test class which throws a *real* Error (not an Exception) is handled correctly. */
-  public void xtestRealError_NOJOIN() throws Exception {
+  public void testRealError_NOJOIN() throws Exception {
     _log.log("Startinging testRealError_NOJOIN");
     
     OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_ERROR_TEXT);
@@ -381,11 +384,11 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     listener.assertJUnitEndCount(1);
     _model.removeListener(listener);
     
-    _log.log("testRealError completed");
+    _log.log("Completing testRealError");
   }
   
   /** Tests that the ui is notified to put up an error dialog if JUnit is run on a non-TestCase. */
-  public void xtestNonTestCaseError_NOJOIN() throws Exception {
+  public void testNonTestCaseError_NOJOIN() throws Exception {
     _log.log("Starting testNonTestCaseError_NOJOIN");
     
     final OpenDefinitionsDocument doc = setupDocument(NON_TESTCASE_TEXT);
@@ -414,7 +417,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     listener.assertJUnitTestEndedCount(0);
     _model.removeListener(listener);
     
-    _log.log("testNonTestCaseError completed");
+    _log.log("Completing testNonTestCaseError");
   }
   
   /** Tests that the ui is notified to put up an error dialog if JUnit is run on a non-public TestCase. N/A for Scala. */
@@ -445,20 +448,22 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     assertEquals("test case has one error reported", 1, _model.getJUnitModel().getJUnitErrorModel().getNumErrors());
     _model.removeListener(listener);
     
-    _log.log("testResultOfNonPublicTestCase completed");
+    _log.log("Completing testResultOfNonPublicTestCase");
   }
   
   /** Tests a document that has no corresponding class file. */
-  public void xtestNoClassFile() throws Exception {
+  public void testNoClassFile() throws Exception {
     _log.log("Starting testNoClassFile");
     
     final OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_PASS_TEXT);
     final File file = new File(_tempDir, "MonkeyTestPass.scala");
     saveFile(doc, new FileSelector(file));
+    _log.log(doc + " saved");
     
-    JUnitTestListener listener = new JUnitCompileBeforeTestListener();
-    
+    JUnitTestListener listener = new JUnitCompileBeforeTestListener(); 
     _model.addListener(listener);
+    _log.log("Listener " + listener + " added");
+    
     _log.log(file + " NOT compiled");
 //    Utilities.show("calling _runJunit in testNoClassFile");
     
@@ -474,17 +479,19 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     listener.assertJUnitTestStartedCount(1);
     listener.assertJUnitTestEndedCount(1);
     _model.removeListener(listener);
-    _log.log("testNoClassFile completed");
+    _log.log("Completing testNoClassFile");
   }
   
   // Commented out because MultiThreadedTestCase objects to the RemoteException thrown by auxiliary unit testing thread
   // after resetInteractions kills the slave JVM.
   /** Tests that an infinite loop in a test case can be aborted by clicking the Reset button. */
-  public void xtestInfiniteLoop_NOJOIN() throws Exception {
+  public void testInfiniteLoop_NOJOIN() throws Exception {
     _log.log("Starting testInfiniteLoop_NOJOIN");
     
     final OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_INFINITE_TEXT);
+    _log.log(doc + " set up");
     final File file = new File(_tempDir, "MonkeyTestInfinite.scala");
+    _log.log(doc + " saved");
     saveFile(doc, new FileSelector(file));
     
     JUnitTestListener listener = new JUnitTestListener(false) {
@@ -521,13 +528,13 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     listener.assertJUnitStartCount(1);
     _model.removeListener(listener);
     listener.assertJUnitEndCount(1);  // Testing was aborted after junitStarted(); junitEnded called in recovery code
-    _log.log("testInfiniteLoop completed");
+    _log.log("Completing testInfiniteLoop");
   }
   
   /** Tests that when a JUnit file with no errors, after being saved and compiled,
     * has it's contents replaced by a test that should fail, will pass all tests.
     */
-  public void xtestUnsavedAndUnCompiledChanges() throws Exception {
+  public void testUnsavedAndUnCompiledChanges() throws Exception {
     _log.log("Starting testUnsavedAndUnCompiledChanges");
     
     OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_PASS_TEXT);
@@ -591,7 +598,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
                  _model.getJUnitModel().getJUnitErrorModel().getNumErrors());
     _model.removeListener(listener);
     
-    _log.log("testUnsavedAndUnCompiledChanges completed");
+    _log.log("Completing testUnsavedAndUnCompiledChanges");
   }
   
   /** Verifies that we get a nonTestCase event and that opening a single test file enables testing. */
@@ -635,7 +642,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     listener2.assertJUnitTestEndedCount(1);
     _model.removeListener(listener2);
     
-    _log.log("testJUnitAllWithNoValidTests completed");
+    _log.log("Completing testJUnitAllWithNoValidTests");
   }
   
   /** Tests that junit all works with one or two test cases that should pass. */
@@ -678,7 +685,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     listener.assertJUnitTestEndedCount(3);
     _model.removeListener(listener);
     
-    _log.log("testJUnitAllWithNoErrors completed");
+    _log.log("Completing testJUnitAllWithNoErrors");
   }
   
   /** Tests that junit all works with test cases that do not pass. */
@@ -717,7 +724,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     assertTrue("first error should be an error", jem.getError(0).isWarning());
     assertFalse("second error should be a failure", jem.getError(1).isWarning());
     
-    _log.log("testJUnitAllWithErrors completed");
+    _log.log("Completing testJUnitAllWithErrors");
   } 
   
   /** Tests that junit all works with one or two test cases that should pass. */
@@ -750,7 +757,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     listener.assertJUnitTestEndedCount(2);
     _model.removeListener(listener);
     
-    _log.log("testJUnitStaticInnerClass completed");
+    _log.log("Completing testJUnitStaticInnerClass");
   }  
   
   /** Tests that testing an uncompiled but correct group of files will first compile and then run test. */
@@ -787,12 +794,14 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   /** Tests that when a JUnit file with no errors is compiled and then modified to contain
     * an error does not pass unit testing (by running correct class files).
     */
-  public void xtestCorrectFilesAfterIncorrectChanges_NOJOIN() throws Exception {
+  public void testCorrectFilesAfterIncorrectChanges_NOJOIN() throws Exception {
     _log.log("Starting testCorrectFilesAfterIncorrectChanges");
     
     final OpenDefinitionsDocument doc1 = setupDocument(MULTI_CLASSES_IN_FILE_TEXT);
-    final File file = new File(_tempDir, "DJTest.scala");
+    _log.log(doc1 + " set up");
+    final File file = new File(_tempDir, "DJTest.scala");     
     saveFile(doc1, new FileSelector(file));
+    _log.log(doc1 + " saved");
     _log.log("In testCorrectFilesAfterIncorrectChanges_NOJOIN(), DJTest.java = \n" + doc1.getText());
     
     final JUnitNonTestListener listener1 = new JUnitNonTestListener(true);
@@ -824,11 +833,11 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     listener2.assertJUnitTestStartedCount(0);
     listener2.assertJUnitTestEndedCount(0);
     _model.removeListener(listener2);
-    _log.log("testCorrectFilesAfterIncorrectChanges completed");
+    _log.log("Completing testCorrectFilesAfterIncorrectChanges");
   }
   
   /* Tests if a JUnit4 style unit test works. */
-  public void xtestJUnit4StyleTestWorks_NOJOIN() throws Exception {
+  public void testJUnit4StyleTestWorks_NOJOIN() throws Exception {
     
     _log.log("Starting testJUnit4StyleTestWorks");
     
@@ -858,11 +867,11 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
                  _model.getJUnitModel().getJUnitErrorModel().getNumErrors());
     
     _model.removeListener(listener);
-    _log.log("testJUnit4StyleTestWorks completed");
+    _log.log("Completing testJUnit4StyleTestWorks");
   }
   
   /** Tests to see if a JUnit4 style test with multiple test cases passes. */
-  public void xtestJUnit4MultiTest_NOJOIN() throws Exception {
+  public void testJUnit4MultiTest_NOJOIN() throws Exception {
     
     _log.log("Starting testJUnit4MultiTest");
     
@@ -890,12 +899,12 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
                  _model.getJUnitModel().getJUnitErrorModel().getNumErrors());
     
     _model.removeListener(listener);
-    _log.log("testJUnit4SMultiTest completed");
+    _log.log("Completing testJUnit4SMultiTest");
   }
   
   
   /** Tests to see if a JUnit4 style test with no test cases will not run. */
-  public void xtestJUnit4NoTest_NOJOIN() throws Exception {
+  public void testJUnit4NoTest_NOJOIN() throws Exception {
     _log.log("Starting testJUnit4NoTest");
     
     File file0 = new File("testFiles/GlobalModelJUnitTestFiles/JUnit4NoTest.scala");
@@ -925,11 +934,11 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     listener.assertJUnitTestEndedCount(0);
     _model.removeListener(listener);
     
-    _log.log("testJUnit4NoTest completed");
+    _log.log("Completing testJUnit4NoTest");
   }
   
   /** Tests to see if a JUnit4 style test with a test method and multiple nonTest methods will run. */
-  public void xtestJUnit4TwoMethod1Test_NOJOIN() throws Exception {
+  public void testJUnit4TwoMethod1Test_NOJOIN() throws Exception {
     
     _log.log("Starting testJUnit4TwoMethod1Test");
     
@@ -957,7 +966,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
                  _model.getJUnitModel().getJUnitErrorModel().getNumErrors());
     
     _model.removeListener(listener);
-    _log.log("testJUnit4TwoMethod1Test completed");
+    _log.log("Completing testJUnit4TwoMethod1Test");
   }
 }
 

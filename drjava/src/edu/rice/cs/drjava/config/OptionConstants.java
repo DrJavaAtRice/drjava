@@ -138,9 +138,6 @@ public interface OptionConstants {
   public static final ColorOption INTERACTIONS_ERROR_COLOR =
     new ColorOption("interactions.error.color", Color.red.darker());
   
-  /* Used in non-debug code. */
-  public static final ColorOption DEBUG_MESSAGE_COLOR = new ColorOption("debug.message.color", Color.blue.darker());
-  
   /** Color for background of definitions pane. */
   public static final ColorOption DEFINITIONS_BACKGROUND_COLOR =
     new ColorOption("definitions.background.color", Color.white);
@@ -1605,14 +1602,7 @@ public interface OptionConstants {
   /** Whether to save and restore window size and position at startUp/shutdown. */
   public static final BooleanOption DIALOG_OPENSCALADOC_STORE_POSITION =
     new BooleanOption("dialog.openscaladoc.store.position", Boolean.TRUE);
-  
-  /** The last state of the "Auto Import" dialog. */
-  public static final StringOption DIALOG_AUTOIMPORT_STATE = new StringOption("dialog.autoimport.state", "default");
-  
-  /** Whether to save and restore window size and position at startUp/shutdown. */
-  public static final BooleanOption DIALOG_AUTOIMPORT_STORE_POSITION =
-    new BooleanOption("dialog.autoimport.store.position", Boolean.TRUE);
-  
+
   /** Number of entries in the browser history (0 for unlimited). */
   public static final NonNegativeIntegerOption BROWSER_HISTORY_MAX_SIZE =
     new NonNegativeIntegerOption("browser.history.max.size", Integer.valueOf(50));
@@ -1697,11 +1687,6 @@ public interface OptionConstants {
   /** Whether to use Runtime.halt to quit DrScala (see bugs 1550220 and 1478796). */
   public static final BooleanOption DRSCALA_USE_FORCE_QUIT =
     new BooleanOption("drscala.use.force.quit", Boolean.FALSE);
-  
-  /** Whether to display the "Auto Import" dialog when an undefined class
-    * is encountered in the Interactions Pane. */
-  public static final BooleanOption DIALOG_AUTOIMPORT_ENABLED =
-    new BooleanOption("dialog.autoimport.enabled", Boolean.TRUE);
   
   /** Delay for following files. */
   public static final NonNegativeIntegerOption FOLLOW_FILE_DELAY =

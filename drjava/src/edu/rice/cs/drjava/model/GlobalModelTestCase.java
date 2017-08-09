@@ -916,10 +916,8 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 
     public void prepareForRun(OpenDefinitionsDocument doc) { listenerFail("prepareForRun fired unexpectedly"); }
     
-    public void interpreterResetting() {
-      _log.log(this + " failed; interpreterResetting fired unexpectedly");
-      listenerFail("interpreterResetting fired unexpectedly");
-    }
+    /* Interpreter is reset if compilation establishes a new class path root. */
+    public void interpreterResetting() { }
     
 //    public void interpreterReplaced() { listenerFail("interpreterReplaced fired unexpectedly"); }
     public void interpreterReady() { listenerFail("interpreterReady() fired unexpectedly");  }

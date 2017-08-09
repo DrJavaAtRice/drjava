@@ -134,9 +134,6 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   protected volatile String _lastError = null;
   protected volatile String _secondToLastError = null;
   
-  /** Set of classes or packages to import again when a breakpoint is hit. */
-  protected final HashSet<String> _autoImportSet = new HashSet<String>();
-  
   /** Constructs an InteractionsModel.  The InteractionsPane is created later by the InteractionsController.
     * As a result, the posting of a banner at the top of InteractionsDocument must be deferred
     * until after the InteracationsPane has been set up.
@@ -216,26 +213,6 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     });
   }
   
-  /** Executes import statements for the classes and packages in the auto-import set. */
-  public void autoImport() {
-    java.util.ArrayList<String> classes = DrScala.getConfig().getSetting(OptionConstants.INTERACTIONS_AUTO_IMPORT_CLASSES);
-    final StringBuilder sb = new StringBuilder();
-    
-    for(String s: classes) {
-      String name = s.trim();
-      if (s.length() > 0) {
-        sb.append("import ");
-        sb.append(s.trim());
-        sb.append("; ");
-      }
-    }
-
-    if (sb.length() > 0) {
-      interpretCommand(sb.toString());
-      _document.insertBeforeLastPrompt("Auto-import: " + sb.toString() + "\n", InteractionsDocument.DEBUGGER_STYLE);
-    }
-  }
-  
   /** Performs pre-interpretation preparation of the interactions document and notifies the view.  Must run in the
     * event thread for newline to be inserted at proper time.  Assumes that Write Lock is already held. */
   private void _prepareToInterpret(String text) {
@@ -288,7 +265,6 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   /** Resets the Java interpreter with working directory wd. */
   public final boolean resetInterpreter(File wd) {
     _workingDir = wd;
-    _autoImportSet.clear(); // clear list when interpreter is reset
     interpreterResetting(); // performed asynchronously in event thread
     return _resetInterpreter(wd);
   }

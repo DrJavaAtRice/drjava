@@ -57,7 +57,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
   */
 public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
   
-  public static final Log _log  = new Log("GlobalModel.txt", false);
+  public static final Log _log  = new Log("GlobalModel.txt", true);
   
   private static final String FOO_MISSING_VAR_KEYWORD = "class DrScalaTestFoo { yy }";
   private static final String BAR_MISSING_DECLARATION_KEYWORD = "class DrScalaTestBar { zz }";
@@ -158,15 +158,20 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     _log.log("** Starting testCompilePackageAsField");
     
     OpenDefinitionsDocument doc = setupDocument(FOO_PACKAGE_AS_FIELD);
+    _log.log(doc + " set up");
     final File file = tempFile();
     saveFile(doc, new FileSelector(file));
+    _log.log(doc + " saved as file " + file);
     
     CompileShouldFailListener listener = new CompileShouldFailListener();
     _model.addListener(listener);
     
+    _log.log("Starting compilation of " + doc);
     testStartCompile(doc);
     
+    _log.log("Waiting on compilation to finish");
     listener.waitCompileDone();
+    _log.log("Compilation done");
     listener.checkCompileOccurred();
     
     // There better be an error since "package" can not be an identifier!

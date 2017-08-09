@@ -540,7 +540,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
   
   /** Tests that the appropriate event is fired when the model's interpreter changes.*/
   // Need to patch code to replace interpreter
-  public void xtestReplaceInterpreter() {
+  public void testReplaceInterpreter() {
     
     _log.log("Starting testReplaceInterpreter");
     TestListener listener = new TestListener(); // {
@@ -560,11 +560,12 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
 //        dim.addInterpreter("Starting testInterpreter");
 //        dim.addInterpreter("testInterpreter");
 //        dim.setActiveInterpreter("testInterpreter", "myPrompt>"); 
+        dim.setUpNewInterpreter();
       }
     });
     
-//    Utilities.clearEventQueue();
-//    listener.assertInterpreterChangedCount(1);
+    Utilities.clearEventQueue();
+    listener.assertInterpreterReadyCount(1);
     _model.removeListener(listener);
     
     _log.log("testReplaceInterpreter completed");

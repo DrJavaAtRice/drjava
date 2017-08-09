@@ -96,10 +96,10 @@ public class ConfigDescriptions {
     add(DIALOG_COMPLETE_SCAN_CLASS_FILES,
         "<html><p align=\"right\">" + 
         StringOps.
-          splitStringAtWordBoundaries("Scan Class Files After Each Compile for Auto-Completion and Auto-Import",
+          splitStringAtWordBoundaries("Scan Class Files After Each Compile for Auto-Completion",
                                       40, "<br>", SEPS)+"</p></html>",
         "<html>Whether to scan the class files after a compile to generate class names<br>"+
-        "used for auto-completion and auto-import.<br>"+
+        "used for auto-completion.<br>"+
         "Enabling this option will slow compiles down.</html>");
     
     add(DIALOG_COMPLETE_JAVAAPI, "<html><p align=\"right\">" + 
@@ -158,9 +158,6 @@ public class ConfigDescriptions {
     add(INTERACTIONS_ERROR_COLOR, "Interactions Error Color",
         "The color for interactions errors in the Interactions Pane.");
     
-    /* Used in non-debug code! */
-    add(DEBUG_MESSAGE_COLOR, "Debug Message Color", "The color for debugger and auto-import messages in the Interactions Pane.");
-    
     add(DRSCALA_ERRORS_BUTTON_COLOR, "DrScala Errors Button Background Color",
         "The background color of the \"Errors\" button used to show internal DrJava errors.");
     add(RIGHT_MARGIN_COLOR, "Right Margin Color", "The color of the right margin line, if displayed.");
@@ -176,8 +173,6 @@ public class ConfigDescriptions {
         "Whether to save and restore the position of the \"Create Jar File from Project\" dialog.");
     add(DIALOG_OPENSCALADOC_STORE_POSITION, "Save \"Open Scaladoc\" Dialog Position",
         "Whether to save and restore the size and position of the \"Open Scaladoc\" dialog.");
-    add(DIALOG_AUTOIMPORT_STORE_POSITION, "Save \"Auto Import\" Dialog Position",
-        "Whether to save and restore the size and position of the \"Auto Import\" dialog.");
     add(DIALOG_EXTERNALPROCESS_STORE_POSITION, "Save \"Execute External Process\" Dialog Position",
         "Whether to save and restore the position of the \"Execute External Process\" dialog.");
     add(DIALOG_EDITEXTERNALPROCESS_STORE_POSITION, "Save \"Edit External Process\" Dialog Position",
@@ -188,36 +183,6 @@ public class ConfigDescriptions {
         "Whether to save and restore the position of the \"Tabbed Panes\" window."); 
     add(DETACH_TABBEDPANES, "Detach Tabbed Panes",
         "Whether to detach the tabbed panes and display them in a separate window.");
-    
-    /* Debugger deactivated in DrScala */
-//    add(DIALOG_DEBUGFRAME_STORE_POSITION, "Save \"Debugger\" Window Position",
-//        "Whether to save and restore the position of the \"Debugger\" window.");
-//    add(DETACH_DEBUGGER, "Detach Debugger",
-//        "Whether to detach the debugger and display it in a separate window.");
-//    
-//    /** Adds all of the components for the Key Bindings panel of the preferences window. */
-//    add(DEBUG_SOURCEPATH, "Sourcepath", "<html>Any directories in which to search for source<br>" +
-//        "files when stepping in the Debugger.</html>");
-//    add(DEBUG_STEP_JAVA, "Step Into Java Classes", 
-//        "<html>Whether the Debugger should step into Java library classes,<br>" +
-//        "including java.*, javax.*, sun.*, com.sun.*, com.apple.eawt.*, and com.apple.eio.*</html>");
-//    add(DEBUG_STEP_INTERPRETER, "Step Into Interpreter Classes",
-//        "<html>Whether the Debugger should step into the classes<br>" +
-//        "used by the Interactions Pane (DynamicJava).</html>");
-//    add(DEBUG_STEP_DRSCALA, "Step Into DrScala Classes", "Whether the Debugger should step into DrJava's own class files.");
-//    add(DEBUG_STEP_EXCLUDE, "Classes/Packages To Exclude",
-//        "<html>Any classes that the debuggger should not step into.<br>" +
-//        "Should be a list of fully-qualified class names.<br>" +
-//        "To exclude a package, add <code>packagename.*</code> to the list.</html>");
-//    add(DEBUG_AUTO_IMPORT, "Auto-Import after Breakpoint/Step",
-//        "<html>Whether the Debugger should automatically import packages<br>" +
-//        "and classes again after a breakpoint or step.</html>");
-//    add(AUTO_STEP_RATE, "Auto-Step Rate in ms",
-//        "<html>A defined rate in ms at which the debugger automatically steps into/over each line of code.<br>" +
-//        "Value entered must be an integer value. </html>");                                                            
-//    add(DEBUG_EXPRESSIONS_AND_METHODS_IN_WATCHES, "Allow Expressions and Method Calls in Watches",
-//        "<html>Whether the Debugger should allow expressions and method<br>" +
-//        "calls in watches. These may have side effects and can cause<br>" + "delays during the debug process.</html>");
     
     add(SCALADOC_API_REF_VERSION, "Java Version for \"Open Java API Scaladoc\"",
         "Version of the Java API documentation to be used.");
@@ -424,22 +389,6 @@ public class ConfigDescriptions {
         "<html>Whether the Run button and meni item should automatically detect<br>" +
         "applets and ACM Java Task Force programs (subclasses of acm.program.Program).</html>");
     add(HISTORY_MAX_SIZE, "Size of Interactions History", "The number of interactions to remember in the history.");
-    add(DIALOG_AUTOIMPORT_ENABLED, "Enable the \"Auto Import\" Dialog",
-        "<html>Whether DrScala should open the \"Auto Import\" dialog when<br>" +
-        "an undefined class is encountered in the Interactions Pane.</html>");
-    add(INTERACTIONS_AUTO_IMPORT_CLASSES, "Classes to Auto-Import",
-        "<html>List of classes to auto-import every time the<br>" +
-        "Interaction Pane is reset or started. Examples:<br><br>" + "java.io.File<br>" + "java.util.*</html>");
-
-    /* These options are not relevant to DrScala. */
-//    add(DYNAMICJAVA_ACCESS_CONTROL, "Enforce access control", 
-//        "What kind of access control should DrScala enforce in the Interactions Pane?");
-//    add(DYNAMICJAVA_REQUIRE_SEMICOLON, "Require Semicolon",
-//        "<html>Whether DrScala should require a semicolon at the<br>" +
-//        "end of a statement in the Interactions Pane.</html>");
-//    add(DYNAMICJAVA_REQUIRE_VARIABLE_TYPE, "Require Variable Type",
-//        "<html>Whether DrScala should require a variable type for<br>" +
-//        "variable declarations in the Interactions Pane.</html>");
     
     /** Add all of the components for the JUnit panel of the preferences window. */
     add(JUNIT_LOCATION_ENABLED, "Use external JUnit",

@@ -81,7 +81,7 @@ import scala.tools.nsc.reporters.ConsoleReporter;
 public class ScalaCompiler extends Javac160FilteringCompiler implements /* Scala */ CompilerInterface {
   
 //  _log is also defined in a superclass
-  public static final Log _log = new Log("jdk8.txt", true);
+  public static final Log _log = new Log("jdk8.txt", false);
   
   private File _outputDir = null;
     
@@ -130,7 +130,6 @@ public class ScalaCompiler extends Javac160FilteringCompiler implements /* Scala
     * @param interactionsString unprocessed command line
     * @return command line with commands transformed */
   public String transformCommands(String interactionsString) {
-    // System.out.println(interactionsString);
     if (interactionsString.startsWith("scala ")) {
       interactionsString = interactionsString.replace("scala ", "java ");
     }
@@ -146,7 +145,6 @@ public class ScalaCompiler extends Javac160FilteringCompiler implements /* Scala
     
     // In this override, we use Scala notation for the class object for "MyClass"
     String ret = JavacCompiler.class.getName() + ".runCommand(\"" + s.toString() + "\", classOf[" + className + "])";
-    // System.out.println(ret);
     return ret;
   }
 
@@ -246,6 +244,7 @@ public class ScalaCompiler extends Javac160FilteringCompiler implements /* Scala
     *  @param showWarnings  Whether compiler warnings should be shown or ignored.
     *  @return Errors that occurred. If no errors, should be zero length (not null).
     */
+  @SuppressWarnings({"rawtypes","unchecked"})
   public List<? extends DJError> compile(List<? extends File> files, List<? extends File> classPath, 
                                          List<? extends File> sourcePath, File destination, 
                                          List<? extends File> bootClassPath, String sourceVersion, boolean showWarnings) {
@@ -275,10 +274,9 @@ public class ScalaCompiler extends Javac160FilteringCompiler implements /* Scala
 //    settings.processArgumentString("-usejavacp");
     settings.processArgumentString("-deprecation");
     String dest = (destination == null) ? null : destination.getPath();
-    System.err.println("In ScalaCompiler, dest = '" + dest + "'");
+    _log.log("In ScalaCompiler, dest = '" + dest + "'");
     if (dest != null) {
       _log.log("Passing argument string '" + "-d " + '"' + dest + '"' + "to the scala compiler (Global)");
-      System.err.println("Passing argument string '" + "-d " + '"' + dest + '"' + "to the scala compiler (Global)");
 //      Utilities.show("Passing argument string '" + "-d " + '"' + dest + '"' + "to the scala compiler (Global)");
       settings.processArgumentString("-d " + '"' + dest + '"');
     }
@@ -301,8 +299,7 @@ public class ScalaCompiler extends Javac160FilteringCompiler implements /* Scala
     
     /* Build a Scala List[PlainFile] corresponding to files.  fileObjects is a Scala List of PlainFile but
      * the Java compiler does not recognize Scala generic covariant types.  */
-    scala.collection.immutable.List fileObjects =   
-      scala.collection.immutable.Nil$.MODULE$;  // the empty list in Scala
+    scala.collection.immutable.List fileObjects =  scala.collection.immutable.Nil$.MODULE$;  // the empty list in Scala
     for (File f : files) fileObjects = fileObjects.$colon$colon(new PlainFile(Path.jfile2path(f)));
     try { 
       _log.log("Compiling " + fileObjects);
