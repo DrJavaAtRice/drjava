@@ -91,7 +91,7 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
     File compiled2 = classForScala(file, "DrScalaTestFoo2");
     assertTrue(_name() + "Class file should exist after compile", compiled.exists());
     assertTrue(_name() + "Class file should exist after compile", compiled2.exists());
-    _log.log("+++Ending testCompileReferenceToNonPublicClass()");
+    _log.log("+++Completing testCompileReferenceToNonPublicClass()");
   }
 
   /** Tests compiling a file with generics works with generic compilers.
@@ -111,7 +111,7 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
       
       CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
       _model.addListener(listener);
-//      _model.getCompilerModel().compileAll();
+
       listener.compile(doc);
 
       if (_model.getCompilerModel().getNumErrors() > 0) {
@@ -124,14 +124,14 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
       // Make sure .class exists
       File compiled = classForScala(file, "DrScalaTestFooGenerics");
       assertTrue(_name() + " FooGenerics Class file doesn't exist after compile", compiled.exists());
-      _log.log("+++Ending testCompileWithGenerics()");
+      _log.log("+++Completing testCompileWithGenerics()");
     }
   }
   
   /** Confirms that calling compileAll with different source roots succeeds. */
   public void testCompileAllDifferentSourceRoots() throws BadLocationException, IOException, InterruptedException {
     _log.log("+++Starting testCompileAllDifferentSourceRoots");
-//    System.err.println("testCompileAllDifferentSourceRoots() compiler =" + _name());
+
     File aDir = new File(_tempDir, "a");
     File bDir = new File(_tempDir, "b");
     aDir.mkdir();
@@ -160,12 +160,11 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
 
     // Make sure .class files exist for the first file in expected place
     File compiled = classForScala(file2, "DrScalaTestBar");
-//    System.err.println("Class file for DrScalaTestBar = " + compiled);
+    _log.log("Class file for DrScalaTestBar = " + compiled);
     assertTrue(_name() + "Bar Class file exists after compile", compiled.exists());
     // Scalac does not respond to null destination by placing each class file in corresponding source file's folder
-//    File compiled2 = classForScala(file2, "DrSclaTestFoo");
-//    assertTrue(_name() + "Foo Class file doesn't exist after compile", ! compiled2.exists());
+
     _model.removeListener(listener);
-    _log.log("+++Ending testCompileAllDifferentSourceRoots");
+    _log.log("+++Completing testCompileAllDifferentSourceRoots");
   }
 }

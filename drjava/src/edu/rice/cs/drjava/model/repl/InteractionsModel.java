@@ -175,7 +175,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   public void removeListener(InteractionsListener listener) { _notifier.removeListener(listener); }
   
   /** Removes all InteractionsListeners from this model. */
-  public void removeAllInteractionListeners() { _notifier.removeAllListeners(); }
+  public void removeAllInteractionsTestListeners() { _notifier.removeAllListeners(); }
   
   /** Returns the InteractionsDocument stored by this model. */
   public InteractionsDocument getDocument() { return _document; }

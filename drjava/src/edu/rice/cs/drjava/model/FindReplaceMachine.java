@@ -78,6 +78,8 @@ public class FindReplaceMachine {
   
   /** Standard Constructor. Creates new machine to perform find/replace operations on documents.  Only called ONCE in
     * initializing FindReplacePanel.  Search/replace commands reuse this machine for each subsequent search/replace
+    * NOTE: the constructor does not fully initialize the machine!  You must also execute setDocument, setFirstDoc, 
+    * setPosition, and setFindWord
     * @param model the model
     * @param docIterator an object that allows navigation through open Swing documents (it is DefaultGlobalModel)
     * @param frame the frame
@@ -95,7 +97,7 @@ public class FindReplaceMachine {
     setFindAnyOccurrence();
     setFindWord("");
     setReplaceWord("");
-    setSearchBackwards(false);
+    setSearchBackwards(false);  // What a ridiculous way to initialize _isForward !!!
     setMatchCase(true);
     setSearchAllDocuments(false);
     setSearchSelectionOnly(false);
@@ -260,87 +262,6 @@ public class FindReplaceMachine {
     * @param s selected region
     */
   public void setSelection(MovingDocumentRegion s) { _selectionRegion = s; }
-
-//  /** Alternative interface for the private method replaceAll(...) 
-//    * @return the number of replacements */
-//  public int replaceAll() { return replaceAll(_searchAllDocuments, _searchSelectionOnly); }
-//  
-//  /** Replaces all occurences of the find word with the replace word
-//    * (i)   in the current document or 
-//    * (ii)  in all documents or 
-//    * (iii) in the current selection of the current document 
-//    * (depending the value of the flags searchAll and searchSelectionOnly)  
-//    * @return the number of replacements
-//    * private method that is ONLY called in public method replaceAll()
-//    */
-//  private int replaceAll(boolean searchAll, boolean searchSelectionOnly) {
-//    
-//    assert EventQueue.isDispatchThread();
-//    
-//    if (searchAll) {
-//      int count = 0;           // the number of replacements done so far
-//      int n = _docIterator.getDocumentCount();
-//      for (int i = 0; i < n; i++) {
-//        // replace all in the rest of the documents
-//        count += _replaceAllInCurrentDoc(false);
-//        _doc = _docIterator.getNextDocument(_doc, _frame);
-//        
-//        if (_doc == null) break;
-//      }
-//      
-//      // update display (adding "*") in navigatgorPane
-//      _model.getDocumentNavigator().repaint();
-//      
-//      return count;
-//    }
-//    else if (searchSelectionOnly) {
-//      int count = 0;
-//      count += _replaceAllInCurrentDoc(searchSelectionOnly);
-//      return count;
-//    }
-//    else 
-//      return _replaceAllInCurrentDoc(false);
-//  }
-//  
-//  /** Replaces all occurences of _findWord with _replaceWord in _doc. Never searches in other documents.  Starts at
-//    * the beginning or the end of the document (depending on find direction).  This convention ensures that matches 
-//    * created by string replacement will not be replaced as in the following example:<p>
-//    *   findString:    "hello"<br>
-//    *   replaceString: "e"<br>
-//    *   document text: "hhellollo"<p>
-//    * Depending on the cursor position, clicking replace all could either make the document text read "hello" 
-//    * (which is correct) or "e".  This is because of the behavior of findNext(), and it would be incorrect
-//    * to change that behavior.  Only executes in event thread.
-//    * @param searchSelectionOnly true if we should only search in the current selection of documents
-//    * @return the number of replacements
-//    */
-//  private int _replaceAllInCurrentDoc(boolean searchSelectionOnly) {
-//    
-//    assert EventQueue.isDispatchThread();
-//    
-//    if (! searchSelectionOnly) {
-//      _selectionRegion = new MovingDocumentRegion(_doc, 0, _doc.getLength(),
-//                                                  _doc._getLineStartPos(0),
-//                                                  _doc._getLineEndPos(_doc.getLength()));
-//    }
-//    /* _selectionRegion is not degenerate unless document is degenerate; may be entire document. */
-//    if (_isForward) setPosition(_selectionRegion.getStartOffset());
-//    else setPosition(_selectionRegion.getEndOffset());
-//    
-//    int count = 0;
-//    FindResult fr = findNext(false);  // find next match in current doc   
-//    //  Utilities.show(fr + " returned by call on findNext()");
-//    
-//    while (!fr.isWrapped() && fr.getFoundOffset() <= _selectionRegion.getEndOffset()) {
-//      replaceCurrent();
-//      count++;
-//      //  Utilities.show("Found " + count + " occurrences. Calling findNext() inside loop");
-//      fr = findNext(false);           // find next match in current doc
-//      //  Utilities.show("Call on findNext() returned " + fr.toString() + "in doc '" + 
-//      //    _doc.getText().substring(0,fr.getFoundOffset()) + "[|]" + _doc.getText().substring(fr.getFoundOffset()) + "'");
-//    }
-//    return count;
-//  }
   
   /** Replaces all occurrences of the find word with the replace word in the specified region while performing the
     * which occurs within the current document.  On each match, the findAction command is executed, assuming that
@@ -487,17 +408,15 @@ public class FindReplaceMachine {
   }
   
   
-  /** Finds next match in specified doc only.  If searching forward, len must 
-   * be doc.getLength().  If searching backward, start must be 0.  If 
-   * searchAll, suppress executing in-document wrapped search, because it 
-   * must be deferred.  Only runs in the event thread.  Note than this method 
-   * does a wrapped search if specified search fails.
-   * @param doc the document to search in
-   * @param start the start offset for searching
-   * @param len the length to search
-   * @param searchAll flao
-   * @return the next match in the specified document
-   */
+  /** Finds next match in specified doc only.  If searching forward, len must be doc.getLength().  If searching 
+    * backward, start must be 0.  If searchAll, suppress executing in-document wrapped search, because it must be 
+    * deferred.  Only runs in the event thread.  Note than this method does a wrapped search if specified search fails.
+    * @param doc the document to search in
+    * @param start the start offset for searching
+    * @param len the length to search
+    * @param searchAll flao
+    * @return the next match in the specified document
+    */
   private FindResult _findNextInDoc(OpenDefinitionsDocument doc, int start, int len, boolean searchAll) {
     
     assert EventQueue.isDispatchThread();
@@ -615,16 +534,15 @@ public class FindReplaceMachine {
 //       if (wrapped && allWrapped) Utilities.show("Executing loop with findWord = " + findWord + "; text = " + text +
 //          "; len = " + len);     
         
-        // loop to find first valid (not ignored) occurrence of findWord
-        // loop carried variables are rem, foundOffset; 
-        // loop invariant variables are _doc, docLen, _isForward, findWord, wordLen, start, len.
-        // Invariant:  on forwardsearch, foundOffset + rem == len; on backward search foundOffset == rem.
-        // loop exits by returning match (as FindResult) or by falling through with no match.
-        // if match is returned, _current has been updated to match location
+        /* Loop to find first valid (not ignored) occurrence of findWord.  The loop-carried variables are rem, 
+         * foundOffset; the loop invariant variables are _doc, docLen, _isForward, findWord, wordLen, start, len.
+         * Invariant:  on forwardsearch, foundOffset + rem == len; on backward search foundOffset == rem.
+         * The loop exits by returning match (as FindResult) or by falling through with no match.  If match is returned,
+         * _current has been updated to match location */
         int foundOffset = _isForward? 0 : len;
         int rem = len;
-//      _log.log("Starting search loop; text = '" + text + "' findWord = '" + findWord + "' forward? = " + _isForward +
-//         " rem = " + rem + " foundOffset = " + foundOffset);
+        _log.log("Starting search loop; text = '" + text + "' findWord = '" + findWord + "' forward? = " + _isForward +
+                 " rem = " + rem + " foundOffset = " + foundOffset);
         while (rem >= wordLen) {
           
           // Find next match in text

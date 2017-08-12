@@ -57,7 +57,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
   */
 public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
   
-  public static final Log _log  = new Log("GlobalModel.txt", true);
+  public static final Log _log  = new Log("GlobalModel.txt", false);
   
   private static final String FOO_MISSING_VAR_KEYWORD = "class DrScalaTestFoo { yy }";
   private static final String BAR_MISSING_DECLARATION_KEYWORD = "class DrScalaTestBar { zz }";

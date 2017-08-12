@@ -93,15 +93,14 @@ public class JUnitTestManager {
     _loaderFactory = loaderFactory;
   }
   
-  /** Find the test classes among the given classNames and accumulate them in
-    * TestSuite for junit.  Returns null if a test suite is already pending.
+  /** Find the test classes among the given classNames and accumulate them in TestSuite for junit.  Returns null if a 
+    * test suite is already pending.
     * @param classNames the class names that are test class candidates
     * @param files the files corresponding to classNames
     */
   public List<String> findTestClasses(final List<String> classNames, final List<File> files) {
 //    debug.logStart(new String[]{"classNames", "files"}, classNames, files);
     _log.log("findTestClasses(" + classNames + ", " + files + ")");
-//    Utilities.show("findTestClasses(" + classNames + ", " + files + ")");
     
     if (_testClassNames != null && ! _testClassNames.isEmpty()) 
       throw new IllegalStateException("Test suite is still pending!");

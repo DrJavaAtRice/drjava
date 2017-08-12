@@ -1152,7 +1152,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     
     _log.log("+++Starting testSaveClearAndLoadHistory+++");
     String newLine = StringOps.EOL;
-    final InteractionListener listener = new InteractionListener();
+    final InteractionsTestListener listener = new InteractionsTestListener();
     
     _model.addListener(listener);
     File f = tempFile();
@@ -1244,7 +1244,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     
     _log.log("+++Starting testLoadHistoryWithAndWithoutSemicolons");
     
-    final InteractionListener listener = new InteractionListener();
+    final InteractionsTestListener listener = new InteractionsTestListener();
     _model.addListener(listener);
     final File f1 = tempFile(1);
     final File f2 = tempFile(2);

@@ -144,11 +144,6 @@ public class MainFrameStatics {
   }
   
   
-  /* Debugger deactivated in DrScala */
-//  public static void showDebugError(Component parent, DebugException de) {
-//    showError(parent, de, "Debug Error", "A Debugger error occurred in the last operation.\n\n");
-//  }
-  
   public static void showJUnitInterrupted(Component parent, UnexpectedException e) {
     showWarning(parent, e.getCause(), "JUnit Testing Interrupted", 
                 "The slave JVM has thrown a RemoteException probably indicating that it has been reset.\n\n");

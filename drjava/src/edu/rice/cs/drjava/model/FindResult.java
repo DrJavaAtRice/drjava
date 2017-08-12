@@ -36,8 +36,7 @@
 
 package edu.rice.cs.drjava.model;
 
-/** Returned to FindMachineDialog with the location of the found string
-  * (or -1 if the string was not found) as well as a flag indicating
+/** Return object with the location of the found string (-1 if the string was not found) as well as a flag indicating 
   * whether the machine wrapped around the end of the document.
   *
   * @version $Id: FindResult.java 5594 2012-06-21 11:23:40Z rcartwright $
@@ -49,11 +48,11 @@ public class FindResult {
   private boolean _allWrapped;
   
   /** Constructor for a FindResult.
-   * @param document the document where the found instance is located
-   * @param foundoffset the offset of the instance found
-   * @param wrapped {@code true} if the search wrapped to the beginning (or end) of the document
-   * @param allWrapped {@code true} if the search wrapped to the start document
-   */
+    * @param document the document where the found instance is located
+    * @param foundoffset the offset of the instance found
+    * @param wrapped {@code true} if the search wrapped to the beginning (or end) of the document
+    * @param allWrapped {@code true} if the search wrapped to the start document
+    */
   public FindResult(OpenDefinitionsDocument document, int foundoffset, boolean wrapped, boolean allWrapped) {
     _document = document;
     _foundoffset = foundoffset;

@@ -58,10 +58,12 @@ import java.util.jar.JarEntry;
 import javax.swing.JOptionPane;
 
 import edu.rice.cs.drjava.config.BooleanOption;
-import edu.rice.cs.drjava.model.GlobalModel;
-import edu.rice.cs.drjava.model.FileMovedException;
-import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.DrScalaFileUtils;
+import edu.rice.cs.drjava.model.FileMovedException;
+import edu.rice.cs.drjava.model.FindReplaceMachine;
+import edu.rice.cs.drjava.model.FindResult;
+import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
+import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.model.repl.newjvm.MainJVM;
 import edu.rice.cs.drjava.model.compiler.CompilerModel;
 import edu.rice.cs.drjava.model.compiler.CompilerListener;
@@ -108,8 +110,8 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     */
   private final CompilerModel _compilerModel;
   
-  /** The global model to which the JUnitModel belongs */
-  private final GlobalModel _model;
+  /** The global model to which the JUnitModel belongs. Typed as SingleDisplayModel to access FindReplaceMachine */
+  private final SingleDisplayModel _model;
   
   /** The error model containing all current JUnit errors. */
   private volatile JUnitErrorModel _junitErrorModel;
@@ -130,7 +132,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     * @param compilerModel the CompilerModel, used only as a lock to prevent simultaneous test and compile
     * @param model used only for getSourceFile
     */
-  public DefaultJUnitModel(MainJVM jvm, CompilerModel compilerModel, GlobalModel model) {
+  public DefaultJUnitModel(MainJVM jvm, CompilerModel compilerModel, SingleDisplayModel model) {
     _jvm = jvm;
     _compilerModel = compilerModel;
     _model = model;
@@ -186,40 +188,20 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     junitOpenDefDocs(lod, true);
   }
   
-//  /** Forwards the classnames and files to the test manager to test all of them; does not notify 
-//    * since we don't have ODD's to send out with the notification of junit start.
-//    * @param qualifiedClassnames a list of all the qualified class names to test.
-//    * @param files a list of their source files in the same order as qualified class names.
-//    */
-//  public void junitClasses(List<String> qualifiedClassnames, List<File> files) {
-//    Utilities.showDebug("junitClasses(" + qualifiedClassnames + ", " + files);
-//    synchronized(_compilerModel.getCompilerLock()) {
-//      
-//      // Check _testInProgress 
-//      if (_testInProgress) return;
-//      
-//      List<String> testClasses;
-//      try { testClasses = _jvm.findTestClasses(qualifiedClassnames, files); }
-//      catch(IOException e) { throw new UnexpectedException(e); }
-//      
-////      _log.log("Found test classes: " + testClasses);
-//      
-//      if (testClasses.isEmpty()) {
-//        nonTestCase(true);
-//        return;
-//      }
-//      _notifier.junitClassesStarted();
-//      _testInProgress = true;
-//      try { _jvm.runTestSuite(); } 
-//      catch(Exception e) {
-////        _log.log("Threw exception " + e);
-//        _notifier.junitEnded();
-//        _testInProgress = false;
-//        throw new UnexpectedException(e); 
-//      }
-//    }
-//  }
-  
+  /** Determines if className appears as an identifier in the open documents. */
+  private boolean appearsInSourceText(String className, FindReplaceMachine frm) {
+    _log.log("***appearsInSourceText(" + className + ", " + frm + ")");
+    OpenDefinitionsDocument doc = _model.getActiveDocument();
+    frm.setDocument(doc);
+    frm.setFirstDoc(doc);
+    frm.setPosition(doc.getCurrentLocation());
+    frm.setFindWord(className);
+    frm.setIgnoreCommentsAndStrings(true);
+    FindResult match = frm.findNext();
+    _log.log("Matching result = " + match);
+    return (match.getFoundOffset() != -1);
+  }
+    
   public void junitDocs(List<OpenDefinitionsDocument> lod) { junitOpenDefDocs(lod, true); }
   
   /** Runs JUnit on the current document.  Forces the user to compile all open documents before proceeding. */
@@ -257,13 +239,12 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     
     // Reset the JUnitErrorModel, fixes bug #907211 "Test Failures Not Cleared Properly".
     _junitErrorModel = new JUnitErrorModel(new JUnitError[0], null, false);
-
     _log.log("Retrieved JUnit error model.  outOfSync = " +  _model.getOutOfSyncDocuments(lod));
+    
     final List<OpenDefinitionsDocument> outOfSync = _model.getOutOfSyncDocuments(lod);
-//    Utilities.show("Out of sync documents = " + outOfSync);
-    _log.log("outOfSync = " + outOfSync);    
+//    Utilities.show("Out of sync documents = " + outOfSync);  
     if ((outOfSync.size() > 0) || _model.hasModifiedDocuments(lod)) {
-      /* hasOutOfSyncDocuments(lod) can return false when some documents have not been successfully compiled; the 
+      /* hasModifiedDocuments(lod) can return false when some documents have not been successfully compiled; the 
        * granularity of time-stamping and the presence of multiple classes in a file (some of which compile 
        * successfully) can produce false reports.  */
       _log.log("Out of sync documents exist");
@@ -312,10 +293,14 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   }
   
   /** Runs all TestCases in the document list lod; assumes all documents have been compiled. It finds the TestCase 
-    * classes by searching the build directories for the documents.  Note: caller must respond to thrown exceptions 
+    * classes by searching the build directories for the documents.  In flat file mode, the build directory may contain 
+    * class files that have not been generated by compiling the open documents.  To heuristically avoid running these 
+    * tests, this method confirms that the name of all test classes appear as identififers in a source document.
+    * Note: caller must respond to thrown exceptions 
     * by invoking _junitUnitInterrupted (to run hourglassOff() and reset the unit testing UI).
     */
   private void _rawJUnitOpenDefDocs(List<OpenDefinitionsDocument> lod, final boolean allTests) {
+    _log.log("_rawJUnitOpenDefDocs(" + lod + ", " + allTests);
     File buildDir = _model.getBuildDirectory();
     _log.log("Running JUnit tests. Build directory is " + buildDir);
     
@@ -327,8 +312,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
       */
     HashMap<File, File> classDirsAndRoots = new HashMap<File, File>();
     
-    // Initialize openDocFiles and classDirsAndRoots
-    // All packageNames should be valid because all source files are compiled
+    // Initialize openDocFiles and classDirsAndRoots; all packageNames should be OK because all source files are compiled
     
     for (OpenDefinitionsDocument doc: lod) /* for all nonEmpty documents in lod */ {
       if (doc.isSourceFile())  { // excludes Untitled documents and open non-source files
@@ -376,6 +360,9 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     /* Flag indicating if project is open */
     boolean isProject = _model.isProjectActive();
     
+    /* Set up FindReplaceMachine to search open definitions documents. */
+    final FindReplaceMachine frm = new FindReplaceMachine(_model, _model.getDocumentIterator(), null);
+    
     try {
       for (File dir: classDirs) { // foreach class file directory
         _log.log("Examining directory " + dir);
@@ -393,17 +380,22 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
             String name = entry.getName();
             if (! name.endsWith(".class")) continue;
             
+            String noExtName = name.substring(0, name.length() - 6);  // remove ".class" from name
+            int indexOfLastDot = noExtName.lastIndexOf('.');
+            String simpleClassName = noExtName.substring(indexOfLastDot + 1);
+            
             /* Ignore class names that do not end in "Test" if FORCE_TEST_SUFFIX option is set */
             if (_forceTestSuffix) {
-              String noExtName = name.substring(0, name.length() - 6);  // remove ".class" from name
-              int indexOfLastDot = noExtName.lastIndexOf('.');
-              String simpleClassName = noExtName.substring(indexOfLastDot + 1);
-            _log.log("Simple class name is " + simpleClassName);  
+              _log.log("Simple class name is " + simpleClassName);  
               if (/*isProject &&*/ ! simpleClassName.endsWith("Test")) continue;
             }
             
             /* ignore entries that do not correspond to files?  Can this happen? */
             if (! entry.isFile()) continue;
+            
+            /* In flat file mode, ignore files that are not named in a source document. */
+            if (! isProject && ! appearsInSourceText(simpleClassName, frm)) continue;
+            _log.log("isProject = " + isProject + "; name = " + name);
             
             _log.log("Found test class: " + name);
             

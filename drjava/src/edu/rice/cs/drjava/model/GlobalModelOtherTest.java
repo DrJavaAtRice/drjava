@@ -121,7 +121,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
 //    debug.logStart();
     _log.log("Starting testExitInteractions");
         
-    final InteractionListener listener = new InteractionListener(); /*{
+    final InteractionsTestListener listener = new InteractionsTestListener(); /*{
       
       public void consoleReset() { consoleResetCount++; }
     }; */
@@ -137,7 +137,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     
 //    listener.assertConsoleResetCount(0);
     listener.assertInteractionStartCount(1);
-    listener.assertInterpreterResettingCount(1);
+//    listener.assertInterpreterResettingCount(1);
     listener.assertInterpreterReadyCount(1);
     listener.assertInterpreterExitedCount(1);
     assertEquals("exit status", 23, listener.getLastExitStatus());

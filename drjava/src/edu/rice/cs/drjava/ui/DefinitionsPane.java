@@ -144,15 +144,6 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     * Keep in mind that, while the array is volatile, the elements inside of it are not! */
   static volatile int[] FIND_RESULTS_PAINTERS_USAGE = new int[FIND_RESULTS_COLORS.length];
 
-  /* Debugger deactivated in DrScala */
-//  /** Highlight painter for breakpoints. */
-//  static volatile ReverseHighlighter.DrScalaHighlightPainter BREAKPOINT_PAINTER =
-//    new ReverseHighlighter.DrScalaHighlightPainter(DrScala.getConfig().getSetting(DEBUG_BREAKPOINT_COLOR));
-//
-//  /** Highlight painter for disabled breakpoints. */
-//  static volatile ReverseHighlighter.DrScalaHighlightPainter DISABLED_BREAKPOINT_PAINTER =
-//    new ReverseHighlighter.DrScalaHighlightPainter(DrScala.getConfig().getSetting(DEBUG_BREAKPOINT_DISABLED_COLOR));
-
   /* Used in non-debug code. */
   /** Highlight painter for thread's current location. */
   static volatile ReverseHighlighter.DrScalaHighlightPainter THREAD_PAINTER =

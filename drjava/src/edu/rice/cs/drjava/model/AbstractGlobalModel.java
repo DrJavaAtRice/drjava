@@ -2232,8 +2232,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   private OpenDefinitionsDocument getNextDocHelper(OpenDefinitionsDocument nextdoc, Component frame) {
     if ( nextdoc.isUntitled() || nextdoc.verifyExists()) return nextdoc;
     // Note: verifyExists prompts user for location of the file if it is not found
-    int rc = JOptionPane.showConfirmDialog(frame, "Files not found, continue to next document?", "Continue?",
-                                           JOptionPane.YES_NO_OPTION); 
+    int rc = 
+      JOptionPane.showConfirmDialog(frame, "No valid document found (supported by a file), continue to next document?", 
+                                    "Continue?", JOptionPane.YES_NO_OPTION); 
     if (rc == JOptionPane.NO_OPTION)
       return null;
     // cannot find nextdoc; move on to next document
