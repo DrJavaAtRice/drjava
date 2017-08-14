@@ -61,6 +61,8 @@ public class DrScalaInterpreter implements Interpreter {
     */
   final private Pattern scalaColonCmd = Pattern.compile("^\\s*:.*$");
 
+  final private String scalaPrompt = System.getProperty("line.separator") + "scala> ";
+
   /* Flag that records whether the interpreter has been initialized */
   private volatile boolean _isInitialized = false;
 
@@ -166,7 +168,7 @@ public class DrScalaInterpreter implements Interpreter {
        * ILoop sends over upon construction.
        */
       s = outputStrings.take();
-      while (! s.equals("\nscala> ")) s = outputStrings.take();
+      while (! s.equals(scalaPrompt)) s = outputStrings.take();
     }
     catch(InterruptedException ie) { 
       /* should never happen. */
@@ -242,7 +244,7 @@ public class DrScalaInterpreter implements Interpreter {
       _log.log("First line of returned output is " + s);
       
       /* if the prompt or continuation string is returned, we're done */
-      if (s.equals("\nscala> ")) return "";
+      if (s.equals(scalaPrompt)) return "";
       if (s.equals("     | "))   return s;
       
       /* Otherwise, we keep taking strings from the return queue until the prompt is encountered.
@@ -253,7 +255,7 @@ public class DrScalaInterpreter implements Interpreter {
       StringBuilder returnString = new StringBuilder(s);
       while (true) {
         s = outputStrings.take();
-        if (s.equals("\nscala> ")) break;
+        if (s.equals(scalaPrompt)) break;
         returnString.append(s);
       }
       return returnString.toString();
