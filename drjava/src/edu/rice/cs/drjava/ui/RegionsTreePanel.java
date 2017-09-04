@@ -158,7 +158,7 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
     _closePanel.add(_closeButton, BorderLayout.NORTH);
     
     _leftPane = new JPanel(new BorderLayout());
-    _setupRegionTree();
+    _setUpRegionTree();
     
     this.add(_leftPane, BorderLayout.CENTER);
     
@@ -166,7 +166,7 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
 
 //    _lastChangeTime = _frame.getLastChangeTime();
     
-    _setupButtonPanel();
+    _setUpButtonPanel();
     this.add(_buttonPanel, BorderLayout.EAST);
     updateButtons();
     
@@ -261,7 +261,7 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
   }
   
   /** Creates the region tree. */
-  private void _setupRegionTree() {
+  private void _setUpRegionTree() {
     _rootNode = new DefaultMutableTreeNode(_title);
     _regTreeModel = new DefaultTreeModel(_rootNode);
     _regTree = new RegionTree(_regTreeModel);
@@ -485,7 +485,7 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
   protected JComponent[] makeButtons() {  return new JComponent[0];  }
   
   /** Creates the buttons for controlling the regions. */
-  private void _setupButtonPanel() {
+  private void _setUpButtonPanel() {
     JPanel mainButtons = new JPanel();
     JPanel emptyPanel = new JPanel();
     JPanel closeButtonPanel = new JPanel(new BorderLayout());

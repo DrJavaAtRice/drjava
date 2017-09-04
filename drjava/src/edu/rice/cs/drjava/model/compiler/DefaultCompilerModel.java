@@ -231,6 +231,7 @@ public class DefaultCompilerModel implements CompilerModel {
   }
   
   /** Check that there are no unsaved or untitled files currently open.
+    * Reset interactions (so it runs simultaneously with compilation)
     * @return  @code{true} iff compilation should continue
     */
   private boolean _prepareForCompile() {

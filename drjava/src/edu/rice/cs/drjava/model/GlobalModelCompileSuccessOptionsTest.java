@@ -59,8 +59,8 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
     */
   public void testCompileReferenceToNonPublicClass() throws BadLocationException, IOException, InterruptedException {
     _log.log("+++Starting testCompileReferenceToNonPublicClass()");
-    OpenDefinitionsDocument doc = setupDocument(FOO_NON_PUBLIC_CLASS_TEXT);
-    OpenDefinitionsDocument doc2 = setupDocument(FOO2_REFERENCES_NON_PUBLIC_CLASS_TEXT);
+    OpenDefinitionsDocument doc = setUpDocument(FOO_NON_PUBLIC_CLASS_TEXT);
+    OpenDefinitionsDocument doc2 = setUpDocument(FOO2_REFERENCES_NON_PUBLIC_CLASS_TEXT);
     final File file = tempFile();
     final File file2 = tempFile();
     saveFile(doc, new FileSelector(file));
@@ -105,7 +105,7 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
     // Only run this test if using a compiler with generics
     if (_isGenericCompiler()) {
       
-      OpenDefinitionsDocument doc = setupDocument(FOO_WITH_GENERICS);
+      OpenDefinitionsDocument doc = setUpDocument(FOO_WITH_GENERICS);
       final File file = new File(_tempDir, "DrScalaTestFooGenerics.scala");
       saveFile(doc, new FileSelector(file));
       
@@ -136,11 +136,11 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
     File bDir = new File(_tempDir, "b");
     aDir.mkdir();
     bDir.mkdir();
-    OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
+    OpenDefinitionsDocument doc = setUpDocument(FOO_TEXT);
     final File file1 = new File(aDir, "DrScalaTestFoo.scala");
     saveFile(doc, new FileSelector(file1));
     _log.log("Saved document as file DrScalaTestFoo.scala");
-    OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
+    OpenDefinitionsDocument doc2 = setUpDocument(BAR_TEXT);
     final File file2 = new File(bDir, "DrScalaTestBar.scala");
     saveFile(doc2, new FileSelector(file2));
     _log.log("Saved document as file DrScalaTestBar.scala");

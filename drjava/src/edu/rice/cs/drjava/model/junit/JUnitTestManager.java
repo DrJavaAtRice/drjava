@@ -107,11 +107,15 @@ public class JUnitTestManager {
     
     _testRunner = makeRunner();
     
+    _log.log("Test runner = " + _testRunner);
+    
     _testClassNames = new ArrayList<String>();
     _testFiles = new ArrayList<File>();
     _suite = new TestSuite();
+    Iterable<Pair<String, File>> pairs = IterUtil.zip(classNames, files);
+    _log.log("Test case pairs = " + pairs);
     
-    for (Pair<String, File> pair : IterUtil.zip(classNames, files)) {
+    for (Pair<String, File> pair : pairs) {
       String cName = pair.first();
       try {
         Class<?> possibleTest = _testRunner.loadPossibleTest(cName); 

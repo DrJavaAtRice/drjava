@@ -613,7 +613,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     _optionalComponents = makeOptions();
     if (_optionalComponents.length > 0) {
       _optionsPanel = new JPanel(new BorderLayout());
-      _setupOptionsPanel(_optionalComponents);
+      _setUpOptionsPanel(_optionalComponents);
       contentPane.add(_optionsPanel, c);
     }
     
@@ -656,7 +656,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
   }
   
   /** Creates the panel with the optional components. */
-  private void _setupOptionsPanel(JComponent[] components) {
+  private void _setUpOptionsPanel(JComponent[] components) {
     JPanel mainButtons = new JPanel();
     JPanel emptyPanel = new JPanel();
     GridBagLayout gbLayout = new GridBagLayout();

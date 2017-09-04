@@ -184,11 +184,11 @@ public final class InteractionsPaneTest extends DrScalaTestCase {
   public void testCaretStaysAtEndDuringInteraction() throws EditDocumentException {
 //    System.err.println("start caret pos = " + _pane.getCaretPosition());
 //    System.err.println("start prompt pos = " + _doc.getPromptPos());
-    _doc.setInProgress(true);
+    _doc.setInteractionInProgress(true);
 //    System.err.println(_pane.getCaretPosition());
     _model.replSystemOutPrint("simulated output");
     Utilities.clearEventQueue();
-    _doc.setInProgress(false);
+    _doc.setInteractionInProgress(false);
 //    System.err.println("caret pos = " + _pane.getCaretPosition());
 //    System.err.println("prompt pos = " + _doc.getPromptPos());
 //    System.err.println("Document = |" + _doc.getDocText(0, _doc.getLength()) + "|");
@@ -396,90 +396,5 @@ public final class InteractionsPaneTest extends DrScalaTestCase {
         assertEquals("Didn't Undo original typing and SHIFT_ENTER call", oldText, _doc.getText());
       }
     });
-  }                
-  // NOT USED
-//  /** Fields used in a closure in testPromptList */
-//  private volatile int _firstPrompt, _secondPrompt, _size;
-//  private volatile boolean _resetDone;
-//  
-//  public void testPromptListClearedOnReset() throws Exception {
-//    // Can't use the fields declared in setUp; we need a real InteractionsModel
-//    final MainFrame _mf = new MainFrame();
-//    final Object _resetLock = new Object();
-//    
-//    Utilities.clearEventQueue();
-//    GlobalModel gm = _mf.getModel();
-//    _controller = _mf.getInteractionsController();
-//    _model = gm.getInteractionsModel();
-//    _adapter = gm.getSwingInteractionsDocument();
-//    _doc = gm.getInteractionsDocument();
-//    _pane = _mf.getInteractionsPane();
-//    
-//    Utilities.invokeAndWait(new Runnable() { public void run() { _pane.resetPrompts(); } });
-//    
-//    Utilities.clearEventQueue();
-//
-////    System.err.println(_pane.getPromptList());
-//    assertEquals("PromptList before insert should contain 0 elements", 0, _pane.getPromptList().size());
-//        
-//    // Insert some text 
-//    _doc.append("5", InteractionsDocument.NUMBER_RETURN_STYLE);
-//
-//    Utilities.invokeAndWait(new Runnable() { public void run() { _pane.setCaretPosition(_doc.getLength()); } });
-////    System.err.println(_pane.getPromptList());
-//    
-//    Utilities.clearEventQueue();
-//    
-//    assertEquals("PromptList after insert should contain 1 element", 1, _pane.getPromptList().size());    
-//    assertEquals("First prompt should be saved as being at position",
-//                 _model.getStartUpBanner().length() + InteractionsDocument.DEFAULT_PROMPT.length(),
-//                 (int)_pane.getPromptList().get(0)); //needs cast to prevent ambiguity
-//    
-//    _doc.insertPrompt();
-//    Utilities.clearEventQueue();
-//    
-//    assertEquals("PromptList has length 2", 2, _pane.getPromptList().size());
-//    
-//    Utilities.invokeAndWait(new Runnable() {
-//      public void run() { 
-//        _pane.setCaretPosition(_doc.getLength());
-//        _firstPrompt = (int) _pane.getPromptList().get(0); // cast prevents ambiguity
-//        _secondPrompt = (int) _pane.getPromptList().get(1); // cast prevents ambiguity
-//      }
-//    });
-//    
-//    assertEquals("PromptList after insertion of new prompt should contain 2 elements", 2, _pane.getPromptList().size());
-//    assertEquals("First prompt should be saved as being at position",
-//                 _model.getStartUpBanner().length() + InteractionsDocument.DEFAULT_PROMPT.length(),
-//                 _firstPrompt); 
-//    assertEquals("Second prompt should be saved as being at position",
-//                 _model.getStartUpBanner().length() + InteractionsDocument.DEFAULT_PROMPT.length() * 2 + 1,
-//                 _secondPrompt); 
-//    
-//    synchronized(_resetLock) { _resetDone = false; }
-//    _model.addListener(new DummyInteractionsListener() {
-//      public void interpreterReady(File wd) {
-//        synchronized(_resetLock) {
-//          _resetDone = true;
-//          _resetLock.notifyAll();
-//        }
-//      }});
-//      
-////    System.err.println("Executing reset interpreter");  
-//    _model.resetInterpreter(FileOption.NULL_FILE);
-//    Utilities.clearEventQueue();
-// 
-//    /* Wait until reset has finished. Reset is started just before interpreterReady notification. */
-//    synchronized(_resetLock) { while (! _resetDone) _resetLock.wait(); }
-//    Utilities.clearEventQueue();
-// 
-//    // wait until the reset operation (which is queued ahead of us) has grabbed the WriteLock
-//    Utilities.invokeAndWait(new Runnable() { public void run() {  _size = _pane.getPromptList().size(); } });
-//      
-//    Utilities.clearEventQueue();
-////    System.err.println("PromptList for pane " + _pane.hashCode() + " is " + _pane.getPromptList());
-//    
-//    assertEquals("PromptList after reset should contain one element", 1, _size);
-//  }
-  
+  }               
 }

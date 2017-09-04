@@ -84,7 +84,7 @@ public final class ProjectMenuTest extends DrScalaTestCase {
     * @throws Exception  This convention is mandated by the JUnit TestClass which is an ancestor of this class. 
     */
   public void setUp() throws Exception {
-    // Perform Swing setup in event thread because the event thread is ALREADY running
+    // Perform Swing setUp in event thread because the event thread is ALREADY running
     superSetUp(); // super.setUp() should be called first; contains an embedded invokeAndWait
     
     Utilities.invokeAndWait(new Runnable() {

@@ -38,18 +38,23 @@ package edu.rice.cs.drjava.model.repl;
 
 import java.io.File;
 
+import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.plt.concurrent.CompletionMonitor;
 
-//TODO: this class should be renamed NullInteractionsListener as should all of the other "dummy" classes.  
-/** An InteractionsListener that does nothing other than support a waitUntilDone method that blocks until
-  * interpreterReady is called.
-  *  @version $Id: DummyInteractionsListener.java 5594 2012-06-21 11:23:40Z rcartwright $
+/** An extension of InteractionsListener that adds support for a completion monitor accessed by the method 
+  * waitResetDone().  The waitResetDone method blocks if interpreterResetting() has been called and interpreterReady() 
+  * has not yet been  called since interpreterResetting() was called.  This class is extended by many other listener 
+  * classes (both anonymous and named).  The extra method waitResetDone() must NOT run in the event thread in contrast 
+  * to all methods in the InteractionsListener interface.
+  * @version $Id: DefaultInteractionsListener.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
-public class DummyInteractionsListener implements InteractionsListener {
+public class DefaultInteractionsListener implements InteractionsListener {
   
-  private static final int WAIT_TIMEOUT = 10000; // time to wait for _interactionDone or _resetDone 
-  public CompletionMonitor _resetDone = new CompletionMonitor();
+  public static final Log _log = new Log("GlobalModel.txt", false);
+  
+  private static final int WAIT_TIMEOUT = 20000; // time to wait for _interactionDone or _restartDone 
+  private CompletionMonitor _resetDone = new CompletionMonitor(true);
   
   /** Called after an interaction is started by the GlobalModel.  */
   public void interactionStarted() { }
@@ -58,17 +63,24 @@ public class DummyInteractionsListener implements InteractionsListener {
   public void interactionEnded() { }
   
   /** Called when the interactions window generates a syntax error.
-   * @param offset the error's offset into the InteractionsDocument
-   * @param length the length of the error
-   */
+    * @param offset the error's offset into the InteractionsDocument
+    * @param length the length of the error
+    */
   public void interactionErrorOccurred(int offset, int length) { }
 
-  /** Called when the interactionsJVM has begun resetting. */
-  public void interpreterResetting() { }
+  /** Activate the completion monitor for a reset. NOTE: this only needs to be done when slave jvm is restarted.*/
+  public void interpreterResetting() { 
+    _resetDone.raise();
+    _log.log("_resetDone.raise() called; after call, _resetDone.isTrue() = " + _resetDone.isTrue() + 
+             "; _resetDone = " + _resetDone);
+  }
   
-  /** Called when the interactions window is reset. */
-//  public void interpreterReady(File wd) { interpreterReady(); }
-  public void interpreterReady() { _resetDone.signal(); } 
+  /** Called when the interactions window has been reset. */
+  public void interpreterReady() { 
+    _resetDone.signal();
+    _log.log("_resetDone.signal() called; after call, _resetDone.isTrue() = " + _resetDone.isTrue() +
+             "; _resetDone = " + _resetDone);
+  } 
   
   /** Called when the interactions JVM was closed by System.exit or by being aborted. Immediately after this the 
     * interactions pane typically is reset.
@@ -79,21 +91,22 @@ public class DummyInteractionsListener implements InteractionsListener {
   /** Called if the interpreter reset failed. (Subclasses must maintain listeners.) */
   public void interpreterResetFailed(Throwable t) { }
   
-//  /** Called when the active interpreter is changed.
-//   * @param inProgress Whether the new interpreter is currently processing an interaction (i.e. whether an 
-//   * interactionEnded event will be fired)
-//   */
-//  public void interpreterReplaced() { }
-
   /** Called when enter was typed in the interactions pane but the interaction was incomplete. */
   public void interactionIncomplete() { }
   
-  /* Waits until interpreterReady has been called and resets the completion monitor when that event happens. */
+  /** Extra method not in InteractionsListener interface */
+  
+  /** Waits until flag in _resetDone is true.  If flag has been raised (set to false), this means waiting until 
+   * interpreterReady has been called.  Resets the CompletionMonitor flag to true. */
   public void waitResetDone() {
-    boolean wasDone = _resetDone.attemptEnsureSignaled(WAIT_TIMEOUT);
-    if (! wasDone) 
+    _log.log("In DefaultInteractionsListener.waitRestDone, waiting for _resetDone flag to be true or signalled; _resetDone = " +
+             _resetDone);
+    boolean wasDone = _resetDone.attemptEnsureSignaled(WAIT_TIMEOUT);  // resets the flag to true
+    _log.log("Did signal occur in DefaultInteractionsListener? " + wasDone);
+    if (! wasDone) {
       throw new UnexpectedException("Interactions pane failed to reset within " + WAIT_TIMEOUT + " milliseconds");
-    _resetDone.reset();  // 
+    }
+    _log.log("wait in DefaultInteractionsListener is complete");
   }
 }
 

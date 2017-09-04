@@ -49,7 +49,7 @@ package edu.rice.cs.util.swing;
   * <p>
   * The <code>runAsync</code> method is given a progress monitor in order for the task to provide feedback to the user 
   * as to the progress of the task. The min and max values for the progress are specified by the 
-  * <code>getMinProgress</code> and <code>getMaxProgress</code> methods in the task.
+  * <code>getMinteractionInProgress()</code> and <code>getMaxProgress</code> methods in the task.
   * @author jlugo
   */
 public abstract class AsyncTask<ParamType, ResType> {
@@ -99,7 +99,7 @@ public abstract class AsyncTask<ParamType, ResType> {
   /** Returns the minimum value of the progress monitor
     * @return The minimum value (0.0%) of the progress monitor
     */
-  public int getMinProgress() { return 0; }
+  public int getMinteractionInProgress() { return 0; }
   
   /** Reutrns the minimum value of the progress monitor
     * @return The minimum value (100.0%) of the progress monitor

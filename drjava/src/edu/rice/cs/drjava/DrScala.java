@@ -93,7 +93,7 @@ import edu.rice.cs.drjava.model.DrScalaFileUtils;
   * @version $Id: DrScala.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class DrScala {
-  public static volatile Log _log = new Log("DrScala.txt", false);
+  public static volatile Log _log = new Log("GlobalModel.txt", false);
   
   private static final String DEFAULT_MAX_HEAP_SIZE_ARG = "-Xmx256M";
   
@@ -180,7 +180,7 @@ public class DrScala {
   public static void main(final String[] args) {    
     // handleCommandLineArgs will return true if DrScala should be loaded
     if (handleCommandLineArgs(args)) {
-      // Platform-specific UI setup.
+      // Platform-specific UI setUp.
       PlatformFactory.ONLY.beforeUISetup();
       configureAndLoadDrScalaRoot(args); 
     }
@@ -224,14 +224,14 @@ public class DrScala {
             JVMBuilder jvmb = JVMBuilder.DEFAULT.jvmArguments(_jvmArgs);
             
             // extend classpath if JUnit/ConcJUnit location specified
-            _log.log("JVMBuilder: classPath = "+jvmb.classPath());
+            _log.log("JVMBuilder: classPath = " + jvmb.classPath());
             ArrayList<File> extendedClassPath = new ArrayList<File>();
             for(File f: jvmb.classPath()) { extendedClassPath.add(f); }
-            _log.log("JVMBuilder: extendedClassPath = "+extendedClassPath);
+            _log.log("JVMBuilder: extendedClassPath = " + extendedClassPath);
             jvmb = jvmb.classPath(edu.rice.cs.plt.iter.IterUtil.asSizedIterable(extendedClassPath));
-            _log.log("JVMBuilder: jvmArguments = "+jvmb.jvmArguments());
-            _log.log("JVMBuilder: classPath = "+jvmb.classPath());
-            _log.log("JVMBuilder: mainParams = "+classArgs);
+            _log.log("JVMBuilder: jvmArguments = " + jvmb.jvmArguments());
+            _log.log("JVMBuilder: classPath = " + jvmb.classPath());
+            _log.log("JVMBuilder: mainParams = " + classArgs);
             
             // start new DrScala
             Process p = jvmb.start(DrScalaRoot.class.getName(), classArgs);
@@ -267,7 +267,7 @@ public class DrScala {
                 // reset configuration, save, and reload it
                 getConfig().resetToDefaults();
                 getConfig().saveConfiguration();
-                if (!handleCommandLineArgs(args)) { System.exit(0); }
+                if (! handleCommandLineArgs(args)) { System.exit(0); }
                 ++failCount;
                 continue;
               }

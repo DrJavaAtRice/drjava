@@ -42,11 +42,9 @@ import java.io.Serializable;
 //import edu.rice.cs.dynamicjava.interpreter.InterpreterException;  // moved to this package
 //import edu.rice.cs.dynamicjava.interpreter.EvaluatorException;  // moved to this package
 
-/**
- * Super class for any type of result that can occur from a call to interpret.
- * 
- * @version $Id: InterpretResult.java 5594 2012-06-21 11:23:40Z rcartwright $
- */
+/** Super class for any type of result that can occur from a call to interpret.
+  * @version $Id: InterpretResult.java 5594 2012-06-21 11:23:40Z rcartwright $
+  */
 public abstract class InterpretResult implements Serializable {  
   public abstract <T> T apply(Visitor<T> v);
 

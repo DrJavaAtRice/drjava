@@ -120,6 +120,19 @@ public class Log {
     }
   }
   
+  /** Prints a message to the log, if enabled.
+    * @param message Message to print.
+    */
+  public synchronized void log(String message, Class<?> clazz) {
+    if (isEnabled()) {
+      if (_writer == null) {
+        _init();
+      }
+      _writer.println(DATE_FORMAT.format(new Date()) + "In class ****" + clazz + "****: " + message);
+      _writer.flush();
+    }
+  }
+  
   /** Converts a stack trace (StackTraceElement[]) to string form */
   public static String traceToString(StackTraceElement[] trace) {
     final StringBuilder traceImage = new StringBuilder();

@@ -244,7 +244,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     * and deletes the listener.  When this method is done newCount is reset to 0.
     * @return the new modified document
     */
-  protected OpenDefinitionsDocument setupDocument(final String text) throws BadLocationException {
+  protected OpenDefinitionsDocument setUpDocument(final String text) throws BadLocationException {
     
     _log.log("*Setting up a document with text \n'" + text + "'\n");
     
@@ -312,7 +312,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   protected synchronized OpenDefinitionsDocument doCompile(String text, File file) throws IOException, 
     BadLocationException, InterruptedException {
     
-    OpenDefinitionsDocument doc = setupDocument(text);
+    OpenDefinitionsDocument doc = setUpDocument(text);
     doCompile(doc, file);
     return doc;
   }
@@ -347,7 +347,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     listener.checkCompileOccurred();
     assertCompileErrorsPresent(false);
     
-    listener.waitResetDone();
+    listener.waitResetDone();  // resets the flat in _resetDone to default (true)
     Utilities.clearEventQueue();
     _model.removeListener(listener);
   }
@@ -378,7 +378,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     // Set up the interaction
     Utilities.invokeAndWait(new Runnable() {
       public void run() {
-        interactionsDoc.setInProgress(false);  // for some reason, the inProgress state can be true when interpret is invoked
+        interactionsDoc.setInteractionInProgress(false);  // for some reason, the interactionInProgress() state can be true when interpret is invoked
         interactionsDoc.append(input, InteractionsDocument.DEFAULT_STYLE);
       }
     });
@@ -804,7 +804,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 
     /* NOTE: this method is not used in DrScala because the interpreter is reset every time the interactions classpath 
      * is potentially modified.  Because of limitations in the Scala interpreter, the addInteractionsClassPath method 
-     * does not update the class path inside the interactions pane until a new interpreter is setup in the interactions
+     * cannot update the class path inside the interactions pane until a new interpreter is setUp in the interactions
      * pane by killing and restarting the slave JVM. */
 //    public void assertInterpreterResettingCount(int i) {
 //      assertEquals("number of times interpreterResetting fired", i, interpreterResettingCount);
@@ -936,8 +936,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     public void interpreterResetting() { }
     
 //    public void interpreterReplaced() { listenerFail("interpreterReplaced fired unexpectedly"); }
-    public void interpreterReady() { listenerFail("interpreterReady() fired unexpectedly");  }
-//    public void interpreterReady(File wd) { listenerFail("interpreterReady(File wd) fired unexpectedly");  }
+    public void interpreterReady() { /* listenerFail("interpreterReady() fired unexpectedly"); */ }
     public void interpreterExited(int status) {
       listenerFail("interpreterExited(" + status + ") fired unexpectedly");
     }
@@ -997,7 +996,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     
     public InteractionsTestListener() {
       _interactionDone = new CompletionMonitor();
-      _resetDone = new CompletionMonitor();
+      _resetDone = new CompletionMonitor(true);  // default is true; raised to false when restart is initiated
     }
     
     public synchronized void interactionStarted() { interactionStartCount++; }
@@ -1022,14 +1021,11 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     
     public void interpreterResetting() {
 //      assertInterpreterResettingCount(0);
-      /* NOTE: in DrScala, this count does not appear to be completely consistent with DrJava.  The resetInteractions
+      /* NOTE: in DrScala, this count does not appear to be completely consistent with DrJava.  The ResetInterpreter
        * protocol in DrScala is very different. */
 //      assertInterpreterReadyCount(0);
       synchronized(this) { interpreterResettingCount++; }
     }
-    
-    
-//    public void interpreterReady(File wd) { interpreterReady(); }
     
     public void interpreterReady() {
       _log.log("GlobalModelTestCase: interpreterReady");
@@ -1049,7 +1045,6 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     
     public synchronized void logInteractionStart() {
       _interactionDone.reset();
-      _resetDone.reset();
     }
     
     public void waitInteractionDone() {
@@ -1057,6 +1052,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
                  _interactionDone.attemptEnsureSignaled(WAIT_TIMEOUT));
     }
     
+    /* Wait until reset is complete or WAIT_TIMEOUT expires; _resetDone is set to default state (with flag == true). */
     public void waitResetDone() throws InterruptedException {
       assertTrue("Reset did not complete before timeout", _resetDone.attemptEnsureSignaled(WAIT_TIMEOUT));
     }

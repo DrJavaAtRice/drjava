@@ -67,14 +67,13 @@ public class JUnitError extends DJError implements Serializable {
     _stackTrace = stackTrace;
   }
 
-  /** Constructor for an error with no associated location.  This constructor also
-    * provides a default stackTrace.
+  /** Constructor for an error with no associated location.  This constructor generates a stackTrace within DrScala.
     * @param message  the error message
     * @param isWarning true if the error is a warning
     * @param test the name of the test that failed
     */
   public JUnitError(String message, boolean isWarning, String test) {
-    this(null, -1, -1, message, isWarning, test, "", "No associated stack trace", new StackTraceElement[0]);
+    this(null, -1, -1, message, isWarning, test, "", "Internal DrScala JUnitError", Thread.currentThread().getStackTrace());
   }
 
   /** Gets the test name

@@ -223,7 +223,7 @@ public class JUnitPanel extends ErrorPanel {
       _popMenu = new JPopupMenu();
       _popMenu.add(_showStackTraceAction);
       _error = null;
-      _setupStackTraceFrame();
+      _setUpStackTraceFrame();
       addMouseListener(new PopupAdapter());
       _runningTestName = null;
       _runningTestNamePositions = new HashMap<String, Position>();
@@ -409,7 +409,7 @@ public class JUnitPanel extends ErrorPanel {
 //      }
 //    }
     
-    private void _setupStackTraceFrame() {
+    private void _setUpStackTraceFrame() {
       //DrJava.consoleOut().println("Stack Trace for Error: \n" +  e.stackTrace());
       JDialog _dialog = new JDialog(_frame,"JUnit Error Stack Trace",false);
       _stackFrame = _dialog;

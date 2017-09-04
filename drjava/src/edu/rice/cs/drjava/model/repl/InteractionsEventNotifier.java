@@ -111,16 +111,6 @@ public class InteractionsEventNotifier extends EventNotifier<InteractionsListene
     finally { _lock.endRead(); }
   }
   
-//  /** Called when the interactions window is reset. */
-//  public void interpreterReady(File wd) {
-//    _lock.startRead();
-//    try {
-//      int size = _listeners.size();
-//      for (int i = 0; i < size; i++) _listeners.get(i).interpreterReady(wd);
-//    }
-//    finally { _lock.endRead(); }
-//  }
-  
   /** Called if the interpreter reset failed.
     * @param t Throwable explaining why the reset failed. (Subclasses must maintain listeners.)
     */

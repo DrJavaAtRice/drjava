@@ -38,10 +38,14 @@ package edu.rice.cs.drjava.model.repl;
 
 import java.io.File;
 
+import edu.rice.cs.util.Log;
+
 /** Interface for any listener to an InteractionsModel.
   * @version $Id: InteractionsListener.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public interface InteractionsListener {
+  
+  public static final Log _log = new Log("GlobalModel.txt", false);
   
   /** Called when an interaction has started. */
   public void interactionStarted();
@@ -72,12 +76,11 @@ public interface InteractionsListener {
   public void interpreterExited(int status);
   
 //  /** Called when the slave JVM is restarted
-//    * @param inProgress Whether the new interpreter is currently in processing an interaction (i.e., whether an 
+//    * @param interactionInProgress() Whether the new interpreter is currently in processing an interaction (i.e., whether an 
 //    * interactionEnded event is pending.)
 //    */
 //  public void interpreterReplaced();
   
   /** Called when enter was typed in the interactions pane but the interaction was incomplete. */
   public void interactionIncomplete();
-  
 }

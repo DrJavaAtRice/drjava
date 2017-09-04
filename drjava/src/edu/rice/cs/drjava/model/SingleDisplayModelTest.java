@@ -69,7 +69,7 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
    *  adds some text.
    *  @return the new modified document
    */
-  protected OpenDefinitionsDocument setupDocument(String text) throws BadLocationException {
+  protected OpenDefinitionsDocument setUpDocument(String text) throws BadLocationException {
     
     assertNotEmpty();
     SDTestListener listener = new SDTestListener() {
@@ -124,13 +124,13 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
     listener.assertSwitchCount(0);
 
     // Set up two more documents
-    OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
+    OpenDefinitionsDocument doc2 = setUpDocument(BAR_TEXT);
     assertNumOpenDocs(2);
     listener.assertNewCount(1);
     listener.assertSwitchCount(1);
     assertActiveDocument(doc2);
 
-    OpenDefinitionsDocument doc1 = setupDocument(BAZ_TEXT);
+    OpenDefinitionsDocument doc1 = setUpDocument(BAZ_TEXT);
     assertNumOpenDocs(3);
     listener.assertNewCount(2);
     listener.assertSwitchCount(2);
@@ -232,7 +232,6 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
       public synchronized void newFileCreated(OpenDefinitionsDocument doc) { newCount++; }
       public synchronized void fileClosed(OpenDefinitionsDocument doc) { closeCount++; }
       public synchronized void activeDocumentChanged(OpenDefinitionsDocument doc) { switchCount++; }
-//      public synchronized void interpreterReady(File wd) { interpreterReady(); }
       public synchronized void interpreterReady() { interpreterReadyCount++; }
     };
     _model.addListener(listener);
@@ -240,7 +239,7 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
     // Set up two documents
     OpenDefinitionsDocument doc1 = _model.getActiveDocument();
     changeDocumentText(FOO_TEXT, doc1);
-    OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
+    OpenDefinitionsDocument doc2 = setUpDocument(BAR_TEXT);
     assertActiveDocument(doc2);
     assertNumOpenDocs(2);
     listener.assertNewCount(1);
@@ -275,7 +274,7 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
     // Set up two documents
     doc1 = _model.getActiveDocument();
     changeDocumentText(FOO_TEXT, doc1);
-    doc2 = setupDocument(BAR_TEXT);
+    doc2 = setUpDocument(BAR_TEXT);
     assertNumOpenDocs(2);
     listener.assertNewCount(3);
 //    listener.assertInterpreterResettingCount(0);

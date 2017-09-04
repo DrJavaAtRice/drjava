@@ -119,7 +119,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   /** State flag to prevent starting new tests on top of old ones and to prevent resetting interactions after compilation
     * is forced by unit testing. This field is NOT REDUNDANT, it is used in junitJVMReady.
     */
-  private volatile boolean _testInProgress = false;
+  protected volatile boolean _testInProgress = false;
   
   /** State flag to record if test classes in projects must end in "Test" */
   private boolean _forceTestSuffix = false;
@@ -197,6 +197,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     frm.setPosition(doc.getCurrentLocation());
     frm.setFindWord(className);
     frm.setIgnoreCommentsAndStrings(true);
+    frm.setSearchAllDocuments(true);
     FindResult match = frm.findNext();
     _log.log("Matching result = " + match);
     return (match.getFoundOffset() != -1);
@@ -358,7 +359,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     final ArrayList<File> files = new ArrayList<File>();           
     
     /* Flag indicating if project is open */
-    boolean isProject = _model.isProjectActive();
+    final boolean isProject = _model.isProjectActive();
     
     /* Set up FindReplaceMachine to search open definitions documents. */
     final FindReplaceMachine frm = new FindReplaceMachine(_model, _model.getDocumentIterator(), null);
@@ -377,18 +378,16 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
             _log.log("Examining file " + entry);
             
             /* ignore non-class files */
-            String name = entry.getName();
+            final String name = entry.getName();
             if (! name.endsWith(".class")) continue;
             
-            String noExtName = name.substring(0, name.length() - 6);  // remove ".class" from name
-            int indexOfLastDot = noExtName.lastIndexOf('.');
-            String simpleClassName = noExtName.substring(indexOfLastDot + 1);
+            final String noExtName = name.substring(0, name.length() - 6);  // remove ".class" from name
+            final int indexOfLastDot = noExtName.lastIndexOf('.');
+            final String simpleClassName = noExtName.substring(indexOfLastDot + 1);
+            _log.log("Simple class name is " + simpleClassName);  
             
             /* Ignore class names that do not end in "Test" if FORCE_TEST_SUFFIX option is set */
-            if (_forceTestSuffix) {
-              _log.log("Simple class name is " + simpleClassName);  
-              if (/*isProject &&*/ ! simpleClassName.endsWith("Test")) continue;
-            }
+            if (_forceTestSuffix && ! simpleClassName.endsWith("Test")) continue;
             
             /* ignore entries that do not correspond to files?  Can this happen? */
             if (! entry.isFile()) continue;
@@ -408,10 +407,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
                 public void visit(int version, int access, String name, String sig, String sup, String[] inters) {
                   className.set(name.replace('/', '.'));
                 }
-                public void visitSource(String source /*, String debug */) {
-                  sourceName.set(source);
-                }
-                
+                public void visitSource(String source, String debug) { sourceName.set(source); }
                 public void visitOuterClass(String owner, String name, String desc) { }
                 public AnnotationVisitor visitAnnotation(String desc, boolean visible) { return null; }
                 public void visitAttribute(Attribute attr) { }
@@ -421,36 +417,18 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
                 public void visitEnd() { }
               }, 0);
               
+              _log.log("In ClassReader, sourceName has been set to " + sourceName.value());
+              _log.log("In ClassReader, className has been set to " + className.value());
               File rootDir = classDirsAndRoots.get(dir);
               
               /** The canonical pathname for the file (including the file name) */
               String sourceFileName = getCanonicalPath(rootDir) + File.separator + sourceName.value();
-              _log.log("Full source fileName = " + sourceFileName);
-              
-//              /* The index in fileName of the dot preceding the extension ".java" or ".scala" */
-//              int indexOfExtDot = sourceFileName.lastIndexOf('.');
-//              _log.log("indexOfExtDot = " + indexOfExtDot);
-//              if (indexOfExtDot == -1) continue;  // RMI stub class files return source file names without extensions
-//              
-//              /* Determine if this source file is a .java or a .scala file. */
-//              String strippedName = sourceFileName.substring(0, indexOfExtDot);
-//              _log.log("Stripped name = " + strippedName);
-//              
-//              String name = null;
-//              
-//              if (openDocFiles.contains(sourceFileName)) name = sourceFileName;
-//              else if (openDocFiles.contains(strippedName + OptionConstants.SCALA_FILE_EXTENSION))
-//                name = strippedName + OptionConstants.SCALA_FILE_EXTENSION;
-//              else if (openDocFiles.contains(strippedName + OptionConstants.JAVA_FILE_EXTENSION))
-//                name = strippedName + OptionConstants.JAVA_FILE_EXTENSION;
-//
-//              else continue; // no matching source file is open
-              
-              _log.log("File found in openDocFiles = "  + openDocFiles.contains(sourceFileName));
+              _log.log("Full source fileName = " + sourceFileName);             
+              _log.log("Source file found in openDocFiles ? = "  + openDocFiles.contains(sourceFileName));
               File sourceFile = new File(sourceFileName);
               classNames.add(className.value());
               files.add(sourceFile);
-              _log.log("Class " + className.value() + " added to classNames.   File " + sourceFileName + " added to files.");
+              _log.log(className.value() + " added to classNames.   File " + sourceFileName + " added to files.");
             }
             catch(IOException e) { /* ignore it; can't read class file */ }
           }
@@ -595,7 +573,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     * @param errors The array of errors from all failed tests in the suite.
     */
   public void testSuiteEnded(final JUnitError[] errors) {
-//    new ScrollableDialog(null, "DefaultJUnitModel.testSuiteEnded(...) called", "", "").show();
+    _log.log("DefaultJUnitModel.testSuiteEnded(" + errors + ") called");
    
     Utilities.invokeLater(new Runnable() { public void run() {
 
@@ -618,11 +596,15 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   
   /** Called when the JVM used for unit tests has registered.  Does not necessarily run in event thread. */
   public void junitJVMReady() {
-    Utilities.invokeLater(new Runnable() { public void run() { 
+    /* The following formerly used Utilities.invokeLater which created a race condition on _testProgress.  Pending
+     * thunks involving operations on _testInProgress in the EventQueue were bypassed. */
+    _log.log("junitJVMReady() thread started");
+    EventQueue.invokeLater(new Runnable() { public void run() {
+      _log.log("_testInProgress = " + _testInProgress);
       if (! _testInProgress) return;
-      
+      _log.log("Creating error with msg: Previous test suite was interrupted");
       JUnitError[] errors = new JUnitError[1];
-      errors[0] = new JUnitError("Previous test suite was interrupted", true, "");
+      errors[0] = new JUnitError("Previous test suite was interrupted", true, "DrScala Error");
       _junitErrorModel = new JUnitErrorModel(errors, _model, true);
       _notifyJUnitEnded();
       _testInProgress = false;

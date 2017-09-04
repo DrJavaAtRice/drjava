@@ -59,7 +59,7 @@ public class ConsoleController extends AbstractConsoleController /* implements S
   /** Gets the ConsoleDocument. */
   public ConsoleDocument getConsoleDoc() { return _consoleDoc; }
 
-  protected void _setupModel() {
+  protected void _setUpModel() {
     _consoleDoc.setBeep(_pane.getBeep());  // Beep support is embedded in the wrapper.
   }
 }

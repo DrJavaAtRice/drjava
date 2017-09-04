@@ -44,23 +44,35 @@ import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.swing.AsyncTask;
 
-/** Keeps track of all listeners to the model, and has the ability to notify them of some event.
+/** Overview: communication between asynchronous tasks is normally conducted by generating an event which is recorded
+  * in volatile global state of the tasks that have registered to observe the event. In addition, some tasks (not 
+  * running in the event dispatch thread!) may explicitly wait for an event to occur by registering for the event and 
+  * waiting for notification.  The library class edu.rice.cs.plt.concurrent.CompletionMonitor makes this protocol easy
+  * to implement. -- Corky 8-31-2017
   * <p>
-  * This class has a specific role of managing GlobalModelListeners.  Other classes with similar names use similar
-  * code to perform the same function for other interfaces, e.g. InteractionsEventNotifier and ScaladocEventNotifier.
-  * These classes implement the appropriate interface definition so that they can be used transparently as composite 
-  * packaging for a particular listener interface.
+  * This class maintains a list of all listeners to events in the global model, and notifies them when any event in this
+  * API occurs (is called by some task). Each method of the corresponding listener interface is a potential event for 
+  * which tasks may register by creating an appropriate listener object containing code blocks for each possible event
+  * to communicate to the task (most importantly it's local volatile storage) AND registering that listener by adding it 
+  * the listener list for the corresponding model. The methods (listener code blocks) within registered listener objects
+  * are often called <i>listeners</i>, creating confusion because the entire object containing all of the listeners to 
+  * model events are also called <i>listeners<i>.  This class supports the communcation of events at the level of the
+  * global model.  Other classes with similar names of the XXXNotifier use similar code to perform the same function for
+  * the event interfaces for other models, e.g., InteractionsEventNotifier and ScaladocEventNotifier for
+  * the interactions model and the scaladoc model. These classes implement the corresponding event notifier interfaces 
+  * so that tasks within the corresponding model can transparently communicate using events local to the model.
   * <p>
-  * Components which might otherwise manage their own list of listeners use EventNotifiers instead to simplify their 
-  * internal implementation.  Notifiers should therefore be considered a private implementation detail of the 
-  * components, and should not be used directly outside of the "host" component.
+  * Tasks which might otherwise communicate using their own event framework should use the listener and event notifier
+  * interfaces of the model to which they belong since these interfaces already provide much of the requisite functionality.
+  * Listeners should therefore be considered a private implementation detail of a particular task or group of 
+  * communicating tasks within model, and should not be directly invoked by tasks outside of that model.
   * <p>
+  * TODO: remove readers/writers locking and confirm that all code in this class executed in the event dispatch thread.
   * TODO: remove direct references to GlobalEventNotifier outside of DefaultGlobalModel
   * TODO: remove public modifier from this class when above has happened
-  *
-  * All methods in this class must use the synchronization methods provided by ReaderWriterLock.  This ensures that 
-  * multiple notifications (reads) can occur simultaneously, but only one thread can be adding or removing listeners 
-  * (writing) at a time, and no reads can occur during a write.
+  * <p>
+  * All methods in this class have been performing synchronization using methods provided by ReaderWriterLock, which is
+  * unncecessary if all event handling is serialized in the event dispatch thread.  
   * <p>
   * <i>No</i> methods on this class should be synchronized using traditional Java synchronization!
   * <p>
@@ -376,13 +388,6 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener> impl
     finally { _lock.endRead(); }
   }
   
-//  /** Called when the interactions window is reset. */
-//  public void interpreterReady(File wd) {
-//    _lock.startRead();
-//    try { for (GlobalModelListener l : _listeners) { l.interpreterReady(wd); } }
-//    finally { _lock.endRead(); }
-//  }
-  
   /** Called if the interpreter reset failed.
     * @param t Throwable explaining why the reset failed.
     * (Subclasses must maintain listeners.)
@@ -404,7 +409,7 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener> impl
   }
   
 //  /** Called when the active interpreter is changed.
-//    * @param inProgress Whether the new interpreter is processing an interaction (i.e,. whether an interactionEnded
+//    * @param interactionInProgress() Whether the new interpreter is processing an interaction (i.e,. whether an interactionEnded
 //    *        event will be fired)
 //    */
 //  public void interpreterReplaced() {

@@ -40,9 +40,10 @@ import java.awt.print.PageFormat;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import edu.rice.cs.plt.iter.EmptyIterable;
 import edu.rice.cs.util.AbsRelFile;
@@ -316,12 +317,12 @@ public class DummyGlobalModel implements GlobalModel {
     throw new UnsupportedOperationException("Tried to call getSwingInteractionsDocument on a Dummy");
   }
   
-  public void resetInteractions() {
-    throw new UnsupportedOperationException("Tried to call resetInteractions on a Dummy");
+  public void resetInterpreter() {
+    throw new UnsupportedOperationException("Tried to call ResetInterpreter on a Dummy");
   }
   
-  public void resetInteractions(File wd) {
-    throw new UnsupportedOperationException("Tried to call resetInteractions on a Dummy");
+  public void resetInterpreter(File wd) {
+    throw new UnsupportedOperationException("Tried to call ResetInterpreter on a Dummy");
   }
   
   public Iterable<File> getInteractionsClassPath() {
@@ -366,7 +367,7 @@ public class DummyGlobalModel implements GlobalModel {
   }
   
   /** @return a degenerate class path so that tests do not break. */
-  public Iterable<File> getClassPath() { return EmptyIterable.make(); }
+  public List<File> getClassPath() { return new ArrayList<File>(); }
   
   public void updateInteractionsClassPath() {
     throw new UnsupportedOperationException("Tried to call updateInteractionsClassPath on a Dummy");

@@ -117,11 +117,11 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     aDir.mkdir();
     bDir.mkdir();
     
-    OpenDefinitionsDocument doc1 = setupDocument(FOO_MISSING_VAR_KEYWORD);
+    OpenDefinitionsDocument doc1 = setUpDocument(FOO_MISSING_VAR_KEYWORD);
     final File file1 = new File(aDir, "DrScalaTestFoo.scala");
     saveFile(doc1, new FileSelector(file1));  // runs synchronously in event thread
     
-    OpenDefinitionsDocument doc2 = setupDocument(BAR_MISSING_DECLARATION_KEYWORD);
+    OpenDefinitionsDocument doc2 = setUpDocument(BAR_MISSING_DECLARATION_KEYWORD);
     final File file2 = new File(bDir, "DrScalaTestBar.scala");
     saveFile(doc2, new FileSelector(file2));  // runs synchronously in event thread
     
@@ -157,7 +157,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     
     _log.log("** Starting testCompilePackageAsField");
     
-    OpenDefinitionsDocument doc = setupDocument(FOO_PACKAGE_AS_FIELD);
+    OpenDefinitionsDocument doc = setUpDocument(FOO_PACKAGE_AS_FIELD);
     _log.log(doc + " set up");
     final File file = tempFile();
     saveFile(doc, new FileSelector(file));
@@ -191,7 +191,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     
     _log.log("** Starting testCompilePackageAsField2");
     
-    final OpenDefinitionsDocument doc = setupDocument(FOO_PACKAGE_AS_FIELD_2);
+    final OpenDefinitionsDocument doc = setUpDocument(FOO_PACKAGE_AS_FIELD_2);
     final File file = tempFile();
     saveFile(doc, new FileSelector(file));
     
@@ -218,7 +218,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     
     _log.log("** Starting testCompileMissingCloseCurly");
     
-    final OpenDefinitionsDocument doc = setupDocument(FOO_MISSING_VAR_KEYWORD);
+    final OpenDefinitionsDocument doc = setUpDocument(FOO_MISSING_VAR_KEYWORD);
     final File file = tempFile();
     saveFile(doc, new FileSelector(file));
     
@@ -254,7 +254,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     subdir.mkdir();
     
     // Save the footext to DrScalaTestFoo.scala in the subdirectory
-    OpenDefinitionsDocument doc = setupDocument(FOO_PACKAGE_INSIDE_CLASS);
+    OpenDefinitionsDocument doc = setUpDocument(FOO_PACKAGE_INSIDE_CLASS);
     saveFileAs(doc, new FileSelector(fooFile));
     
     // do compile -- should fail since package decl is not valid!
@@ -287,11 +287,11 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     File aDir = new File(_tempDir, "a");
     aDir.mkdir();
     
-    OpenDefinitionsDocument doc = setupDocument(BAR_MISSING_DECLARATION_KEYWORD_MULTIPLE_LINES);
+    OpenDefinitionsDocument doc = setUpDocument(BAR_MISSING_DECLARATION_KEYWORD_MULTIPLE_LINES);
     final File file = new File(aDir, "DrScalaTestBar.scala");
     saveFile(doc, new FileSelector(file));
     
-    OpenDefinitionsDocument doc2 = setupDocument(FOO_MISSING_VAR_KEYWORD);
+    OpenDefinitionsDocument doc2 = setUpDocument(FOO_MISSING_VAR_KEYWORD);
     final File file2 = new File(aDir, "DrScalaTestFoo.scala");
     _log.log("**Setting up " + file2);
     saveFile(doc2, new FileSelector(file2));
@@ -339,7 +339,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     
     _log.log("** Starting testCompileEndWhileParsing");
     
-    final OpenDefinitionsDocument doc = setupDocument(COMPILER_ERRORS_2872797_TEXT);
+    final OpenDefinitionsDocument doc = setUpDocument(COMPILER_ERRORS_2872797_TEXT);
     final File dir = tempDirectory();
     final File file = new File(dir, "CompilerErrors.scala");
     saveFile(doc, new FileSelector(file));

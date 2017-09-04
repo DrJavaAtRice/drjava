@@ -64,20 +64,28 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
 //  public static final String INPUT_REQUIRED_MESSAGE =
 //    "Please enter input in the Console tab." + _newLine;
   
-  /* static final Log _log inherited from InteractionsModel */
+  /* inherited from InteractionsModel:
+   *     protected final InteractionsEventNotifier _notifier = new InteractionsEventNotifier();
+   *     protected volatile InteractionsDocument _document;
+   *     protected volatile File _workingDir;
+   *     protected volatile boolean _restartInProgress;
+   *     protected volatile InputListener _inputListener;
+   *     protected final ConsoleDocumentInterface _cDoc;
+   * 
+   *     static final Log _log 
+   */
   
-  /** Model that contains the interpreter to use. */
+  /** Model that contains the interpreter to use; not present in InteractionsModel or RMIInteractionsModel. */
   protected final DefaultGlobalModel _model;
   
-  /** Creates a new InteractionsModel.
+  /** Creates a new InteractionsModel capable of interpretation using the slave JVM.
     * @param model DefaultGlobalModel to do the interpretation
-    * @param jvm  the RMI interface used by the Main JVM to access the Interpreter JVM
+    * @param jvm  the RMI agent used by the Main JVM to access the Interpreter JVM
     * @param cDoc document
     * @param wd  the working directory for interactions i/o
     */
   public DefaultInteractionsModel(DefaultGlobalModel model, MainJVM jvm, ConsoleDocumentInterface cDoc, File wd) {
-    super(jvm, cDoc, wd, DrScala.getConfig().getSetting(OptionConstants.HISTORY_MAX_SIZE).intValue(),
-          WRITE_DELAY);
+    super(jvm, cDoc, wd, DrScala.getConfig().getSetting(OptionConstants.HISTORY_MAX_SIZE).intValue(), WRITE_DELAY);
     _model = model;
     // Set whether to allow "assert" statements to be run in the remote JVM.
     Boolean allow = DrScala.getConfig().getSetting(OptionConstants.RUN_WITH_ASSERT);
@@ -153,7 +161,6 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
     * This method may run outside the event thread. 
     */
   public void interpreterReady() {
-    // Transmit the class path (corresponding to opened documents) to the _classPathMan
     super.interpreterReady();  // invokes interpreterReady() in abstract class InteractionsModel.
     _log.log("In InteractionsModel, Event: interpreterReady() called");
   }
@@ -182,23 +189,9 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
     } });
   }
   
-//  /** In the event thread, notifies listeners that the interpreter is ready. Sometimes called from outside the event
-//    * thread. */
-//  public void _notifyInterpreterReady(final File wd) {   /* TODO  rename this method */
-//    _log.log("Asynchronously notifying interpreterReady event listeners");  // DEBUG
-//    Utilities.invokeLater(new Runnable() { 
-//      public void run() { 
-////        _notifier.interpreterReady(wd);
-//        _notifier.interpreterReady();
-//        _log.log("In InteractionsModel, Event: the interpreter is ready with wd " + wd);
-//        _document.clearColoring();  // _document is inherited from the abstract superclass InteractionsModel
-//      } 
-//    });
-//  }
-  
   /** In the event thread, notifies listeners that the interpreter is ready. Sometimes called from outside the event
     * thread. */
-  public void _notifyInterpreterReady() {   /* TODO  rename this method */
+  public void _notifyInterpreterReady() {
     _log.log("Asynchronously notifying interpreterReady event listeners");  // DEBUG
     Utilities.invokeLater(new Runnable() { 
       public void run() { 

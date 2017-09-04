@@ -431,14 +431,14 @@ public class DocumentCacheTest extends DrScalaTestCase {
 //    assertEquals("The save in the reconstructor was not called", 0, _doc_saved);
 //  }
   
-  // not being used.  The new definition of the cache allows for a closed document, if it is used again, to bring its document back.
+  // Not being used.  The new definition of the cache allows for a closed document, if it is used again, to bring its document back.
   // This should be dealt with.
+  
   public void testNoDDocInCache() {
     OpenDefinitionsDocument doc1 = _model.newFile();
     _model.closeFile(doc1);
     assertFalse("The document should now be closed", _adapterTable.get(doc1).isReady());
   }
-  
   
   public void testNumListeners() {
     OpenDefinitionsDocument doc1 = _model.newFile();

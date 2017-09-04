@@ -79,12 +79,12 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
   /** Executes internal reset operation of the interpreter; fails when interpreter is busy performing a computation. */
   public void reset() throws RemoteException;
   
-  /** Gets the string representation of the value of a variable in the current interpreter.
-    * @param var the name of the variable
-    * @return null if the variable is not defined, "null" if the value is null; otherwise,
-    *         its string representation
-    */
-  public Pair<String,String> getVariableToString(String var) throws RemoteException;
+//  /** Gets the string representation of the value of a variable in the current interpreter.
+//    * @param var the name of the variable
+//    * @return null if the variable is not defined, "null" if the value is null; otherwise,
+//    *         its string representation
+//    */
+//  public Pair<String,String> getVariableToString(String var) throws RemoteException;
   
   /** Returns the class path stored in the ClassPathManager. */
   public List<File> getInteractionsClassPath() throws RemoteException;  

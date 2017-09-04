@@ -88,7 +88,7 @@ public abstract class AbortablePanel extends TabbedPanel {
     this.add(_leftPane, BorderLayout.CENTER);
     
     _buttonPanel = new JPanel(new BorderLayout());
-    _setupButtonPanel();
+    _setUpButtonPanel();
     this.add(_buttonPanel, BorderLayout.EAST);
     updateButtons();
     //MainFrame.LOG.log("\tAbortablePanel ctor done");
@@ -123,7 +123,7 @@ public abstract class AbortablePanel extends TabbedPanel {
   }
   
   /** Creates the buttons for controlling the regions. */
-  private void _setupButtonPanel() {
+  private void _setUpButtonPanel() {
     JPanel mainButtons = new JPanel();
     JPanel emptyPanel = new JPanel();
     JPanel closeButtonPanel = new JPanel(new BorderLayout());

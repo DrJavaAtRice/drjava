@@ -41,6 +41,7 @@ import edu.rice.cs.drjava.model.DummyGlobalModel;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.repl.newjvm.MainJVM;
 import edu.rice.cs.drjava.model.FileSaveSelector;
+import edu.rice.cs.drjava.ui.InteractionsPane;
 
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.Log;
@@ -700,8 +701,12 @@ public final class InteractionsModelTest extends DrScalaTestCase {
     /** Constructs a new InteractionsModel. */
     public TestInteractionsModel(InteractionsDJDocument adapter) {
       // Adapter, history size, write delay
-      super(adapter, new File(System.getProperty("user.dir")), 1000, 25);
+      super(adapter, /* new File(System.getProperty("user.dir")),*/ 1000, 25);
     }
+    
+    public void setUpPane(InteractionsPane pane) { };
+    public InteractionsPane getPane() { return null; }
+    protected void scrollToCaret() { }
     
     /** Sets toEval field and simulates successful interpretation. */
     protected void _interpretCommand(String toEval) {
@@ -718,33 +723,39 @@ public final class InteractionsModelTest extends DrScalaTestCase {
       }
     }
         
-    public Pair<String,String> getVariableToString(String var) {
-      fail("cannot getVariableToString in a test");
-      return null;
-    }
+//    public Pair<String,String> getVariableToString(String var) {
+//      fail("cannot getVariableToString in a test");
+//      return null;
+//    }
     
     public void addInteractionsClassPath(File path) { fail("cannot add to classpath in a test"); }
-    protected boolean _softResetInterpreter() { throw new UnexpectedException("cannot reset interpreter in a test"); }
-    protected boolean _resetInterpreter(File wd) { 
+//    protected boolean _softResetInterpreter() { throw new UnexpectedException("cannot reset interpreter in a test"); }
+    public void resetInterpreter(File wd) { 
       throw new UnexpectedException("cannot reset interpreter in a test"); 
     }
     public List<File> getCompilerBootClassPath() {
       // TODO: figure out what to do here
       return new ArrayList<File>();
     }
+    public void resetLastErrors() { } 
     public String transformCommands(String interactionsString) {
       // TODO: figure out what to do here
       return interactionsString;
     }
     
+    public void documentReset() { };
+    public void interpreterReady() { };
+    public void hardResetInterpreter(File wd) { 
+      throw new UnexpectedException("hardResetInterpreter(" + wd + ") thrown in InteractionsModelTest");
+    }
     public void _notifyInteractionStarted() { }
     protected void _notifySyntaxErrorOccurred(int offset, int length) { }
     protected void _notifyInterpreterExited(int status) { }
     protected void _notifyInterpreterResetFailed(Throwable t) { }
-//    public void _notifyInterpreterReady(File wd) { }
     public void _notifyInterpreterReady() { }
     protected void _interpreterResetFailed(Throwable t) { }
     protected void _interpreterWontStart(Exception e) { }
+    public String getStartUpBanner() { return "This is a test"; }
     protected void _notifyInteractionIncomplete() { }
     public ConsoleDocument getConsoleDocument() { return null; }
   }
@@ -795,7 +806,7 @@ public final class InteractionsModelTest extends DrScalaTestCase {
     /** Constructs a new IncompleteInputInteractionsModel. */
     public IncompleteInputInteractionsModel(InteractionsDJDocument adapter) throws RemoteException {
       // MainJVM, Adapter, history size, write delay
-      super(new MainJVM(null, new DummyGlobalModel()), adapter, new File(System.getProperty("user.dir")), 1000, 25);
+      super(new MainJVM(new DummyGlobalModel()), adapter, new File(System.getProperty("user.dir")), 1000, 25);
       _jvm.setInteractionsModel(this); // _jvm is set to MainJVM(null) by super call;
       _jvm.startInterpreterJVM();
       continuationException = false;
@@ -877,7 +888,7 @@ public final class InteractionsModelTest extends DrScalaTestCase {
     }
   }
   
-//  public class TestInteractionsListener extends DummyInteractionsListener {
+//  public class TestInteractionsListener extends DefaultInteractionsListener {
 //    private volatile boolean _interactionDone = false;       // records when the interaction is done
 //    private final Object _interactionLock = new Object();    // lock for _interactionDone
 //    

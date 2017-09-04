@@ -82,7 +82,8 @@ public abstract class AbstractMasterJVM implements MasterRemote {
     */
   private enum State { FRESH, STARTING, RUNNING, QUITTING, DISPOSED };
   
-  public static Log _log = DrScala._log;
+  /** Debugging log. */
+  public static final Log _log  = new Log("GlobalModel.txt", false);
   
   /** Loads an instance of the given AbstractSlaveJVM class.  Invoked in the slave JVM. */
   private static class SlaveFactory implements Thunk<AbstractSlaveJVM>, Serializable {
@@ -147,6 +148,7 @@ public abstract class AbstractMasterJVM implements MasterRemote {
     * @throws IllegalStateException  If this object has been disposed.
     */
   protected final void invokeSlave(JVMBuilder jvmBuilder) {
+    _log.log("AbstractMasterJVM.invokeSlave(" + jvmBuilder + " called");
     transition(State.FRESH, State.STARTING);
 
     // update jvmBuilder with any special properties
@@ -188,7 +190,7 @@ public abstract class AbstractMasterJVM implements MasterRemote {
       catch (RemoteException e) {
         _log.log("In AbstactMasterJVM, threw Exception " + e + "\nAttempting to quit with argument '" + newSlave + "'");
         attemptQuit(newSlave);
-        _log.log("In AbstactMasterJVM, entered state " + State.FRESH + "\nCalling handleSlaveWontStart(" + e + ")");
+        _log.log("In AbstactMasterJVM, entered state " + State.FRESH + "; Calling handleSlaveWontStart(" + e + ")");
         _monitor.set(State.FRESH);
         handleSlaveWontStart(e);
         return;
@@ -198,7 +200,7 @@ public abstract class AbstractMasterJVM implements MasterRemote {
       handleSlaveConnected(newSlave);  // calls  _stateMonitor.value().started
       _slave = newSlave;
       _log.log("In AbstactMasterJVM, entered new state " + State.RUNNING + " slave = " + _slave);
-      _monitor.set(State.RUNNING);  // already accomplished by newSlave.start() above (?)
+      _monitor.set(State.RUNNING);  // already accomplished by newSlave.start() in try clause above
     }
   }
   
@@ -208,6 +210,7 @@ public abstract class AbstractMasterJVM implements MasterRemote {
   protected final void quitSlave() {
     _log.log("quitSlave called; state is " + _monitor.value());
     transition(State.RUNNING, State.QUITTING);
+    _log.log("Attempting to quit slave");
     attemptQuit(_slave);
     _slave = null;
     _log.log("In AbstactMasterJVM, entered state " + State.FRESH);
@@ -222,7 +225,7 @@ public abstract class AbstractMasterJVM implements MasterRemote {
     }
     catch (RemoteException e) { 
       _log.log("Unable to complete slave.quit(); rhrew " + e);
-      error.log("Unable to complete slave.quit()", e); 
+//      error.log("Unable to complete slave.quit()", e); 
     }
     catch (NullPointerException e) {
       if (Utilities.TEST_MODE) { /* ignore exception in test mode */ }  // TODO: fix the problem in slave.quit() }
@@ -243,7 +246,10 @@ public abstract class AbstractMasterJVM implements MasterRemote {
   }
   
   /** Transition from State.STARTING to State.RUNNING; used in MainJVM from which State is hidden. */
-  protected void _enterRunningState() { transition(State.STARTING, State.RUNNING); }
+  protected void _enterRunningState() { 
+    transition(State.STARTING, State.RUNNING); 
+    _log.log("Entered RUNNING state");
+  }
   
   /** Make a thread-safe state transition.  Blocks until the {@code from} state is reached and this
     * thread is successful in performing the transition (only one thread can do so at a time).  Throws

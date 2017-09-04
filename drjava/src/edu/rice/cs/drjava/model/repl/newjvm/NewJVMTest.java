@@ -69,7 +69,7 @@ public final class NewJVMTest extends DrScalaTestCase {
 
   public static Test suite() {
     TestSuite suite = new TestSuite(NewJVMTest.class);
-    TestSetup setup = new TestSetup(suite) {
+    TestSetup setUp = new TestSetup(suite) {
       protected void setUp() throws Exception { 
         super.setUp();
         _log.log("Executing setUp()");
@@ -81,7 +81,7 @@ public final class NewJVMTest extends DrScalaTestCase {
       }
     };
 
-    return setup;
+    return setUp;
   }
 
   public void testPrintln() throws Throwable {
@@ -279,7 +279,7 @@ public final class NewJVMTest extends DrScalaTestCase {
 //  }
 
   private static class TestJVMExtension extends MainJVM {
-    private static final int WAIT_TIMEOUT = 100000; // time to wait for an interaction to complete
+    private static final int WAIT_TIMEOUT = 50000; // time to wait for an interaction to complete
     
     private volatile CompletionMonitor _done;
     private volatile StringBuffer _outBuffer;
@@ -288,17 +288,17 @@ public final class NewJVMTest extends DrScalaTestCase {
     private volatile StringBuffer _exceptionMsgBuffer;
     private volatile boolean _voidReturnFlag;
 
-    private volatile InterpretResult.Visitor<Void> _testHandler;
+    private volatile InterpretResult.Visitor<String> _testHandler;
 
     public TestJVMExtension() throws RemoteException {
-      super(IOUtil.WORKING_DIRECTORY, new DummyGlobalModel());
+      super(new DummyGlobalModel());
       _done = new CompletionMonitor();
       _testHandler = new TestResultHandler();
       startInterpreterJVM();
       resetState();
     }
 
-    @Override protected InterpretResult.Visitor<Void> resultHandler() {
+    @Override protected InterpretResult.Visitor<String> resultHandler() {
       return _testHandler;
     }
 
@@ -353,19 +353,19 @@ public final class NewJVMTest extends DrScalaTestCase {
     
     /* InterpretResult handler for this test.  Note that Scala only creates StringValue results so most of
      * the methods in this visitor interface can never be called. */
-    private class TestResultHandler implements InterpretResult.Visitor<Void> {
-      public Void forNoValue() {
+    private class TestResultHandler implements InterpretResult.Visitor<String> {
+      public String forNoValue() {
         debug.log();
         _voidReturnFlag = true;
         _done.signal();
         _log.log("NewJVMTest: void returned by interpretResult callback");
         return null;
       }
-      public Void forStringValue(String s) { handleValueResult(s); return null; }
-      public Void forCharValue(Character c) { handleValueResult(c.toString()); return null; }
-      public Void forNumberValue(Number n) { handleValueResult(n.toString()); return null; }
-      public Void forBooleanValue(Boolean b) { handleValueResult(b.toString()); return null; }
-      public Void forObjectValue(String objString, String objTypeString) { handleValueResult(objString); return null; }
+      public String forStringValue(String s) { handleValueResult(s); return null; }
+      public String forCharValue(Character c) { handleValueResult(c.toString()); return null; }
+      public String forNumberValue(Number n) { handleValueResult(n.toString()); return null; }
+      public String forBooleanValue(Boolean b) { handleValueResult(b.toString()); return null; }
+      public String forObjectValue(String objString, String objTypeString) { handleValueResult(objString); return null; }
       
       private void handleValueResult(String s) {
         debug.log();
@@ -374,7 +374,7 @@ public final class NewJVMTest extends DrScalaTestCase {
         _log.log("NewJVMTest: " + _returnBuffer + " returned by interpretResult callback");
       }
       
-      public Void forEvalException(String message, StackTraceElement[] stackTrace) {
+      public String forEvalException(String message, StackTraceElement[] stackTrace) {
         debug.log();
         StringBuilder sb = new StringBuilder(message);
         for(StackTraceElement ste: stackTrace) {
@@ -387,7 +387,7 @@ public final class NewJVMTest extends DrScalaTestCase {
         return null;
       }
       
-      public Void forException(String message) {
+      public String forException(String message) {
         debug.log();
         _exceptionMsgBuffer.append(message);
         _done.signal();
@@ -395,12 +395,12 @@ public final class NewJVMTest extends DrScalaTestCase {
         return null;
       }
       
-      public Void forUnexpectedException(Throwable t) {
+      public String forUnexpectedException(Throwable t) {
         debug.log();
         throw new UnexpectedException(t);
       }
 
-//      public Void forBusy() {
+//      public String forBusy() {
 //        debug.log();
 //        throw new UnexpectedException("MainJVM.interpret called when interpreter was busy!");
 //      }

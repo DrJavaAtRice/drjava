@@ -131,7 +131,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
 //    debug.logStart();
     _log.log("testErrorArrayInOrder_NOJOIN started");
     final JUnitTestListener listener = new JUnitTestListener();
-    final OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_FAIL_TEXT);
+    final OpenDefinitionsDocument doc = setUpDocument(MONKEYTEST_FAIL_TEXT);
     _log.log("doc setUp");
     
     Utilities.invokeAndWait(new Runnable() {
@@ -210,9 +210,9 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
   public void testVerifyErrorHandledCorrectly_NOJOIN() throws Exception {
     _log.log("testVerifyErrorHandledCorrectly_NOJOIN started");
     
-    final OpenDefinitionsDocument doc = setupDocument(ABC_CLASS_ONE);
+    final OpenDefinitionsDocument doc = setUpDocument(ABC_CLASS_ONE);
     final File file = new File(_tempDir, "ABC1.scala");
-    final OpenDefinitionsDocument doc2 = setupDocument(ABC_TEST);
+    final OpenDefinitionsDocument doc2 = setUpDocument(ABC_TEST);
     final File file2 = new File(_tempDir, "ABCTest.scala");
     
     Utilities.invokeAndWait(new Runnable() {
@@ -232,7 +232,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     
    _log.log("First compile in  testVerifyErrorHandledCorrectly_NOJOIN comlete");
    
-    final OpenDefinitionsDocument doc3 = setupDocument(ABC_CLASS_TWO);
+    final OpenDefinitionsDocument doc3 = setUpDocument(ABC_CLASS_TWO);
     final File file3 = new File(_tempDir, "ABC2.scala");
     
     Utilities.invokeAndWait(new Runnable() {
@@ -280,8 +280,8 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
   public void testErrorInSuperClass_NOJOIN() throws Exception {
     _log.log("testErrorInSuperClass_NOJOIN started");
 //    debug.logStart();
-    final OpenDefinitionsDocument doc1 = setupDocument(TEST_ONE);
-    final OpenDefinitionsDocument doc2 = setupDocument(TEST_TWO);
+    final OpenDefinitionsDocument doc1 = setUpDocument(TEST_ONE);
+    final OpenDefinitionsDocument doc2 = setUpDocument(TEST_TWO);
     final File file1 = new File(_tempDir, "TestOne.scala");
     final File file2 = new File(_tempDir, "TestTwo.scala");
     

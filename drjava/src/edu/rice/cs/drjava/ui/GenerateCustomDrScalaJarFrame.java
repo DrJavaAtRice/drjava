@@ -113,7 +113,7 @@ public class GenerateCustomDrScalaJarFrame extends SwingFrame {
 
   /** Initializes the components in this frame. */
   private void init() {
-    _setupPanel(_mainPanel);
+    _setUpPanel(_mainPanel);
     JScrollPane scrollPane = new JScrollPane(_mainPanel);
     Container cp = getContentPane();
     
@@ -562,7 +562,7 @@ public class GenerateCustomDrScalaJarFrame extends SwingFrame {
   /** Set up the panel with the explanation, the output file selector,
     * and the table with the additional sources.
     * @param panel to which the components get added */
-  private void _setupPanel(JPanel panel) {
+  private void _setUpPanel(JPanel panel) {
     GridBagLayout gridbag = new GridBagLayout();
     GridBagConstraints c = new GridBagConstraints();
     panel.setLayout(gridbag);

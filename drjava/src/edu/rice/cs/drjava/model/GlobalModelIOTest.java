@@ -74,7 +74,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
         
     assertNumOpenDocs(1);
     
-    OpenDefinitionsDocument doc1 = setupDocument(FOO_TEXT);
+    OpenDefinitionsDocument doc1 = setUpDocument(FOO_TEXT);
     assertNumOpenDocs(2);
     
     // Create a second, empty document
@@ -100,9 +100,9 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     _log.log("+++Starting testMultipleFilesArray");
 
     OpenDefinitionsDocument doc1, doc2, doc3;
-    doc1 = setupDocument(FOO_TEXT);
-    doc2 = setupDocument(BAR_TEXT);
-    doc3 = setupDocument(FOO_TEXT);
+    doc1 = setUpDocument(FOO_TEXT);
+    doc2 = setUpDocument(BAR_TEXT);
+    doc3 = setUpDocument(FOO_TEXT);
     assertNumOpenDocs(4);
     
     List<OpenDefinitionsDocument> docs = _model.getSortedOpenDefinitionsDocuments();
@@ -122,9 +122,9 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     _log.log("+++Starting testCloseMultipleFiles()");
         
     assertNumOpenDocs(1);
-    OpenDefinitionsDocument doc1 = setupDocument(FOO_TEXT);
+    OpenDefinitionsDocument doc1 = setUpDocument(FOO_TEXT);
     assertNumOpenDocs(2);
-    OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
+    OpenDefinitionsDocument doc2 = setUpDocument(BAR_TEXT);
     assertNumOpenDocs(3);
     
     _model.closeFile(doc1);
@@ -148,7 +148,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     
     _log.log("+++Starting testCloseFileDisallowAbandon");
     
-    OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
+    OpenDefinitionsDocument doc = setUpDocument(FOO_TEXT);
     
     // Try to close and check for proper events
     TestListener listener = new TestIOListener() {
@@ -169,7 +169,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
   
   /** Creates a new document, modifies it, but disallows a call to close it without saving changes. */
   public void testCloseFileDisallowAbandon() throws BadLocationException {
-    OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
+    OpenDefinitionsDocument doc = setUpDocument(FOO_TEXT);
     
     TestListener listener = new TestIOListener() {
       public synchronized boolean canAbandonFile(OpenDefinitionsDocument doc) {
@@ -228,7 +228,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     
     _log.log("+++Starting testCancelOpenFile");
     
-    OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
+    OpenDefinitionsDocument doc = setUpDocument(FOO_TEXT);
     assertNumOpenDocs(2);
     
     final TestListener listener = new TestIOListener() {
@@ -443,8 +443,8 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     
     _log.log("+++Starting CancelMultipleOpenFiles");
     
-    OpenDefinitionsDocument doc1 = setupDocument(FOO_TEXT);
-    OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
+    OpenDefinitionsDocument doc1 = setUpDocument(FOO_TEXT);
+    OpenDefinitionsDocument doc2 = setUpDocument(BAR_TEXT);
     assertNumOpenDocs(3);
     
     final TestListener listener = new TestIOListener() {
@@ -603,7 +603,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     
     _log.log("+++Starting testCancelFirstSave");
  
-    OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
+    OpenDefinitionsDocument doc = setUpDocument(FOO_TEXT);
     
     // No need to override methods since no events should be fired
     _model.addListener(new TestListener());
@@ -622,7 +622,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     
     _log.log("+++Starting testRealSaveFirstSave");
     
-    OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
+    OpenDefinitionsDocument doc = setUpDocument(FOO_TEXT);
     final File file = tempFile();
     
     TestListener listener = new TestListener() {
@@ -652,7 +652,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
   /** Makes a first save-copy of the current document, ensures that it's still modified. */
   public void testRealSaveFirstSaveCopy() throws BadLocationException, IOException {
     _log.log("+++Starting testRealSaveFirstSaveCopy");
-    OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
+    OpenDefinitionsDocument doc = setUpDocument(FOO_TEXT);
     final File file = tempFile();
     
     TestListener listener = new TestListener() {
@@ -688,7 +688,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     DrScala.getConfig().setSetting(BACKUP_FILES, Boolean.FALSE);
     Utilities.clearEventQueue();  // config changes rely on the event thread
     
-    final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
+    final OpenDefinitionsDocument doc = setUpDocument(FOO_TEXT);
     final File file = tempFile();
     
     // No listeners here -- other tests ensure the first save works
@@ -784,7 +784,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     
     {/* Bracket former testSaveAlreadySaved */
       
-      OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
+      OpenDefinitionsDocument doc = setUpDocument(FOO_TEXT);
       final File file = tempFile();
       
       // No listeners here -- other tests ensure the first save works
@@ -844,7 +844,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
      
     { /* Bracket former testCancelSaveAsAlreadySaved */
    
-      final OpenDefinitionsDocument fooDoc = setupDocument(FOO_TEXT);
+      final OpenDefinitionsDocument fooDoc = setUpDocument(FOO_TEXT);
       final File fooFile = tempFile();
       
       // No listeners here -- other tests ensure the first save works
@@ -883,7 +883,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     { /* Bracket former testSaveAsAlreadySaved */
       /** Ensures that saveAs saves to a different file. */
       
-      OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
+      OpenDefinitionsDocument doc = setUpDocument(FOO_TEXT);
       final File file1 = tempFile();
       final File file2 = tempFile();
       
@@ -933,7 +933,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
       Utilities.invokeAndWait(new Runnable() {
         public void run() { 
           try {
-            OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
+            OpenDefinitionsDocument doc = setUpDocument(FOO_TEXT);
             File file = tempFile();
             doc.saveFileAs(new WarningFileSelector(file));
             fail("Did not warn of open file as expected");
@@ -991,9 +991,9 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     { /* Bracket former testSaveAllSaveCorrectFiles */
       
       _log.log("+++Starting testSaveAllSaveCorrectFiles");
-      OpenDefinitionsDocument fooDoc = setupDocument(FOO_TEXT);
-      OpenDefinitionsDocument barDoc = setupDocument(BAR_TEXT);
-      OpenDefinitionsDocument trdDoc = setupDocument("third document contents");
+      OpenDefinitionsDocument fooDoc = setUpDocument(FOO_TEXT);
+      OpenDefinitionsDocument barDoc = setUpDocument(BAR_TEXT);
+      OpenDefinitionsDocument trdDoc = setUpDocument("third document contents");
       final File fileFoo = tempFile();
       final File fileBar = tempFile();
       final File fileTrd = tempFile();
@@ -1208,7 +1208,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     _log.log("Resetting interactions in testSaveClearAndLoadHistory");
     Utilities.invokeLater(new Runnable() { 
       public void run() {
-        _model.resetInteractions(_model.getWorkingDirectory());
+        _model.resetInterpreter(_model.getWorkingDirectory());
         _log.log("Interactions reset is complete.");
         _model.resetConsole();
       }
@@ -1288,7 +1288,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     */
   public void testFileMovedWhenTriedToSave() throws BadLocationException, IOException {
     
-    final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
+    final OpenDefinitionsDocument doc = setUpDocument(FOO_TEXT);
     final File file = tempFile();
     
     _log.log("+++Starting testFileMovedWhenTriedToSave+++");

@@ -126,7 +126,7 @@ public class ConfigFrame extends SwingFrame {
       public void actionPerformed(ActionEvent e) {
         // Always save settings
         try {
-//          _mainFrame.enableResetInteractions();
+//          _mainFrame.enableResetInterpreter();
           saveSettings(); 
           _applyButton.setEnabled(false); 
           
@@ -144,7 +144,7 @@ public class ConfigFrame extends SwingFrame {
         // Always apply and save settings
         boolean successful = true;
         try {
-//          _mainFrame.enableResetInteractions();
+//          _mainFrame.enableResetInterpreter();
           successful = saveSettings();
         }
         catch (IOException ioe) {
@@ -421,50 +421,50 @@ public class ConfigFrame extends SwingFrame {
   private void _createPanels() {
 
     PanelTreeNode resourceLocNode = _createPanel("Resource Locations");
-    _setupResourceLocPanel(resourceLocNode.getPanel());
+    _setUpResourceLocPanel(resourceLocNode.getPanel());
 
     PanelTreeNode displayNode = _createPanel("Display Options");
-    _setupDisplayPanel(displayNode.getPanel());
+    _setUpDisplayPanel(displayNode.getPanel());
     
     PanelTreeNode fontNode = _createPanel("Fonts", displayNode);
-    _setupFontPanel(fontNode.getPanel());
+    _setUpFontPanel(fontNode.getPanel());
 
     PanelTreeNode colorNode = _createPanel("Colors", displayNode);
-    _setupColorPanel(colorNode.getPanel());
+    _setUpColorPanel(colorNode.getPanel());
 
     PanelTreeNode positionsNode = _createPanel("Window Positions", displayNode);
-    _setupPositionsPanel(positionsNode.getPanel());
+    _setUpPositionsPanel(positionsNode.getPanel());
 
     PanelTreeNode keystrokesNode = _createPanel("Key Bindings");
-    _setupKeyBindingsPanel(keystrokesNode.getPanel());
+    _setUpKeyBindingsPanel(keystrokesNode.getPanel());
     
     PanelTreeNode compilerOptionsNode = _createPanel("Compiler Options");
-    _setupCompilerPanel(compilerOptionsNode.getPanel());
+    _setUpCompilerPanel(compilerOptionsNode.getPanel());
     
     PanelTreeNode interactionsNode = _createPanel("Interactions Pane");
-    _setupInteractionsPanel(interactionsNode.getPanel());
+    _setUpInteractionsPanel(interactionsNode.getPanel());
     
     /* Debugger deactivated in DrScala */
 //    PanelTreeNode debugNode = _createPanel("Debugger");
-//    _setupDebugPanel(debugNode.getPanel());
+//    _setUpDebugPanel(debugNode.getPanel());
 
     PanelTreeNode junitNode = _createPanel("JUnit");
-    _setupJUnitPanel(junitNode.getPanel());
+    _setUpJUnitPanel(junitNode.getPanel());
     
     PanelTreeNode scaladocNode = _createPanel("Scaladoc");
-    _setupScaladocPanel(scaladocNode.getPanel());
+    _setUpScaladocPanel(scaladocNode.getPanel());
 
     PanelTreeNode notificationsNode = _createPanel("Notifications");
-    _setupNotificationsPanel(notificationsNode.getPanel());
+    _setUpNotificationsPanel(notificationsNode.getPanel());
     
     PanelTreeNode miscNode = _createPanel("Miscellaneous");
-    _setupMiscPanel(miscNode.getPanel());
+    _setUpMiscPanel(miscNode.getPanel());
     
     PanelTreeNode fileTypesNode = _createPanel("File Types", miscNode);
-    _setupFileTypesPanel(fileTypesNode.getPanel());
+    _setUpFileTypesPanel(fileTypesNode.getPanel());
     
     PanelTreeNode jvmsNode = _createPanel("JVMs", miscNode);
-    _setupJVMsPanel(jvmsNode.getPanel());
+    _setUpJVMsPanel(jvmsNode.getPanel());
     
     // Expand the display options node
     //DrJava.consoleOut().println("expanding path...");
@@ -523,7 +523,7 @@ public class ConfigFrame extends SwingFrame {
   }
   
   /** Add all of the components for the Resource Locations panel of the preferences window. */
-  private void _setupResourceLocPanel(ConfigPanel panel) {
+  private void _setUpResourceLocPanel(ConfigPanel panel) {
     FileOptionComponent browserLoc =
       newFileOptionComponent(BROWSER_FILE, _browserChooser);
     addOptionComponent(panel, browserLoc);    
@@ -548,7 +548,7 @@ public class ConfigFrame extends SwingFrame {
   }
 
   /** Add all of the components for the Display Options panel of the preferences window. */
-  private void _setupDisplayPanel(ConfigPanel panel) {
+  private void _setUpDisplayPanel(ConfigPanel panel) {
 
     final ForcedChoiceOptionComponent lookAndFeelComponent =
       newForcedChoiceOptionComponent(LOOK_AND_FEEL);
@@ -613,7 +613,7 @@ public class ConfigFrame extends SwingFrame {
   }
 
   /** Add all of the components for the Font panel of the preferences window. */
-  private void _setupFontPanel(ConfigPanel panel) {
+  private void _setUpFontPanel(ConfigPanel panel) {
     addOptionComponent(panel, newFontOptionComponent(FONT_MAIN));
     addOptionComponent(panel, newFontOptionComponent(FONT_LINE_NUMBERS));
     addOptionComponent(panel, newFontOptionComponent(FONT_DOCLIST));
@@ -624,7 +624,7 @@ public class ConfigFrame extends SwingFrame {
 
   /** Adds all of the components for the Color panel of the preferences window.
    */
-  private void _setupColorPanel(ConfigPanel panel) {
+  private void _setUpColorPanel(ConfigPanel panel) {
     addOptionComponent(panel, newColorOptionComponent(DEFINITIONS_NORMAL_COLOR));
     addOptionComponent(panel, newColorOptionComponent(DEFINITIONS_KEYWORD_COLOR));
     addOptionComponent(panel, newColorOptionComponent(DEFINITIONS_TYPE_COLOR));
@@ -666,7 +666,7 @@ public class ConfigFrame extends SwingFrame {
   }
 
   /** Add all of the components for the Positions panel of the preferences window. */
-  private void _setupPositionsPanel(ConfigPanel panel) {
+  private void _setUpPositionsPanel(ConfigPanel panel) {
     addOptionComponent(panel, newBooleanOptionComponent(WINDOW_STORE_POSITION, false)
                          .setEntireColumn(true));
     addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
@@ -778,7 +778,7 @@ public class ConfigFrame extends SwingFrame {
   
   /** Adds all of the components for the Key Bindings panel of the preferences window.
    */
-  private void _setupKeyBindingsPanel(ConfigPanel panel) {
+  private void _setUpKeyBindingsPanel(ConfigPanel panel) {
     // using a treemap because it automatically sorts element upon insertion
     TreeMap<String,ArrayListKeyStrokeOptionComponent> _comps = new TreeMap<String,ArrayListKeyStrokeOptionComponent>();
 
@@ -819,7 +819,7 @@ public class ConfigFrame extends SwingFrame {
 
   /* Debugger deactivated in DrScala */
 //  /** Add all of the components for the Debugger panel of the preferences window. */
-//  private void _setupDebugPanel(ConfigPanel panel) {
+//  private void _setUpDebugPanel(ConfigPanel panel) {
 //    if (!_mainFrame.getModel().getDebugger().isAvailable()) {
 //      // Explain how to use debugger
 //      String howto =
@@ -856,7 +856,7 @@ public class ConfigFrame extends SwingFrame {
 //  }
 
   /** Add all of the components for the Scaladoc panel of the preferences window. */
-  private void _setupScaladocPanel(ConfigPanel panel) {
+  private void _setUpScaladocPanel(ConfigPanel panel) {
     addOptionComponent(panel, newForcedChoiceOptionComponent(SCALADOC_API_REF_VERSION));
     addOptionComponent(panel, newForcedChoiceOptionComponent(SCALADOC_ACCESS_STATUS));
 //    addOptionComponent(panel, newForcedChoiceOptionComponent(SCALADOC_LINK_VERSION));
@@ -918,7 +918,7 @@ public class ConfigFrame extends SwingFrame {
   }
 
   /** Adds all of the components for the Prompts panel of the preferences window. */
-  private void _setupNotificationsPanel(ConfigPanel panel) {
+  private void _setUpNotificationsPanel(ConfigPanel panel) {
     // Quit
     addOptionComponent(panel, newBooleanOptionComponent(QUIT_PROMPT, false)
                          .setEntireColumn(true));
@@ -1023,7 +1023,7 @@ public class ConfigFrame extends SwingFrame {
   }
 
   /** Adds all of the components for the Miscellaneous panel of the preferences window. */
-  private void _setupMiscPanel(ConfigPanel panel) {
+  private void _setUpMiscPanel(ConfigPanel panel) {
     /* Dialog box options */
     addOptionComponent(panel, newIntegerOptionComponent(INDENT_INC));
     addOptionComponent(panel, newIntegerOptionComponent(RECENT_FILES_MAX_SIZE));
@@ -1056,7 +1056,7 @@ public class ConfigFrame extends SwingFrame {
   }  
 
   /** Adds all of the components for the JVMs panel of the preferences window. */
-  private void _setupJVMsPanel(ConfigPanel panel) {
+  private void _setUpJVMsPanel(ConfigPanel panel) {
     addOptionComponent(panel, 
                        newForcedChoiceOptionComponent(MASTER_JVM_XMX));
     addOptionComponent(panel, 
@@ -1069,7 +1069,7 @@ public class ConfigFrame extends SwingFrame {
   }
 
   /** Adds all of the components for the file types panel of the preferences window. */
-  private void _setupFileTypesPanel(ConfigPanel panel) {
+  private void _setUpFileTypesPanel(ConfigPanel panel) {
     if (PlatformFactory.ONLY.canRegisterFileExtension()) {
       addOptionComponent(panel, new LabelComponent("<html>Assign DrScala project file extension<br>"+
                                                    "(with the extensions .drscala) to DrScala.<br>"+
@@ -1175,7 +1175,7 @@ public class ConfigFrame extends SwingFrame {
   
   /** Adds all of the components for the Compiler Options Panel of the preferences window
     */
-  private void _setupCompilerPanel(ConfigPanel panel) {
+  private void _setUpCompilerPanel(ConfigPanel panel) {
     addOptionComponent(panel, 
                        newBooleanOptionComponent(SHOW_UNCHECKED_WARNINGS, false)
                          .setEntireColumn(true));
@@ -1230,7 +1230,7 @@ public class ConfigFrame extends SwingFrame {
   }
   
   /** Add all of the components for the Interactions panel of the preferences window. */
-  private void _setupInteractionsPanel(ConfigPanel panel) {
+  private void _setUpInteractionsPanel(ConfigPanel panel) {
     final DirectoryOptionComponent wdComponent =
       newDirectoryOptionComponent(FIXED_INTERACTIONS_DIRECTORY, _dirChooser);
     addOptionComponent(panel, wdComponent);
@@ -1265,7 +1265,7 @@ public class ConfigFrame extends SwingFrame {
   }
 
   /** Add all of the components for the JUnit panel of the preferences window. */
-  private void _setupJUnitPanel(ConfigPanel panel) {
+  private void _setUpJUnitPanel(ConfigPanel panel) {
     final BooleanOptionComponent junitLocEnabled =
       newBooleanOptionComponent(JUNIT_LOCATION_ENABLED,false)
       .setEntireColumn(true);

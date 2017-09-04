@@ -118,7 +118,7 @@ public final class CommandLineTest extends DrScalaTestCase {
         
         _log.log("Creating a MainFrame for " + this);
         _mf = new MainFrame(); 
-        _log.log("Created a MainFrame for " + this + "; stating file setup");
+        _log.log("Created a MainFrame for " + this + "; stating file setUp");
         
         try {
           f1 = File.createTempFile("DrScala-test", ".scala").getCanonicalFile();

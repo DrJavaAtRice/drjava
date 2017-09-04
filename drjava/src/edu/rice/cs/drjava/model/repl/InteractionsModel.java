@@ -42,27 +42,21 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-import javax.swing.text.BadLocationException;
-import java.awt.EventQueue;
-
 import edu.rice.cs.drjava.ui.DrScalaErrorHandler;
 import edu.rice.cs.drjava.ui.InteractionsPane;
-import edu.rice.cs.drjava.ui.avail.DefaultGUIAvailabilityNotifier;
-import edu.rice.cs.drjava.ui.avail.GUIAvailabilityListener;
 import edu.rice.cs.util.FileOpenSelector;
+import edu.rice.cs.util.Log;
 import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.*;  // imports Log
+
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.ConsoleDocumentInterface;
 import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.plt.tuple.Pair;
-import edu.rice.cs.drjava.DrScala;
-import edu.rice.cs.drjava.config.OptionConstants;
 
-import static edu.rice.cs.plt.debug.DebugUtil.debug;
+//import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /** A Swing specific model for the DrScala InteractionsPane.  It glues together an InteractionsDocument, an 
   * InteractionsPane and a JavaInterpreter.  This abstract class provides common functionality for all such models.
@@ -78,9 +72,6 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     * with print calls. */
   public static final int WRITE_DELAY = 50;
   
-  /** GUI component availability notifier.  An identical copy is heavily used in MainFrame. */
-  final DefaultGUIAvailabilityNotifier _guiNotifier = DefaultGUIAvailabilityNotifier.ONLY;
-  
   public static final Log _log = new Log("GlobalModel.txt", false);
  
 //  public static final String _newLine = "\n"; // was StringOps.EOL; but Swing uses '\n' for newLine
@@ -94,21 +85,11 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     */
   protected volatile InteractionsDocument _document;
   
-//  /** Whether we are waiting for the interpreter to register for the first time. */
-//  protected volatile boolean _waitingForFirstInterpreter;
-  
   /** The working directory for the current interpreter. */
   protected volatile File _workingDir;
   
-  /** A lock object to prevent print calls to System.out or System.err from flooding the JVM, ensuring the UI remains
-    * responsive.  Only public for testing purposes. */
-  public final Object _writerLock;
-  
-  /** Number of milliseconds to wait after each println, to prevent the JVM from being flooded with print calls. */
-  private final int _writeDelay;
-  
-  /** The String added to history when the interaction is complete or an error is thrown */
-  private volatile String _toAddToHistory = "";
+  /* Flag set only while resetInterpreter is in progress. Only modified by code in the class DefaultInteractionsModel*/ 
+  protected volatile boolean _restartInProgress = false;
   
   /** The input listener to listen for requests to System.in. */
   protected volatile InputListener _inputListener;
@@ -116,52 +97,43 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   /** The embedded interactions document (a SwingDocument in native DrJava) */
   protected final ConsoleDocumentInterface _cDoc;
   
-  /** The interactions pane attached to this document.  In contrast to a standard MVC decomposition, where the model
-    * and the view are independent components, an interactions model inherently includes a prompt and a cursor marking
-    * where the next input expression (in progress) begins and where the cursor is within that expression.  In Swing, the
-    * view contains the cursor.  Our InteractionsDocument (a form of ConsoleDocument) contains the prompt.  Public only for
-    * testing purposes; otherwise protected.
-    * 
-    * TODO: The Eclipse plug-in doesn't use Swing, and so has no InteractionsPane.  In that case, _pane is always null.
-    * This should be redesigned to eliminate the strong coupling with Swing.
-    */
-  public volatile InteractionsPane _pane;  // initially null
+  /** A lock object to prevent print calls to System.out or System.err from flooding the JVM, ensuring the UI remains
+    * responsive.  Only public for testing purposes. */
+  private final Object _writerLock;
   
-  /** Banner displayed at top of the interactions document */
-  private volatile String _banner;
+  /** Number of milliseconds to wait after each println, to prevent the JVM from being flooded with print calls. */
+  private final int _writeDelay;
+  
+  /** The String added to history when the interaction is complete or an error is thrown */
+  private volatile String _toAddToHistory = "";
   
   /** Last error, or null if successful. */
   protected volatile String _lastError = null;
   protected volatile String _secondToLastError = null;
   
-  /** Constructs an InteractionsModel.  The InteractionsPane is created later by the InteractionsController.
-    * As a result, the posting of a banner at the top of InteractionsDocument must be deferred
-    * until after the InteracationsPane has been set up.
+  /** Constructs part of an InteractionsModel, namely the interactions document.  Classes derived from this one
+    * create the interactions pane (including printing a banner with the working directory which is unknown
+    * in this class) and set up an interpreter.  This constructs the interactions document and installs a degnerate
+    * input listener.
     * @param cDoc document to use in the InteractionsDocument
-    * @param wd Working directory for the interpreter
     * @param historySize Number of lines to store in the history
     * @param writeDelay Number of milliseconds to wait after each println
     */
-  public InteractionsModel(ConsoleDocumentInterface cDoc, final File wd, int historySize, int writeDelay) {
+  public InteractionsModel(ConsoleDocumentInterface cDoc, int historySize, int writeDelay) {
     _document = new InteractionsDocument(cDoc, historySize);
     _cDoc = cDoc;
     _writeDelay = writeDelay;
-//    _waitingForFirstInterpreter = true;
-    _workingDir = wd;
-    _writerLock = new Object();
-    
+    _writerLock = new Object(); 
     _inputListener = NoInputListener.ONLY;
-    Utilities.invokeLater(new Runnable() {
-      public void run() { _document.setBanner(generateBanner(wd));}
-    });
   }
   
-  /** Sets the _pane field and initializes the caret position in the pane.  Called in the InteractionsController. */
-  public void setUpPane(InteractionsPane pane) { 
-    _pane = pane;
-    _pane.setCaretPosition(_document.getLength());
-//    _caretInit();  // places the caret (in the UNIQUE interactions pane) at the end of the document
-  }
+  /** Sets _pane and initializes the caret position in the pane.  Called in the InteractionsController. */
+  public abstract void setUpPane(InteractionsPane pane);
+     
+  /** Gets _pane for this interactions model */
+  public abstract InteractionsPane getPane();
+
+  protected abstract void scrollToCaret();
   
   /** Adds an InteractionsListener to the model.
     * @param listener a listener that reacts to Interactions events. 
@@ -181,7 +153,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   public InteractionsDocument getDocument() { return _document; }
   
   public void interactionContinues() {
-    _document.setInProgress(false);
+    _document.setInteractionInProgress(false);
     _notifyInteractionEnded();
     _notifyInteractionIncomplete();
   }
@@ -192,7 +164,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     Utilities.invokeLater(new Runnable() {
       public void run() {
         
-        if (_document.inProgress()) return;  // Don't start a new interaction while one is in progress
+        if (_document.interactionInProgress() ) return;  // Don't start a new interaction while one is in progress
         
         String text = _document.getCurrentInteraction();
         String toEval = text.trim();
@@ -218,7 +190,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   private void _prepareToInterpret(String text) {
     _addNewline();
     _notifyInteractionStarted();
-    _document.setInProgress(true);
+    _document.setInteractionInProgress(true);
     _toAddToHistory = text; // _document.addToHistory(text);
     //Do not add to history immediately in case the user is not finished typing when they press return
   }
@@ -241,39 +213,22 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   /** Notifies listeners that an interaction has started. (Subclasses must maintain listeners.) */
   public abstract void _notifyInteractionStarted();
   
-  /** Gets the string representation of the value of a variable in the current interpreter.
-    * @param var the name of the variable
-    * @return A string representation of the value, or {@code null} if the variable is not defined.
-    */
-  public abstract Pair<String,String> getVariableToString(String var);
+//  /** Gets the string representation of the value of a variable in the current interpreter.
+//    * @param var the name of the variable
+//    * @return A string representation of the value, or {@code null} if the variable is not defined.
+//    */
+//  public abstract Pair<String,String> getVariableToString(String var);
   
-  public void documentReset() { 
-    assert EventQueue.isDispatchThread();
-    _log.log("invoking documentReset()");
-    _document.reset(generateBanner(_workingDir));
-    _log.log("documentReset() returned");
-    _document.clearColoring();
-     _guiNotifier.available(GUIAvailabilityListener.ComponentType.INTERACTIONS);
-  }
+  public abstract void documentReset();
   
-    /** Resets the Java interpreter without changing the working directory or clearing auto imports. */
-  public final boolean softResetInterpreter() {
-    interpreterResetting();
-    return _softResetInterpreter();
-  }
-  
-  /** Resets the Java interpreter with working directory wd. */
-  public final boolean resetInterpreter(File wd) {
-    _workingDir = wd;
-    interpreterResetting(); // performed asynchronously in event thread
-    return _resetInterpreter(wd);
-  }
-  
-  protected abstract boolean _resetInterpreter(File wd);
-  protected abstract boolean _softResetInterpreter();
+  /** Resets the Java interpreter with working directory wd. All interpeter resets invoke this method! */
+  public abstract void resetInterpreter(File wd);
   
   /** Returns the working directory for the current interpreter. */
   public File getWorkingDirectory() { return _workingDir; }
+  
+  /** Resets the interpreter by replacing the slave JVM. */
+  public abstract void hardResetInterpreter(File wd);
 
   /** These add the given path to the project files classpaths used in the interpreter.
     * @param f  the path to add
@@ -416,43 +371,6 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     if (!"".equals(last)) interactions.add(last);
     return interactions;
   }
-  
-  
-  /* Debugger deactivated in DrScala */
-//  /** Returns the port number to use for debugging the interactions JVM. Generates an available port if one has 
-//    * not been set manually.
-//    * @throws IOException if unable to get a valid port number.
-//    */
-//  public int getDebugPort() throws IOException {
-//    if (!_debugPortSet) _createNewDebugPort();
-//    return _debugPort;
-//  }
-//  
-//  /** Generates an available port for use with the debugger.
-//    * @throws IOException if unable to get a valid port number.
-//    */
-//  protected void _createNewDebugPort() throws IOException {
-////    Utilities.showDebug("InteractionsModel: _createNewDebugPort() called");
-//    try {
-//      ServerSocket socket = new ServerSocket(0);
-//      _debugPort = socket.getLocalPort();
-//      socket.close();
-//    }
-//    catch (java.net.SocketException se) {
-//      // something wrong with sockets, can't use for debugger
-//      _debugPort = -1;
-//    }
-//    _debugPortSet = true;
-//    System.setProperty("drscala.debug.port", String.valueOf(_debugPort));
-//  }
-//  
-//  /** Sets the port number to use for debugging the interactions JVM.
-//    * @param port Port to use to debug the interactions JVM
-//    */
-//  public void setDebugPort(int port) {
-//    _debugPort = port;
-//    _debugPortSet = true;
-//  }
     
   private static final int DELAY_INTERVAL = 10;
   private volatile int delayCount = DELAY_INTERVAL;
@@ -525,7 +443,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     Utilities.invokeLater(new Runnable() {
       public void run() {
         _document.addToHistory(_toAddToHistory);
-        _document.setInProgress(false);
+        _document.setInteractionInProgress(false);
         _log.log("_interactionIsOver method inserting prompt in interactions pane");
         _document.insertPrompt();
         _notifyInteractionEnded();
@@ -539,7 +457,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     Utilities.invokeLater(new Runnable() {
       public void run() {
         _document.addToHistory(_toAddToHistory);
-        _document.setInProgress(false);
+        _document.setInteractionInProgress(false);
         _document.insertContinuationString();
         _notifyInteractionEnded();
       }
@@ -687,7 +605,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     Utilities.invokeLater(new Runnable() {
       public void run() {
         _document.insertBeforeLastPrompt(" Resetting interactions by killing and restarting the interactions JVM.  Be patient ...\n", InteractionsDocument.ERROR_STYLE);
-        _document.setInProgress(true);
+        _document.setInteractionInProgress(true);
       }
     });
   }
@@ -697,13 +615,13 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     */
   public void interpreterResetFailed(Throwable t) {
     _interpreterResetFailed(t);
-    _document.setInProgress(false);
+    _document.setInteractionInProgress(false);
     _notifyInterpreterResetFailed(t);
   }
   
   public void interpreterWontStart(Exception e) {
     _interpreterWontStart(e);
-    _document.setInProgress(true); // prevent editing -- is there a better way to do this?
+    _document.setInteractionInProgress(true); // prevent editing -- is there a better way to do this?
   }
   
   /** Any extra action to perform (beyond notifying listeners) when the interpreter fails to reset.
@@ -718,85 +636,8 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   
   /** Action to perform when the interpreter won't start. */
   protected abstract void _interpreterWontStart(Exception e);
-  
-  public String getBanner() { return _banner; }
-  
-  public String getStartUpBanner() { return generateBanner(_workingDir); }
-  
-  /* The method repackages generates the banner corresponding to wd, binds _banner to this value, and returns it. 
-   * It is package private so that RMIInteractionsModel inherits it. */
-  String generateBanner(File wd) { 
-    _banner = BANNER_PREFIX + "  Working directory is " + wd + '\n';
-    return _banner;
-  }
-  
-//  /** Initializes the caret in a new or reset InteractionsModel. */
-//  private void _caretInit() { advanceCaret(_document.getLength()); }
-  
-//  /** Advances the caret in the interactions pane by n characters. After component realization, only runs in event thread
-//    * and assumes read lock or write lock is already held. 
-//    */
-//  protected void advanceCaret(final int n) {
-//    /* In legacy unit tests, _pane can apparently be null in some cases.  It can also be mutated in the middle of run() 
-//     in InteractionsDJDocumentTest.testStylesListContentAndReset. */
-//    final InteractionsPane pane = _pane;  
-////    if (Utilities.TEST_MODE && pane == null) return;  // Some legacy unit tests do not set up an interactions pane
-//
-//    int caretPos = pane.getCaretPosition();     
-//    int newCaretPos = Math.min(caretPos + n, _document.getLength());
-//    pane.setCaretPos(newCaretPos);
-//  }
-  
-  protected void scrollToCaret() {
-    Utilities.invokeLater(new Runnable() {
-      public void run() {
-        final InteractionsPane pane = _pane; 
-        if (pane == null) return;  // Can be called in tests when component has not been realized
-        int pos = pane.getCaretPosition();
-        try { pane.scrollRectToVisible(pane.modelToView(pos)); }
-        catch(BadLocationException e) { throw new UnexpectedException(e); }
-      }
-    });
-  }
-                                                    
-//  /** Called when a new Java interpreter has registered and is ready for use. */
-//  public void interpreterReady(final File wd) { interpreterReady(); }
-  
-  /** Directly called when a new Java interpreter has registered and is ready for use. 
-    * Indirectly called by interpreterReady(final File wd). */
-  public void interpreterReady() {
-    _log.log("interpreterReady() called in InteractionsModel");
-    Utilities.invokeLater(new Runnable() {
-      public void run() {
-        _document.setInProgress(false);
-        if (_pane != null) _pane.setCaretPosition(_document.getLength());  
-        performDefaultImports();
-        _notifyInterpreterReady();
-      }
-    });
-  }
 
-  /** Perform the default imports of the classes and packages listed in the INTERACTIONS_AUTO_IMPORT_CLASSES. */
-  public void performDefaultImports() {
-    java.util.ArrayList<String> classes = DrScala.getConfig().getSetting(OptionConstants.INTERACTIONS_AUTO_IMPORT_CLASSES);
-    final StringBuilder sb = new StringBuilder();
-    
-    for(String s: classes) {
-      String name = s.trim();
-      if (s.length() > 0) {
-        sb.append("import ");
-        sb.append(s.trim());
-        sb.append("; ");
-      }
-    }
-    if (sb.length() > 0) {
-      interpretCommand(sb.toString());
-      _document.insertBeforeLastPrompt("Default imports: " + sb.toString() + "\n", InteractionsDocument.DEBUGGER_STYLE);
-    }
-  }
-  
-//  /** Notifies listeners that the interpreter is ready. (Subclasses must maintain listeners.) */
-//  public abstract void _notifyInterpreterReady(File wd);
+  public abstract String getStartUpBanner();
   
   /** Singleton InputListener which should never be asked for input. */
   private static class NoInputListener implements InputListener {
@@ -819,10 +660,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     return _secondToLastError;
   }
   
-  /** Reset the information about the last and second to last error. */
-  public void resetLastErrors() {
-    _lastError = _secondToLastError = null;
-  }
+  abstract public void resetLastErrors();
   
   /** Returns the last history item and then removes it, or returns null if the history is empty. */
   public String removeLastFromHistory() {

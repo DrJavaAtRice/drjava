@@ -156,7 +156,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     _log.log("Starting testInteractionsCanSeeCompiledClasses");
     
     // Compile Foo
-    OpenDefinitionsDocument doc1 = setupDocument(FOO_TEXT);
+    OpenDefinitionsDocument doc1 = setUpDocument(FOO_TEXT);
     File dir1 = tempDirectory("dir1");
     File file1 = tempFile("TestFile1", dir1);
     _log.log("Prior to compilation, interactions class Path is: " + _model.getInteractionsClassPath());
@@ -179,7 +179,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     _model.closeFile(doc1);
     
     // Compile Baz which extends Foo in another directory.
-    OpenDefinitionsDocument doc2 = setupDocument(BAZ_TEXT);
+    OpenDefinitionsDocument doc2 = setUpDocument(BAZ_TEXT);
     File dir2 = tempDirectory("dir2");
     File file2 = tempFile("TestFile2", dir2);
     doCompile(doc2, file2);
@@ -209,7 +209,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     
     _log.log("Starting testInteractionsVariableWithLowerCaseClassName");
     // Compile a test file
-    OpenDefinitionsDocument doc1 = setupDocument("class DrScalaTestClass {}");
+    OpenDefinitionsDocument doc1 = setUpDocument("class DrScalaTestClass {}");
     File file1 = makeCanonical(new File(_tempDir, "DrScalaTestClass.scala"));
     doCompile(doc1, file1);
     
@@ -233,7 +233,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     OpenDefinitionsDocument doc;
     
     for (int i = 0; i < num_iterations; i++) {
-      doc = setupDocument(text_before + i + text_after);
+      doc = setUpDocument(text_before + i + text_after);
       file = tempFile(i);
       doCompile(doc, file);
       
@@ -256,7 +256,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     
     OpenDefinitionsDocument doc;
     
-    doc = setupDocument(interface_text);
+    doc = setUpDocument(interface_text);
     doCompile(doc, file);
     
     for (int i = 0; i < 3; i++) {
@@ -286,7 +286,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     
     // Save the footext to DrScalaTestFoo.scala in the subdirectory
     File fooFile = makeCanonical(new File(subdir, "DrScalaTestFoo.scala"));
-    OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
+    OpenDefinitionsDocument doc = setUpDocument(FOO_TEXT);
     saveFileAs(doc, new FileSelector(fooFile));
     
     // No events should fire
@@ -316,7 +316,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     
     // Save the footext to DrScalaTestFoo.scala in the subdirectory
     File fooFile = makeCanonical(new File(subdir, "DrScalaTestFoo.scala"));
-    OpenDefinitionsDocument doc = setupDocument("package a.b.c\n" + FOO_TEXT);
+    OpenDefinitionsDocument doc = setUpDocument("package a.b.c\n" + FOO_TEXT);
     saveFileAs(doc, new FileSelector(fooFile));
 //    System.err.println("Package name is: " + _model.getPackageName());
     
@@ -350,7 +350,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     File relDir = makeCanonical(new File(baseTempDir, "./a/b/../b/c"));
     File fooFile = makeCanonical(new File(relDir, "DrScalaTestFoo.scala"));
     OpenDefinitionsDocument doc =
-      setupDocument("package a.b.c\n" + FOO_TEXT);
+      setUpDocument("package a.b.c\n" + FOO_TEXT);
     saveFileAs(doc, new FileSelector(fooFile));
     
     // No events should fire
@@ -380,7 +380,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     
     // Save the footext to DrScalaTestFoo.scala in the subdirectory
     File fooFile = makeCanonical(new File(subdir, "DrScalaTestFoo.scala"));
-    OpenDefinitionsDocument doc = setupDocument("package a.b.c;\n" + FOO_TEXT);
+    OpenDefinitionsDocument doc = setUpDocument("package a.b.c;\n" + FOO_TEXT);
     saveFileAs(doc, new FileSelector(fooFile));
     
     // No events should fire
@@ -407,7 +407,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     
     // Save the footext to DrScalaTestFoo.scala in the subdirectory
     File fooFile = makeCanonical(new File(subdir, "DrScalaTestFoo.scala"));
-    OpenDefinitionsDocument doc = setupDocument("package a;\n" + FOO_TEXT);
+    OpenDefinitionsDocument doc = setUpDocument("package a;\n" + FOO_TEXT);
     saveFileAs(doc, new FileSelector(fooFile));
     
     // No events should fire
@@ -439,17 +439,17 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     
     // Save the footext to DrScalaTestFoo.scala in subdirectory 1
     File file1 = makeCanonical(new File(subdir1, "DrScalaTestFoo.scala"));
-    OpenDefinitionsDocument doc1 = setupDocument(FOO_TEXT);
+    OpenDefinitionsDocument doc1 = setUpDocument(FOO_TEXT);
     saveFileAs(doc1, new FileSelector(file1));
     
     // Save the bartext to Bar.java in subdirectory 1
     File file2 = makeCanonical(new File(subdir1, "Bar.scala"));
-    OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
+    OpenDefinitionsDocument doc2 = setUpDocument(BAR_TEXT);
     saveFileAs(doc2, new FileSelector(file2));
     
     // Save the bartext to Bar.java in subdirectory 2
     File file3 = makeCanonical(new File(subdir2, "Bar.scala"));
-    OpenDefinitionsDocument doc3 = setupDocument(BAR_TEXT);
+    OpenDefinitionsDocument doc3 = setUpDocument(BAR_TEXT);
     saveFileAs(doc3, new FileSelector(file3));
     
     Utilities.clearEventQueue();
@@ -480,7 +480,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
 //    debug.logStart();
     _log.log("Starting testInteractionsLiveUpdateClassPath");
     
-    OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
+    OpenDefinitionsDocument doc = setUpDocument(FOO_TEXT);
     Utilities.clearEventQueue();
     
     File f = tempFile();
@@ -545,7 +545,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     _log.log("Starting testReplaceInterpreter");
     TestListener listener = new TestListener(); // {
 //      public void interpreterReplaced() {
-////        assertTrue("should not be in progress", !inProgress);
+////        assertTrue("should not be in progress", !interactionInProgress());
 //        interpreterReplacedCount++;
 //      }
 //    };

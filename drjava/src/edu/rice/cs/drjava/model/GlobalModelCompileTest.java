@@ -91,7 +91,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     
      _log.log("Starting testCompileResetsInteractions");
     
-    OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
+    OpenDefinitionsDocument doc = setUpDocument(FOO_TEXT);
     final File file = new File(_tempDir, "DrScalaTestFoo.scala");
     saveFile(doc, new FileSelector(file));
     
@@ -131,7 +131,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     * not do the compile or any other actions.
     */
   public void xtestCompileAbortsIfUnsaved() throws Exception {
-    final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
+    final OpenDefinitionsDocument doc = setUpDocument(FOO_TEXT);
     
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener() {
       public void saveBeforeCompile() {
@@ -155,8 +155,8 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     * it should not do the compile or any other actions.
     */
   public void xtestCompileAbortsIfAnyUnsaved() throws Exception {
-    final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
-    final OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
+    final OpenDefinitionsDocument doc = setUpDocument(FOO_TEXT);
+    final OpenDefinitionsDocument doc2 = setUpDocument(BAR_TEXT);
     
     CompileShouldFailListener listener = new CompileShouldFailListener() {
       public void saveBeforeCompile() {
@@ -182,8 +182,8 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     * compile should occur happily.  Doesn't reset interactions because no interpretations are performed.
     */
   public void xtestCompileAnyUnsavedButSaveWhenAsked() throws BadLocationException, IOException, InterruptedException {
-    final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
-    final OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
+    final OpenDefinitionsDocument doc = setUpDocument(FOO_TEXT);
+    final OpenDefinitionsDocument doc2 = setUpDocument(BAR_TEXT);
     final File file = tempFile();
     final File file2 = tempFile(2);
     
@@ -248,8 +248,8 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
   public void xtestCompileActiveSavedAnyUnsavedButSaveWhenAsked() throws BadLocationException, IOException, 
     InterruptedException {
     
-    final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
-    final OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
+    final OpenDefinitionsDocument doc = setUpDocument(FOO_TEXT);
+    final OpenDefinitionsDocument doc2 = setUpDocument(BAR_TEXT);
     final File file = tempFile();
     final File file2 = tempFile(1);
     

@@ -60,7 +60,7 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
     _log.log("Starting testCompileClassPathOKDefaultPackage1");
 //    System.out.println("testCompileClasspathOKDefaultPackage()");
     // Create/compile foo, assuming it works
-    OpenDefinitionsDocument doc1 = setupDocument(FOO_PACKAGE_AS_PART_OF_FIELD);
+    OpenDefinitionsDocument doc1 = setUpDocument(FOO_PACKAGE_AS_PART_OF_FIELD);
     final File fooFile = new File(_tempDir, "DrScalaTestFoo1.scala");
     _log.log("Saving doc1 as file " + fooFile);
     saveFile(doc1, new FileSelector(fooFile));
@@ -79,7 +79,7 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
   public void testCompileClassPathOKDefaultPackage2() throws BadLocationException, IOException, InterruptedException {
     _log.log("Starting testCompileClassPathOKDefaultPackage2");
     
-    OpenDefinitionsDocument doc2 = setupDocument(FOO_PACKAGE_AS_PART_OF_FIELD + "\n" + FOO2_EXTENDS_FOO_TEXT);
+    OpenDefinitionsDocument doc2 = setUpDocument(FOO_PACKAGE_AS_PART_OF_FIELD + "\n" + FOO2_EXTENDS_FOO_TEXT);
     final File fooFile = new File(_tempDir, "DrScalaTestFoo2.scala");
     _log.log("Saving doc2 as file " + fooFile);
     saveFile(doc2, new FileSelector(fooFile));
@@ -114,7 +114,7 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
 
     // Create/compile foo, assuming it works
     // foo must be public and in DrScalaTestFoo.java!
-    OpenDefinitionsDocument doc1 = setupDocument("package a\n" + FOO_TEXT);
+    OpenDefinitionsDocument doc1 = setUpDocument("package a\n" + FOO_TEXT);
     final File fooFile = new File(aDir, "DrScalaTestFoo.scala");
 //    System.err.println("fooFile = " + fooFile.getCanonicalPath());
     saveFile(doc1, new FileSelector(fooFile));
@@ -135,7 +135,7 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
     _model.removeListener(listener);
     
     OpenDefinitionsDocument doc2 =
-      setupDocument("package b\n" + "import a.DrScalaTestFoo\n" + FOO2_EXTENDS_FOO_TEXT);
+      setUpDocument("package b\n" + "import a.DrScalaTestFoo\n" + FOO2_EXTENDS_FOO_TEXT);
     final File foo2File = new File(bDir, "DrScalaTestFoo2.scala");
 //    System.err.println("foo2File = " + foo2File.getCanonicalPath());
     saveFile(doc2, new FileSelector(foo2File));

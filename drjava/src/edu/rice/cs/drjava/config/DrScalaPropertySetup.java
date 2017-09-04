@@ -59,7 +59,7 @@ import static edu.rice.cs.util.XMLConfig.XMLConfigException;
   *  @version $Id: DrJavaPropertySetup.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class DrScalaPropertySetup implements OptionConstants {
-  public static void setup() {
+  public static void setUp() {
     final String DEF_DIR = "${drjava.working.dir}";
     
     // fake "Config" properties

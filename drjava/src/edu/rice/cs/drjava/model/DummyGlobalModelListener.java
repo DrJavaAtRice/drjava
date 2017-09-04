@@ -39,7 +39,7 @@ package edu.rice.cs.drjava.model;
 import java.io.File;
 import java.util.List;
 import edu.rice.cs.drjava.model.compiler.CompilerListener;
-import edu.rice.cs.drjava.model.repl.DummyInteractionsListener;
+import edu.rice.cs.drjava.model.repl.DefaultInteractionsListener;
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.swing.AsyncTask;
 import edu.rice.cs.util.FileOpenSelector;
@@ -48,7 +48,7 @@ import edu.rice.cs.util.FileOpenSelector;
   * Not currently used.
   * @version $Id: DummyGlobalModelListener.java 5727 2012-09-30 03:58:32Z rcartwright $
   */
-public class DummyGlobalModelListener extends DummyInteractionsListener implements GlobalModelListener {
+public class DummyGlobalModelListener extends DefaultInteractionsListener implements GlobalModelListener {
   
   /** Called when an asynchronous task must be run in the model */
   public <P,R> void executeAsyncTask(AsyncTask<P,R> task, P param, boolean showProgress, boolean lockUI) {  }
@@ -89,6 +89,9 @@ public class DummyGlobalModelListener extends DummyInteractionsListener implemen
   
   /** Called if a compile is aborted. */
   public void compileAborted(Exception e) { }
+
+  /** Called after the active compiler has been changed. */
+  public void activeCompilerChanged() { }
 
   /** Called when a file's main method is about to be run. */
   public void prepareForRun(OpenDefinitionsDocument doc) { }

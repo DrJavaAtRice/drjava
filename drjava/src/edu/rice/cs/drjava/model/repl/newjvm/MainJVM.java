@@ -69,6 +69,7 @@ import edu.rice.cs.util.newjvm.*;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.ConsoleDocument;
 
+import edu.rice.cs.plt.collect.CollectUtil;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.reflect.JavaVersion;
@@ -77,7 +78,6 @@ import edu.rice.cs.plt.tuple.Option;
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.concurrent.JVMBuilder;
 import edu.rice.cs.plt.concurrent.StateMonitor;
-import edu.rice.cs.plt.concurrent.CompletionMonitor;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 import static edu.rice.cs.drjava.config.OptionConstants.*;
@@ -118,9 +118,15 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
 
   // Inheriting static final Log _log from AbstractMasterJVM 
   
+  /* Note that the MainJVM is created only once
+  
   /* TODO: add additional phase to Phase called BusyPhase instead of using a _busy flag */
   private volatile boolean _busy = false;  // flag that records whether the interpreter is busy
   public volatile String _toEval = "";     // the String being evaluated when the interpreter is busy
+  
+  /** static flag giving existence status of interpreter (slave) JVM.  Since it is static, it can be queried before
+    * the MainJVM is created. */
+  public static volatile boolean _interpreterJVMStarted = false;
   
   /** Number of slave startup failures allowed before aborting the startup process. */
   private static final int MAX_STARTUP_FAILURES = 3;
@@ -147,11 +153,17 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   /** Whether to allow "assert" statements to run in the remote JVM. */
   private volatile boolean _allowAssertions = false;
   
-  /** Class path to use for starting the interpreter JVM */
-  private volatile Iterable<File> _startupClassPath;
+  /* _classPath is initialized to ReflectUtil.SYSTEM_CLASS_PATH and updated only when the interpreter is restarted.
+   * in the slave JVM.  In a restart operation, the intended value of the interactions class path is fetched from 
+   * the slave JVM and the class path for new slave JVM is stored in _newClassPath. */
   
-  /** Working directory for slave JVM */
+  /** Caches the current working directory and classPath of the slave JVM; matches the current working directory and
+    * classPath in the slave JVM except during startUp and when a reset is taking place. _classpath should only be 
+    * updated when the current slave JVM is killed and new slave JVM is started. _classPath and _newClassPath should 
+    * never be mutated. */
   private volatile File _workingDir;
+  private volatile List<File> _classPath = ReflectUtil.SYSTEM_CLASS_PATH;
+  private volatile List<File> _newClassPath = ReflectUtil.SYSTEM_CLASS_PATH;
   
   private volatile GlobalModel _model;
   
@@ -159,17 +171,14 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     * global model.  The MainJVM but does not automatically start the Interpreter JVM.  Callers must set the
     * InteractionsModel and JUnitModel and then call startInterpreterJVM().
     */
-  public MainJVM(File wd, GlobalModel model) {
+  public MainJVM(GlobalModel model) {
     super(InterpreterJVM.class.getName());
-    _log.log("MainJVM object created with workingDir = " + wd);
-//    Utilities.show("MainJVM object created with workingDir = " + wd);
-    _workingDir = wd;
+    /* the intended _workingDir is maintained by the interactions model; it is null in the DefaultInteractionsModel */
+     _log.log("MainJVM object created with null workingDir");
+    _workingDir = null;
     _model = model;
-    _interactionsModel = new DummyInteractionsModel();
+    _interactionsModel = new DefaultInteractionsModel();
     _junitModel = new DummyJUnitModel();
-    
-    _startupClassPath = ReflectUtil.SYSTEM_CLASS_PATH;
-    _log.log("In MainJVM constructor, _startupClassPath initialized to " + _startupClassPath);
   }
   
   /* === Boolean methods === */
@@ -177,10 +186,10 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   
   /* === Startup and shutdown methods === */
   
-  /** Starts the interpreter if it's not running already. */
+  /** Starts the interpreter for the first time. */
   public void startInterpreterJVM() { 
 //    Utilities.show("Trying to start SlaveJVM");
-    _log.log("In MainJVM, startInterpreterJVM() called");
+    _log.log("In MainJVM, startInterpreterJVM() called; invoking start() on " + _stateMonitor.value());
     _stateMonitor.value().start();  
   }
   
@@ -188,7 +197,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     * again, all methods that delegate to the interpreter JVM will fail, returning "false" or "none".)
     */
   public void stopInterpreterJVM() { 
-    _log.log("In MainJVM, stopInterpreterJVM() called");
+    _log.log("In MainJVM, stopInterpreterJVM() called; invoking stop() on " + _stateMonitor.value());
     _stateMonitor.value().stop(); 
   }
   
@@ -198,10 +207,16 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     */
   public void restartInterpreterJVM() {
     assert EventQueue.isDispatchThread();
-    _log.log("In MainJVM, restartInterpreterJVM() called");
-    _stateMonitor.value().restart(); 
-    _interactionsModel.documentReset();
-    _interactionsModel._notifyInterpreterReady();
+    _log.log("restartInterpreter called; _interpreterJVMStarted = " + _interpreterJVMStarted);
+
+    _newClassPath = getInteractionsClassPath();
+    _log.log("***** _newClassPath = " + _newClassPath);
+    
+    _log.log("In MainJVM, restartInterpreterJVM() called; invoking restart() on " + _stateMonitor.value());
+    _stateMonitor.value().restart();
+    /* The following are inconsistent with startInterpreter which is supposed to be equivalent if no interpreter exists */
+//    _interactionsModel.documentReset();
+//    _interactionsModel._notifyInterpreterReady();
   }
   
   /** Stop the interpreter JVM, do not restart it, and terminate the RMI server associated with this object.
@@ -217,7 +232,8 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     */
   protected void handleSlaveConnected(SlaveRemote newSlave) {
     InterpreterJVMRemoteI slaveCast = (InterpreterJVMRemoteI) newSlave;
-    _log.log("In MainJVM, handleSlaveConnected(" + newSlave + ") called; slaveClast = " + slaveCast);
+    _log.log("In MainJVM, handleSlaveConnected(" + newSlave + ") called; invoking started(" + slaveCast + ") on " +
+             _stateMonitor.value());
     _stateMonitor.value().started(slaveCast);
   }
   
@@ -226,7 +242,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     */
   protected void handleSlaveQuit(int status) {
 //    debug.logValue("Slave quit", "status", status);
-    _log.log("In MainJVM, slave JVM has called back indicating that is has quit!");
+    _log.log("In MainJVM, handleSlaveQuit() called; invoking stopped(" + status + ") on " + _stateMonitor.value());
     _stateMonitor.value().stopped(status);  // This event is very important
   }
   
@@ -234,7 +250,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     * @param e  Exception that occurred during startup.
     */
   protected void handleSlaveWontStart(Exception e) {
-    debug.log("Slave won't start", e);
+    debug.log("In MainJVM, handleSlaveWontStart called; invoking startFailed(" + e + ") on " + _stateMonitor.value());
     _stateMonitor.value().startFailed(e);
   }
   
@@ -337,20 +353,24 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   /** Sets whether the remote JVM will run "assert" statements after the next restart. */
   public void setAllowAssertions(boolean allow) { _allowAssertions = allow; }
   
-  /** Sets the class path to use for starting the interpreter JVM. Must include the classes for the interpreter.
-    * @param classPath Class path for the interpreter JVM
-    */
-  public void setStartupClassPath(String classPath) {
-    _startupClassPath = IOUtil.parsePath(classPath);
-  }
+//  /** Sets the class path to match that of the that in the starting slave JVM. Must include the classes for the 
+//    * interpreter.
+//    * @param classPath Class path for the interpreter JVM
+//    */
+//  public void setClassPath(String classPath) {
+//    _classPath = CollectUtil.makeList(IOUtil.parsePath(classPath));
+//  }
   
-  /** Sets the working directory for the interpreter (takes effect on next startup). */
-  public void setWorkingDirectory(File dir) {
-    _workingDir = dir;
-  }
+  /** Gets the cached value of the working directory for the slave JVM; should be accurate except when hardReset is
+    * in progress. */
+  public File getWorkingDirectory() { return _workingDir; }
+  
+  /** Sets the working directory for the slave JVM; should only be changed as the working directory is changed in the
+    * slave JVM; the assumption is that this field is updated ahead of resetting interactions in the slave. */
+  public void setWorkingDirectory(File dir) { _workingDir = dir; }
   
   /** Declared as a getter in order to allow subclasses to override the standard behavior. */
-  protected InterpretResult.Visitor<Void> resultHandler() { return _handler; }
+  protected InterpretResult.Visitor<String> resultHandler() { return _handler; }
   
   /* === Wrappers for InterpreterJVMRemoteI methods === */
   
@@ -380,8 +400,8 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
       InterpretResult result = remote.interpret(s);  // blocks until a result is returned
       _busy = false;
       _log.log("In MainJVM, after interpreting [" + s + "] result = " + result + "; _busy = " + _busy);
-      result.apply(resultHandler());
-      _log.log("In MainJVM, embedded result actually returned to MainJVM is " + result.toString());
+      String printedResult = result.apply(resultHandler());
+      _log.log("In MainJVM, embedded result actually returned to MainJVM is " + printedResult);
       return true;
     }
     catch (RemoteException e) { 
@@ -396,7 +416,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     * NOTE: this method can be called in any thread.
     */
   public boolean resetInterpreter() {
-    _log.log("In MainJVM, resetInterpeter in MainJVM called; _busy = " + _busy);
+    _log.log("In MainJVM, resetInterpreter in MainJVM called; _busy = " + _busy);
     if (_busy)
       throw new InterpreterBusyException("Attempt to resetInterpreter failed because the interpreter was busy");
     
@@ -420,75 +440,73 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     }
   }
   
-  /** Gets the string representation of the value of a variable in the current interpreter, or "none"
-    * if the remote JVM is unavailable or an error occurs.  Blocks until the interpreter is connected.
-    * @param var the name of the variable
-    */
-  public Option<Pair<String,String>> getVariableToString(String var) {
-    InterpreterJVMRemoteI remote = _stateMonitor.value().interpreter();
-    if (remote == null || _busy) { return Option.none(); }
-    try { return Option.some(remote.getVariableToString(var)); }
-    catch (RemoteException e) { _handleRemoteException(e); return Option.none(); }
-  }
+//  /** Gets the string representation of the value of a variable in the current interpreter, or "none"
+//    * if the remote JVM is unavailable or an error occurs.  Blocks until the interpreter is connected.
+//    * @param var the name of the variable
+//    */
+//  public Option<Pair<String,String>> getVariableToString(String var) {
+//    InterpreterJVMRemoteI remote = _stateMonitor.value().interpreter();
+//    if (remote == null || _busy) { return Option.none(); }
+//    try { return Option.some(remote.getVariableToString(var)); }
+//    catch (RemoteException e) { _handleRemoteException(e); return Option.none(); }
+//  }
   
-  /** Returns the class path stored in the ClassPathManager as a list of unique entries.  The result is "none" if the
-    * remote JVM is unavailable or if an exception occurs.  Blocks until the interpreter is connected.
+  /** Returns the class path stored in the ClassPathManager as a list of unique entries.  Delegates to the remote
+    * (slave) JVM. The result is "none" if the remote JVM is unavailable or if an exception occurs.  Blocks until the 
+    * interpreter is connected.
     * @return the class path
     */
   public List<File> getInteractionsClassPath() {
     InterpreterJVMRemoteI remote = _stateMonitor.value().interpreter();
-    if (remote == null || _busy) { return new ArrayList<File>(); }
+    if (! _interpreterJVMStarted || remote == null || _busy) return _newClassPath;
+    _log.log("In getInteractionsClassPath, _interpreterJVMStarted = " + _interpreterJVMStarted + "; remote = " + remote + "; _busy = " + _busy);
     try { return remote.getInteractionsClassPath(); }
-    catch (RemoteException e) { _handleRemoteException(e); return new ArrayList<File>() ; }
+    catch (RemoteException e) { _handleRemoteException(e); return _newClassPath ; }
   }
   
   static final List<File> EMPTY_FILE_LIST = Arrays.asList(new File[]{});
   
-  /** Returns the current class path of the interpreter as a list of unique entries.  The result is "none" if the remote
-    * JVM is unavailable or if an exception occurs.  Blocks until the interpreter is connected.
-    * @return the class path
-    */
-  public List<File> getCurrentClassPath() {
-    InterpreterJVMRemoteI remote = _stateMonitor.value().interpreter();
-    if (remote == null || _busy) { return EMPTY_FILE_LIST; }
-    try { return remote.getCurrentClassPath(); }
-    catch (RemoteException e) { _handleRemoteException(e); return EMPTY_FILE_LIST; }
-  }
+  /* Current class path in slave JVM now stored in _classPath. */
   
   /** Blocks until the interpreter is connected.  Returns {@code true} if the change was successfully passed to
-    * the remote JVM.
-    */
-  public boolean addInteractionsClassPath(File f) {
-    _log.log("In MainJVM, adding '" + f + "' to interactions class path");
+    * the remote JVM.  Assumes the same addition has already been made in the interactions model.  If we obtain a Scala
+    * interpreter where we can incrementally extend the class path, then this code must be modified so that the 
+    * cached value here reflects it. */
+  public void addInteractionsClassPath(File f) {
+//    _log.log("In MainJVM, adding '" + f + "' to interactions class path; _classPath = " + _classPath);
     InterpreterJVMRemoteI remote = _stateMonitor.value().interpreter();
-    if (remote == null || _busy) { return false; }
-    try { 
-      _log.log("In MainJVM, calling addInteractionClassPath(" + f + ")");
-      remote.addInteractionsClassPath(f); 
-      return true; 
-    } catch (RemoteException e) { _handleRemoteException(e); return false; }
+    if (remote != null && ! _busy) {
+      try { 
+        _log.log("In MainJVM, calling remote.addInteractionClassPath(" + f + ")");
+        /* if the interpreter is changed to support additions to classPath, then f must be added to _classPath here */
+        remote.addInteractionsClassPath(f);
+        /* _classPath is NOT updated; it caches immutable value of the class path embedded in the slave JVM.  It only 
+         * changes when the slave JVM is replaced. */
+      }
+      catch (RemoteException e) { _handleRemoteException(e); }
+    }
   }
 
-  /** Blocks until the interpreter is connected.  Returns {@code true} if the change was successfully passed to
-    * the remote JVM.
-    */
-  public boolean addInteractionsClassPath(List<File> cp) {
+  /** Blocks until the interpreter is connected.  This method handles the addition of multiple entries to class path.
+    * Returns {@code true} if all files are successfully passed to the remote JVM. */
+  public void addInteractionsClassPath(List<File> cp) {
     InterpreterJVMRemoteI remote = _stateMonitor.value().interpreter();
-    if (remote == null || _busy) { return false; }
-        _log.log("In MainJVM, adding '" + cp + "' to interactions class path");
-    try { remote.addInteractionsClassPath(cp); return true; }
-    catch (RemoteException e) { _handleRemoteException(e); return false; }
+    if (remote != null && ! _busy) {
+      _log.log("In MainJVM, adding '" + cp + "' to interactions class path");
+      for (File f:cp)  addInteractionsClassPath(f);
+    }
   }
   
   /** Returns true iff the current classPath stored in the ClassPathManager (running in the interpreter [slave] JVM
-    * matches the class path for the current interpreter [slave] JVM. */
+    * matches the class path for the current interpreter [slave] JVM.  */
   public boolean classPathUnchanged() {
+    _log.log("classPathUnchanged called");
     InterpreterJVMRemoteI remote = _stateMonitor.value().interpreter();
     if (remote == null) return false;
-    HashSet<File> cpmClassPath = new HashSet<File>(getInteractionsClassPath());
-    HashSet<File> curClassPath = new HashSet<File>(getCurrentClassPath());                          
-    _log.log("In classPathUnchanged: cpmClassPath = " + cpmClassPath + "; curClassPath = " + curClassPath);
-    return cpmClassPath.equals(curClassPath); 
+    final HashSet<File> interactionsClassPath = new HashSet<File>(_newClassPath);
+    final HashSet<File> classPath = new HashSet<File>(_classPath);                          
+    _log.log("In classPathUnchanged: interactions classPath = " + interactionsClassPath + "; current classPath = " + classPath);
+    return interactionsClassPath.equals(classPath); 
   }
   
   /** Sets up a JUnit test suite in the Interpreter JVM and finds which classes are really TestCase
@@ -626,14 +644,16 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   private void _doStartup() {
 //    Utilities.show("Executing _doStartup()");
     _log.log("In MainJVM, executing _doStartup()");
-    File dir = _workingDir;
+    /* Set the _workingDir to the desired working directory embedded in the interactions model */
+    File _workingDir = _interactionsModel.getWorkingDirectory();  // could use the setter setWorkingDirectory
     // TODO: Eliminate this use of NULL_FILE.  It is a bad idea!  The correct behavior when it is used always depends on
-    // context, so it can never be treated transparently.  In this case, the process won't start.
-    // COMMENT: I emphatically disagree.  null should never be used as a legal data value.  So if no _workingDir has 
-    //          been specified, NULL_FILE is the only option, independent of "transparency".  I added the null check
+    //       context, so it can never be treated transparently.  In this case, the process won't start.
+    // COMMENT: I emphatically disagree.  null should never be used as a legal data value.  So if no _workingDir is 
+    //          specified, NULL_FILE is the only good option, independent of "transparency".  I added the null check
     //          below because I have no assurance that NULL_FILE is used everywhere in the DrJava code base. -- Corky
     
-    if (dir == null || dir == FileOps.NULL_FILE) { dir = IOUtil.WORKING_DIRECTORY; }
+    if (_workingDir == null || _workingDir == FileOps.NULL_FILE) { _workingDir = IOUtil.WORKING_DIRECTORY; }
+    _log.log("Working directory is " + _workingDir);
     
     _log.log("In MainJVM, setting up jvmArgs");
     List<String> jvmArgs = new ArrayList<String>();
@@ -641,7 +661,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     if (_allowAssertions) { jvmArgs.add("-ea"); }
     
     String slaveMemory = DrScala.getConfig().getSetting(SLAVE_JVM_XMX);
-    if (!"".equals(slaveMemory) && !heapSizeChoices.get(0).equals(slaveMemory)) {
+    if (! "".equals(slaveMemory) && ! heapSizeChoices.get(0).equals(slaveMemory)) {
       jvmArgs.add("-Xmx" + slaveMemory + "M");
     }
     String slaveArgs = DrScala.getConfig().getSetting(SLAVE_JVM_ARGS);
@@ -649,15 +669,16 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
       jvmArgs.add("-Xdock:name=Interactions");
     }
     
+    /* The streamlined code that follows assumes the class path for the new JVM is constructed from the system path
+     * and the new path entries already stored in the interactions model. */
     _log.log("In MainJVM, adding boot class path to jvmArgs");
     // add additional boot class path items specified by the selected compiler
-    for (File f: _interactionsModel.getCompilerBootClassPath()) {
+    for (File f: /* getInteractionsClassPath() */ _classPath) {
       try {
-        // NOTE: this is a work-around
-        // it seems like it's impossible to pass long file names here on Windows
+        // NOTE: this is a work-around; it seems like it's impossible to pass long file names here on Windows
         // so we are using a clumsy method that determines the short file name
         File shortF = FileOps.getShortFile(f);
-        jvmArgs.add("-Xbootclasspath/a:"+shortF.getAbsolutePath().replace(File.separatorChar, '/'));
+        jvmArgs.add("-Xbootclasspath/a:" + shortF.getAbsolutePath().replace(File.separatorChar, '/'));
       }
       catch(IOException ioe) {
         // TODO: figure out what to do here. error? warn?
@@ -665,19 +686,16 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     }
     
     jvmArgs.addAll(ArgumentTokenizer.tokenize(slaveArgs));
+    _log.log("Completed execution of ArgumentTokenizer; slaveArgs = " + slaveArgs);
     
-    _log.log("In MainJVM, getting interactions class path as seen by the global model");
-    Iterable<File> interactionsClassPath = _model.getClassPath();
-    _log.log("In MainJVM, interactionsClassPath = " + interactionsClassPath);
-    
-    Iterable<File> classPath = IterUtil.compose(interactionsClassPath, _startupClassPath);
-
-    JVMBuilder jvmb = new JVMBuilder(classPath).directory(dir).jvmArguments(jvmArgs);
-    _log.log("In MainJVM, classPath = " + classPath + "; jvmb = " + jvmb);
+    /* class path for new slave JVM is _newClassPath*/
+    final JVMBuilder jvmb = new JVMBuilder(_newClassPath).directory(_workingDir).jvmArguments(jvmArgs);
+    _log.log("In MainJVM, _newClassPath = " + _newClassPath + "; jvmb = " + jvmb);
     
 //    Utilities.show("Calling invokeSlave(" + jvmb + ")");
     _log.log("In MainJVM, calling invokeSlave(" + jvmb + ")");
     invokeSlave(jvmb);
+    _interpreterJVMStarted = true;
   }
   
   /** Lets the model know if any exceptions occur while communicating with the Interpreter JVM. */
@@ -773,7 +791,11 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     public void restart() {
       _log.log("In MainJVM, startingPhase.restart() invoked");  // what prevents infinite recursion here ?
       try { _stateMonitor.ensureNotState(this, STARTUP_TIMEOUT).restart(); }
-      catch (Exception e) { throw new UnexpectedException(e); }
+      catch (Exception e) {
+        UnexpectedException ue = new UnexpectedException(e); 
+        _log.log("Throwing " + e);
+        throw ue;
+      }
     }
     
     public void stop() {
@@ -791,6 +813,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
         // Note that _workingDir isn't guaranteed to be the dir at the time startup began.  Is that a problem?
         // (Is the user ever going to see a working dir message that doesn't match the actual setting?)
         _interactionsModel.interpreterReady();
+        _classPath = _newClassPath; // The intended class path has become the actual class path
         _junitModel.junitJVMReady();        
       }
       else { _stateMonitor.value().started(i); }
@@ -828,7 +851,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
       _log.log("In MainJVM, runningPhase.restart() executed");
       if (_stateMonitor.compareAndSet(this, new RestartingPhase())) {
         _log.log("In MainJVM, advancing phase to RestartingPhase");
-//        _interactionsModel.interpreterResetting();
+//        _interactionsModel.interpreterResetting();  // now done in setUpNewInterpreter
         _log.log("In MainJVM, setting _busy to false and calling quitSlave()");
         _busy = false; // restarting may involve terminating a busy interpreter in current slaveJVM
         quitSlave();
@@ -851,27 +874,6 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
       _stateMonitor.value().stopped(status); // delegate whether state changed here or in another thread
     }
   }
-  
-  /* This Phase is not used in DrScala; note that the parameter "boolean used" has been excised from
-   * the interpreter method in classes derived from Phase. */
-//  /** Variant of RunningPhase where the interpreter JVM has not yet been used. */
-//  private class FreshRunningPhase extends RunningPhase {
-//    public FreshRunningPhase(InterpreterJVMRemoteI interpreter) { super(interpreter); }
-//    @Override public InterpreterJVMRemoteI interpreter() {
-//      if (used) {
-//        _stateMonitor.compareAndSet(this, new RunningPhase(_interpreter));
-//        return _stateMonitor.value().interpreter(); // delegate whether state changed here or in another thread
-//      }
-//      else { return super.interpreter(); }
-//    }
-//    @Override public void restart(boolean force) {
-//      if (force) { super.restart(force); }
-//      else {
-//        // otherwise, ignore and say that we are ready
-//        _interactionsModel.interpreterReady(_workingDir);
-//      }
-//    }
-//  }
   
   /** Waiting for stop, should automatically start when that happens. */
   private class RestartingPhase extends Phase {
@@ -947,64 +949,67 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   }
   
   /** Performs the appropriate action to return any type of result from a call to interpret back to the GlobalModel. */
-  private class ResultHandler implements InterpretResult.Visitor<Void> {
+  private class ResultHandler implements InterpretResult.Visitor<String> {
     
     /** Lets the model know that void was returned. */
-    public Void forNoValue() {
+    public String forNoValue() {
       _interactionsModel.replReturnedVoid();
       return null;
     }
     
     /** Calls replReturnedResult() */
-    public Void forObjectValue(String objString, String objTypeString) {
+    public String forObjectValue(String objString, String objTypeString) {
       _interactionsModel.replReturnedResult(objString, InteractionsDocument.OBJECT_RETURN_STYLE);
-      return null;
+      return objString;
     }
     
     /** Calls replReturnedResult() */
-    public Void forStringValue(String s) {
+    public String forStringValue(String s) {
       _interactionsModel.replReturnedResult(s, InteractionsDocument.STRING_RETURN_STYLE);
-      return null;
+      return s;
     }
     
     /** Calls replReturnedResult() */
-    public Void forCharValue(Character c) {
-      _interactionsModel.replReturnedResult(c.toString(), InteractionsDocument.CHARACTER_RETURN_STYLE);
-      return null;
+    public String forCharValue(Character c) {
+      final String s = c.toString();
+      _interactionsModel.replReturnedResult(s, InteractionsDocument.CHARACTER_RETURN_STYLE);
+      return s;
     }
     
     /** Calls replReturnedResult() */
-    public Void forNumberValue(Number n) {
-      _interactionsModel.replReturnedResult(n.toString(), InteractionsDocument.NUMBER_RETURN_STYLE);
-      return null;
+    public String forNumberValue(Number n) {
+      final String s = n.toString();
+      _interactionsModel.replReturnedResult(s, InteractionsDocument.NUMBER_RETURN_STYLE);
+      return s;
     }
     
     /** Calls replReturnedResult() */
-    public Void forBooleanValue(Boolean b) {
-      _interactionsModel.replReturnedResult(b.toString(), InteractionsDocument.OBJECT_RETURN_STYLE);
-      return null;
+    public String forBooleanValue(Boolean b) {
+      final String s = b.toString();
+      _interactionsModel.replReturnedResult(s, InteractionsDocument.OBJECT_RETURN_STYLE);
+      return s;
     }
     
     /** Calls replThrewException() */
-    public Void forEvalException(String message, StackTraceElement[] stackTrace) {
+    public String forEvalException(String message, StackTraceElement[] stackTrace) {
       // TODO: restore location/syntax highlighting functionality
       _interactionsModel.replThrewException(message, stackTrace);
       return null;
     }
     
     /** Calls replThrewException() */
-    public Void forException(String message) {
+    public String forException(String message) {
       // TODO: restore location/syntax highlighting functionality
       _interactionsModel.replThrewException(message);
-      return null;
+      return "Exception: " + message;
     }
     
-    public Void forUnexpectedException(Throwable t) {
+    public String forUnexpectedException(Throwable t) {
       _interactionsModel.replReturnedVoid();
       throw new UnexpectedException(t);
     }
     
-//    public Void forBusy() {
+//    public String forBusy() {
 //            
 //      Utilities.show("forBusy() invoked by resultHandler.");
 //      /* Force the interpreter to restart in a new slave JVM. */
@@ -1016,12 +1021,12 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
 //       * restarted. After the interpreter is restarted, this display is not included int the new InteractionsDocument. */
 //
 //      restartInterpreterJVM();
-//      return null;
+//      return "*** JVM was busy and restarted ***";
 //    }
   }
   
   /** InteractionsModel which does not react to events. */
-  public static class DummyInteractionsModel implements InteractionsModelCallback {
+  public static class DefaultInteractionsModel implements InteractionsModelCallback {
     
     /* Degenerate method definitions */
     
@@ -1059,9 +1064,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     public void documentReset() { }
     public void interpreterResetFailed(Throwable th) { }
     public void interpreterWontStart(Exception e) { }
-//    public void interpreterReady(File wd) { }
     public void interpreterReady() { }
     public List<File> getCompilerBootClassPath() { return new ArrayList<File>(); }
+    public File getWorkingDirectory() { return null; }
     public String transformCommands(String interactionsString) { return interactionsString; }
   }
   

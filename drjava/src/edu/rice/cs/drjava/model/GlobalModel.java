@@ -67,11 +67,11 @@ import edu.rice.cs.util.text.AbstractDocumentInterface;
 import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.drjava.config.OptionParser;
 
-/** Handles the bulk of DrScala's program logic.  The UI components interface with the GlobalModel through its 
-  * public methods, and GlobalModel responds via the GlobalModelListener interface.  This removes the dependency 
-  * on the UI for the logical flow of the program's features.  With the current implementation, we can finally test 
-  * the compile an unit testing functionality of DrScala, along with many other things.  An ongoing refactoring effort 
-  * will be moving many GlobalModel functions into more specific sub-interfaces for particular behaviors:
+/** Interface encompassing all incarnations of the DrJava global model. The UI components interface with the GlobalModel
+  * through its public methods, and GlobalModel responds via the GlobalModelListener interface.  This removes the 
+  * dependence on the UI from the logical flow of program execution.  With the current implementation, we can finally 
+  * test the compile and unit testing functionality of DrScala, along with many other things.  An ongoing refactoring 
+  * effort will be moving many GlobalModel functions into more specific sub-interfaces for particular behaviors:
   * 
   * @see DefaultGlobalModel
   * @see ILoadDocuments
@@ -335,11 +335,11 @@ public interface GlobalModel extends ILoadDocuments {
   /** Clears and resets the interactions pane using the existing working directory. Invoked by "Reset interactions" 
     * command (in MainFrame) and as part of other actions such as run, project loading, compilation and unit 
     * testing commands.*/
-  public void resetInteractions();
+  public void resetInterpreter();
   
   /** Clears and resets the interactions pane in the specified working directory. Invoked by actions such as the run, 
     * project loading, compilation and unit testing commands.*/
-  public void resetInteractions(File wd);
+  public void resetInterpreter(File wd);
   
   /** Interprets the current given text at the prompt in the interactions pane. */
   public void interpretCurrentInteraction();
@@ -391,7 +391,7 @@ public interface GlobalModel extends ILoadDocuments {
   //--------------------------------- Misc ---------------------------------//
   
   /** Gets the class path to be used in all class-related operations. */
-  public Iterable<File> getClassPath();
+  public List<File> getClassPath();
     
   /* Updates the interactions class path (in the slave JVM) to include the files (directories) in getClassPath() */
   public void updateInteractionsClassPath();

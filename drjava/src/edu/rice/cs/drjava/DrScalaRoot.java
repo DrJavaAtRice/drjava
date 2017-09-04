@@ -97,7 +97,7 @@ public class DrScalaRoot {
   
   public static void main(final String[] args) {
     debug.log("Starting up");
-    // Platform-specific UI setup.
+    // Platform-specific UI setUp.
     PlatformFactory.ONLY.beforeUISetup();
     
 //    Utilities.show("DrScalaRoot started with args = " + Arrays.toString(args));
@@ -152,7 +152,7 @@ public class DrScalaRoot {
         UIManager.setLookAndFeel(configLAFName);
       }
       
-      // The MainFrame *must* be constructed after the compiler setup process has
+      // The MainFrame *must* be constructed after the compiler setUp process has
       // occurred; otherwise, the list of compilers in the UI will be wrong.
       
 //      Utilities.showDebug("Creating MainFrame");

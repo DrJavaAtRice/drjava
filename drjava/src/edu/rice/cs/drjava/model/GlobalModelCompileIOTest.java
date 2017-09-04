@@ -58,7 +58,7 @@ public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
   public void testClassFileSynchronization() throws BadLocationException, IOException, InterruptedException {
     
     _log.log("+++Starting testClassFileSynchronization");
-    final OpenDefinitionsDocument doc = setupDocument(BAR_TEXT);
+    final OpenDefinitionsDocument doc = setUpDocument(BAR_TEXT);
     _log.log(doc + " has been set up");
     final File file = tempFile();
     
@@ -117,7 +117,7 @@ public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
     
     _log.log("+++Starting testClassFileSynchronizationAfterRename");
     
-    final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
+    final OpenDefinitionsDocument doc = setUpDocument(FOO_TEXT);
     final File file = tempFile();   
     final File file2 = tempFile();  
     saveFile(doc, new FileSelector(file));
@@ -151,7 +151,7 @@ public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
   public void testCompileAfterFileMoved() throws BadLocationException, IOException {
     _log.log("+++Starting testCompileAfterFileMoved");
     
-    final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
+    final OpenDefinitionsDocument doc = setUpDocument(FOO_TEXT);
     final File file = tempFile();
     saveFile(doc, new FileSelector(file));
     _log.log(doc + " saved as File " + file);

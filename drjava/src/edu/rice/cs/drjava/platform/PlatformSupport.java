@@ -61,10 +61,10 @@ public interface PlatformSupport {
    */
   public boolean isUsingSystemLAF();
   
-  /** Hook for performing general UI setup.  Called before all other UI setup is done. */
+  /** Hook for performing general UI setUp.  Called before all other UI setUp is done. */
   public void beforeUISetup();
   
-  /** Hook for performing general UI setup.  Called after all other UI setup is done.
+  /** Hook for performing general UI setUp.  Called after all other UI setUp is done.
    *  @param about the Action associated with openning the About dialog
    *  @param prefs the Action associated with openning the Preferences dialog
    *  @param quit the Action associated with quitting the DrScala application

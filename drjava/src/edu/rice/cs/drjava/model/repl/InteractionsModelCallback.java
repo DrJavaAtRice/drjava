@@ -46,13 +46,6 @@ import java.util.List;
   */
 public interface InteractionsModelCallback {
   
-  
-  /* Debugger deactivated in DrScala */
-//  /** Returns an available port number to use for debugging a remote interpreter.
-//    * @throws IOException if unable to get a valid port number.
-//    */
-//  public int getDebugPort() throws IOException;
-  
   /** Called when the repl prints to System.out.
     * @param s String to print
     */
@@ -146,7 +139,6 @@ public interface InteractionsModelCallback {
     * Is sometimes preceded by a call to {@code interpreterResetting()}, but not when the interpreter is
     * first starting or is already fresh.
     */
-//  public void interpreterReady(File wd);
   public void interpreterReady();
   
   /** Called to signal that the interpreter is now read (after a reset). */  // TODO: consolidate with preceding method
@@ -157,6 +149,9 @@ public interface InteractionsModelCallback {
   /** A compiler can instruct DrScala to include additional elements for the boot
     * class path of the Interactions JVM. */
   public List<File> getCompilerBootClassPath();
+  
+  /** Gets the working directory.  A non-degnerate InteractionsModel contains a working directory. */
+  public File getWorkingDirectory();
   
   /** Transform the command line to be interpreted into something the Interactions JVM can use.
     * This replaces "java MyClass a b c" with Java code to call MyClass.main(new String[]{"a","b","c"}).

@@ -65,16 +65,16 @@ public class InteractionsScriptController /* implements Serializable */ {
     _pane = new InteractionsScriptPane(4, 1);
 
     // Previous
-    _setupAction(_prevInteractionAction, "Previous", "Insert Previous Interaction from Script");
+    _setUpAction(_prevInteractionAction, "Previous", "Insert Previous Interaction from Script");
     _pane.addButton(_prevInteractionAction);
     // Next
-    _setupAction(_nextInteractionAction, "Next", "Insert Next Interaction from Script");
+    _setUpAction(_nextInteractionAction, "Next", "Insert Next Interaction from Script");
     _pane.addButton(_nextInteractionAction);
     // Execute
-    _setupAction(_executeInteractionAction, "Execute", "Execute Current Interaction");
+    _setUpAction(_executeInteractionAction, "Execute", "Execute Current Interaction");
     _pane.addButton(_executeInteractionAction);
     // Close
-    _setupAction(_closeScriptAction, "Close", "Close Interactions Script");
+    _setUpAction(_closeScriptAction, "Close", "Close Interactions Script");
     _pane.addButton(_closeScriptAction);
     setActionsEnabled();
   }
@@ -132,7 +132,7 @@ public class InteractionsScriptController /* implements Serializable */ {
    * @param name Default name for the Action (for buttons)
    * @param desc Short description of the Action (for tooltips)
    */
-  protected void _setupAction(Action a, String name, String desc) {
+  protected void _setUpAction(Action a, String name, String desc) {
     a.putValue(Action.DEFAULT, name);
     a.putValue(Action.SHORT_DESCRIPTION, desc);
   }

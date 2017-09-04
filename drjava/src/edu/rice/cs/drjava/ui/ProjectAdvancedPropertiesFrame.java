@@ -152,7 +152,7 @@ public class ProjectAdvancedPropertiesFrame extends SwingFrame {
 
   /** Initializes the components in this frame. */
   private void init() {
-    _setupPanel(_mainPanel);
+    _setUpPanel(_mainPanel);
     JScrollPane scrollPane = new JScrollPane(_mainPanel);
     Container cp = getContentPane();
     
@@ -231,7 +231,7 @@ public class ProjectAdvancedPropertiesFrame extends SwingFrame {
     _preferencesList.setValue(list);
   }
   
-  private void _setupPanel(JPanel panel) {
+  private void _setUpPanel(JPanel panel) {
     GridBagLayout gridbag = new GridBagLayout();
     GridBagConstraints c = new GridBagConstraints();
     panel.setLayout(gridbag);

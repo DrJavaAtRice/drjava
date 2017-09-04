@@ -8,7 +8,7 @@ import java.util.HashSet;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
-import edu.rice.cs.drjava.DrScala;
+import edu.rice.cs.drjava.model.AbstractGlobalModel;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 
@@ -31,13 +31,13 @@ import edu.rice.cs.util.swing.Utilities;
   */
 public class DrScalaInterpreter implements Interpreter {
   
-  static final Log _log = DrScala._log;
+  static final Log _log = AbstractGlobalModel._log;
   
-  static {
-    _log.log("DrScalaInterpreter loading");
-    _log.log("Class loader for DrScalaInterpreter is: " + 
-             edu.rice.cs.drjava.model.repl.newjvm.DrScalaInterpreter.class.getClassLoader());
-  }
+//  static {
+//    _log.log("DrScalaInterpreter loading");
+//    _log.log("Class loader for DrScalaInterpreter is: " + 
+//             edu.rice.cs.drjava.model.repl.newjvm.DrScalaInterpreter.class.getClassLoader());
+//  }
   
   /** Standard default 0-ary constructor that prints an optional log message */
   public DrScalaInterpreter() { _log.log("Creating DrScalaInterpreter instance"); }
@@ -60,6 +60,9 @@ public class DrScalaInterpreter implements Interpreter {
     * pane unusable. This regex is used to catch those colon commands so they can be ignored.
     */
   final private Pattern scalaColonCmd = Pattern.compile("^\\s*:.*$");
+  
+  /** Platform dependent Scala prompt used instead of "\nscala> "*/
+  final private String scalaPrompt = System.getProperty("line.separator") + "scala> ";
 
   /* Flag that records whether the interpreter has been initialized */
   private volatile boolean _isInitialized = false;
@@ -166,7 +169,8 @@ public class DrScalaInterpreter implements Interpreter {
        * ILoop sends over upon construction.
        */
       s = outputStrings.take();
-      while (! s.equals("\nscala> ")) s = outputStrings.take();
+      while (! s.equals(scalaPrompt)) s = outputStrings.take();    // platform indpendent
+//      while (! s.equals("\nscala> ")) s = outputStrings.take();  // unix specific
     }
     catch(InterruptedException ie) { 
       /* should never happen. */
@@ -209,7 +213,8 @@ public class DrScalaInterpreter implements Interpreter {
 //      return "";
 //    }
     _log.log("interpret(" + input + ") called in DrScalaInterpreter in SLAVE JVM");
-    _log.log("Class loader = " + getClass().getClassLoader());
+    _log.log("this = " + this);
+    _log.log("Class loader = " + this.getClass().getClassLoader());
     Matcher match = scalaColonCmd.matcher(input);
     if (match.matches())
       return "Error:  Scala interpreter colon commands not accepted.\n";
@@ -242,18 +247,19 @@ public class DrScalaInterpreter implements Interpreter {
       _log.log("First line of returned output is " + s);
       
       /* if the prompt or continuation string is returned, we're done */
-      if (s.equals("\nscala> ")) return "";
+      if (s.equals(scalaPrompt)) return "";  // platform independent
+//      if (s.equals("\nscala> ")) return "";  // unix specific
       if (s.equals("     | "))   return s;
       
       /* Otherwise, we keep taking strings from the return queue until the prompt is encountered.
-       * Assumption: EVERY interpretation return which does not consist of
-       * only the continuation string, "     | ", is followed by "\nscala> "
-       * if this assumption is incorrect, the loop below could diverge
+       * Assumption: EVERY interpretation return which does not consist of only the continuation string, "     | ", 
+       * is followed by scalaPrompt.  If this assumption is incorrect, the loop below could diverge.
        */
       StringBuilder returnString = new StringBuilder(s);
       while (true) {
         s = outputStrings.take();
-        if (s.equals("\nscala> ")) break;
+        if (s.equals(scalaPrompt)) break;  // platform independent
+//        if (s.equals("\nscala> ")) break;  // unix specific
         returnString.append(s);
       }
       return returnString.toString();

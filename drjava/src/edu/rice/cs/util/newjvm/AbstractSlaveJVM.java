@@ -40,6 +40,8 @@ import edu.rice.cs.plt.concurrent.ConcurrentUtil;
 
 import java.rmi.*;
 
+import edu.rice.cs.util.Log;
+import edu.rice.cs.util.swing.Utilities;
 import static edu.rice.cs.plt.debug.DebugUtil.error;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
@@ -48,6 +50,10 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
   * @version $Id: AbstractSlaveJVM.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public abstract class AbstractSlaveJVM implements SlaveRemote {
+  
+  /** Debugging log. */
+  public static final Log _log  = new Log("GlobalModel.txt", false);
+  
   public static final int CHECK_MAIN_VM_ALIVE_SECONDS = 3;
   
   /** Name of the thread to quit the slave. */
@@ -86,9 +92,11 @@ public abstract class AbstractSlaveJVM implements SlaveRemote {
     * startup is complete.
     */
   public final synchronized void start(final MasterRemote master) throws RemoteException {
+//    Utilities.show("******In AbstractSlaveJVM, start(" + master + ") called******");
+    _log.log("*****In AbstractSlaveJVM, start(" + master + ") called in " + getClass().getName());
     if (_started) { throw new IllegalArgumentException("start() has already been invoked"); }
     master.checkStillAlive(); // verify that two-way communication works; may throw RemoteException
-
+    _log.log("Verified that " + master + " is still alive");
     Thread checkMaster = new Thread(_pollMasterThreadName) {
       public void run() {
         while (true) {
@@ -103,15 +111,17 @@ public abstract class AbstractSlaveJVM implements SlaveRemote {
         }
       }
     };
+    _log.log("CheckMaster thread has been created in " + getClass().getName());
     checkMaster.setDaemon(true);
     checkMaster.start();
-    handleStart(master);
+    _init(master);  // Finish initalizing the started JVM
+    _log.log("In AbstractMasterJVM, start(...) has finished in " + getClass().getName());
   }
   
   /** This method is called just before the JVM is quit.  It can be overridden to provide cleanup code, etc. */
   protected void beforeQuit() { }
   
   /** Called when the slave JVM has started running.  Subclasses must implement this method. */
-  protected abstract void handleStart(MasterRemote master);
+  protected abstract void _init(MasterRemote master);
   
 }

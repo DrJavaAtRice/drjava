@@ -187,7 +187,7 @@ public class IntegratedMasterSlaveTest extends DrScalaTestCase {
     /* Some inherited methods are synchronized */
     public synchronized int getNumber() { return _counter++; }
     
-    protected void handleStart(MasterRemote m) { _master = (TestMasterRemote) m; }
+    protected void _init(MasterRemote m) { _master = (TestMasterRemote) m; }
     
     public void startLetterTest() {
       // Run this part of the test in a new thread, so this call will immediately return

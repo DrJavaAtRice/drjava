@@ -267,8 +267,7 @@ public class InteractionsController extends AbstractConsoleController {
       _interactionsDJDocument.clearColoring();
       _endOfStream = false;
     }
-    
-//    public void interpreterReady(File wd) { interpreterReady(); }
+
     public void interpreterReady() { 
       _interactionsDJDocument.clearColoring();  // probably redundant
     }
@@ -418,11 +417,11 @@ public class InteractionsController extends AbstractConsoleController {
   }
   
   /** Adds listeners to the model. */
-  protected void _setupModel() { _doc.setBeep(_pane.getBeep()); }
+  protected void _setUpModel() { _doc.setBeep(_pane.getBeep()); }
   
   /** Adds actions to the view. */
-  protected void _setupView() {
-    super._setupView();
+  protected void _setUpView() {
+    super._setUpView();
     
     // Get proper cross-platform mask.
     int mask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
@@ -495,7 +494,7 @@ public class InteractionsController extends AbstractConsoleController {
 //    if (! _interactionsDJDocument._insideBlockComment()) {
 //       
 //    String toEval;
-//    if (_doc.inProgress()) return;  // Don't start a new interaction while one is in progress
+//    if (_doc.interactionInProgress()) return;  // Don't start a new interaction while one is in progress
 //      
 //      String text = _doc.getCurrentInteraction();
 //      toEval = text.trim();
@@ -512,7 +511,7 @@ public class InteractionsController extends AbstractConsoleController {
 //  private void _prepareToInterpret(String text) {
 //    _addNewline();
 //    _notifyInteractionStarted();
-//    _doc.setInProgress(true);
+//    _doc.setInteractionInProgress(true);
 //    _model.setAddToHistory(text); // _document.addToHistory(text);
 //    //Do not add to history immediately in case the user is not finished typing when they press return
 //  }

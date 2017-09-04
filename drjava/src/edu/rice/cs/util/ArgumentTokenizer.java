@@ -39,15 +39,12 @@ package edu.rice.cs.util;
 import java.util.List;
 import java.util.LinkedList;
 
-/**
- * Utility class which can tokenize a String into a list of String arguments,
- * with behavior similar to parsing command line arguments to a program.
- * Quoted Strings are treated as single arguments, and escaped characters
- * are translated so that the tokenized arguments have the same meaning.
- * Since all methods are static, the class is declared abstract to prevent
- * instantiation.
- * @version $Id: ArgumentTokenizer.java 5594 2012-06-21 11:23:40Z rcartwright $
- */
+/** Utility class which can tokenize a String into a list of String arguments, with behavior similar to parsing command
+  * line arguments to a program. Quoted Strings are treated as single arguments, and escaped characters are translated 
+  * so that the tokenized arguments have the same meaning. Since all methods are static, the class is declared abstract
+  * to prevent instantiation.
+  * @version $Id: ArgumentTokenizer.java 5594 2012-06-21 11:23:40Z rcartwright $
+  */
 public abstract class ArgumentTokenizer {
   private static final int NO_TOKEN_STATE = 0;
   private static final int NORMAL_TOKEN_STATE = 1;

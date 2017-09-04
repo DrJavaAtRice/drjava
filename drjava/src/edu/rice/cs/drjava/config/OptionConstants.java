@@ -512,7 +512,7 @@ public interface OptionConstants {
   
   /** The key binding for showing the print preview */
   public static final ArrayListOption<KeyStroke> KEY_PAGE_SETUP =
-    new ArrayListOption<KeyStroke>("key.page.setup", new KeyStrokeOption("",null), to.vector());
+    new ArrayListOption<KeyStroke>("key.page.setUp", new KeyStrokeOption("",null), to.vector());
   
   /** The key binding for showing the print preview. */
   public static final ArrayListOption<KeyStroke> KEY_PRINT_PREVIEW =
@@ -785,11 +785,11 @@ public interface OptionConstants {
     new ArrayListOption<KeyStroke>("key.clear.history", new KeyStrokeOption("",null), to.vector());
   
   /** The key binding for resetting the interactions pane. */
-  public static final ArrayListOption<KeyStroke> KEY_RESET_INTERACTIONS =
+  public static final ArrayListOption<KeyStroke> KEY_RESET_INTERPRETER =
     new ArrayListOption<KeyStroke>("key.reset.interactions", new KeyStrokeOption("",null), to.vector());
   
   /** The key binding for hard resetting the interactions pane. */
-  public static final ArrayListOption<KeyStroke> KEY_HARD_RESET_INTERACTIONS =
+  public static final ArrayListOption<KeyStroke> KEY_HARD_RESET_INTERPRETER =
     new ArrayListOption<KeyStroke>("key.hard.reset.interactions", new KeyStrokeOption("",null), to.vector());
   
   /** The key binding for viewing the interactions classpath. */
@@ -1302,7 +1302,7 @@ public interface OptionConstants {
   public static final BooleanOption QUIT_PROMPT = new BooleanOption("quit.prompt", Boolean.TRUE);
   
 //  /** Whether to prompt before resetting the interactions pane. */
-//  public static final BooleanOption INTERACTIONS_RESET_PROMPT =
+//  public static final BooleanOption RESET_INTERPRETER_PROMPT =
 //    new BooleanOption("interactions.reset.prompt", Boolean.TRUE);
   
   /** Whether to prompt to save before compiling. */
@@ -1495,12 +1495,12 @@ public interface OptionConstants {
     new NonNegativeIntegerOption("window.width", Integer.valueOf(800));
   
   /** X position of MainFrame at startUp.  Can be overridden if out of bounds. This value can legally be negative in a
-    * multi-screen setup.
+    * multi-screen setUp.
     */
   public static final IntegerOption WINDOW_X = new IntegerOption("window.x",  Integer.valueOf(Integer.MAX_VALUE));
   
   /** Y position of MainFrame at startUp.  Can be overridden if out of bounds. This value can legally be negative in a
-    * multi-screen setup.
+    * multi-screen setUp.
     */
   public static final IntegerOption WINDOW_Y = new IntegerOption("window.y", Integer.valueOf(Integer.MAX_VALUE));
   

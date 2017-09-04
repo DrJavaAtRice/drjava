@@ -57,7 +57,7 @@ public class DrScalaPropertySetupTest extends MultiThreadedTestCase {
   public static final java.util.Random _r = new java.util.Random();
   public void setUp() throws Exception {
     super.setUp();
-    DrScalaPropertySetup.setup();
+    DrScalaPropertySetup.setUp();
   }
   public void tearDown() throws Exception {
     super.tearDown();

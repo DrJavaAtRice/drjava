@@ -222,17 +222,7 @@ public class DefaultScaladocModel implements ScaladocModel {
         // This will throw an IllegalStateException if no file can be found
         File docFile = _getFileFromDocument(doc, saver);
         final File file = IOUtil.attemptCanonicalFile(docFile);
-        
-        // Java language levels is disabled
-//        // If this is a language level file, make sure it has been compiled
-//        if (DrJavaFileUtils.isLLFile(file)) {
-//          // Utilities.showDebug("isLLFile=true: "+file);
-//          llDocs.add(doc);
-//          docFiles.add(DrJavaFileUtils.getJavaForLLFile(file).getPath());
-//        }
-//        else {
         docFiles.add(file.getPath());
-//        }
       }
       catch (IllegalStateException e) {
         // Something wrong with _getFileFromDocument; ignore

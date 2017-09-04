@@ -118,10 +118,10 @@ public class InteractionsDocument extends ConsoleDocument {
   /** Lets this document know whether an interaction is in progress.
     * @param inProgress whether an interaction is in progress
     */
-  public void setInProgress(boolean inProgress) { _document.setHasPrompt(! inProgress); }
+  public void setInteractionInProgress(boolean inProgress) { _document.setHasPrompt(! inProgress); }
   
   /** Returns whether an interaction is currently in progress. */
-  public boolean inProgress() { return ! _document.hasPrompt(); }
+  public boolean interactionInProgress() { return ! _document.hasPrompt(); }
   
   /** Sets the banner in an empty interactions document. Only runs in event thread. */
   public void setBanner(String banner) {
@@ -149,7 +149,7 @@ public class InteractionsDocument extends ConsoleDocument {
       insertPrompt();
        _log.log("Banner and prompt inserted in resetting interactions document");
       _history.moveEnd();
-      setInProgress(false);  // redundant? also done in InteractionsDocument.interpreterReady(...)
+      setInteractionInProgress(false);  // redundant? also done in InteractionsDocument.interpreterReady() ?
     }
     catch (EditDocumentException e) { 
       _log.log("reset in InteractionsDocument threw UnexpectedException " + e);

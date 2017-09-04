@@ -48,16 +48,16 @@ import edu.rice.cs.util.text.EditDocumentException;
 import javax.swing.text.BadLocationException;
 import edu.rice.cs.plt.tuple.Pair;
 
+import edu.rice.cs.drjava.DrScalaTestCase;
 import edu.rice.cs.drjava.model.repl.newjvm.*;
 import edu.rice.cs.drjava.model.repl.newjvm.ClassPathManager;
+import edu.rice.cs.drjava.model.repl.newjvm.DrScalaInterpreter;
 import edu.rice.cs.drjava.model.repl.newjvm.InterpreterException;
-import edu.rice.cs.drjava.DrScalaTestCase;
 
 import edu.rice.cs.plt.tuple.OptionVisitor;
 import edu.rice.cs.plt.reflect.ReflectUtil;
 import edu.rice.cs.plt.text.TextUtil;
 
-import edu.rice.cs.drjava.model.repl.newjvm.DrScalaInterpreter;
 //import edu.rice.cs.dynamicjava.interpreter.InterpreterException;  // moved to newjvm package 
 
 import java.io.File;
@@ -121,7 +121,7 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
     throws BadLocationException, IOException, InterruptedException {
     _log.log("testInterpretExtendPublic started");
     
-//    OpenDefinitionsDocument doc = setupDocument(UNARY_FUN_PUBLIC_INTERFACE_TEXT);
+//    OpenDefinitionsDocument doc = setUpDocument(UNARY_FUN_PUBLIC_INTERFACE_TEXT);
 //    final File file = createFile("UnaryFun.scala");
 //    saveFile(doc, new FileSelector(file));
 //    CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
@@ -164,7 +164,7 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
     throws BadLocationException, IOException, InterruptedException {
     _log.log("testInterpretExtendNonPublic started");
     
-    OpenDefinitionsDocument doc = setupDocument(UNARY_FUN_NON_PUBLIC_CLASS_TEXT);
+    OpenDefinitionsDocument doc = setUpDocument(UNARY_FUN_NON_PUBLIC_CLASS_TEXT);
     final File file = tempFile();
     saveFile(doc, new FileSelector(file));
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
@@ -200,7 +200,7 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
   public void testInterpretExtendPublicClass() throws BadLocationException, IOException, InterruptedException {
     _log.log("testInterpretExtendPublic started");
     
-//    OpenDefinitionsDocument doc = setupDocument(UNARY_FUN_PUBLIC_CLASS_TEXT);
+//    OpenDefinitionsDocument doc = setUpDocument(UNARY_FUN_PUBLIC_CLASS_TEXT);
 //    final File file = createFile("UnaryFun.scala");
 //    saveFile(doc, new FileSelector(file));
 //    CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
@@ -238,7 +238,7 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
     throws BadLocationException, IOException, InterruptedException {
     _log.log("testInterpretGetPackageClass started");
     
-    OpenDefinitionsDocument doc = setupDocument(CLASS_IN_PACKAGE_CLASS_TEXT);
+    OpenDefinitionsDocument doc = setUpDocument(CLASS_IN_PACKAGE_CLASS_TEXT);
 
     final File dir = tempDirectory();
     final File packDir = new File(dir, "foo");

@@ -67,7 +67,7 @@ public final class InteractionsDJDocumentTest extends DrScalaTestCase {
         _model = gm.getInteractionsModel();
         _adapter = gm.getSwingInteractionsDocument();
         _doc = gm.getInteractionsDocument();
-        assert _model._pane != null;  // MainFrame creates an interactions controller which creates the pane.
+        assert _model.getPane() != null;  // MainFrame creates an interactions controller which creates the pane.
       }
     });
   }
@@ -79,7 +79,7 @@ public final class InteractionsDJDocumentTest extends DrScalaTestCase {
     catch(Throwable t) { t.printStackTrace(); }
   }
   
-//  Rewrite this test to use the Completion Monitor in DummyInteractionsListener instead of _restartLock
+//  Rewrite this test to use the Completion Monitor in DefaultInteractionsListener instead of _restartLock
   /** Tests that the styles list is updated and reset properly */
   public void helpTestStylesListContentAndReset() throws EditDocumentException, InterruptedException {
 //    System.err.println("testStylesList started");
@@ -94,9 +94,7 @@ public final class InteractionsDJDocumentTest extends DrScalaTestCase {
     
     int blen = _model.getStartUpBanner().length();
 //    System.err.println("StartUpBanner:\n'" + _model.getStartUpBanner() + "'");
-//    System.err.println("length = " +  _model.getStartUpBanner().length());
-//    System.err.println("Banner:\n'" + _model.getBanner() + "'");
-//    System.err.println("length = " +  _model.getBanner().length());                   
+//    System.err.println("length = " +  _model.getStartUpBanner().length());                 
     
     /** Elt1, Elt2 are first two elements pushed on the StylesList stack */
     String styleElt1 = "((0, " + blen + "), object.return.style)";
@@ -130,7 +128,7 @@ public final class InteractionsDJDocumentTest extends DrScalaTestCase {
     
     /* Reset interactions and wait until it completes */
 
-    InteractionsListener restartCommand = new DummyInteractionsListener() {
+    InteractionsListener restartCommand = new DefaultInteractionsListener() {
       public void interpreterReady() {
         super.interpreterReady();
         synchronized(_restartLock) {
@@ -138,14 +136,6 @@ public final class InteractionsDJDocumentTest extends DrScalaTestCase {
           _restartLock.notify();
         }
       }
-        
-//      public void interpreterReady(File wd) {
-//        super.interpreterReady(wd);
-//        synchronized(_restartLock) {
-//          _interpreterRestarted = true;
-//          _restartLock.notify();
-//        }
-//      }
     };
     
     _model.addListener(restartCommand);
@@ -156,7 +146,7 @@ public final class InteractionsDJDocumentTest extends DrScalaTestCase {
     synchronized(_restartLock) { _interpreterRestarted = false; }
       
     // Reset the interactions pane, restarting the interpreter with no changes to working directory and class path
-    _globalModel.resetInteractions();
+    _globalModel.resetInterpreter();
     
 //    System.err.println("Interpreter reset");
 

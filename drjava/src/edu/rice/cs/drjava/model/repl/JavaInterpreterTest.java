@@ -75,7 +75,7 @@ public class JavaInterpreterTest extends DrScalaTestCase {
 
   static public boolean testValue;
 
-  /** The setup method run before each test. */
+  /** The setUp method run before each test. */
   protected void setUp() throws Exception {
     super.setUp();
 //    _interpreter = new DynamicJavaAdapter(new ClassPathManager());

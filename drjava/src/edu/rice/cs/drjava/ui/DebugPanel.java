@@ -116,7 +116,7 @@ import edu.rice.cs.util.swing.RightClickMouseAdapter;
 //    _leftPane = new JTabbedPane();
 //    _rightPane = new JTabbedPane();
 //
-//    _setupTabPanes();
+//    _setUpTabPanes();
 //
 //    _tabsPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true, _leftPane, _rightPane);
 //    _tabsPane.setOneTouchExpandable(true);
@@ -133,7 +133,7 @@ import edu.rice.cs.util.swing.RightClickMouseAdapter;
 //    this.add(_tabsAndStatusPane, BorderLayout.CENTER);
 //
 //    _buttonPanel = new JPanel(new BorderLayout());
-//    _setupButtonPanel();
+//    _setUpButtonPanel();
 //    this.add(_buttonPanel, BorderLayout.EAST);
 //
 //    _debugger.addListener(new DebugPanelListener());
@@ -181,7 +181,7 @@ import edu.rice.cs.util.swing.RightClickMouseAdapter;
 //
 //
 //  /** Creates the tabbed panes in the debug panel. */
-//  private void _setupTabPanes() {
+//  private void _setUpTabPanes() {
 //
 //    // Watches table
 //    _initWatchTable();
@@ -407,7 +407,7 @@ import edu.rice.cs.util.swing.RightClickMouseAdapter;
 //  }
 //
 //  /** Creates the buttons for controlling the debugger. */
-//  private void _setupButtonPanel() {
+//  private void _setUpButtonPanel() {
 //    JPanel mainButtons = new JPanel();
 //    JPanel emptyPanel = new JPanel();
 //    JPanel closeButtonPanel = new JPanel(new BorderLayout());

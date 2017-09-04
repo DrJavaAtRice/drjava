@@ -79,7 +79,7 @@ public abstract class AsyncTaskLauncher {
       public void run() {
         final boolean shouldUnlockUI = shouldSetEnabled() && lockUI;
         final IAsyncProgress monitor = 
-          createProgressMonitor(task.getDiscriptionMessage(), task.getMinProgress(), task.getMaxProgress());
+          createProgressMonitor(task.getDiscriptionMessage(), task.getMinteractionInProgress(), task.getMaxProgress());
         if (shouldSetEnabled() && lockUI) setParentContainerEnabled(false);
         
         Thread taskThread = new Thread(new Runnable() {

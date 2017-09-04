@@ -44,10 +44,14 @@ import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.StringOps;
 
-import javax.swing.*;
+import java.awt.Desktop;
 import java.io.File;
+import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 import java.util.List;
+
+import javax.swing.*;
 
 /** Default platform-neutral implementation of PlatformSupport.  Most implementations
   * will extend this class to inherit default behaviors.
@@ -70,12 +74,12 @@ class DefaultPlatform implements PlatformSupport {
     return (sysLAF.equals(curLAF));
   }
   
-  /** Hook for performing general UI setup.  Called before all other UI setup is done. The default implementation 
+  /** Hook for performing general UI setUp.  Called before all other UI setUp is done. The default implementation 
     * does nothing.
     */
   public void beforeUISetup() { }
 
-  /** Hook for performing general UI setup.  Called after all other UI setup is done. The default implementation 
+  /** Hook for performing general UI setUp.  Called after all other UI setUp is done. The default implementation 
     * does nothing.
     *
     * @param about the Action associated with openning the About dialog
@@ -120,55 +124,69 @@ class DefaultPlatform implements PlatformSupport {
     * @param address the URL to open
     * @return true if the URL was successfully handled, false otherwise
     */
+  // New experimental code
   public boolean openURL(URL address) {
-    // Get the two config options.
-    Configuration config = DrScala.getConfig();
-    File exe = config.getSetting(OptionConstants.BROWSER_FILE);
-    String command = config.getSetting(OptionConstants.BROWSER_STRING);
-
-    // Check for empty settings.
-    if ((exe == FileOps.NULL_FILE) && (command.equals(""))) {
-      // If the user hasn't specified anything, don't try to run it.
-      return false;
-    }
-    else {
-      String addr = address.toString();
-      if (command.equals("")) {
-        // If there is no command, simply use the URL.
-        command = addr;
-      }
-      else {
-        // Otherwise, replace any <URL> tags in the command with the address.
-        String tag = "<URL>";
-        if (command.indexOf(tag) != -1) {
-          command = StringOps.replace(command, tag, addr);
-        }
-        else {
-          // No <URL> specified, so tack it onto the end.
-          command = command + " " + addr;
-        }
-      }
-
-      // Build a string array of command and arguments.
-      List<String> args = ArgumentTokenizer.tokenize(command);
-
-      // Prepend the file only if it exists.
-      if (exe != FileOps.NULL_FILE) args.add(0, exe.getAbsolutePath());
-
-      // Call the command.
-      try {
-        // Process proc =
-        Runtime.getRuntime().exec(args.toArray(new String[args.size()]));
-      }
-      catch (Throwable t) {
-        // If there was any kind of problem, ignore it and report failure.
-        return false;
+    
+    try {
+      if (Desktop.isDesktopSupported()) {
+        Desktop.getDesktop().browse(address.toURI());
+        return true;
       }
     }
-
-    // Otherwise, trust that it worked.
-    return true;
+    catch(Exception e) { /* fall through */ }
+    return false;
   }
+ 
+  // Old code
+//  public boolean openURL(URL address) {
+//    // Get the two config options.
+//    Configuration config = DrScala.getConfig();
+//    File exe = config.getSetting(OptionConstants.BROWSER_FILE);
+//    String command = config.getSetting(OptionConstants.BROWSER_STRING);
+//
+//    // Check for empty settings.
+//    if ((exe == FileOps.NULL_FILE) && (command.equals(""))) {
+//      // If the user hasn't specified anything, don't try to run it.
+//      return false;
+//    }
+//    else {
+//      String addr = address.toString();
+//      if (command.equals("")) {
+//        // If there is no command, simply use the URL.
+//        command = addr;
+//      }
+//      else {
+//        // Otherwise, replace any <URL> tags in the command with the address.
+//        String tag = "<URL>";
+//        if (command.indexOf(tag) != -1) {
+//          command = StringOps.replace(command, tag, addr);
+//        }
+//        else {
+//          // No <URL> specified, so tack it onto the end.
+//          command = command + " " + addr;
+//        }
+//      }
+//
+//      // Build a string array of command and arguments.
+//      List<String> args = ArgumentTokenizer.tokenize(command);
+//
+//      // Prepend the file only if it exists.
+//      if (exe != FileOps.NULL_FILE) args.add(0, exe.getAbsolutePath());
+//
+//      // Call the command.
+//      try {
+//        // Process proc =
+//        Runtime.getRuntime().exec(args.toArray(new String[args.size()]));
+//      }
+//      catch (Throwable t) {
+//        // If there was any kind of problem, ignore it and report failure.
+//        return false;
+//      }
+//    }
+//
+//    // Otherwise, trust that it worked.
+//    return true;
+//  }
   
   /** Set the keyboard mnemonic for the component in a way that is consistent with
     * the current platform.

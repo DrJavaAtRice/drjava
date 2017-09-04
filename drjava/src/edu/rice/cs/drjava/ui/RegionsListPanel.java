@@ -90,12 +90,12 @@ public abstract class RegionsListPanel<R extends IDocumentRegion> extends Tabbed
     _closePanel.add(_closeButton, BorderLayout.NORTH);
     
     _leftPane = new JPanel(new BorderLayout());
-    _setupRegionList();
+    _setUpRegionList();
     
     this.add(_leftPane, BorderLayout.CENTER);
     
     _buttonPanel = new JPanel(new BorderLayout());
-    _setupButtonPanel();
+    _setUpButtonPanel();
     this.add(_buttonPanel, BorderLayout.EAST);
     updateButtons();
     
@@ -119,7 +119,7 @@ public abstract class RegionsListPanel<R extends IDocumentRegion> extends Tabbed
   }
   
   /** Creates the region list. TODO: fold this into constructor so related fields can be declared final. */
-  private void _setupRegionList() {
+  private void _setUpRegionList() {
     _listModel = new DefaultListModel<RegionListUserObj<R>>();
     _list = new JList<RegionListUserObj<R>>(_listModel) {
       public String getToolTipText(MouseEvent evt) {
@@ -189,7 +189,7 @@ public abstract class RegionsListPanel<R extends IDocumentRegion> extends Tabbed
   
   /** Creates the buttons for controlling the regions. 
     * TODO: fold this into constructor so related fields can be declared final. */
-  private void _setupButtonPanel() {
+  private void _setUpButtonPanel() {
     JPanel mainButtons = new JPanel();
     JPanel emptyPanel = new JPanel();
     JPanel closeButtonPanel = new JPanel(new BorderLayout());

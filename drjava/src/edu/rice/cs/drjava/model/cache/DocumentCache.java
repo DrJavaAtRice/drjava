@@ -79,7 +79,7 @@ import edu.rice.cs.plt.iter.IterUtil;
 public class DocumentCache {
   
   /** Log file. */
-  private static final Log _log = new Log("DocumentCache.txt", false);
+  private static final Log _log = new Log("GlobalModel.txt", false);
   
   private static final int INIT_CACHE_SIZE = 32;
   
@@ -172,18 +172,18 @@ public class DocumentCache {
     
     /** Makes this document; assumes that cacheLock is already held. */
     private DefinitionsDocument makeDocument() {
+      _log.log("makeDocument() called");
       try { // _doc is not in memory
         _doc = _rec.make();
         assert _doc != null;
         // update documents if necessary
         if (_keywords != null) {  // copy cached keywords to new copy of doc
-          _doc.setKeywords(_keywords); /* _keywords.clear(); */ _keywords = null;  //_keywords is  bound to shared immutable table
+          _doc.setKeywords(_keywords); /* _keywords.clear(); */ _keywords = null;  //_keywords is bound to shared immutable table
         }
       }
       catch(IOException e) { throw new UnexpectedException(e); }
       catch(BadLocationException e) { throw new UnexpectedException(e); }      
-//        Utilities.showDebug("Document " + _doc + " reconstructed; _stat = " + _stat);
-//      System.err.println("Making document for " + this);
+      _log.log("Document " + _doc + " reconstructed for " + this + "; _stat = " + _stat);
       if (_stat == NOT_IN_QUEUE) add();       // add this to queue 
       return _doc;
     }
@@ -195,7 +195,7 @@ public class DocumentCache {
       * @return the physical document that is managed by this adapter
       */
     public DefinitionsDocument getDocument() throws IOException, FileMovedException {
-//      Utilities.showDebug("getDocument called on " + this + " with _stat = " + _stat);
+//      _log.log("getDocument called on " + this);  //Note toString() for this prints value of _stat
       
 //      The following double-check idiom is safe in Java 1.4 and later JVMs provided that _doc is volatile.
       final DefinitionsDocument doc = _doc;  // create a snapshot of _doc

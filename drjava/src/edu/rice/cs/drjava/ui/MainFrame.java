@@ -841,7 +841,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public void actionPerformed(ActionEvent ae) { _printInteractionsPreview(); }
   };
   
-  /** Opens the page setup window. */
+  /** Opens the page setUp window. */
   private final Action _pageSetupAction = new AbstractAction("Page Setup...") {
     public void actionPerformed(ActionEvent ae) { _pageSetup(); }
   };
@@ -870,7 +870,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _compileProject(); 
 //      _findReplace.updateFirstDocInSearch();  // why is this necessary?
       updateStatusField("Compilation of project " + projectName + " is complete");
-      /* The _clearInteractionsListener performs a resetInteractions operation. */
+      /* The compileStarted event triggers a ResetInterpreter() operation. */
     }
   };
   
@@ -2113,43 +2113,44 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   };
   
   /** Resets the Interactions pane using Scala :reset command if possible. */
-  private final Action _resetInteractionsAction = new AbstractAction("Reset Interactions") {
+  private final Action _resetInterpreterAction = new AbstractAction("Reset Interactions") {
     public void actionPerformed(ActionEvent ae) {
       /* Revised reset implementation relies on fast internal Scala reset. */
-      _doResetInteractions();
+      _doResetInterpreter();
     }
   };
   
   /** Resets the Interactions pane by killing the slave JVM and resgtarting */
-  private final Action _hardResetInteractionsAction = new AbstractAction("Hard Reset Interactions") {
+  private final Action _hardResetInterpreterAction = new AbstractAction("Hard Reset Interactions") {
     public void actionPerformed(ActionEvent ae) {
       /* Revised reset implementation relies on fast internal Scala reset. */
-      _doHardResetInteractions();
+      _doHardResetInterpreter();
     }
   };
   
   /** Resets the interactions pane, initially trying to reset the existing interpreter. */
-  private void _doResetInteractions() {
+  private void _doResetInterpreter() {
     _tabbedPane.setSelectedIndex(INTERACTIONS_TAB);
     updateStatusField("Resetting Interactions");
     _interactionsPane.discardUndoEdits();
-    MainJVM._log.log("MainFrame invoking DefaultGlobalModel.resetInteractions");
-    _model.resetInteractions();
-    MainJVM._log.log("DefaultGlobalModel.resetInteractions complete");
+    MainJVM._log.log("MainFrame invoking DefaultGlobalModel.ResetInterpreter");
+    _model.resetInterpreter();
+    MainJVM._log.log("DefaultGlobalModel.ResetInterpreter complete");
     _closeSystemInAction.setEnabled(true);
-    _enableInteractionsPane();
+//    _enableInteractionsPane(); // already done in interpreterReady()
   }
   
   /** Resets the interactions pane by starting a new slave JVM */
-  private void _doHardResetInteractions() {
+  private void _doHardResetInterpreter() {
     _tabbedPane.setSelectedIndex(INTERACTIONS_TAB);
     updateStatusField("Hard Resetting Interactions");
     _interactionsPane.discardUndoEdits();
-    _log.log("MainFrame invoking DefaultGlobalModel.hardResetInteractions");
-    _model.hardResetInteractions(_model.getWorkingDirectory());
-    _log.log("In MainFrame, DefaultGlobalModel.hardResetInteractions complete");
+    _log.log("MainFrame invoking DefaultGlobalModel.hardResetInterpreter");
+    /* The following immediately delegates to the InteractionsModel, but controls synchronization */
+    _model.hardResetInterpreter(_model.getWorkingDirectory());
+    _log.log("In MainFrame, DefaultGlobalModel.hardResetInterpreter complete");
     _closeSystemInAction.setEnabled(true);
-    _enableInteractionsPane();
+//    _enableInteractionsPane();  // already done in interpreterReady()
   }
   
   /** Defines actions that displays the interactions classpath. */
@@ -3308,7 +3309,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       if (width > screenSize.width)  width = screenSize.width; // Too wide, so resize
       
       // I assume that we want to be contained on the default screen.
-      // TODO: support spanning screens in multi-screen setups.
+      // TODO: support spanning screens in multi-screen setUps.
       Rectangle bounds = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().
         getDefaultConfiguration().getBounds();
       
@@ -3445,7 +3446,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       
       KeyBindingManager.ONLY.setShouldCheckConflict(false);
       
-      // Platform-specific UI setup.
+      // Platform-specific UI setUp.
       PlatformFactory.ONLY.afterUISetup(_aboutAction, _editPreferencesAction, _quitAction);
       setUpKeys();    
       
@@ -3611,7 +3612,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   public void setUpDrScalaProperties() {
     final String DEF_DIR = "${drjava.working.dir}";
     
-    DrScalaPropertySetup.setup(); 
+    DrScalaPropertySetup.setUp(); 
     
     // Files
     PropertyMaps.TEMPLATE.setProperty("DrScala", 
@@ -4075,10 +4076,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   public SingleDisplayModel getModel() { return _model; }
   
   /** Returns the frame's interactions pane.  (Package private accessor) */
-  InteractionsPane getInteractionsPane() { return _interactionsPane; }
+  public InteractionsPane getInteractionsPane() { return _interactionsPane; }
   
   /** Returns the frame's interactions controller. (Package private accessor) */
-  InteractionsController getInteractionsController() { return _interactionsController; }
+  public InteractionsController getInteractionsController() { return _interactionsController; }
   
   /** @return The frame's close button (Package private accessor). */
   JButton getCloseButton() { return _closeButton; }
@@ -6119,8 +6120,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _setUpAction(_saveHistoryAction, "Save History", "Save the history of interactions to a file");
     _setUpAction(_clearHistoryAction, "Clear History", "Clear the current history of interactions");
     
-    _setUpAction(_resetInteractionsAction, "Reset", "Reset the Interactions Pane");
-    _setUpAction(_hardResetInteractionsAction, "Hard Reset", "Hard Reset the Interactions Pane");
+    _setUpAction(_resetInterpreterAction, "Reset", "Reset the Interactions Pane");
+    _setUpAction(_hardResetInterpreterAction, "Hard Reset", "Hard Reset the Interactions Pane");
                    
     _setUpAction(_closeSystemInAction, "Close System.in", "Close System.in Stream in Interactions Pane"); 
     
@@ -6332,7 +6333,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _addMenuItem(fileMenu, _closeAction, KEY_CLOSE_FILE, updateKeyboardManager);
     _addMenuItem(fileMenu, _closeAllAction, KEY_CLOSE_ALL_FILES, updateKeyboardManager);
     
-    // Page setup, print preview, print
+    // Page setUp, print preview, print
     fileMenu.addSeparator();
     _addMenuItem(fileMenu, _pageSetupAction, KEY_PAGE_SETUP, updateKeyboardManager);
     _addMenuItem(fileMenu, _printDefDocPreviewAction, KEY_PRINT_PREVIEW, updateKeyboardManager);
@@ -6478,8 +6479,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _addMenuItem(toolsMenu, _runAction, KEY_RUN, updateKeyboardManager);
     /* Omit this menu item until Scala applets are supported. */
 //    _addMenuItem(toolsMenu, _runAppletAction, KEY_RUN_APPLET, updateKeyboardManager);
-    _addMenuItem(toolsMenu, _resetInteractionsAction, KEY_RESET_INTERACTIONS, updateKeyboardManager);
-    _addMenuItem(toolsMenu, _hardResetInteractionsAction, KEY_HARD_RESET_INTERACTIONS, updateKeyboardManager);
+    _addMenuItem(toolsMenu, _resetInterpreterAction, KEY_RESET_INTERPRETER, updateKeyboardManager);
+    _addMenuItem(toolsMenu, _hardResetInterpreterAction, KEY_HARD_RESET_INTERPRETER, updateKeyboardManager);
     toolsMenu.addSeparator();
     
     // Scaladoc
@@ -6772,7 +6773,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     // Compile, reset, abort
     _toolBar.addSeparator();
     _toolBar.add(_compileButton = _createToolbarButton(_compileAllAction));
-    _toolBar.add(_createToolbarButton(_resetInteractionsAction));
+    _toolBar.add(_createToolbarButton(_resetInterpreterAction));
     
     // Run, Junit, and JavaDoc
     _toolBar.addSeparator();
@@ -7473,8 +7474,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _interactionsPanePopupMenu.add(_saveHistoryAction);
     _interactionsPanePopupMenu.add(_clearHistoryAction);
     _interactionsPanePopupMenu.addSeparator();
-    _interactionsPanePopupMenu.add(_resetInteractionsAction);
-    _interactionsPanePopupMenu.add(_hardResetInteractionsAction);
+    _interactionsPanePopupMenu.add(_resetInterpreterAction);
+    _interactionsPanePopupMenu.add(_hardResetInterpreterAction);
     _interactionsPanePopupMenu.add(_viewInteractionsClassPathAction);
     _interactionsPanePopupMenu.add(_copyInteractionToDefinitionsAction);
     _interactionsPane.addMouseListener(new RightClickMouseAdapter() {
@@ -8072,35 +8073,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
   }
   
-    /* Debugger deactivated in DrScala */
-//  /** Disable any step timer. */
-//  private void _disableStepTimer() {
-//    synchronized(_debugStepTimer) { if (_debugStepTimer.isRunning()) _debugStepTimer.stop(); }
-//  }
-//  
-//  /** Checks if debugPanel's status bar displays the DEBUGGER_OUT_OF_SYNC message but the current document is 
-//    * in sync.  Clears the debugPanel's status bar in this case.  Does not assume that frame is in debug mode.
-//    * Must be executed in event thread.
-//    */
-//  private void _updateDebugStatus() {
-//    boolean debuggerReady = isDebuggerReady();
-//    _guiAvailabilityNotifier.ensureAvailabilityIs(GUIAvailabilityListener.ComponentType.DEBUGGER, debuggerReady);
-//    if (!debuggerReady) { return; }
-//    
-//    // if the document is untitled, don't show that it is out of sync since it can't be debugged anyway
-//    if (_model.getActiveDocument().isUntitled() || _model.getActiveDocument().getClassFileInSync()) {
-//      // Hide message
-//      if (_debugPanel.getStatusText().equals(DEBUGGER_OUT_OF_SYNC)) _debugPanel.setStatusText("");
-//    } 
-//    else {
-//      // Show message
-//      if (_debugPanel.getStatusText().equals("")) {
-//        _debugPanel.setStatusText(DEBUGGER_OUT_OF_SYNC);
-//      }
-//    }
-//    _debugPanel.repaint();  // display the updated panel
-//  }
-  
   /** Ensures that the interactions pane is not editable during an interaction. */
   protected void _disableInteractionsPane() {
     assert EventQueue.isDispatchThread();
@@ -8111,9 +8083,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   /** Ensures that the interactions pane is editable after an interaction completes or the interpreter resets. */
-  protected void _enableInteractionsPane() {
-    _log.log("_enableInteractionsPane() called");
+  protected void _enableInteractionsPane() { 
     assert EventQueue.isDispatchThread();
+    _log.log("MainFrame._enableInteractionsPane() called");
+    
     _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
     _interactionsPane.setEditable(true);
     _interactionsController.moveToEnd();
@@ -8694,6 +8667,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     public void interactionEnded() {
       assert EventQueue.isDispatchThread();
+      _log.log("interactionEnded()");
       final InteractionsModel im = _model.getInteractionsModel();
       final String lastError = im.getLastError();
       final FileConfiguration config = DrScala.getConfig();
@@ -8720,14 +8694,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       
       _guiNotifier.available(GUIAvailabilityListener.ComponentType.COMPILER);
       
-      /* Note: interactions class path is set in _clearInteractionsListener. */
+      /* Note: interactions class path is set in _compilerListener. */
       
       _compilerErrorPanel.reset(excludedFiles.toArray(new File[0]));
       
-      if ((DrScala.getConfig().getSetting(DIALOG_COMPLETE_SCAN_CLASS_FILES).booleanValue()) && 
-          (_model.getBuildDirectory() != null)) {
-        _scanClassFiles();
-      }
       if (_junitPanel.isDisplayed()) _resetJUnit();
       _model.refreshActiveDocument();
     }
@@ -8897,13 +8867,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _interactionsPane.setEditable(false);
       _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
     }
-    
-//    public void interpreterReady(File wd) { interpreterReady(); }
+
     public void interpreterReady() {
       assert duringInit() || EventQueue.isDispatchThread();
       
-      interactionEnded();
-      //enable interactions pane
+//      interactionEnded();
+      /*  Enable interactions pane. */
       _guiNotifier.available(GUIAvailabilityListener.ComponentType.INTERACTIONS);
       _enableInteractionsPane();
       
@@ -9228,7 +9197,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       }
     }
     
-    public void interactionIncomplete() { }
+    public void interactionIncomplete() { }  // do nothing
+    
+    public void waitResetDone() { }  // do nothing
     
     /* Changes to the state */
     

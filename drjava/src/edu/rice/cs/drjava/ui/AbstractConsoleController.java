@@ -100,8 +100,8 @@ public abstract class AbstractConsoleController /* implements Serializable */ {
   /** Initialization method.  *Must* be called in constructor by all subclasses. */
   protected void _init() {
     _addDocumentStyles();
-    _setupModel();
-    _setupView();
+    _setUpModel();
+    _setUpView();
   }
 
   /** Adds AttributeSets as named styles to the Swing console document. */
@@ -135,10 +135,10 @@ public abstract class AbstractConsoleController /* implements Serializable */ {
   }
 
   /** Sets up the model.*/
-  protected abstract void _setupModel();
+  protected abstract void _setUpModel();
   
   /** Sets up the view. */
-  protected void _setupView() {
+  protected void _setUpView() {
     _pane.addActionForKeyStroke(DrScala.getConfig().getSetting(OptionConstants.KEY_BEGIN_LINE), gotoPromptPosAction);
     _pane.addActionForKeyStroke(DrScala.getConfig().getSetting(OptionConstants.KEY_BEGIN_LINE_SELECT), selectToPromptPosAction);
     _pane.addActionForKeyStroke(DrScala.getConfig().getSetting(OptionConstants.KEY_END_LINE), gotoEndAction);

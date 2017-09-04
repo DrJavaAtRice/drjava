@@ -708,7 +708,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
   /** Performs the "replace all" command. */
   private void _replaceAll() {
     _frame.updateStatusField("Replacing All");
-    _updateMachine();
+//    _updateMachine();
     _machine.setFindWord(_findField.getText());
     _machine.setReplaceWord(_replaceField.getText());
     _machine.setSearchBackwards(false);

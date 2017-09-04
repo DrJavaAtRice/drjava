@@ -60,7 +60,7 @@ public final class CompilerErrorModelTest extends DrScalaTestCase {
   private DJError[] errors;
   private CompilerErrorModel model;
   
-  /** Tests CompilerErrorModel setup code with no compiler errors. */
+  /** Tests CompilerErrorModel setUp code with no compiler errors. */
   public void testConstructNoErrors() {
     getter = new TestDocGetter();
     model = new CompilerErrorModel(new DJError[0], getter);
@@ -72,7 +72,7 @@ public final class CompilerErrorModelTest extends DrScalaTestCase {
     assertTrue("hasOnlyWarnings should return true.", model.hasOnlyWarnings());
   }
   
-  /** Tests CompilerErrorModel setup code with only warnings without files. Also tests hasOnlyWarnings logic. */
+  /** Tests CompilerErrorModel setUp code with only warnings without files. Also tests hasOnlyWarnings logic. */
   public void testConstructOnlyWarnings() {
     getter = new TestDocGetter();
     errors = new DJError[] { 
@@ -88,7 +88,7 @@ public final class CompilerErrorModelTest extends DrScalaTestCase {
     assertTrue("hasOnlyWarnings should return true.", model.hasOnlyWarnings());
   }
   
-  /** Tests CompilerErrorModel setup code with only errors without files. */
+  /** Tests CompilerErrorModel setUp code with only errors without files. */
   public void testConstructDoclessErrors() {
     getter = new TestDocGetter();
     errors = new DJError[] { 
@@ -110,9 +110,9 @@ public final class CompilerErrorModelTest extends DrScalaTestCase {
     assertTrue("hasOnlyWarnings should return false.", !model.hasOnlyWarnings());
   }
   
-  /** Tests CompilerErrorModel setup code with one file and only errors without line numbers. */
+  /** Tests CompilerErrorModel setUp code with one file and only errors without line numbers. */
   public void testConstructOneDocWithoutLineNums() {
-    setupDoc();
+    setUpDoc();
     errors = new DJError[] { 
       new DJError(files[0], "Test error with File", false),
       new DJError(files[0], "Test warning with File", true),
@@ -132,9 +132,9 @@ public final class CompilerErrorModelTest extends DrScalaTestCase {
     assertTrue("hasOnlyWarnings should return false.", !model.hasOnlyWarnings());
   }
   
-  /** Tests CompilerErrorModel setup code with one file and only errors with line numbers. */
+  /** Tests CompilerErrorModel setUp code with one file and only errors with line numbers. */
   public void testConstructOneDocWithLineNums() {
-    setupDoc();
+    setUpDoc();
     errors = new DJError[] { 
       new DJError(files[0], 2, 0, "Test error with File and line", false),
       new DJError(files[0], 1, 0, "Test warning with File and line", true),
@@ -158,9 +158,9 @@ public final class CompilerErrorModelTest extends DrScalaTestCase {
     assertTrue("hasOnlyWarnings should return false.", !model.hasOnlyWarnings());
   }
   
-  /** Tests CompilerErrorModel setup code with one file and errors both with and without line numbers. */
+  /** Tests CompilerErrorModel setUp code with one file and errors both with and without line numbers. */
   public void testConstructOneDocWithBoth() {
-    setupDoc();
+    setUpDoc();
     errors = new DJError[] { 
       new DJError(files[0], 2, 0, "Test error with File and line", false),
       new DJError(files[0], "Test warning with File (no line)", true),
@@ -190,9 +190,9 @@ public final class CompilerErrorModelTest extends DrScalaTestCase {
     assertTrue("hasOnlyWarnings should return false.", !model.hasOnlyWarnings());
   }
   
-  /** Tests CompilerErrorModel setup code with several files and only errors without line numbers. */
+  /** Tests CompilerErrorModel setUp code with several files and only errors without line numbers. */
   public void testConstructManyDocsWithoutLineNums() {
-    setupDocs();
+    setUpDocs();
     errors = new DJError[] { 
       new DJError(files[0], "Test error with File", false),
       new DJError(files[2], "Test warning with File", true),
@@ -224,9 +224,9 @@ public final class CompilerErrorModelTest extends DrScalaTestCase {
     assertTrue("hasOnlyWarnings should return false.", !model.hasOnlyWarnings());
   }
   
-  /** Tests CompilerErrorModel setup code with several files and only errors with line numbers. */
+  /** Tests CompilerErrorModel setUp code with several files and only errors with line numbers. */
   public void testConstructManyDocsWithLineNums() {
-    setupDocs();
+    setUpDocs();
     errors = new DJError[] { 
       new DJError(files[0], 2, 0, "Test error with File", false),
       new DJError(files[2], 3, 0, "Test warning with File", true),
@@ -258,7 +258,7 @@ public final class CompilerErrorModelTest extends DrScalaTestCase {
     assertTrue("hasOnlyWarnings should return false.", !model.hasOnlyWarnings());
   }
   
-  /** Tests CompilerErrorModel setup code with several files and errors both with and without line numbers. */
+  /** Tests CompilerErrorModel setUp code with several files and errors both with and without line numbers. */
   public void testConstructManyDocsWithBoth() {
     fullSetup();
     
@@ -357,7 +357,7 @@ public final class CompilerErrorModelTest extends DrScalaTestCase {
   }
   
   /** Setup for test cases with one document. */
-  private void setupDoc() {
+  private void setUpDoc() {
     files = new File[] { new File("/tmp/nowhere") };
     texts = new String[] { 
       "This is a block of test text.\n" + "It doesn't matter what goes in here.\n" +
@@ -366,7 +366,7 @@ public final class CompilerErrorModelTest extends DrScalaTestCase {
   }
   
   /** Setup for test cases with several documents. */
-  private void setupDocs() {
+  private void setUpDocs() {
     files = new File[] { 
       new File("/tmp/nowhere1"),
       new File("/tmp/nowhere2"),
@@ -388,9 +388,9 @@ public final class CompilerErrorModelTest extends DrScalaTestCase {
     getter = new TestDocGetter(files, texts);
   }
   
-  /** Extra setup for test cases with several documents. */
+  /** Extra setUp for test cases with several documents. */
   private void fullSetup() {
-    setupDocs();
+    setUpDocs();
     errors = new DJError[] { 
       new DJError(files[0], "Test error with File (no line)", false),
       new DJError(files[4], 3, 0, "Test error with File", false),

@@ -91,8 +91,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.error;
   */
 public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRemoteI, JUnitModelCallback {
   
-  /** Debugging log. Note this statement must appear before the binding of ONLY! */
-  public static final Log _log  = DrScala._log;
+  /* Log _log inherited from AbstractSlaveJVM */
   
   public static final String PATH_SEPARATOR = System.getProperty("path.separator");
   
@@ -104,11 +103,11 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   
 //  private final InteractionsPaneOptions _interpreterOptions;
   
-  private volatile Interpreter _defaultInterpreter;  // it should be final but static checks are too weak
+  private volatile Interpreter _interpreter;  // it should be final but static checks are too weak
 
   private final ClassPathManager _classPathManager;
   private final ClassLoader _interpreterLoader;
-  private volatile Class<?> _interpreterClass;      // it should be final but static checks are too weak
+  private volatile Class<?> _interpreterClass;  // should be final but static checks are too weak because 
   
   // Lock object for ensuring mutual exclusion on updates and compound accesses
   private final Object _stateLock = new Object();
@@ -120,42 +119,49 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   private volatile MainJVMRemoteI _mainJVM;
   
   private volatile boolean scalaInterpreterStarted = false;
+  
+  private Interpreter createInterpreter(final String scalaInterpreterName) {
+    try {
+      _log.log("_interpreterLoader = " + _interpreterLoader);
+      Class<?> _interpreterClass = Class.forName(scalaInterpreterName, true, _interpreterLoader);
+      _log.log("In InterpreterJVM," + _interpreterClass  + " was loaded by " + _interpreterClass.getClassLoader());
+      return (Interpreter) _interpreterClass.newInstance();  // The unique constructor for DrScalaInterpreter is 0-ary
+    }
+    catch(Exception e) {
+      _log.log("In InterpreterJVM, either ClassforName(" + scalaInterpreterName + ", true, " + _interpreterLoader + 
+               ") or _interpreterClass.newInstance() failed");
+      throw new UnexpectedException(e); 
+    }
+  }
 
   /** Private constructor; use the singleton ONLY instance. */
   private InterpreterJVM() {
     super("Reset Interactions Thread", "Poll DrScala Thread");
-    if (_log != null) _log.log("InterpreterJVM starting");
-//    Utilities.show("Interpreter JVM starting");
-    /* Important singleton objects embedded in an InterpreterJVM */
+    _log.log("In InterpreterJVM, interpreter JVM starting");
+    _classPathManager = new ClassPathManager();
+    
     final String scalaInterpreterName = "edu.rice.cs.drjava.model.repl.newjvm.DrScalaInterpreter";
-    
-    _classPathManager = new ClassPathManager(ReflectUtil.SYSTEM_CLASS_PATH);
-    
-    ClassLoader interpreterLoaderParent =
+    final ClassLoader interpreterLoaderParent =
       ShadowingClassLoader.blackList(InterpreterJVM.class.getClassLoader(), scalaInterpreterName);
-    _log.log("Interpreter loader parent = " + interpreterLoaderParent);
+    _log.log("In InterpreterJVM, interpreter loader parent = " + interpreterLoaderParent);
     _interpreterLoader = _classPathManager.makeClassLoader(interpreterLoaderParent);
-    _log.log("Interpreter loader = " + _interpreterLoader);
-    try {
-      Class<?> _interpreterClass = Class.forName(scalaInterpreterName, true, _interpreterLoader);
-      _log.log("Class " + _interpreterClass + " was loaded by " + _interpreterClass.getClassLoader());
-      _defaultInterpreter = (Interpreter) _interpreterClass.newInstance();  // The unique constructor for DrScalaInterpreter is 0-ary
-      _log.log("_defaultInterpreter = " + _defaultInterpreter);
-    }
-    catch(Exception e) {
-      _log.log("Either ClassforName(" + scalaInterpreterName + ", true, " + _interpreterLoader + 
-               ") or _interpreterClass.newInstance() failed");
-      throw new UnexpectedException(e); 
-    }
+    _log.log("In InterpreterJVM, Interpreter loader = " + _interpreterLoader);
+    
+    _interpreter = createInterpreter("edu.rice.cs.drjava.model.repl.newjvm.DrScalaInterpreter");
+    _log.log("In InterpreterJVM, _interpreter = " + _interpreter + " loader = " + 
+             _interpreter.getClass().getClassLoader());
+//    Utilities.show("Interpreter JVM started");
+    /* Important singleton objects embedded in an InterpreterJVM */
       
     _junitTestManager = new JUnitTestManager(this, _classPathManager);
+    _log.log("In InterpreterJVM, _junitTestManager = " + _junitTestManager);
   }
  
   /** Actions to perform when this JVM is started (through its superclass, AbstractSlaveJVM). Not synchronized
     * because "this" is not initialized for general access until this method has run. */
-  protected void handleStart(MasterRemote mainJVM) {
-    //_dialog("handleStart");
-    _mainJVM = (MainJVMRemoteI) mainJVM;
+  protected void _init(MasterRemote mainJVM) {
+    _log.log("In InterpreterJVM, _init(" + mainJVM + " called");
+    _mainJVM = (MainJVMRemoteI) mainJVM;  // safe upcast that ensures only remote method are called 
     
     // redirect stdin
     System.setIn(new InputStreamRedirector() {
@@ -190,8 +196,9 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
       }
     }));
     
-    /* _defaultInterpreter is final bound to an instance of DrScalaInterpreter, so it can NEVER be null once initialized. */ 
-    _defaultInterpreter.start();
+    _log.log("In InterpreterJVM, Standard In, Out, and Err have been redirected; calling interpreter.start()");
+    /* _interpreter is final bound to an instance of DrScalaInterpreter, so it can NEVER be null once initialized. */ 
+    _interpreter.start();
 
     /* On Windows, any frame or dialog opened from Interactions pane will appear *behind* DrScala's frame, unless a 
      * previous frame or dialog is shown here.  Not sure what the difference is, but this hack seems to work.  (I'd
@@ -215,15 +222,15 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   public InterpretResult interpret(String input) {
 //    Utilities.show("interpret(" + input + ") called in InterpreterJVM running in SLAVE JVM");
     
-    _log.log("interpret(" + input + ") called in InterpreterJVM running in SLAVE JVM");
+    _log.log("In InterpreterJVM, interpret(" + input + ") called in InterpreterJVM running in SLAVE JVM");
     
 //    // This may be overkill for DrScala; there is only one loader for the interpreter
 //    Thread.currentThread().setContextClassLoader(_interpreterLoader);  // _interpreterLoader is final
 
     String result = null;
-    try { result = _defaultInterpreter.interpret(input); }  // may block forever
+    try { result = _interpreter.interpret(input); }  // may block forever
     catch (InterpreterException e) {
-      _log.log("interpret invocation threw InterpreterException: " + e);
+      _log.log("In InterpreterJVM, interpret invocation threw InterpreterException: " + e);
       // DEBUGGING PRINTLINE
       System.out.println(e);
       // DEBUGGING PRINTLINE
@@ -232,7 +239,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
       return InterpretResult.exception(e);
     }
     catch (Throwable e) {
-      _log.log("interpret invocation threw Throwable: " + e);
+      _log.log("In InterpreterJVM, interpret invocation threw Throwable: " + e);
       // DEBUGGING PRINTLINE
       System.out.println(e);
       // DEBUGGING PRINTLINE
@@ -246,63 +253,63 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   
   /** Executes internal reset operation of the interpreter. */
   public void reset() throws RemoteException { 
-    _log.log("reset() called in InterpreterJVM");
-    _defaultInterpreter.reset(); 
+    _log.log("In InterpreterJVM, reset() called in InterpreterJVM");
+    _interpreter.reset(); 
   }
   
-  /** Gets the value and type string of the variable with the given name in the current interpreter.
-    * Invoked reflectively by the debugger.  To simplify the inter-process exchange,
-    * an array here is used as the return type rather than an {@code Option<Object>} --
-    * an empty array corresponds to "none," and a singleton array corresponds to a "some."
-    */
-  @SuppressWarnings("all")  // New array operations must use raw types, which creates typing mismatches.
-  public Pair<Object,String>[] getVariable(String var) {
-    synchronized(_stateLock) {
-      InterpretResult ir = interpret(var);
-      return ir.apply(new InterpretResult.Visitor<Pair<Object,String>[]>() {
-        
-        @SuppressWarnings({"unchecked", "rawtypes"})
-        public Pair<Object,String>[] fail() { return new Pair[0]; }
-        
-        @SuppressWarnings({"unchecked", "rawtypes"})
-        public Pair<Object,String>[] value(Object val) {
-          return new Pair[] { new Pair<Object,String>(val, getClassName(val.getClass())) };
-        }
-        public Pair<Object,String>[] forNoValue() { return fail(); }
-        public Pair<Object,String>[] forStringValue(String val) { return value(val); }
-        public Pair<Object,String>[] forCharValue(Character val) { return value(val); }
-        public Pair<Object,String>[] forNumberValue(Number val) { return value(val); }
-        public Pair<Object,String>[] forBooleanValue(Boolean val) { return value(val); }
-        
-        @SuppressWarnings({"unchecked", "rawtypes"})
-        public Pair<Object,String>[] forObjectValue(String valString, String objTypeString) {
-          return new Pair[] { new Pair<Object,String>(valString, objTypeString) }; 
-        }
-        public Pair<Object,String>[] forException(String message) { return fail(); }
-        public Pair<Object,String>[] forEvalException(String message, StackTraceElement[] stackTrace) { return fail(); }
-        public Pair<Object,String>[] forUnexpectedException(Throwable t) { return fail(); }
-//        public Pair<Object,String>[] forBusy() { return fail(); }
-      });
-    }
-  }
+//  /** Gets the value and type string of the variable with the given name in the current interpreter.
+//    * Invoked reflectively by the debugger.  To simplify the inter-process exchange,
+//    * an array here is used as the return type rather than an {@code Option<Object>} --
+//    * an empty array corresponds to "none," and a singleton array corresponds to a "some."
+//    */
+//  @SuppressWarnings("all")  // New array operations must use raw types, which creates typing mismatches.
+//  public Pair<Object,String>[] getVariable(String var) {
+//    synchronized(_stateLock) {
+//      InterpretResult ir = interpret(var);
+//      return ir.apply(new InterpretResult.Visitor<Pair<Object,String>[]>() {
+//        
+//        @SuppressWarnings({"unchecked", "rawtypes"})
+//        public Pair<Object,String>[] fail() { return new Pair[0]; }
+//        
+//        @SuppressWarnings({"unchecked", "rawtypes"})
+//        public Pair<Object,String>[] value(Object val) {
+//          return new Pair[] { new Pair<Object,String>(val, getClassName(val.getClass())) };
+//        }
+//        public Pair<Object,String>[] forNoValue() { return fail(); }
+//        public Pair<Object,String>[] forStringValue(String val) { return value(val); }
+//        public Pair<Object,String>[] forCharValue(Character val) { return value(val); }
+//        public Pair<Object,String>[] forNumberValue(Number val) { return value(val); }
+//        public Pair<Object,String>[] forBooleanValue(Boolean val) { return value(val); }
+//        
+//        @SuppressWarnings({"unchecked", "rawtypes"})
+//        public Pair<Object,String>[] forObjectValue(String valString, String objTypeString) {
+//          return new Pair[] { new Pair<Object,String>(valString, objTypeString) }; 
+//        }
+//        public Pair<Object,String>[] forException(String message) { return fail(); }
+//        public Pair<Object,String>[] forEvalException(String message, StackTraceElement[] stackTrace) { return fail(); }
+//        public Pair<Object,String>[] forUnexpectedException(Throwable t) { return fail(); }
+////        public Pair<Object,String>[] forBusy() { return fail(); }
+//      });
+//    }
+//  }
 
-  /** Gets the string representation of the value of a variable in the current interpreter.
-    * @param var the name of the variable
-    * @return null if the variable is not defined; the first part of the pair is "null" if the value is null,
-    * otherwise its string representation; the second part is the string representation of the variable's type
-    */
-  public Pair<String,String> getVariableToString(String var) {
-    synchronized(_stateLock) {
-//    if (!isValidFieldName(var)) { return "<error in watch name>"; }
-      Pair<Object,String>[] val = getVariable(var);  // recursive locking
-      if (val.length == 0) { return new Pair<String,String>(null,null); }
-      else {
-        Object o = val[0].first();
-        try { return new Pair<String,String>(TextUtil.toString(o),val[0].second()); }
-        catch (Throwable t) { return new Pair<String,String>("<error in toString()>",""); }
-      }
-    }
-  }
+//  /** Gets the string representation of the value of a variable in the current interpreter.
+//    * @param var the name of the variable
+//    * @return null if the variable is not defined; the first part of the pair is "null" if the value is null,
+//    * otherwise its string representation; the second part is the string representation of the variable's type
+//    */
+//  public Pair<String,String> getVariableToString(String var) {
+//    synchronized(_stateLock) {
+////    if (!isValidFieldName(var)) { return "<error in watch name>"; }
+//      Pair<Object,String>[] val = getVariable(var);  // recursive locking
+//      if (val.length == 0) { return new Pair<String,String>(null,null); }
+//      else {
+//        Object o = val[0].first();
+//        try { return new Pair<String,String>(TextUtil.toString(o),val[0].second()); }
+//        catch (Throwable t) { return new Pair<String,String>("<error in toString()>",""); }
+//      }
+//    }
+//  }
 
   /** @return the name of the class, with the right number of array suffixes "[]" and while being ambiguous
     * about boxed and primitive types. */
@@ -333,20 +340,17 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   }
   
   /** Gets the default interpreter (the ONLY interpreter). */
-  public Interpreter getInterpreter() throws RemoteException { return _defaultInterpreter; }
+  public Interpreter getInterpreter() throws RemoteException { return _interpreter; }
   
-  /** Gets the class path maintained by the ClassPathManager. */
+  /** Gets the interactions class path maintained by the ClassPathManager. */
   public List<File> getInteractionsClassPath() {
     return _classPathManager.getInteractionsClassPath();
   }
   
   /** Gets the class path for the current interpreter [slave] JVM. */
-  public List<File> getCurrentClassPath() {
-    String cp = System.getProperty("java.class.path");
-    List<String> cpAsList = Arrays.asList(cp.split(PATH_SEPARATOR));
-    Stream<String> cpAsStream = cpAsList.stream();
-    return cpAsStream.map(File::new).collect(Collectors.toList());
-  } 
+  public List<File> getCurrentClassPath() { return _classPathManager.getJVMClassPath(); }
+    /* The following return statement is equivalent to the preceding but more computationally expensive. */
+//    return CollectUtil.makeList(IOUtil.parse(System.getProperty("java.class.path")));
   
   // ---------- JUnit methods ----------
   /** Sets up a JUnit test suite in the Interpreter JVM and finds which classes are really TestCases classes (by 
@@ -357,8 +361,10 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     */
   public List<String> findTestClasses(List<String> classNames, List<File> files) throws RemoteException {
 //    Utilities.show("InterpreterJVM.findTestClasses(" + classNames + ", " + files + ") called");
-    _log.log("InterpreterJVM.findTestClaseClasses(" + classNames + ", " + files + ") called");
-    return _junitTestManager.findTestClasses(classNames, files);
+    _log.log("InterpreterJVM.findTestCaseClasses(" + classNames + ", " + files + ") called");
+    List<String> result = _junitTestManager.findTestClasses(classNames, files);
+    _log.log("InterpreterJVM.findTestCaseClasses(...) returned: " + result);
+    return result;
   }
   
   /** Runs JUnit test suite already cached in the Interpreter JVM.  Unsynchronized because it contains a remote call
