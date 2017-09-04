@@ -1222,7 +1222,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     final StringBuilder buf = new StringBuilder();
     
     buf.append("import junit.framework.TestCase\n");
-    buf.append("import junit.framework.Assert._\n\n");
+    buf.append("import org.junit.Assert._\n\n");
     buf.append("/**\n");
     buf.append("* A JUnit test case class.\n");
     buf.append("* Every method starting with the word \"test\" will be called when running\n");

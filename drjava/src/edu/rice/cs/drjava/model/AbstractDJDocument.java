@@ -592,7 +592,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   
   /** Assumes that reduced lock is already held. */
   public ReducedModelState getStateAtCurrent() { 
-    /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     return _reduced.getStateAtCurrent(); 
   }
   

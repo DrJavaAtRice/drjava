@@ -63,7 +63,7 @@ import java.io.IOException;
 import java.rmi.UnmarshalException;
 import java.util.regex.*;
 import java.util.List;
-import junit.framework.Assert;
+import org.junit.Assert;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 

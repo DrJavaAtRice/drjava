@@ -938,7 +938,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   
   /* NOTE: TEST_MODE hack was added because the Scala interpreter reset process broke in later versions of DrScala 
    * (later than 2.9?) , requiring interpreter replacement instead of interpreter resetting (including soft resets).  
-   * The old unit test infrastructure (inheritied from DrJava did not handle this issue well. */
+   * The old unit test infrastructure (inheritied from DrJava) did not handle this issue well. */
   private class DisposedPhase extends Phase {
     public InterpreterJVMRemoteI interpreter() { throw new IllegalStateException("MainJVM is disposed"); }
     public void start() { if (! Utilities.TEST_MODE) throw new IllegalStateException("MainJVM is disposed"); }

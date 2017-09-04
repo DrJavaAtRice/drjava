@@ -36,17 +36,17 @@
 
 package edu.rice.cs.util;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import junit.framework.TestCase;
+
 import org.w3c.dom.*;
 
 import java.io.*;
 import java.util.*;
 
-/**
- * XML configuration management tests.
- * @author Mathias Ricken
- */
+/** XML configuration management tests.
+  * @author Mathias Ricken
+  */
 public class XMLConfigTest extends TestCase {
   /** Newline string.
     */

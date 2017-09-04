@@ -56,7 +56,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
   
   private static final String MONKEYTEST_FAIL_TEXT =
     "import junit.framework._ \n" +
-    "import junit.framework.Assert._ \n" +
+    "import org.junit.Assert._ \n" +
     "import java.io._ \n" +
     "class MonkeyTestFail extends TestCase { \n" +
 //    "  def MonkeyTestFail(name: String) { super(name); } \n" +
@@ -70,7 +70,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
   
   private static final String TEST_ONE =
     "import junit.framework._ \n" +
-    "import junit.framework.Assert._ \n" +
+    "import org.junit.Assert._ \n" +
     "class TestOne extends TestCase {\n" +
     "  def testMyMethod() {\n" +
     "    assertTrue(false)\n" +
@@ -88,7 +88,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
   
   private static final String TEST_TWO =
     "import junit.framework._ \n" +
-    "import junit.framework.Assert._ \n" +
+    "import org.junit.Assert._ \n" +
     "class TestTwo extends TestOne {\n" +
     "  def testTwo() { assertTrue(true) }\n" +
     "  override def toString() = \"TestTwo()\"\n" +
