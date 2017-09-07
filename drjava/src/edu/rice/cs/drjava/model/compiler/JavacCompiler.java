@@ -37,6 +37,7 @@
 package edu.rice.cs.drjava.model.compiler;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.HashSet;
@@ -66,13 +67,8 @@ public abstract class JavacCompiler implements CompilerInterface {
   protected List<? extends File> _defaultBootClassPath;
   
   /** The set of class names that are run as ACM Java Task Force library programs. */
-  protected static final Set<String> ACM_PROGRAM_CLASSES = new HashSet<String>();
-  static {
-    Collections.addAll(ACM_PROGRAM_CLASSES, new String[] {
-      "acm.program.Program",
-        "acm.graphics.GTurtle"
-    });
-  }
+  protected static final Set<String> ACM_PROGRAM_CLASSES = 
+    new HashSet<String>(Arrays.asList(new String[]{"acm.program.Program", "acm.graphics.GTurtle"}));
   
   protected JavacCompiler(JavaVersion.FullVersion version, String location, List<? extends File> defaultBootClassPath) {
     _version = version;

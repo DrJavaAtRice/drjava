@@ -1,3 +1,8 @@
 drscala.jar
 classes/  
-
+svn-info.txt
+*.old
+*.drscala
+drscala.jar.*
+oldlib
+Logs

@@ -1,1 +1,6 @@
 platform.jar
+*.old
+*.older
+hs_err_*
+classes
+replay_*

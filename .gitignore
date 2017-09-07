@@ -7,5 +7,9 @@
 *.old
 *.svn
 *.new
-drjava/svn-info.txt
-drjava/classes
+Bugs
+*.txt
+
+VectorArch
+hs_err_*
+replay_*
