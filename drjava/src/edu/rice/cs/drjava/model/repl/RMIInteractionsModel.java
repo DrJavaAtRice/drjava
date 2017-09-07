@@ -212,7 +212,7 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
     final File currentWorkDir = _jvm.getWorkingDirectory();
 
     if ((wd == currentWorkDir) && _jvm.classPathUnchanged()) {
-      _log.log("i reset interpreter in ResetInterpreter"); 
+      _log.log("Executing reset interpreter in ResetInterpreter"); 
       
       // Try to reset the interpreter internally without killing and restarting the slave JVM
       try {

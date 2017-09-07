@@ -733,15 +733,9 @@ public final class InteractionsModelTest extends DrScalaTestCase {
     public void resetInterpreter(File wd) { 
       throw new UnexpectedException("cannot reset interpreter in a test"); 
     }
-    public List<File> getCompilerBootClassPath() {
-      // TODO: figure out what to do here
-      return new ArrayList<File>();
-    }
+    public List<File> getCompilerBootClassPath() { return new ArrayList<File>(); }
     public void resetLastErrors() { } 
-    public String transformCommands(String interactionsString) {
-      // TODO: figure out what to do here
-      return interactionsString;
-    }
+    public String transformCommands(String interactionsString) { return interactionsString; }
     
     public void documentReset() { };
     public void interpreterReady() { };

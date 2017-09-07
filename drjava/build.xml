@@ -605,7 +605,7 @@
        ************* -->
       
   <target name="clean" depends="clean-intermediate, clean-products"
-          description="Remove all build products; the result should match the intended Subversion contents">
+          description="Remove all build products; the result should match the intended repository contents">
   </target>
 
   <target name="clean-intermediate" unless="skip-clean">

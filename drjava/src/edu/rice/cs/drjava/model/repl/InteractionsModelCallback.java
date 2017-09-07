@@ -146,8 +146,8 @@ public interface InteractionsModelCallback {
 //  /** Called to signal that the interpreter is now read (after a reset). */  // TODO: consolidate with preceding method
 //  public void _notifyInterpreterReady(File wd);
   
-  /** A compiler can instruct DrScala to include additional elements for the boot
-    * class path of the Interactions JVM. */
+  /** A compiler can instruct DrScala to include additional elements for the boot class path of the Interactions JVM. 
+    * Not currently used. */
   public List<File> getCompilerBootClassPath();
   
   /** Gets the working directory.  A non-degnerate InteractionsModel contains a working directory. */

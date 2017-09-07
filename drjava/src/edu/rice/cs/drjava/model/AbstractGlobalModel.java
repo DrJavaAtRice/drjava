@@ -590,7 +590,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       _projRoot = pr;
       _mainClass = main;
       _buildDir = bd;
-      _workDir = wd;
+      _workDir = (wd != null) && (wd != FileOps.NULL_FILE) ? wd : IOUtil.WORKING_DIRECTORY;
       _projectFile = project;
       _projectFiles = srcFiles;
       _auxFiles = new ArrayList<File>(auxFiles.length);

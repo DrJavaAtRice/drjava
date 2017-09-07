@@ -54,6 +54,7 @@ import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.ConsoleDocumentInterface;
 import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.text.EditDocumentException;
+import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.tuple.Pair;
 
 //import static edu.rice.cs.plt.debug.DebugUtil.debug;
@@ -86,7 +87,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   protected volatile InteractionsDocument _document;
   
   /** The working directory for the current interpreter. */
-  protected volatile File _workingDir;
+  protected volatile File _workingDir = IOUtil.WORKING_DIRECTORY;
   
   /* Flag set only while resetInterpreter is in progress. Only modified by code in the class DefaultInteractionsModel*/ 
   protected volatile boolean _restartInProgress = false;

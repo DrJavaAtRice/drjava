@@ -161,7 +161,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     * classPath in the slave JVM except during startUp and when a reset is taking place. _classpath should only be 
     * updated when the current slave JVM is killed and new slave JVM is started. _classPath and _newClassPath should 
     * never be mutated. */
-  private volatile File _workingDir;
+  private volatile File _workingDir = IOUtil.WORKING_DIRECTORY;
   private volatile List<File> _classPath = ReflectUtil.SYSTEM_CLASS_PATH;
   private volatile List<File> _newClassPath = ReflectUtil.SYSTEM_CLASS_PATH;
   
@@ -173,11 +173,10 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     */
   public MainJVM(GlobalModel model) {
     super(InterpreterJVM.class.getName());
-    /* the intended _workingDir is maintained by the interactions model; it is null in the DefaultInteractionsModel */
-     _log.log("MainJVM object created with null workingDir");
-    _workingDir = null;
+    /* The intended _workingDir is maintained by the interactions model; ?? */
+     _log.log("MainJVM object created with default workingDir");
     _model = model;
-    _interactionsModel = new DefaultInteractionsModel();
+    _interactionsModel = new DummyInteractionsModel();
     _junitModel = new DummyJUnitModel();
   }
   
@@ -1026,7 +1025,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   }
   
   /** InteractionsModel which does not react to events. */
-  public static class DefaultInteractionsModel implements InteractionsModelCallback {
+  public static class DummyInteractionsModel implements InteractionsModelCallback {
     
     /* Degenerate method definitions */
     
@@ -1066,7 +1065,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     public void interpreterWontStart(Exception e) { }
     public void interpreterReady() { }
     public List<File> getCompilerBootClassPath() { return new ArrayList<File>(); }
-    public File getWorkingDirectory() { return null; }
+    public File getWorkingDirectory() { return IOUtil.WORKING_DIRECTORY; }
     public String transformCommands(String interactionsString) { return interactionsString; }
   }
   

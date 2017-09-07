@@ -51,6 +51,7 @@ import javax.swing.UIManager.LookAndFeelInfo;
 
 import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.platform.PlatformFactory;
+import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.util.FileOps;
 
@@ -1529,13 +1530,15 @@ public interface OptionConstants {
 //    new NonNegativeIntegerOption("debug.panel.height", Integer.valueOf(0));
   
   /** The directory in use by the file choosers upon the previous quit. */
-  public static final FileOption LAST_DIRECTORY = new FileOption("last.dir", FileOps.NULL_FILE);
+  public static final FileOption LAST_DIRECTORY = new FileOption("last.dir", IOUtil.WORKING_DIRECTORY);
   
   /** The directory in use by the Interactions pane upon the previous quit. */
-  public static final FileOption LAST_INTERACTIONS_DIRECTORY = new FileOption("last.interactions.dir", FileOps.NULL_FILE);
+  public static final FileOption LAST_INTERACTIONS_DIRECTORY = 
+    new FileOption("last.interactions.dir", IOUtil.WORKING_DIRECTORY);
   
   /** The directory for the Interactions pane to use (as long as there is no project working directory). */
-  public static final FileOption FIXED_INTERACTIONS_DIRECTORY = new FileOption("fixed.interactions.dir", FileOps.NULL_FILE);
+  public static final FileOption FIXED_INTERACTIONS_DIRECTORY = 
+    new FileOption("fixed.interactions.dir", IOUtil.WORKING_DIRECTORY);
   
   /** Whether to save and restore Interactions pane directory at startUp/shutdown (sticky=true), or to use
     * "user.home" (sticky=false). */
