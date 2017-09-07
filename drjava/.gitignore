@@ -1,8 +1,10 @@
+arch/
 drscala.jar
 classes/  
-svn-info.txt
+*.txt
 *.old
 *.drscala
 drscala.jar.*
-oldlib
-Logs
+oldlib/
+Logs/
+junit*.properties
