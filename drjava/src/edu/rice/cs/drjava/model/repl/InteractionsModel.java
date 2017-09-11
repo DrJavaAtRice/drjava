@@ -57,14 +57,23 @@ import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.tuple.Pair;
 
-//import static edu.rice.cs.plt.debug.DebugUtil.debug;
-
 /** A Swing specific model for the DrScala InteractionsPane.  It glues together an InteractionsDocument, an 
   * InteractionsPane and a JavaInterpreter.  This abstract class provides common functionality for all such models.
   * The methods in this class generally can be executed only in the event thread once the model has been constructed.
   * @version $Id: InteractionsModel.java 5727 2012-09-30 03:58:32Z rcartwright $
   */
 public abstract class InteractionsModel implements InteractionsModelCallback {
+  
+  /** methods inherited from InteractionsModelCallBack that are left abstract:
+ 
+    * void_notifyInterpreterResetting()
+    * 
+    * void interpreterReady()
+    * void notifyInterpreterReady()
+    * 
+    * List<File> getCompilerBootClassPath();
+    * String transformCommands(String interactionsString)
+    */
   
   /** Banner prefix. */
   public static final String BANNER_PREFIX = "Welcome to DrScala.";
@@ -73,7 +82,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     * with print calls. */
   public static final int WRITE_DELAY = 50;
   
-  public static final Log _log = new Log("GlobalModel.txt", false);
+  public static final Log _log = new Log("GlobalModel.txt", true);
  
 //  public static final String _newLine = "\n"; // was StringOps.EOL; but Swing uses '\n' for newLine
   

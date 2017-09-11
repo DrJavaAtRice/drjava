@@ -3035,7 +3035,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     // create our model
     _model = new DefaultGlobalModel();
     
-    _log.log("In MainJVM, DefaultGlobalModel constructed");
+    _log.log("In MainFrame, DefaultGlobalModel constructed");
     
     /* Debugger is deactivated in DrScala */     
 //      _showDebugger = _model.getDebugger().isAvailable();
@@ -4488,7 +4488,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     * @param projectFile the file of the project to open
     */
   private void _openProjectHelper(File projectFile) {
-    _log.log("In MainJVM, opening project file " + projectFile);
+    _log.log("In MainFrame, opening project file " + projectFile);
     _currentProjFile = projectFile;
     try {
       _mainListener.resetFNFCount();
@@ -8763,7 +8763,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     public void junitEnded() {
       assert EventQueue.isDispatchThread();
-//      new ScrollableDialog(null, "MainFrame.junitEnded() called", "", "").show();
+      
       _guiNotifier.junitFinished(); // JUNIT and COMPILER
       
       // Use EventQueue invokeLater to ensure that JUnit panel is "reset" after it is updated with test results
@@ -8856,8 +8856,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
     
     public void interpreterResetFailed(Throwable t) {
-      MainJVM._log.log("interpreterReady() called in MainFrame.interpreterResetFailed");
-      interpreterReady();  // Why?
+      MainJVM._log.log("interpreterResetFailed() called");
+//      interpreterReady();  // Why?
+      throw new UnexpectedException(t);
     }
     
     public void interpreterResetting() {
@@ -9408,7 +9409,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     finally {
       hourglassOff();
       _guiNotifier.junitFinished(); // JUNIT and COMPILER
-  }
+    }
   }
   
   /* Pops up a message and cleans up after unit testing has been interrupted. */

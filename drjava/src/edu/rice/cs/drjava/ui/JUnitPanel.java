@@ -40,6 +40,9 @@ import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.model.DJError;
 import edu.rice.cs.drjava.model.junit.JUnitError;
 import edu.rice.cs.drjava.model.junit.JUnitErrorModel;
+import edu.rice.cs.drjava.model.junit.JUnitModel;
+
+import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.BorderlessScrollPane;
 import edu.rice.cs.util.swing.RightClickMouseAdapter;
@@ -59,6 +62,9 @@ import java.util.HashMap;
   * @version $Id: JUnitPanel.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class JUnitPanel extends ErrorPanel {
+  
+  private static final Log _log = new Log("GlobalModel.txt", true);
+  
   private static final String START_JUNIT_MSG = "Testing in progress.  Please wait ...\n";
   private static final String JUNIT_FINISHED_MSG = "All tests completed successfully.\n";
   private static final String NO_TESTS_MSG = "";
@@ -151,6 +157,12 @@ public class JUnitPanel extends ErrorPanel {
   
   /** called when work begins */
   public void setJUnitInProgress() {
+    _log.log("In JUnitPanel, setJUnitInProgress() called");
+    /* Changing the state of the JUnit model using the junitPanel is really ugly.  It should be done in the JUnitStarted
+     * method in the appropriate JUnitListener.  But the only significant JUnitListener is defined in MainFrame which has
+     * no direct access to the JUnitModel. MainFrame has direct access to the JUnitPanel.  UGLY!
+     */
+//    getModel().getJUnitModel().setTestInProgress(true);
     _errorListPane.setJUnitInProgress();
   }
   
@@ -164,11 +176,18 @@ public class JUnitPanel extends ErrorPanel {
   
   /** Reset the errors to the current error information. */
   public void reset() {
-    JUnitErrorModel juem = getModel().getJUnitModel().getJUnitErrorModel();
+    /** Resetting the error model via the errorPanel is an UGLY hack; the model should be directly
+      * reset by the most appropriate listener.  Unfortunately, the only JUnitListener appears to
+      * be defined in MainFrame which does not have direct access to the JUnitModel. it does have
+      * direct access the JUnitPanel. Ugh. Perhaps, we should create a resetJunitModel() method in
+      * the global model which MainFrame can directly access. */
+    JUnitModel junitModel = getModel().getJUnitModel();
+//    junitModel.setTestInProgress(false);
+    JUnitErrorModel junitErrorModel = junitModel.getJUnitErrorModel();
     boolean testsHaveRun = false;
-    if (juem != null) {
-      _numErrors = juem.getNumErrors();
-      testsHaveRun = juem.haveTestsRun();
+    if (junitErrorModel != null) {
+      _numErrors = junitErrorModel.getNumErrors();
+      testsHaveRun = junitErrorModel.haveTestsRun();
     } 
     else _numErrors = 0;
     _errorListPane.updateListPane(testsHaveRun); //changed!!

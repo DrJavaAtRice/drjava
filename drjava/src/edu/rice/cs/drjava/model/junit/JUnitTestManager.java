@@ -67,7 +67,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.error;
   */
 public class JUnitTestManager {
  
-  protected static final Log _log = new Log("GlobalModel.txt", false);
+  protected static final Log _log = new Log("GlobalModel.txt", true);
   
   /** The interface to the master JVM via RMI. */
   private final JUnitModelCallback _jmc;
@@ -165,30 +165,30 @@ public class JUnitTestManager {
 
       while (errEnum.hasMoreElements()) {
         TestFailure tErr = errEnum.nextElement();
-//        Utilities.show("Processing error " + tErr);
+        _log.log("Processing error " + tErr);
         errors[i] = _makeJUnitError(tErr, _testClassNames, true, _testFiles);
         i++;
       }
-//      Utilities.show("Finished processing errors");
+      _log.log("Finished processing errors");
       while (failures.hasMoreElements()) {
         TestFailure tFail = failures.nextElement();
-//        Utilities.show("Processing failure " + tFail);
+        _log.log("Processing failure " + tFail);
         errors[i] = _makeJUnitError(tFail, _testClassNames, false, _testFiles);
         i++;
       }
-//      new ScrollableDialog(null, "Slave JVM: testSuite ended with errors", "", Arrays.toString(errors)).show();
-//      Utilities.show("Finished processing failures");
-//      Utilities.show("errors = " + Arrays.toString(errors));
-       
+      _log.log("Slave JVM: testSuite ended with errors " + Arrays.toString(errors));
+      _log.log("Finished processing failures");
+
       _reset();
       _jmc.testSuiteEnded(errors);
     }
-    catch(Exception e) { 
+    catch(Exception e) {
+      _log.log("Exception occurred in JUnitManager.runTestSuite()");
       JUnitError[] errors = new JUnitError[1];      
       errors[0] = new JUnitError(null, -1, -1, e.getMessage(), false, "", "", e.toString(), e.getStackTrace());
       _reset();
       _jmc.testSuiteEnded(errors);
-//      new ScrollableDialog(null, "Slave JVM: testSuite ended with errors", "", Arrays.toString(errors)).show();
+      _log.log("Slave JVM: testSuite ended with errors " + Arrays.toString(errors));
     }
     _log.log("Exiting runTestSuite()");
     return true;

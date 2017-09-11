@@ -129,22 +129,23 @@ public interface InteractionsModelCallback {
   /** Called when the slave JVM fails to startup */
   public void interpreterWontStart(Exception e);
 
-  /** Called when the interpreter starts to reset. */
+  /** Called when the interpreter starts to reset. Only runs in event dispatch thread. */
   public void interpreterResetting();
+  
+  /** Called to signal that the interpreter is now resetting.  May run outside event dispatch thread. */ 
+  public void _notifyInterpreterResetting();
   
   /** Called to reset the contents of the interactions document, including generating a banner. */
   public void documentReset();
   
   /** Called to assert that a fresh Java interpreter is ready for use either after a start or a restart.
     * Is sometimes preceded by a call to {@code interpreterResetting()}, but not when the interpreter is
-    * first starting or is already fresh.
+    * first starting or is already fresh.  Only runs in event dispatch thread.
     */
   public void interpreterReady();
   
-  /** Called to signal that the interpreter is now read (after a reset). */  // TODO: consolidate with preceding method
+  /** Called to signal that the interpreter is now ready (after a reset). May run outside of the event dispatch thread.*/
   public void _notifyInterpreterReady();
-//  /** Called to signal that the interpreter is now read (after a reset). */  // TODO: consolidate with preceding method
-//  public void _notifyInterpreterReady(File wd);
   
   /** A compiler can instruct DrScala to include additional elements for the boot class path of the Interactions JVM. 
     * Not currently used. */

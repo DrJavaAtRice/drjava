@@ -60,9 +60,7 @@ import edu.rice.cs.util.swing.Utilities;
   * @version $Id: DefaultInteractionsModel.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class DefaultInteractionsModel extends RMIInteractionsModel {
-  /** Message to signal that input is required from the console. */
-//  public static final String INPUT_REQUIRED_MESSAGE =
-//    "Please enter input in the Console tab." + _newLine;
+  /** Message to signal that input is required from the console. */;
   
   /* inherited from InteractionsModel:
    *     protected final InteractionsEventNotifier _notifier = new InteractionsEventNotifier();
@@ -189,14 +187,25 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
     } });
   }
   
-  /** In the event thread, notifies listeners that the interpreter is ready. Sometimes called from outside the event
+  /** In the event thread, notifies listeners that an interaction has started. May run outside of event dispatch
     * thread. */
+  public void _notifyInterpreterResetting() {
+    _log.log("Asynchronously notifying interpreterResetting event listeners");
+    Utilities.invokeLater(new Runnable() { public void run() { 
+      _notifier.interpreterResetting(); 
+      _log.log("In InteractionsModel, Event: the interpreter is resetting");
+    } });
+  }
+  
+  /** In the event thread, notifies listeners that the interpreter is ready. May run outside the event dispatch thread. */
   public void _notifyInterpreterReady() {
-    _log.log("Asynchronously notifying interpreterReady event listeners");  // DEBUG
+    _log.log("Asynchronously notifying interpreterReady event listeners");
     Utilities.invokeLater(new Runnable() { 
-      public void run() { 
+      public void run() {
         _notifier.interpreterReady(); 
-        _log.log("In InteractionsModel, Event: the interpreter is ready with existing working directory");
+        _log.log("***** In InteractionsModel, invoking _notifier for event interpreterReady()");
+        documentReset();
+        _log.log("In InteractionsModel, document '" + _document + "' reset()");
         _document.clearColoring();  // _document is inherited from the abstract superclass InteractionsModel
       } 
     });

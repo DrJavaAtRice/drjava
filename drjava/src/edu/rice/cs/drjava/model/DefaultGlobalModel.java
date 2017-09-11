@@ -397,7 +397,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   
   /** Synchronously reset the interpreter in the interactions pane; DOES NOT RETURN UNTIL RESET IS COMPLETE */
   public void resetInterpreter(File wd) {
-    assert ! EventQueue.isDispatchThread();
+    assert Utilities.TEST_MODE || ! EventQueue.isDispatchThread();
     /* Calling invokeAndWait ensures that non-blocking hardResetInterpreter runs before waitResetDone is executed. */
     Utilities.invokeAndWait(new Runnable() { public void run() {_interactionsModel.resetInterpreter(wd);}}); 
     _interactionsListener.waitResetDone();
@@ -627,7 +627,10 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     }
     
     /** Runs JUnit on the current document.  Requires that all source documents are compiled before proceeding. */
-    public void startJUnit() throws ClassNotFoundException, IOException { _junitModel.junit(this); }
+    public void startJUnit() throws ClassNotFoundException, IOException {
+      _log.log("In DefaultGlobalModel, startJUnit() called; calling junit(" + this + ") in " + _junitModel);
+      _junitModel.junit(this); 
+    }
     
     /** Generates Scaladoc for this document, saving the output to a temporary directory.  The location is provided to 
       * the scaladocEnded event on the given listener.

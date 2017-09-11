@@ -83,7 +83,7 @@ public abstract class AbstractMasterJVM implements MasterRemote {
   private enum State { FRESH, STARTING, RUNNING, QUITTING, DISPOSED };
   
   /** Debugging log. */
-  public static final Log _log  = new Log("GlobalModel.txt", false);
+  public static final Log _log  = new Log("GlobalModel.txt", true);
   
   /** Loads an instance of the given AbstractSlaveJVM class.  Invoked in the slave JVM. */
   private static class SlaveFactory implements Thunk<AbstractSlaveJVM>, Serializable {
@@ -141,7 +141,7 @@ public abstract class AbstractMasterJVM implements MasterRemote {
    */
   protected abstract void handleSlaveWontStart(Exception e);
   
-  /** Creates and starts the slave JVM.  If the the slave is currently running, waits until it completes.
+  /** Creates and starts the slave JVM.  If the slave is currently running, waits until it completes.
     * Also waits until the new process has started up and calls one of {@link #handleSlaveConnected}
     * or {@link #handleSlaveWontStart} before returning.
     * @param jvmBuilder  JVMBuilder to use in starting the remote process.
@@ -163,11 +163,11 @@ public abstract class AbstractMasterJVM implements MasterRemote {
 
     SlaveRemote newSlave = null;
     try {
-      _log.log("invoking remote JVM process");
+      _log.log("In AbstractMasterJVM, invoking remote JVM process");
       newSlave =
         (SlaveRemote) ConcurrentUtil.exportInProcess(_slaveFactory, tweakedJVMBuilder, new Runnable1<Process>() {
           public void run(Process p) {
-            _log.log("Remote JVM quit");
+            _log.log("In AbstractMasterJVM, Slave JVM process being started");
             _monitor.set(State.FRESH);
             _log.log("In AbstactMasterJVM, entered state " + State.FRESH + "; Invoking handleSlaveQuit(" + p.exitValue() + ")");
             handleSlaveQuit(p.exitValue());

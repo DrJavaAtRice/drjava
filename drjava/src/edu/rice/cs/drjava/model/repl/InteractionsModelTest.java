@@ -745,6 +745,7 @@ public final class InteractionsModelTest extends DrScalaTestCase {
     public void _notifyInteractionStarted() { }
     protected void _notifySyntaxErrorOccurred(int offset, int length) { }
     protected void _notifyInterpreterExited(int status) { }
+    public void _notifyInterpreterResetting() { }
     protected void _notifyInterpreterResetFailed(Throwable t) { }
     public void _notifyInterpreterReady() { }
     protected void _interpreterResetFailed(Throwable t) { }
@@ -817,8 +818,8 @@ public final class InteractionsModelTest extends DrScalaTestCase {
     }
     protected void _notifySyntaxErrorOccurred(int offset, int length) { }
     protected void _notifyInterpreterExited(int status) { }
+    public void _notifyInterpreterResetting() { }
     protected void _notifyInterpreterResetFailed(Throwable t) { }
-//    public void _notifyInterpreterReady(File wd) { }
     public void _notifyInterpreterReady() { }
     protected void _interpreterResetFailed(Throwable t) { }
     protected void _interpreterWontStart(Exception e) { }

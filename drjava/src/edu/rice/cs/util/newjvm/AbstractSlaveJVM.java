@@ -52,7 +52,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 public abstract class AbstractSlaveJVM implements SlaveRemote {
   
   /** Debugging log. */
-  public static final Log _log  = new Log("GlobalModel.txt", false);
+  public static final Log _log  = new Log("GlobalModel.txt", true);
   
   public static final int CHECK_MAIN_VM_ALIVE_SECONDS = 3;
   

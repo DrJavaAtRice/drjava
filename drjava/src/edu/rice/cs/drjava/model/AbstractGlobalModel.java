@@ -160,7 +160,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
   */
 public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants, DocumentIterator {
   
-  public static final Log _log  = new Log("GlobalModel.txt", false);
+  public static final Log _log  = new Log("GlobalModel.txt", true);
   
   /** A document cache that manages how many unmodified documents are open at once. */
   protected DocumentCache _cache;  
@@ -1249,11 +1249,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 //      if (! elementary) buf.append("public ");
 //      buf.append("void tearDown() throws Exception {\n}\n\n");
 //    }
-    buf.append("/**\n");
-    buf.append("* A test method.\n");
-    buf.append("* (Replace \"X\" with a name describing the test.  You may write as\n");
-    buf.append ("* many \"testSomething\" methods in this class as you wish, and each\n");
-    buf.append("* one will be called when running JUnit over this class.)\n");
+    buf.append("/** A test method.\n");
+    buf.append("*  (Replace \"X\" with a name describing the test.  You may write as\n");
+    buf.append ("*  many \"testSomething\" methods in this class as you wish, and each\n");
+    buf.append("*  one will be called when running JUnit over this class.)\n");
     buf.append("*/\n");
 //    if (! elementary) buf.append("public ");
     buf.append("def testX() {\n}\n\n");
@@ -4092,7 +4091,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 ///* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
 //    if (_activeDocument == doc) return; // this optimization appears to cause some subtle bugs
-//    Utilities.showDebug("DEBUG: Called setActiveDocument()");
     
     try {
       Utilities.invokeAndWait(new Runnable() {  

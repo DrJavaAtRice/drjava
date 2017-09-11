@@ -51,7 +51,7 @@ import edu.rice.cs.plt.concurrent.CompletionMonitor;
   */
 public class DefaultInteractionsListener implements InteractionsListener {
   
-  public static final Log _log = new Log("GlobalModel.txt", false);
+  public static final Log _log = new Log("GlobalModel.txt", true);
   
   private static final int WAIT_TIMEOUT = 20000; // time to wait for _interactionDone or _restartDone 
   private CompletionMonitor _resetDone = new CompletionMonitor(true);
@@ -78,8 +78,8 @@ public class DefaultInteractionsListener implements InteractionsListener {
   /** Called when the interactions window has been reset. */
   public void interpreterReady() { 
     _resetDone.signal();
-    _log.log("_resetDone.signal() called; after call, _resetDone.isTrue() = " + _resetDone.isTrue() +
-             "; _resetDone = " + _resetDone);
+    _log.log("In DefaultInteractionsListener.interpreterReady(), _resetDone.signal() called; after call, " +
+             "_resetDone.isTrue() = " + _resetDone.isTrue() + "; _resetDone = " + _resetDone);
   } 
   
   /** Called when the interactions JVM was closed by System.exit or by being aborted. Immediately after this the 
@@ -99,14 +99,14 @@ public class DefaultInteractionsListener implements InteractionsListener {
   /** Waits until flag in _resetDone is true.  If flag has been raised (set to false), this means waiting until 
    * interpreterReady has been called.  Resets the CompletionMonitor flag to true. */
   public void waitResetDone() {
-    _log.log("In DefaultInteractionsListener.waitRestDone, waiting for _resetDone flag to be true or signalled; _resetDone = " +
-             _resetDone);
+    _log.log("In DefaultInteractionsListener.waitRestDone, waiting for _resetDone flag to be true or signalled; " +
+             "_resetDone = " + _resetDone);
     boolean wasDone = _resetDone.attemptEnsureSignaled(WAIT_TIMEOUT);  // resets the flag to true
     _log.log("Did signal occur in DefaultInteractionsListener? " + wasDone);
     if (! wasDone) {
       throw new UnexpectedException("Interactions pane failed to reset within " + WAIT_TIMEOUT + " milliseconds");
     }
-    _log.log("wait in DefaultInteractionsListener is complete");
+    _log.log("waiting in DefaultInteractionsListener is complete");
   }
 }
 

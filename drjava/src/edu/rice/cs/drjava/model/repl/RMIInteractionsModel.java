@@ -70,6 +70,17 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
   
   /* static final Log _log inherited from InteractionsModel */
   
+  /* instance fields inherited from Interactions Model:
+   *   protected final InteractionsEventNotifier _notifier = new InteractionsEventNotifier();
+   *   protected volatile InteractionsDocument _document;
+   *   protected volatile File _workingDir;
+   *   protected volatile boolean _restartInProgress;
+   *   protected volatile InputListener _inputListener;
+   *   protected final ConsoleDocumentInterface _cDoc;
+   *   protected volatile String _lastError = null;
+   *   protected volatile String _secondToLastError = null;
+   */
+
   private static final int WAIT_TIMEOUT = 30000; // time to wait for the slave JVM to restart in milliseconds
  
   /** RMI interface to the remote Java interpreter.*/
@@ -177,17 +188,17 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
     _log.log("*****interpreterReady() called in InteractionsModel");
     Utilities.invokeLater(new Runnable() {
       public void run() {
-        _log.log("run method in RMIInteractionsModel.interpreterReady() started");
+        _log.log("In RMIInteractionsMode.Runnable(at line 189).run() started");
         _document.setInteractionInProgress(false);
         /* The following is already done in restartInterpreter and setUpNewInterpreter. */
 //        _log.log("resetting interactions document in RMIInteractionsModel.interpreterReady()");
         documentReset();  // resets the interactions document
-        _log.log("interactions document has been reset in RMIInteractionsModel.interpreterReady()");
+        _log.log("In RMIInteractionsModel.Runnable(at line 189).run(), interactions document has been reset");
         if (_pane != null) _pane.setCaretPosition(_document.getLength());  
         performDefaultImports();
-        _log.log("calling _notifyInterpreterReady() in RMIInteractionsModel.interpreterReady()");
+        _log.log("In RMIInteractionsModel.Runnable(at line 189).run(), calling notifyInterpreterReady()");
         _notifyInterpreterReady();
-        _log.log("completed _notifyInterpreterReady() in RMIInteractionsModel.interpreterReady()");
+        _log.log("In RMIInteractionsModel.Runnable(at line 189).run(), completed _notifyInterpreterReady()");
       }
     });
   }
@@ -206,20 +217,25 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
     assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
 
     _log.log("DefaultGlobalModel.ResetInterpreter(" + wd + ") called.");    
-    interpreterResetting(); // performed asynchronously in event thread
+    _notifyInterpreterResetting(); // performed asynchronously in event thread
   
     /* Determine working directory of the current slave JVM which is cached in the MainJVM object. */
     final File currentWorkDir = _jvm.getWorkingDirectory();
+    
+    boolean trySoftReset = _jvm.classPathUnchanged();
+    _log.log("In RMIInteractionsModel, trySoftReset = " + trySoftReset);
 
-    if ((wd == currentWorkDir) && _jvm.classPathUnchanged()) {
-      _log.log("Executing reset interpreter in ResetInterpreter"); 
+    if ((wd.equals(currentWorkDir)) && trySoftReset) {
+      _log.log("In RMIInteractionsModel, executing reset interpreter in ResetInterpreter"); 
       
       // Try to reset the interpreter internally without killing and restarting the slave JVM
       try {
         boolean success = _jvm.resetInterpreter();
         
         _log.log("_jvm.resetInterpreter() returned " + success);;
-        if (success /* && ! _jvm.isDisposed()*/) {  // In some tests, the Main JVM is already disposed ? 
+        if (success /* && ! _jvm.isDisposed()*/) {  // In some tests, the Main JVM is already disposed ?
+          /* trigger the interpreterResetting event
+          _notifier.interpreterResetting();
           /* inform InteractionsModel that interpreter is ready */
           _notifyInterpreterReady();  // operation runs the event thread
         }
@@ -230,7 +246,8 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
       }
     }
     else {
-      _log.log("simple reset interpreter failed, forcing a hard reset");
+      _log.log("simple reset interpreter failed, forcing a hard reset; wd = " + wd + 
+               " currentWorkDir = " + currentWorkDir);
       hardResetInterpreter(wd);
     }
     _notifyInterpreterReady();  // _notifyInterpreterReady invokes the event thread
@@ -281,7 +298,7 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
     _log.log("In RMIInteractionsModel, setUpNewInterpreter has been called");
     Utilities.invokeLater(new Runnable() {
       public void run() {
-        _log.log("EventQueue thunk in RMIInteractionsModel.setUpNewInterpreter called; restarting interpreter");
+        _log.log("EventQueue thunk in RMIInteractionsModel.; restarting interpreter");
         _jvm.restartInterpreterJVM();  // only place other than tests where this method is called
         _log.log("Interpreter JVM being replaced");
         _notifier.interpreterResetting();

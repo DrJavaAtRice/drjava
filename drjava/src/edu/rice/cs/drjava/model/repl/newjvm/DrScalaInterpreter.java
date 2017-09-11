@@ -142,7 +142,7 @@ public class DrScalaInterpreter implements Interpreter {
     @Override public void flush(){}
   };
 
-  /* thread in which ILoop runs */
+  /* Thread in which ILoop runs */
   private final Thread _iLoopThread = new Thread(new Runnable(){
     public void run() {
       final DrScalaILoop iLoop = new DrScalaILoop(_iLoopReader, _iLoopWriter);

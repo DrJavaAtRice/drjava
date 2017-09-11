@@ -439,7 +439,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     catch (RemoteException re) { error.log(re); return null; }
   }
   
-  public void junitJVMReady() { }
+//  public void junitJVMReady() { }
   
   // --------- Class path methods ----------
   public void addInteractionsClassPath(File f) { _classPathManager.addInteractionsClassPath(f);  }

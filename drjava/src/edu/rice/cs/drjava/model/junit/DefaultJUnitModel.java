@@ -95,7 +95,7 @@ import static edu.rice.cs.drjava.config.OptionConstants.*;
 public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   
   /** log for use in debugging */
-  private static Log _log = new Log("GlobalModel.txt", false);
+  private static Log _log = new Log("GlobalModel.txt", true);
   
   /** Manages listeners to this model. */
   private final JUnitEventNotifier _notifier = new JUnitEventNotifier();
@@ -116,10 +116,10 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   /** The error model containing all current JUnit errors. */
   private volatile JUnitErrorModel _junitErrorModel;
   
-  /** State flag to prevent starting new tests on top of old ones and to prevent resetting interactions after compilation
-    * is forced by unit testing. This field is NOT REDUNDANT, it is used in junitJVMReady.
-    */
-  protected volatile boolean _testInProgress = false;
+//  /** State flag to prevent starting new tests on top of old ones and to prevent resetting interactions after compilation
+//    * is forced by unit testing. This field is NOT REDUNDANT, it is used in junitJVMReady.
+//    */
+//  protected volatile boolean _testInProgress = false;
   
   /** State flag to record if test classes in projects must end in "Test" */
   private boolean _forceTestSuffix = false;
@@ -144,10 +144,14 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   //-------------------------- Field Setters --------------------------------//
   
   public void setForceTestSuffix(boolean b) { _forceTestSuffix = b; }
+//  public void setTestInProgress(boolean b) { 
+//    _testInProgress = b; 
+//    _log.log("In DefaultJUnitModel, _testInProgress set to " + b);
+//  }
   
   //------------------------ Simple Predicates ------------------------------//
   
-  public boolean isTestInProgress() { return _testInProgress;  }
+//  public boolean isTestInProgress() { return _testInProgress;  }
   
   //------------------------Listener Management -----------------------------//
   
@@ -190,7 +194,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   
   /** Determines if className appears as an identifier in the open documents. */
   private boolean appearsInSourceText(String className, FindReplaceMachine frm) {
-    _log.log("***appearsInSourceText(" + className + ", " + frm + ")");
+    _log.log("Called appearsInSourceText(" + className + ", " + frm + ")");
     OpenDefinitionsDocument doc = _model.getActiveDocument();
     frm.setDocument(doc);
     frm.setFirstDoc(doc);
@@ -205,27 +209,28 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     
   public void junitDocs(List<OpenDefinitionsDocument> lod) { junitOpenDefDocs(lod, true); }
   
-  /** Runs JUnit on the current document.  Forces the user to compile all open documents before proceeding. */
+  /** Runs JUnit on the specified document.  Forces user to finish compiling all open documents before proceeding. */
   public void junit(OpenDefinitionsDocument doc) throws ClassNotFoundException, IOException {
     
-    debug.logStart("junit(doc)");
+    _log.log("junit(" + doc + ") called");
     
-//    new ScrollableDialog(null, "junit(" + doc + ") called in DefaultJunitModel", "", "").show();
-    File testFile;
+    File testFile = null;
     try { 
       testFile = doc.getFile(); 
-      if (testFile == null) {  // document is untitiled: abort unit testing and return
+      if (testFile == null) {  // document is untitiled (and hence unsaved): abort unit testing and return
+        // Is this possible, wouldn't the checking for compilation detect the extistence of an untitled document? 
         nonTestCase(false, false);
-        debug.logEnd("junit(doc): no corresponding file");
+        _log.log("junit(doc): no corresponding file; aborting unit testing");
         return;
       }
     } 
     catch(FileMovedException fme) { /* do nothing */ }
     
-    LinkedList<OpenDefinitionsDocument> lod = new LinkedList<OpenDefinitionsDocument>();
-    lod.add(doc);
+    LinkedList<OpenDefinitionsDocument> lod = 
+      new LinkedList<OpenDefinitionsDocument>(Arrays.asList(new OpenDefinitionsDocument[]{doc}));
+    
+    _log.log("In DefaultJUnitModel.junit(" + doc + "), calling junitOpenDefDocs(" + lod + ", false)");
     junitOpenDefDocs(lod, false);
-    debug.logEnd("junit(doc)");
   }
   
   /** Ensures that all documents have been compiled since their last modification and then delegates the actual testing
@@ -233,17 +238,17 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   private void junitOpenDefDocs(final List<OpenDefinitionsDocument> lod, final boolean allTests) {
     // If a test is running, don't start another one.
 
-    _log.log("junitOpenDefDocs(" + lod + ", " + allTests + ", " + _testInProgress + ")");
+    _log.log("In DefaultJUnitModel, junitOpenDefDocs(" + lod + ", " + allTests + ") called");
     
-    // Check_testInProgress flag
-    if (_testInProgress) return;
+//    // Check_testInProgress flag
+//    if (_testInProgress) return;
     
     // Reset the JUnitErrorModel, fixes bug #907211 "Test Failures Not Cleared Properly".
     _junitErrorModel = new JUnitErrorModel(new JUnitError[0], null, false);
-    _log.log("Retrieved JUnit error model.  outOfSync = " +  _model.getOutOfSyncDocuments(lod));
     
     final List<OpenDefinitionsDocument> outOfSync = _model.getOutOfSyncDocuments(lod);
-//    Utilities.show("Out of sync documents = " + outOfSync);  
+    _log.log("In DefaultJUnitModel.junitOpenDefDocs, OutOfSyncDocuments = " + outOfSync);
+    
     if ((outOfSync.size() > 0) || _model.hasModifiedDocuments(lod)) {
       /* hasModifiedDocuments(lod) can return false when some documents have not been successfully compiled; the 
        * granularity of time-stamping and the presence of multiple classes in a file (some of which compile 
@@ -284,29 +289,33 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
         }
       };
       
-        _log.log("Notifying JUnitModelListener");
-      _testInProgress = true;
+      /* Using the _testInProgress flag to ensure mutual exclusion between compilation and testing is obscure and
+       * UGLY.  The _testInProgress flag should only be set to true when the slave JVM is actually executing unit tests.
+       */
+//      setTestInProgress(true);  // ensures that compilation and testing are disjoint
       _notifyCompileBeforeJUnit(testAfterCompile, outOfSync);
-      _testInProgress = false;
+//      setTestInProgress(false);  // probably redundant
     }
     
     else _rawJUnitOpenDefDocs(lod, allTests);
   }
   
-  /** Runs all TestCases in the document list lod; assumes all documents have been compiled. It finds the TestCase 
-    * classes by searching the build directories for the documents.  In flat file mode, the build directory may contain 
-    * class files that have not been generated by compiling the open documents.  To heuristically avoid running these 
-    * tests, this method confirms that the name of all test classes appear as identififers in a source document.
-    * Note: caller must respond to thrown exceptions 
-    * by invoking _junitUnitInterrupted (to run hourglassOff() and reset the unit testing UI).
+  /** Runs all TestCases in the open document list lod; assumes all documents have been compiled. It finds the TestCase 
+    * class files by searching the build directories for the files.  In flat file mode, a build directory may contain 
+    * class files that have not been generated by compiling open documents.  To heuristically avoid running these 
+    * tests, this method confirms that the names of all test classes appear as identififers in a source document.
+    * Note: caller must respond to thrown exceptions by invoking _junitUnitInterrupted (to run hourglassOff() and 
+    * resetting the unit testing UI).  TODO: improve the heuristic test by looking for identifier sequences "class"
+    * className and "interface className?  (Note since Java 8, interfaces can contain code and hence tests.)
     */
   private void _rawJUnitOpenDefDocs(List<OpenDefinitionsDocument> lod, final boolean allTests) {
-    _log.log("_rawJUnitOpenDefDocs(" + lod + ", " + allTests);
+    _log.log("In DefaultJUnitModel, executing _rawJUnitOpenDefDocs(" + lod + ", " + allTests +")");
     File buildDir = _model.getBuildDirectory();
-    _log.log("Running JUnit tests. Build directory is " + buildDir);
+    _log.log("***** Beginning JUnit tests. Build directory is " + buildDir);
     
-    /** Open java source files */
-    HashSet<String> openDocFiles = new HashSet<String>();
+    /** Idenify the open Scala source files corresponding to candidate test class files. */
+    _log.log("Identifying Scala source files corresponding to tests.");
+    HashSet<String> openDocFiles = new HashSet<String>();  // TODO: choose a better variable name for this var
     
     /** A map whose keys are directories containing class files corresponding to open java source files.
       * Their values are the corresponding source roots. 
@@ -318,7 +327,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     for (OpenDefinitionsDocument doc: lod) /* for all nonEmpty documents in lod */ {
       if (doc.isSourceFile())  { // excludes Untitled documents and open non-source files
         try {
-          _log.log("Processing " + doc);
+          _log.log("Among open definitions documents, processing " + doc);
           File sourceRoot = doc.getSourceRoot(); // may throw an InvalidPackageException
           
           // doc has valid package name; add it to list of open java source doc files
@@ -345,12 +354,12 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
       }
     }
 
-    _log.log("classDirs = " + classDirsAndRoots.keySet());
+    _log.log("For this unit test command, classDirs = " + classDirsAndRoots.keySet());
     
     /** set of dirs potentially containing test classes */
     Set<File> classDirs = classDirsAndRoots.keySet();
     
-    _log.log("openDocFiles = " + openDocFiles);
+    _log.log("Files with open docments = " + openDocFiles);
     
     /* Names of test classes. */
     final ArrayList<String> classNames = new ArrayList<String>();  // TODO: convert classNames/files to HashSet<Pair<String, File>>
@@ -366,7 +375,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     
     try {
       for (File dir: classDirs) { // foreach class file directory
-        _log.log("Examining directory " + dir);
+        _log.log("Examining class file directory " + dir);
         
         File[] listing = dir.listFiles();
         
@@ -375,7 +384,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
         if (listing != null) { // listFiles may return null if there's an IO error
           for (File entry : listing) { /* for each class file in the build directory */        
             
-            _log.log("Examining file " + entry);
+            _log.log("Examining class file " + entry);
             
             /* ignore non-class files */
             final String name = entry.getName();
@@ -442,42 +451,45 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     
     _log.log("files = " + files);
     /** Run the junit test suite that has already been set up on the slave JVM */
-    _testInProgress = true;
-     _log.log("Spawning test thread");
+
+     _log.log("***** Spawning test thread in Main JVM; may need to wait for interpreter to be ready");
+     
     new Thread(new Runnable() { // this thread is not joined, but the wait/notify scheme guarantees that it ends
-      public void run() { 
-        // TODO: should we disable compile commands while testing?  Should we use protected flag instead of lock?
-        // Utilities.show("Preparing to synchronize");
+      public void run() {
+
+        /* We use the compiler model lock to ensure that all compilations and unit tests are mutually exclusive. */
+        _log.log("Preparing to synchronize");
         
-        // The call to findTestClasses had to be moved out of the event thread (bug 2722310)
-        // The event thread is still blocked in findTestClasses when JUnit needs to
-        // have a class prepared. This invokes EventHandlerThread._handleClassPrepareEvent, which puts a call to
-        // _debugger.getPendingRequestManager().classPrepared(e); (which presumably
-        // deals with preparing the class) on the event thread using invokeLater.
-        // This, however, doesn't get executed because the event thread is still blocking --> deadlock.
+        /* The call to findTestClasses had to be moved out of the event thread (bug 2722310).  Why? The event thread is 
+         * still blocked in findTestClasses when JUnit needs to have a class prepared. This invokes EventHandlerThread.
+         * _handleClassPrepareEvent, which puts a call to_debugger.getPendingRequestManager().classPrepared(e); (which 
+         * presumably deals with preparing the class) on the event thread using invokeLater. This, however, 
+         * doesn't get executed because the event thread is still blocking --> deadlock.
+         */
         
         synchronized(_compilerModel.getCompilerLock()) {
           // synchronized over _compilerModel to ensure that compilation and junit testing are mutually exclusive.
           /** Set up junit test suite on slave JVM; get TestCase classes forming that suite */
           List<String> tests = _jvm.findTestClasses(classNames, files).unwrap(null);
-//          Utilities.show("found tests " + tests);
-          _log.log("tests = " + tests);
+          _log.log("Found tests = " + tests);
           if (tests == null || tests.isEmpty()) {
             nonTestCase(allTests, false);
             return;
           }
-        }
         
-        try {
-          // Utilities.show("Starting JUnit");
-          
-          _notifyJUnitStarted(); 
-          boolean testsPresent = _jvm.runTestSuite();  // The false return value could be changed to an exception.
-          if (! testsPresent) throw new RemoteException("No unit test classes were passed to the slave JVM");
-        }
-        catch(RemoteException e) { // Unit testing aborted; cleanup; hourglassOff already called in junitStarted
-          _notifyJUnitEnded();  // balances junitStarted()
-          _testInProgress = false;
+          try {
+            _log.log("Starting JUnit");
+            
+            _notifyJUnitStarted();
+            
+//          setTestInProgress(true);  //  may be redundant
+            boolean testsPresent = _jvm.runTestSuite();  // The false return value could be changed to an exception.
+            if (! testsPresent) throw new RemoteException("No unit test classes were passed to the slave JVM");
+          }
+          catch(RemoteException e) { // Unit testing aborted; cleanup; hourglassOff already called in junitStarted
+            _notifyJUnitEnded();  // balances junitStarted()
+//          setTestInProgress(false);  // probably redundant
+          }
         }
       }
     }).start();
@@ -534,7 +546,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     //       is used to prevent a new test from being started and overrunning the existing one.
 //      Utilities.show("DefaultJUnitModel.nonTestCase(" + isTestAll + ") called");
     _notifyNonTestCase(isTestAll, didCompileFail);
-    _testInProgress = false;
+//    setTestInProgress(false);  // probably redundant
   }
   
   /** Called to indicate that an illegal class file was encountered
@@ -579,7 +591,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
 
       _junitErrorModel = new JUnitErrorModel(errors, _model, true);
       _notifyJUnitEnded();
-      _testInProgress = false;
+//      setTestInProgress(false);  // probably redundant
 //    new ScrollableDialog(null, "DefaultJUnitModel.testSuiteEnded(...) finished", "", "").show();
     }});
   }
@@ -594,20 +606,20 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     return _model.getSourceFile(className + OptionConstants.JAVA_FILE_EXTENSION);
   }
   
-  /** Called when the JVM used for unit tests has registered.  Does not necessarily run in event thread. */
-  public void junitJVMReady() {
-    /* The following formerly used Utilities.invokeLater which created a race condition on _testProgress.  Pending
-     * thunks involving operations on _testInProgress in the EventQueue were bypassed. */
-    _log.log("junitJVMReady() thread started");
-    EventQueue.invokeLater(new Runnable() { public void run() {
-      _log.log("_testInProgress = " + _testInProgress);
-      if (! _testInProgress) return;
-      _log.log("Creating error with msg: Previous test suite was interrupted");
-      JUnitError[] errors = new JUnitError[1];
-      errors[0] = new JUnitError("Previous test suite was interrupted", true, "DrScala Error");
-      _junitErrorModel = new JUnitErrorModel(errors, _model, true);
-      _notifyJUnitEnded();
-      _testInProgress = false;
-    }});
-  }
+//  /** Called when the JVM used for unit tests has registered.  Does not necessarily run in event thread. */
+//  public void junitJVMReady() {
+//    /* The following formerly used Utilities.invokeLater which created a race condition on _testProgress.  Pending
+//     * thunks involving operations on _testInProgress in the EventQueue were bypassed. */
+//    _log.log("junitJVMReady() thread started");
+//    EventQueue.invokeLater(new Runnable() { public void run() {
+//      _log.log("_testInProgress = " + _testInProgress);
+//      if (! _testInProgress) return;
+//      _log.log("Creating error with msg: Previous test suite was interrupted");
+//      JUnitError[] errors = new JUnitError[1];
+//       errors[0] = new JUnitError("Previous test suite was interrupted", true, "DrScala Error");
+//      _junitErrorModel = new JUnitErrorModel(errors, _model, true);
+//      _notifyJUnitEnded();
+//      setTestInProgress(false);  // probably redundant
+//    }});
+//  }
 }

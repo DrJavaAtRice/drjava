@@ -54,9 +54,6 @@ import edu.rice.cs.util.Log;
 import edu.rice.cs.util.newjvm.AbstractSlaveJVM;
 import edu.rice.cs.util.swing.Utilities;
 
-//import static edu.rice.cs.plt.debug.DebugUtil.error;
-//import static edu.rice.cs.plt.debug.DebugUtil.debug;
-
 /** Maintains a dynamic class path, allowing entries to be incrementally added in the appropriate
   * place in the list.  In normal DrScala sessions, this class is used in the interpreter JVM, and 
   * may be accessed concurrently.
