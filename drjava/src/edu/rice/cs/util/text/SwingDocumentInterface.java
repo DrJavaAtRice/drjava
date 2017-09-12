@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2015, JavaPLT group at Rice University (drjava@rice.edu). All rights reserved.
+ * Copyright (c) 2001-2017, JavaPLT group at Rice University (drjava@rice.edu). All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
  * following conditions are met:
@@ -23,8 +23,7 @@
  * This software is Open Source Initiative approved Open Source Software.
  * Open Source Initative Approved is a trademark of the Open Source Initiative.
  * 
- * This file is part of DrScala.  Download the current version of this project
- * from http://www.drscala.org/.
+ * This file is part of DrScala.  Download the current version of this project from http://www.drscala.org/.
  * 
  * END_COPYRIGHT_BLOCK*/
 
