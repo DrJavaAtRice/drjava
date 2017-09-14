@@ -586,7 +586,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     _log.log("Refreshing active document after 'find all'");
     _model.refreshActiveDocument();  // Rationale: a giant findAll left the definitions pane is a strange state
     panel.requestFocusInWindow();
-    EventQueue.invokeLater(new Runnable() { public void run() { panel.getRegTree().scrollRowToVisible(0); } });
+//    EventQueue.invokeLater(new Runnable() { public void run() { panel.getRegTree().scrollRowToVisible(0); } });
   }
   
   /** Performs "find all" with the specified options. 
@@ -753,12 +753,12 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     
     _frame.hourglassOn();
     int count = 0;
-    Runnable1<FindResult> doNothing =  new Runnable1<FindResult>() { 
-        public void run(FindResult fr) {  } 
-    };
+    Runnable1<FindResult> replaceMatchingString =   // replaces current (found) string 
+      new Runnable1<FindResult>() { 
+      public void run(FindResult fr) { _machine.replaceCurrent(); }};
     try {
       /* Replace all matching strings in region (which may be entire project). */
-      count = _machine.processAll(doNothing, region);
+      count = _machine.processAll(replaceMatchingString, region);
     }
     finally { 
       _frame.hourglassOff(); 
@@ -786,7 +786,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     
     _log.log("Refreshing active document after 'replace all'");
     _model.refreshActiveDocument();  // Rationale: a giant findAll left the definitions pane is a strange state
-//    panel.requestFocusInWindow();
+    _findField.requestFocusInWindow();
 //    EventQueue.invokeLater(new Runnable() { public void run() { panel.getRegTree().scrollRowToVisible(0); } });
   }
   

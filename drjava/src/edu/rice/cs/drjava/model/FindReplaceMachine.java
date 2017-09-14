@@ -407,11 +407,11 @@ public class FindReplaceMachine {
     * _selectionRegion and _isForward.  Ignores value of _searchAllDocuments.  Processes selected region (which may be 
     * the whole document) sequentially depending on find direction. This convention ensures that matches created by 
     * string replacement will not be replaced as in the following example:<p>
-    *   findString:    "hello"<br>
-    *   replaceString: "e"<br>
+    *   findString:    "e"<br>
+    *   replaceString: "hello"<br>
     *   document text: "hhellollo"<p>
     * Only executes in event thread.  Assumes (i) this has exclusive access to _doc (since it only runs in event thread) 
-    * and (ii) findAction does not modify _doc.
+    * and (ii) findAction does not modify _doc (What about replacement?)
     * @param findAction action to perform on the occurrences; input is the FindResult, output is ignored
     * @return the number of replacements
     */
@@ -488,24 +488,21 @@ public class FindReplaceMachine {
   }
   
   
-  /** Finds next match in specified doc only.  If searching forward, len must 
-   * be doc.getLength().  If searching backward, start must be 0.  If 
-   * searchAll, suppress executing in-document wrapped search, because it 
-   * must be deferred.  Only runs in the event thread.  Note than this method 
-   * does a wrapped search if specified search fails.
-   * @param doc the document to search in
-   * @param start the start offset for searching
-   * @param len the length to search
-   * @param searchAll flao
-   * @return the next match in the specified document
-   */
+  /** Finds next match in specified doc only.  If searching forward, len must  be doc.getLength().  If searching 
+    * backward, start must be 0.  If searchAll, suppress executing in-document wrapped search, because it must be 
+    * deferred.  Only runs in the event thread.  Note than this method does a wrapped search if specified search fails.
+    * @param doc the document to search in
+    * @param start the start offset for searching
+    * @param len the length to search
+    * @param searchAll flao
+    * @return the next match in the specified document
+    */
   private FindResult _findNextInDoc(OpenDefinitionsDocument doc, int start, int len, boolean searchAll) {
     
     assert EventQueue.isDispatchThread() || Utilities.TEST_MODE;
 
     // search from current position to "end" of document ("end" is start if searching backward)
-//    Utilities.show("_findNextInDoc([" + doc.getText() + "], " + start + ", " + len + ", " + searchAll + ")");
-//    _log.log("_findNextInDoc([" + doc.getText() + "], " + start + ", " + len + ", " + searchAll + ")");
+    _log.log("_findNextInDoc([" + doc.getText() + "], " + start + ", " + len + ", " + searchAll + ")");
     FindResult fr = _findNextInDocSegment(doc, start, len);
     if (fr.getFoundOffset() >= 0 || searchAll) return fr;
     
