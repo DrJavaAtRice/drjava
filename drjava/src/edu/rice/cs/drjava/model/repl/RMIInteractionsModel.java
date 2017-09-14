@@ -225,7 +225,7 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
         boolean success = _jvm.resetInterpreter();
         
         _log.log("_jvm.resetInterpreter() returned " + success);;
-        if (success /* && ! _jvm.isDisposed()*/) {  // In some tests, the Main JVM is already disposed ?
+        if (success && ! _jvm.isDisposed()) {  // In some tests, the Main JVM is already disposed ?
           /* trigger the interpreterResetting event
           _notifier.interpreterResetting();
           /* inform InteractionsModel that interpreter is ready */
@@ -291,27 +291,12 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
     Utilities.invokeLater(new Runnable() {
       public void run() {
         _log.log("EventQueue thunk in RMIInteractionsModel.; restarting interpreter");
-        _jvm.restartInterpreterJVM();  // only place other than tests where this method is called
-        _log.log("Interpreter JVM being replaced");
-        _notifier.interpreterResetting();
-//        EventQueue.invokeLater(new Runnable() { 
-//          public void run() {
-//             /* Waits until flag in _newSlaveMonitor is true.  If flag has been raised (set to false), this means
-//              * waiting until interpreterReady has been called.  Resets the CompletionMonitor flag to true. */
-//            _log.log("EventQueue thunk awaiting interpreterReady() started;_newSlaveMonitor.isTrue() = " + _newSlaveMonitor.isTrue());
-//            try { 
-//              _newSlaveMonitor.ensureSignaled(WAIT_TIMEOUT); /* resets the flag to true */
-//              _log.log("In RMIInteractionsModel, ensured that _newSlaveMonitor is true or is signalled");
-//             }
-//            catch(Exception e) {
-//              _log.log("setUpNewInterpreter timed out; Exception = " + e);
-//              _jvm.setWorkingDirectory(null);  // There is no working directory in the slave
-//              interpreterReady();  // TODO: create an interpreterNotReady() event;
-//              throw new UnexpectedException(e);
-//            }
-//            _log.log("setUpNewInterpreter completed with time limit");
-//            interpreterReady();
-//          }});
+        if (!_jvm.isDisposed()) {  // in some unit tests, _jvm is already disposed and setUpNewInterpreter 
+          _jvm.restartInterpreterJVM();  // only place other than tests where this method is called
+          _log.log("Interpreter JVM being replaced");
+          _notifier.interpreterResetting();
+        }
+        /* when _jvm.isDisposed, there setUpNewInterpreter() becomes a no-op */
       }
     });
   }
@@ -325,8 +310,6 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
     _document.setPrompt(prompt);
     _document.insertNewline(_document.getLength());
     _document.insertPrompt();
-//            int len = _document.getPromptLength();  
-//            advanceCaret(len);
     scrollToCaret();
   }
  

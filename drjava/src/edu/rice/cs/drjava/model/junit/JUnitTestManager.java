@@ -59,7 +59,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.error;
   */
 public class JUnitTestManager {
  
-  protected static final Log _log = new Log("GlobalModel.txt", false);
+  protected static final Log _log = new Log("GlobalModel.txt", true);
   
   /** The interface to the master JVM via RMI. */
   private final JUnitModelCallback _jmc;
@@ -107,20 +107,25 @@ public class JUnitTestManager {
     Iterable<Pair<String, File>> pairs = IterUtil.zip(classNames, files);
     _log.log("Test case pairs = " + pairs);
     
+     Class<?> possibleTest = null;
     for (Pair<String, File> pair : pairs) {
       String cName = pair.first();
       try {
-        Class<?> possibleTest = _testRunner.loadPossibleTest(cName); 
+        possibleTest = _testRunner.loadPossibleTest(cName); 
         _log.log("Exploring possibleTest " + possibleTest);
         if (_isJUnitTest(possibleTest)) {
+          _log.log("Adding test " + possibleTest + " to _testClassNames");
           _testClassNames.add(cName);
           _testFiles.add(pair.second());
           _suite.addTest(new JUnit4TestAdapter(_testRunner.loadPossibleTest(cName)));
         }
       }
-      catch (ClassNotFoundException e) { error.log(e); }
+      catch (ClassNotFoundException e) {
+        _log.log(possibleTest + " was not found!");
+        error.log(e); 
+      }
       catch(LinkageError e) {
-        //debug.log(e);
+        _log.log("A LinkageError occurred: " + e);
         String path = IOUtil.attemptAbsoluteFile(pair.second()).getPath();
         _jmc.classFileError(new ClassFileError(cName, path, e));
       }
@@ -142,47 +147,49 @@ public class JUnitTestManager {
     
     if (_testClassNames == null || _testClassNames.isEmpty()) return false;
     
-//    Utilities.show("runTestSuite() in SlaveJVM called");
+    ArrayList<JUnitError> anomalies = new ArrayList<JUnitError>();
     
     try {
 //      System.err.println("Calling _testRunner.runSuite(...)");
       TestResult result = _testRunner.runSuite(_suite);
+      int anomalyCt = result.errorCount() + result.failureCount();
       
-      JUnitError[] errors = new JUnitError[result.errorCount() + result.failureCount()];
+      _log.log("In JUnitTestManager, running the suite generated " + result.errorCount() + 
+               " errors " + result.failureCount() + " failures");
       
       Enumeration<TestFailure> failures = result.failures();
-      Enumeration<TestFailure> errEnum = result.errors();
+      Enumeration<TestFailure> errors = result.errors();
       
       int i = 0;
 
-      while (errEnum.hasMoreElements()) {
-        TestFailure tErr = errEnum.nextElement();
+      while (errors.hasMoreElements()) {
+        TestFailure tErr = errors.nextElement();
         _log.log("Processing error " + tErr);
-        errors[i] = _makeJUnitError(tErr, _testClassNames, true, _testFiles);
+        anomalies.add(_makeJUnitError(tErr, _testClassNames, true, _testFiles));
         i++;
       }
       _log.log("Finished processing errors");
       while (failures.hasMoreElements()) {
         TestFailure tFail = failures.nextElement();
         _log.log("Processing failure " + tFail);
-        errors[i] = _makeJUnitError(tFail, _testClassNames, false, _testFiles);
+        anomalies.add(_makeJUnitError(tFail, _testClassNames, false, _testFiles));
         i++;
       }
-      _log.log("Slave JVM: testSuite ended with errors " + Arrays.toString(errors));
-      _log.log("Finished processing failures");
+      _log.log("In JUnitTestManager, finished processing failures");
+      _log.log("Slave JVM: testSuite ended with anomalies " + anomalies);
 
       _reset();
-      _jmc.testSuiteEnded(errors);
+      _log.log("In JUnitTestManager, JUnit reset() completed");
+      _jmc.testSuiteEnded(anomalies.toArray(new JUnitError[0]));
     }
     catch(Exception e) {
-      _log.log("Exception occurred in JUnitManager.runTestSuite()");
-      JUnitError[] errors = new JUnitError[1];      
-      errors[0] = new JUnitError(null, -1, -1, e.getMessage(), false, "", "", e.toString(), e.getStackTrace());
+      _log.log("In JUnitTestMananger, Runtime Error (not Exception) occurred in runTestSuite() interrupting testing");
+      anomalies.add(new JUnitError(null, -1, -1, e.getMessage(), false, "", "", e.toString(), e.getStackTrace()));
       _reset();
-      _jmc.testSuiteEnded(errors);
-      _log.log("Slave JVM: testSuite ended with errors " + Arrays.toString(errors));
+      _jmc.testSuiteEnded(anomalies.toArray(new JUnitError[0]));
     }
-    _log.log("Exiting runTestSuite()");
+    _log.log("In JUnitTestManager, testSuite ended with anomalies " + anomalies);
+    _log.log("In JUnitTestManager, exiting runTestSuite()");
     return true;
   }
   

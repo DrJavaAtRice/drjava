@@ -50,7 +50,13 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.HashMap;
 
-/** The panel that displays all the testing errors.
+/** The panel that displays all the testing errors.  It should be called JUnitErrorPanel.
+  * Factoring out the common code between the ErrorPanels for compilation and testing leads to some strange
+  * nomenclature in the context of testing.  There are no warnings in unit testing; there are runtime test
+  * errors (as opposed to test failures) instead.  So all references to warnings here actually are references
+  * to runtime test errors.  Similarly, there are no compiler errors; all such references here refer to
+  * test failures.
+  * TODO: rename this class JUnitErrorPanel
   * @version $Id: JUnitPanel.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class JUnitPanel extends ErrorPanel {
@@ -59,7 +65,10 @@ public class JUnitPanel extends ErrorPanel {
   
   private static final String START_JUNIT_MSG = "Testing in progress.  Please wait ...\n";
   private static final String JUNIT_FINISHED_MSG = "All tests completed successfully.\n";
-  private static final String NO_TESTS_MSG = "";
+  private static final String NO_TESTS_MSG = "No tests were run";
+  
+  private static final String ANOMALY_NAME = "test";
+  private static final String ANOMALY_VERB = "failed";
   
   private static final SimpleAttributeSet OUT_OF_SYNC_ATTRIBUTES = _getOutOfSyncAttributes();
   private static final SimpleAttributeSet _getOutOfSyncAttributes() {
@@ -206,9 +215,9 @@ public class JUnitPanel extends ErrorPanel {
   public void testStarted(String className, String testName) { }
   
   private void _displayStackTrace (JUnitError e) {
-    _errorLabel.setText((e.isWarning() ? "Error: " : "Failure: ") + e.message());
+    _errorLabel.setText((e.isWarning() ? "Runtime Error: " : "Failure: ") + e.message());
     _fileLabel.setText("File: " + (new File(e.fileName())).getName());
-    if (!e.testName().equals(""))
+    if (! e.testName().equals(""))
       _testLabel.setText("Test: " + e.testName());
     else
       _testLabel.setText("");
@@ -223,7 +232,7 @@ public class JUnitPanel extends ErrorPanel {
     private volatile JPopupMenu _popMenu;
     private volatile String _runningTestName;
     private volatile boolean _warnedOutOfSync;
-    private static final String JUNIT_WARNING = "junit.framework.TestSuite$1.warning";
+//    private static final String JUNIT_WARNING = "junit.framework.TestSuite$1.warning";
     
     /** Maps any test names in the currently running suite to the position that they appear in the list pane. */
     private final HashMap<String, Position> _runningTestNamePositions;
@@ -263,7 +272,7 @@ public class JUnitPanel extends ErrorPanel {
       String testName = _getTestFromName(name);
       String className = _getClassFromName(name);
       String fullName = className + "." + testName;
-      if (fullName.equals(JUNIT_WARNING)) return;
+//      if (fullName.equals(JUNIT_WARNING)) return;
       ErrorDocument doc = getErrorDocument();
       try {
         int len = doc.getLength();
@@ -294,7 +303,7 @@ public class JUnitPanel extends ErrorPanel {
 
       String testName = _getTestFromName(name);
       String fullName = _getClassFromName(name) + "." + testName;
-      if (fullName.equals(JUNIT_WARNING)) return;
+//      if (fullName.equals(JUNIT_WARNING)) return;
       
       ErrorDocument doc = getErrorDocument();
       Position namePos = _runningTestNamePositions.get(fullName);
@@ -325,42 +334,52 @@ public class JUnitPanel extends ErrorPanel {
       selectNothing();
     }
     
-    /** Used to show that testing was unsuccessful. */
-    protected void _updateWithErrors() throws BadLocationException {
-      //DefaultStyledDocument doc = new DefaultStyledDocument();
-      ErrorDocument doc = getErrorDocument();
-//      _checkSync(doc);
-      _updateWithErrors("test", "failed", doc);
-    }
-    
-    /** Gets the message indicating the number of errors and warnings.*/
-    protected String _getNumErrorsMessage(String failureName, String failureMeaning) {
-      StringBuilder numErrMsg;
+     /** Gets the message revealing the number of test failures and runtime error occurrences, together with brief
+       * descriptoins.*/
+    protected String _getNumErrorsMessage() {
       
       /** Used for display purposes only */
-      int numCompErrs = getErrorModel().getNumCompilerErrors();
-      int numWarnings = getErrorModel().getNumWarnings();     
+      int numFailures = getErrorModel().getNumCompilerErrors();
+      int numRuntimeErrors = getErrorModel().getNumWarnings(); 
+      StringBuilder numErrMsg = new StringBuilder("In JUnit testing, ");
       
-      if (! getErrorModel().hasOnlyWarnings()) {
-        numErrMsg = new StringBuilder(numCompErrs + " " + failureName);   //failureName = error or test (for compilation and JUnit testing respectively)
-        if (numCompErrs > 1) numErrMsg.append("s");
-        numErrMsg.append(" " + failureMeaning);
-        if (numWarnings > 0) numErrMsg.append(" and " + numWarnings + " warning");        
+      if (numFailures > 0) {
+        numErrMsg.append(numFailures + " " + ANOMALY_NAME);   
+        if (numFailures > 1) numErrMsg.append("s");
+        numErrMsg.append(" " + ANOMALY_VERB);
+        if (numRuntimeErrors > 0) numErrMsg.append(" and ");          
       }
-      else  numErrMsg = new StringBuilder(numWarnings + " warning");       
       
-      if (numWarnings > 1) numErrMsg.append("s");
-      if (numWarnings > 0) numErrMsg.append(" found");
+      if (numRuntimeErrors > 0) numErrMsg.append(numRuntimeErrors + " runtime error"); 
       
-      numErrMsg.append(":\n");
-      
+      if (numRuntimeErrors > 1) numErrMsg.append("s");
+     
+      numErrMsg.append(" occurred:\n");
       return numErrMsg.toString();
     }
     
-    protected void _updateWithErrors(String failureName, String failureMeaning, ErrorDocument doc)
-      throws BadLocationException {
+    /** Gets the message to title the block containing only failures. */
+    protected String _getErrorTitle() {
+      JUnitErrorModel jem = getErrorModel();
+      if (jem.getNumCompilerErrors() > 1) return "--------------\n*** Failures ***\n--------------\n";
+      if (jem.getNumCompilerErrors() > 0) return "-------------\n*** Failure ***\n-------------\n";
+      return "";
+    }
+      
+    /** Gets the message to title the block containing only runtime errors. */
+    protected String _getWarningTitle() {
+      JUnitErrorModel jem = getErrorModel();
+      if (jem.getNumWarnings() > 1) return "--------------\n*** Runtime Errors ***\n--------------\n";
+      if (jem.getNumWarnings() > 0) return "-------------\n*** Runtime Error ***\n-------------\n";
+      return "";
+    }
+    
+    /** Convenience method. */
+    protected void _updateWithErrors() throws BadLocationException { _updateWithErrors(getErrorDocument()); }
+    
+    protected void _updateWithErrors(ErrorDocument doc) throws BadLocationException {
       // Print how many errors
-      _replaceInProgressText(_getNumErrorsMessage(failureName, failureMeaning));
+      _replaceInProgressText(_getNumErrorsMessage());
       
       _insertErrors(doc);
       
@@ -383,12 +402,11 @@ public class JUnitPanel extends ErrorPanel {
       }
     }
     
-    /** Returns the string to identify a warning. In JUnit, warnings (the odd case) indicate errors/exceptions.
-      */
-    protected String _getWarningText() {  return "Error: "; }
+    /** Returns the string to identify a warning. In JUnit, warnings (the odd case) indicate errors/exceptions. */
+    protected String _getWarningText() {  return "Runtime Error: "; }
     
     /** Returns the string to identify an error.  In JUnit, errors (the normal case) indicate TestFailures. */
-    protected String _getErrorText() { return "Failure: "; }
+    protected String _getErrorText() { return "Test Failure: "; }
     
     /** Updates the list pane with no errors. */
     protected void _updateNoErrors(boolean haveTestsRun) throws BadLocationException {
@@ -399,26 +417,6 @@ public class JUnitPanel extends ErrorPanel {
       selectNothing();
       setCaretPosition(0);
     }
-    
-//    /** Checks the document being tested to see if it's in sync. If not,
-//      * displays a message in the document in the test output pane.
-//      */
-//    private void _checkSync(Document doc) {
-//      if (_warnedOutOfSync) return;
-//      List<OpenDefinitionsDocument> odds = _odds;  // grab current _odds
-//      for (OpenDefinitionsDocument odoc: odds) {
-//        if (! odoc.checkIfClassFileInSync()) {
-//          try {
-//            doc.insertString(0, TEST_OUT_OF_SYNC, OUT_OF_SYNC_ATTRIBUTES);
-//            _warnedOutOfSync = true;
-//            return;
-//          }
-//          catch (BadLocationException ble) {
-//            throw new UnexpectedException(ble);
-//          }
-//        }
-//      }
-//    }
     
     private void _setUpStackTraceFrame() {
       //DrJava.consoleOut().println("Stack Trace for Error: \n" +  e.stackTrace());

@@ -55,6 +55,9 @@ import java.util.ArrayList;
   */
 public class CompilerErrorPanel extends ErrorPanel {
   
+  private static final String ANOMALY_NAME = "error";
+  private static final String ANOMALY_VERB = "found";
+  
   /** Whether a compile has occurred since the last compiler change. */
   private volatile boolean _compileHasOccurred;
   private volatile CompilerErrorListPane _errorListPane;
@@ -163,6 +166,45 @@ public class CompilerErrorPanel extends ErrorPanel {
   
   class CompilerErrorListPane extends ErrorPanel.ErrorListPane {
     
+     /** Gets the message indicating the number of errors and warnings.*/
+    protected String _getNumErrorsMessage() {
+      StringBuilder numErrMsg = new StringBuilder("In compilation, ");
+      
+      /** Used for display purposes only */
+      int numCompErrs = getErrorModel().getNumCompilerErrors();
+      int numWarnings = getErrorModel().getNumWarnings();     
+      
+      if (numCompErrs > 0) {
+        //NOTE: ANOMALY_NAME is consistent across ErrorPanel descendant classes
+        numErrMsg.append(numCompErrs + " " + ANOMALY_NAME);   
+        if (numCompErrs > 1) numErrMsg.append("s");
+        if (numWarnings > 0) numErrMsg.append(" and " + numWarnings + " warning");          
+      }
+      
+      else numErrMsg = new StringBuilder(numWarnings + " warning"); 
+      
+      if (numWarnings > 1) numErrMsg.append("s");
+     
+      numErrMsg.append(" " + ANOMALY_VERB + ":\n");
+      return numErrMsg.toString();
+    }
+    
+    /** Gets the message to title the block containing only errors. */
+    protected String _getErrorTitle() {
+      CompilerErrorModel cem = getErrorModel();
+      if (cem.getNumCompilerErrors() > 1) return "--------------\n*** Errors ***\n--------------\n";
+      if (cem.getNumCompilerErrors() > 0) return "-------------\n*** Error ***\n-------------\n";
+      return "";
+    }
+      
+    /** Gets the message to title the block containing only warnings. */
+    protected String _getWarningTitle() {
+      CompilerErrorModel cem = getErrorModel();
+      if (cem.getNumWarnings() > 1) return "--------------\n*** Warnings ***\n--------------\n";
+      if (cem.getNumWarnings() > 0) return "-------------\n*** Warning ***\n-------------\n";
+      return "";
+    }
+    
     protected void _updateWithErrors() throws BadLocationException {
       ErrorDocument doc = new ErrorDocument(getErrorDocumentTitle());
       CompilerModel compilerModel = getModel().getCompilerModel();
@@ -176,13 +218,25 @@ public class CompilerErrorPanel extends ErrorPanel {
         doc.append(msgBuffer.toString(), NORMAL_ATTRIBUTES);
       }
 
-      String failureName = "error";
-      if (getErrorModel().hasOnlyWarnings()) failureName = "warning";
-
-      _updateWithErrors(failureName, "found", doc);
+      _updateWithErrors(doc);
     }
     
+    /** Used to show that the last compile was unsuccessful.*/
+    protected void _updateWithErrors(ErrorDocument doc)
+      throws BadLocationException {
+      // Print how many errors
+      String numErrsMsg = _getNumErrorsMessage();
+      doc.append(numErrsMsg, BOLD_ATTRIBUTES);
+      
+      _insertErrors(doc);
+      setDocument(doc);
+      
+      // Select the first error if there are some errors (i.e. does not select if there are only warnings)
+      if (!getErrorModel().hasOnlyWarnings())
+        getErrorListPane().switchToError(0);
+    }
     /** Puts the error pane into "compilation in progress" state. */
+    
     public void setCompilationInProgress() {
       _errorListPositions = new Position[0];
       _compileHasOccurred = true;

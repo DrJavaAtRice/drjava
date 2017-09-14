@@ -179,7 +179,6 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   
   /** Starts the interpreter for the first time. */
   public void startInterpreterJVM() { 
-//    Utilities.show("Trying to start SlaveJVM");
     _log.log("In MainJVM, startInterpreterJVM() called; invoking start() on " + _stateMonitor.value());
     _stateMonitor.value().start();  
   }
@@ -198,18 +197,19 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     */
   public void restartInterpreterJVM() {
     assert EventQueue.isDispatchThread();
-    _log.log("In MainJVM, restartInterpreterJVM() called; invoking restart() on " + _stateMonitor.value());
- 
-    _newClassPath = getInteractionsClassPath();
-    _log.log("***** _newClassPath = " + _newClassPath);
-    
-   
-    _stateMonitor.value().restart();
-    /* The following are inconsistent with startInterpreter which is supposed to be equivalent if no interpreter exists */
-//    _interactionsModel.documentReset();
-//    _interactionsModel._notifyInterpreterReady();
+    if (! isDisposed()) {
+      _log.log("In MainJVM, restartInterpreterJVM() called; invoking restart() on " + _stateMonitor.value());
+      
+      _newClassPath = getInteractionsClassPath();
+      _log.log("***** _newClassPath = " + _newClassPath);
+      
+      
+      _stateMonitor.value().restart();
+    }
+    /* if isDisposed() == true, then this MainJVM has been disposed and this call is a no-op.  
+     * DrScala is shutting down!  This should only happen in unit tests. */
   }
-  
+    
   /** Stop the interpreter JVM, do not restart it, and terminate the RMI server associated with this object.
     * May be useful when a number of different MainJVM objects are created (such as when running tests).
     */

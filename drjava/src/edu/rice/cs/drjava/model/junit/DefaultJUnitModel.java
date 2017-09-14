@@ -87,7 +87,7 @@ import static edu.rice.cs.drjava.config.OptionConstants.*;
 public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   
   /** log for use in debugging */
-  private static Log _log = new Log("GlobalModel.txt", false);
+  private static Log _log = new Log("GlobalModel.txt", true);
   
   /** Manages listeners to this model. */
   private final JUnitEventNotifier _notifier = new JUnitEventNotifier();
@@ -425,7 +425,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
               /** The canonical pathname for the file (including the file name) */
               String sourceFileName = getCanonicalPath(rootDir) + File.separator + sourceName.value();
               _log.log("Full source fileName = " + sourceFileName);             
-              _log.log("Source file found in openDocFiles ? = "  + openDocFiles.contains(sourceFileName));
+              _log.log("Source file found in openDocFiles? = "  + openDocFiles.contains(sourceFileName));
               File sourceFile = new File(sourceFileName);
               classNames.add(className.value());
               files.add(sourceFile);

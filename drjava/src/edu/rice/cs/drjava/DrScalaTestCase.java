@@ -61,13 +61,9 @@ public class DrScalaTestCase extends TestCase {
     Utilities.TEST_MODE = true;
     final String newName = System.getProperty("drscala.test.config");
     assert newName != null;
-//    _log.log("newName = " + newName);
-//    if (newName != null) {
-//      Utilities.show("Setting '" + newName + "' as DrScala configuration file");
     Utilities.invokeAndWait(new Runnable() {
       public void run() {
         DrScala.setPropertiesFile(newName);  // spawns change updates which should run in event thread
-//        Utilities.clearEventQueue();
         DrScala._initConfig();               // spawns change updates which should run in event thread
       }
     });

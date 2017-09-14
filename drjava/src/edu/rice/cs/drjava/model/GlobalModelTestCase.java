@@ -100,8 +100,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
    */
   public void setUp() throws Exception {
     super.setUp();  // declared to throw Exception
-//    debug.logStart();
-    _log.log("*Setting up " + this);
+//    _log.log("*Setting up " + this);
     _model = new TestGlobalModel();
     Utilities.invokeLater(new Runnable() {
       public void run() {
@@ -115,7 +114,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
                                      _model.getSwingInteractionsDocument(),
                                      new Runnable() { public void run() { } });
 
-        _log.log("*Global model created for " + this);
+//        _log.log("*Global model created for " + this);
         DrScala.getConfig().resetToDefaults();
         String user = System.getProperty("user.name");
         try { _tempDir = FileOps.createTempDirectory("DrScala-test-" + user /*, ""*/); }
@@ -134,23 +133,20 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   /** Teardown for each test case, which recursively deletes the temporary directory created in setUp. */
   public void tearDown() throws Exception {
 
-    _log.log("*Tearing down " + this);
-//    System.err.println("Tearing down " + this);
+//    _log.log("*Tearing down " + this);
     _model.dispose();
     _log.log("*Global model has been disposed");
-    // We have disposed of the model, remove all interaction listeners to ensure
-    // we do not get any late notifications from the interpreter JVM.
-    // This fixes the "MainJVM is disposed" errors.
+    /* We have disposed of the model, remove all interaction listeners to ensure we do not get any late notifications
+     * from the interpreter JVM. This fixes the "MainJVM is disposed" errors. */
     _model.getInteractionsModel().removeAllInteractionsTestListeners();
 
     /*boolean ret =*/ IOUtil.deleteOnExitRecursively(_tempDir);
-    //assertTrue("delete temp directory " + _tempDir, ret);
+//    assertTrue("delete temp directory " + _tempDir, ret);
 
     _tempDir = null;
     _model = null;
     super.tearDown();
-    _log.log("*Completed tear down of " + this);
-//    System.err.println("Completed tear down of " + this);
+//    _log.log("*Completed tear down of " + this);
   }
 
   /** Clear all old text and insert the given text. */
@@ -172,7 +168,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   /** Create a new temporary file in _tempDir. */
   protected File tempFile() throws IOException {
     File f = File.createTempFile("DrScala-test", ".scala", _tempDir).getCanonicalFile();
-//    System.err.println("temp file created with name " + f);
+//    _log.log("temp file created with name " + f);
     return f;
   }
 
@@ -186,14 +182,14 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   /** Create a new NAMED (last segment of qualified class name) temporary file in _tempDir. */
   protected File tempFile(String name) throws IOException {
     File f = File.createTempFile(name, ".scala", _tempDir).getCanonicalFile();
-//    System.err.println("temp file created with name " + f);
+//    _log.log("temp file created with name " + f);
     return f;
   }
   
    /** Create a new NAMED (last segment of qualified class name) temporary file in specified location. */
   protected File tempFile(String name, File location) throws IOException {
     File f = File.createTempFile(name, ".scala", location).getCanonicalFile();
-//    System.err.println("temp file created with name " + f);
+//    _log.log("temp file created with name " + f);
     return f;
   }
   
@@ -238,7 +234,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     */
   protected OpenDefinitionsDocument setUpDocument(final String text) throws BadLocationException {
     
-    _log.log("*Setting up a document with text \n'" + text + "'\n");
+//    _log.log("*Setting up a document with text \n'" + text + "'\n");
     
     TestListener listener = new TestListener() {
       public void newFileCreated(OpenDefinitionsDocument doc) { newCount++; }
@@ -272,7 +268,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   
   protected void safeLoadHistory(final FileSelector fs) {
     Utilities.invokeAndWait(new Runnable() { public void run() {
-      _log.log("Loading history using fileSelector " + fs);
+//      _log.log("Loading history using fileSelector " + fs);
       _model.loadHistory(fs); 
     } });
   }
@@ -295,6 +291,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       } 
     });
   }
+  
   /** Compiles a new file with the given text. The compile is expected to succeed and it is checked to make sure it
    *  worked reasonably.  This method does not return until the Interactions JVM has reset and is ready to use.
    *  @param text Code for the class to be compiled
@@ -330,7 +327,6 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     listener.logCompileStart();
 
     testStartCompile(doc);
-//    Utilities.clearEventQueue();
     
     if (_model.getCompilerModel().getNumErrors() > 0)  fail("compile failed: " + getCompilerErrorString());
 
@@ -397,8 +393,8 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     final int resultsEndLocation = interactionsDoc.getLength() - newLineLen - interactionsDoc.getPrompt().length();
     
     final int resultsLen = resultsEndLocation - resultsStartLocation;
-    _log.log("*resultsStartLoc = " + resultsStartLocation + " resultsEndLocation = " + resultsEndLocation);
-    _log.log("*Contents = '" + interactionsDoc.getDocText(0, resultsEndLocation+1) + "'");
+//    _log.log("*resultsStartLoc = " + resultsStartLocation + " resultsEndLocation = " + resultsEndLocation);
+//    _log.log("*Contents = '" + interactionsDoc.getDocText(0, resultsEndLocation+1) + "'");
     if (resultsLen <= 0) return "";
     return interactionsDoc.getDocText(resultsStartLocation, resultsLen);
   }
@@ -443,8 +439,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   }
 
   /** Asserts that the text in the Interactions Document does NOT match the given regex. */
-  protected void assertInteractionsDoesNotMatch(String regex)
-    throws EditDocumentException {
+  protected void assertInteractionsDoesNotMatch(String regex) throws EditDocumentException {
     _assertInteractionMatchesHelper(regex, false);
   }
   
@@ -525,7 +520,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     int numErrors = _model.getCompilerModel().getNumErrors();
 
     if (name.length() > 0)  name += ": ";
-//    System.err.println("Compiler errors = " + getCompilerErrorString());
+//    _log.log("Compiler errors = " + getCompilerErrorString());
     assertEquals(name + " compile errors > 0 ? numErrors = " + numErrors, b, numErrors > 0);
   }
 
@@ -620,14 +615,14 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     protected volatile int interpreterExitedCount;
     protected volatile int interpreterResetFailedCount;
 //    protected volatile int interpreterReplacedCount;
-    //protected int interactionCaretPositionChangedCount;
+//    protected int interactionCaretPositionChangedCount;
     protected volatile int consoleResetCount;
     protected volatile int saveBeforeCompileCount;
-    //protected int saveBeforeRunCount;
+//    protected int saveBeforeRunCount;
     protected volatile int compileBeforeJUnitCount;
     protected volatile int saveBeforeScaladocCount;
     protected volatile int compileBeforeScaladocCount;
-    //protected int saveBeforeDebugCount;
+//    protected int saveBeforeDebugCount;
     protected volatile int nonTestCaseCount;
     protected volatile int lastExitStatus;
     protected volatile int fileRevertedCount;
@@ -639,7 +634,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     public TestListener() {
       _startupTrace = new Exception();
       resetCounts();
-      _log.log("*TestListener created");
+//      _log.log("*TestListener created");
     }
 
     public synchronized void resetCounts() {
@@ -663,18 +658,18 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       interactionEndCount = 0;
       interactionErrorCount = 0;
 //      interpreterReplacedCount = 0;
-      //interactionCaretPositionChangedCount = 0;
+//      interactionCaretPositionChangedCount = 0;
       consoleResetCount = 0;
       interpreterResettingCount = 0;
       interpreterReadyCount = 0;
       interpreterExitedCount = 0;
       interpreterResetFailedCount = 0;
       saveBeforeCompileCount = 0;
-      //saveBeforeRunCount = 0;
+//      saveBeforeRunCount = 0;
       compileBeforeJUnitCount = 0;
       saveBeforeScaladocCount = 0;
       compileBeforeScaladocCount = 0;
-      //saveBeforeDebugCount = 0;
+//      saveBeforeDebugCount = 0;
       nonTestCaseCount = 0;
       lastExitStatus = 0;
       fileRevertedCount = 0;
@@ -712,9 +707,11 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     public void assertQuitFileCount(int i) {
       assertEquals("number of times quitFile fired", i, quitFileCount);
     }
-     public void assertClassFileErrorCount(int i) {
+    
+    public void assertClassFileErrorCount(int i) {
       assertEquals("number of times classFileError fired", i, classFileErrorCount);
     }
+    
     public void assertNewCount(int i) {
       assertEquals("number of times newFile fired", i, newCount);
     }
@@ -883,6 +880,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     public void newFileCreated(OpenDefinitionsDocument doc) { listenerFail("newFileCreated fired unexpectedly"); } 
     public void filesNotFound(File... f) { listenerFail("fileNotFound fired unexpectedly"); }
     public File[] filesReadOnly(File... f) { listenerFail("filesReadOnly fired unexpectedly"); return f; }
+    
     // Recent revision defers opening files until the document for a file is requested forcing the following comment out
     public void fileOpened(OpenDefinitionsDocument doc) { /* listenerFail("fileOpened fired unexpectedly"); */ }
     public void fileClosed(OpenDefinitionsDocument doc) { listenerFail("fileClosed fired unexpectedly"); }
@@ -1001,7 +999,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     }
     
     public void interpreterExited(int status) {
-      _log.log("GlobalModelTestCase: interpreterExited");
+//      _log.log("GlobalModelTestCase: interpreterExited");
 //        assertInteractionStartCount(1);
 //        assertInterpreterResettingCount(0);
       synchronized(this) { 
@@ -1020,7 +1018,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     }
     
     public void interpreterReady() {
-      _log.log("GlobalModelTestCase: interpreterReady");
+//      _log.log("GlobalModelTestCase: interpreterReady");
       synchronized(this) { interpreterReadyCount++; }
       _resetDone.signal();
     }

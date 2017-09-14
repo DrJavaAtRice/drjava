@@ -37,13 +37,14 @@ import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.model.DJError;
 import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
 import edu.rice.cs.drjava.model.ClipboardHistoryModel;
+import edu.rice.cs.drjava.model.print.DrScalaBook;
+
+import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.HighlightManager;
 import edu.rice.cs.util.swing.BorderlessScrollPane;
-import edu.rice.cs.util.text.SwingDocument;
-import edu.rice.cs.drjava.model.print.DrScalaBook;
-  
 import edu.rice.cs.util.swing.RightClickMouseAdapter;
+import edu.rice.cs.util.text.SwingDocument; 
 
 import java.util.HashMap;
 import java.util.ArrayList;
@@ -68,6 +69,8 @@ import java.io.IOException;
  *  @version $Id: ErrorPanel.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public abstract class ErrorPanel extends TabbedPanel implements OptionConstants {
+  
+  protected static final Log _log = new Log("GlobalModel.txt", true);
   
   protected static final SimpleAttributeSet NORMAL_ATTRIBUTES = _getNormalAttributes();
   protected static final SimpleAttributeSet BOLD_ATTRIBUTES = _getBoldAttributes();
@@ -137,28 +140,17 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     _prevErrorButton.setMargin(new Insets(0, 0, 0, 0));
     _prevErrorButton.setToolTipText("Go to the previous error");
     
-    
-    //    _errorPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 3));
-    //    _errorPanel.setPreferredSize(new Dimension(27,35));
-    //    _errorPanel.add(_prevErrorButton);
-    //    _errorPanel.add(_nextErrorButton);
-    //    _uiBox.add(_errorPanel, BorderLayout.WEST);
     _errorNavButtonsPanel.add(_prevErrorButton, BorderLayout.NORTH);
     _errorNavButtonsPanel.add(_nextErrorButton, BorderLayout.SOUTH);
     _errorNavButtonsPanel.setBorder(new EmptyBorder(18, 5, 18, 5)); // 5 pix padding on sides
     
-    //    JPanel middlePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
-    //    middlePanel.add(_errorNavButtonsPanel);
-    
     _errorNavPanel.add(_errorNavButtonsPanel);//, BorderLayout.CENTER);
     _showHighlightsCheckBox = new JCheckBox( "Highlight source", true);
     
-    //    _mainPanel.setMinimumSize(new Dimension(225,60));
-    // We make the vertical scrollbar always there.
-    // If we don't, when it pops up it cuts away the right edge of the
-    // text. Very bad.
-    _scroller = new BorderlessScrollPane(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-                                         JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+    /* NOTE: we make the vertical scrollbar always there.  If we don't, when it pops up it cuts away the right edge of 
+     * the text. Ugh. */
+    
+    _scroller = new BorderlessScrollPane(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
     
     _leftPanel.add(_scroller, BorderLayout.CENTER);
     _leftPanel.add(_errorNavPanel, BorderLayout.EAST);
@@ -166,7 +158,6 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     customPanel = new JPanel(new BorderLayout());
     _rightPanel = new JPanel(new BorderLayout());
     _rightPanel.setBorder(new EmptyBorder(0,5,0,5)); // 5 pix padding on sides
-    //    uiBox.setBorder(new EmptyBorder(5,0,0,0)); // 5 pix padding on top
     _rightPanel.add(new JLabel(labelString, SwingConstants.LEFT), BorderLayout.NORTH);
     _rightPanel.add(customPanel, BorderLayout.CENTER);
     _rightPanel.add(_showHighlightsCheckBox, BorderLayout.SOUTH);
@@ -385,10 +376,6 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
           
           else if (e.getStateChange() == ItemEvent.SELECTED) {   
             getErrorListPane().switchToError(getSelectedIndex());
-// Commented out because they are redudant; done in switchToError(...)            
-//          DefinitionsPane curDefPane = _frame.getCurrentDefPane(); 
-//            lastDefPane.requestFocusInWindow();
-//            lastDefPane.getCaret().setVisible(true);
           }
         }
       });
@@ -413,6 +400,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
           addActionForKeyStroke(DrScala.getConfig().getSetting(OptionConstants.KEY_PASTE_FROM_HISTORY), pasteAction);
         }
       });
+      /* end of ErrorListPane constructor */
     }
     
     /** Gets the ErrorDocument associated with this ErrorListPane.  The inherited getDocument method must be preserved
@@ -445,7 +433,6 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     public void lostOwnership(Clipboard clipboard, Transferable contents) {
       // ignore
     }
-
   
     /** Returns true if the errors should be highlighted in the source
      *  @return the status of the JCheckBox _showHighlightsCheckBox
@@ -507,28 +494,10 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     
     abstract protected void _updateWithErrors() throws BadLocationException;
     
+    abstract protected void _updateWithErrors(ErrorDocument doc) throws BadLocationException;
+    
     /** Gets the message indicating the number of errors and warnings.*/
-    protected String _getNumErrorsMessage(String failureName, String failureMeaning) {
-      StringBuilder numErrMsg;
-      
-      /** Used for display purposes only */
-      int numCompErrs = getErrorModel().getNumCompilerErrors();
-      int numWarnings = getErrorModel().getNumWarnings();     
-      
-      if (!getErrorModel().hasOnlyWarnings()) {
-        //failureName = error or test (for compilation and JUnit testing respectively)
-        numErrMsg = new StringBuilder(numCompErrs + " " + failureName);   
-        if (numCompErrs > 1) numErrMsg.append("s");
-        if (numWarnings > 0) numErrMsg.append(" and " + numWarnings + " warning");          
-      }
-      
-      else numErrMsg = new StringBuilder(numWarnings + " warning"); 
-      
-      if (numWarnings > 1) numErrMsg.append("s");
-     
-      numErrMsg.append(" " + failureMeaning + ":\n");
-      return numErrMsg.toString();
-    }
+    abstract protected String _getNumErrorsMessage();
     
     /** Gets the message to title the block containing only errors. */
     protected String _getErrorTitle() {
@@ -541,24 +510,9 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     /** Gets the message to title the block containing only warnings. */
     protected String _getWarningTitle() {
       CompilerErrorModel cem = getErrorModel();
-      if (cem.getNumWarnings() > 1) return "--------------\n** Warnings **\n--------------\n";
-      if (cem.getNumWarnings() > 0) return "-------------\n** Warning **\n-------------\n";
+      if (cem.getNumWarnings() > 1) return "--------------\n*** Warnings ***\n--------------\n";
+      if (cem.getNumWarnings() > 0) return "-------------\n*** Warning ***\n-------------\n";
       return "";
-    }
-        
-    /** Used to show that the last compile was unsuccessful.*/
-    protected void _updateWithErrors(String failureName, String failureMeaning, ErrorDocument doc)
-      throws BadLocationException {
-      // Print how many errors
-      String numErrsMsg = _getNumErrorsMessage(failureName, failureMeaning);
-      doc.append(numErrsMsg, BOLD_ATTRIBUTES);
-      
-      _insertErrors(doc);
-      setDocument(doc);
-      
-      // Select the first error if there are some errors (i.e. does not select if there are only warnings)
-      if (!getErrorModel().hasOnlyWarnings())
-        getErrorListPane().switchToError(0);
     }
     
     /** Returns true if there is an error after the selected error. */
@@ -763,7 +717,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
      *  @param error The error to switch to
      */
     void switchToError(DJError error) {
-//      Utilities.showDebug("ErrorPanel.switchToError called");
+      _log.log("ErrorPanel.switchToError called");
       if (error == null) return;
       
       final SingleDisplayModel model = getModel();

@@ -9,7 +9,7 @@
 *.new
 Bugs
 *.txt
-
+arch
 VectorArch
 hs_err_*
 replay_*

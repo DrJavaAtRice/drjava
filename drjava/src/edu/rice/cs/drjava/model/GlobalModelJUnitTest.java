@@ -47,7 +47,7 @@ import edu.rice.cs.util.swing.Utilities;
   */
 public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   
-  private static final Log _log = new Log("GlobalModel.txt", false);
+  private static final Log _log = new Log("GlobalModel.txt", true);
   
   /** Whether or not to print debugging output. */
   static final boolean printMessages = false;
@@ -576,7 +576,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     _model.removeListener(listener);
     
     final JUnitErrorModel junitErrorModel = _model.getJUnitModel().getJUnitErrorModel();
-    assertEquals("test case has one error reported", 2, junitErrorModel.getNumErrors());
+    assertEquals("test does not report two errors", 2, junitErrorModel.getNumErrors());
     
     assertTrue("first error should be an error", junitErrorModel.getError(0).isWarning());
     assertFalse("second error should be a failure", junitErrorModel.getError(1).isWarning());

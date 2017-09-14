@@ -110,11 +110,55 @@ public class ScaladocErrorPanel extends ErrorPanel {
 
     /** Used to show that the last scaladoc command was unsuccessful. */
     protected void _updateWithErrors() throws BadLocationException {
-      ErrorDocument doc = new ErrorDocument(getErrorDocumentTitle());
+      _updateWithErrors(new ErrorDocument(getErrorDocumentTitle()));
+    }
+    
+    protected void _updateWithErrors(ErrorDocument doc) throws BadLocationException {
       String failureName = "error";
       if (getErrorModel().hasOnlyWarnings()) failureName = "warning";
       _updateWithErrors(failureName, "found", doc);
     }
+    
+    /** TODO: streamline this code.*/
+    protected void _updateWithErrors(String failureName, String failureMeaning, ErrorDocument doc)
+      throws BadLocationException {
+      // Print how many errors
+      String numErrsMsg = _getNumErrorsMessage(failureName, failureMeaning);
+      doc.append(numErrsMsg, BOLD_ATTRIBUTES);
+      
+      _insertErrors(doc);
+      setDocument(doc);
+      
+      // Select the first error if there are some errors (i.e. does not select if there are only warnings)
+      if (!getErrorModel().hasOnlyWarnings()) getErrorListPane().switchToError(0);
+    }
+    
+    /** TODO: streamline this code. */
+    /** Gets the message indicating the number of errors and warnings.*/
+    protected String _getNumErrorsMessage(String failureName, String failureMeaning) {
+      StringBuilder numErrMsg;
+      
+      /** Used for display purposes only */
+      int numCompErrs = getErrorModel().getNumCompilerErrors();
+      int numWarnings = getErrorModel().getNumWarnings();     
+      
+      if (!getErrorModel().hasOnlyWarnings()) {
+        //failureName = error or test (for compilation and JUnit testing respectively)
+        numErrMsg = new StringBuilder(numCompErrs + " " + failureName);   
+        if (numCompErrs > 1) numErrMsg.append("s");
+        if (numWarnings > 0) numErrMsg.append(" and " + numWarnings + " warning");          
+      }
+      
+      else numErrMsg = new StringBuilder(numWarnings + " warning"); 
+      
+      if (numWarnings > 1) numErrMsg.append("s");
+     
+      numErrMsg.append(" " + failureMeaning + ":\n");
+      return numErrMsg.toString();
+    }
+    
+/** Gets the message indicating the number of errors and warnings.*/
+    protected String _getNumErrorsMessage() { return _getNumErrorsMessage("error", "found"); }
 
     /** Used to show that the last compile was successful. */
     protected void _updateNoErrors(boolean done) throws BadLocationException {
