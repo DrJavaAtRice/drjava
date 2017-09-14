@@ -48,10 +48,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import edu.rice.cs.drjava.config.BooleanOption;
-import edu.rice.cs.drjava.model.GlobalModel;
-import edu.rice.cs.drjava.model.FileMovedException;
-import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.DrJavaFileUtils;
+import edu.rice.cs.drjava.model.FileMovedException;
+import edu.rice.cs.drjava.model.FindReplaceMachine;
+import edu.rice.cs.drjava.model.FindResult;
+import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
+import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.model.repl.newjvm.MainJVM;
 import edu.rice.cs.drjava.model.compiler.CompilerModel;
 import edu.rice.cs.drjava.model.compiler.CompilerListener;
@@ -85,7 +87,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   private CoverageMetadata coverageMetadata = new CoverageMetadata(false, "");
 
   /** log for use in debugging */
-  private static Log _log = new Log("DefaultJUnitModel.txt", false);
+  private static Log _log = new Log("GlobalModel.txt", false);
   
   /** Manages listeners to this model. */
   private final JUnitEventNotifier _notifier = new JUnitEventNotifier();
@@ -101,7 +103,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   private final CompilerModel _compilerModel;
   
   /** The global model to which the JUnitModel belongs */
-  private final GlobalModel _model;
+  private final SingleDisplayModel _model;
   
   /** The error model containing all current JUnit errors. */
   private volatile JUnitErrorModel _junitErrorModel;
@@ -122,7 +124,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     * @param compilerModel the CompilerModel, used only as a lock to prevent simultaneous test and compile
     * @param model used only for getSourceFile
     */
-  public DefaultJUnitModel(MainJVM jvm, CompilerModel compilerModel, GlobalModel model) {
+  public DefaultJUnitModel(MainJVM jvm, CompilerModel compilerModel, SingleDisplayModel model) {
     _jvm = jvm;
     _compilerModel = compilerModel;
     _model = model;
@@ -191,39 +193,20 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     junitOpenDefDocs(lod, true);
   }
   
-//  /** Forwards the classnames and files to the test manager to test all of them; does not notify 
-//    * since we don't have ODD's to send out with the notification of junit start.
-//    * @param qualifiedClassnames a list of all the qualified class names to test.
-//    * @param files a list of their source files in the same order as qualified class names.
-//    */
-//  public void junitClasses(List<String> qualifiedClassnames, List<File> files) {
-//    Utilities.showDebug("junitClasses(" + qualifiedClassnames + ", " + files);
-//    synchronized(_compilerModel.getCompilerLock()) {
-//      
-//      // Check _testInProgress 
-//      if (_testInProgress) return;
-//      
-//      List<String> testClasses;
-//      try { testClasses = _jvm.findTestClasses(qualifiedClassnames, files); }
-//      catch(IOException e) { throw new UnexpectedException(e); }
-//      
-////      System.err.println("Found test classes: " + testClasses);
-//      
-//      if (testClasses.isEmpty()) {
-//        nonTestCase(true);
-//        return;
-//      }
-//      _notifier.junitClassesStarted();
-//      _testInProgress = true;
-//      try { _jvm.runTestSuite(); } 
-//      catch(Exception e) {
-////        System.err.println("Threw exception " + e);
-//        _notifier.junitEnded();
-//        _testInProgress = false;
-//        throw new UnexpectedException(e); 
-//      }
-//    }
-//  }
+  /** Determines if className appears as an identifier in the open documents. */
+  private boolean appearsInSourceText(String className, FindReplaceMachine frm) {
+    _log.log("***appearsInSourceText(" + className + ", " + frm + ")");
+    OpenDefinitionsDocument doc = _model.getActiveDocument();
+    frm.setDocument(doc);
+    frm.setFirstDoc(doc);
+    frm.setPosition(doc.getCurrentLocation());
+    frm.setFindWord(className);
+    frm.setIgnoreCommentsAndStrings(true);
+    frm.setSearchAllDocuments(true);
+    FindResult match = frm.findNext();
+    _log.log("Matching result = " + match);
+    return (match.getFoundOffset() != -1);
+  }
   
   public void junitDocs(List<OpenDefinitionsDocument> lod) { junitOpenDefDocs(lod, true); }
   
@@ -384,6 +367,12 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     /* Source files corresonding to potential test class files */
     final ArrayList<File> files = new ArrayList<File>();
     
+    /* Flag indicating if project is open */
+    final boolean isProject = _model.isProjectActive();
+    
+    /* Set up FindReplaceMachine to search open definitions documents. */
+    final FindReplaceMachine frm = new FindReplaceMachine(_model, _model.getDocumentIterator(), null);
+    
     try {
       for (File dir: classDirs) { // foreach class file directory
 //        System.err.println("Examining directory " + dir);
@@ -395,24 +384,26 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
         if (listing != null) { // listFiles may return null if there's an IO error
           for (File entry : listing) { /* for each class file in the build directory */        
             
-            //System.err.println("Examining file " + entry);
+            _log.log("Examining file " + entry);
             
             /* ignore non-class files */
-            String name = entry.getName();
+            final String name = entry.getName();
             if (! name.endsWith(".class")) continue;
             
+            final String noExtName = name.substring(0, name.length() - 6);  // remove ".class" from name
+            final int indexOfLastDot = noExtName.lastIndexOf('.');
+            final String simpleClassName = noExtName.substring(indexOfLastDot + 1);
+            _log.log("Simple class name is " + simpleClassName);  
+            
             /* Ignore class names that do not end in "Test" if FORCE_TEST_SUFFIX option is set */
-            String noExtName = "";
-            if (_forceTestSuffix) {
-              noExtName = name.substring(0, name.length() - 6);  // remove ".class" from name
-              int indexOfLastDot = noExtName.lastIndexOf('.');
-              String simpleClassName = noExtName.substring(indexOfLastDot + 1);
-//              System.err.println("Simple class name is " + simpleClassName);  
-              if (/*isProject &&*/ ! simpleClassName.endsWith("Test")) continue;
-            }
+            if (_forceTestSuffix && ! simpleClassName.endsWith("Test")) continue;
                        
             /* ignore entries that do not correspond to files?  Can this happen? */
             if (! entry.isFile()) continue;
+            
+            /* In flat file mode, ignore files that are not named in a source document. */
+            if (! isProject && ! appearsInSourceText(simpleClassName, frm)) continue;
+            _log.log("isProject = " + isProject + "; name = " + name);
             
             // Add this class and the corrresponding source file to classNames and files, respectively.
             // Finding the source file is non-trivial because it may be a language-levels file
@@ -424,9 +415,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
                 public void visit(int version, int access, String name, String sig, String sup, String[] inters) {
                   className.set(name.replace('/', '.'));
                 }
-                public void visitSource(String source, String debug) {
-                  sourceName.set(source);
-                }
+                public void visitSource(String source, String debug) { sourceName.set(source); }
                 public void visitOuterClass(String owner, String name, String desc) { }
                 public AnnotationVisitor visitAnnotation(String desc, boolean visible) { return null; }
                 public void visitAttribute(Attribute attr) { }
@@ -660,7 +649,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   /** Returns the current classpath in use by the JUnit JVM. */
   public Iterable<File> getClassPath() {  return _jvm.getClassPath().unwrap(IterUtil.<File>empty()); }
   
-  /** Called when the JVM used for unit tests has registered.  Does not necessarily run in even thread. */
+  /** Called when the JVM used for unit tests has registered.  Does not necessarily run in event thread. */
   public void junitJVMReady() {
     Utilities.invokeLater(new Runnable() { public void run() { 
       if (! _testInProgress) return;

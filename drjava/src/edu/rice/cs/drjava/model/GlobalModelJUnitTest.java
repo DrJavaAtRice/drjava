@@ -254,9 +254,9 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     
     listener.runJUnit(doc);
     
-    JUnitErrorModel jem = _model.getJUnitModel().getJUnitErrorModel();
-    assertEquals("test case has one error reported", 1, jem.getNumErrors());
-    assertTrue("first error should be an error not a warning", !jem.getError(0).isWarning());
+    JUnitErrorModel junitErrorModel = _model.getJUnitModel().getJUnitErrorModel();
+    assertEquals("test case has one error reported", 1, junitErrorModel.getNumErrors());
+    assertTrue("first error should be an error not a warning", !junitErrorModel.getError(0).isWarning());
     _model.removeListener(listener);
     
     _log.log("testElspethOneJUnitError completed");
@@ -285,14 +285,14 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     listener.assertJUnitEndCount(1);
     _model.removeListener(listener);
     
-    _log.log("testRealError completed");
+    _log.log("+++Completing testRealError completed");
   }
   
   /** Tests that the ui is notified to put up an error dialog if JUnit is run on a non-TestCase. 
    * @throws Exception if something goes wrong 
    */
   public void testNonTestCaseError_NOJOIN() throws Exception {
-    _log.log("----testNonTestCaseError-----");
+    _log.log("+++Starting testNonTestCaseError");
 //    Utilities.show("Running testNonTestCaseError");
     
     final OpenDefinitionsDocument doc = setupDocument(NON_TESTCASE_TEXT);
@@ -674,11 +674,11 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     listener.assertJUnitTestEndedCount(2);
     _model.removeListener(listener);
     
-    JUnitErrorModel jem = _model.getJUnitModel().getJUnitErrorModel();
-    assertEquals("test case has one error reported", 2, jem.getNumErrors());
+    JUnitErrorModel junitErrorModel = _model.getJUnitModel().getJUnitErrorModel();
+    assertEquals("test case has one error reported", 2, junitErrorModel.getNumErrors());
     
-    assertTrue("first error should be an error", jem.getError(0).isWarning());
-    assertFalse("second error should be a failure", jem.getError(1).isWarning());
+    assertTrue("first error should be an error", junitErrorModel.getError(0).isWarning());
+    assertFalse("second error should be a failure", junitErrorModel.getError(1).isWarning());
     
     _log.log("testJUnitAllWithErrors completed");
   } 

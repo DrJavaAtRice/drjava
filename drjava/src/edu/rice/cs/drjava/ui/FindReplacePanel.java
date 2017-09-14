@@ -284,12 +284,12 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     
     /******** Label Initializations ********/
     // Create the Structure for the replace label
-    JLabel _replaceLabelTop = new JLabel("Replace", SwingConstants.RIGHT);
-    JLabel _replaceLabelBot = new JLabel("With", SwingConstants.RIGHT);
+    final JLabel _replaceLabelTop = new JLabel("Replace", SwingConstants.RIGHT);
+    final JLabel _replaceLabelBot = new JLabel("With", SwingConstants.RIGHT);
     
-    JPanel replaceLabelPanelTop = new JPanel(new BorderLayout(5,5));
-    JPanel replaceLabelPanelBot = new JPanel(new BorderLayout(5,5));
-    JPanel replaceLabelPanel = new JPanel(new GridLayout(2,1));
+    final JPanel replaceLabelPanelTop = new JPanel(new BorderLayout(5,5));
+    final JPanel replaceLabelPanelBot = new JPanel(new BorderLayout(5,5));
+    final JPanel replaceLabelPanel = new JPanel(new GridLayout(2,1));
     
     replaceLabelPanelTop.add(_replaceLabelTop, BorderLayout.SOUTH);
     replaceLabelPanelBot.add(_replaceLabelBot, BorderLayout.NORTH);
@@ -559,8 +559,6 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
 
   /** Performs "find all" command. */
   private void _findAll() {
-    // The following line was moved to _findAll(...) so it is executed by FindResultsPanel._findAgain
-//    _machine.setSearchBackwards(false);
     
     _findLabelBot.setText("Next");
     String searchStr = _findField.getText();
@@ -585,7 +583,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     findAll(searchStr, searchAll, searchSelectionOnly, _machine.getMatchCase(),  _machine.getMatchWholeWord(), 
             _machine.getIgnoreCommentsAndStrings(), _ignoreTestCases.isSelected(), startDoc, rm, region, panel);
 
-//    System.err.println("Refreshing active document after 'find all'");
+    _log.log("Refreshing active document after 'find all'");
     _model.refreshActiveDocument();  // Rationale: a giant findAll left the definitions pane is a strange state
     panel.requestFocusInWindow();
     EventQueue.invokeLater(new Runnable() { public void run() { panel.getRegTree().scrollRowToVisible(0); } });
@@ -652,14 +650,10 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     }
     finally { 
       _frame.hourglassOff(); 
-      
-      // extracted from run() above because findAll occasionally left active document in inconsistent state 
-//      _model.setActiveDocument(startDoc);
       _model.refreshActiveDocument();
     } 
-//    _frame.clearStatusMessage(); 
     /* Restore state of FindReplaceMachine */
-//    System.out.println("Restoring FindReplaceMachine");
+    _log.log("Restoring FindReplaceMachine");
     _machine.setDocument(oldDoc);
     _machine.setFirstDoc(oldFirstDoc);
     _machine.setFindWord(oldFindWord);
@@ -698,53 +692,102 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
         _defPane.setSelectionEnd(region.getEndOffset());
       }
     } }); 
-//    System.out.println("Completing findAll call");
+    _log.log("Completing findAll call");
     Toolkit.getDefaultToolkit().beep();
-//    System.out.println("Updating status message to report number of matching occurrences");
+    _log.log("Updating status message to report number of matching occurrences");
     _frame.setStatusMessage("Found " + count + " occurrence" + ((count == 1) ? "" : "s") + ".");
   }
   
   /** Performs the "replace all" command. */
   private void _replaceAll() {
-    _frame.updateStatusField("Replacing All");
-//    _updateMachine(); // at the beginning of _findAll, this call encountered _defPane = null, blowing up
-    _machine.setFindWord(_findField.getText());
-    _machine.setReplaceWord(_replaceField.getText());
-    _machine.setSearchBackwards(false);
+    
+    final String searchStr = _findField.getText();
+    final String title = searchStr;
     final OpenDefinitionsDocument startDoc = _defPane.getOpenDefDocument();
+    final boolean searchAll = _machine.getSearchAllDocuments();
+    final boolean searchSelectionOnly = _machine.getSearchSelectionOnly();
+    final boolean matchCase = _machine.getMatchCase();
+    final boolean wholeWord = _machine.getMatchWholeWord();
+    final boolean noComments = _machine.getIgnoreCommentsAndStrings();
+    final boolean noTestCases = _machine.getIgnoreTestCases();
+    
+    final MovingDocumentRegion region = 
+      new MovingDocumentRegion(startDoc, _defPane.getSelectionStart(), _defPane.getSelectionEnd(), 
+                               startDoc._getLineStartPos(_defPane.getSelectionStart()),
+                               startDoc._getLineEndPos(_defPane.getSelectionEnd()));
+    
+    _machine.setSearchBackwards(false);
 
-    final MovingDocumentRegion region = new MovingDocumentRegion(startDoc, 
-      _defPane.getSelectionStart(), _defPane.getSelectionEnd(), 
-      startDoc._getLineStartPos(_defPane.getSelectionStart()),
-      startDoc._getLineEndPos(_defPane.getSelectionEnd()));
+    final int searchLen = searchStr.length();
+    if (searchLen == 0) return;
+    
 
-    _machine.setSelection(region);
-    _frame.clearStatusMessage();
+    
+    final OpenDefinitionsDocument oldDoc = _machine.getDocument();
+    final OpenDefinitionsDocument oldFirstDoc = _machine.getFirstDoc();
+    final String oldFindWord = _machine.getFindWord();
+    final boolean oldSearchAll = _machine.getSearchAllDocuments();
+    final boolean oldSearchSelectionOnly = _machine.getSearchSelectionOnly();
+    final boolean oldMatchCase = _machine.getMatchCase();
+    final boolean oldWholeWord = _machine.getMatchWholeWord();
+    final boolean oldNoComments = _machine.getIgnoreCommentsAndStrings();
+    final boolean oldNoTestCases = _machine.getIgnoreTestCases();
+    final int oldPosition = _machine.getCurrentOffset();
+    
+    _machine.setDocument(startDoc);
+    if (_machine.getFirstDoc() == null) _machine.setFirstDoc(startDoc);
+    _machine.setSearchAllDocuments(searchAll);
+    _machine.setSearchSelectionOnly(searchSelectionOnly);
+    _machine.setMatchCase(matchCase);
+    if (wholeWord) { _machine.setMatchWholeWord(); }
+    else { _machine.setFindAnyOccurrence(); }
+    _machine.setIgnoreCommentsAndStrings(noComments);
+    _machine.setPosition(startDoc.getCurrentLocation());
+    _machine.setIgnoreTestCases(noTestCases);
+
+    _machine.setFindWord(searchStr);
+    final String replaceStr = _replaceField.getText();
+    _machine.setReplaceWord(replaceStr);
+
+    _frame.updateStatusField("Replacing All");
     
     _frame.hourglassOn();
     int count = 0;
-    Runnable1<FindResult> replaceMatchingString =   // replaces current (found) string 
-      new Runnable1<FindResult>() { 
-        public void run(FindResult fr) { 
-          if (fr.getFoundOffset() >= 0) /* matching string found */ _machine.replaceCurrent();
-        }};
+    Runnable1<FindResult> doNothing =  new Runnable1<FindResult>() { 
+        public void run(FindResult fr) {  } 
+    };
     try {
       /* Replace all matching strings in region (which may be entire project). */
-      count = _machine.processAll(replaceMatchingString, region);
+      count = _machine.processAll(doNothing, region);
     }
     finally { 
       _frame.hourglassOff(); 
-      
-      // extracted from run() above because findAll occasionally left active document in inconsistent state 
       _model.refreshActiveDocument();
     } 
+    /* Restore state of FindReplaceMachine */
+    _log.log("Restoring FindReplaceMachine");
+    _machine.setDocument(oldDoc);
+    _machine.setFirstDoc(oldFirstDoc);
+    _machine.setFindWord(oldFindWord);
+    _machine.setSearchAllDocuments(oldSearchAll);
+    _machine.setSearchSelectionOnly(oldSearchSelectionOnly);
+    _machine.setMatchCase(oldMatchCase);
+    if (oldWholeWord) { _machine.setMatchWholeWord(); }
+    else { _machine.setFindAnyOccurrence(); }
+    _machine.setIgnoreCommentsAndStrings(oldNoComments);
+    _machine.setIgnoreTestCases(oldNoTestCases);
+    _machine.setPosition(oldPosition);
     
     Toolkit.getDefaultToolkit().beep();
     _frame.setStatusMessage("Replaced " + count + " occurrence" + ((count == 1) ? "" : "s") + ".");
     _replaceAction.setEnabled(false);
     _replaceFindNextAction.setEnabled(false);
     _replaceFindPreviousAction.setEnabled(false);
-//    _model.refreshActiveDocument();  // Rationale: a giant replaceAll left the definitions pane is a strange state
+    
+    _log.log("Refreshing active document after 'replace all'");
+    _model.refreshActiveDocument();  // Rationale: a giant findAll left the definitions pane is a strange state
+//    panel.requestFocusInWindow();
+//    EventQueue.invokeLater(new Runnable() { public void run() { panel.getRegTree().scrollRowToVisible(0); } });
   }
   
   private void _replaceFindNext() {

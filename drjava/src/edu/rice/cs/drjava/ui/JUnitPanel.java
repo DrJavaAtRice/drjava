@@ -164,11 +164,11 @@ public class JUnitPanel extends ErrorPanel {
   
   /** Reset the errors to the current error information. */
   public void reset() {
-    JUnitErrorModel juem = getModel().getJUnitModel().getJUnitErrorModel();
+    JUnitErrorModel junitErrorModel = getModel().getJUnitModel().getJUnitErrorModel();
     boolean testsHaveRun = false;
-    if (juem != null) {
-      _numErrors = juem.getNumErrors();
-      testsHaveRun = juem.haveTestsRun();
+    if (junitErrorModel != null) {
+      _numErrors = junitErrorModel.getNumErrors();
+      testsHaveRun = junitErrorModel.haveTestsRun();
     } 
     else _numErrors = 0;
     _errorListPane.updateListPane(testsHaveRun); //changed!!

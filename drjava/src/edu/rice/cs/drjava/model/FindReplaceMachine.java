@@ -44,10 +44,11 @@ import edu.rice.cs.util.Log;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.drjava.config.OptionConstants;
 
+import java.awt.Component;
 import java.awt.EventQueue;
 
 import javax.swing.text.BadLocationException;
-import java.awt.Component;
+import javax.swing.text.BadLocationException;;
 
 /** Implementation of logic of the find/replace command over a given document or all open documents.
   * @version $Id$
@@ -230,7 +231,7 @@ public class FindReplaceMachine {
     */
   public boolean replaceCurrent() {
     
-    assert EventQueue.isDispatchThread();
+    assert EventQueue.isDispatchThread() || Utilities.TEST_MODE;
     
     if (! onMatch()) return false;
     try {
@@ -275,7 +276,7 @@ public class FindReplaceMachine {
 //    */
 //  private int replaceAll(boolean searchAll, boolean searchSelectionOnly) {
 //    
-//    assert EventQueue.isDispatchThread();
+//    assert EventQueue.isDispatchThread() || Utilities.TEST_MODE;
 //    
 //    if (searchAll) {
 //      int count = 0;           // the number of replacements done so far
@@ -316,7 +317,7 @@ public class FindReplaceMachine {
 //    */
 //  private int _replaceAllInCurrentDoc(boolean searchSelectionOnly) {
 //    
-//    assert EventQueue.isDispatchThread();
+//    assert EventQueue.isDispatchThread() || Utilities.TEST_MODE;
 //    
 //    if (! searchSelectionOnly) {
 //      _selectionRegion = new MovingDocumentRegion(_doc, 0, _doc.getLength(),
@@ -344,8 +345,8 @@ public class FindReplaceMachine {
   
   /** Replaces all occurrences of the find word with the replace word in the specified region while performing the
     * which occurs within the current document.  On each match, the findAction command is executed, assuming that
-    * indAction does not modify the document it processes.  Saves value of _searchAllDocuments and _searchSelectionOnly 
-    * and restores trem, an ugly hack dictated by embedding this information in the FindReplaceMachine. During this 
+    * findAction does not modify the document it processes.  Saves value of _searchAllDocuments and _searchSelectionOnly 
+    * and restores them, an ugly hack dictated by embedding this information in the FindReplaceMachine. During this 
     * particular search action, _searchAllDocuments is false since it is confined to a region within the current document.  
     * Only executes in event thread.
     * @param findAction action to perform on the occurrences; input is the FindResult, output is ignored
@@ -354,7 +355,7 @@ public class FindReplaceMachine {
     */
   public int processAll(Runnable1<FindResult> findAction, MovingDocumentRegion region) {
     
-    assert EventQueue.isDispatchThread();
+    assert EventQueue.isDispatchThread() || Utilities.TEST_MODE;
     
     _selectionRegion = region;
     
@@ -373,7 +374,7 @@ public class FindReplaceMachine {
     */
   public int processAll(Runnable1<FindResult> findAction) {
     
-    assert EventQueue.isDispatchThread();
+    assert EventQueue.isDispatchThread() || Utilities.TEST_MODE;
     
     if (_searchAllDocuments) {
       int count = 0;                 // the number of replacements done so far
@@ -416,7 +417,7 @@ public class FindReplaceMachine {
     */
   private int _processAllInCurrentDoc(Runnable1<FindResult> findAction) {
     
-    assert EventQueue.isDispatchThread();
+    assert EventQueue.isDispatchThread() || Utilities.TEST_MODE;
 
     if (! _searchSelectionOnly) {
       _selectionRegion = new MovingDocumentRegion(_doc, 0, _doc.getLength(), _doc._getLineStartPos(0),
@@ -449,7 +450,7 @@ public class FindReplaceMachine {
     */
   private FindResult findNext(boolean searchAll) {
     
-    assert EventQueue.isDispatchThread();
+    assert EventQueue.isDispatchThread() || Utilities.TEST_MODE;
     
     // Find next match, if any, in _doc. 
     FindResult fr;
@@ -500,7 +501,7 @@ public class FindReplaceMachine {
    */
   private FindResult _findNextInDoc(OpenDefinitionsDocument doc, int start, int len, boolean searchAll) {
     
-    assert EventQueue.isDispatchThread();
+    assert EventQueue.isDispatchThread() || Utilities.TEST_MODE;
 
     // search from current position to "end" of document ("end" is start if searching backward)
 //    Utilities.show("_findNextInDoc([" + doc.getText() + "], " + start + ", " + len + ", " + searchAll + ")");
@@ -522,7 +523,7 @@ public class FindReplaceMachine {
     */  
   private FindResult _findWrapped(OpenDefinitionsDocument doc, int start, int len, boolean allWrapped) {
     
-    assert EventQueue.isDispatchThread();
+    assert EventQueue.isDispatchThread() || Utilities.TEST_MODE;
     
     final int docLen = doc.getLength();
     if (docLen == 0) return new FindResult(doc, -1, true, allWrapped); // failure result
@@ -582,7 +583,7 @@ public class FindReplaceMachine {
 //    Utilities.show("called _findNextInDocSegment(" + doc.getText() + ",\n" + start + ", " + len + ", " + wrapped +
 //      ", " = allWrapped + ")");
     
-    assert EventQueue.isDispatchThread();
+    assert EventQueue.isDispatchThread() || Utilities.TEST_MODE;
 
     boolean inTestCase = false;
     for(String ext: OptionConstants.LANGUAGE_LEVEL_EXTENSIONS) {
@@ -678,7 +679,7 @@ public class FindReplaceMachine {
     */
   private FindResult _findNextInOtherDocs(final OpenDefinitionsDocument startDoc, int start, int len) {
     
-    assert EventQueue.isDispatchThread();
+    assert EventQueue.isDispatchThread() || Utilities.TEST_MODE;
 
 //    System.err.println("_findNextInOtherDocs(" + startDoc.getText() + ", " + start + ", " + len + ")");
     
@@ -723,7 +724,7 @@ public class FindReplaceMachine {
     */
   private boolean wholeWordFoundAtCurrent(OpenDefinitionsDocument doc, int foundOffset) {
     
-    assert EventQueue.isDispatchThread();
+    assert EventQueue.isDispatchThread() || Utilities.TEST_MODE;
     
     char leftOfMatch = 0;   //  forced initialization
     char rightOfMatch = 0;  //  forced initialization
@@ -761,7 +762,7 @@ public class FindReplaceMachine {
     */
   private boolean _shouldIgnore(int foundOffset, OpenDefinitionsDocument odd) {
     
-    assert EventQueue.isDispatchThread();
+    assert EventQueue.isDispatchThread() || Utilities.TEST_MODE;
 
     return (_matchWholeWord && ! wholeWordFoundAtCurrent(odd, foundOffset)) || 
       (_ignoreCommentsAndStrings && odd.isShadowed(foundOffset));

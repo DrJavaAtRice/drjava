@@ -229,10 +229,10 @@ public class FindReplaceMachineTest extends DrJavaTestCase {
     _initFrm(0);
     _assertOffsets(_frm, 0, 0);
     _frm.setFindWord("evil");
-    _frm.setReplaceWord("monkey");
+    _frm.setReplaceWord("monkey evil");
     _testFindNextSucceeds(_frm, 0, 12);
     Utilities.invokeAndWait(new Runnable() { public void run() { _frm.replaceCurrent(); } });
-    assertEquals("new replaced text", "Hear no monkey, see no evil, speak no evil.", _doc.getText());
+    assertEquals("new replaced text", "Hear no monkey evil, see no evil, speak no evil.", _doc.getText());
 //    System.err.println("testSimpleReplace completed"); 
   }
   
@@ -242,9 +242,9 @@ public class FindReplaceMachineTest extends DrJavaTestCase {
     _initFrm(15);
     _assertOffsets(_frm, 15, 15);
     _frm.setFindWord("evil");
-    _frm.setReplaceWord("monkey");
+    _frm.setReplaceWord("monkey evil");
     replaceAll();
-    assertEquals("revised text", "Hear no monkey, see no monkey, speak no monkey.", _doc.getText());
+    assertEquals("revised text", "Hear no monkey evil, see no monkey evil, speak no monkey evil.", _doc.getText());
 //    System.err.println("testReplaceAllContinue completed"); 
   }
   

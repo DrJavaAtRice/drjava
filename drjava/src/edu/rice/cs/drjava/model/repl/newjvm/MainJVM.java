@@ -402,7 +402,8 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     InterpreterJVMRemoteI remote = _state.value().interpreter(false);
     if (remote == null) { return false; }
     try { remote.addBuildDirectoryClassPath(f); return true; }
-    catch (RemoteException e) { _handleRemoteException(e); return false; }
+    catch (RemoteException e) { /* ignore exception; it happens in test cases. */ 
+      _handleRemoteException(e); return false; }
   }
   
   /** Blocks until the interpreter is connected. 
@@ -462,12 +463,12 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   }
   
   /** Sets up a JUnit test suite in the Interpreter JVM and finds which classes are really TestCase
-   * classes (by loading them).  Blocks until the interpreter is connected and the operation completes.
-   * @param classNames the class names to run in a test
-   * @param files the associated file
-   * @param coverageMetadata metadata used to generate a coverage report
-   * @return the class names that are actually test cases
-   */
+    * classes (by loading them).  Blocks until the interpreter is connected and the operation completes.
+    * @param classNames the class names to run in a test
+    * @param files the associated file
+    * @param coverageMetadata metadata used to generate a coverage report
+    * @return the class names that are actually test cases
+    */
   public Option<List<String>> findTestClasses(List<String> classNames, 
     List<File> files, CoverageMetadata coverageMetadata) {
     InterpreterJVMRemoteI remote = _state.value().interpreter(false);
@@ -684,7 +685,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
                                                     javax.swing.JOptionPane.ERROR_MESSAGE);
         }
       }
-    } while(repeat);
+    } while (repeat);
     // end of the section that may loop
     // ------------------------------------------------------
     
