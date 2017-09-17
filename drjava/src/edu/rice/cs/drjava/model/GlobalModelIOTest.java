@@ -30,6 +30,7 @@ package edu.rice.cs.drjava.model;
 
 import java.io.*;
 
+import java.util.Date;
 import java.util.List;
 import javax.swing.text.BadLocationException;
 
@@ -1083,7 +1084,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     IOUtil.writeStringToFile(tempFile1, s);
     assertEquals("contents of saved file", s, IOUtil.toString(tempFile1));
     
-    tempFile1.setLastModified((new java.util.Date()).getTime());
+    tempFile1.setLastModified((new Date()).getTime());
     
     assertTrue("modified on disk1", doc.modifiedOnDisk());
     boolean res = doc.revertIfModifiedOnDisk();

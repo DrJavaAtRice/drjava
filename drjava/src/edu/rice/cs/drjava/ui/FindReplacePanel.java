@@ -58,6 +58,7 @@ import edu.rice.cs.drjava.model.ClipboardHistoryModel;
 import edu.rice.cs.drjava.model.MovingDocumentRegion;
 import edu.rice.cs.drjava.model.RegionManager;
 import edu.rice.cs.plt.lambda.Runnable1;  // variant on Runnable with unary run method
+import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.BorderlessScrollPane;
 import edu.rice.cs.util.text.SwingDocument;
@@ -79,6 +80,8 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
    */
   public static final char LEFT = '\u25FE'; 
   public static final char RIGHT = '\u25FE'; 
+  
+  public static final Log _log = new Log("GlobalModel.txt", false);
   
   // Fields of FindReplacePanel
   // Note: these fields are closed over in listeners (Runnables) so concurrent access is possible!
@@ -586,7 +589,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     findAll(searchStr, searchAll, searchSelectionOnly, _machine.getMatchCase(),  _machine.getMatchWholeWord(), 
             _machine.getIgnoreCommentsAndStrings(), _ignoreTestCases.isSelected(), startDoc, rm, region, panel);
 
-//    System.err.println("Refreshing active document after 'find all'");
+    _log.log("Refreshing active document after 'find all'");
     _model.refreshActiveDocument();  // Rationale: a giant findAll left the definitions pane is a strange state
     panel.requestFocusInWindow();
     EventQueue.invokeLater(new Runnable() { public void run() { panel.getRegTree().scrollRowToVisible(0); } });
@@ -702,7 +705,11 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
 //    System.out.println("Completing findAll call");
     Toolkit.getDefaultToolkit().beep();
 //    System.out.println("Updating status message to report number of matching occurrences");
-    _frame.setStatusMessage("Found " + count + " occurrence" + ((count == 1) ? "" : "s") + ".");
+    final int finalCount = count;
+    EventQueue.invokeLater(new Runnable() {
+      public void run() { 
+        _frame.setStatusMessage("Found " + finalCount + " occurrence" + ((finalCount == 1) ? "" : "s") + "."); }
+    });
   }
   
   /** Performs the "replace all" command. */

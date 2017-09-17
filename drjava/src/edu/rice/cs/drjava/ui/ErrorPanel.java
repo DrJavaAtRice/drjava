@@ -70,7 +70,7 @@ import java.io.IOException;
  */
 public abstract class ErrorPanel extends TabbedPanel implements OptionConstants {
   
-  protected static final Log _log = new Log("GlobalModel.txt", true);
+  protected static final Log _log = new Log("GlobalModel.txt", false);
   
   protected static final SimpleAttributeSet NORMAL_ATTRIBUTES = _getNormalAttributes();
   protected static final SimpleAttributeSet BOLD_ATTRIBUTES = _getBoldAttributes();

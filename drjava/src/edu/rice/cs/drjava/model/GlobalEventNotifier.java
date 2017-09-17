@@ -28,13 +28,18 @@
 
 package edu.rice.cs.drjava.model;
 
+import java.awt.EventQueue;
+
 import java.io.File;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 import edu.rice.cs.drjava.model.compiler.CompilerListener;
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.swing.AsyncTask;
+import edu.rice.cs.util.swing.Utilities;
 
 /** Overview: communication between asynchronous tasks is normally conducted by generating an event which is recorded
   * in volatile global state of the tasks that have registered to observe the event. In addition, some tasks (not 
@@ -76,29 +81,25 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener> impl
   /*, Serializable */ {
   
   public <P,R> void executeAsyncTask(AsyncTask<P,R> task, P param, boolean showProgress, boolean lockUI) {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.executeAsyncTask(task, param, showProgress, lockUI); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.executeAsyncTask(task, param, showProgress, lockUI); }
   }
   
   public void filesNotFound(File... f) {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.filesNotFound(f); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.filesNotFound(f); }
   }
   
   /** @return the intersection of all the return values from the listeners. */
   public File[] filesReadOnly(File... f) {
-    _lock.startRead();
-    java.util.LinkedList<File> files = new java.util.LinkedList<File>();
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    LinkedList<File> files = new LinkedList<File>();
     for(File fi: f) { files.add(fi); }
-    try {
-      for (GlobalModelListener l : _listeners) {
-        java.util.List<File> retry = java.util.Arrays.asList(l.filesReadOnly(f));
-        files.retainAll(retry);
-      }
+    for (GlobalModelListener l : _listeners) {
+      List<File> retry = Arrays.asList(l.filesReadOnly(f));
+      files.retainAll(retry);
     }
-    finally { _lock.endRead(); }
+    
     return files.toArray(new File[files.size()]);
   }
   
@@ -108,52 +109,44 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener> impl
    * @param doc  {@code true} if the user wishes to revert the document, {@code false} to ignore
    */
   public void handleAlreadyOpenDocument(OpenDefinitionsDocument doc) {
-    _lock.startRead();
-    try { for(GlobalModelListener l : _listeners) { l.handleAlreadyOpenDocument(doc); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for(GlobalModelListener l : _listeners) { l.handleAlreadyOpenDocument(doc); }
   }
   
   /* -------------- project state ------------------*/
   public void openProject(File pfile, FileOpenSelector files) {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.openProject(pfile, files); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.openProject(pfile, files); }
   }
   
   public void projectClosed() {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.projectClosed();} }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.projectClosed(); }
   }
   
   public void allFilesClosed() {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.allFilesClosed();} }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.allFilesClosed();}
   }
    
   public void projectModified() {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.projectModified(); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.projectModified(); }
   }
   
   public void projectBuildDirChanged() {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.projectBuildDirChanged(); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.projectBuildDirChanged(); }
   }
   
   public void projectWorkDirChanged() {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.projectWorkDirChanged(); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.projectWorkDirChanged(); }
   }
   
   public void projectRunnableChanged() {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.projectRunnableChanged(); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.projectRunnableChanged(); }
   }
   
   
@@ -163,9 +156,8 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener> impl
     * @param n tells the listener what happened.
     */
   public void notifyListeners(Notifier n) {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { n.notifyListener(l); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { n.notifyListener(l); }
   }
   
   /** Allows the GlobalModel to ask its listeners a yes/no question and receive a response.
@@ -176,12 +168,9 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener> impl
     */
   @Deprecated
   public boolean pollListeners(Poller p) {
-    _lock.startRead();
-    try {
-      for (GlobalModelListener l: _listeners) { if (! p.poll(l)) return false; }
-      return true;
-    }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l: _listeners) { if (! p.poll(l)) return false; }
+    return true; 
   }
   
   /** Class model for notifying listeners of an event.
@@ -208,152 +197,128 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener> impl
   
   /** Called when a file's main method is about to be run. */
   public void prepareForRun(OpenDefinitionsDocument doc) {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.prepareForRun(doc); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.prepareForRun(doc); }
   }
   
   /** Called after a new document is created. */
   public void newFileCreated(OpenDefinitionsDocument doc) {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.newFileCreated(doc); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.newFileCreated(doc); }
   }
   
   /** Called when the console window is reset. */
   public void consoleReset() {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.consoleReset(); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.consoleReset(); }
   }
   
   /** Called after the current document is saved. */
   public void fileSaved(OpenDefinitionsDocument doc) {
 //    ScrollableDialog sd = new ScrollableDialog(null, "fileSaved(" + doc + ") called in GlobalEventNotifier.java", "", "");
 //    sd.show();
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.fileSaved(doc); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.fileSaved(doc); }
   }
   
   /** Called after a file is opened and read into the current document. */
   public void fileOpened(OpenDefinitionsDocument doc) {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.fileOpened(doc); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.fileOpened(doc); }
   }
   
   /** Called after a document is closed. */
   public void fileClosed(OpenDefinitionsDocument doc) {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.fileClosed(doc); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.fileClosed(doc); }
   }
   
   /** Called after a document is reverted. */
   public void fileReverted(OpenDefinitionsDocument doc) {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.fileReverted(doc); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.fileReverted(doc); }
   }
   
   /** Called when an undoable edit occurs. */
   public void undoableEditHappened() {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.undoableEditHappened(); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.undoableEditHappened(); }
   }
   
   /** Called to ask the listeners if it is OK to abandon the current document. */
   public boolean canAbandonFile(OpenDefinitionsDocument doc) {
-    _lock.startRead();
-    try {
-      for (GlobalModelListener l: _listeners) { if (! l.canAbandonFile(doc)) return false; }
-      return true;
-    }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l: _listeners) { if (! l.canAbandonFile(doc)) return false; }
+    return true;
   }
   
   /** Called to ask the listeners save the file before quitting at the user's option.
     * @return true if quitting should continue, false if the user cancelled */
   public boolean quitFile(OpenDefinitionsDocument doc) {
-    _lock.startRead();
-    try {
-      // if one of the listeners returns false (=user cancelled), abort
-      for (GlobalModelListener l: _listeners) { if (!l.quitFile(doc)) return false; }
-    }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    // if one of the listeners returns false (=user cancelled), abort
+    for (GlobalModelListener l: _listeners) { if (!l.quitFile(doc)) return false; }
     return true;
   }
   
   /** Called to ask the listeners if it is OK to revert the current document to the version saved on disk. */
   public boolean shouldRevertFile(OpenDefinitionsDocument doc) {
-    _lock.startRead();
-    try { 
-      for (GlobalModelListener l: _listeners) { if (! l.shouldRevertFile(doc)) return false; }
-      return true;
-    }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l: _listeners) { if (! l.shouldRevertFile(doc)) return false; }
+    return true;
   }
   
   /** Called when the selection in the navigator changes the current directory without changing the active document. */
   public void currentDirectoryChanged(File dir) {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.currentDirectoryChanged(dir); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.currentDirectoryChanged(dir); }
   }
   
   /** Called when the selection in the navigator changes the active document. */
   public void activeDocumentChanged(OpenDefinitionsDocument active) {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.activeDocumentChanged(active); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.activeDocumentChanged(active); } 
   }
   
   /** Called when the active document is refreshed.  */
   public void activeDocumentRefreshed(OpenDefinitionsDocument active) {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.activeDocumentRefreshed(active); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.activeDocumentRefreshed(active); }
   }
   
   /** Called to shift the focus to the Definitions Pane. */
   public void focusOnDefinitionsPane() {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.focusOnDefinitionsPane(); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.focusOnDefinitionsPane(); }
+    
   }
   
   /** Called to shift the focus to the last focus owner among the main frame panes. */
   public void focusOnLastFocusOwner() {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.focusOnLastFocusOwner(); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.focusOnLastFocusOwner(); }
   }
 //  /** Called to demand that all files be saved before running the main method of a document. It is up to the caller
 //    * of this method to check if the documents have been saved, using IGetDocuments.hasModifiedDocuments(). This is
 //    * nor used currently, but it is commented out in case it is needed later. 
 //    */
 //  public void saveBeforeRun() {
-//    _lock.startRead();
-//    try { for (GlobalModelListener l : _listeners) { l.saveBeforeRun(); } }
-//    finally { _lock.endRead(); }
+//    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+//    for (GlobalModelListener l : _listeners) { l.saveBeforeRun(); }
 //  }
   
   //------------------------------ Interactions ------------------------------//
   
   /** Called after an interaction is started by the GlobalModel. */
   public void interactionStarted() {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.interactionStarted(); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.interactionStarted(); }
   }
   
   /** Called when an interaction has finished running. */
   public void interactionEnded() {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.interactionEnded(); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.interactionEnded(); }
   }
   
   /** Called when the interactions window generates a syntax error.
@@ -361,23 +326,20 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener> impl
     * @param length the length of the error.
     */
   public void interactionErrorOccurred(int offset, int length) {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.interactionErrorOccurred(offset, length); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.interactionErrorOccurred(offset, length); }
   }
   
   /** Called when the interactionsJVM has begun resetting. */
   public void interpreterResetting() {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.interpreterResetting(); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.interpreterResetting(); }
   }
   
   /** Called when the interactions window is softly reset. */
   public void interpreterReady() {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.interpreterReady(); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.interpreterReady(); }
   }
   
   /** Called if the interpreter reset failed.
@@ -385,9 +347,8 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener> impl
     * (Subclasses must maintain listeners.)
     */
   public void interpreterResetFailed(final Throwable t) {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.interpreterResetFailed(t); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.interpreterResetFailed(t); }
   }
   
   /** Called when the interactions JVM was closed by System.exit or by being aborted. Immediately after this the
@@ -395,9 +356,8 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener> impl
     * @param status the exit code
     */
   public void interpreterExited(int status) {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.interpreterExited(status); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.interpreterExited(status); }
   }
   
 //  /** Called when the active interpreter is changed.
@@ -405,48 +365,41 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener> impl
 //    *        event will be fired)
 //    */
 //  public void interpreterReplaced() {
-//    _lock.startRead();
-//    try { for (GlobalModelListener l : _listeners) { l.interpreterReplaced(); } }
-//    finally { _lock.endRead(); }
+//    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+//    for (GlobalModelListener l : _listeners) { l.interpreterReplaced(); }  
 //  }
   
   //-------------------------------- Compiler --------------------------------//
   
   /** Called after a compile is started by the GlobalModel. */
   public void compileStarted() {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.compileStarted(); }
-    }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.compileStarted(); }
   }
   
   /** Called when a compile has finished running. */
   public void compileEnded(File workDir, List<? extends File> excludedFiles) {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.compileEnded(workDir, excludedFiles); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.compileEnded(workDir, excludedFiles); }
   }
   
    /** Called if a compile is aborted. */
   public void compileAborted(Exception e) {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.compileAborted(e); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.compileAborted(e); }
   }
   /** Called to demand that all files be saved before compiling. It is up to the caller of this method to check
     * if the documents have been saved, using IGetDocuments.hasModifiedDocuments().
     */
   public void saveBeforeCompile() {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.saveBeforeCompile(); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.saveBeforeCompile(); }
   }
   
   /** Called to demand that the active document, which is untitled, is saved before compiling.  */
   public void saveUntitled() {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.saveUntitled(); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.saveUntitled(); }
   }
   
   //---------------------------------- JUnit ---------------------------------//
@@ -456,60 +409,54 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener> impl
     * @param didCompileFail whether or not a compile before this JUnit attempt failed
     */
   public void nonTestCase(boolean isTestAll, boolean didCompileFail) {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.nonTestCase(isTestAll, didCompileFail); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.nonTestCase(isTestAll, didCompileFail); }
   }
   
   /** Called when trying to test an illegal class file.
     * @param e the ClassFileError thrown when DrScala attempted to load the offending file
     */
   public void classFileError(ClassFileError e) {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.classFileError(e); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.classFileError(e); }
   }
   
   /** Called before attempting unit testing if tested class files are out of sync, to give the user a chance to save. Do
     * not continue with JUnit if the user doesn't recompile!
     */
   public void compileBeforeJUnit(final CompilerListener cl, List<OpenDefinitionsDocument> outOfSync) {
-//    Utilities.show("compileBeforeJUnit invoked with argument " + cl + " in GlobalEventNotifier " + this);
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.compileBeforeJUnit(cl, outOfSync); } }
-    finally { _lock.endRead(); }
+    _log.log("compileBeforeJUnit invoked with argument " + cl + " in GlobalEventNotifier " + this);
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.compileBeforeJUnit(cl, outOfSync); }
+    
   }
   
   /** Called after JUnit is started by the GlobalModel. */
   public void junitStarted() {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.junitStarted(); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.junitStarted(); }
   }
   
   /** Called when testing specific list of classes. */
   public void junitClassesStarted() {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.junitClassesStarted(); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.junitClassesStarted(); }  
   }
   
   /** Called to indicate that a suite of tests has started running.
     * @param numTests The number of tests in the suite to be run.
     */
   public void junitSuiteStarted(int numTests) {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.junitSuiteStarted(numTests); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.junitSuiteStarted(numTests); }
   }
   
   /** Called when a particular test is started.
     * @param name The name of the test being started.
     */
   public void junitTestStarted(String name) {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.junitTestStarted(name); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.junitTestStarted(name); }
   }
   
   /** Called when a particular test has ended.
@@ -518,42 +465,30 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener> impl
     * @param causedError if not successful, whether the test caused an error or simply failed
     */
   public void junitTestEnded(String name, boolean wasSuccessful, boolean causedError) {
-    _lock.startRead();
-    try { 
-      for (GlobalModelListener l : _listeners) { l.junitTestEnded(name, wasSuccessful, causedError); }
-    }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.junitTestEnded(name, wasSuccessful, causedError); }
   }
   
   /** Called after JUnit is finished running tests. */
   public void junitEnded() {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.junitEnded(); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.junitEnded(); }
   }
   
 //  /** Called to demand that all files be saved before running JUnit tests. It is up to the caller of this 
 //    * method to check if the documents have been saved, using IGetDocuments.hasModifiedDocuments(). This is 
 //    * never called currently, but it is commented out in case it is needed later. */
 //  public void saveBeforeJUnit() {
-//    _lock.startRead();
-//    try {
-//      for (GlobalModelListener l : _listeners) {
-//        l.saveBeforeJUnit();
-//      }
-//    }
-//    finally {
-//      _lock.endRead();
-//    }
+//    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+//    for (GlobalModelListener l : _listeners) { l.saveBeforeJUnit(); }
 //  }
   
   //--------------------------------- Scaladoc --------------------------------//
   
   /** Called after Scaladoc is started by the GlobalModel. */
   public void scaladocStarted() {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.scaladocStarted(); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.scaladocStarted(); }
   }
   
   /** Called after Scaladoc is finished.
@@ -562,9 +497,8 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener> impl
     * @param allDocs Whether Scaladoc was run for all open documents
     */
   public void scaladocEnded(boolean success, File destDir, boolean allDocs) {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.scaladocEnded(success, destDir, allDocs); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.scaladocEnded(success, destDir, allDocs); }
   }
   
   
@@ -572,60 +506,52 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener> impl
     * doesn't save!
     */
   public void saveBeforeScaladoc() {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.saveBeforeScaladoc(); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.saveBeforeScaladoc(); }
   }
 
   /** Called before attempting Scaladoc, to give the user a chance to compile. Do not continue with Scaladoc if the
     * user doesn't comoile!
     */
   public void compileBeforeScaladoc(final CompilerListener afterCompile) {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.compileBeforeScaladoc(afterCompile); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.compileBeforeScaladoc(afterCompile); }
   }
   
 //  /** Called to demand that all files be saved before starting the debugger. It is up to the caller of this method
 //    * to check if the documents have been saved, using IGetDocuments.hasModifiedDocuments(). This is not used 
 //    * currently, but it is commented out in case it is needed later. */
 //  public void saveBeforeDebug() {
-//    _lock.startRead();
-//    try { for (GlobalModelListener l : _listeners) { l.saveBeforeDebug(); } }
-//    finally { _lock.endRead(); }
+//    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+//    for (GlobalModelListener l : _listeners) { l.saveBeforeDebug(); }
 //  }
   
   /** Notifies the view that the current interaction is incomplete. */
   public void interactionIncomplete() {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.interactionIncomplete(); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.interactionIncomplete(); }
   }
   
   /** Notifies the view that the current file path contains a #. */
   public void filePathContainsPound() {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.filePathContainsPound(); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.filePathContainsPound(); }
   }
   
   // ----- Cache -----
   public void documentNotFound(OpenDefinitionsDocument d, File f) {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.documentNotFound(d,f); } }
-    finally { _lock.endRead(); } 
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.documentNotFound(d,f); }
   }
   
   // ----- BrowserHistory -----
   public void browserChanged() {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.browserChanged(); } }
-    finally { _lock.endRead(); } 
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.browserChanged(); }
   }
 
   public void updateCurrentLocationInDoc() {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.updateCurrentLocationInDoc(); } }
-    finally { _lock.endRead(); } 
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (GlobalModelListener l : _listeners) { l.updateCurrentLocationInDoc(); }
   }
 }

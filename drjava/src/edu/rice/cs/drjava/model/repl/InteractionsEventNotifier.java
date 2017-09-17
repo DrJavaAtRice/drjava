@@ -28,9 +28,11 @@
 
 package edu.rice.cs.drjava.model.repl;
 
+import java.awt.EventQueue;
 import java.io.File;
 
 import edu.rice.cs.drjava.model.EventNotifier;
+import edu.rice.cs.util.swing.Utilities;
 
 /** Keeps track of all listeners to an InteractionsModel, and has the ability to notify them of some event. <p>
   * This class has a specific role of managing InteractionsListeners.  Other classes with similar names use similar 
@@ -51,22 +53,16 @@ public class InteractionsEventNotifier extends EventNotifier<InteractionsListene
   
   /** Called after an interaction is started by the GlobalModel. */
   public void interactionStarted() {
-    _lock.startRead();
-    try {
-      int size = _listeners.size();
-      for (int i = 0; i < size; i++)  _listeners.get(i).interactionStarted();
-    }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    int size = _listeners.size();
+    for (int i = 0; i < size; i++)  _listeners.get(i).interactionStarted();
   }
   
   /** Called when an interaction has finished running. */
   public void interactionEnded() {
-    _lock.startRead();
-    try {
-      int size = _listeners.size();
-      for (int i = 0; i < size; i++) _listeners.get(i).interactionEnded();
-    }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    int size = _listeners.size();
+    for (int i = 0; i < size; i++) _listeners.get(i).interactionEnded();
   }
   
   /** Called when the interactions window generates a syntax error.
@@ -74,45 +70,33 @@ public class InteractionsEventNotifier extends EventNotifier<InteractionsListene
     * @param length the length of the error
     */
   public void interactionErrorOccurred(int offset, int length) {
-    _lock.startRead();
-    try {
-      int size = _listeners.size();
-      for (int i = 0; i < size; i++) _listeners.get(i).interactionErrorOccurred(offset, length);
-    }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    int size = _listeners.size();
+    for (int i = 0; i < size; i++) _listeners.get(i).interactionErrorOccurred(offset, length);
   }
   
   /** Called when the interactionsJVM has begun resetting. */
   public void interpreterResetting() {
-    _lock.startRead();
-    try {
-      int size = _listeners.size();
-//      Utilities.showDebug("InteractionsEventNotifier: interpreterResetting called on " + size + " listeners");
-      for (int i = 0; i < size; i++) _listeners.get(i).interpreterResetting();
-    }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    int size = _listeners.size();
+    _log.log("InteractionsEventNotifier: interpreterResetting called on " + size + " listeners");
+    for (int i = 0; i < size; i++) _listeners.get(i).interpreterResetting(); 
   }
   
   /** Called when the interactions window is softly reset. */
   public void interpreterReady() {
-    _lock.startRead();
-    try {
-      int size = _listeners.size();
-      for (int i = 0; i < size; i++) _listeners.get(i).interpreterReady();
-    }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    int size = _listeners.size();
+    for (int i = 0; i < size; i++) _listeners.get(i).interpreterReady();
   }
   
   /** Called if the interpreter reset failed.
     * @param t Throwable explaining why the reset failed. (Subclasses must maintain listeners.)
     */
   public void interpreterResetFailed(final Throwable t) {
-    _lock.startRead();
-    try {
-      int size = _listeners.size();
-      for (int i = 0; i < size; i++)  _listeners.get(i).interpreterResetFailed(t);
-    }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    int size = _listeners.size();
+    for (int i = 0; i < size; i++)  _listeners.get(i).interpreterResetFailed(t);  
   }
   
   /** Called when the interactions JVM was closed by System.exit or by being aborted. Immediately after this the 
@@ -120,31 +104,22 @@ public class InteractionsEventNotifier extends EventNotifier<InteractionsListene
     * @param status the exit code
     */
   public void interpreterExited(int status) {
-    _lock.startRead();
-    try {
-      int size = _listeners.size();
-      for (int i = 0; i < size; i++) { _listeners.get(i).interpreterExited(status); }
-    }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    int size = _listeners.size();
+    for (int i = 0; i < size; i++) { _listeners.get(i).interpreterExited(status); }
   }
   
 //  /** Called when the active interpreter is changed. */
 //  public void interpreterReplaced() {
-//    _lock.startRead();
-//    try {
-//      int size = _listeners.size();
-//      for (int i = 0; i < size; i++)  _listeners.get(i).interpreterReplaced();
-//    }
-//    finally { _lock.endRead(); }
+//    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+//    int size = _listeners.size();
+//    for (int i = 0; i < size; i++)  _listeners.get(i).interpreterReplaced(); 
 //  }
   
   /** Notifies the view that the current interaction is incomplete. */
   public void interactionIncomplete() {
-    _lock.startRead();
-    try {
-      int size = _listeners.size();
-      for (int i = 0; i < size; i++)  _listeners.get(i).interactionIncomplete();
-    }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    int size = _listeners.size();
+    for (int i = 0; i < size; i++)  _listeners.get(i).interactionIncomplete();
   }
 }

@@ -406,9 +406,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** @return true the given file is in the current project file. */
   public boolean inProject(File f) { return _state.inProject(f); }
   
-  /** A file is in the project if the source root is the same as the
-    * project root. this means that project files must be saved at the
-    * source root. (we query the model through the model's state)
+  /** A file is in the project if the source root is the same as the project root. This means that project files must be
+    * saved at the source root. (we query the model through the model's state)
     */
   public boolean inProjectPath(OpenDefinitionsDocument doc) { return _state.inProjectPath(doc); }
   
@@ -574,6 +573,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       // by default, put INDENT_INC into the project file
       defaultStoredPreferences.put(INDENT_INC, DrScala.getConfig().getOptionMap().getString(INDENT_INC));      
       setPreferencesStoredInProject(defaultStoredPreferences);
+      final File parentFile = project.getParentFile();
+      setProjectRoot(new File(parentFile, "src"));
+      setBuildDirectory(new File(parentFile, "classes"));   
     }
     
     ProjectFileGroupingState(File pr, String main, File bd, File wd, File project, File[] srcFiles, File[] auxFiles, 
@@ -602,7 +604,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       _manifest = customManifest;
       setPreferencesStoredInProject(storedPreferences); 
     }
-    
+  
     public boolean isProjectActive() { return true; }
     
     /** Determines whether the specified doc in within the project file tree.
@@ -638,12 +640,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       }
       catch(IOException ioe) { return false; }
     }
-    
+  
     public File[] getProjectFiles() { return _projectFiles; }
-    
+  
     public File getProjectRoot() {
       if (_projRoot == null || _projRoot.equals( FileOps.NULL_FILE)) return _projectFile.getParentFile();
-//      Utilities.show("File grouping state returning project root of " + _projRoot);
+      _log.log("File grouping state returning project root of " + _projRoot);
       return _projRoot;
     }
     
@@ -681,8 +683,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     public void setProjectRoot(File f) {
       _projRoot = f;
-//      System.err.println("Project root set to " + f);
+//      _log.log("Project root set to " + f);
     }
+   
     
     /** Adds File f to end of _auxFiles vector. */
     public void addAuxFile(File f) {
@@ -933,7 +936,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public File getBuildDirectory() { return FileOps.NULL_FILE; }
     
     public File getProjectRoot() { 
-      File sourceRoot = null;
+      File sourceRoot = FileOps.NULL_FILE;
       try { sourceRoot = getActiveDocument().getSourceRoot(); }
       catch(InvalidPackageException e) { sourceRoot = getWorkingDirectory(); }
       return sourceRoot;
@@ -1579,7 +1582,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     // FileLists for project file    
     File projectRoot = builder.getProjectRoot();
     
-//    Utilities.show("Fetched project root is " + projectRoot);
+//    _log.log("Fetched project root is " + projectRoot);
     
 //    List<File> exCp = new LinkedList<File>();  // not used
     
@@ -1643,11 +1646,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     if (exCp != null) {
       for (AbsRelFile f : exCp) { builder.addClassPathFile(f); }
     }
-//    else System.err.println("Project ClasspathArrayList is null!");
     
     // add build directory
     File bd = getBuildDirectory();
-    if (bd != FileOps.NULL_FILE) builder.setBuildDirectory(bd);
+    if (bd != FileOps.NULL_FILE & bd != null) builder.setBuildDirectory(bd);
     
     // add working directory
     File wd = getWorkingDirectory();  // the value of the working directory to be stored in the project
@@ -1821,8 +1823,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
                                                       auxFiles, excludedFiles, projectClassPaths, createJarFile, 
                                                       createJarFlags, autoRefresh, manifest, storedPreferences));
     
-    // Reset interactions pane in new working directory as part of loading this projet
-    resetInterpreter(getWorkingDirectory());  
+    /* DrScala does not reset the interpreter until the project is compiled. */
+//    // Reset interactions pane in new working directory as part of loading this projet
+//    resetInterpreter(getWorkingDirectory());  
      
     ArrayList<DocFile> projFiles = new ArrayList<DocFile>();
     DocFile active = null;

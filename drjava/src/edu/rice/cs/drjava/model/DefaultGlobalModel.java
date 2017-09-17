@@ -389,7 +389,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   
   /** Synchronously reset the interpreter in the interactions pane; DOES NOT RETURN UNTIL RESET IS COMPLETE */
   public void resetInterpreter(File wd) {
-    assert Utilities.TEST_MODE || ! EventQueue.isDispatchThread();
+//    assert Utilities.TEST_MODE || ! EventQueue.isDispatchThread();
     /* Calling invokeAndWait ensures that non-blocking hardResetInterpreter runs before waitResetDone is executed. */
     Utilities.invokeAndWait(new Runnable() { public void run() {_interactionsModel.resetInterpreter(wd);}}); 
     _interactionsListener.waitResetDone();

@@ -297,9 +297,8 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
     // only notify if the region was actually added
     if (! alreadyPresent) {
       // notify.  invokeLater unnecessary if it only runs in the event thread
-      _lock.startRead();
-      try { for (RegionManagerListener<R> l: _listeners) { l.regionAdded(region); } } 
-      finally { _lock.endRead(); }
+      assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+      for (RegionManagerListener<R> l: _listeners) { l.regionAdded(region); }
     }
   }
   
@@ -308,10 +307,10 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
     * @param region the IDocumentRegion to be removed.
     */
   public void removeRegion(final R region) {
-//    System.err.println("ConcreteRegionManager.removeRegion(" + region + ") called");
+    _log.log("ConcreteRegionManager.removeRegion(" + region + ") called");
     OpenDefinitionsDocument doc = region.getDocument();
     SortedSet<R> docRegions = _regions.get(doc);
-//    System.err.println("doc regions for " + doc + " = " + docRegions);
+    _log.log("doc regions for " + doc + " = " + docRegions);
     if (docRegions == null) return;  // since region is not stored in this region manager, exit!
     final boolean wasRemoved = docRegions.remove(region);  // remove the region from the manager
     if (docRegions.isEmpty()) {
@@ -329,21 +328,20 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
   }
   
   private void _notifyRegionRemoved(final R region) {
-    _lock.startRead();
-    try { for (RegionManagerListener<R> l: _listeners) { l.regionRemoved(region); } } 
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (RegionManagerListener<R> l: _listeners) { l.regionRemoved(region); } 
   }
     
   /** Remove the specified document from _documents and _regions (removing all of its contained regions). */
   public void removeRegions(final OpenDefinitionsDocument doc) {
     assert doc != null;
-//    System.err.println("Removing regions from ODD " + doc + " in " + this);
-//    System.err.println("_documents = " + _documents);
+    _log.log("Removing regions from ODD " + doc + " in " + this);
+    _log.log("_documents = " + _documents);
     boolean found = _documents.remove(doc);
-//    System.err.println("ODD " + doc + " exists in " + this);
+    _log.log("ODD " + doc + " exists in " + this);
     if (found) {
       final SortedSet<R> regions = _regions.get(doc);
-//      System.err.println("Before removal, regions = " + regions);
+      _log.log("Before removal, regions = " + regions);
       // The following ugly loop is dictated by the "fail fast" semantics of Java iterators
       while (! regions.isEmpty()) {
         R r = regions.first();
@@ -407,9 +405,8 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
   public void changeRegion(final R region, Lambda<R,Object> cmd) {
     cmd.value(region);
     // notify
-    _lock.startRead();
-    try { for (RegionManagerListener<R> l: _listeners) { l.regionChanged(region); } } 
-    finally { _lock.endRead(); }            
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (RegionManagerListener<R> l: _listeners) { l.regionChanged(region); }        
   }
   
   /** Updates _lineStartPos, _lineEndPos of regions in the interval [firstRegion, lastRegion] using total ordering on

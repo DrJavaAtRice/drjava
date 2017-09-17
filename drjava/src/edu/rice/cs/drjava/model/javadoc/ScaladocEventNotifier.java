@@ -28,9 +28,11 @@
 
 package edu.rice.cs.drjava.model.javadoc;
 
+import java.awt.EventQueue;
 import java.io.File;
 import edu.rice.cs.drjava.model.EventNotifier;
 import edu.rice.cs.drjava.model.compiler.CompilerListener;
+import edu.rice.cs.util.swing.Utilities;
 
 /**
  * Keeps track of all listeners to a ScaladocModel, and has the ability
@@ -69,9 +71,8 @@ class ScaladocEventNotifier extends EventNotifier<ScaladocListener>
   
   /** Called after Scaladoc is started by the GlobalModel. */
   public void scaladocStarted() {
-    _lock.startRead();
-    try { for (ScaladocListener jl: _listeners) { jl.scaladocStarted(); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (ScaladocListener jl: _listeners) { jl.scaladocStarted(); }
   }
   
   /** Called after Scaladoc is finished.
@@ -80,27 +81,24 @@ class ScaladocEventNotifier extends EventNotifier<ScaladocListener>
     * @param allDocs Whether Scaladoc was run for all open documents
     */
   public void scaladocEnded(boolean success, File destDir, boolean allDocs) {
-    _lock.startRead();
-    try { for (ScaladocListener jl: _listeners) { jl.scaladocEnded(success, destDir, allDocs); } }
-    finally { _lock.endRead();}
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (ScaladocListener jl: _listeners) { jl.scaladocEnded(success, destDir, allDocs); }
   }
   
   /** Asks the user if all files should be saved before running scaladoc (assuming the proper listener has been 
     * installed). Does not continue with scaladoc if the user fails to save!
     */
   public void saveBeforeScaladoc() {
-    _lock.startRead();
-    try { for (ScaladocListener jl: _listeners) { jl.saveBeforeScaladoc(); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (ScaladocListener jl: _listeners) { jl.saveBeforeScaladoc(); } 
   }
   
   /** Asks the user if all files should be compiled before running scaladoc (assuming the proper listener has been 
     * installed). Does not continue with scaladoc if the user fails to save!
     */
   public void compileBeforeScaladoc(final CompilerListener afterCompile) {
-    _lock.startRead();
-    try { for (ScaladocListener jl: _listeners) { jl.compileBeforeScaladoc(afterCompile); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (ScaladocListener jl: _listeners) { jl.compileBeforeScaladoc(afterCompile); }
   }
 }
 

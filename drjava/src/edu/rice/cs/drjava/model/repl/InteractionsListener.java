@@ -37,8 +37,6 @@ import edu.rice.cs.util.Log;
   */
 public interface InteractionsListener {
   
-  public static final Log _log = new Log("GlobalModel.txt", false);
-  
   /** Called when an interaction has started. */
   public void interactionStarted();
   

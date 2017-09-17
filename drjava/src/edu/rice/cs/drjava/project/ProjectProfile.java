@@ -104,16 +104,19 @@ public class ProjectProfile implements ProjectFileIR {
   /** Constructs a File for fileName and forwards this call to the main constructor. */
   public ProjectProfile(String fileName) throws IOException { this(new File(fileName)); }
   
-  /** Creates new ProjectProfiles with specifed project file name and project root that is parent folder of
-    * the project file.  The project file presumably may not exist yet, but its parent folder is assumed to exist.
-    * Assumes that the File f is not a null reference.
+  /** Creates new ProjectProfiles with specifed project file name f and project root that is the parent folder extended 
+    * by folder name "src" of the project file.  The project file may not exist yet, but its parent folder is assumed to
+    * exist. Assumes that the File f is not a null reference.  This constructor also sets the build directory the the 
+    * parent folder name extended by the folder name "classes".
     * @throws IOException parent directory of project file does not exist.
     */
-  public ProjectProfile(File f) throws IOException { 
-    _projectFile = f; 
-    _projectRoot = _projectFile.getParentFile();
-    if (! _projectRoot.exists()) 
-      throw new IOException("Parent directory of project root " + _projectRoot + " does not exist");
+  public ProjectProfile(File f) throws IOException {
+    _projectFile = f;
+    final File parentFile = f.getParentFile();
+    if (! parentFile.exists()) 
+      throw new IOException("Parent directory of project file " + f + " does not exist");
+    _projectRoot = new File(parentFile, "src");
+    _buildDir = new File(parentFile, "classes");
   }
   
   /* Public getters */
@@ -511,12 +514,12 @@ public class ProjectProfile implements ProjectFileIR {
      * indicate that the project root now serves as the base for source file path names. */
 
     fw.write("\n(proj-root-and-base");
-//      Utilities.show("Writing project root = " + _projRoot);
+//     _log.log("Writing project root = " + _projRoot);
     fw.write("\n" + encodeFileRelative(_projectRoot, "  ", _projectFile));
     fw.write(")");
 
     //write the project manifest
-    if(_manifest != null){
+    if (_manifest != null){
       fw.write("\n(proj-manifest");
       fw.write("\n" + _manifest);
       fw.write(")");

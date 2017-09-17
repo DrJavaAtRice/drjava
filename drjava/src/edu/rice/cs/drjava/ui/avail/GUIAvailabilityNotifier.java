@@ -29,6 +29,9 @@
 package edu.rice.cs.drjava.ui.avail;
 
 import edu.rice.cs.drjava.model.EventNotifier;
+import edu.rice.cs.util.swing.Utilities;
+
+import java.awt.EventQueue;
 import java.util.HashMap;
 
 /**
@@ -145,10 +148,9 @@ public class GUIAvailabilityNotifier extends EventNotifier<GUIAvailabilityListen
   /** Notify the listeners for the specified component.
     * @param component the component whose listeners should be notified */
   protected void notifyListeners(ComponentType component) {
-    _lock.startRead();
-    try { for (GUIAvailabilityListener cl : _listeners) {
+   assert Utilities.TEST_MODE || EventQueue.isDispatchThread();  // serializes all event listener code
+   for (GUIAvailabilityListener cl : _listeners) {
       cl.availabilityChanged(component, isAvailable(component));
-    } }
-    finally { _lock.endRead(); }
+    }
   }
 }

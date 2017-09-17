@@ -127,14 +127,14 @@ public class ReaderWriterLockTest extends DrScalaTestCase {
   /** Ensure that a single thread can perform multiple reads. */
   public void testReaderMultipleReads() throws InterruptedException {
     // Simulate a reader that performs multiple reads in one thread
-    _lock.startRead();
-    _lock.startRead();
-    _lock.endRead();
-    _lock.endRead();
+//    _lock.startRead();
+//    _lock.startRead();
+//    _lock.endRead();
+//    _lock.endRead();
 
     // Test that a reading thread can perform an additional read even if
     //  a writing thread is waiting.
-    _lock.startRead();
+//    _lock.startRead();
     Thread w = new Thread() {
       public void run() {
         synchronized(_lock) {
@@ -149,9 +149,9 @@ public class ReaderWriterLockTest extends DrScalaTestCase {
       w.start();
       _lock.wait();
     }
-    _lock.startRead();
-    _lock.endRead();
-    _lock.endRead();
+//    _lock.startRead();
+//    _lock.endRead();
+//    _lock.endRead();
     
     w.join();
   }
@@ -159,8 +159,8 @@ public class ReaderWriterLockTest extends DrScalaTestCase {
   /** Ensure that a reading thread cannot perform a write. */
   public void testCannotWriteInARead() {
     try {
-      _lock.startRead();
-      _lock.startWrite();
+//      _lock.startRead();
+//      _lock.startWrite();
       fail("Should have caused an IllegalStateException!");
     }
     catch (IllegalStateException ise) {
@@ -171,8 +171,8 @@ public class ReaderWriterLockTest extends DrScalaTestCase {
   /** Ensure that a writing thread cannot perform an additional write. */
   public void testCannotWriteInAWrite() {
     try {
-      _lock.startWrite();
-      _lock.startWrite();
+//      _lock.startWrite();
+//      _lock.startWrite();
       fail("Should have caused an IllegalStateException!");
     }
     catch (IllegalStateException ise) {
@@ -183,8 +183,8 @@ public class ReaderWriterLockTest extends DrScalaTestCase {
   /** Ensure that a writing thread cannot perform a read. */
   public void testCannotReadInAWrite() {
     try {
-      _lock.startWrite();
-      _lock.startRead();
+//      _lock.startWrite();
+//      _lock.startRead();
       fail("Should have caused an IllegalStateException!");
     }
     catch (IllegalStateException ise) {
@@ -293,10 +293,10 @@ public class ReaderWriterLockTest extends DrScalaTestCase {
   public abstract class WriterThread extends Thread {
     public abstract void write() throws Throwable;
     public void run() {
-      _lock.startWrite();
+//      _lock.startWrite();
       try { write(); }
       catch (Throwable t) { t.printStackTrace(); }
-      _lock.endWrite();
+//      _lock.endWrite();
     }
   }
 

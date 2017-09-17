@@ -28,80 +28,54 @@
 
 package edu.rice.cs.drjava.model;
 
+import java.awt.EventQueue;
 import java.util.LinkedList;
-import edu.rice.cs.util.ReaderWriterLock;
 
+import edu.rice.cs.util.Log;
+//import edu.rice.cs.util.ReaderWriterLock;
+import edu.rice.cs.util.swing.Utilities;
+
+/* This class and its descendants are no longer used because all listener code is executed in the event dispatch thread
+ * (except in some poorly written tests). */
 /** Base class for all component-specific EventNotifiers.  This class provides common methods to 
   * manage listeners of a specific type.  T the type of the listener class to be managed.
   * @version $Id: EventNotifier.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public abstract class EventNotifier<T> {
+  
+  public static final Log _log = new Log("GlobalModel.txt", false);
+  
+  /*  Synchronization provided by thread confinement using event dispatch thread. */
   /** All T Listeners that are listening to the model.  Accesses to this collection are protected by the 
     * ReaderWriterLock. The collection must be synchronized, since multiple readers could access it at once.
     */
   protected final LinkedList<T> _listeners = new LinkedList<T>();
   
-  /** Provides synchronization primitives for solving the readers/writers problem.  In EventNotifier, adding and 
-    * removing listeners are considered write operations, and all notifications are considered read operations. Multiple 
-    * reads can occur simultaneously, but only one write can occur at a time, and no reads can occur during a write.
-    */
-  protected final ReaderWriterLock _lock = new ReaderWriterLock();
+//  /** Provides synchronization primitives for solving the readers/writers problem.  In EventNotifier, adding and 
+//    * removing listeners are considered write operations, and all notifications are considered read operations. Multiple 
+//    * reads can occur simultaneously, but only one write can occur at a time, and no reads can occur during a write.
+//    */
+//  protected final ReaderWriterLock _lock = new ReaderWriterLock();
   
-  /** Adds a listener to the notifier.
+  /** Adds a listener to the notifier.  Only runs in the event dispatch thread.
     * @param listener a listener that reacts on events
     */
   public void addListener(T listener) {
-    _lock.startWrite();
-    try { _listeners.add(listener); }
-    finally { _lock.endWrite(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    _listeners.add(listener);
   }
   
-  /** Removes a listener from the notifier. If the thread already holds the lock,
-    * then the listener is removed later, but as soon as possible.
-    * Note: It is NOT guaranteed that the listener will not be executed again.
-    * @param listener a listener that reacts on events
-    */
-  public void removeListener(final T listener) {
-    try {
-      _lock.startWrite();
-      try { _listeners.remove(listener); }
-      finally { _lock.endWrite(); }
-    }
-    catch(ReaderWriterLock.DeadlockException e) {
-      // couldn't remove right now because this thread already owns a lock
-      // remember to remove it later
-      new Thread(new Runnable() {
-        public void run() {
-          _lock.startWrite();
-          try { _listeners.remove(listener); }
-          finally { _lock.endWrite(); }
-        }
-      }, "Pending Listener Removal").start();
-//      synchronized(_listenersToRemove) {
-//        _listenersToRemove.add(listener);
-//      }
-    }
+  /** Removes a listener from the notifier. Only runs in the event dispatch thread. */
+  public void removeListener(final T listener) { 
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    _listeners.remove(listener); 
   }
   
   /** Removes all listeners from this notifier.  If the thread already holds the lock,
     * then the listener is removed later, but as soon as possible.
     * Note: It is NOT guaranteed that the listener will not be executed again. */
   public void removeAllListeners() {
-    try { 
-      _lock.startWrite();
-      try { _listeners.clear(); }
-      finally { _lock.endWrite(); }
-    }
-    catch(ReaderWriterLock.DeadlockException e) {
-      // couldn't remove right now because this thread already owns a lock
-      // remember to remove it later
-      new Thread(new Runnable() {
-        public void run() {
-          _lock.startWrite();
-          try { _listeners.clear(); }
-          finally { _lock.endWrite(); }
-        }
-      }, "Pending Listener Removal").start();
-    }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    _listeners.clear();
   }
 }

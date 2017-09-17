@@ -28,49 +28,58 @@
 
 package edu.rice.cs.drjava.model.junit;
 
-import edu.rice.cs.drjava.model.EventNotifier;
-import edu.rice.cs.drjava.model.compiler.CompilerListener;
-import edu.rice.cs.util.classloader.ClassFileError;
-import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
+import java.awt.EventQueue;
 import java.util.List;
 
-/**
- * Keeps track of all listeners to a JUnitModel, and has the ability
- * to notify them of some event.
- * <p>
- *
- * This class has a specific role of managing JUnitListeners.  Other
- * classes with similar names use similar code to perform the same function for
- * other interfaces, e.g. InteractionsEventNotifier and GlobalEventNotifier.
- * These classes implement the appropriate interface definition so that they
- * can be used transparently as composite packaging for a particular listener
- * interface.
- * <p>
- *
- * Components which might otherwise manage their own list of listeners use
- * EventNotifiers instead to simplify their internal implementation.  Notifiers
- * should therefore be considered a private implementation detail of the
- * components, and should not be used directly outside of the "host" component.
- * <p>
- *
- * All methods in this class must use the synchronization methods
- * provided by ReaderWriterLock.  This ensures that multiple notifications
- * (reads) can occur simultaneously, but only one thread can be adding
- * or removing listeners (writing) at a time, and no reads can occur
- * during a write.
- * <p>
- *
- * <i>No</i> methods on this class should be synchronized using traditional
- * Java synchronization!
- * <p>
- *
- * @version $Id: JUnitEventNotifier.java 5594 2012-06-21 11:23:40Z rcartwright $
- */
+import edu.rice.cs.drjava.model.EventNotifier;
+import edu.rice.cs.drjava.model.compiler.CompilerListener;
+import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
+
+import edu.rice.cs.util.Log;
+import edu.rice.cs.util.classloader.ClassFileError;
+import edu.rice.cs.util.swing.Utilities;
+
+/** Keeps track of all listeners to a JUnitModel, and has the ability
+  * to notify them of some event.
+  * <p>
+  *
+  * This class has a specific role of managing JUnitListeners.  Other
+  * classes with similar names use similar code to perform the same function for
+  * other interfaces, e.g. InteractionsEventNotifier and GlobalEventNotifier.
+  * These classes implement the appropriate interface definition so that they
+  * can be used transparently as composite packaging for a particular listener
+  * interface.
+  * <p>
+  *
+  * Components which might otherwise manage their own list of listeners use
+  * EventNotifiers instead to simplify their internal implementation.  Notifiers
+  * should therefore be considered a private implementation detail of the
+  * components, and should not be used directly outside of the "host" component.
+  * <p>
+  *
+  * Synchronization is implemented using thread confinement in the event dispatch 
+  * hread, not what follows!
+  * 
+  * All methods in this class must use the synchronization methods
+  * provided by ReaderWriterLock.  This ensures that multiple notifications
+  * (reads) can occur simultaneously, but only one thread can be adding
+  * or removing listeners (writing) at a time, and no reads can occur
+  * during a write.
+  * <p>
+  *
+  * <i>No</i> methods on this class should be synchronized using traditional
+  * Java synchronization!
+  * <p>
+  *
+  * @version $Id: JUnitEventNotifier.java 5594 2012-06-21 11:23:40Z rcartwright $
+  */
 class JUnitEventNotifier extends EventNotifier<JUnitListener> implements JUnitListener {
+  
+  public static Log _log = new Log("GlobalModel.txt", false);
   
   public void addListener(JUnitListener jul) {
     super.addListener(jul);
-//    Utilities.show("Adding listener " + jul + " to listener list in " + this);
+    _log.log("Adding listener " + jul + " to listener list in " + this);
   }
   
   /** Called when trying to test a non-TestCase class.
@@ -78,54 +87,47 @@ class JUnitEventNotifier extends EventNotifier<JUnitListener> implements JUnitLi
     * @param didCompileFail whether or not a compile before this JUnit attempt failed
     */
   public void nonTestCase(boolean isTestAll, boolean didCompileFail) {
-    _lock.startRead();
-    try { for (JUnitListener jul : _listeners) { jul.nonTestCase(isTestAll, didCompileFail); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (JUnitListener jul : _listeners) { jul.nonTestCase(isTestAll, didCompileFail); }
   }
   
   public void classFileError(ClassFileError e) {
-    _lock.startRead();
-    try { for (JUnitListener jul : _listeners) { jul.classFileError(e); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (JUnitListener jul : _listeners) { jul.classFileError(e); }
   }
   
   /** Called before JUnit is started by the DefaultJUnitModel. */
   public void compileBeforeJUnit(final CompilerListener cl, List<OpenDefinitionsDocument> outOfSync) {
-    _lock.startRead();
-    try { for (JUnitListener jul : _listeners) { jul.compileBeforeJUnit(cl, outOfSync); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (JUnitListener jul : _listeners) { jul.compileBeforeJUnit(cl, outOfSync); }
   }
   
   /** Called after junit/junitAll is started by the GlobalModel. */
   public void junitStarted() {
-    _lock.startRead();
-    try { for (JUnitListener jul : _listeners) { jul.junitStarted(); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (JUnitListener jul : _listeners) { jul.junitStarted(); }
   }
   
   /** Called after junitClasses is started by the GlobalModel. */
   public void junitClassesStarted() {
-    _lock.startRead();
-    try { for (JUnitListener jul : _listeners) { jul.junitClassesStarted(); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (JUnitListener jul : _listeners) { jul.junitClassesStarted(); }
   }
   
   /** Called to indicate that a suite of tests has started running.
     * @param numTests The number of tests in the suite to be run.
     */
   public void junitSuiteStarted(int numTests) {
-    _lock.startRead();
-    try { for (JUnitListener jul : _listeners) { jul.junitSuiteStarted(numTests); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (JUnitListener jul : _listeners) { jul.junitSuiteStarted(numTests); }
   }
   
   /** Called when a particular test is started.
     * @param name The name of the test being started.
     */
   public void junitTestStarted(String name) {
-    _lock.startRead();
-    try { for (JUnitListener jul : _listeners) { jul.junitTestStarted(name); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (JUnitListener jul : _listeners) { jul.junitTestStarted(name); }
   }
   
   /** Called when a particular test has ended.
@@ -134,16 +136,14 @@ class JUnitEventNotifier extends EventNotifier<JUnitListener> implements JUnitLi
     * @param causedError If not successful, whether the test caused an error or simply failed.
     */
   public void junitTestEnded(String name, boolean wasSuccessful, boolean causedError) {
-    _lock.startRead();
-    try { for (JUnitListener jul : _listeners) { jul.junitTestEnded(name, wasSuccessful, causedError); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for (JUnitListener jul : _listeners) { jul.junitTestEnded(name, wasSuccessful, causedError); }
   }
   
   /** Called after JUnit is finished running tests. */
   public void junitEnded() {
-    _lock.startRead();
-    try { for(JUnitListener jul : _listeners) { jul.junitEnded(); } }
-    finally { _lock.endRead(); }
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    for(JUnitListener jul : _listeners) { jul.junitEnded(); }
   }
 }
 
