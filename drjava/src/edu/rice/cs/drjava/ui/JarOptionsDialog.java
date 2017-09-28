@@ -331,7 +331,9 @@ public class JarOptionsDialog extends SwingFrame {
     gridbag.setConstraints(jarClassesPanel, c);
     panel.add(jarClassesPanel);
     
-    _cantJarClassesLabel = new JLabel("<html><center>A build directory must be specified in order to jar class files,<br>and the project needs to be compiled.</center></html>",  SwingConstants.CENTER);
+    _cantJarClassesLabel = 
+      new JLabel("<html><center>A build directory must be specified in order to jar class files,<br>" + 
+                 "and the project needs to be compiled.</center></html>",  SwingConstants.CENTER);
     c.gridx = 0;
     c.anchor = GridBagConstraints.WEST;
     c.fill = GridBagConstraints.HORIZONTAL;

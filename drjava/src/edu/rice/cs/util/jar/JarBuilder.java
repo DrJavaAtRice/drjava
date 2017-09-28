@@ -44,7 +44,7 @@ import java.util.jar.Manifest;
 public class JarBuilder {
   private JarOutputStream _output;
   
-  /** Creates a file file without a manifest
+  /** Creates a jar file without a manifest
    *
    * @param file the file to write the jar to
    * @throws IOException thrown if the file cannot be opened for writing

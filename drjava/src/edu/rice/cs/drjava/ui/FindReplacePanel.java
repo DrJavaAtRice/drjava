@@ -584,9 +584,13 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
             _machine.getIgnoreCommentsAndStrings(), _ignoreTestCases.isSelected(), startDoc, rm, region, panel);
 
     _log.log("Refreshing active document after 'find all'");
-    _model.refreshActiveDocument();  // Rationale: a giant findAll left the definitions pane is a strange state
-    panel.requestFocusInWindow();
-//    EventQueue.invokeLater(new Runnable() { public void run() { panel.getRegTree().scrollRowToVisible(0); } });
+
+    EventQueue.invokeLater(new Runnable() {  // execute these actions after all pending Runnables in the EventQueue
+      public void run() {
+        _model.refreshActiveDocument();  // Rationale: a giant findAll left the definitions pane is a strange state
+        panel.requestFocusInWindow();
+//        panel.getRegTree().scrollRowToVisible(0);
+      }});
   }
   
   /** Performs "find all" with the specified options. 
@@ -721,8 +725,6 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     final int searchLen = searchStr.length();
     if (searchLen == 0) return;
     
-
-    
     final OpenDefinitionsDocument oldDoc = _machine.getDocument();
     final OpenDefinitionsDocument oldFirstDoc = _machine.getFirstDoc();
     final String oldFindWord = _machine.getFindWord();
@@ -753,9 +755,10 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     
     _frame.hourglassOn();
     int count = 0;
-    Runnable1<FindResult> replaceMatchingString =   // replaces current (found) string 
-      new Runnable1<FindResult>() { 
-      public void run(FindResult fr) { _machine.replaceCurrent(); }};
+    /* Code snippet to replace matched String (findWord) with replaceWord loaded into FindReplaceMachine*/
+    Runnable1<FindResult> replaceMatchingString = new Runnable1<FindResult>() { 
+      public void run(FindResult fr) { _machine.replaceCurrent(); }
+    };
     try {
       /* Replace all matching strings in region (which may be entire project). */
       count = _machine.processAll(replaceMatchingString, region);
