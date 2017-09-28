@@ -8,7 +8,7 @@
 
   <property name="readable-project-name" value="DrJava" />
   <property name="src-working-dir" value="src/edu/rice/cs/drjava" />
-  <property name="junit-jar-to-include" value="lib/buildlib/junit.jar" />
+  <property name="junit-jar-to-include" value="lib/concutest-junit-4.7-withrt-nodep.jar" />
   <property name="md5-temp-name" value="classes/md5.properties" />
   <property name="md5-properties-path" value="edu/rice/cs/drjava/md5.properties" />
   <property name="main-class" value="edu.rice.cs.drjava.DrJava" />
@@ -70,20 +70,6 @@
   <echo message="jrelibs = ${toString:jrelibs}" />
   <fileset id="extlibs" dir="${java.home}/lib/ext" includes="*.jar" /> 
   <echo message="extlibs = ${toString:extlibs}" />
-  <!-- Use ConcJUnit if use-concjunit is not defined and we are not running Java 7. -->
-  <!-- ConcJUnit is currently incompatible with Java 7. -->
-  <!-- ConcJunit is causing problems with unit testing on Mac OS x platforms; defeating it here
-  <if>
-    <contains string="${java.version}" substring="1.7"/>
-    <then>
-      <echo message="ConcJUnit is currently incompatible with Java 7."/>
-      <property name="use-concjunit" value="false" />
-    </then>
-    <else>
-      <property name="use-concjunit" value="false" />
-    </else>
-  </if>
-  -->
   <property name="use-concjunit" value="false" />
   <!-- ************
        Help Targets

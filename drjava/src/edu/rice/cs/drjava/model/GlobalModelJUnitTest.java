@@ -52,7 +52,7 @@ import java.util.List;
   */
 public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   
-  private static Log _log = new Log("GlobalModelJUnitTest.txt", true);
+  private static Log _log = new Log("GlobalModelJUnitTest.txt", false);
   
   /** Whether or not to print debugging output. */
   static final boolean printMessages = true;
@@ -195,6 +195,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
 //    Utilities.show("Running testNoJUnitErrors");
     
     final OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_PASS_TEXT);
+    
     final File file = new File(_tempDir, "MonkeyTestPass.java");
     saveFile(doc, new FileSelector(file));
     JUnitTestListener listener = new JUnitTestListener();
@@ -338,6 +339,8 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
 //    Utilities.show("Running testResultOfNonPublicTestCase");
     
     final OpenDefinitionsDocument doc = setupDocument(NONPUBLIC_TEXT);
+    _log.log("     doc.getClass() = "  + doc.getClass());
+                       
     final File file = new File(_tempDir, "NonPublic.java");
     saveFile(doc, new FileSelector(file));
     
@@ -363,9 +366,9 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     _log.log("testResultOfNonPublicTestCase completed");
   }
   
-  /* This test has become inconsistent with DrJava behavior.  If a document's file no longer exists and no class file
+  /* This test has become inconsistent with the behavior of DrJava.  If a document's file no longer exists and no class file
    * exists, DrJava will detect that there is no valid class file for the document and ask the user to compile the
-   * file
+   * file.
    */
 //  public void testDoNotRunJUnitIfFileHasBeenMoved() throws Exception {
 //    if (printMessages) System.err.println("----testDoNotRunJUnitIfFileHasBeenMoved-----");

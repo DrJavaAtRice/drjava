@@ -1217,7 +1217,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     public void runJUnit(OpenDefinitionsDocument doc) throws IOException, ClassNotFoundException, 
       InterruptedException {
       logJUnitStart();
-//    System.err.println("Starting JUnit on " + doc);
+      System.err.println("********** Starting JUnit on " + doc);
       doc.startJUnit();
 //    System.err.println("JUnit Started on " + doc);
       waitJUnitDone();

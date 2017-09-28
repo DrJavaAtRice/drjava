@@ -558,15 +558,15 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   public int getDebugPort() throws IOException { return _interactionsModel.getDebugPort(); }
 
   // ---------- ConcreteOpenDefDoc inner class ----------
-
+  
   /** Inner class to handle operations on each of the open DefinitionsDocuments by the GlobalModel. <br><br>
-   * This was at one time called the <code>DefinitionsDocumentHandler</code>
-   * but was renamed (2004-Jun-8) to be more descriptive/intuitive.
-   */
+    * This was at one time called the <code>DefinitionsDocumentHandler</code> but was renamed (2004-Jun-8) to be more 
+    * descriptive/intuitive.
+    */
   class ConcreteOpenDefDoc extends AbstractGlobalModel.ConcreteOpenDefDoc {
     /** Standard constructor for a document read from a file.  Initializes this ODD's DD.
-     * @param f file describing DefinitionsDocument to manage
-     */
+      * @param f file describing DefinitionsDocument to manage
+      */
     ConcreteOpenDefDoc(File f) {
       super(f);
 
@@ -724,11 +724,10 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       _runInInteractions("run {0}", qualifiedClassName);
     }
 
-    /** Runs JUnit on the current document.  Requires that all source documents are compiled before proceeding. */
-    //TODO: Allow JUnit on current document?
-    /*public void startJUnit() throws ClassNotFoundException, IOException {
+    /** Runs JUnit on this (a document).  Requires that all source documents are compiled before proceeding. */
+    public void startJUnit() throws ClassNotFoundException, IOException {
       _junitModel.junit(this);
-    }*/
+    }
 
     /** Generates Javadoc for this document, saving the output to a temporary directory.  The location is provided to 
      * the javadocEnded event on the given listener.
