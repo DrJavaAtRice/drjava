@@ -235,7 +235,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     _log.log("+++Completing testElspethOneJUnitError");
   }
   
-  /** Tests that a test class which throws a *real* Error (not an Exception) is handled correctly. */
+  /** Tests that a syntactically legal test class which throws an Error is handled correctly. */
   public void testRealError_NOJOIN() throws Exception {
     _log.log("+++Startinging testRealError_NOJOIN");
     
@@ -251,7 +251,9 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     listener.runJUnit(doc);
     // runJUnit waits until the thread started in DefaultJUnitModel._rawJUnitOpenDefDocs has called notify
     
-    assertEquals("$$$$$ Test case has one error reported", 1, _model.getJUnitModel().getJUnitErrorModel().getNumErrors());
+    final int n = _model.getJUnitModel().getJUnitErrorModel().getNumErrors();
+    System.err.println("Number of execution errors in unit testing = " + n);
+    assertEquals("$$$$$ Test case has one execution error reported", 1, n);
     listener.assertJUnitEndCount(1);
     _model.removeListener(listener);
     
