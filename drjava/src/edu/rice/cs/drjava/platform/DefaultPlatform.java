@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -100,8 +100,9 @@ class DefaultPlatform implements PlatformSupport {
    *  version of tools.jar.
    *
    * @param main Class object for com.sun.tools.javadoc.Main
+   * @return true if the given class object has an execute(String[]) method; false otherwise
    */
-  @SuppressWarnings({"unchecked", "rawtypes"})
+  @SuppressWarnings({"unchecked","rawtypes"})
   private boolean _javadocMainHasExecuteMethod(Class<?> main) {
     try {
       Class<String[]>[] arr = new Class[]{String[].class};

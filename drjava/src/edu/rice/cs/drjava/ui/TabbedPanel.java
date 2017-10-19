@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,7 @@ import java.awt.event.*;
 import java.awt.*;
 import java.awt.dnd.*;
 import edu.rice.cs.drjava.DrJavaRoot;
+import edu.rice.cs.util.Log;
 
 /** Extended by all panels that can dynamically be added or removed from the _tabbedPane in MainFrame. Provides a
   * boolean indicating if the panel is being displayed, and a close button. Attaches an action to the close button
@@ -48,6 +49,8 @@ import edu.rice.cs.drjava.DrJavaRoot;
   * @version $Id$
   */
 public abstract class TabbedPanel extends JPanel implements DropTargetListener {
+  
+  public static Log _log = new Log("TabbedPanel", false);
   
   /** indicates whether this tab is displayed in the tabbed pane. */
   protected volatile boolean _displayed;
@@ -114,7 +117,9 @@ public abstract class TabbedPanel extends JPanel implements DropTargetListener {
   /** @return the display name of this tab. */
   public String getName() { return _name; }
 
-  /** Sets whether the tab is displayed.  Doesn't actually show or hide the tab. */
+  /** Sets whether the tab is displayed.  Doesn't actually show or hide the tab. 
+   * @param displayed the value to be set
+   */
   public void setDisplayed(boolean displayed) { _displayed = displayed; }
 
   JPanel getMainPanel() { return _mainPanel; }

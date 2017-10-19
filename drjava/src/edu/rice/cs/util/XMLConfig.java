@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (javaplt@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -48,41 +48,36 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.*;
 import java.util.*;
 
-/**
- * XML configuration management.
- * <p/>
- * This class uses DOM paths of a specific form to refer to nodes in the XML document.
- * Consider this XML structure:
- * <foo a="foo.a">
- *   <bar>abc</bar>
- *   <fum fee="xyz">def</fum>
- * </foo>
- * The path "foo/bar" refers to the value "abc".
- * The path "foo/fum" refers to the value "def".
- * If this form is used, there may be only #text or #comment nodes in the node. All #text nodes will be
- * concatenated and then stripped of whitespace at the beginning and the end.
- * The path "foo/fum.fee" refers to the value "xyz".
- * The path "foo.a" refers to the value "foo.a".
- *
- * When using getMultiple, any node or attribute name can be substituted with "*" to get all elements:
- * The path "foo/*" returns both the value "abc" and "def".
- * @author Mathias Ricken
- */
+/** XML configuration management.
+  * 
+  * This class uses DOM paths of a specific form to refer to nodes in the XML document.
+  * Consider this XML structure:
+  * {@code <foo a="foo.a">
+  *   <bar>abc</bar>
+  *   <fum fee="xyz">def</fum>
+  * </foo>}
+  * The path "foo/bar" refers to the value "abc".
+  * The path "foo/fum" refers to the value "def".
+  * If this form is used, there may be only #text or #comment nodes in the node. All #text nodes will be
+  * concatenated and then stripped of whitespace at the beginning and the end.
+  * The path "foo/fum.fee" refers to the value "xyz".
+  * The path "foo.a" refers to the value "foo.a".
+  *
+  * When using getMultiple, any node or attribute name can be substituted with "*" to get all elements:
+  * The path "foo/*" returns both the value "abc" and "def".
+  * @author Mathias Ricken
+  */
 public class XMLConfig {
-  /** Newline string.
-   */
+  /** Newline string. */
   public static final String NL = System.getProperty("line.separator");
   
-  /** XML document.
-   */
+  /** XML document. */
   private Document _document;
   
-  /** XMLConfig to delegate to, or null.
-   */
+  /** XMLConfig to delegate to, or null. */
   private XMLConfig _parent = null;
   
-  /** Node where this XMLConfig starts if delegation is used, or null.
-   */
+  /** Node where this XMLConfig starts if delegation is used, or null. */
   private Node _startNode = null;
   
   /** Creates an empty configuration.
@@ -285,7 +280,7 @@ public class XMLConfig {
   /** Returns the value as specified by the DOM path.
    * @param path DOM path
    * @return value.
-   * @throws IllegalArgumentException
+   * @throws IllegalArgumentException if the path is invalid
    */
   public int getInt(String path) {
     List<String> r = getMultiple(path);
@@ -300,7 +295,7 @@ public class XMLConfig {
    * @param path DOM path
    * @param root node where the search should start
    * @return value.
-   * @throws IllegalArgumentException
+   * @throws IllegalArgumentException if the path is invalid
    */
   public int getInt(String path, Node root) {
     List<String> r = getMultiple(path, root);
@@ -315,7 +310,7 @@ public class XMLConfig {
    * @param path DOM path
    * @param defaultVal default value in case value is not in DOM
    * @return value.
-   * @throws IllegalArgumentException
+   * @throws IllegalArgumentException if the path is invalid
    */
   public int getInt(String path, int defaultVal) {
     try {
@@ -331,7 +326,7 @@ public class XMLConfig {
    * @param root node where the search should start
    * @param defaultVal default value in case value is not in DOM
    * @return value.
-   * @throws IllegalArgumentException
+   * @throws IllegalArgumentException if the path is invalid
    */
   public int getInt(String path, Node root, int defaultVal) {
     try {
@@ -347,7 +342,7 @@ public class XMLConfig {
   /** Returns the value as specified by the DOM path.
    * @param path DOM path
    * @return value.
-   * @throws IllegalArgumentException
+   * @throws IllegalArgumentException if the path is invalid
    */
   public boolean getBool(String path) {
     List<String> r = getMultiple(path);
@@ -366,7 +361,7 @@ public class XMLConfig {
    * @param path DOM path
    * @param root node where the search should start
    * @return value.
-   * @throws IllegalArgumentException
+   * @throws IllegalArgumentException if the path is invalid
    */
   public boolean getBool(String path, Node root) {
     List<String> r = getMultiple(path, root);
@@ -386,7 +381,7 @@ public class XMLConfig {
    * @param path DOM path
    * @param defaultVal default value in case value is not in DOM
    * @return value.
-   * @throws IllegalArgumentException
+   * @throws IllegalArgumentException if the path is invalid
    */
   public boolean getBool(String path, boolean defaultVal) {
     try {
@@ -402,7 +397,7 @@ public class XMLConfig {
    * @param root node where the search should start
    * @param defaultVal default value in case value is not in DOM
    * @return value.
-   * @throws IllegalArgumentException
+   * @throws IllegalArgumentException if the path is invalid
    */
   public boolean getBool(String path, Node root, boolean defaultVal) {
     try {

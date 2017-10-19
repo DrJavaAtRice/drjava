@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -83,7 +83,6 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
     _notifier = new GlobalEventNotifier(); // so this isn't null
   } 
    
-
   public InteractionsDJDocument(GlobalEventNotifier notifier){
    super();
    _hasPrompt = false;
@@ -137,10 +136,10 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
     _undoManager.setLimit(UNDO_LIMIT);
   }
   
-  /** Public accessor for the next undo action. */
+  /** @return the next undo action. */
   public UndoableEdit getNextUndo() { return _undoManager.getNextUndo(); }
   
-  /** Public accessor for the next undo action. */
+  /** @return the next redo action. */
   public UndoableEdit getNextRedo() { return _undoManager.getNextRedo(); }
   
   /** Informs this document's undo manager that the document has been saved. */
@@ -192,7 +191,9 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
   //-------------end Undo/Redo Functionality---------------------// 
   
   
-  /** Returns a new indenter. Eventually to be used to return an interactions indenter */
+  /** @param indentLevel indentation level
+   * @return a new indenter. Eventually to be used to return an interactions indenter 
+   */
   protected Indenter makeNewIndenter(int indentLevel) { return new Indenter(indentLevel); }
   
   /** A list of styles and their locations augmenting this document.  This augmentation is NOT part of the reduced
@@ -220,12 +221,14 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
 //    }
   }
   
-  /** Accessor method used to copy contents of _stylesList to an array.  Used in test cases. */
+  /** Accessor method used to copy contents of _stylesList to an array.  Used in test cases. 
+   * @return a copy of the contents of _styleList
+   */
   public Pair<Pair<Integer, Integer>, String>[] getStyles() { 
     synchronized(_stylesList) {
       // TODO: file javac bug report concerning placement of @SuppressWarnings.  Fails if rhs of result binding is used as body of 
       // return statement.
-      @SuppressWarnings({"unchecked", "rawtypes"})
+      @SuppressWarnings({"unchecked","rawtypes"})
       Pair<Pair<Integer, Integer>, String>[] result = _stylesList.toArray(new Pair[0]);
       return result;
     }
@@ -233,6 +236,9 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
   
   /** Attempts to set the coloring on the graphics based upon the content of the styles list
     * returns false if the point is not in the list.  Only runs in event thread.
+    * @param point point
+    * @param g Graphics object
+    * @return true if coloring was set; false otherwise (e.g. if point was not in the list)
     */
   public boolean setColoring(int point, Graphics g) {
     synchronized(_stylesList) {
@@ -290,8 +296,10 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
     }
   }
   
-  /** Attempts to set the font on the graphics context based upon the styles held in the styles list. Only runs in
-    * event thread. 
+  /** Attempts to set the font on the graphics context based upon the styles 
+    * held in the styles list. Only runs in event thread. 
+    * @param point point
+    * @param g Graphics object
     */
   public void setBoldFonts(int point, Graphics g) {
     synchronized(_stylesList) {

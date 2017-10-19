@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -45,9 +45,18 @@ public interface JUnitModel {
   
   //-------------------------- Field Setters --------------------------------//
   
-  
-  /** set the forceTestSuffix flag that forces class names in projects to end in "Test */
+  /** @param c true if a coverage report is desired; false otherwise
+    * @param p value to set the outdir path to
+    */
+  public void setCoverage(boolean c, String p);
+
+  /** Set the forceTestSuffix flag that forces class names in projects to end in "Test 
+    * @param b true if call names are to be forced to end in "Test", false otherwise
+    */
   public void setForceTestSuffix(boolean b);
+
+  public JUnitResultTuple getFinalResult(); 
+  public boolean getCoverage();
   
   //-------------------------- Listener Management --------------------------//
   
@@ -66,7 +75,9 @@ public interface JUnitModel {
   
   //-------------------------------- Triggers --------------------------------//
   
-  /** This is used by test cases and perhaps other things.  We should kill it. */
+  /** This is used by test cases and perhaps other things.  We should kill it. 
+   * @return the JUnit document
+   */
   public SwingDocument getJUnitDocument();
   
   /** Creates a JUnit test suite over all currently open documents and runs it.  If the class file 
@@ -91,6 +102,8 @@ public interface JUnitModel {
   /** Runs JUnit over a single document.  Synchronized against the compiler model to prevent testing
     * and compiling at the same time, which would create invalid results.
     * @param doc the document to be run under JUnit
+    * @throws ClassNotFoundException if a class is not found
+    * @throws IOException if an IO operation fails
     */
   public void junit(OpenDefinitionsDocument doc) throws ClassNotFoundException, IOException;
   
@@ -110,7 +123,7 @@ public interface JUnitModel {
   
   //----------------------------- Error Results -----------------------------//
   
-  /** Gets the JUnitErrorModel, which contains error info for the last test run. */
+  /** @return the JUnitErrorModel, which contains error info for the last test run. */
   public JUnitErrorModel getJUnitErrorModel();
   
   /** Resets the junit error state to have no errors. */

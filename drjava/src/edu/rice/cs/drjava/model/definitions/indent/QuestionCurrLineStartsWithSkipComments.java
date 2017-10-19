@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -50,9 +50,12 @@ public class QuestionCurrLineStartsWithSkipComments extends IndentRuleQuestion {
   /** The String to be matched. This String may not contain whitespace characters or comment-delimiting characters. */
   private String _prefix;
   
-  /** @param yesRule The decision subtree for the case that this rule applies in the current context.
-    * @param noRule The decision subtree for the case that this rule does not apply in the current context.
-    */
+  /** @param prefix the String to be matched
+   * @param yesRule The decision subtree for the case that this rule applies 
+   *                in the current context.
+   * @param noRule  The decision subtree for the case that this rule does not 
+   *                apply in the current context.
+   */
   public QuestionCurrLineStartsWithSkipComments(String prefix, IndentRule yesRule, IndentRule noRule) {
     super(yesRule, noRule);
     _prefix = prefix;

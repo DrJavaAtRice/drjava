@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -47,16 +47,15 @@ import java.io.IOException;
 
 import edu.rice.cs.util.UnexpectedException;
 
-/**
- * DrJava's Javadoc viewing frame
- * @version $Id$
- */
+/** DrJava's Javadoc viewing frame
+  * @version $Id$
+  */
 public class JavadocFrame extends HTMLFrame {
 
   private static final int MAX_READ_PACKAGES_LINES = 100;
   private static final int MAX_READ_FOR_LINK_LINES = 100;
   private static final String[] INTRO_PAGE= {
-    "overview-summary.html",
+    "overview-frame.html",
     "packages.html"
   };
   private static final String INDEX_PAGE= "allclasses-frame.html";
@@ -85,6 +84,8 @@ public class JavadocFrame extends HTMLFrame {
    * file (if it's not a pointer), or the file used for "No frames" (if
    * it is a pointer).
    * @param packages Full path to the packages.html file
+   * @param destDir destination directory
+   * @return packages
    */
   private static File _parsePackagesFile(File packages, File destDir) {
     try {
@@ -138,6 +139,7 @@ public class JavadocFrame extends HTMLFrame {
    * @param destDir Directory holding the Javadoc
    * @param curClass Name of the class to try to show by default
    * @param allDocs Whether Javadoc was run for all open documents
+   * @throws MalformedURLException if the URL is not in the correct format
    */
   public JavadocFrame(File destDir, String curClass, boolean allDocs)
     throws MalformedURLException

@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -49,39 +49,39 @@ import edu.rice.cs.plt.lambda.Runnable1;
 
 import edu.rice.cs.util.FileOpenSelector;
 
-/**
- * Manages a list of the most recently used files to be displayed
- * in the File menu.
- * @version $Id$
- */
+/** Manages a list of the most recently used files to be displayed in the File menu.
+  * @version $Id$
+  */
 public class RecentFileManager implements OptionConstants {
   /** Position in the file menu where the entries start. */
-  protected int _initPos;
+  protected volatile int _initPos;
 
   /** Position in the file menu for the next insert. */
-  protected int _pos;
+  protected volatile int _pos;
   
   /** All of the recently used files in the list, in order. */
-  protected Vector<File> _recentFiles;
+  protected final Vector<File> _recentFiles;
   
   /** The maximum number of files to display in the list. */
-  protected int MAX = DrJava.getConfig().getSetting(RECENT_FILES_MAX_SIZE).intValue();
+  protected volatile int MAX = DrJava.getConfig().getSetting(RECENT_FILES_MAX_SIZE).intValue();
   
   /** The File menu containing the entries. */
-  protected JMenu _fileMenu;
+  protected final JMenu _fileMenu;
   
   /** Other File menus to be kept synchronized to the original File menu. */
-  protected HashSet<JMenu> _mirroredMenus = new HashSet<JMenu>();
+  protected final HashSet<JMenu> _mirroredMenus = new HashSet<JMenu>();
   
   /** The OptionConstant that should be used to retrieve the list of recent files. */
-  protected VectorOption<File> _settingConfigConstant;
+  protected final VectorOption<File> _settingConfigConstant;
   
   /** An action that will be invoked when the file is clicked. */
-  protected RecentFileAction _recentFileAction;
+  protected final RecentFileAction _recentFileAction;
   
   /** Creates a new RecentFileManager.
     * @param pos  Position in the file menu
     * @param fileMenu  File menu to add the entry to
+    * @param action action to be invoked when the file is clicked
+    * @param settingConfigConstant configuration info
     */
   public RecentFileManager(int pos, JMenu fileMenu, RecentFileAction action, VectorOption<File> settingConfigConstant) {
     _initPos = _pos = pos;
@@ -106,7 +106,7 @@ public class RecentFileManager implements OptionConstants {
     if (_recentFiles.size()>0) {
       mirroredMenu.insertSeparator(_initPos);  //one at top
     }
-    for(int i=0; i<_recentFiles.size(); ++i) {
+    for(int i = 0; i < _recentFiles.size(); ++i) {
       final File file = _recentFiles.get(i);
       final FileOpenSelector recentSelector = new FileOpenSelector() {
         public File[] getFiles() { return new File[] { file }; }
@@ -135,7 +135,7 @@ public class RecentFileManager implements OptionConstants {
     _mirroredMenus.remove(mirroredMenu);
   }
   
-  /** Returns the list of recently used files, in order. */
+  /** @return the list of recently used files, in order. */
   public Vector<File> getFileVector() { return _recentFiles; }
   
   /** Changes the maximum number of files to display in the list.
@@ -148,7 +148,9 @@ public class RecentFileManager implements OptionConstants {
     DrJava.getConfig().setSetting(_settingConfigConstant, _recentFiles);
   }
   
-  /** Updates the list after the given file has been opened. */
+  /** Updates the list after the given file has been opened. 
+    * @param file the file being opened
+    */
   public void updateOpenFiles(final File file) {
     
     if (_recentFiles.size() == 0) {
@@ -184,9 +186,10 @@ public class RecentFileManager implements OptionConstants {
   }
   
   /** Removes the given file from the list if it is already there.
-    * Only removes the first occurrence of the file, since each
-    * entry should be unique (based on canonical path).
-    */
+   * Only removes the first occurrence of the file, since each
+   * entry should be unique (based on canonical path).
+   * @param file the file to remove
+   */
   public void removeIfInList(File file) {
     // Use canonical path if possible
     File canonical = null;
@@ -218,15 +221,15 @@ public class RecentFileManager implements OptionConstants {
     }
   }
   
-  /** Trims the recent file list to the configured size and numbers the
-   * remaining files according to their position in the list
-   */
+  /** Trims the recent file list to the configured size and numbers the remaining files according to their position in 
+    * the list
+    */
   public void numberItems() {
     int delPos = _recentFiles.size();
     boolean wasEmpty = (delPos == 0);
     while (delPos > MAX) {
       _recentFiles.remove(delPos - 1);
-      _remove(_initPos+delPos);
+      _remove(_initPos + delPos);
       
       delPos = _recentFiles.size();
     }
@@ -236,6 +239,7 @@ public class RecentFileManager implements OptionConstants {
         public void run(JMenu fileMenu) {
           JMenuItem currItem = fileMenu.getItem(_initPos+fi+1);
           currItem.setText((fi+1) + ". " + _recentFiles.get(fi).getName());
+          currItem.setFont(DrJava.getConfig().getSetting(FONT_MENUBAR));
         }
       });
     }

@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -65,6 +65,7 @@ public interface IDocumentNavigatorFactory<ItemT extends INavigatorItem> {
   /** Creates a tree navigator and migrates the navigator items from the parent to the new navigator
     * @param name the name of the root node
     * @param parent the navigator to migrate from
+    * @param l list of {@code <Pair<String, INavigatorFilter<ItemT>>>}s
     * @return the new tree navigator
     */
   public IDocumentNavigator<ItemT> makeTreeNavigator(String name, IDocumentNavigator<ItemT> parent, 

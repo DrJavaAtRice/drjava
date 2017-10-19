@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -87,7 +87,7 @@ public class Log {
         try {
           FileWriter w = new FileWriter(_file.getAbsolutePath(), true);
           _writer = new PrintWriter(w);
-          log("Log '" + _name + "' opened: " + DATE_FORMAT.format(new Date()));
+          log("Log '" + _name + "' opened: " + DATE_FORMAT.format(new Date()) + " with name " + _file.getAbsolutePath());
         }
         catch (IOException ioe) {
           throw new RuntimeException("Could not create log: " + ioe);
@@ -101,7 +101,7 @@ public class Log {
     */
   public void setEnabled(boolean isEnabled) { _isEnabled = isEnabled; }
   
-  /** Returns whether this log is currently enabled. */
+  /** @return  whether this log is currently enabled. */
   public boolean isEnabled() { return (_isEnabled || ENABLE_ALL); }
   
   /** Prints a message to the log, if enabled.
@@ -117,7 +117,10 @@ public class Log {
     }
   }
   
-  /** Converts a stack trace (StackTraceElement[]) to string form */
+  /** Converts a stack trace (StackTraceElement[]) to string form 
+   * @param trace trace to be converted
+   * @return string representation of trace
+   */
   public static String traceToString(StackTraceElement[] trace) {
     final StringBuilder traceImage = new StringBuilder();
     for (StackTraceElement e: trace) traceImage.append("\n\tat " + e.toString());
@@ -151,7 +154,11 @@ public class Log {
     _writer = null;
   }
   
-  /** Parses a date printed by Date.toString(); returns null if there is a parse error or if there is no date. */
+  /** Parses a date printed by Date.toString(); returns null if there is a 
+   * parse error or if there is no date. 
+   * @param s date to be parsed
+   * @return Date representation of s
+   */
   public synchronized Date parse(String s) {
     int pos = s.indexOf("GMT: ");
     if (pos == -1) { return null; }

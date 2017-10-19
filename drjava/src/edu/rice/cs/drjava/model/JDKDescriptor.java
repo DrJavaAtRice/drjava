@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,6 @@ import java.util.Collections;
 
 import edu.rice.cs.drjava.model.JDKToolsLibrary;
 import edu.rice.cs.plt.reflect.JavaVersion;
-import edu.rice.cs.plt.reflect.JavaVersion.FullVersion;
 import edu.rice.cs.plt.iter.IterUtil;
 
 /** A description of a JDK.
@@ -104,7 +103,9 @@ public abstract class JDKDescriptor {
   }
   
   /** Return true if the file (jar file or directory) contains the compiler.
-    * @return true if the file contains the compiler */
+   * @param f the file to search within
+   * @return true if the file contains the compiler 
+   */
   public abstract boolean containsCompiler(File f);
   
   /** Return the guessed version for the compiler in the specified file (jar file or directory).
@@ -112,6 +113,7 @@ public abstract class JDKDescriptor {
     * For full (non-compound) JDKs, this is equal to the version, i.e. JDK6 should guess Java 6.0.
     * For compound JDKs, this is equal to the version of the full JDK that the compound JDK needs, i.e.
     * if a version of the HJ compiler requires JDK6, it should guess JDK6.
+    * @param f the file to guess the version of
     * @return guessed version */
   public JavaVersion.FullVersion guessVersion(File f) {
       return edu.rice.cs.drjava.model.JarJDKToolsLibrary.guessVersion(f, this);
@@ -122,28 +124,31 @@ public abstract class JDKDescriptor {
   public abstract JavaVersion getMinimumMajorVersion();
   
   /** Return the list of additional files required to use the compiler.
-    * The compiler was found in the specified file. This method may have to search the user's hard drive, e.g.
-    * by looking relative to compiler.getParentFile(), by checking environment variables, or by looking in
-    * certain OS-specific directories.
-    * 
-    * // for example:
-    * public Iterable<File> getAdditionalCompilerFiles(File compiler) throws FileNotFoundException {
-    *   File parent = compiler.getParentFile();
-    *   File nextgen2orgjar = new File(parent, "nextgen2org.jar");
-    *   if (!Util.exists(nextgen2orgjar,
-    *                    "org/apache/bcel/classfile/Node.class")) {
-    *     throw new FileNotFoundException("org/apache/bcel/classfile/Node.class");
-    *   }
-    *   return IterUtil.singleton(nextgen2orgjar);
-    * }
-    * 
-    * @param compiler location where the compiler was fund
-    * @return list of additional files that need to be available */
+   * The compiler was found in the specified file. This method may have to search the user's hard drive, e.g.
+   * by looking relative to compiler.getParentFile(), by checking environment variables, or by looking in
+   * certain OS-specific directories.
+   * 
+   * // for example:
+   * <code>public {@literal Iterable<File>} getAdditionalCompilerFiles(File compiler) throws FileNotFoundException {
+   *   File parent = compiler.getParentFile();
+   *   File nextgen2orgjar = new File(parent, "nextgen2org.jar");
+   *   if (!Util.exists(nextgen2orgjar,
+   *                    "org/apache/bcel/classfile/Node.class")) {
+   *     throw new FileNotFoundException("org/apache/bcel/classfile/Node.class");
+   *   }
+   *   return IterUtil.singleton(nextgen2orgjar);
+   * }</code>
+   * 
+   * @param compiler location where the compiler was fund
+   * @return list of additional files that need to be available 
+   * @throws FileNotFoundException if one or more files could not be found
+   */
   public abstract Iterable<File> getAdditionalCompilerFiles(File compiler) throws FileNotFoundException;
 
   /** Return a description of this JDK.
-    * @param version the specific version of the compiler
-    * @return description */
+   * @param version the specific version of the compiler
+   * @return description 
+   */
   public String getDescription(JavaVersion.FullVersion version) {
     return getName() + " library " + version.versionString();
   }
@@ -184,7 +189,7 @@ public abstract class JDKDescriptor {
       return JDKToolsLibrary.adapterForDebugger(guessedVersion);
     }
     public boolean containsCompiler(File f) { return true; }
-    public JavaVersion getMinimumMajorVersion() { return JavaVersion.JAVA_1_1; }
+    public JavaVersion getMinimumMajorVersion() { return JavaVersion.JAVA_6; }
     public Iterable<File> getAdditionalCompilerFiles(File compiler) throws FileNotFoundException {
       return IterUtil.empty();
     }
@@ -200,15 +205,20 @@ public abstract class JDKDescriptor {
       if (jarOrDir.isFile()) {
         try {
           JarFile jf = new JarFile(jarOrDir);
-          for(String fn: fileNames) {
-            if (jf.getJarEntry(fn)==null) return false;
+          for (String fn: fileNames) {
+
+            if (jf.getJarEntry(fn) == null) {
+              jf.close();
+              return false;
+            }
           }
+          jf.close();
           return true;
         }
         catch(IOException ioe) { return false; }
       }
       else if (jarOrDir.isDirectory()) {
-        for(String fn: fileNames) {
+        for (String fn: fileNames) {
           if (!(new File(jarOrDir,fn).exists())) return false;
         }
         return true;
@@ -218,7 +228,7 @@ public abstract class JDKDescriptor {
    
     /** Return the first of the file names that exists in the specified directory.
       * Throws FileNotFoundException if none of them exists.
-      * @param jarOrDir jar file or directory
+      * @param dir jar file or directory
       * @param fileNames file names that need to exist
       * @return file name if found, or null
       * @throws FileNotFoundException if none of them exists.*/
@@ -230,10 +240,8 @@ public abstract class JDKDescriptor {
         }
         throw new FileNotFoundException("None of "+IterUtil.toString(IterUtil.make(fileNames), "", ", ", "") +
                                         " found in " + dir);
-
       }
       throw new FileNotFoundException(dir + " is not a directory");
-
     }
   }
 }

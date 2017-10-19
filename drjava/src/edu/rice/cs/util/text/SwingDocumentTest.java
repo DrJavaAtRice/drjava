@@ -1,6 +1,6 @@
 /* BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -81,7 +81,11 @@ public class SwingDocumentTest extends DrJavaTestCase {
     catch (EditDocumentException e) { /* Expected. Silently succeed. */ }
   }
   
-  /** Tests that a SwingDocument can receive an object that determines whether certain edits are legal. */
+  /** Tests that a SwingDocument can receive an object that determines whether 
+   * certain edits are legal. 
+   * @throws EditDocumentException if an error occurs during editing
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testEditCondition() throws EditDocumentException, BadLocationException {
     DocumentEditCondition c = new DocumentEditCondition() {
       public boolean canInsertText(int offs) { return (offs > 5); }

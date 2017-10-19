@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,6 @@ import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 
 import edu.rice.cs.util.swing.*;
-import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.SwingDocument;
 
 import java.awt.*;
@@ -96,8 +95,8 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
       DJDocument doc = getDJDocument();
       try { 
         char prevChar = doc.getText(offset - 1, 1).charAt(0);
-        if (prevChar == '{' || prevChar == '(' ) matchUpdate(offset, true);       // forward match
-        else if (prevChar == '}' || prevChar == ')') matchUpdate(offset, false);  // backward match
+        if (prevChar == '{' || prevChar == '(' || prevChar == '[') matchUpdate(offset, true);       // forward match
+        else if (prevChar == '}' || prevChar == ')' || prevChar == ']') matchUpdate(offset, false);  // backward match
         else updateStatusField();  // update main frame status fields; a no-op for InteractionsPanes
         
       }
@@ -132,7 +131,9 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
   
   //--------- METHODS -----------
   
-  /** Create a null default action for Cntl/Alt/Meta chars in the keymap for p. */
+  /** Create a null default action for Cntl/Alt/Meta chars in the keymap for p. 
+   * @param p the component to update
+   */
   public static void disableAltCntlMetaChars(JTextComponent p) {
     // caused bug 3280955: Reoccurrence of French keyboard problem
     // calls to this method have been commented out
@@ -178,7 +179,10 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
     }
   }
   
-  /** A length checked version of setCaretPosition(int pos) that ensures pos is within the DJDocument. */
+  /** A length checked version of setCaretPosition(int pos) that ensures pos 
+   * is within the DJDocument. 
+   * @param pos the position to be set
+   */
   public void setCaretPos(int pos) {
 //    System.err.println("setCaretPos(" + pos + ") called");
     DJDocument doc = getDJDocument();
@@ -200,7 +204,7 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
     return (int) (visibleRectangle.getHeight() * SCROLL_UNIT);
   }
   
-  /** Runs indent(int) with a default value of Indenter.IndentReason.OTHER */
+  /** Runs indent(Indenter.IndentReason) with a default value of Indenter.IndentReason.OTHER */
   public void indent() { indent(Indenter.IndentReason.OTHER); }
 
   /** Perform an indent either on the current line or on the given selected box of text.  Calls are sent to GlobalModel
@@ -248,19 +252,21 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
     */
   protected abstract void indentLines(int selStart, int selEnd, Indenter.IndentReason reason, ProgressMonitor pm);
      
-  /** Returns true if the indent is to be performed.
-    * @param selStart - the selection start
-    * @param selEnd - the selection end
-    */
+  /** @param selStart - the selection start
+   * @param selEnd - the selection end
+   * @return true if the indent is to be performed.
+   */
   protected abstract boolean shouldIndent(int selStart, int selEnd);
   
-  /** Returns the DJDocument held by the pane. */
+  /** @return the DJDocument held by the pane. */
   public abstract DJDocument getDJDocument();
   
   /** Drag and drop target. */
   volatile DropTarget dropTarget = new DropTarget(this, this);  
 
-  /** User dragged something into the component. */
+  /** User dragged something into the component. 
+   * @param dropTargetDragEvent the drag event
+   */
   public void dragEnter(DropTargetDragEvent dropTargetDragEvent) {
     DrJavaRoot.dragEnter(dropTargetDragEvent);
   }

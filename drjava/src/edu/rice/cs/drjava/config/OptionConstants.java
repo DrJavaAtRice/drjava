@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -51,7 +51,6 @@ import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
 import edu.rice.cs.drjava.platform.PlatformFactory;
-import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.util.FileOps;
 
 import static java.awt.Event.*;
@@ -72,7 +71,7 @@ public interface OptionConstants {
   /** A String used to launch a user's preferred browser. It is tokenized and appended to the file path. */
   public static final StringOption BROWSER_STRING = new StringOption("browser.string", "");
   
-  /** A Vector<String> storing the classes to automatically import. */
+  /** A {@code Vector<String>} storing the classes to automatically import. */
   public static final VectorOption<String> INTERACTIONS_AUTO_IMPORT_CLASSES =
     new VectorOption<String>("interactions.auto.import.classes", new StringOption("",""), new Vector<String>());
   
@@ -243,8 +242,8 @@ public interface OptionConstants {
       else return Font.decode("Monospaced-12");
     }
     public static Font getDefaultDocListFont() {
-      if (PlatformFactory.ONLY.isMacPlatform()) return Font.decode("Monaco-10");
-      else return Font.decode("Monospaced-10");
+      /* if (PlatformFactory.ONLY.isMacPlatform()) return Font.decode("Monaco-10");
+      else */ return Font.decode("dialog-10");
     }
   }
   
@@ -255,8 +254,9 @@ public interface OptionConstants {
   /** List of open documents */
   public static final FontOption FONT_DOCLIST = new FontOption("font.doclist", DefaultFont.getDefaultDocListFont());
   
-  /** Toolbar buttons */
-  public static final FontOption FONT_TOOLBAR = new FontOption("font.toolbar", Font.decode("dialog-10"));
+  /** ToolBar buttons */
+  public static final FontOption FONT_TOOLBAR = new FontOption("font.toolbar", Font.decode("dialog-12"));
+  public static final FontOption FONT_MENUBAR = new FontOption("font.menu", Font.decode("dialog-12"));
   
   /** Whether to draw anti-aliased text.  (Slightly slower.) */
   public static final BooleanOption TEXT_ANTIALIAS = new BooleanOption("text.antialias", Boolean.TRUE);
@@ -306,7 +306,7 @@ public interface OptionConstants {
     
     private static boolean _registered = false;
     
-    /** Return the look-and-feel class name to use by default */
+    /** @return the look-and-feel class name to use by default */
     public static String getDefaultLookAndFeel() {
       if (PlatformFactory.ONLY.isMacPlatform())
         return UIManager.getSystemLookAndFeelClassName(); // Mac: Let the system decide.
@@ -1164,6 +1164,10 @@ public interface OptionConstants {
   public static final VectorOption<KeyStroke> KEY_NEW_DRJAVA_INSTANCE= 
     new VectorOption<KeyStroke>("key.new.drjava.instance", new KeyStrokeOption("",null),
                                 to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_F1, CTRL_MASK|SHIFT_MASK)));
+
+  /** The key binding for starting a new code coverage frame. */
+  public static final VectorOption<KeyStroke> KEY_CODE_COVERAGE = 
+    new VectorOption<KeyStroke>("key.code.coverage", new KeyStrokeOption("",null), to.vector());
   
   /* ---------- Find Replace Options ---------- */
   
@@ -1244,53 +1248,50 @@ public interface OptionConstants {
   
   /** Possible options for Javadoc system class documentation links. */
   static final String JAVADOC_NONE_TEXT = "none";
-  static final String JAVADOC_1_3_TEXT = "1.3";
-  static final String JAVADOC_1_4_TEXT = "1.4";
-  static final String JAVADOC_1_5_TEXT = "1.5";
-  static final String JAVADOC_1_6_TEXT = "1.6";
-  static final String JAVADOC_1_7_TEXT = "1.7";
+  static final String JAVADOC_1_3_TEXT = "1.3";  // deprecated
+  static final String JAVADOC_1_4_TEXT = "1.4";  // deprecated
+  static final String JAVADOC_1_5_TEXT = "1.5";  // deprecated
+  static final String JAVADOC_1_6_TEXT = "1.6";  
+  static final String JAVADOC_1_7_TEXT = "1.7";  
+  static final String JAVADOC_1_8_TEXT = "1.8";
   static final String JAVADOC_AUTO_TEXT = "use compiler version"; // for "Open Java API Javadoc"
   
-  static final String[] linkChoices = new String[]{
-    JAVADOC_NONE_TEXT, JAVADOC_1_5_TEXT, JAVADOC_1_6_TEXT, JAVADOC_1_7_TEXT };
+  static final String[] linkChoices = 
+    new String[]{ JAVADOC_NONE_TEXT, JAVADOC_1_6_TEXT, JAVADOC_1_7_TEXT, JAVADOC_1_8_TEXT };
   static final ArrayList<String> linkVersionChoices = new ArrayList<String>(Arrays.asList(linkChoices));
 
-  static final String[] linkDeprecated = new String[]{
-    JAVADOC_1_3_TEXT, JAVADOC_1_4_TEXT };
+  static final String[] linkDeprecated = new String[]{JAVADOC_1_3_TEXT, JAVADOC_1_4_TEXT, JAVADOC_1_5_TEXT};
   static final ArrayList<String> linkVersionDeprecated = new ArrayList<String>(Arrays.asList(linkDeprecated));  
   
-  /** Constants for the URLs of Sun's system class documentation for different versions of Java. */
-  public static final StringOption JAVADOC_1_3_LINK =
-    new StringOption("javadoc.1.3.link", "http://download.oracle.com/javase/1.3/docs/api");
-  public static final StringOption JAVADOC_1_4_LINK =
-    new StringOption("javadoc.1.4.link", "http://download.oracle.com/javase/1.4.2/docs/api");
-  public static final StringOption JAVADOC_1_5_LINK =
-    new StringOption("javadoc.1.5.link", "http://download.oracle.com/javase/1.5.0/docs/api");
   public static final StringOption JAVADOC_1_6_LINK =
     new StringOption("javadoc.1.6.link", "http://download.oracle.com/javase/6/docs/api");
   public static final StringOption JAVADOC_1_7_LINK =
     new StringOption("javadoc.1.7.link", "http://download.oracle.com/javase/7/docs/api/");
+  public static final StringOption JAVADOC_1_8_LINK =
+    new StringOption("javadoc.1.8.link", "http://download.oracle.com/javase/8/docs/api/");
   
   /** The version of Java to use for links to Javadoc for system classes. */
   public static final ForcedChoiceOption JAVADOC_LINK_VERSION =
     new ForcedChoiceOption("javadoc.link.version",
-                           (System.getProperty("java.specification.version").startsWith("1.5") ? JAVADOC_1_5_TEXT : 
-                              (System.getProperty("java.specification.version").startsWith("1.6") ? JAVADOC_1_6_TEXT : 
-                                 JAVADOC_1_7_TEXT)),
+                           (System.getProperty("java.specification.version").startsWith("1.6") ? JAVADOC_1_6_TEXT : 
+                              (System.getProperty("java.specification.version").startsWith("1.7") ? JAVADOC_1_7_TEXT : 
+                                 JAVADOC_1_8_TEXT)),
                            linkVersionChoices, linkVersionDeprecated);
   
-  static final String[] apiJavadocChoices = new String[] {
-    JAVADOC_1_5_TEXT, JAVADOC_1_6_TEXT, JAVADOC_1_7_TEXT, JAVADOC_AUTO_TEXT};
+  static final String[] apiJavadocChoices = new String[] {JAVADOC_1_6_TEXT, JAVADOC_1_7_TEXT, JAVADOC_1_8_TEXT, JAVADOC_AUTO_TEXT};
+  
   static final ArrayList<String> apiJavadocVersionChoices = new ArrayList<String>(Arrays.asList(apiJavadocChoices));
 
-  static final String[] apiJavadocDeprecated = new String[] {
-    JAVADOC_1_3_TEXT, JAVADOC_1_4_TEXT}; // deprecated, will be changed to JAVADOC_AUTO_TEXT
-  static final ArrayList<String> apiJavadocVersionDeprecated = new ArrayList<String>(Arrays.asList(apiJavadocDeprecated));  
+  static final String[] apiJavadocDeprecated = 
+    new String[] { JAVADOC_1_3_TEXT, JAVADOC_1_4_TEXT, JAVADOC_1_5_TEXT, }; // deprecated (changed to JAVADOC_AUTO_TEXT)
+  
+  static final ArrayList<String> apiJavadocVersionDeprecated = 
+    new ArrayList<String>(Arrays.asList(apiJavadocDeprecated));  
   
   /** The version of Java to use for the "Open Java API Javadoc" feature. */
   public static final ForcedChoiceOption JAVADOC_API_REF_VERSION =
-    new ForcedChoiceOption("javadoc.api.ref.version", JAVADOC_AUTO_TEXT,
-                           apiJavadocVersionChoices, apiJavadocVersionDeprecated);
+    new ForcedChoiceOption("javadoc.api.ref.version", JAVADOC_AUTO_TEXT, apiJavadocVersionChoices, 
+                           apiJavadocVersionDeprecated);
   
   /** URL for JUnit javadocs. */
   public static final StringOption JUNIT_LINK =
@@ -1380,7 +1381,7 @@ public interface OptionConstants {
   /** Whether to warn that a restart is necessary before the default compiler preference will change. */
   public static final BooleanOption WARN_CHANGE_DCP = new BooleanOption("warn.change.dcp", Boolean.TRUE);
 
-  /** Whether to prompt to change the language level extensions (.dj0/.dj1->.dj, .dj2->.java). */
+  /** Whether to prompt to change the language level extensions {@literal (.dj0/.dj1->.dj, .dj2->.java)}. */
   public static final BooleanOption PROMPT_RENAME_LL_FILES = new BooleanOption("prompt.rename.ll.files", Boolean.TRUE);
   
   /* ---------- MISC OPTIONS ---------- */
@@ -1392,7 +1393,7 @@ public interface OptionConstants {
   public static final BooleanOption OPEN_FOLDER_RECURSIVE =  new BooleanOption("open.folder.recursive", Boolean.FALSE);
   
   /** How many spaces to use for indenting. */
-  public static final NonNegativeIntegerOption INDENT_LEVEL = 
+  public static final NonNegativeIntegerOption INDENT_INC = 
     new NonNegativeIntegerOption("indent.level", Integer.valueOf(2));
   
   /** Number of lines to remember in the Interactions History */
@@ -1460,20 +1461,18 @@ public interface OptionConstants {
   public static final BooleanOption SHOW_PATH_WARNINGS = 
     new BooleanOption("show.path.warnings", Boolean.FALSE);
   
-  /**
-   * Default compiler to use
-   * Stores the name of the compiler to use, set by changing the selection in
-   * the ForcedChoiceOption created by COMPILER_PREFERENCE_CONTROL.evaluate()
-   */
+  /** Default compiler to use
+    * Stores the name of the compiler to use, set by changing the selection in
+    * the ForcedChoiceOption created by COMPILER_PREFERENCE_CONTROL.evaluate()
+    */
   public static final StringOption DEFAULT_COMPILER_PREFERENCE = 
     new StringOption("default.compiler.preference", COMPILER_PREFERENCE_CONTROL.NO_PREFERENCE);
   
-  /**
-   * Class that is used to dynamically populate the ForcedChoiceOption.
-   * setList method is used by DefaultCompilerModel to set the available
-   * compilers that it has
-   * Must store the selected name into DEFAULT_COMPILER_PREFERENCE to save the setting
-   */
+  /** Class that is used to dynamically populate the ForcedChoiceOption.
+    * setList method is used by DefaultCompilerModel to set the available
+    * compilers that it has
+    * Must store the selected name into DEFAULT_COMPILER_PREFERENCE to save the setting
+    */
   public static final class COMPILER_PREFERENCE_CONTROL {
     public static final String NO_PREFERENCE = "No Preference";
     public static ArrayList<String> _list = new ArrayList<String>();
@@ -1673,10 +1672,9 @@ public interface OptionConstants {
   
   /** Number of entries in the browser history (0 for unlimited). */
   public static final NonNegativeIntegerOption BROWSER_HISTORY_MAX_SIZE =
-    new NonNegativeIntegerOption("browser.history.max.size", Integer.valueOf(50));
+    new NonNegativeIntegerOption("browser.history.max.size", 10000);  // exploting autoboxing
   
-  /** Whether to also list files with fully qualified paths.
-    */
+  /** Whether to also list files with fully qualified paths. */
   public static final BooleanOption DIALOG_GOTOFILE_FULLY_QUALIFIED =
     new BooleanOption("dialog.gotofile.fully.qualified", Boolean.FALSE);
   

@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -43,8 +43,6 @@ import java.util.List;
 import java.util.ArrayList;
 
 import edu.rice.cs.drjava.model.repl.newjvm.ClassPathManager;
-import edu.rice.cs.drjava.model.AbstractGlobalModel;
-
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.ConsoleDocument;
@@ -98,7 +96,7 @@ public class SimpleInteractionsModel extends InteractionsModel {
     catch (InterpreterException e) {
       StringWriter msg = new StringWriter();
       e.printUserMessage(new PrintWriter(msg));
-      _document.appendExceptionResult(msg.toString(), InteractionsDocument.DEFAULT_STYLE);
+      _document.appendExceptionResult(msg.toString(), ConsoleDocument.DEFAULT_STYLE);
     }
     finally { _interactionIsOver(); }
   }
@@ -149,16 +147,16 @@ public class SimpleInteractionsModel extends InteractionsModel {
     */
   public void addExtraClassPath(File path) { _classPathManager.addExtraCP(path); }
   
-  /** Sets whether or not the interpreter should enforce access to all members. */
+  /** @param enforce true if the interpreter should enforce access to all members. */
   public void setEnforceAllAccess(boolean enforce) { _interpreterOptions.setEnforceAllAccess(enforce); }
   
-  /** Sets whether or not the interpreter should enforce access to private members. */
+  /** @param enforce true if the interpreter should enforce access to private members. */
   public void setEnforcePrivateAccess(boolean enforce) { _interpreterOptions.setEnforcePrivateAccess(enforce); }
 
-  /** Require a semicolon at the end of statements. */
+  /** @param require true if the interpreter requires a semicolon at the end of statements. */
   public void setRequireSemicolon(boolean require) { _interpreterOptions.setRequireSemicolon(require); }
   
-  /** Require variable declarations to include an explicit type. */
+  /** @param require true if the interpreter requires variable declarations to include an explicit type. */
   public void setRequireVariableType(boolean require) { _interpreterOptions.setRequireVariableType(require); }
   
   /** Any extra action to perform (beyond notifying listeners) when the interpreter fails to reset.

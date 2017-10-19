@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -76,7 +76,11 @@ public abstract class IndentRuleWithTrace implements IndentRule {
 
   static ArrayList<String> getTrace() { return trace; }
 
-  /** This rule just adds to the trace kept in trace */
+  /** This rule just adds to the trace kept in trace 
+   * @param ruleName rule name
+   * @param direction direction to add to the trace
+   * @param terminus true if we should start over next time; false otherwise
+   */
   protected static void _addToIndentTrace(String ruleName, String direction, boolean terminus) {
     if (ruleTraceEnabled) {
       if (startOver) trace = new ArrayList<String>();
@@ -85,41 +89,46 @@ public abstract class IndentRuleWithTrace implements IndentRule {
     }
   }
 
-  /** Properly indents the line identified by pos. Replaces all whitespace characters at the beginning of the line with
-    * the appropriate spacing or characters.
-    * @param doc  the AbstractDJDocument containing the line to be indented.
-    * @param pos  the position identifying the line to be indented
-    * @param reason  the reason that the indentation is taking place
-    * @return true if the caller should update the current location itself, false if the indenter has already handled it
-    */
-  public boolean indentLine(AbstractDJDocument doc, int pos, Indenter.IndentReason reason) {
+  /** Properly indents the line identified by pos. Replaces all whitespace 
+   * characters at the beginning of the line with the appropriate spacing or 
+   * characters.
+   * @param doc  the AbstractDJDocument containing the line to be indented.
+   * @param pos  the position identifying the line to be indented
+   * @param reason  the reason that the indentation is taking place
+   */
+  public void indentLine(AbstractDJDocument doc, int pos, Indenter.IndentReason reason) {
     int oldPos = doc.getCurrentLocation();
     doc.setCurrentLocation(pos);
     indentLine(doc, reason);
     if (oldPos > doc.getLength()) oldPos = doc.getLength();
     doc.setCurrentLocation(oldPos);
-    return false;
   }
 
-  /** This method does not indent the current line! */
-  public boolean indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
-    _addToIndentTrace(getRuleName(), TERMINUS_RULE, true);
-
-    //Add the next line, and every time something is indented, the indent trace will be printed
-    //printLastIndentTrace(System.out);
-    return true;
+  /** This method optionally traces indenting; it does not indent the current line! 
+   * @param doc  the AbstractDJDocument containing the line to be indented.
+   * @param reason  the reason that the indentation is taking place
+   */
+  public void indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
+    _addToIndentTrace(getRuleName(), TERMINUS_RULE, true);;
   }
   
-  /** Convenience method that wraps calls on indentLine in a write lock. Only used in testing. */
-  public boolean testIndentLine(AbstractDJDocument doc, int pos, Indenter.IndentReason reason) {
-    return indentLine(doc, pos, reason); 
+  /** Convenience method that wraps calls on indentLine in a write lock. Only used in testing. 
+   * @param doc  the AbstractDJDocument containing the line to be indented.
+   * @param pos  the position identifying the line to be indented
+   * @param reason  the reason that the indentation is taking place
+   */
+  public void testIndentLine(AbstractDJDocument doc, int pos, Indenter.IndentReason reason) {
+    indentLine(doc, pos, reason); 
   }
   
-  /** Convenience method that wraps calls on indentLine in a write lock. Only used in testing. */
-   public boolean testIndentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
-     return indentLine(doc, reason); 
+  /** Convenience method that wraps calls on indentLine in a write lock. Only used in testing. 
+   * @param doc  the AbstractDJDocument containing the line to be indented.
+   * @param reason  the reason that the indentation is taking place
+   */
+   public void testIndentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
+     indentLine(doc, reason); 
    }
 
-  /** The rule name to report to _addToIndentTrace */
+  /** @return the rule name to report to _addToIndentTrace */
   public String getRuleName() { return this.getClass().getName(); }
 }

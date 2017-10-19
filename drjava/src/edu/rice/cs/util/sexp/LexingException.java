@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -36,8 +36,7 @@
 
 package edu.rice.cs.util.sexp;
 
-/**
- * This exception is used by the lexer.  It extends
+/** * This exception is used by the lexer.  It extends
  * RuntimeException so that each place readToken() is
  * used on the lexer doesn't need to be declared to
  * throw an SExpParseException.  This exception is

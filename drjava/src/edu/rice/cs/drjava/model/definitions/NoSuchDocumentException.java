@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -36,8 +36,7 @@
 
 package edu.rice.cs.drjava.model.definitions;
 
-/**
- * This exception is to be thrown when an <code>OpenDefinitionsDocument</code> 
+/** * This exception is to be thrown when an <code>OpenDefinitionsDocument</code> 
  * was asked for its DefinitionsDocument and when the <code>OpenDefinitionsDocument</code>
  * itself is not registered in the Document Cache.  This could happen either if the
  * <code>OpenDefinitionsDocument</code> was not correctly initialized (unlikely) or if

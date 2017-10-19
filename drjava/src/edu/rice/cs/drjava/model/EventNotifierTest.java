@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -39,8 +39,7 @@ package edu.rice.cs.drjava.model;
 import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.model.GlobalModelTestCase.TestListener;
 
-/**
- * Tests the functionality of the class that notifies listeners
+/** * Tests the functionality of the class that notifies listeners
  * of a global model.
  * @version $Id$
  */

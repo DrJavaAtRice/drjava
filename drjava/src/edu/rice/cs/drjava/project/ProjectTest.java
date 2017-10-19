@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -80,17 +80,19 @@ public class ProjectTest extends DrJavaTestCase {
     super.tearDown();
   }
   
-  /** Test to make sure all elements of the project are read correctly into the IR */
+  /** Test to make sure all elements of the project are read correctly into the IR 
+   * @throws IOException if an IO operation fails
+   * @throws MalformedProjectFileException if the project file is not in the expected format
+   * @throws java.text.ParseException if parsing fails
+   */
   public void testLegacyParseProject() throws IOException, MalformedProjectFileException, java.text.ParseException {
     String proj1 =
       ";; DrJava project file.  Written with build: 20040623-1933\n" +
       "(source ;; comment\n" +
       "   (file (name \"src/sexp/Atom.java\")(select 32 32)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
-      "   (file (name \"src/sexp/BoolAtom.java\")(select 0 0)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
       "   (file (name \"src/sexp/Cons.java\")(select 0 0)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
       "   (file (name \"src/sexp/Empty.java\")(select 24 28)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
       "   (file (name \"src/sexp/Lexer.java\")(select 0 0)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
-      "   (file (name \"src/sexp/NumberAtom.java\")(select 12 12)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
       "   (file (name \"src/sexp/SEList.java\")(select 0 0)))\n" + // doesn't have mod date
       "(auxiliary ;; absolute file names\n" +
       "   (file (name " + convertToLiteral(new File(parent, "junk/sexp/Tokens.java").getCanonicalPath()) + 
@@ -119,7 +121,7 @@ public class ProjectTest extends DrJavaTestCase {
 //    System.err.println("projFile exists? " + f.exists());
     ProjectFileIR pfir = ProjectFileParserFacade.ONLY.parse(f);
 //    System.err.println("buildDir = " + pfir.getBuildDirectory().getCanonicalPath());
-    assertEquals("number of source files", 7, pfir.getSourceFiles().length);
+    assertEquals("number of source files", 5, pfir.getSourceFiles().length);
     assertEquals("number of aux files", 2, pfir.getAuxiliaryFiles().length);
     assertEquals("number of collapsed", 2, pfir.getCollapsedPaths().length);
     assertEquals("number of classpaths", 1, IterUtil.sizeOf(pfir.getClassPaths()));
@@ -129,7 +131,7 @@ public class ProjectTest extends DrJavaTestCase {
                  ProjectProfile.MOD_DATE_FORMAT.parse("16-Jul-2004 03:45:23").getTime(),
                  pfir.getSourceFiles()[0].getSavedModDate());
     assertEquals("last source filename", new File(base,"src/sexp/SEList.java").getPath(), 
-                 pfir.getSourceFiles()[6].getPath());
+                 pfir.getSourceFiles()[4].getPath());
     assertEquals("first aux filename", new File(base,"junk/sexp/Tokens.java").getPath(), 
                  pfir.getAuxiliaryFiles()[0].getCanonicalPath());
     assertEquals("last collapsed path", "./[ External ]/", pfir.getCollapsedPaths()[1]);
@@ -143,18 +145,20 @@ public class ProjectTest extends DrJavaTestCase {
                  pfir.getMainClass());
   }
 
-   /** Test to make sure all elements of the project are read correctly into the IR */
+  /** Test to make sure all elements of the project are read correctly into the IR
+   * @throws IOException if an IO operation fails
+   * @throws MalformedProjectFileException if the project file is not in the expected format
+   * @throws java.text.ParseException if parsing fails
+   */
   public void testParseProject() throws IOException, MalformedProjectFileException, java.text.ParseException {
     String proj2 =
       ";; DrJava project file.  Written with build: 2006??\n" +
       "(proj-root-and-base (file (name \"src\")))\n" +
       "(source-files ;; comment\n" +
       "   (file (name \"sexp/Atom.java\")(select 32 32)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
-      "   (file (name \"sexp/BoolAtom.java\")(select 0 0)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
       "   (file (name \"sexp/Cons.java\")(select 0 0)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
       "   (file (name \"sexp/Empty.java\")(select 24 28)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
       "   (file (name \"sexp/Lexer.java\")(select 0 0)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
-      "   (file (name \"sexp/NumberAtom.java\")(select 12 12)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
       "   (file (name \"sexp/SEList.java\")(select 0 0)))\n" + // doesn't have mod date
       "(auxiliary ;; absolute file names\n" +
       "   (file (name " + convertToLiteral(new File(parent,"junk/sexp/Tokens.java").getCanonicalPath()) +
@@ -180,7 +184,7 @@ public class ProjectTest extends DrJavaTestCase {
 //    System.err.println("projFile exists? " + f.exists());
     ProjectFileIR pfir = ProjectFileParserFacade.ONLY.parse(f);
 //    System.err.println("buildDir = " + pfir.getBuildDirectory().getCanonicalPath());
-    assertEquals("number of source files", 7, pfir.getSourceFiles().length);
+    assertEquals("number of source files", 5, pfir.getSourceFiles().length);
     assertEquals("number of aux files", 2, pfir.getAuxiliaryFiles().length);
     assertEquals("number of collapsed", 2, pfir.getCollapsedPaths().length);
     assertEquals("number of classpaths", 1, IterUtil.sizeOf(pfir.getClassPaths()));
@@ -192,7 +196,7 @@ public class ProjectTest extends DrJavaTestCase {
                  ProjectProfile.MOD_DATE_FORMAT.parse("16-Jul-2004 03:45:23").getTime(),
                  pfir.getSourceFiles()[0].getSavedModDate());
     assertEquals("last source filename", new File(root, "sexp/SEList.java").getPath(), 
-                 pfir.getSourceFiles()[6].getPath());
+                 pfir.getSourceFiles()[4].getPath());
     assertEquals("first aux filename", new File(base,"junk/sexp/Tokens.java").getPath(), 
                  pfir.getAuxiliaryFiles()[0].getCanonicalPath());
     assertEquals("last collapsed path", "./[ External ]/", pfir.getCollapsedPaths()[1]);
@@ -275,17 +279,19 @@ public class ProjectTest extends DrJavaTestCase {
   
   // ----- ProjectFileParser -----
   
-  /** Test to make sure all elements of the project are read correctly into the IR */
+  /** Test to make sure all elements of the project are read correctly into the IR
+   * @throws IOException if an IO operation fails
+   * @throws MalformedProjectFileException if the project file is not in the expected format
+   * @throws java.text.ParseException if parsing fails
+   */
   public void testLegacyParseProjectPJT() throws IOException, MalformedProjectFileException, java.text.ParseException {
     String proj1 =
       ";; DrJava project file.  Written with build: 20040623-1933\n" +
       "(source ;; comment\n" +
       "   (file (name \"src/sexp/Atom.java\")(select 32 32)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
-      "   (file (name \"src/sexp/BoolAtom.java\")(select 0 0)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
       "   (file (name \"src/sexp/Cons.java\")(select 0 0)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
       "   (file (name \"src/sexp/Empty.java\")(select 24 28)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
       "   (file (name \"src/sexp/Lexer.java\")(select 0 0)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
-      "   (file (name \"src/sexp/NumberAtom.java\")(select 12 12)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
       "   (file (name \"src/sexp/SEList.java\")(select 0 0)))\n" + // doesn't have mod date
       "(auxiliary ;; absolute file names\n" +
       "   (file (name " + convertToLiteral(new File(parent, "junk/sexp/Tokens.java").getCanonicalPath()) + 
@@ -314,7 +320,7 @@ public class ProjectTest extends DrJavaTestCase {
 //    System.err.println("projFile exists? " + f.exists());
     ProjectFileIR pfir = ProjectFileParser.ONLY.parse(f);
 //    System.err.println("buildDir = " + pfir.getBuildDirectory().getCanonicalPath());
-    assertEquals("number of source files", 7, pfir.getSourceFiles().length);
+    assertEquals("number of source files", 5, pfir.getSourceFiles().length);
     assertEquals("number of aux files", 2, pfir.getAuxiliaryFiles().length);
     assertEquals("number of collapsed", 2, pfir.getCollapsedPaths().length);
     assertEquals("number of classpaths", 1, IterUtil.sizeOf(pfir.getClassPaths()));
@@ -324,7 +330,7 @@ public class ProjectTest extends DrJavaTestCase {
                  ProjectProfile.MOD_DATE_FORMAT.parse("16-Jul-2004 03:45:23").getTime(),
                  pfir.getSourceFiles()[0].getSavedModDate());
     assertEquals("last source filename", new File(base,"src/sexp/SEList.java").getPath(), 
-                 pfir.getSourceFiles()[6].getPath());
+                 pfir.getSourceFiles()[4].getPath());
     assertEquals("first aux filename", new File(base,"junk/sexp/Tokens.java").getPath(), 
                  pfir.getAuxiliaryFiles()[0].getCanonicalPath());
     assertEquals("last collapsed path", "./[ External ]/", pfir.getCollapsedPaths()[1]);
@@ -338,18 +344,20 @@ public class ProjectTest extends DrJavaTestCase {
                  pfir.getMainClass());
   }
 
-   /** Test to make sure all elements of the project are read correctly into the IR */
+  /** Test to make sure all elements of the project are read correctly into the IR
+   * @throws IOException if an IO operation fails
+   * @throws MalformedProjectFileException if the project file is not in the expected format
+   * @throws java.text.ParseException if parsing fails
+   */
   public void testParseProjectPJT() throws IOException, MalformedProjectFileException, java.text.ParseException {
     String proj2 =
       ";; DrJava project file.  Written with build: 2006??\n" +
       "(proj-root-and-base (file (name \"src\")))\n" +
       "(source-files ;; comment\n" +
       "   (file (name \"sexp/Atom.java\")(select 32 32)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
-      "   (file (name \"sexp/BoolAtom.java\")(select 0 0)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
       "   (file (name \"sexp/Cons.java\")(select 0 0)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
       "   (file (name \"sexp/Empty.java\")(select 24 28)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
       "   (file (name \"sexp/Lexer.java\")(select 0 0)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
-      "   (file (name \"sexp/NumberAtom.java\")(select 12 12)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
       "   (file (name \"sexp/SEList.java\")(select 0 0)))\n" + // doesn't have mod date
       "(auxiliary ;; absolute file names\n" +
       "   (file (name " + convertToLiteral(new File(parent,"junk/sexp/Tokens.java").getCanonicalPath()) +
@@ -375,7 +383,7 @@ public class ProjectTest extends DrJavaTestCase {
 //    System.err.println("projFile exists? " + f.exists());
     ProjectFileIR pfir = ProjectFileParser.ONLY.parse(f);
 //    System.err.println("buildDir = " + pfir.getBuildDirectory().getCanonicalPath());
-    assertEquals("number of source files", 7, pfir.getSourceFiles().length);
+    assertEquals("number of source files", 5, pfir.getSourceFiles().length);
     assertEquals("number of aux files", 2, pfir.getAuxiliaryFiles().length);
     assertEquals("number of collapsed", 2, pfir.getCollapsedPaths().length);
     assertEquals("number of classpaths", 1, IterUtil.sizeOf(pfir.getClassPaths()));
@@ -387,7 +395,7 @@ public class ProjectTest extends DrJavaTestCase {
                  ProjectProfile.MOD_DATE_FORMAT.parse("16-Jul-2004 03:45:23").getTime(),
                  pfir.getSourceFiles()[0].getSavedModDate());
     assertEquals("last source filename", new File(root, "sexp/SEList.java").getPath(), 
-                 pfir.getSourceFiles()[6].getPath());
+                 pfir.getSourceFiles()[4].getPath());
     assertEquals("first aux filename", new File(base,"junk/sexp/Tokens.java").getPath(), 
                  pfir.getAuxiliaryFiles()[0].getCanonicalPath());
     assertEquals("last collapsed path", "./[ External ]/", pfir.getCollapsedPaths()[1]);

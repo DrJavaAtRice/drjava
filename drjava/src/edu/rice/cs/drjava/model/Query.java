@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -106,7 +106,7 @@ public interface Query {
     }
     
     public int hashCode() { 
-      int[] intArray = new int[] { getClass().hashCode(), _pos, (int)_chars[0], (int)_chars[_chars.length-1], (_flag ? 1 : 0) };
+      int[] intArray = new int[] { getClass().hashCode(), _pos, _chars[0], _chars[_chars.length-1], (_flag ? 1 : 0) };
       return hash(intArray); 
     }
   }

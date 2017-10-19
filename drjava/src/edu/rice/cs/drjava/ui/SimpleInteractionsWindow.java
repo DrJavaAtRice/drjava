@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -110,10 +110,13 @@ public class SimpleInteractionsWindow extends SwingFrame {
     */
   protected void close() { System.exit(0); }
   
-  /** Accessor for the controller. */
+  /** @return the controller. */
   public InteractionsController getController() { return _controller; }
   
-  /** Main method to create a SimpleInteractionsWindow from the console. Doesn't take any command line arguments. */
+  /** Main method to create a SimpleInteractionsWindow from the console. 
+   * Doesn't take any command line arguments. 
+   * @param args should be empty
+   */
   public static void main(String[] args) {
     SimpleInteractionsWindow w = new SimpleInteractionsWindow();
     if (args.length > 0 && args[0].equals("-debug")) {

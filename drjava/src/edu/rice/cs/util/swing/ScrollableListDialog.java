@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -253,8 +253,7 @@ public class ScrollableListDialog<T> extends JDialog {
     setSize(dialogSize);
   }
   
-  /**
-   * A method to check if they given message type is a know message
+  /** A method to check if they given message type is a know message
    * type.
    * 
    * @param messageType The message type to check
@@ -268,8 +267,7 @@ public class ScrollableListDialog<T> extends JDialog {
       messageType == JOptionPane.PLAIN_MESSAGE;
   }
   
-  /**
-   * Lookup the icon associated with the given messageType. The message
+  /** Lookup the icon associated with the given messageType. The message
    * type must be one of the message types from
    * {@link javax.swing.JOptionPane}.
    * 
@@ -301,8 +299,7 @@ public class ScrollableListDialog<T> extends JDialog {
     return null;
   }
   
-  /**
-   * Adds buttons to the bottom of the dialog. By default, a single
+  /** Adds buttons to the bottom of the dialog. By default, a single
    * &quot;OK&quot; button is added that calls {@link #closeDialog}. It
    * is also set as the dialog's default button.
    *
@@ -329,20 +326,17 @@ public class ScrollableListDialog<T> extends JDialog {
     getRootPane().setDefaultButton(buttons.get(0));
   }
   
-  /**
-   * Adds additional components to the bottom of the dialog.
+  /** Adds additional components to the bottom of the dialog.
    * @param buttonPanel The JPanel that should contain the components.
    * @param additional The list of components
    */
   protected void _addAdditionalComponents(JPanel buttonPanel, List<JComponent> additional) {
-    int i = 0;
     for (JComponent c: additional) {
       buttonPanel.add(c);
     }
   }
   
-  /**
-   * Shows the dialog.
+  /** Shows the dialog.
    */
   public void showDialog() {
     pack();
@@ -350,18 +344,17 @@ public class ScrollableListDialog<T> extends JDialog {
     setVisible(true);
   }
   
-  /**
-   * Should be called when the dialog should be closed. The default
+  /** Should be called when the dialog should be closed. The default
    * implementation simply hides the dialog.
    */
   protected void closeDialog() {
     setVisible(false);
   }
   
-  /** Return the number of the button that was pressed to close the dialog. */
+  /** @return the number of the button that was pressed to close the dialog. */
   public int getButtonPressed() { return _buttonPressed; }
   
-  /** Return a list of the selected items. */
+  /** @return a list of the selected items. */
   public List<T> getSelectedItems() {
     ArrayList<T> l = new ArrayList<T>();
     for (int i: list.getSelectedIndices())  l.add(listItems.get(i));

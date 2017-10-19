@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -48,21 +48,27 @@ import edu.rice.cs.drjava.model.DJError;
 public class CompilerError extends DJError {
   
   /** Constructor.
-    * @param  file the file where the error occurred
-    * @param  lineNumber the line number of the error
-    * @param  startColumn the starting column of the error
-    * @param  message  the error message
-    */
+   * @param  file the file where the error occurred
+   * @param  lineNumber the line number of the error
+   * @param  startColumn the starting column of the error
+   * @param  message  the error message
+   * @param  isWarning true if this is a warning; false if it's an error
+   */
   public CompilerError(File file, int lineNumber, int startColumn, String message, boolean isWarning) { 
     super(file, lineNumber, startColumn, message, isWarning);
   }
   
-  /** Constructor for an DJError with an associated file but no location in the source */
+  /** Constructor for an DJError with an associated file but no location in the source 
+   * @param  file the file where the error occurred
+   * @param  message  the error message
+   * @param  isWarning true if this is a warning; false if it's an error
+   */
   public CompilerError(File file, String message, boolean isWarning) { super(file, message, isWarning); }
   
   /** Constructor for CompilerErrors without files.
-    * @param message the error message
-    */
+   * @param message the error message
+   * @param  isWarning true if this is a warning; false if it's an error
+   */
   public CompilerError(String message, boolean isWarning) { super(message, isWarning); }
 }
   

@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -40,13 +40,18 @@ package edu.rice.cs.drjava.config;
   * @version $Id$
   */
 public class VariableProperty extends ConstantProperty {
-  /** Create a variable property. */
+
+  /** Create a variable property. 
+   * @param name the name of the property
+   * @param value the value of the property
+   */
   public VariableProperty(String name, String value) {
     super(name, value, "User-defined variable.");
   }
   
   /** Set the value of the variable.
-    * @param value new value */
+   * @param value new value 
+   */
   public void setValue(String value) {
     _value = value;
   }

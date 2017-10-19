@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -47,8 +47,7 @@ import javax.swing.JOptionPane;
   * @version $Id$
   */
 public class DrJavaRestart {
-  /**
-   * Number of attempts to delete or rename files. This is necessary since an OS,
+  /** Number of attempts to delete or rename files. This is necessary since an OS,
    * particularly Windows, may still have a write lock on a file.
    * Currently, we pause up to 5*1000 ms per operation. */
   public static final int ATTEMPTS = 5;
@@ -132,7 +131,7 @@ public class DrJavaRestart {
                     dest.getAbsolutePath());
           }
           LOG.log("Restarting...");
-          Process p = JVMBuilder.DEFAULT.classPath(exec).start(DrJava.class.getName(), "-new", "-delete-after-restart", args[2]);
+          JVMBuilder.DEFAULT.classPath(exec).start(DrJava.class.getName(), "-new", "-delete-after-restart", args[2]);
           LOG.log("Done with DrJavaRestart");
           System.exit(0);
         }
@@ -201,7 +200,7 @@ public class DrJavaRestart {
           }
           if (macOpenFile.exists()) {
             LOG.log("Restarting using ProcessBuilder...");
-            Process p = new ProcessBuilder()
+            new ProcessBuilder()
               .command(macOpenFile.getAbsolutePath(), exec.getAbsolutePath())
               .redirectErrorStream(true)
               .start();
@@ -210,7 +209,7 @@ public class DrJavaRestart {
           else {
             LOG.log("Restarting using JVMBuilder...");
             exec = new File(exec,"Contents/Resources/Java/drjava.jar");
-            Process p = JVMBuilder.DEFAULT.classPath(exec).start(DrJava.class.getName(), "-new", "-delete-after-restart", args[2]);
+            JVMBuilder.DEFAULT.classPath(exec).start(DrJava.class.getName(), "-new", "-delete-after-restart", args[2]);
             LOG.log("Done with DrJavaRestart");
             System.exit(0);
           }

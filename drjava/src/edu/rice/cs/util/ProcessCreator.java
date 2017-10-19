@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -43,8 +43,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-/**
- * This class abstracts out process creation, similar to ProcessCreator,
+/** * This class abstracts out process creation, similar to ProcessCreator,
  * which is only available in Java 1.5.
  * This ProcessCreator cannot deal with process sequences and chains.
  * It can only create one processes.
@@ -123,21 +122,23 @@ public class ProcessCreator {
     return _workdir;
   }
   
-  /** Return the command line after evaluation, or null if it hasn't been replaced yet. */
+  /** @return the command line after evaluation, or null if it hasn't been replaced yet. */
   public String evaluatedCommandLine() {
     return _evaluatedCmdLine;
   }
   
-  /** Return the work directory after evaluation, or null if it hasn't been replaced yet. */
+  /** @return the work directory after evaluation, or null if it hasn't been replaced yet. */
   public String evaluatedWorkDir() {
     return _evaluatedWorkDir;
   }
   
-  /** Return the PropertyMaps object used for substitution. */
+  /** @return the PropertyMaps object used for substitution. */
   public PropertyMaps getPropertyMaps() { return _props; }
   
   /** Starts a new process using the attributes of this process creator.
-    */
+   * @return the newly-started process
+   * @throws IOException if an IO operation fails
+   */
   public Process start() throws IOException {
     // set up work directory
     _evaluatedWorkDir = StringOps.replaceVariables(_workdir, _props, PropertyMaps.GET_CURRENT);

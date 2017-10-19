@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.model;
 
-/** Any class which wants to listen to DocumentRegion events fired by a RegionManager should implement this interface
+/** Any class which wants to listen to StaticDocumentRegion events fired by a RegionManager should implement this interface
  *  and use RegionManager's addListener() method.
  *  @version $Id$
  */

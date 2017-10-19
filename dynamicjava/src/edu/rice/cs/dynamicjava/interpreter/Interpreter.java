@@ -13,9 +13,7 @@ import edu.rice.cs.dynamicjava.Options;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
-/**
- * The external interface for the interpreter.
- */
+/** The external interface for the interpreter. */
 public class Interpreter {
 
   private final Options _opt;

@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -36,8 +36,7 @@
 
 package edu.rice.cs.drjava.model.debug;
 
-/**
- * Class for keeping track of watched fields and variables.
+/** * Class for keeping track of watched fields and variables.
  * @version $Id$
  */
 public class DebugWatchData {
@@ -72,14 +71,13 @@ public class DebugWatchData {
     _changed = false;
   }
 
-  /** Returns the name of this field or variable. */
+  /** @return the name of this field or variable. */
   public String getName() { return _name; }
 
-  /** Returns the most recently determined value for this field or variable. */
+  /** @return the most recently determined value for this field or variable. */
   public String getValue() { return (_showValue) ? _value : ""; }
 
-  /** Returns the type of this field or variable in the current context.
-   */
+  /** @return the type of this field or variable in the current context. */
   public String getType() {
     return (_showType) ? _type : "";
   }
@@ -136,9 +134,9 @@ public class DebugWatchData {
     _type = NOT_LOADED;
   }
 
-  /** Returns whether this value has changed since the last call to setValue. */
+  /** @return whether this value has changed since the last call to setValue. */
   public boolean isChanged() { return _changed; }
 
-  /** Returns a legible representation of the type, name, and value. */
+  /** @return a legible representation of the type, name, and value. */
   public String toString() { return _type + " " + _name + ": " + _value; }
 }

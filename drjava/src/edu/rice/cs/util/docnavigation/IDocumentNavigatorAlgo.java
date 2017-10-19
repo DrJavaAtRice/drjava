@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -36,8 +36,7 @@
 
 package edu.rice.cs.util.docnavigation;
 
-/**
- * Visitor interface implemented by anything which wishes to visit an IDocumentNavigator
+/** * Visitor interface implemented by anything which wishes to visit an IDocumentNavigator
  */
 
 public interface IDocumentNavigatorAlgo<ItemT extends INavigatorItem, InType, ReturnType>
@@ -45,12 +44,14 @@ public interface IDocumentNavigatorAlgo<ItemT extends INavigatorItem, InType, Re
   /** the List case for the visitor
    * @param navigator the navigator that is executing the visitor
    * @param input the input to the algorithm
+   * @return result
    */
   public ReturnType forList(IDocumentNavigator<ItemT> navigator, InType input);
 
   /** the Tree case for the visitor
    * @param navigator the navigator that is executing the visitor
    * @param input the input to the algorithm
+   * @return result
    */
   public ReturnType forTree(IDocumentNavigator<ItemT> navigator, InType input);
 }

@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -45,9 +45,9 @@ import edu.rice.cs.util.OperationCanceledException;
   */
 public interface FileSaveSelector {
   
-  /** Returns the file to save.
-    * @throws OperationCanceledException if the save request is cancelled
-    */
+  /** @return the file to save.
+   * @throws OperationCanceledException if the save request is cancelled
+   */
   public File getFile() throws OperationCanceledException;
   
   /** Informs the user that the chosen file is already open and prompts them asking whether to continue with the save
@@ -63,8 +63,10 @@ public interface FileSaveSelector {
   public boolean verifyOverwrite(File f);
   
   /** Confirms whether a new file should be selected since the previously chosen file has been deleted or moved.
-    * @param oldFile The file that was moved or deleted.
-    */
+   * @param doc the open document
+   * @param oldFile The file that was moved or deleted.
+   * @return true if should save; false otherwise
+   */
   public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile);
   
   /** Return true if saving should update the document's state (i.e. new file name and reset

@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -40,8 +40,7 @@ import junit.framework.*;
 import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.BraceException;
 
-/**
- * Tests the Brace class.
+/** * Tests the Brace class.
  * @version $Id$
  */
 public final class BraceTest extends DrJavaTestCase implements ReducedModelStates {

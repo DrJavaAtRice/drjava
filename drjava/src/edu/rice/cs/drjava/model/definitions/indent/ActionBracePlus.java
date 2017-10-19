@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -54,10 +54,9 @@ public class ActionBracePlus extends IndentRuleAction {
     * the line with the appropriate spacing or characters.<p>
     * Preconditions: must be inside a brace.
     * @param doc AbstractDJDocument containing the line to be indented.
-    * @return true if the caller should update the current location, false if the indenter has already done this.
     */
-  public boolean indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
-    boolean supResult = super.indentLine(doc, reason);
+  public void indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
+    super.indentLine(doc, reason);
     int here = doc.getCurrentLocation();
     int startLine = doc._getLineStartPos(here);
     doc.setCurrentLocation(startLine);  // Is this necessary?  _getLineEnclosingBrace only depends on current LINE
@@ -67,7 +66,7 @@ public class ActionBracePlus extends IndentRuleAction {
     // Check preconditions
     if (info.braceType().equals("") || dist < 0) {  // Should use interned Strings here
       // Can't find brace, so do nothing.
-      return supResult;
+      return;
     }
 
     // Find length to brace
@@ -83,7 +82,5 @@ public class ActionBracePlus extends IndentRuleAction {
     doc.setCurrentLocation(here);
 
     doc.setTab(tab, here);
-    
-    return supResult;
   }
 }

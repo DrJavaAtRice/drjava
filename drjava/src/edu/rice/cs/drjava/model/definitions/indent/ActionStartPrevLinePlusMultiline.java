@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -40,8 +40,7 @@ import javax.swing.text.*;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 
-/**
- * Indents the current line in the document to the indent level of the
+/** * Indents the current line in the document to the indent level of the
  * start of the previous line, adds several lines of text at that indent level,
  * and moves the cursor to a particular line and position.
  * @version $Id$
@@ -93,9 +92,8 @@ class ActionStartPrevLinePlusMultiline extends IndentRuleAction {
     * location.  If on the first line, indent is set to 0.  Only runs in event thread.
     * @param doc AbstractDJDocument containing the line to be indented.
     * @param reason The reason that the indentation is taking place
-    * @return this is always false, since we are updating the cursor location
     */
-  public boolean indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
+  public void indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
     super.indentLine(doc, reason);
     try {
       // Find start of line
@@ -125,7 +123,6 @@ class ActionStartPrevLinePlusMultiline extends IndentRuleAction {
           here += _suffices[i].length();
         }
       }
-      return false;
     }
     catch (BadLocationException e) {
       // Shouldn't happen

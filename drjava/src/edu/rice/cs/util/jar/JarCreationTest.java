@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -173,6 +173,7 @@ public class JarCreationTest extends DrJavaTestCase {
   }
 
   /** Test the manual creation of jar files
+   * @throws IOException if an IO operation fails
    */
   public void testCreateJar() throws IOException {
     File f = edu.rice.cs.plt.io.IOUtil.createAndMarkTempFile("test", ".jar");
@@ -203,13 +204,18 @@ public class JarCreationTest extends DrJavaTestCase {
 
       JarInputStream jarStream = new JarInputStream(new FileInputStream(f), true);
 
-      JarEntry ent = jarStream.getNextJarEntry();
-      assertTrue("should have JarTest", ent != null);
-      assertEquals("names should match", "JarTest.java", ent.getName());
-
-      ent = jarStream.getNextJarEntry();
-      assertTrue("should have JarTest", ent != null);
-      assertEquals("names should match", "dir/JarTest.java", ent.getName());
+      try {
+        JarEntry ent = jarStream.getNextJarEntry();
+        assertTrue("should have JarTest", ent != null);
+        assertEquals("names should match", "JarTest.java", ent.getName());
+  
+        ent = jarStream.getNextJarEntry();
+        assertTrue("should have JarTest", ent != null);
+        assertEquals("names should match", "dir/JarTest.java", ent.getName());
+      }
+      finally {
+        jarStream.close();
+      }
     }
     catch (IOException e) {
       e.printStackTrace();

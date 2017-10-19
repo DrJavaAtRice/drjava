@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -39,18 +39,15 @@ package edu.rice.cs.drjava.model.repl.newjvm;
 import java.io.File;
 import java.util.LinkedList;
 import java.lang.ClassLoader;
+
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.plt.reflect.PathClassLoader;
 
-import static edu.rice.cs.plt.debug.DebugUtil.error;
-import static edu.rice.cs.plt.debug.DebugUtil.debug;
-
-/**
- * Maintains a dynamic class path, allowing entries to be incrementally added in the appropriate
- * place in the list.  This class is used in the interpreter JVM, and may be accessed concurrently.
- */
+/** Maintains a dynamic class path, allowing entries to be incrementally added in the appropriate
+  * place in the list.  This class is used in the interpreter JVM, and may be accessed concurrently.
+  */
 public class ClassPathManager implements Lambda<ClassLoader, ClassLoader> {
   
   // For thread safety, all accesses to these lists are synchronized on this, and when they are made available
@@ -98,14 +95,16 @@ public class ClassPathManager implements Lambda<ClassLoader, ClassLoader> {
     }
   };
   
-  /** Adds the entry to the front of the project classpath
-    * (this is the classpath specified in project properties)
+  /** Adds the entry to the front of the project classpath (this is the classpath specified in project properties)
+    * @param f the file to be added to the classpath
     */
   public synchronized void addProjectCP(File f) { _projectCP.addFirst(f); updateProperty(); }
   
   public synchronized Iterable<File> getProjectCP() { return IterUtil.snapshot(_projectCP); }
   
-  /** Adds the entry to the front of the build classpath. */
+  /** Adds the entry to the front of the build classpath. 
+   * @param f the file to be added to the classpath
+   */
   public synchronized void addBuildDirectoryCP(File f) {
     _buildCP.remove(f); // eliminate duplicates
     _buildCP.addFirst(f);
@@ -114,7 +113,9 @@ public class ClassPathManager implements Lambda<ClassLoader, ClassLoader> {
   
   public synchronized Iterable<File> getBuildDirectoryCP() { return IterUtil.snapshot(_buildCP); }
   
-  /** Adds the entry to the front of the project files classpath (this is the classpath for all open project files). */
+  /** Adds the entry to the front of the project files classpath (this is the classpath for all open project files). 
+    * @param f the file to be added to the classpath
+    */
   public synchronized void addProjectFilesCP(File f) {
     _projectFilesCP.remove(f); // eliminate duplicates
     _projectFilesCP.addFirst(f);
@@ -123,7 +124,9 @@ public class ClassPathManager implements Lambda<ClassLoader, ClassLoader> {
   
   public synchronized Iterable<File> getProjectFilesCP() { return IterUtil.snapshot(_projectFilesCP); }
   
-  /** Adds new entry containing f to the front of the external classpath. */
+  /** Adds new entry containing f to the front of the external classpath. 
+   * @param f the file to be added to the classpath
+   */
   public synchronized void addExternalFilesCP(File f) {
     _externalFilesCP.remove(f); // eliminate duplicates
     _externalFilesCP.addFirst(f);
@@ -132,7 +135,9 @@ public class ClassPathManager implements Lambda<ClassLoader, ClassLoader> {
   
   public synchronized Iterable<File> getExternalFilesCP() { return IterUtil.snapshot(_externalFilesCP); }
   
-  /** Adds the entry to the front of the extra classpath. */
+  /** Adds the entry to the front of the extra classpath. 
+   * @param f the file to be added to the classpath
+   */
   public synchronized void addExtraCP(File f) {
     _extraCP.remove(f); // eliminate duplicates
     _extraCP.addFirst(f);
@@ -147,15 +152,16 @@ public class ClassPathManager implements Lambda<ClassLoader, ClassLoader> {
     * by a common parent.
     * @param parent  The parent class loader.  May be {@code null}, signifying the bootstrap
     *                class loader.
+    * @return the newly-created class loader
     */
   public synchronized ClassLoader makeClassLoader(ClassLoader parent) {
     updateProperty();
     return new PathClassLoader(parent, _fullPath);
   }
   
-  /** Lambda value method */
+  /** Lambda value method.  In DrJava usage, parent is often null. */
   public ClassLoader value(ClassLoader parent) { return makeClassLoader(parent); }
   
-  /** Get a dynamic view of the full class path. */
+  /** @return a dynamic view of the full class path. */
   public synchronized Iterable<File> getClassPath() { updateProperty(); return _fullPath; }
 }

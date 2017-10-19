@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -42,8 +42,7 @@ import javax.swing.*;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 
-/**
- * The row header of the DefinitionsPane which displays the line numbers
+/** * The row header of the DefinitionsPane which displays the line numbers
  * @version $Id$
  */
 public class LineEnumRule extends JComponent {
@@ -90,8 +89,8 @@ public class LineEnumRule extends JComponent {
   }
 
   /** Updates the row header's font information.
-   * Uses a custom config setting for this purpose.
-   */
+    * Uses a custom config setting for this purpose.
+    */
   public void updateFont() {
     _fm = _pane.getFontMetrics(_pane.getFont());
     _newFont = _getLineNumFont();

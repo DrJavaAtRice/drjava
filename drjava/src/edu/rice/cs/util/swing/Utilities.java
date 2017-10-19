@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -54,9 +54,11 @@ public class Utilities {
   
   public static final String JGOODIES_PACKAGE = "com.jgoodies.looks";
   
-  /** Runs the task synchronously if the current thread is the event thread; otherwise passes it to the
-    * event thread to be run asynchronously after all events already on the queue have been processed.
-    */
+  /** Runs the task synchronously if the current thread is the event thread; 
+   * otherwise passes it to the event thread to be run asynchronously after 
+   * all events already on the queue have been processed.
+   * @param task task to run
+   */
   public static void invokeLater(Runnable task) {
     if (EventQueue.isDispatchThread()) {
       task.run(); 
@@ -115,8 +117,9 @@ public class Utilities {
   public static void showDebug(String msg) { showMessageBox(msg, "Debug Message"); }
   
   /** Shows a modal message box with an OK button.
-    * @param msg string to display
-    */
+   * @param msg string to display
+   * @param title title to display
+   */
   public static void showMessageBox(final String msg, final String title) {
     if (TEST_MODE) System.out.println(title + ": " + msg); else {
       //Utilities.invokeAndWait(new Runnable() { public void run() { JOptionPane.showMessageDialog(null, msg); } } );
@@ -140,7 +143,9 @@ public class Utilities {
     } } );
   }
   
-  /** @return a string with the current clipboard selection, or null if not available. */
+  /** @param c Component from which to extract the clipboard selection
+   * @return a string with the current clipboard selection, or null if not available. 
+   */
   public static String getClipboardSelection(Component c) {
     Clipboard cb = c.getToolkit().getSystemClipboard();
     if (cb == null) return null;
@@ -159,7 +164,10 @@ public class Utilities {
     return s;
   }
   
-  /** @return an action with a new name that delegates to another action. */
+  /** @param newName the name of the new action
+   * @param delegate action to delegate to
+   * @return an action with a new name that delegates to another action. 
+   */
   public static AbstractAction createDelegateAction(String newName, final Action delegate) {
     return new AbstractAction(newName) {
       public void actionPerformed(ActionEvent ae) { delegate.actionPerformed(ae); }
@@ -266,8 +274,9 @@ public class Utilities {
   }
   
   /** Return the index of the component in the parent container, or -1 if no parent or not found.
-    * @param component
-    * @return index of the component in the parent container, or -1 if not found */
+   * @param component the component for which to find the index
+   * @return index of the component in the parent container, or -1 if not found 
+   */
   public static int getComponentIndex(Component component) {
     if (component != null && component.getParent() != null) {
       Container c = component.getParent();

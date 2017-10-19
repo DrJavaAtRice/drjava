@@ -1,6 +1,6 @@
  /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -43,10 +43,7 @@ import javax.swing.text.BadLocationException;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 
-import edu.rice.cs.util.swing.Utilities;
-
-/**
- * Tests to ensure that compilation succeeds when expected.
+/** * Tests to ensure that compilation succeeds when expected.
  * 
  * Every test in this class is run for *each* of the compilers that is available.
  *
@@ -57,6 +54,9 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
   /** Tests a compile on a file that references a non-public class defined in
    * another class with a name different than the non-public class.
    * Doesn't reset interactions because no interpretations are performed.
+   * @throws BadLocationException if attempts to reference an invalid location
+   * @throws IOException if an IO operation fails
+   * @throws InterruptedException if execution is interrupted unexpectedly
    */
   public void testCompileReferenceToNonPublicClass() 
     throws BadLocationException, IOException, InterruptedException {
@@ -96,6 +96,9 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
   /** Test support for assert keyword if enabled.
    * Note that this test only runs in Java 1.4 or higher.
    * Doesn't reset interactions because no interpretations are performed.
+   * @throws BadLocationException if attempts to reference an invalid location
+   * @throws IOException if an IO operation fails
+   * @throws InterruptedException if execution is interrupted unexpectedly
    */
   public void testCompileWithJavaAssert()
     throws BadLocationException, IOException, InterruptedException {
@@ -148,6 +151,9 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
    * JSR-14 is only available if the config option is set, and we clear
    * the config before running the tests.  We have a guess where the jar
    * is -- the lib directory -- but how can we get a URL for that?)
+   * @throws BadLocationException if attempts to reference an invalid location
+   * @throws IOException if an IO operation fails
+   * @throws InterruptedException if execution is interrupted unexpectedly
    */
   public void testCompileWithGenerics()throws BadLocationException, IOException, InterruptedException {
 //    System.out.println("testCompileWithGenerics()");

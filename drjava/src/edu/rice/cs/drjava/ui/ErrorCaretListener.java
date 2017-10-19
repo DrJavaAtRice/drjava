@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -39,8 +39,6 @@ package edu.rice.cs.drjava.ui;
 import edu.rice.cs.drjava.model.DJError;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
-import edu.rice.cs.util.swing.Utilities;
-
 import java.awt.EventQueue;
 
 import javax.swing.event.CaretEvent;
@@ -55,18 +53,24 @@ public class ErrorCaretListener implements CaretListener {
   private final DefinitionsPane _definitionsPane;
   protected final MainFrame _frame;
 
-  /** Constructs a new caret listener to highlight errors. */
+  /** Constructs a new caret listener to highlight errors. 
+   * @param doc document
+   * @param defPane reference to the definitions pane
+   * @param frame reference to the main frame
+   */
   public ErrorCaretListener(OpenDefinitionsDocument doc, DefinitionsPane defPane, MainFrame frame) {
     _openDoc = doc;
     _definitionsPane = defPane;
     _frame = frame;
   }
 
-  /** Gets the OpenDefinitionsDocument corresponding to this listener. */
+  /** @return the OpenDefinitionsDocument corresponding to this listener. */
   public OpenDefinitionsDocument getOpenDefDoc() { return _openDoc; }
 
-  /** After each update to the caret, determine if changes in highlighting need to be made.  Highlights the line 
-   *  if the compiler output tab is showing.  Only runs in the event thread.
+  /** After each update to the caret, determine if changes in highlighting 
+   * need to be made.  Highlights the line if the compiler output tab is 
+   * showing.  Only runs in the event thread.
+   * @param evt the event to update based on
    */
   public void caretUpdate(final CaretEvent evt) {
     assert EventQueue.isDispatchThread();
@@ -74,7 +78,9 @@ public class ErrorCaretListener implements CaretListener {
     updateHighlight(evt.getDot());
   }
   
-  /** Update the highlight appropriately. */
+  /** Update the highlight appropriately. 
+   * @param curPos the current position
+   */
   public void updateHighlight(final int curPos) {
     assert EventQueue.isDispatchThread();
     ErrorPanel panel = _frame.getSelectedErrorPanel();

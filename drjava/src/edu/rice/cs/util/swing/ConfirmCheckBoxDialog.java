@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -39,8 +39,7 @@ package edu.rice.cs.util.swing;
 import edu.rice.cs.util.swing.Utilities;
 import javax.swing.*;
 
-/**
- * Simple class wrapping JOptionPane to have a checkbox underneath the message.
+/** * Simple class wrapping JOptionPane to have a checkbox underneath the message.
  * @version $Id$
  */
 public class ConfirmCheckBoxDialog {
@@ -86,7 +85,10 @@ public class ConfirmCheckBoxDialog {
     _dialog = _optionPane.createDialog(parent, title);
   }
   
-  /** Initializes the JCheckBox to have the given text. */
+  /** Initializes the JCheckBox to have the given text. 
+   * @param text text to display
+   * @return the newly-created JCheckBox
+   */
   private JCheckBox _initCheckBox(String text) {
     _checkBox = new JCheckBox(text);
     return _checkBox;

@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -61,7 +61,12 @@ public class IntegerOptionComponent extends OptionComponent<Integer,JTextField> 
     setComponent(_jtf);
   }
   
-  /** Constructor that allows for a tooltip description. */
+  /** Constructor that allows for a tooltip description. 
+   * @param opt the option
+   * @param text text for descriptive label of this option
+   * @param parent the parent frame
+   * @param description tooltip text
+   */
   public IntegerOptionComponent (IntegerOption opt, String text, SwingFrame parent, String description) {
     this(opt, text, parent);
     setDescription(description);

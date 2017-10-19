@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -50,7 +50,7 @@ public abstract class JPDADebugTestCase extends DebugTestCase {
    * unnecessary as all uses of _debugger are consistent with the Debugger interface. */
 //  public void setUp() throws Exception {
 //    super.setUp();
-//    // This cast will fail if the debugger has an unexpected type
+//// This cast will fail if the debugger has an unexpected type
 //    _debugger = (JPDADebugger) super._debugger;
 //  }
 

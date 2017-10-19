@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -48,8 +48,6 @@ import edu.rice.cs.drjava.model.DJError;
 import edu.rice.cs.drjava.model.DrJavaFileUtils;
 import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.plt.reflect.JavaVersion;
-import edu.rice.cs.util.swing.Utilities;
-
 import javax.swing.filechooser.FileFilter;
 import edu.rice.cs.drjava.ui.SmartSourceFilter;
 
@@ -58,7 +56,7 @@ import java.lang.reflect.Constructor;
 /** An abstract parent for all javac-based compiler interfaces.  Manages the auxiliary naming methods.
   * To support loading via reflection, all subclasses are assumed to have a public constructor with
   * a matching signature.
-  *  @version $Id: JavacCompiler.java 5611 2012-07-25 15:03:33Z rcartwright $
+  *  @version $Id$
   */
 public abstract class JavacCompiler implements CompilerInterface {
   
@@ -138,16 +136,13 @@ public abstract class JavacCompiler implements CompilerInterface {
   }
   
   /** This method performs the "smart run". Unfortunately, we don't get the right static error messages.
-    * @param s full command line, i.e. "run MyClass 1 2 3"
-    * @param c class to be run, i.e. MyClass.class
-    */
-  @SuppressWarnings("unchecked")
+   * @param s full command line, i.e. "run MyClass 1 2 3"
+   * @param c class to be run, i.e. MyClass.class
+   * @throws Throwable if something goes wrong
+   */
   public static void runCommand(String s, Class<?> c) throws Throwable {
     if (s.endsWith(";"))  s = _deleteSemiColon(s);
     List<String> tokens = ArgumentTokenizer.tokenize(s, true);
-    final String classNameWithQuotes = tokens.get(1); // this is "MyClass"
-    final String className =
-      classNameWithQuotes.substring(1, classNameWithQuotes.length() - 1); // removes quotes, becomes MyClass
     String[] args = new String[tokens.size() - 2];
     for (int i = 2; i < tokens.size(); i++) {
       String t = tokens.get(i);
@@ -177,7 +172,7 @@ public abstract class JavacCompiler implements CompilerInterface {
         if (!m.getReturnType().equals(void.class)) { m = null; }
       }
       catch (java.lang.NoSuchMethodException e) { m = null; }
-      if (m==null) {
+      if (m == null) {
         java.applet.Applet instance = null;
         if (args.length == 0) {
           try {
@@ -196,7 +191,7 @@ public abstract class JavacCompiler implements CompilerInterface {
               System.err.println("Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.");
             }
           }
-          if (instance==null) {
+          if (instance == null) {
             try {
               // try String[] constructor next
               Constructor<?> ctor = c.getConstructor(String[].class);
@@ -215,7 +210,7 @@ public abstract class JavacCompiler implements CompilerInterface {
               }
             }
           }
-          if (instance==null) {
+          if (instance == null) {
             System.err.println("Static Error: This applet does not have a default constructor or a constructor "+
                                "accepting String[].");
             return;
@@ -239,7 +234,7 @@ public abstract class JavacCompiler implements CompilerInterface {
               return;
             }
           }
-          if (instance==null) {
+          if (instance == null) {
             System.err.println("Static Error: This applet does not have a constructor accepting String[].");
             return;
           }
@@ -289,16 +284,17 @@ public abstract class JavacCompiler implements CompilerInterface {
   }
   
   /** This is a method that automatically detects if
-    * a) the class is an ACM Java Task Force program (subclass of acm.program.Program)
-    * b) an applet
-    * c) a class with a static main method
-    
-    If a), then DrJava inserts "code=MyClass" as argument 0.
-    If b), then DrJava performs the same as "applet MyClass" (see above).
-    If c), then DrJava executes MyClass.main (traditional java behavior).
-    
-    It formerly was static, but it is overriden in ScalacCompiler.
-    */
+   * a) the class is an ACM Java Task Force program (subclass of acm.program.Program)
+   * b) an applet
+   * c) a class with a static main method
+   * 
+   * If a), then DrJava inserts "code=MyClass" as argument 0.
+   * If b), then DrJava performs the same as "applet MyClass" (see above).
+   * If c), then DrJava executes MyClass.main (traditional java behavior).
+   *
+   * @param s the command to be transformed
+   * @return the transformed command
+   */
   public String transformRunCommand(String s) {    
     if (s.endsWith(";"))  s = _deleteSemiColon(s);
     List<String> args = ArgumentTokenizer.tokenize(s, true);
@@ -313,16 +309,17 @@ public abstract class JavacCompiler implements CompilerInterface {
   }
 
   /** Assumes a trimmed String. Returns a string of the call that the interpreter can use.
-    * The arguments get formatted as comma-separated list of strings enclosed in quotes.
-    * Example: _transformCommand("java MyClass arg1 arg2 arg3", "{0}.main(new String[]'{'{1}'}');")
-    * returns "MyClass.main(new String[]{\"arg1\",\"arg2\",\"arg3\"});"
-    * NOTE: the command to run is constructed using {@link java.text.MessageFormat}. That means that certain characters,
-    * single quotes and curly braces, for example, are special. To write single quotes, you need to double them.
-    * To write curly braces, you need to enclose them in single quotes. Example:
-    * MessageFormat.format("Abc {0} ''foo'' '{'something'}'", "def") returns "Abc def 'foo' {something}".
-    * @param s the command line, either "java MyApp arg1 arg2 arg3" or "applet MyApplet arg1 arg2 arg3"
-    * @param command the command to execute, with {0} marking the place for the class name and {1} the place for the arguments
-    */
+   * The arguments get formatted as comma-separated list of strings enclosed in quotes.
+   * Example: _transformCommand("java MyClass arg1 arg2 arg3", "{0}.main(new String[]'{'{1}'}');")
+   * returns "MyClass.main(new String[]{\"arg1\",\"arg2\",\"arg3\"});"
+   * NOTE: the command to run is constructed using {@link java.text.MessageFormat}. That means that certain characters,
+   * single quotes and curly braces, for example, are special. To write single quotes, you need to double them.
+   * To write curly braces, you need to enclose them in single quotes. Example:
+   * MessageFormat.format("Abc {0} ''foo'' '{'something'}'", "def") returns "Abc def 'foo' {something}".
+   * @param s the command line, either "java MyApp arg1 arg2 arg3" or "applet MyApplet arg1 arg2 arg3"
+   * @param command the command to execute, with {0} marking the place for the class name and {1} the place for the arguments
+   * @return the transformed command
+   */
   protected static String _transformCommand(String s, String command) {
     if (s.endsWith(";"))  s = _deleteSemiColon(s);
     List<String> args = ArgumentTokenizer.tokenize(s, true);
@@ -345,11 +342,11 @@ public abstract class JavacCompiler implements CompilerInterface {
     */
   protected static String _deleteSemiColon(String s) { return  s.substring(0, s.length() - 1); }
 
-  /** .java --> true
-    * .dj   --> true
-    * .dj0  --> true
-    * .dj1  --> true
-    * .dj2  --> true
+  /** .java {@literal -->} true
+    * .dj   {@literal -->} true
+    * .dj0  {@literal -->} true
+    * .dj1  {@literal -->} true
+    * .dj2  {@literal -->} true
     * otherwise false 
     * @return true if the specified file is a source file for this compiler. */
   public boolean isSourceFileForThisCompiler(File f) {
@@ -451,7 +448,7 @@ public abstract class JavacCompiler implements CompilerInterface {
 //       "    if (!m.getReturnType().equals(void.class)) { m = null; }\n" +
 //       "  }\n" +
 //       "  catch (java.lang.NoSuchMethodException e) { m = null; }\n" +
-//       "  if (m==null) {\n" +
+//       "  if (m == null) {\n" +
 //       "    java.applet.Applet instance = null;\n" +
 //       "    boolean fail = false;\n");
 //    if (args.length == 0) {
@@ -472,7 +469,7 @@ public abstract class JavacCompiler implements CompilerInterface {
 //       "        System.err.println(\"Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.\");\n" +
 //       "      }\n" +
 //       "    }\n" +
-//       "    if (instance==null) {\n" +
+//       "    if (instance == null) {\n" +
 //       "      try {\n" +
 //       "        // try String[] constructor next\n" +
 //       "        java.lang.reflect.Constructor ctor = c.getConstructor(String[].class);\n" +
@@ -491,7 +488,7 @@ public abstract class JavacCompiler implements CompilerInterface {
 //       "        }\n" +
 //       "      }\n" +
 //       "    }\n" +
-//       "    if (!fail && (instance==null)) {\n" +
+//       "    if (!fail && (instance == null)) {\n" +
 //       "      System.err.println(\"Error: This applet does not have a default constructor or a constructor \"+\n" +
 //       "                         \"accepting String[].\");\n" +
 //       "      fail = true;\n" +
@@ -516,14 +513,14 @@ public abstract class JavacCompiler implements CompilerInterface {
 //       "        fail = true;\n" +
 //       "      }\n" +
 //       "    }\n" +
-//       "    if (!fail && (instance==null)) {\n" +
+//       "    if (!fail && (instance == null)) {\n" +
 //       "      System.err.println(\"Error: This applet does not have a constructor accepting String[].\");\n" +
 //       "      fail = true;\n" +
 //       "    }\n");
 //    }
 //    command.append(
 //       "    if (!fail) { edu.rice.cs.plt.swing.SwingUtil.showApplet(instance, 400, 300); }\n" +
-//       "  } // if (m==null)\n" +
+//       "  } // if (m == null)\n" +
 //       "} // if (isApplet)\n" +
 //       "else {\n" +
 //       "  try {\n" +
@@ -566,7 +563,7 @@ public abstract class JavacCompiler implements CompilerInterface {
 //       "}\n" +
 //    "}");
 //    
-//    // System.out.println(command);
+//// System.out.println(command);
 //
 //    return command.toString();
 //  }

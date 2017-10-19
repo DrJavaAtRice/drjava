@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,6 @@ import edu.rice.cs.drjava.model.print.DrJavaBook;
 
 import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.text.ConsoleDocumentInterface;
 import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.util.text.ConsoleDocument;
@@ -110,10 +109,12 @@ public class InteractionsDocument extends ConsoleDocument {
     */
   public void setInProgress(boolean inProgress) { _document.setHasPrompt(! inProgress); }
   
-  /** Returns whether an interaction is currently in progress. */
+  /** @return whether an interaction is currently in progress. */
   public boolean inProgress() { return ! _document.hasPrompt(); }
   
-  /** Sets the banner in an empty docuemnt. */
+  /** Sets the banner in an empty docuemnt. 
+   * @param banner value to set banner to
+   */
   public void setBanner(String banner) {
     try {
       setPromptPos(0);
@@ -124,7 +125,9 @@ public class InteractionsDocument extends ConsoleDocument {
     catch (EditDocumentException e) { throw new UnexpectedException(e); }
   }
     
-  /** Resets the document to a clean state.  Does not reset the history. */
+  /** Resets the document to a clean state.  Does not reset the history.
+   * @param banner value to set banner to
+   */
   public void reset(String banner) {
     try {
 //      System.err.println("Resetting the interactions document with banner '" + banner + "'");
@@ -150,39 +153,45 @@ public class InteractionsDocument extends ConsoleDocument {
     catch (EditDocumentException ble) { throw new UnexpectedException(ble); }
   }
   
-  /** Accessor method for the history of commands. */
+  /** @return the history of commands. */
   public OptionListener<Integer> getHistoryOptionListener() { return _history.getHistoryOptionListener(); }
   
-  /** Adds the given text to the history of commands. */
+  /** Adds the given text to the history of commands. 
+   * @param text text to add
+   */
   public void addToHistory(String text) { _history.add(text); }
   
-  /** Returns the last history item and then removes it, or returns null if the history is empty. */
+  /** @return the last history item and then removes it, or returns null if the history is empty. */
   public String removeLastFromHistory() { return _history.removeLast(); }
   
   /** Saves the unedited version of the current history to a file
-    * @param selector File to save to
-    */
+   * @param selector File to save to
+   * @throws IOException if an IO operation fails
+   */
   public void saveHistory(FileSaveSelector selector) throws IOException { _history.writeToFile(selector); }
   
   /** Saves the edited version of the current history to a file
-    * @param selector File to save to
-    * @param editedVersion Edited version of the history which will be
-    * saved to file instead of the lines saved in the history. The saved
-    * file will still include any tags needed to recognize it as a saved
-    * interactions file.
-    */
+   * @param selector File to save to
+   * @param editedVersion Edited version of the history which will be
+   * saved to file instead of the lines saved in the history. The saved
+   * file will still include any tags needed to recognize it as a saved
+   * interactions file.
+   * @throws IOException if an IO operation fails
+   */
   public void saveHistory(FileSaveSelector selector, String editedVersion) throws IOException {
     History.writeToFile(selector, editedVersion); 
   }
   
-  /** Returns the entire history as a single string.  Commands should be separated by semicolons. If an entire
-    * command does not end in a semicolon, one is added.
-    */
+  /** Returns the entire history as a single string.  Commands should be 
+   * separated by semicolons. If an entire command does not end in a 
+   * semicolon, one is added.
+   * @return the entire history as a single string
+   */
   public String getHistoryAsStringWithSemicolons() {
     return _history.getHistoryAsStringWithSemicolons(); 
   }
   
-  /** Returns the entire history as a single string.  Commands should be separated by semicolons. */
+  /** @return the entire history as a single string.  Commands should be separated by semicolons. */
   public String getHistoryAsString() { 
     return _history.getHistoryAsString(); 
   }
@@ -191,6 +200,7 @@ public class InteractionsDocument extends ConsoleDocument {
   public void clearHistory() { _history.clear(); }
   
   public String lastEntry() { return _history.lastEntry(); }
+
   /** Puts the previous line from the history on the current line and moves the history back one line.
     * @param entry the current entry (perhaps edited from what is in history)
     */
@@ -207,10 +217,14 @@ public class InteractionsDocument extends ConsoleDocument {
     _replaceCurrentLineFromHistory();
   }
   
-  /** Returns whether there is a previous command in the history.  Only runs in event thread. */
+  /** Returns whether there is a previous command in the history.  Only runs in event thread. 
+   * @return true if there is a previous command in the history
+   */
   private boolean hasHistoryPrevious() { return _history.hasPrevious(); }
   
-  /** Returns whether there is a next command in the history.  Only runs in event thread. */
+  /** Returns whether there is a next command in the history.  Only runs in event thread.
+   * @return true if there is a next command in the history
+   */
   public boolean hasHistoryNext() { return _history.hasNext(); }
   
   /** Reverse searches the history for the given string.
@@ -229,9 +243,11 @@ public class InteractionsDocument extends ConsoleDocument {
     _replaceCurrentLineFromHistory();
   }
   
-  /** Gets the previous interaction in the history and replaces whatever is on the current interactions input
-    * line with this interaction.  Only runs in event thread.
-    */
+  /** Gets the previous interaction in the history and replaces whatever is 
+   * on the current interactions input line with this interaction.  
+   * Only runs in event thread.
+   * @return true if there is a previous interaction in the history; false otherwise
+   */
   public boolean recallPreviousInteractionInHistory() {   
     if (hasHistoryPrevious()) {
       moveHistoryPrevious(getCurrentInteraction());
@@ -241,9 +257,10 @@ public class InteractionsDocument extends ConsoleDocument {
     return false;
   }
   
-  /** Gets the next interaction in the history and replaces whatever is on the current interactions input line 
-    * with this interaction.
-    */
+  /** Gets the next interaction in the history and replaces whatever is on the 
+   * current interactions input line with this interaction.
+   * @return true if there is a previous interaction in the history; false otherwise
+   */
   public boolean recallNextInteractionInHistory() {
     if (hasHistoryNext()) {
       moveHistoryNext(getCurrentInteraction());
@@ -252,7 +269,6 @@ public class InteractionsDocument extends ConsoleDocument {
     _beep.run();
     return false;
   }
-  
   
   /** Reverse searches the history for interactions that started with the current interaction. */
   public void reverseSearchInteractionsInHistory() {
@@ -285,7 +301,7 @@ public class InteractionsDocument extends ConsoleDocument {
   public void appendSyntaxErrorResult(String message, String interaction, int startRow, int startCol,
                                       int endRow, int endCol, String styleName) {
     try {
-      if (null == message || "null".equals(message))  message = "";
+      if (message == null || message.equals("null"))  message = "";
       
       if (message.indexOf("Lexical error") != -1) {
         int i = message.lastIndexOf(':');
@@ -305,10 +321,10 @@ public class InteractionsDocument extends ConsoleDocument {
     _history.moveEnd();
   }  
   
-  /** Returns the string that the user has entered at the current prompt. Forwards to getCurrentInput(). */
+  /** @return the string that the user has entered at the current prompt. Forwards to getCurrentInput(). */
   public String getCurrentInteraction() { return getCurrentInput(); }
   
-  public String getDefaultStyle() { return InteractionsDocument.DEFAULT_STYLE; }
+  public String getDefaultStyle() { return ConsoleDocument.DEFAULT_STYLE; }
   
   /** This method tells the document to prepare all the DrJavaBook and PagePrinter objects. */
   public void preparePrintJob() {

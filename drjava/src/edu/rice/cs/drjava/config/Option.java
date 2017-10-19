@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -48,7 +48,7 @@ import java.util.Vector;
   * necessary -- but may be convenient in order to re-use code.  For example, to make an anonymous class that handles
   * options of static type Integer, with the name "indent.level", you could use the following code:
   * <pre>
-  * Option&lt;Integer&gt; INDENT_LEVEL = new Option&lt;Integer&gt;("indent.level") {
+  * Option&lt;Integer&gt; INDENT_INC = new Option&lt;Integer&gt;("indent.level") {
   *         public Integer parse(String s) {
   *             return new Integer(s);
   *         }
@@ -88,7 +88,10 @@ public abstract class Option<T> extends OptionParser<T> implements FormatStrateg
   /** Uses format() and getOption() so that any changes in format will automatically be applied to getString(). */
   String getString(DefaultOptionMap om) { return format(getOption(om)); }
   
-  /** Sends an OptionEvent to all OptionListeners who have registered on this Option. */
+  /** Sends an OptionEvent to all OptionListeners who have registered on this Option. 
+   * @param config configuration information about the option
+   * @param val the type of option
+   */
   synchronized void notifyListeners(Configuration config, T val) {
     final Vector<OptionListener<T>> v = listeners.get(config);
 //    System.err.println("Notifying " + v + " with value " + val);
@@ -102,7 +105,10 @@ public abstract class Option<T> extends OptionParser<T> implements FormatStrateg
     });
   }
   
-  /** Magic listener-bag adder */
+  /** Magic listener-bag adder 
+   * @param c configuration information about the option to listen on
+   * @param l the new listener on c to add
+   */
   synchronized void addListener(Configuration c, OptionListener<T> l) {
     Vector<OptionListener<T>> v = listeners.get(c);
     if (v == null) {
@@ -112,7 +118,10 @@ public abstract class Option<T> extends OptionParser<T> implements FormatStrateg
     v.add(l);
   }
   
-  /** Magic listener-bag remover */
+  /** Magic listener-bag remover 
+   * @param c configuration information about the option being listened on
+   * @param l the listener to remove
+   */
   synchronized void removeListener(Configuration c, OptionListener<T> l) {
     Vector<OptionListener<T>> v = listeners.get(c);
     if (v != null && v.remove(l) && v.size() == 0) listeners.remove(c);  // v.remove(l) has a side effect!

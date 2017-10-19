@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,6 @@
 package edu.rice.cs.drjava.model.compiler;
 
 import java.util.List;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Iterator;
 import java.io.File;
@@ -46,11 +45,8 @@ import java.io.FilenameFilter;
 import java.io.FileFilter;
 import java.io.InputStream;
 import java.io.FileOutputStream;
+
 import edu.rice.cs.plt.io.IOUtil;
-import edu.rice.cs.drjava.config.OptionConstants;
-import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.model.DJError;
-import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.plt.reflect.JavaVersion;
 
 /** An abstract parent for all javac-based compiler interfaces that may need to filter .exe files from the
@@ -77,23 +73,21 @@ public abstract class Javac160FilteringCompiler extends JavacCompiler {
         // edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("jdk160.txt",true);
         // LOG.log("Filtering exe files from classpath.");
         InputStream is = Javac160FilteringCompiler.class.getResourceAsStream("/junit.jar");
-        if (is!=null) {
+        if (is != null) {
           // LOG.log("\tjunit.jar found");
           tempJUnit = edu.rice.cs.plt.io.IOUtil.createAndMarkTempFile(PREFIX,SUFFIX);
           FileOutputStream fos = new FileOutputStream(tempJUnit);
+          
+          @SuppressWarnings("unused")
           int size = edu.rice.cs.plt.io.IOUtil.copyInputStream(is,fos);
           // LOG.log("\t"+size+" bytes written to "+tempJUnit.getAbsolutePath());
         }
         else {
           // LOG.log("\tjunit.jar not found");
-          if (tempJUnit!=null) {
-            tempJUnit.delete();
-            tempJUnit = null;
-          }
         }
       }
       catch(IOException ioe) {
-        if (tempJUnit!=null) {
+        if (tempJUnit != null) {
           tempJUnit.delete();
           tempJUnit = null;
         }
@@ -110,7 +104,7 @@ public abstract class Javac160FilteringCompiler extends JavacCompiler {
                 if ((!name.startsWith(PREFIX)) || (!name.endsWith(SUFFIX))) return false;
                 String rest = name.substring(PREFIX.length(), name.length()-SUFFIX.length());
                 try {
-                  Integer i = new Integer(rest);
+                  new Integer(rest);
                   // we could create an integer from the rest, this is one of our temporary files
                   return true;
                 }
@@ -140,7 +134,7 @@ public abstract class Javac160FilteringCompiler extends JavacCompiler {
         while (i.hasNext()) {
           if (filter.accept(i.next())) { i.remove(); }
         }
-        if (_tempJUnit!=null) { filteredClassPath.add(_tempJUnit); }
+        if (_tempJUnit != null) { filteredClassPath.add(_tempJUnit); }
       }
     }
     return filteredClassPath;

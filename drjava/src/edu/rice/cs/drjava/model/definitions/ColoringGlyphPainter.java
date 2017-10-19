@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -175,7 +175,13 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
     return _metrics.getDescent();
   }
   
-  /** Only runs in event thread. */
+  /** Only runs in event thread. 
+   * @param v the view
+   * @param pos position
+   * @param bias bias
+   * @param a a Shape
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public Shape modelToView(GlyphView v, int pos, Position.Bias bias, Shape a) throws BadLocationException {
     
     sync(v);
@@ -235,10 +241,10 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
     * Only runs in event thread.
     *
     * @param v  The view 
-    * @param start  The location in the model where the fragment should start its representation >= 0
-    * @param x  The graphic location along the axis that the broken view would occupy >= 0; this may be useful for
+    * @param start  The location in the model where the fragment should start its representation {@literal >=} 0
+    * @param x  The graphic location along the axis that the broken view would occupy {@literal >=} 0; this may be useful for
     *           things like tab calculations
-    * @param len  Specifies the distance into the view where a potential break is desired >= 0  
+    * @param len  Specifies the distance into the view where a potential break is desired {@literal >=} 0  
     * @return  The model location desired for a break
     * @see View#breakView
     */
@@ -251,7 +257,9 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
     return end;
   }
   
-  /** Only runs in event thread. */
+  /** Only runs in event thread. 
+   * @param v the view to sync
+   */
   void sync(GlyphView v) {
     Font f = v.getFont();
     if ((_metrics == null) || (! f.equals(_metrics.getFont()))) {
@@ -321,7 +329,7 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
 //    */
 //  public void changedUpdate(DocumentEvent changes, Shape a, ViewFactory f) {
 //    super.changedUpdate(changes, a, f);
-//    // Make sure we redraw since something changed in the formatting
+//// Make sure we redraw since something changed in the formatting
 //    Container c = getContainer();
 //    if (c != null) c.repaint();
 //  }

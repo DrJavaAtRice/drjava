@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -46,13 +46,13 @@ import java.net.URL;
   */
 public interface PlatformSupport {
   
-  /** Returns whether this is a Mac OS X platform. */
+  /** @return whether this is a Mac OS X platform. */
   public boolean isMacPlatform();
   
-  /** Returns whether this is a Windows platform. */
+  /** @return whether this is a Windows platform. */
   public boolean isWindowsPlatform();
   
-  /** Returns the current Java specification version. */
+  /** @return the current Java specification version. */
   public String getJavaSpecVersion();
   
   /** Utility method to determine if the current Swing look and feel is the

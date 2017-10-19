@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -38,23 +38,17 @@ package edu.rice.cs.drjava.ui;
 
 import java.awt.event.*;
 import java.awt.*;
-import java.io.IOException;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 import javax.swing.*;
-import javax.swing.event.*;
 import javax.swing.border.EmptyBorder;
 
 import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.config.OptionParser;
 import edu.rice.cs.drjava.config.StringOption;
-import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.ui.config.*;
 
-import edu.rice.cs.plt.iter.IterUtil;
-import edu.rice.cs.plt.collect.CollectUtil;
 import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.plt.lambda.LambdaUtil;
 import edu.rice.cs.plt.concurrent.CompletionMonitor;
@@ -119,7 +113,11 @@ public class ProjectAdvancedPropertiesFrame extends SwingFrame {
   //  private JButton _saveSettingsButton;
   private JPanel _mainPanel;
   
-  /** Constructs project properties frame for a new project and displays it.  Assumes that a project is active. */
+  /** Constructs project properties frame for a new project and displays it.  
+   * Assumes that a project is active. 
+   * @param mf reference to the main frame
+   * @param parentFrame reference to the parent frame
+   */
   public ProjectAdvancedPropertiesFrame(MainFrame mf, SwingFrame parentFrame) {
     super("Advanced Project Properties");
 
@@ -133,7 +131,6 @@ public class ProjectAdvancedPropertiesFrame extends SwingFrame {
     Action okAction = new AbstractAction("OK") {
       public void actionPerformed(ActionEvent e) {
         // Always apply and save settings
-        boolean successful = true;
         ProjectAdvancedPropertiesFrame.this.setVisible(false);
       }
     };
@@ -208,7 +205,6 @@ public class ProjectAdvancedPropertiesFrame extends SwingFrame {
     setPreferencesStoredInProject(_unmodifiedStoredPreferences);
   }
   
-  @SuppressWarnings("unchecked")
   public Map<OptionParser<?>,String> getPreferencesStoredInProject() {
     Map<OptionParser<?>,String> sp = new HashMap<OptionParser<?>,String>();
     for(PreferencesRecord pr: _preferencesList.getValue()) {
@@ -217,7 +213,6 @@ public class ProjectAdvancedPropertiesFrame extends SwingFrame {
     return sp;
   }
 
-  @SuppressWarnings("unchecked")
   public void setPreferencesStoredInProject(Map<OptionParser<?>,String> sp) {
     ArrayList<PreferencesRecord> list = new ArrayList<PreferencesRecord>();
     for(OptionParser<?> o: sp.keySet()) {

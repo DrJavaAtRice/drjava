@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -89,9 +89,9 @@ public class CompilerErrorModel {
   
   /** Cached result of hasOnlyWarnings.
     * Three-state enum:
-    *  -1 => result has not been computed
-    *   0 => false
-    *   1 => true
+    *  -1 {@literal =>} result has not been computed
+    *   0 {@literal =>} false
+    *   1 {@literal =>} true
     */
   private volatile int _onlyWarnings = -1;
   
@@ -141,12 +141,12 @@ public class CompilerErrorModel {
     // .dj2 file anymore. When we get a compiler error in a .java file, and we have a corresponding
     // .dj2 file open, but not the .java file, then we change the error to refer to the .dj2 file
     // instead.
-    if (model!=null) {
+    if (model != null) {
       HashSet<File> odds = new HashSet<File>();
       for(OpenDefinitionsDocument odd: model.getOpenDefinitionsDocuments()) {
         odds.add(odd.getRawFile());
       }
-      for(int i=0; i<errors.length; ++i) {
+      for(int i = 0; i < errors.length; ++i) {
         DJError e = errors[i];
         if (e.fileName().endsWith(edu.rice.cs.drjava.config.OptionConstants.JAVA_FILE_EXTENSION)) {
           // only needs to be done for .java files
@@ -172,7 +172,7 @@ public class CompilerErrorModel {
     
     _numWarnings = 0;
     _numCompilerErrors = 0;
-    for (int i =0; i < errors.length; i++) {
+    for (int i = 0; i < errors.length; i++) {
       if (errors[i].isWarning()) _numWarnings++;
       else _numCompilerErrors++;
     }
@@ -184,30 +184,35 @@ public class CompilerErrorModel {
     Utilities.invokeLater(new Runnable() { public void run() { _calculatePositions(); } });
   }
   
+  /** Accessor for errors field; only used in testing and debugging. */
+  public DJError[] getErrors() { return _errors; }
+  
   /** Accessor for errors maintained here.
     * @param idx the index of the error to retrieve
     * @return the error at index idx
     * @throws NullPointerException if this object was improperly initialized
-    * @throws ArrayIndexOutOfBoundsException if !(0 <= idx < this.getNumErrors())
+    * @throws ArrayIndexOutOfBoundsException if {@code !(0 <= idx < this.getNumErrors())}
     */
   public DJError getError(int idx) { return _errors[idx]; }
   
-  /** Returns the position of the given error in the document representing its file. */
+  /** @param error the error whose position is to be found
+   * @return the position of the given error in the document representing its file. 
+   */
   public Position getPosition(DJError error) {
     int spot = Arrays.binarySearch(_errors, error);
     return _positions[spot];
   }
   
-  /** Returns the number of CompilerErrors. */
+  /** @return the number of CompilerErrors. */
   public int getNumErrors() { return _numErrors; }
   
-  /** Returns the number of CompilerErrors that are compiler errors */
+  /** @return the number of CompilerErrors that are compiler errors */
   public int getNumCompilerErrors() { return _numCompilerErrors; }
   
-  /** Returns the number of CompilerErrors that are warnings */
+  /** @return the number of CompilerErrors that are warnings */
   public int getNumWarnings() { return _numWarnings; }
   
-  /** Prints out this model's errors. */
+  /** @return a string of this model's errors. */
   public String toString() {
     final StringBuilder buf = new StringBuilder();
     buf.append(this.getClass().toString() + ":\n  ");
@@ -288,7 +293,10 @@ public class CompilerErrorModel {
     return _errors[shouldSelect];
   }
   
-  /** This function tells if there are errors with source locations associated with the given file. */
+  /** This function tells if there are errors with source locations associated with the given file. 
+   * @param odd the document to check
+   * @return true if there are errors with source locations; false otherwise
+   */
   public boolean hasErrorsWithPositions(OpenDefinitionsDocument odd) {
     File file = FileOps.NULL_FILE;
     try { 
@@ -350,7 +358,7 @@ public class CompilerErrorModel {
           }
           else throw new UnexpectedException(e);
         }
-        if (document==null) {
+        if (document == null) {
           do { curError++;}
           while ((curError < _numErrors) && (_errors[curError].file().equals(file)));
           //If the document couldn't be loaded, start the loop over at the top

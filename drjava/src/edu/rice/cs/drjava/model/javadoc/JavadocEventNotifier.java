@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -40,8 +40,7 @@ import java.io.File;
 import edu.rice.cs.drjava.model.EventNotifier;
 import edu.rice.cs.drjava.model.compiler.CompilerListener;
 
-/**
- * Keeps track of all listeners to a JavadocModel, and has the ability
+/** * Keeps track of all listeners to a JavadocModel, and has the ability
  * to notify them of some event.
  * <p>
  *

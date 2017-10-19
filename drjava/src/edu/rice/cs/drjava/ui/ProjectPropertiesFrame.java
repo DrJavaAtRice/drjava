@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -49,14 +49,9 @@ import javax.swing.event.*;
 import javax.swing.border.EmptyBorder;
 
 import edu.rice.cs.drjava.model.SingleDisplayModel;
-import edu.rice.cs.drjava.config.Option;
 import edu.rice.cs.drjava.config.OptionParser;
 import edu.rice.cs.drjava.config.OptionConstants;
-import edu.rice.cs.drjava.config.OptionListener;
-import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.ui.config.*;
-import edu.rice.cs.drjava.DrJava;
-
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.collect.CollectUtil;
 import edu.rice.cs.plt.lambda.Runnable1;
@@ -64,14 +59,11 @@ import edu.rice.cs.plt.lambda.LambdaUtil;
 
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.AbsRelFile;
-import edu.rice.cs.util.swing.FileSelectorComponent;
 import edu.rice.cs.util.swing.DirectorySelectorComponent;
 import edu.rice.cs.util.swing.DirectoryChooser;
 import edu.rice.cs.util.swing.FileChooser;
 import edu.rice.cs.util.swing.SwingFrame;
 import edu.rice.cs.util.swing.Utilities;
-
-import javax.swing.filechooser.FileFilter;
 
 /** A frame for setting Project Preferences */
 public class ProjectPropertiesFrame extends SwingFrame {
@@ -100,7 +92,10 @@ public class ProjectPropertiesFrame extends SwingFrame {
   private volatile VectorFileOptionComponent _excludedFilesList;
   private final Map<OptionParser<?>,String> _storedPreferences = new HashMap<OptionParser<?>,String>();
   
-  /** Constructs project properties frame for a new project and displays it.  Assumes that a project is active. */
+  /** Constructs project properties frame for a new project and displays it.  
+   * Assumes that a project is active. 
+   * @param mf reference to the main frame
+   */
   public ProjectPropertiesFrame(MainFrame mf) {
     super("Project Properties for " + mf.getModel().getProjectFile().getName());
 
@@ -238,7 +233,9 @@ public class ProjectPropertiesFrame extends SwingFrame {
     _applyButton.setEnabled(false);
   }
 
-  /** Caches the settings in the global model */
+  /** Caches the settings in the global model 
+   * @return true always
+   */
   public boolean saveSettings() {//throws IOException {
     boolean projRootChanged = false;
 
@@ -280,35 +277,35 @@ public class ProjectPropertiesFrame extends SwingFrame {
     return true;
   }
 
-  /** Returns the current project root in the project profile. */
+  /** @return the current project root in the project profile. */
   private File _getProjRoot() {
     File projRoot = _model.getProjectRoot();
     if (projRoot != null) return projRoot;
     return FileOps.NULL_FILE;
   }
 
-  /** Returns the current build directory in the project profile. */
+  /** @return the current build directory in the project profile. */
   private File _getBuildDir() {
     File buildDir = _model.getBuildDirectory();
     if (buildDir != null) return buildDir;
     return FileOps.NULL_FILE;
   }
 
-  /** Returns the current working directory in the project profile (FileOption.NULL_FILE if none is set) */
+  /** @return the current working directory in the project profile (FileOption.NULL_FILE if none is set) */
   private File _getWorkDir() {
     File workDir = _model.getWorkingDirectory();
     if (workDir != null) return workDir;
     return FileOps.NULL_FILE;
   }
 
-  /** Returns the file contianing the main class in the project profile (FileOption.NULL_FILE if none is set) */
+  /** @return the file contianing the main class in the project profile (FileOption.NULL_FILE if none is set) */
   private File _getMainFile() {
     File mainFile = _model.getMainClassContainingFile();
     if (mainFile != null) return mainFile;
     return FileOps.NULL_FILE;
   }
   
-  /** Returns the fully-qualified name of the main class in the project profile ("" if none is set) */
+  /** @return the fully-qualified name of the main class in the project profile ("" if none is set) */
   private String _getMainClass(){
     String mainClass = _model.getMainClass();
     if(mainClass == null) return "";
@@ -316,7 +313,7 @@ public class ProjectPropertiesFrame extends SwingFrame {
     return mainClass;
   }
   
-  /** Returns whether the project is set to automatically open new source files */
+  /** @return whether the project is set to automatically open new source files */
   private boolean _getAutoRefreshStatus() {
     return _model.getAutoRefreshStatus();
   }

@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (javaplt@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -37,10 +37,7 @@
 package edu.rice.cs.drjava.ui;
 
 import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.config.OptionConstants;
-import edu.rice.cs.drjava.config.PropertyMaps;
 import edu.rice.cs.drjava.config.*;
-
 import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.plt.lambda.LambdaUtil;
 import edu.rice.cs.plt.concurrent.CompletionMonitor;
@@ -60,6 +57,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.*;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.*;
@@ -694,8 +692,13 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
   }
   
   /** Color properties as variables.
-    * @param pane the pane that contains the text
-    * @param props the properties to color */
+   * @param pane the pane that contains the text
+   * @param props the properties to color 
+   * @param dl a DocumentListener
+   * @param normal the nrmal attributes
+   * @param variable the attributes for variables
+   * @param error the attributes for errors
+   */
   protected void colorVariables(final JTextPane pane,
                                 final PropertyMaps props,
                                 final DocumentListener dl,
@@ -979,7 +982,9 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     xc.save(f);
   }
   
-  /** Save the settings for this dialog. */
+  /** Save the settings for this dialog. 
+   * @return true always
+   */
   private boolean _saveSettings() {
     _lastState = new FrameState(this);
     return true;
@@ -1047,7 +1052,9 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     super.setVisible(vis);
   }
   
-  /** Opens the file chooser to select a directory, putting the result in the file field. */
+  /** Opens the file chooser to select a directory, putting the result in the file field. 
+   * @param pane a JTextPane
+   */
   protected void chooseDir(JTextPane pane) {
     // Get the file from the chooser
     File wd = new File(StringOps.replaceVariables(pane.getText().trim(), _props, PropertyMaps.GET_CURRENT));
@@ -1061,13 +1068,15 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     _mainFrame.removeModalWindowAdapter(this);
     int returnValue = _dirChooser.showDialog(wd);
     _mainFrame.installModalWindowAdapter(this, LambdaUtil.NO_OP, CANCEL);      
-    if (returnValue == DirectoryChooser.APPROVE_OPTION) {
+    if (returnValue == JFileChooser.APPROVE_OPTION) {
       File chosen = _dirChooser.getSelectedDirectory();
       if (chosen != null) { pane.setText(chosen.toString()); };
     }
   }
   
-  /** Opens the file chooser to select a file, putting the result in the file field. */
+  /** Opens the file chooser to select a file, putting the result in the file field.
+   * @param pane a JTextPane
+   */
   protected void chooseFile(JTextPane pane) {
     // Get the file from the chooser
     File wd = new File(StringOps.replaceVariables(pane.getText().trim(), _props, PropertyMaps.GET_CURRENT));
@@ -1081,7 +1090,7 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     _mainFrame.removeModalWindowAdapter(this);
     int returnValue = _fileChooser.showOpenDialog(this);
     _mainFrame.installModalWindowAdapter(this, LambdaUtil.NO_OP, CANCEL);      
-    if (returnValue == DirectoryChooser.APPROVE_OPTION) {
+    if (returnValue == JFileChooser.APPROVE_OPTION) {
       File chosen = _fileChooser.getSelectedFile();
       if (chosen != null) { pane.setText(chosen.toString()); } else { pane.setText(""); }
     }

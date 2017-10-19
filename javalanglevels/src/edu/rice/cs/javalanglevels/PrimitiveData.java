@@ -42,7 +42,8 @@ import java.util.*;
 
 import junit.framework.TestCase;
 
-/** Represents the data for a given primitive type. */
+/** Represents the data for a given primitive type.  This data representation is a CROCK.  For example, getInstanceData() is
+  * defined for PrimitiveData!  Huh?  Must return null.  It appears that this field is NEVER initialized for this class! */
 public class PrimitiveData extends SymbolData {
       
   /** All PrimitiveData have public modifiers and visibility and are not continuations. Delegate the initialization of

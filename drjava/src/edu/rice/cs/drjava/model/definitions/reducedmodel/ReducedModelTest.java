@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -997,7 +997,9 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     assertEquals("#0.6", 9, model0.absOffset());
   }
 
-  /** sets up example reduction for the following tests */
+  /** sets up example reduction for the following tests 
+   * @return a ReducedModelControl object
+   */
   protected ReducedModelControl setUpExample() {
     ReducedModelControl model = new ReducedModelControl();
     model.insertChar('{');

@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -36,8 +36,9 @@
 
 package edu.rice.cs.drjava.model.debug.jpda;
 
-import edu.rice.cs.drjava.model.OrderedDocumentRegion;
 import edu.rice.cs.drjava.model.IDocumentRegion;
+import edu.rice.cs.drjava.model.OrderedDocumentRegion;
+import edu.rice.cs.drjava.model.RegionSet;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.debug.Breakpoint;
 import edu.rice.cs.drjava.model.debug.DebugException;
@@ -45,6 +46,7 @@ import edu.rice.cs.util.UnexpectedException;
 
 import java.awt.EventQueue;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Vector;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Position;
@@ -60,15 +62,22 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
   private volatile Position _position;
   private volatile Position _startPos;
   private volatile Position _endPos;
-  
+  private ArrayList<RegionSet<IDocumentRegion>> _regionSets;
+
   /** Note that _position, which records the breakpoint position, is inherited from DocumentDebugAction. */
   private volatile OpenDefinitionsDocument _doc;
   
-  /** @throws DebugException if the document does not have a file */
+  /** @param doc the document within which to create the breakpoint
+   * @param offset offset within the document at which to set the breakpoint
+   * @param isEnabled true if the breakpoint is enabled; false for disabled
+   * @param manager manager
+   * @throws DebugException if the document does not have a file 
+   */
   public JPDABreakpoint(OpenDefinitionsDocument doc, int offset, boolean isEnabled, JPDADebugger manager)
     throws DebugException {
     
     super(manager, doc, offset);
+    _regionSets = new ArrayList<RegionSet<IDocumentRegion>>();
     
     assert EventQueue.isDispatchThread();
     _doc = doc;
@@ -152,6 +161,11 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
     */
   public int getEndOffset() { return _endPos.getOffset(); }
   
+  /** Accessor for the offset of this breakpoint's middle position
+    * @return the position offset
+    */
+  public int getPosOffset() { return _position.getOffset(); }
+
   /** Accessor for the offset of this breakpoint's start position
     * @return the start offset
     */
@@ -164,7 +178,7 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
   
   /** Update _startPos, _endPos and _lineNumber from the position that moves with the document. */
   public void update() {
-    try {  // _doc is inherited from DocumentRegion
+    try {  // _doc is inherited from StaticDocumentRegion
       int offset = _position.getOffset();
       _startPos = _doc.createPosition(_doc._getLineStartPos(offset));
       _endPos = _doc.createPosition(_doc._getLineEndPos(offset));
@@ -190,21 +204,37 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
     * not just equality of the current offsets of Positions. 
     */
   public final boolean equals(Object o) {
-    if (o == null || ! (o instanceof IDocumentRegion)) return false;
+    if (o == null || ! (o instanceof Breakpoint)) return false;
     update(); 
-    IDocumentRegion r = (IDocumentRegion) o;
-    return getDocument() == r.getDocument() && getStartOffset() == r.getStartOffset() && getEndOffset() == r.getEndOffset();
+    Breakpoint r = (Breakpoint) o;
+    return getDocument() == r.getDocument() && getStartOffset() == r.getStartOffset() && getEndOffset() == r.getEndOffset() && getPosOffset() == r.getPosOffset();
   }
   
-  /** Totally orders regions lexicographically based on (_doc, endOffset, startOffset). This method is typically applied
-    * to regions within the same document. 
+  /** A trivial override of hashCode to satisfy javac, which complains if hashCode is not overridden.
+    * WARNING: This overriding leaves the hashCode function unchanged making it inconsisent with equality.  Hence, 
+    * only Identity based hash tables should use this type as keys. Since this class is mutable, there is NO overriding
+    * of hashCode that will work for conventional (equals-based) hash tables.*/
+  @Override
+  public final int hashCode() { return super.hashCode(); }
+  
+  /** Totally orders regions lexicographically based on (_doc, endOffset, 
+    * startOffset, _position). This method is typically applied to
+    * regions within the same document. It is consistent with equals.
     */
   public int compareTo(OrderedDocumentRegion r) {
     int docRel = getDocument().compareTo(r.getDocument());
     if (docRel != 0) return docRel;
-    // At this point, we know that this and r have identical file paths, but they do not have to be the same allocation
+    /* 
+     * At this point, we know that this and r have identical file paths, but 
+     * they do not have to be the same allocation.
+     */
     
-    assert getDocument() == r.getDocument();  // DrJava never creates two ODD objects with the same path
+    /* DrJava never creates two ODD objects with the same path */
+    assert getDocument() == r.getDocument();  
+
+    /* We should only be comparing to other Breakpoints (not just any Regions). */
+    assert (r instanceof Breakpoint);
+
     int end1 = getEndOffset();
     int end2 = r.getEndOffset();
     int endDiff = end1 - end2;
@@ -212,7 +242,16 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
     
     int start1 = getStartOffset();
     int start2 = r.getStartOffset();
-    return start1 - start2;
+    int startDiff = start1 - start2;
+    if (startDiff != 0) return startDiff;
+
+    /* 
+     * If we use _position as a second tie-breaker, then it will be 
+     * impossible for the order to flip in the RegionSet.
+     */
+    int pos1 = getPosOffset();
+    int pos2 = ((Breakpoint)r).getPosOffset();
+    return pos1 - pos2;
   }
   
   /** Returns the line number this DebugAction occurs on */
@@ -256,6 +295,20 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
     else {
       return "Breakpoint[class: " + cn +
         ", lineNumber: " + getLineNumber() + "]";
+    }
+  }
+
+  /** @param rs set to add */
+  public void addSet(RegionSet<IDocumentRegion> rs) {
+    if (!_regionSets.contains(rs)) {
+      _regionSets.add(rs);
+    }
+  }
+
+  /** @param rs set to remove */
+  public void removeSet(RegionSet<IDocumentRegion> rs) {
+    if (_regionSets.contains(rs)) {
+      _regionSets.remove(rs);
     }
   }
 }

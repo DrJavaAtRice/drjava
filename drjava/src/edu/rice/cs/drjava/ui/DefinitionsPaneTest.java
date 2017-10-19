@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -38,14 +38,13 @@ package edu.rice.cs.drjava.ui;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
-import edu.rice.cs.drjava.model.MultiThreadedTestCase;
 import edu.rice.cs.drjava.model.*;
-import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.swing.Utilities;
 
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
+
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -53,6 +52,8 @@ import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Vector;
 import java.util.Date;
+
+import org.junit.Assert;
 
 /** Tests the Definitions Pane
   * @version $Id$
@@ -105,11 +106,14 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     super.tearDown();
   }
   
-  /** Tests that shift backspace works the same as backspace. (Ease of use issue 693253).  Ideally, this test should
-    * be lighter weight, and not require the creation of an entire MainFrame+GlobalModel.  Refactor?
-    * NOTE: This test doesn't work yet, since we can't currently bind two keys to the same action.  This should be 
-    * implemented as part of feature request 683300.
-    */
+  /** Tests that shift backspace works the same as backspace. (Ease of use 
+   * issue 693253).  Ideally, this test should be lighter weight, and not 
+   * require the creation of an entire MainFrame+GlobalModel.  Refactor?
+   * NOTE: This test doesn't work yet, since we can't currently bind two 
+   * keys to the same action.  This should be implemented as part of 
+   * feature request 683300.
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testShiftBackspace() throws BadLocationException {
 //    _log.log("Starting testShiftBackSpace");
     final DefinitionsPane defPane = _frame.getCurrentDefPane();
@@ -153,7 +157,9 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
   }
 
   
-  /** Tests that typing a brace in a string/comment does not cause an indent. */
+  /** Tests that typing a brace in a string/comment does not cause an indent.
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testTypeBraceNotInCode() throws BadLocationException {
     final DefinitionsPane defPane = _frame.getCurrentDefPane();
     final OpenDefinitionsDocument doc = defPane.getOpenDefDocument();
@@ -173,9 +179,14 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     _log.log("testTypeBraceNotInCode completed");
   }
   
-  /** Tests that typing Enter in a string/comment does cause an indent.  This behavior works in practice, but I can't 
-    * get the test to work.  If we use definitions.processKeyEvent, the caret position is not updated, so the " * " 
-    * is not inserted.  If we try to dispatchEvent from the EventDispatchingThread, it hangs...?
+  /** Tests that typing Enter in a string/comment does cause an indent.  
+    * This behavior works in practice, but I can't get the test to work.  
+    * If we use definitions.processKeyEvent, the caret position is not 
+    * updated, so the " * " is not inserted.  If we try to dispatchEvent 
+    * from the EventDispatchingThread, it hangs...?
+    * @throws BadLocationException if attempts to reference an invalid location
+    * @throws InterruptedException if execution is interrupted unexpectedly
+    * @throws InvocationTargetException if the invocation target is invalid
     */
   public void testTypeEnterNotInCode() throws BadLocationException, InterruptedException, InvocationTargetException {
     
@@ -205,7 +216,9 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     });
   }
   
-  /** Tests that a simulated key press with the meta modifier is correct.  Reveals bug 676586. */
+  /** Tests that a simulated key press with the meta modifier is correct.  Reveals bug 676586.
+    * @throws BadLocationException if attempts to reference an invalid location
+    */
   public void testMetaKeyPress() throws BadLocationException {
     final DefinitionsPane defPane = _frame.getCurrentDefPane();
     final OpenDefinitionsDocument doc = defPane.getOpenDefDocument();
@@ -268,7 +281,9 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
   // Used to hold a document offset between successive Runnables moved to the event thread;
   private int _redoPos;
   
-  /** Tests that undoing/redoing a multi-line comment/uncomment will restore the caret position */
+  /** Tests that undoing/redoing a multi-line comment/uncomment will restore the caret position
+    * @throws BadLocationException if attempts to reference an invalid location
+    */
   public void testMultilineCommentOrUncommentAfterScroll() throws BadLocationException {
     
     final DefinitionsPane pane = _frame.getCurrentDefPane();
@@ -433,6 +448,8 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     /* Test bug #905405 Undo Alt+Anything Causes Exception */
     
     // What does the following code test?  There are no assertions!  -- Corky 5/9/06
+    // But it will still fail if this code throws an exception.  So it confirms that no exception is thrown.
+    // -- Corky 11/14/16 [TEN years later!]
     
     // Type 'Alt-B'
      Utilities.invokeAndWait(new Runnable() {
@@ -449,11 +466,9 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
                                                   ALT,
                                                   KeyEvent.VK_Q, UNDEFINED));
          
-         /*
-          * If the bug is not fixed in DefinitionsPane.processKeyEvent, this test
-          * will not fail because the exception is thrown in another thread.
-          * However, the stack trace will get printed onto the console.  I don't
-          * know how to fix this problem in case someone unfixes the bug.
+         /* If the bug is not fixed in DefinitionsPane.processKeyEvent, this test will not fail because the exception is
+          * thrown in another thread. However, the stack trace will get printed onto the console.  I don't know how to 
+          * fix this problem in case someone unfixes the bug.
           */
          SwingUtilities.notifyAction(a, ks.get(0), e, e.getSource(), e.getModifiers());
          _frame.validate();
@@ -564,10 +579,16 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     });
   }
       
-  /** This testcase checks that we do no longer discard Alt keys that would be used to make the {,},[,] chars that the 
-    * French keyboards has.  Using the Locale did not work, and checking if the key was consumed by the document would
-    * only pass on the specific keyboards.  It was therefore unavoidable to add a few lines of code in the original code
-    * that is only used for this test case. These lines were added to the DefinitionsPane.java file. */
+  /** This testcase checks that we do no longer discard Alt keys that would be 
+   * used to make the {,},[,] chars that the French keyboards has.  
+   * Using the Locale did not work, and checking if the key was consumed by 
+   * the document would only pass on the specific keyboards.  It was 
+   * therefore unavoidable to add a few lines of code in the original code
+   * that is only used for this test case. These lines were added to the 
+   * DefinitionsPane.java file.
+   * @throws IOException if an IO operation fails
+   * @throws InterruptedException if execution is interrupted unexpectedly
+   */
   public void testFrenchKeyStrokes() throws IOException, InterruptedException {
     
     final DefinitionsPane pane = _frame.getCurrentDefPane(); // pane is NOT null.
@@ -732,9 +753,9 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
 
   static class KeyTestListener implements KeyListener {
     
-    public void keyPressed(KeyEvent e) { DefinitionsPaneTest.fail("Unexpected keypress " + e); }
-    public void keyReleased(KeyEvent e) { DefinitionsPaneTest.fail("Unexpected keyrelease " + e); }
-    public void keyTyped(KeyEvent e) { DefinitionsPaneTest.fail("Unexpected keytyped " + e);  }
+    public void keyPressed(KeyEvent e) { Assert.fail("Unexpected keypress " + e); }
+    public void keyReleased(KeyEvent e) { Assert.fail("Unexpected keyrelease " + e); }
+    public void keyTyped(KeyEvent e) { Assert.fail("Unexpected keytyped " + e);  }
     public boolean done() { return true; }
   }
   

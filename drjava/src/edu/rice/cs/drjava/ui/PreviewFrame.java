@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,7 @@ import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.border.MatteBorder;
 import javax.swing.border.EmptyBorder;
+
 import java.awt.event.*;
 import java.awt.*;
 import java.awt.print.*;
@@ -146,8 +147,11 @@ public abstract class PreviewFrame extends SwingFrame {
     public void windowClosing(WindowEvent ev) { _close(); }
   };
   
-  /** Contructs a new PreviewFrame using a parent model and a Pageable object print to show. Should only be called in 
-    * event thread. 
+  /** Contructs a new PreviewFrame using a parent model and a Pageable object 
+    * print to show. Should only be called in event thread. 
+    * @param model the parent model
+    * @param mainFrame the main frame
+    * @param interactions true if the document being previewed is an interactions document
     */
   public PreviewFrame(SingleDisplayModel model, MainFrame mainFrame, boolean interactions) 
     throws IllegalStateException {
@@ -184,8 +188,8 @@ public abstract class PreviewFrame extends SwingFrame {
     //zooming modification
     _previewScroll = new JScrollPane(previewHolder);
     //_previewScroll = new JScrollPane(cp);
-    _previewScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-    _previewScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+    _previewScroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    _previewScroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
     tbCont.add(_toolBar,BorderLayout.NORTH);
     tbCont.add(Box.createVerticalStrut(10),BorderLayout.SOUTH);
     tbCont.setBorder(new EmptyBorder(0,0,5,0));
@@ -346,7 +350,10 @@ public abstract class PreviewFrame extends SwingFrame {
     return m.invoke(rec,args);
   }
   
-  /** Mirrored from MainFrame, will later use the same Icon access code. */
+  /** Mirrored from MainFrame, will later use the same Icon access code. 
+   * @param name the name for which to get the icon
+   * @return the icon corresponding to name
+   */
   private ImageIcon _getIcon(String name) {
     URL url = PreviewFrame.class.getResource(ICON_PATH + name);
     if (url != null) return new ImageIcon(url);
@@ -448,7 +455,10 @@ public abstract class PreviewFrame extends SwingFrame {
     protected volatile Image _source;
     protected volatile Image _image;
     
-    /** Constructs a PagePreview object with given width and height. */
+    /** Constructs a PagePreview object with given width and height. 
+     * @param width the width
+     * @param height the height
+     */
     public PagePreview(int width, int height) {
       super();
       _width = width;

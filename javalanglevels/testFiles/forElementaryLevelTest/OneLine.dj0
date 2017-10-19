@@ -1,1 +1,10 @@
-class OneLine extends Maggie { int stuff; double method(char c) { return stuff; } }
+class Maggie extends Object { int i, j;
+  int foo() {
+    System.out.println("Hello World.");
+    return i;
+  }
+}
+class OneLine extends Maggie { 
+  int stuff; 
+  double method(char c) { return stuff; } 
+}

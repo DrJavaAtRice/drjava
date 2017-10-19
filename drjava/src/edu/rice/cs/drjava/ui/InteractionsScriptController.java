@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (javaplt@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -54,9 +54,10 @@ public class InteractionsScriptController /* implements Serializable */ {
   private InteractionsPane _interactionsPane;
 
   /** Builds a new interactions script pane and links it to the given model.
-    * @param model the InteractionsScriptModel to use
-    * @param closeAction how to close this script.
-    */
+   * @param model the InteractionsScriptModel to use
+   * @param closeAction how to close this script.
+   * @param interactionsPane reference to the interactions pane
+   */
   public InteractionsScriptController(InteractionsScriptModel model, Action closeAction,
                                       InteractionsPane interactionsPane) {
     _model = model;

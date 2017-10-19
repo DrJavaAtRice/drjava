@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -68,7 +68,7 @@ public class History implements OptionConstants, Serializable {
    */
   public static final String HISTORY_FORMAT_VERSION_2 = "// DrJava saved history v2" + StringOps.EOL;
 
-  private final ArrayList<String> _vector = new ArrayList<String>();
+  private final ArrayList<String> _history = new ArrayList<String>();
   private volatile int _cursor = -1;
 
   /** A hashmap for edited entries in the history. */
@@ -82,7 +82,7 @@ public class History implements OptionConstants, Serializable {
     public void optionChanged (OptionEvent<Integer> oce) {
       int newSize = oce.value;
 //      System.err.println("optionChanged called for historyOptionListener; newSize = " + newSize);
-      setMaxSize(newSize);
+      setMaximumSize(newSize);
     }
     public String toString() { return "HISTORY_MAX_SIZE OptionListener #" + hashCode(); }
   };
@@ -114,18 +114,19 @@ public class History implements OptionConstants, Serializable {
   }
 
   /** Adds an item to the history and moves the cursor to point to the place after it.
-    * Note: Items are not inserted if they are empty. (This is in accordance with
-    * bug #522123, but in divergence from feature #522213 which originally excluded
-    * sequential duplicate entries from ever being stored.)
-    *
-    * Thus, to access the newly inserted item, you must movePrevious first.
-    */
+   * Note: Items are not inserted if they are empty. (This is in accordance with
+   * bug #522123, but in divergence from feature #522213 which originally excluded
+   * sequential duplicate entries from ever being stored.)
+   *
+   * Thus, to access the newly inserted item, you must movePrevious first.
+   * @param item the item to be added
+   */
   public void add(String item) {
     // for consistency in saved History files, WILL save sequential duplicate entries
     if (item.trim().length() > 0) {
-      _vector.add(item);
-      // If max size of _vector is exceeded, spill the oldest element out of the History.
-      if (_vector.size() > _maxSize) _vector.remove(0);
+      _history.add(item);
+      // If max size of _history is exceeded, spill the oldest element out of the History.
+      if (_history.size() > _maxSize) _history.remove(0);
 
       moveEnd();
       _editedEntries.clear();
@@ -136,14 +137,14 @@ public class History implements OptionConstants, Serializable {
     * @return last element before it was removed, or null if history is empty
     */
   public String removeLast() {
-    if (_vector.size() == 0) { return null; }
-    String last = _vector.remove(_vector.size()-1);
-    if (_cursor > _vector.size()) { _cursor = _vector.size()-1; }
+    if (_history.size() == 0) { return null; }
+    String last = _history.remove(_history.size()-1);
+    if (_cursor > _history.size()) { _cursor = _history.size()-1; }
     return last;
   }
 
   /** Move the cursor to just past the end. Thus, to access the last element, you must movePrevious. */
-  public void moveEnd() { _cursor = _vector.size(); }
+  public void moveEnd() { _cursor = _history.size(); }
 
   /** Moves cursor back 1, or throws exception if there is none.
     * @param entry the current entry (perhaps edited from what is in history)
@@ -154,8 +155,8 @@ public class History implements OptionConstants, Serializable {
     _cursor--;
   }
   
-  /** Returns the last entry from the history. Throw array indexing exception if no such entry. */
-  public String lastEntry() { return _vector.get(_cursor - 1); }
+  /** @return the last entry from the history. Throw array indexing exception if no such entry. */
+  public String lastEntry() { return _history.get(_cursor - 1); }
 
   /** Moves cursor forward 1, or throws exception if there is none.
     * @param entry the current entry (perhaps edited from what is in history)
@@ -166,35 +167,37 @@ public class History implements OptionConstants, Serializable {
     _cursor++;
   }
 
-  /** Returns whether moveNext() would succeed right now. */
-  public boolean hasNext() { return  _cursor < (_vector.size()); }
+  /** @return whether moveNext() would succeed right now. */
+  public boolean hasNext() { return  _cursor < (_history.size()); }
 
-  /** Returns whether movePrevious() would succeed right now. */
+  /** @return whether movePrevious() would succeed right now. */
   public boolean hasPrevious() { return  _cursor > 0; }
 
-  /** Returns item in history at current position; returns "" if no current item exists. */
+  /** @return item in history at current position; returns "" if no current item exists. */
   public String getCurrent() {
     Integer cursor = Integer.valueOf(_cursor);
     if (_editedEntries.containsKey(cursor))  return _editedEntries.get(cursor);
 
-    if (hasNext()) return _vector.get(_cursor);
+    if (hasNext()) return _history.get(_cursor);
     return "";
   }
 
-  /** Returns the number of items in this History. */
-  public int size() { return _vector.size(); }
+  /** @return the number of items in this History. */
+  public int size() { return _history.size(); }
 
   /** Clears the vector */
-  public void clear() { _vector.clear(); }
+  public void clear() { _history.clear(); }
 
-  /** Returns the history as a string by concatenating each string in the vector separated by the delimiting
-    * character. A semicolon is added to the end of every statement that didn't already end with one.
-    */
+  /** Returns the history as a string by concatenating each string in the 
+   * vector separated by the delimiting character. A semicolon is added 
+   * to the end of every statement that didn't already end with one.
+   * @return the history as a string
+   */
   public String getHistoryAsStringWithSemicolons() {
     final StringBuilder s = new StringBuilder();
     final String delimiter = INTERACTION_SEPARATOR + StringOps.EOL;
-    for (int i = 0; i < _vector.size(); i++) {
-      String nextLine = _vector.get(i);
+    for (int i = 0; i < _history.size(); i++) {
+      String nextLine = _history.get(i);
 //      int nextLength = nextLine.length();
 //      if ((nextLength > 0) && (nextLine.charAt(nextLength-1) != ';')) {
 //        nextLine += ";";
@@ -206,16 +209,17 @@ public class History implements OptionConstants, Serializable {
     return s.toString();
   }
 
-  /** Returns the history as a string by concatenating the lines in _vector with EOL as separator. */
+  /** @return the history as a string by concatenating the lines in _history with EOL as separator. */
   public String getHistoryAsString() {
     final StringBuilder sb = new StringBuilder();
     final String delimiter = StringOps.EOL;
-    for (String s: _vector) sb.append(s).append(delimiter);
+    for (String s: _history) sb.append(s).append(delimiter);
     return sb.toString();
   }
 
   /** Writes this (unedited) History to the file selected in the FileSaveSelector.
     * @param selector File to save to
+    * @throws IOException if an IO operation fails 
     */
   public void writeToFile(FileSaveSelector selector) throws IOException {
     writeToFile(selector, getHistoryAsStringWithSemicolons());
@@ -225,6 +229,7 @@ public class History implements OptionConstants, Serializable {
     * any tags or extensions needed to recognize it as a saved interactions file.
     * @param selector File to save to
     * @param editedVersion The edited version of the text to be saved (which already uses proper EOL string)
+    * @throws IOException if an IO operation fails 
     */
   public static void writeToFile(FileSaveSelector selector, final String editedVersion) throws IOException {
     File c;
@@ -253,14 +258,14 @@ public class History implements OptionConstants, Serializable {
   /** Changes the maximum number of interactions remembered by this History.
     * @param newSize New number of interactions to remember.
     */
-  public void setMaxSize(int newSize) {
+  public void setMaximumSize(int newSize) {
     if (newSize < 0) newSize = 0;    // Sanity check
 
     // Remove old elements if the new size is less than current size
     if (size() > newSize) {
 
       int numToDelete = size() - newSize;
-      for (int i = 0; i < numToDelete; i++) { _vector.remove(0); }
+      for (int i = 0; i < numToDelete; i++) { _history.remove(0); }
 
       moveEnd();
     }

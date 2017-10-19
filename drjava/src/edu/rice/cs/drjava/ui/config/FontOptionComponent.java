@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -37,6 +37,7 @@
 package edu.rice.cs.drjava.ui.config;
 
 import javax.swing.*;
+
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.*;
 import edu.rice.cs.util.swing.FontChooser;
@@ -68,7 +69,7 @@ public class FontOptionComponent extends OptionComponent<Font,JPanel> {
     _fontField = new JTextField();
     _fontField.setEditable(false);
     _fontField.setBackground(Color.white);
-    _fontField.setHorizontalAlignment(JTextField.CENTER);
+    _fontField.setHorizontalAlignment(SwingConstants.CENTER);
     _panel = new JPanel(new BorderLayout());
     _panel.add(_fontField, BorderLayout.CENTER);
     _panel.add(_button, BorderLayout.EAST);
@@ -78,7 +79,12 @@ public class FontOptionComponent extends OptionComponent<Font,JPanel> {
     setComponent(_panel);
   }
   
-  /** Constructor that allows for a tooltip description. */
+  /** Constructor that allows for a tooltip description. 
+   * @param opt the option
+   * @param text text for descriptive label of this option
+   * @param parent the parent frame
+   * @param description tooltip text
+   */
   public FontOptionComponent(FontOption opt, String text, SwingFrame parent, String description) {
     this(opt, text, parent);
     setDescription(description);
@@ -93,7 +99,9 @@ public class FontOptionComponent extends OptionComponent<Font,JPanel> {
     _label.setToolTipText(description);
   }
 
-  /** Updates the font field to display the given font. */
+  /** Updates the font field to display the given font. 
+   * @param f the font to be displayed
+   */
   private void _updateField(Font f) {
     _fontField.setFont(f);
     _fontField.setText(_option.format(f));

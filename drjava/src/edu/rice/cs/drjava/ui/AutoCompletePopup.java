@@ -2,7 +2,7 @@ package edu.rice.cs.drjava.ui;
 
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -38,25 +38,9 @@ package edu.rice.cs.drjava.ui;
 
 import java.awt.event.*;
 import java.awt.Component;
-import java.awt.Container;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
-import java.awt.Insets;
-import java.awt.Color;
-import java.awt.EventQueue;
-import java.io.IOException;
-import java.io.File;
-import java.net.URL;
 import java.util.*;
 import javax.swing.*;
-import javax.swing.event.*;
-import javax.swing.border.EmptyBorder;
-import java.awt.Dimension;
-import javax.swing.text.JTextComponent;
-import javax.swing.text.BadLocationException;
-
 import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.ui.predictive.PredictiveInputFrame;
 import edu.rice.cs.drjava.ui.predictive.PredictiveInputModel;
@@ -68,7 +52,6 @@ import edu.rice.cs.plt.lambda.*;
 import edu.rice.cs.plt.iter.*;
 import edu.rice.cs.plt.collect.UnionSet;
 
-import edu.rice.cs.util.swing.SwingFrame;
 import edu.rice.cs.util.swing.Utilities;
 
 import static edu.rice.cs.drjava.ui.MainFrameStatics.*;
@@ -123,7 +106,7 @@ public class AutoCompletePopup {
     * @param initial initial text
     * @param loc caret location in the initial text
     * @param canceledAction action to take if canceled
-    * @param acceptedAction action to take if accepted <simple name, full name, from, to>
+    * @param acceptedAction action to take if accepted {@literal <simple name, full name, from, to>}
     */
   public void show(final Component parent,
                    final String title,
@@ -144,7 +127,7 @@ public class AutoCompletePopup {
     * @param loc caret location in the initial text
     * @param actionNames names for the actions
     * @param canceledAction action to take if canceled
-    * @param acceptedActions actions to take if accepted <simple name, full name, from, to>
+    * @param acceptedActions actions to take if accepted {@literal <simple name, full name, from, to>}
     */
   public void show(final Component parent,
                    final String title,
@@ -171,7 +154,7 @@ public class AutoCompletePopup {
     * @param actionKeyStrokes keystrokes for the actions
     * @param oneMatchActionIndex the action to take when there's just one match, or -1
     * @param canceledAction action to take if canceled
-    * @param acceptedActions actions to take if accepted <simple name, full name, from, to>
+    * @param acceptedActions actions to take if accepted {@literal <simple name, full name, from, to>}
     */
   public void show(final Component parent,
                    final String title,
@@ -356,8 +339,7 @@ public class AutoCompletePopup {
     Iterator<Runnable3<AutoCompletePopupEntry,Integer,Integer>> actionIt =
       acceptedActions.iterator();
     Iterator<KeyStroke> ksIt = actionKeyStrokes.iterator();
-    for(int i=0; i<acceptedActions.size(); ++i) {
-      final int acceptedActionIndex = i;
+    for(int i = 0; i<acceptedActions.size(); ++i) {
       final String name = nameIt.next();
       final Runnable3<AutoCompletePopupEntry,Integer,Integer> runnable = actionIt.next();
       final KeyStroke ks = ksIt.next();

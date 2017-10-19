@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -127,7 +127,7 @@ public class FindReplaceMachineTest extends DrJavaTestCase {
   }
   
 //  public void testCreateMachineFail() {
-//    // before 0
+//// before 0
 //    try {
 //      _initFrm(-2);
 //      System.err.println(_frm.getStartOffset() + " " +
@@ -138,7 +138,7 @@ public class FindReplaceMachineTest extends DrJavaTestCase {
 //      // expected: -2 is not a valid offset.
 //    }
 //
-//    // after doc.getLength()
+//// after doc.getLength()
 //    try {
 //      _initFrm(5);
 //      System.out.println(_frm.getStartOffset() + " " +
@@ -304,8 +304,9 @@ public class FindReplaceMachineTest extends DrJavaTestCase {
   }
   
   /** This tests that a replace all where the replacement action creates a new match
-    * does not replace this new match
-    */
+   * does not replace this new match
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testReplaceCreatesMatch() throws BadLocationException {
     _doc.insertString(0, "hhelloello", null);
     _initFrm(1);
@@ -319,8 +320,9 @@ public class FindReplaceMachineTest extends DrJavaTestCase {
   }
   
   /** This tests that a replace all backwards where the replacement action creates a new match
-    * does not replace this new match
-    */
+   * does not replace this new match
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testReplaceCreatesMatchBackwards() throws BadLocationException {
     _doc.insertString(0, "hhelloello", null);
     _initFrm(1);
@@ -333,7 +335,9 @@ public class FindReplaceMachineTest extends DrJavaTestCase {
 //    System.err.println("testReplaceCreatesMatchBackwards completed");
   }
   
-  /** This test checks that replacing a word with itself will halt on replace all. */
+  /** This test checks that replacing a word with itself will halt on replace all. 
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testReplaceAllSameWord() throws BadLocationException {
     _doc.insertString(0, "cool cool", null);
     _initFrm(3);
@@ -351,9 +355,10 @@ public class FindReplaceMachineTest extends DrJavaTestCase {
   }
   
   /** This test checks that a findNext won't find two matches that partially overlap.
-    * This is the current behavior of the FindReplaceMachine, though at some time
-    * in the future someone may want to change it.
-    */
+   * This is the current behavior of the FindReplaceMachine, though at some time
+   * in the future someone may want to change it.
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testFindPartialSubstrings() throws BadLocationException {
     _doc.insertString(0, "ooAooAoo", null);
     _initFrm(0);
@@ -371,9 +376,10 @@ public class FindReplaceMachineTest extends DrJavaTestCase {
   }
   
   /** This test addresses bug #745714 Searches Repeat When Changing Direction.
-    * The word that was just found should not be found again after toggling
-    * the search backwards flag.
-    */
+   * The word that was just found should not be found again after toggling
+   * the search backwards flag.
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testSearchesDoNotRepeatWhenChangingDirection() throws BadLocationException {
     _doc.insertString(0, "int int int", null);
     _initFrm(0);
@@ -398,7 +404,9 @@ public class FindReplaceMachineTest extends DrJavaTestCase {
 //    System.err.println("testSearchesDoNotRepeatWhenChangingDirection completed");
   }
   
-  /** This test addresses feature request #784514 Find/Replace in all Open Files. */
+  /** This test addresses feature request #784514 Find/Replace in all Open Files. 
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testFindReplaceInAllOpenFiles() throws BadLocationException {
     _doc.insertString(0, EVIL_TEXT, null);
     _docPrev.insertString(0, EVIL_TEXT_PREV, null);

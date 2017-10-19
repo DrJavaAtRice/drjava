@@ -87,7 +87,7 @@ public class BodyBodyFullJavaVisitor extends FullJavaVisitor {
     SymbolData objectSD = symbolTable.get("java.lang.Object");   
     SymbolData integerSD = symbolTable.get("java.lang.Integer");
     assert objectSD != null && integerSD != null;
-    assert integerSD.isAssignableTo(objectSD, JavaVersion.JAVA_5);
+    assert integerSD.isAssignableTo(objectSD, true);
   }
    
   
@@ -118,7 +118,7 @@ public class BodyBodyFullJavaVisitor extends FullJavaVisitor {
     SymbolData objectSD = symbolTable.get("java.lang.Object");   
     SymbolData integerSD = symbolTable.get("java.lang.Integer");
     assert objectSD != null && integerSD != null;
-    assert integerSD.isAssignableTo(objectSD, JavaVersion.JAVA_5);
+    assert integerSD.isAssignableTo(objectSD, true);
   }
   
   /** Ignore MethodDef. */

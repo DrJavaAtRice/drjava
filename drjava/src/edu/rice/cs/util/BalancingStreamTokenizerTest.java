@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -41,8 +41,7 @@ import junit.framework.TestCase;
 import java.io.StringReader;
 import java.io.IOException;
 
-/**
- * Tests for a class to tokenize a stream while balancing quoting characters.
+/** * Tests for a class to tokenize a stream while balancing quoting characters.
  * @author Mathias Ricken
  * @version $Id$
  */
@@ -1896,11 +1895,11 @@ public class BalancingStreamTokenizerTest extends TestCase {
 //    BalancingStreamTokenizer tok = make("''test''", '\'');
 //    tok.defaultTwoQuoteSetup();
 //    String s = tok.getNextToken();
-//    // System.err.println(s);
+//// System.err.println(s);
 //    assertEquals("'test'", s);
 //    assertEquals(BalancingStreamTokenizer.Token.QUOTED, tok.token());
 //    s = tok.getNextToken();
-//    // System.err.println(s);
+//// System.err.println(s);
 //    assertEquals(null, s);
 //    assertEquals(BalancingStreamTokenizer.Token.END, tok.token());
 //  }

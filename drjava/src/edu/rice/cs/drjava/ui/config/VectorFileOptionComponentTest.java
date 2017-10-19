@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -108,9 +108,9 @@ public final class VectorFileOptionComponentTest extends DrJavaTestCase {
   }
 
   /** The equals method for a parameterized Vector.
-    * @param v1 the first Vector<File>
-    * @param v2 the Vector<File> to compare with
-    * @return <code>true</code> iff the two vectors are equal
+    * @param v1 the first {@code Vector<File>}
+    * @param v2 the {@code Vector<File>} to compare with
+    * @return {@code true} iff the two vectors are equal
     */
   public boolean vectorEquals(Vector<File> v1, Vector<File> v2) {
     if (v1.size() == v2.size()) {

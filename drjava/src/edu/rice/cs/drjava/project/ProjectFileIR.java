@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,7 @@ import java.util.List;
 import java.util.Map;
 
 import edu.rice.cs.drjava.config.OptionParser;
-import edu.rice.cs.drjava.model.FileRegion;
+import edu.rice.cs.drjava.model.IRegion;
 import edu.rice.cs.drjava.model.debug.DebugBreakpointData;
 import edu.rice.cs.drjava.model.debug.DebugWatchData;
 import edu.rice.cs.util.AbsRelFile;
@@ -94,7 +94,7 @@ public interface ProjectFileIR {
   public int getCreateJarFlags();
   
   /** @return the array of bookmarks. */
-  public FileRegion[] getBookmarks();
+  public IRegion[] getBookmarks();
   
   /** @return the array of breakpoints. */
   public DebugBreakpointData[] getBreakpoints();
@@ -118,38 +118,36 @@ public interface ProjectFileIR {
   public void setProjectRoot(File root);
   public void setCreateJarFile(File createJarFile);
   public void setCreateJarFlags(int createJarFlags);
-  public void setBookmarks(List<? extends FileRegion> bms);
+  public void setBookmarks(List<? extends IRegion> bms);
   public void setBreakpoints(List<? extends DebugBreakpointData> bps);
   public void setWatches(List<? extends DebugWatchData> ws);
   public void setAutoRefreshStatus(boolean b);
   public void setPreferencesStoredInProject(Map<OptionParser<?>,String> sp);
   
-  /**
-   * The version of dr java that created this project (as determined from its serialization as a .pjt or .drjava or .xml file)
-   * 
-   * @return The version string, if known, or "unknown" otherwise.
-   */
+  /** The version of dr java that created this project (as determined from its serialization as a .pjt or .drjava or .xml file)
+    * 
+    * @return The version string, if known, or "unknown" otherwise.
+    */
   public String getDrJavaVersion();
   
-  /**
-   * Sets the version of DrJava that built this project.
-   * 
-   * @param version - the version string, should be called with "unknown" if the version could not be determined.
-   */
+  /** Sets the version of DrJava that built this project.
+    * 
+    * @param version - the version string, should be called with "unknown" if the version could not be determined.
+    */
   public void setDrJavaVersion(String version);
   
-  /**
-   * Accessor for custom manifest in project.
-   * Note that the existance of such a manifest does not mean
-   * that the custom manifest is in USE.
-   * That depends on other JAR creation settings.
-   * 
-   * @see #getCreateJarFlags()
-   */
+  /** Accessor for custom manifest in project.
+    * Note that the existance of such a manifest does not mean
+    * that the custom manifest is in USE.
+    * That depends on other JAR creation settings.
+    * 
+    * @return custom manifest for the project
+    * @see #getCreateJarFlags()
+    */
   public String getCustomManifest();
   
-  /**
-   * Mutator for custom manifest.
+  /** Mutator for custom manifest.
+   * @param manifest custom manifest to be set for the project
    */
   public void setCustomManifest(String manifest);
 }

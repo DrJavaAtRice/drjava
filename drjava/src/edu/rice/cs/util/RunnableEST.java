@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -35,12 +35,6 @@
  * END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util;
-
-import java.io.*;
-
-import java.util.Date;
-import java.text.SimpleDateFormat;
-import java.util.TimeZone;
 
 /** Runnable with extended stack trace. Catches all thrown exceptions and rethrows them
   * with the stack trace of the creation site of this RunnableEST appended.

@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -45,8 +45,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
-/**
- * This parser is not meant to be instantiated.  It has
+/** * This parser is not meant to be instantiated.  It has
  * static methods that do all the work for you.  These
  * parse methods take in the data that is to be parsed
  * and simply returns an s-expression abstract syntax.
@@ -87,9 +86,9 @@ public class SExpParser {
       _lex = new Lexer(r);
     }
     
-    /**
-     * Parse a forest of top-level s-expressions from {@link #parseTopLevelExp()}.
+    /** Parse a forest of top-level s-expressions from {@link #parseTopLevelExp()}.
      * @see #parseTopLevelExp()
+     * @return the parsed expression
      */
     public List<SEList> parseMultiple() {
       ArrayList<SEList> l = new ArrayList<SEList>();
@@ -100,8 +99,7 @@ public class SExpParser {
       return l;
     }
     
-    /**
-     * A top-level s-expression is simply a non-empty list.  Our s-expression files
+    /** A top-level s-expression is simply a non-empty list.  Our s-expression files
      * can be a forest of several trees, but the Atomic values are not allowed
      * at the top level, only lists.
      * @return the top-level list s-expression
@@ -120,8 +118,7 @@ public class SExpParser {
       }
     }
     
-    /**
-     * Parses the next s-expression in the lexer's buffer.
+    /** Parses the next s-expression in the lexer's buffer.
      * This may be either a cons or an atom
      * @return the next s-expression in the read buffer.
      */
@@ -136,8 +133,7 @@ public class SExpParser {
       }
     }
     
-    /**
-     * The left paren has already been read. This starts
+    /** The left paren has already been read. This starts
      * building up the recursive list structure
      * @return the parsed recursive s-expression list
      */
@@ -163,34 +159,25 @@ public class SExpParser {
       return cons;
     }
     
-    /** Parses an atom.  The token was already read and
-      * found not to start a list, this method interprets
-      * what is given.  This method chooses which type of
-      * atom the token represents and creates the atom.
+    /** Parses an atom.  The token was already read and found not to start a list, this method interprets
+      * what is given.  This method chooses which type of atom the token represents and creates the atom.
       * @param t the token to interpret
       * @return the correct corresponding atom */
     
-    @SuppressWarnings("all")  /* package private class QuotedTextAtom is defined in file TextAtom rather than its own file. */
     private Atom parseAtom(Tokens.SExpToken t) {
       if (t instanceof Tokens.BooleanToken) {
-        if (((Tokens.BooleanToken)t).getValue())
-          return BoolAtom.TRUE;
-        else 
-          return BoolAtom.FALSE;
+        if (((Tokens.BooleanToken)t).getValue()) return Atom.Bool.TRUE;
+        else return Atom.Bool.FALSE;
       }
-      else if (t instanceof Tokens.NumberToken) {
-        return new NumberAtom(((Tokens.NumberToken)t).getValue());
-      }
-      else if (t instanceof Tokens.QuotedTextToken) {
-        return new QuotedTextAtom(t.getText());
-      }
-      else {
-        return new TextAtom(t.getText());
-      }
+      else if (t instanceof Tokens.NumberToken)
+        return new Atom.Number(((Tokens.NumberToken)t).getValue());
+      else if (t instanceof Tokens.QuotedTextToken)
+        return new Atom.QuotedText(t.getText());
+      else
+        return new Atom.Text(t.getText());
     }
     
-    /**
-     * Throws the EOF exception if the given token is the end of file
+    /** Throws the EOF exception if the given token is the end of file
      * @param t the token to check
      */
     private void assertNotEOF(Tokens.SExpToken t) {
@@ -205,8 +192,7 @@ public class SExpParser {
    * the SExpParseException to be thrown.
    */
   private static class PrivateParseException extends RuntimeException {
-    /**
-     * Creates a runtime exception with the message that is desired for
+    /** Creates a runtime exception with the message that is desired for
      * the eventual checked exception
      * @param msg the message to display
      */

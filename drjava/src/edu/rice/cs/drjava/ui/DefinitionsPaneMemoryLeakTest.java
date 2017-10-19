@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -37,28 +37,16 @@
 package edu.rice.cs.drjava.ui;
 
 import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.config.OptionConstants;
-import edu.rice.cs.drjava.model.MultiThreadedTestCase;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
-import edu.rice.cs.util.Log;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.FileOps;
-import static edu.rice.cs.drjava.model.GlobalModelTestCase.FileSelector;
 
-import javax.swing.*;
-import javax.swing.text.BadLocationException;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.io.*;
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Vector;
-import java.util.Date;
-
 import java.lang.ref.WeakReference;
+
 import static org.netbeans.test.MemoryTestUtils.*;
 
 /** Tests the Definitions Pane
@@ -97,6 +85,7 @@ public final class DefinitionsPaneMemoryLeakTest extends MultiThreadedTestCase {
     super.tearDown();
   }
   
+  @SuppressWarnings("unused")
   private volatile DefinitionsDocument preventFinalization;
 
   private volatile int _finalPaneCt;
@@ -130,7 +119,7 @@ public final class DefinitionsPaneMemoryLeakTest extends MultiThreadedTestCase {
     OpenDefinitionsDocument[] d = new OpenDefinitionsDocument[PANE_COUNT];
     DefinitionsPane[] p = new DefinitionsPane[PANE_COUNT];
     
-    for(int i=0; i<PANE_COUNT; ++i) {
+    for(int i = 0; i < PANE_COUNT; ++i) {
       listener.reset();
       d[i] = _model.newFile();
       try {
@@ -163,23 +152,23 @@ public final class DefinitionsPaneMemoryLeakTest extends MultiThreadedTestCase {
     sbIdHashCodes = new StringBuilder();
     sbIdHashCodes.append("_frame = "+_frame.getClass().getName()+"@0x"+hexIdentityHashCode(_frame)+"\n");
     sbIdHashCodes.append("_model = "+_model.getClass().getName()+"@0x"+hexIdentityHashCode(_frame)+"\n");
-    for(int i=0; i<PANE_COUNT;++i) {
+    for(int i = 0; i < PANE_COUNT;++i) {
       sbIdHashCodes.append("p["+i+"]   = "+p[i].getClass().getName()+"@0x"+hexIdentityHashCode(p[i])+"\n");
     }
-    for(int i=0; i<PANE_COUNT;++i) {
+    for(int i = 0; i < PANE_COUNT;++i) {
       sbIdHashCodes.append("d["+i+"]   = "+d[i].getClass().getName()+"@0x"+hexIdentityHashCode(d[i])+"\n");
     }
 
     List<WeakReference<OpenDefinitionsDocument>> wd = new ArrayList<WeakReference<OpenDefinitionsDocument>>(PANE_COUNT);
     List<WeakReference<DefinitionsPane>> wp = new ArrayList<WeakReference<DefinitionsPane>>(PANE_COUNT);
-    for(int i=0; i<PANE_COUNT;++i) {
+    for(int i = 0; i < PANE_COUNT;++i) {
       wd.add(new WeakReference<OpenDefinitionsDocument>(d[i]));
       wp.add(new WeakReference<DefinitionsPane>(p[i]));
     }
     
     // all the panes have a listener, so lets close all files
 //    Utilities.show("Waiting to start");
-    for(int i=0; i<PANE_COUNT; ++i) {
+    for(int i = 0; i < PANE_COUNT; ++i) {
       p[i] = null;
       d[i] = null;
     }
@@ -199,14 +188,15 @@ public final class DefinitionsPaneMemoryLeakTest extends MultiThreadedTestCase {
     Utilities.invokeAndWait(new Runnable() { public void run() { _model.closeAllFiles(); } });
     Utilities.clearEventQueue();
     
-    for(int i=0; i<PANE_COUNT; ++i) {
+    for(int i = 0; i < PANE_COUNT; ++i) {
       assertGC("Document "+i+" leaked", wd.get(i));
       assertGC("Pane "+i+" leaked", wp.get(i));
     }
   }
     
   
-  public void testDocumentPaneMemoryLeak() throws InterruptedException, IOException {
+  @SuppressWarnings("unused")
+public void testDocumentPaneMemoryLeak() throws InterruptedException, IOException {
     println("---- testDocumentPaneMemoryLeak ----");
 
     // _model has been setUp
@@ -286,7 +276,11 @@ public final class DefinitionsPaneMemoryLeakTest extends MultiThreadedTestCase {
   
   public static final edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("heap.log",false);
   
-  /** Dumps the current heap to a file. */
+  /** Dumps the current heap to a file. 
+   * @return the newly-created file
+   * @throws IOException if an IO operation fails
+   * @throws InterruptedException if execution is interrupted unexpectedly
+   */
   public static File dumpHeap() throws IOException, InterruptedException {
     String javaHome = System.getenv("JAVA_HOME");
     char SEP = File.separatorChar;
@@ -345,7 +339,9 @@ public final class DefinitionsPaneMemoryLeakTest extends MultiThreadedTestCase {
     return newDump;
   }
   
-  /** @return the identity hash code in hex. */
+  /** @param o object for which to get the hash code
+   * @return the identity hash code in hex. 
+   */
   public static String hexIdentityHashCode(Object o) {
     return Integer.toHexString(System.identityHashCode(o));
   }

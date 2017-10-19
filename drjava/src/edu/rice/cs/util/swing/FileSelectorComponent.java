@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -153,13 +153,13 @@ public class FileSelectorComponent extends JPanel {
     super.setEnabled(isEnabled);
   }
   
-  /** Returns the file text field. */
+  /** @return the file text field. */
   public JTextField getFileField() { return _fileField; }
   
-  /** Returns the file chooser. */
+  /** @return the file chooser. */
   public JFileChooser getFileChooser() { return _chooser; }
   
-  /** Returns the file currently typed into the file field. */
+  /** @return the file currently typed into the file field. */
   public File getFileFromField() {
     String txt = _fileField.getText().trim();
     if (txt.equals("")) _file = FileOps.NULL_FILE;
@@ -188,7 +188,9 @@ public class FileSelectorComponent extends JPanel {
     }
   }
   
-  /** Sets the file filter to use. */
+  /** Sets the file filter to use. 
+   * @param filter the filter to be set
+   */
   public void setFileFilter(FileFilter filter) { _fileFilter = filter; }
   
   public void setToolTipText(String text) {

@@ -7,7 +7,6 @@
 <project name="docs" default="help">
 
   <property name="readable-project-name" value="DrJava Documentation" />
-  <property name="svn-repository" value="https://svn.sourceforge.net/svnroot/drjava" />
 
   <property environment="env" />
   <property name="docbook-xsl-home" value="${env.DOCBOOK_XSL_HOME}" />
@@ -37,8 +36,8 @@
     <echo message="For this build file to function properly, the following environment " />
     <echo message="variables should be defined:" />
     <echo message="DOCBOOK_XSL_HOME: Location of the DocBook XSL style sheets" />
-    <echo message="PATH: 'xsltproc' must be available; 'svn' needs to refer to the" />
-    <echo message="      Subversion client executable" />
+    <echo message="PATH: 'xsltproc' must be available; 'git' needs to refer to the" />
+    <echo message="      git client executable" />
     <echo message="" />
     <echo message="Ant may also require ANT_HOME to be set.  Note that the value of " />
     <echo message="CLASSPATH will be ignored -- classes on the system classpath will " />
@@ -257,68 +256,6 @@
   </target>
   
 
-  <!-- ******************
-       Subversion Targets 
-       ****************** -->
-  
-  <target name="update" depends="clean" description="Reconcile source with the Subversion archive">
-    <echo message="Running Subversion update" />
-    <exec executable="svn" failonerror="yes">
-      <arg value="update" />
-    </exec>
-    <exec executable="svn" failonerror="yes">
-      <arg value="status" />
-    </exec>
-  </target>
-  
-  <target name="commit" depends="update, build" 
-          description="Commit source to the Subversion archive (after building)">
-    <antcall target="clean-intermediate"> <!-- Clean up after the latest build -->
-      <param name="clean-can-fail" value="no" />
-    </antcall>
-    <exec executable="svn" failonerror="yes">
-      <arg value="status" />
-    </exec>
-    <input message="Please enter a log message for the commit: "
-           addproperty="svn-commit-message" />
-    <echo message="Running Subversion commit" />
-    <exec executable="svn" failonerror="yes">
-      <arg value="commit" />
-      <arg value="-m" />
-      <arg value="${svn-commit-message}" />
-    </exec>
-  </target>
-
-  <target name="tag" depends="update, resolve-version-tag" 
-          description="Copy the working copy to a new Subversion tag (after updating)">
-    <echo message="Creating a new Subversion tag with name ${version-tag}"/>
-    <exec executable="svn" failonerror="yes">
-      <arg value="copy" />
-      <arg value="${basedir}" />
-      <arg value="${svn-repository}/tags/${version-tag}" />
-      <arg value="-m" />
-      <arg value="Created tag ${version-tag}" />
-    </exec>
-  </target>
-  
-  <target name="branch" depends="update" 
-          description="Copy the working copy to a new Subversion branch (after updating)">
-    <echo message="This will create a new branch from your working copy.  If there are changes " />
-    <echo message="in your copy that have not been committed, you may want to do so first, " />
-    <echo message="so that there's a clear branch point for merging later." />
-    <input message="Enter a name for the new branch: "
-           addproperty="svn-branch-name" />
-    <echo message="Creating a new Subversion branch ${svn-branch-name}" />
-    <exec executable="svn" failonerror="yes">
-      <arg value="copy" />
-      <arg value="${basedir}" />
-      <arg value="${svn-repository}/branches/${svn-branch-name}" />
-      <arg value="-m" />
-      <arg value="Created branch ${svn-branch-name}" />
-    </exec>
-  </target>
-
-
   <!-- ***************
        Release Targets
        *************** -->
@@ -336,7 +273,7 @@
   </target>
        
   <target name="release"
-          depends="update, build, tag, jar-app, src-zip" 
+          depends="build, jar-app" 
           description="Generate all release files (after building)">
     <delete dir="${version-tag}" />
   </target>
@@ -346,17 +283,6 @@
     <copy file="${ant.project.name}.jar" tofile="${version-tag}.jar" />
   </target>
 
-  <target name="src-zip" depends="resolve-version-tag">
-    <echo message="Creating ${version-tag}-src.zip" />
-    <exec executable="svn" failonerror="yes">
-      <arg value="export" />
-      <arg value="${svn-repository}/tags/${version-tag}" />
-      <arg value="${version-tag}/src" />
-    </exec>
-    <zip destfile="${version-tag}-src.zip">
-      <zipfileset dir="${version-tag}/src" prefix="${version-tag}/src" />
-    </zip>
-  </target>
     
   
   <!-- ********************************
@@ -384,9 +310,6 @@
     </replace>
   </target>
   
-  <!-- Standardize all newline character sequences.  Subversion takes care of this 
-       automatically, but sometimes files crop up with the wrong sequence.
-       Use "svn status" after running this to see which files were fixed. -->
   <target name="fix-newlines" description="Standardize newline character sequences in all text files">
     <!-- If we're in Windows, use \r\n -->
     <condition property="newline-code" value="crlf">

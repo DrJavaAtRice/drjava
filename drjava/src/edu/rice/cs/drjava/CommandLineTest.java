@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -50,10 +50,9 @@ import edu.rice.cs.util.Log;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.Utilities;
 
-/**
- * Tests opening/creating files specified as command line arguments.
- * @version $Id$
- */
+/** Tests opening/creating files specified as command line arguments.
+  * @version $Id$
+  */
 public final class CommandLineTest extends DrJavaTestCase {
   /** File separator, i.e. '/' or '\\'. */
   private static final char FS = File.separatorChar;
@@ -197,7 +196,7 @@ public final class CommandLineTest extends DrJavaTestCase {
           _log.log("File initialization (setUp) is complete");
         }
         catch (IOException e) {
-          System.out.print("createTempFile failed.  This should not happen.");
+          System.err.print("createTempFile failed.  This should not happen.");
           throw new RuntimeException(e.toString());
         }
       }
@@ -223,7 +222,9 @@ public final class CommandLineTest extends DrJavaTestCase {
     
   }
   
-  /** Open one file on the command line.  Should (obviously) open that file. */
+  /** Open one file on the command line.  Should (obviously) open that file. 
+   * @throws BadLocationException if an invalid location within the document model is referenced
+   */
   public void testOpenOne() throws BadLocationException {
     String[] list = new String[1];
     list[0] = f1_name;
@@ -254,7 +255,10 @@ public final class CommandLineTest extends DrJavaTestCase {
     _log.log("testNE completed");
   }
   
-  /** Many files on the command line.  Should open all of them, displaying the last one. */
+  /** Many files on the command line. 
+   * Should open all of them, displaying the last one. 
+   * @throws BadLocationException if an invalid location within the document model is referenced
+   */
   public void testOpenMany() throws BadLocationException {
     String[] list = new String[3];
     list[0] = f1_name;
@@ -280,7 +284,10 @@ public final class CommandLineTest extends DrJavaTestCase {
     _log.log("testOpenMany completed");
   }
   
-  /** Supplying both valid and invalid filenames on the command line. Should open only the valid ones. */
+  /** Supplying both valid and invalid filenames on the command line. 
+   * Should open only the valid ones. 
+   * @throws BadLocationException if an invalid location within the document model is referenced
+   */
   public void testMixed() throws BadLocationException {
     String[] list = new String[6];
     list[0] = f4_name;
@@ -309,7 +316,9 @@ public final class CommandLineTest extends DrJavaTestCase {
     _log.log("testMixed completed");
   }
   
-  /** Test duplicate files. */
+  /** Test duplicate files.
+   * @throws BadLocationException if an invalid location within the document model is referenced
+   */
   public void testDups() throws BadLocationException {
     String[] list = new String[6];
     list[0] = f7_name;
@@ -337,9 +346,11 @@ public final class CommandLineTest extends DrJavaTestCase {
   }
   
   /** A regression test for bug #542747, which related to opening a file via the command line using a relative path.
-    * The problem was that getSourceRoot() would fail on the document, because the filename was not absolute. (The
-    * fix will be to absolutize file paths when opening files.)
-    */
+   * The problem was that getSourceRoot() would fail on the document, because the filename was not absolute. (The
+   * fix will be to absolutize file paths when opening files.)
+   * @throws IOException if an IO operation fails
+   * @throws InvalidPackageException if the document contains an invalid package statement
+   */
   public void testRelativePath() throws IOException, InvalidPackageException {
     String funnyName = "DrJava_automatically_deletes_this_1";
     File newDirectory = mkTempDir(funnyName);
@@ -354,8 +365,8 @@ public final class CommandLineTest extends DrJavaTestCase {
   }
   
   /** Tests paths with "." and ".." in them.  Windows will blow up if you use one in a JFileChooser without
-    * converting it to a canonical filename.
-    */
+   * converting it to a canonical filename.
+   */
   public void testDotPaths() {
     String funnyName = "DrJava_automatically_deletes_this_2";
     File newDirectory = mkTempDir(funnyName);
@@ -376,7 +387,10 @@ public final class CommandLineTest extends DrJavaTestCase {
     _log.log("testDotPaths completed");
   }
   
-  /** Helper for testRelativeFile and testDotPaths. */
+  /** Helper for testRelativeFile and testDotPaths. 
+   * @param funnyName the name of the directory to create
+   * @return the newly-created directory
+   */
   private File mkTempDir(String funnyName) {
     // OK, we have to create a directory with a hard-coded name in the current working directory, so we'll make it
     // strange. If this directory happens to exist, it'll be deleted.
@@ -388,8 +402,15 @@ public final class CommandLineTest extends DrJavaTestCase {
     return newDirectory;
   }
   
-  /** Helper for testRelativeFile and testDotPaths. */
-  private void checkFile(File relativeFile, String funnyName) throws IOException, InvalidPackageException {
+  /** Helper for testRelativeFile and testDotPaths. 
+   * @param relativeFile file to write to
+   * @param funnyName name of package to write to file
+   * @throws IOException if an IO operation fails
+   * @throws InvalidPackageException if the document contains an invalid package statement
+   */
+  private void checkFile(File relativeFile, String funnyName) 
+    throws IOException, InvalidPackageException {
+
     IOUtil.writeStringToFile(relativeFile, "package " + funnyName + "; class X { }");
     assertTrue("file exists", relativeFile.exists());
     

@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -45,8 +45,7 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 
-/**
- * Tests that a custom config file can be specified.
+/** * Tests that a custom config file can be specified.
  * @version $Id$
  */
 public final class ConfigFileTest extends DrJavaTestCase {
@@ -56,10 +55,15 @@ public final class ConfigFileTest extends DrJavaTestCase {
     "definitions.keyword.color = #0000ff\n";
   
   
-  /** Constructor. */
+  /** Constructor. 
+   * @param name name of the test case
+   */
   public ConfigFileTest(String name) { super(name); }
   
-  /** Creates a custom properties file, tells DrJava to use it, and checks that it is being used. */
+  /** Creates a custom properties file, tells DrJava to use it, and checks 
+   * that it is being used. 
+   * @throws IOException if an IO operation fails
+   */
   public void testCustomConfigFile() throws IOException {
     final File propsFile = IOUtil.createAndMarkTempFile("DrJavaProps", ".txt");
     IOUtil.writeStringToFile(propsFile, CUSTOM_PROPS);
@@ -73,7 +77,7 @@ public final class ConfigFileTest extends DrJavaTestCase {
 //    Utilities.clearEventQueue();
     
     FileConfiguration config = DrJava.getConfig();
-    assertEquals("custom indent level", 5, config.getSetting(OptionConstants.INDENT_LEVEL).intValue());
+    assertEquals("custom indent level", 5, config.getSetting(OptionConstants.INDENT_INC).intValue());
     assertEquals("custom history size", 1, config.getSetting(OptionConstants.HISTORY_MAX_SIZE).intValue());
     //Tests if a user can put a default value in the .drjava file
     assertEquals("definitions.keyword.color", Color.blue, config.getSetting(OptionConstants.DEFINITIONS_KEYWORD_COLOR));

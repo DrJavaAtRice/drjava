@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -67,8 +67,8 @@ public class ManifestWriter {
   }
   
   /** Set the main class of the Manifest
-    * @param mainClass
-    */
+   * @param mainClass the class to be set
+   */
   public void setMainClass(String mainClass) {
     _mainClass = mainClass;
     _rawManifest = null;

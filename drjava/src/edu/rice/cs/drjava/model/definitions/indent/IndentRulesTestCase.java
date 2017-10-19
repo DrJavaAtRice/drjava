@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -48,7 +48,7 @@ import javax.swing.text.BadLocationException;
   */
 public abstract class IndentRulesTestCase extends DrJavaTestCase {
   
-  public static final int TEST_INDENT_LEVEL = 2;
+  public static final int TEST_INDENT_INC = 2;
 
   protected volatile AbstractDJDocument _doc;
 //  private String _indent;
@@ -59,7 +59,7 @@ public abstract class IndentRulesTestCase extends DrJavaTestCase {
     super.setUp();
     //_notifier = new GlobalEventNotifier();
     //_doc = new DefinitionsDocument(_notifier);
-    _doc = new AbstractDJDocument(TEST_INDENT_LEVEL) {
+    _doc = new AbstractDJDocument(TEST_INDENT_INC) {
       protected int startCompoundEdit() { return 0; /* Do nothing. */ }
       protected void endCompoundEdit(int key) { /* Do nothing. */ }
       protected void endLastCompoundEdit() { /* Do nothing. */ }
@@ -77,7 +77,10 @@ public abstract class IndentRulesTestCase extends DrJavaTestCase {
     super.tearDown();
   }
   
-  /** Clears the text of the _doc field and sets it to the given string. */
+  /** Clears the text of the _doc field and sets it to the given string. 
+   * @param text the text to be set
+   * @throws BadLocationException if attempts to reference an invalid position
+   */
   protected final void _setDocText(String text) throws BadLocationException {
     setDocText(_doc, text);
   }
@@ -91,7 +94,7 @@ public abstract class IndentRulesTestCase extends DrJavaTestCase {
    *
   protected final void _setIndentSize(int size) {
     _indent = "";
-    for (int i=0; i < size; i++) {
+    for (int i = 0; i < size; i++) {
       _indent = _indent + " ";
     }
   }*/
@@ -108,7 +111,7 @@ public abstract class IndentRulesTestCase extends DrJavaTestCase {
    *
   protected String _getIndentString(int numLevels) {
     String indent = "";
-    for (int i=0; i < numLevels; i++) {
+    for (int i = 0; i < numLevels; i++) {
       indent += _indent;
     }
     return indent;
@@ -128,8 +131,9 @@ public abstract class IndentRulesTestCase extends DrJavaTestCase {
   }*/
   
   /** Asserts that the document contains the expected text.
-    * @param expected what text of document should be
-    */
+   * @param expected what text of document should be
+   * @throws BadLocationException if attempts to reference an invalid position
+   */
   protected void _assertContents(String expected) throws BadLocationException {
     assertEquals("document contents", expected, _doc.getText());
   }

@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -69,6 +69,8 @@ public class DrJavaTestCase extends TestCase {
     Utilities.TEST_MODE = true;
     final String newName = System.getProperty("drjava.test.config");
     assert newName != null;
+    
+//    Utilities.show("newName = '" + newName + "'");
 
     if (newName != null) {  // in deployed code, assertion checking may be turned off
       Utilities.invokeAndWait(new Runnable() {
@@ -83,7 +85,7 @@ public class DrJavaTestCase extends TestCase {
   
   /** Clean up for every test case.  Only used in unit tests.  Added because Windows would intermittently throw
     * a java.util.concurrent.RejectedExecutionException during cleanup.
-    * @throws Exception
+    * @throws Exception if an exception occurs during cleanup
     */
   protected void tearDown() throws Exception { 
     DrJava.cleanUp();  
@@ -94,7 +96,10 @@ public class DrJavaTestCase extends TestCase {
     Utilities.invokeAndWait(new Runnable() { public void run() { DrJava.getConfig().setSetting(op, value); } });
   }
   
-    /** Clears the text of the _doc field and sets it to the given string. */
+  /** Clears the text of the _doc field and sets it to the given string. 
+    * @param doc the document whose text should be set to "text"
+    * @param text the text to set
+    */
   protected static final void setDocText(final AbstractDJDocument doc, final String text) {
     Utilities.invokeAndWait(new Runnable() {
       public void run() {

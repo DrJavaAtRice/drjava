@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -137,9 +137,11 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList<ItemT> implemen
   public void addDocument(ItemT doc, String path) { addDocument(doc); }
   
   /** A typesafe version of {@code _model.get(i)}.  This is a workaround for the
-    * non-generic implementation of DefaultListModel, and should be removed once that
-    * is fixed.
-    */
+   * non-generic implementation of DefaultListModel, and should be removed once that
+   * is fixed.
+   * @param i index at which to get item
+   * @return item at index i
+   */
   protected ItemT getFromModel(int i) {
     ItemT result = _model.get(i);
     return result;
@@ -205,7 +207,7 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList<ItemT> implemen
     }
   }
   
-  /** Resets a given <code>INavigatorItem<code> in the tree.  This may affect the placement of the item or its
+  /** Resets a given {@code INavigatorItem} in the tree.  This may affect the placement of the item or its
     * display to reflect any changes made in the model.  Should only be executed in event thread.
     * @param doc the docment to be refreshed
     * @throws IllegalArgumentException if this navigator contains no document that is equal to the passed document.
@@ -242,22 +244,22 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList<ItemT> implemen
   
   /** @return an Enumeration of the documents in this list (ordering is consistent with getNext() and getPrev()).
     * This cast in this method required to work around the stupid partial generification of DefaultListModel in Java 1.5.
-    * The class should be generic: DefaultListModel<T> { ... Enumeration<T> elements() {...} ... } instead of 
-    * DefaultListModel { ... Enumeration<?> elements() {...} ... }.
+    * The class should be generic: <code>{@literal DefaultListModel<T>} { ... {@literal Enumeration<T>} elements() {...} ... }</code> instead of 
+    * <code>DefaultListModel { ... {@literal Enumeration<?>} elements() {...} ... }</code>.
     */
   public ArrayList<ItemT> getDocuments() { 
     synchronized(_model) {
 //    Cast forced by lousy generic typing of DefaultListModel in Java 1.5
-      @SuppressWarnings("unchecked") Enumeration<ItemT> items = _model.elements();
+      Enumeration<ItemT> items = _model.elements();
       ArrayList<ItemT> result = new ArrayList<ItemT>(_model.size());
       while (items.hasMoreElements()) result.add(items.nextElement());
       return result;                               
     }
   }
   
-  /** Returns all the <code>IDocuments</code> contained in the specified bin. Always empty.
+  /** Returns all the {@code IDocument}s contained in the specified bin. Always empty.
     * @param binName name of bin
-    * @return an <code>INavigatorItem<code> enumeration of this navigator's contents.
+    * @return an {@code INavigatorItem} enumeration of this navigator's contents.
     */
   public ArrayList<ItemT> getDocumentsInBin(String binName) { return new ArrayList<ItemT>(0); }
   
@@ -268,14 +270,14 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList<ItemT> implemen
   public boolean isEmpty() { return _model.isEmpty(); }
   
   /** Adds listener to the collection of listeners.
-    * @param listener
+    * @param listener the listener to add
     */
   public void addNavigationListener(INavigationListener<? super ItemT> listener) { 
     synchronized(_model) { navListeners.add(listener); }
   }
   
   /** Unregisters the listener listener
-    * @param listener
+    * @param listener the listener to remove
     */
   public void removeNavigationListener(INavigationListener<? super ItemT> listener) { 
     synchronized(_model) { navListeners.remove(listener); }
@@ -352,7 +354,7 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList<ItemT> implemen
   public int getDocumentSelectedCount() { return getSelectionCount(); }
   
   /** @return the documents currently selected. Only runs in event thread. */
-  @SuppressWarnings("unchecked") public java.util.List<ItemT> getSelectedDocuments() {
+  public java.util.List<ItemT> getSelectedDocuments() {
 //    Object[] selected = getSelectedValues();
 //    ArrayList<ItemT> l = new ArrayList<ItemT>(selected.length);
 //    for (Object o: selected) { l.add((ItemT)o); }
@@ -398,13 +400,13 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList<ItemT> implemen
   /** The cell renderer for this list. */
   private static class CustomListCellRenderer extends DefaultListCellRenderer {
     
-    /** Rreturns the renderer component for a cell
-      * @param list
-      * @param value
-      * @param index
-      * @param isSelected
-      * @param hasFocus
-      */
+    /** @param list the JList we're painting
+     * @param value the value returned by list.getModel().getElemetAt(index)
+     * @param index the cell's index
+     * @param isSelected true if the specified cell was selected
+     * @param hasFocus true if the specified cell has the focus
+     * @return the renderer component for a cell
+     */
     public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean hasFocus) {
       
       super.getListCellRendererComponent(list, value, index, isSelected, hasFocus);

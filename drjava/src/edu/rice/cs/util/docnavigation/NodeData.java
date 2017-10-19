@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -40,9 +40,12 @@ package edu.rice.cs.util.docnavigation;
  *  the visitor pattern.
  */
 public interface NodeData<ItemT extends INavigatorItem> {
+
   /** Execute the specified visitor, passing a variable number of parameters.
+   * @param <Ret> return type
    * @param v visitor to execute
    * @param p parameters as varargs
+   * @return result of visiting
    */
   <Ret> Ret execute(NodeDataVisitor<? super ItemT, Ret> v, Object... p);  
 }

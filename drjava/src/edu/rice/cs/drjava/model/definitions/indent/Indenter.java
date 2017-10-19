@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,7 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 
 /** Singleton class to construct and use the indentation decision tree.
-  * @version $Id: Indenter.java 5677 2012-08-17 11:09:48Z rcartwright $
+  * @version $Id$
   */
 public class Indenter {
   
@@ -70,8 +70,9 @@ public class Indenter {
   public int getIndentLevel() { return _indentLevel; }
   
   /** Builds the decision tree for indentation.
-    * For now, this method needs to be called every time the size of one indent level is being changed!
-    */
+   * For now, this method needs to be called every time the size of one indent level is being changed!
+   * @param indentLevel number of spaces to indent
+   */
   public void buildTree(int indentLevel) {
     char[] indent = new char[indentLevel];
     java.util.Arrays.fill(indent,' ');
@@ -153,11 +154,11 @@ public class Indenter {
   }
   
   /** Indents the current line based on a decision tree which determines the indent based on context.
-    * @param doc document containing line to be indented  Assumes that reduced lock is already held.
-    * @return true if the condition tested by the top rule holds, false otherwise
-    */
-  public boolean indent(AbstractDJDocument doc, Indenter.IndentReason reason) {
+   * @param doc document containing line to be indented  Assumes that reduced lock is already held.
+   * @param reason reason for indentation
+   */
+  public void indent(AbstractDJDocument doc, Indenter.IndentReason reason) {
 //    Utilities.showDebug("Indenter.indent called on doc "  + doc);
-    return _topRule.indentLine(doc, reason);
+    _topRule.indentLine(doc, reason);
   }
 }

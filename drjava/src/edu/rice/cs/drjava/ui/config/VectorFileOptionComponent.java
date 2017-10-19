@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -39,11 +39,7 @@ package edu.rice.cs.drjava.ui.config;
 
 import java.awt.event.*;
 import java.io.File;
-import javax.swing.filechooser.FileFilter;
 import javax.swing.*;
-
-import java.util.Vector;
-import java.util.List;
 
 import edu.rice.cs.drjava.ui.*;
 import edu.rice.cs.drjava.config.*;
@@ -61,12 +57,23 @@ public class VectorFileOptionComponent extends VectorOptionComponent<File> imple
     this(opt, text, parent, null);
   }
   
-  /** Constructor that allows for a tooltip description. */
+  /** Constructor that allows for a tooltip description. 
+   * @param opt the option to display
+   * @param text descriptive text to put in label
+   * @param parent the parent frame
+   * @param description tooltip text
+   */
   public VectorFileOptionComponent(VectorOption<File> opt, String text, SwingFrame parent, String description) {
     this(opt, text, parent, description, false);
   }
 
-  /** Constructor with flag for move buttons. */
+  /** Constructor with flag for move buttons. 
+   * @param opt the option to display
+   * @param text descriptive text to put in label
+   * @param parent the parent frame
+   * @param description tooltip text
+   * @param moveButtonEnabled whether or not move buttons are enabled
+   */
   public VectorFileOptionComponent(VectorOption<File> opt, String text, SwingFrame parent,
                                    String description, boolean moveButtonEnabled) {
     super(opt, text, parent, new String[] { }, description, moveButtonEnabled);  // creates all four buttons
@@ -82,7 +89,9 @@ public class VectorFileOptionComponent extends VectorOptionComponent<File> imple
     _jfc.setFileFilter(ClassPathFilter.ONLY);
   }
 
-  /** Sets the directory where the chooser will start if no file is selected. */
+  /** Sets the directory where the chooser will start if no file is selected.
+   * @param f directory to be set
+   */
   public void setBaseDir(File f) {
     if (f.isDirectory()) { _baseDir = f; }
   }

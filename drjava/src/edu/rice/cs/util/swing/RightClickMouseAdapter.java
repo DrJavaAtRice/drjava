@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -38,8 +38,7 @@ package edu.rice.cs.util.swing;
 
 import java.awt.event.*;
 
-/**
- * Abstract mouse listener that supports showing a popup menu.
+/** * Abstract mouse listener that supports showing a popup menu.
  * If subclasses override mousePressed() or mouseReleased(), they should
  * first call the superclass method so that the popup will be shown correctly.
  * Because of platform differences, we must check for popup trigger both

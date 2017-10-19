@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -36,8 +36,7 @@
 
 package edu.rice.cs.drjava.project;
 
-/**
- * The exception thrown when a project file which was being parsed did not conform to the expected structure.
+/** * The exception thrown when a project file which was being parsed did not conform to the expected structure.
  * This is not a checked exception because future implementations of a project file parser might never raise it.
  */
 public class MalformedProjectFileException extends Exception {

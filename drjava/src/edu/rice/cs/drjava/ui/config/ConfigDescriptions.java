@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -73,8 +73,8 @@ public class ConfigDescriptions {
     add(OptionConstants.PLASTIC_THEMES, "Plastic Theme", 
         "Pick the theme to be used by the Plastic family of Look and Feels");
     
-    //ToolbarOptionComponent is a degenerate option component
-    // addOptionComponent(panel, new ToolbarOptionComponent("Toolbar Buttons"
+    //ToolBarOptionComponent is a degenerate option component
+    // addOptionComponent(panel, new ToolBarOptionComponent("ToolBar Buttons"
     //                                               "How to display the toolbar buttons."));
     add(OptionConstants.LINEENUM_ENABLED,
         "Show All Line Numbers",
@@ -123,24 +123,22 @@ public class ConfigDescriptions {
         "Right Margin Position",
         "The number of columns after which the right margin is displayed.");
     
-    add(OptionConstants.FONT_MAIN, "Main Font", 
-        "The font used for most text in DrJava.");
+    add(OptionConstants.FONT_MAIN, "Main Font", "The font used for most text in DrJava.");
     add(OptionConstants.FONT_LINE_NUMBERS, "Line Numbers Font",
         "<html>The font for displaying line numbers on the left side of<br>" +
         "the Definitions Pane if Show All Line Numbers is enabled.<br>" +
         "Cannot be displayed larger than the Main Font.</html>");
-    add(OptionConstants.FONT_DOCLIST, "Document List Font",
-        "The font used in the list of open documents.");
-    add(OptionConstants.FONT_TOOLBAR, "Toolbar Font",
-        "The font used in the toolbar buttons.");
-    add(OptionConstants.TEXT_ANTIALIAS, "Use anti-aliased text",
-        "Whether to graphically smooth the text.");
+    add(OptionConstants.FONT_DOCLIST, "Document List Font", "The font used in the list of open documents.");
+    add(OptionConstants.FONT_MENUBAR, "MenuBar Font", "The font used in menus and tabbed pane labels.");
+    add(OptionConstants.FONT_TOOLBAR, "ToolBar Font", "The font used in the toolbar buttons.");
+     
+    add(OptionConstants.TEXT_ANTIALIAS, "Use anti-aliased text", "Whether to graphically smooth the text.");
     
-    add(OptionConstants.DEFINITIONS_NORMAL_COLOR, "Normal Color",
+    add(OptionConstants.DEFINITIONS_NORMAL_COLOR, "Normal Color", 
         "The default color for text in the Definitions Pane.");
     add(OptionConstants.DEFINITIONS_KEYWORD_COLOR, "Keyword Color",
         "The color for Java keywords in the Definitions Pane.");
-    add(OptionConstants.DEFINITIONS_TYPE_COLOR, "Type Color",
+    add(OptionConstants.DEFINITIONS_TYPE_COLOR, "Type Color", 
         "The color for classes and types in the Definitions Pane.");
     add(OptionConstants.DEFINITIONS_COMMENT_COLOR, "Comment Color",
         "The color for comments in the Definitions Pane.");
@@ -285,15 +283,15 @@ public class ConfigDescriptions {
     add(OptionConstants.JAVADOC_LINK_VERSION,
         "Java Version for Javadoc Links", 
         "Version of Java for generating links to online Javadoc documentation.");
-    add(OptionConstants.JAVADOC_1_5_LINK,
-        "Javadoc 1.5 URL",
-        "URL for the Java 1.5 API, for generating links to library classes.");
     add(OptionConstants.JAVADOC_1_6_LINK,
         "Javadoc 1.6 URL",
         "URL for the Java 1.6 API, for generating links to library classes.");
     add(OptionConstants.JAVADOC_1_7_LINK,
         "Javadoc 1.7 URL",
         "URL for the Java 1.7 API, for generating links to library classes.");
+    add(OptionConstants.JAVADOC_1_8_LINK,
+        "Javadoc 1.8 URL",
+        "URL for the Java 1.8 API, for generating links to library classes.");
     add(OptionConstants.JUNIT_LINK,
         "JUnit URL",
         "URL for the JUnit API, for \"Open Java API Javadoc\".");
@@ -353,7 +351,7 @@ public class ConfigDescriptions {
     // Prompt to change the language level extensions (.dj0/.dj1->.dj, .dj2->.java)
     add(OptionConstants.PROMPT_RENAME_LL_FILES, "Prompt to Rename Old Language Level Files When Saving",
         "<html>Whether DrJava should prompt the user to rename old language level files.<br>"+
-        "DrJava suggests to rename .dj0 and .dj1 files to .dj, and .dj2 files to .java.</html>");
+        "DrJava suggests renaming .dj0 and .dj1 files as .dj files, and .dj2 files as .java files.</html>");
     
     
     
@@ -464,7 +462,7 @@ public class ConfigDescriptions {
         "The number of days between automatic new version checks.");
     
     /* Dialog box options */
-    add(OptionConstants.INDENT_LEVEL,
+    add(OptionConstants.INDENT_INC,
         "Indent Level",
         "The number of spaces to use for each level of indentation.");
     add(OptionConstants.RECENT_FILES_MAX_SIZE, "Recent Files List Size",

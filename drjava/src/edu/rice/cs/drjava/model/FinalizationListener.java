@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -36,8 +36,7 @@
 
 package edu.rice.cs.drjava.model;
 
-/**
- * A listener that may be added to classes that
+/** * A listener that may be added to classes that
  * implement the <code>Finalizable</code> interface.
  * When the object is garbage collected, these 
  * listeners will be notified.

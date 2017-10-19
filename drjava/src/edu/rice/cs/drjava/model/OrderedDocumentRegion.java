@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -36,28 +36,32 @@
 
 package edu.rice.cs.drjava.model;
 
-/** Interface supported by all document regions used in search results, bookmarks, and breakpoints (e.g., region 
-  * classes other than DummyDocumentRegion and BrowserDocumentRegion).  OrderedDocumentRegions are presumed to
-  * contain three fields: an OpenDefinitionsDocument, a start Postion, and an end Position, where Positions 
-  * refers to javax.swing.text.Position.  They are presumed to be ordered by first by document (using some form
-  * of lexicographic ordering on the name), then by start Position and then by end Position.
+/** Interface supported by all document regions used in search results, bookmarks, and breakpoints (e.g., region classes
+  * other than DummyDocumentRegion and BrowserDocumentRegion).  OrderedDocumentRegions are presumed to contain three 
+  * fields: an OpenDefinitionsDocument, a start Postion, and an end Position, where Positions refers to 
+  * javax.swing.text.Position.  They are presumed to be ordered by first by document (using some form of lexicographic 
+  * ordering on the name), then by start Position and then by end Position.
   * 
-  * All implementations of this interface should be immutable (at the level of the field bindings in those classes), 
-  * but a given document Position can "move" when the associated document is modified.  As a result, hashing on 
-  * OrderedDocumentRegions will produce upredictable results (WiLL NOT WORK) unless hashing on Positions works 
-  * (which this design does NOT presume).  On the other hand, the relative ordering of Positions is invariant 
-  * (except for possible coalescing of formerly distinct Positions) regardless of how the associated document is 
-  * modified.  Mutation of the document backing an OrderedDocumentRegion can coarsen the compareTo ordering, equating
-  * DocumentRegions that were previously unequal. but it never alters the weak inequality ordering among regions.  
-  * If a1 <= a2 <= .. .<= an, this property remains invariant regardless of what mutation occurs.  Similarly, if a1 = 
-  * a2 = ... = an, this property remains invariant.  As a result, searches in SortedSets of OrderedDocumentRegions
-  * work regardless of what document mutation occurs.  (Note the complements of the preceding two relations are NOT
-  * invariant as a document is modified.)
+  * All implementations of this interface should be immutable (at the level of the field bindings in those classes), but
+  * a given document Position can "move" when the associated document is modified.  As a result, conventional hashing on 
+  * OrderedDocumentRegions will produce upredictable results (WILL NOT WORK) unless hashing on Positions works (which 
+  * this design does NOT presume).  On the other hand, the relative ordering of Positions is nearly invariant;
+  * formerly distinct Positions can be coalesced which in unusual corner cases can invert the ordering between
+  * overlapping regions.  In addition, mutating the document backing an OrderedDocumentRegion can coarsen the compareTo
+  * ordering, equating DocumentRegions that were previously unequal, but it rarely alters the weak ordering 
+  * among regions. In the rare cases when the ordering between two DocumentRegions changes, their start Positions
+  * are coalesced by the change.
+  *
+  * If {@literal a1 <= a2 <= .. .<= an}, this property typically remains invariant under mutation.  The rare cases
+  * when ordering changes can be efficiently addressed by reordering all elements that have coalesced as a result
+  * of a change.  In contrast, if a1 = a2 = ... = an, this property ALWAYS remains invariant.  As a result, searches 
+  * in SortedSets of OrderedDocumentRegions work as long as the requisite reordering is atomically performed when 
+  * the backing document is modified.  In most cases, no such reordering is necessary because no coalescing of start
+  * Positions occurs. (Note the complements of the preceding two relations are NOT invariant as a document is modified.)
   */
 public interface OrderedDocumentRegion extends IDocumentRegion, Comparable<OrderedDocumentRegion> {
   public int getLineStartOffset();
   public int getLineEndOffset();
-  public void update();
   public String getString();
   public boolean isEmpty();
 }

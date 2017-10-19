@@ -44,71 +44,67 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.LinkedList;
 
-import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.io.IOUtil;
+import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.util.Log;
 
 import static edu.rice.cs.plt.debug.DebugUtil.error;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
-/**
- * A class loader that mimics the standard application system loader by loading classes from
- * a file path of directories and jar files.  This class also supports a <em>dynamic</em>
- * class path: an {@code Iterable} provided as input to the constructor is held, not copied,
- * and subsequent changes to that iterable are reflected in the path that is searched.  Of 
- * course, once a class is loaded, subsequent changes to the path will not change the class 
- * bound to that name.  The dynamic nature of the search path makes possible unusual errors --
- * a class may be valid in the path in which it is initially loaded, but when the JVM 
- * later transitively resolves the referenced classes, they may no longer exist, or may be
- * shadowed.  This is not a unique problem, however -- the standard system class loader is
- * based on an underlying file system that may also change in arbitrary ways at any time.
- */
+/** A class loader that mimics the standard application system loader by loading classes from
+  * a file path of directories and jar files.  This class also supports a <em>dynamic</em>
+  * class path: an {@code Iterable} provided as input to the constructor is held, not copied,
+  * and subsequent changes to that iterable are reflected in the path that is searched.  Of 
+  * course, once a class is loaded, subsequent changes to the path will not change the class 
+  * bound to that name.  The dynamic nature of the search path makes possible unusual errors --
+  * a class may be valid in the path in which it is initially loaded, but when the JVM 
+  * later transitively resolves the referenced classes, they may no longer exist, or may be
+  * shadowed.  This is not a unique problem, however -- the standard system class loader is
+  * based on an underlying file system that may also change in arbitrary ways at any time.
+  */
 public class PathClassLoader extends AbstractClassLoader {
   
-  /**
-   * Locate a resource in the given path.  Returns {@code null} if the resource is not found.
-   * If multiple queries will be performed on the same path, a PathClassLoader instance
-   * should be created for better performance.
-   */
+  private static final Log _log = new Log("PathClassLoader.txt", true);
+  
+  /** Locate a resource in the given path.  Returns {@code null} if the resource is not found.
+    * If multiple queries will be performed on the same path, a PathClassLoader instance
+    * should be created for better performance.
+    */
   public static URL getResourceInPath(String name, File... path) {
     return getResourceInPath(name, IterUtil.asIterable(path));
   }
 
-  /**
-   * Locate a resource in the given path.  Returns {@code null} if the resource is not found.
-   * If multiple queries will be performed on the same path, a PathClassLoader instance
-   * should be created for better performance.
-   */
+  /** Locate a resource in the given path.  Returns {@code null} if the resource is not found.
+    * If multiple queries will be performed on the same path, a PathClassLoader instance
+    * should be created for better performance.
+    */
   public static URL getResourceInPath(String name, Iterable<File> path) {
     return new PathClassLoader(EmptyClassLoader.INSTANCE, path).getResource(name);
   }
 
-  /**
-   * Locate a resource in the given path.  Returns {@code null} if the resource is not found.
-   * If multiple queries will be performed on the same path, a PathClassLoader instance
-   * should be created for better performance.
-   */
+  /** Locate a resource in the given path.  Returns {@code null} if the resource is not found.
+    * If multiple queries will be performed on the same path, a PathClassLoader instance
+    * should be created for better performance.
+    */
   public static InputStream getResourceInPathAsStream(String name, File... path) {
     return getResourceInPathAsStream(name, IterUtil.asIterable(path));
   }
 
-  /**
-   * Locate a resource in the given path.  Returns {@code null} if the resource is not found.
-   * If multiple queries will be performed on the same path, a PathClassLoader instance
-   * should be created for better performance.
-   */
+  /** Locate a resource in the given path.  Returns {@code null} if the resource is not found.
+    * If multiple queries will be performed on the same path, a PathClassLoader instance
+    * should be created for better performance.
+    */
   public static InputStream getResourceInPathAsStream(String name, Iterable<File> path) {
     return new PathClassLoader(EmptyClassLoader.INSTANCE, path).getResourceAsStream(name);
   }
-  
 
   private final Iterable<? extends File> _path;
   private URLClassLoader _urlLoader;
   private Iterable<File> _urlLoaderPath;
 
-  /**
-   * Create a path class loader with the default parent ({@link ClassLoader#getSystemClassLoader})
-   * and the specified path.
-   */
+  /** Create a path class loader with the default parent ({@link ClassLoader#getSystemClassLoader})
+    * and the specified path.
+    */
   public PathClassLoader(File... path) { this(IterUtil.asIterable(path)); }
   
   /**
@@ -129,6 +125,7 @@ public class PathClassLoader extends AbstractClassLoader {
     super(parent);
     _path = path;
     updateURLLoader();
+    _log.log("Constructing PathClassLoader with parent " + parent + " and path '" + path + "'");
   }
 
   private void updateURLLoader() {
@@ -143,7 +140,18 @@ public class PathClassLoader extends AbstractClassLoader {
     _urlLoader = new URLClassLoader(urls.toArray(new URL[urls.size()]), EmptyClassLoader.INSTANCE);
   }
   
-  @Override protected Class<?> findClass(String name) throws ClassNotFoundException {
+//  /** This override is defined solely to trace calls to this method; it immediately invokes the
+//    * overridden code.
+//    */
+//  @Override 
+//  protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+//    _log.log("PathClassLoader.loadClass(" + name + ", " + resolve + ") called");
+//    return super.loadClass(name, resolve);
+//  }
+  
+  @Override 
+  protected Class<?> findClass(String name) throws ClassNotFoundException {
+    _log.log("PathClassLoader.findClass(" + name + ") called");
     URL resource = findResource(name.replace('.', '/') + ".class");
     if (resource == null) { throw new ClassNotFoundException(); }
     else {
@@ -161,14 +169,17 @@ public class PathClassLoader extends AbstractClassLoader {
     }
   }
   
-  @Override protected URL findResource(String name) {
+  @Override 
+  protected URL findResource(String name) {
+    _log.log("findResource(" + name + ") called; _path is " + _path);
     if (!IterUtil.isEqual(_path, _urlLoaderPath)) { updateURLLoader(); }
     return _urlLoader.findResource(name);
   }
   
-  @Override protected Enumeration<URL> findResources(String name) throws IOException {
+  @Override 
+  protected Enumeration<URL> findResources(String name) throws IOException {
+    _log.log("findResources(" + name + ") called _path is " + _path);
     if (!IterUtil.isEqual(_path, _urlLoaderPath)) { updateURLLoader(); }
     return _urlLoader.findResources(name);
   }
-  
 }

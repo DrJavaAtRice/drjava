@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -57,8 +57,7 @@ import edu.rice.cs.plt.reflect.ReflectUtil;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 import static edu.rice.cs.plt.debug.DebugUtil.error;
 
-/**
- * An abstract class implementing the logic to invoke and control, via RMI, a second Java virtual 
+/** * An abstract class implementing the logic to invoke and control, via RMI, a second Java virtual 
  * machine. This class is used by subclassing it. (See package documentation for more details.)
  * The state-changing methods of this class consistently block until a precondition for the state
  * change is satisfied &mdash; for example, {@link #quitSlave} cannot complete until a slave is
@@ -71,8 +70,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.error;
  */
 public abstract class AbstractMasterJVM implements MasterRemote {
   
-  /**
-   * Synchronization strategy: compare-and-swap guarantees that only one thread enters a STARTING, or
+  /** Synchronization strategy: compare-and-swap guarantees that only one thread enters a STARTING, or
    * QUITTING, or DISPOSED state.  After that, the only state transitions out of STARTING/QUITTING occur 
    * in the same thread (or a single designated worker thread); all other threads must wait until the
    * transition to FRESH or RUNNING.
@@ -98,8 +96,7 @@ public abstract class AbstractMasterJVM implements MasterRemote {
   /** The slave JVM remote stub (non-null when the state is RUNNING). */
   private volatile SlaveRemote _slave;
   
-  /**
-   * Set up the master JVM object.  Does not start a slave JVM.
+  /** Set up the master JVM object.  Does not start a slave JVM.
    * @param slaveClassName The fully-qualified class name of the class to start up in the second JVM.  Must be a
    *                       subclass of {@link AbstractSlaveJVM}.
    */
@@ -120,31 +117,28 @@ public abstract class AbstractMasterJVM implements MasterRemote {
     System.setProperty("java.rmi.server.hostname", "127.0.0.1");
   }
   
-  /**
-   * Callback for when the slave JVM has connected, and the bidirectional communications link has been 
+  /** Callback for when the slave JVM has connected, and the bidirectional communications link has been 
    * established.  Provides access to the newly-created slave JVM.
+   * @param newSlave link to the slave JVM
    */
   protected abstract void handleSlaveConnected(SlaveRemote newSlave);
   
-  /**
-   * Callback for when the slave JVM has quit.
+  /** Callback for when the slave JVM has quit.
    * @param status The exit code returned by the slave JVM.
    */
   protected abstract void handleSlaveQuit(int status);
   
-  /**
-   * Callback for when the slave JVM fails to either run or respond to {@link SlaveRemote#start}.
+  /** Callback for when the slave JVM fails to either run or respond to {@link SlaveRemote#start}.
    * @param e  Exception that occurred during startup.
    */
   protected abstract void handleSlaveWontStart(Exception e);
   
-  /**
-   * Creates and starts the slave JVM.  If the the slave is currently running, waits until it completes.
-   * Also waits until the new process has started up and calls one of {@link #handleSlaveConnected}
-   * or {@link #handleSlaveWontStart} before returning.
-   * @param jvmBuilder  JVMBuilder to use in starting the remote process.
-   * @throws IllegalStateException  If this object has been disposed.
-   */
+  /** Creates and starts the slave JVM.  If the the slave is currently running, waits until it completes.
+    * Also waits until the new process has started up and calls one of {@link #handleSlaveConnected}
+    * or {@link #handleSlaveWontStart} before returning.
+    * @param jvmBuilder  JVMBuilder to use in starting the remote process.
+    * @throws IllegalStateException  If this object has been disposed.
+    */
   protected final void invokeSlave(JVMBuilder jvmBuilder) {
     transition(State.FRESH, State.STARTING);
 
@@ -200,10 +194,9 @@ public abstract class AbstractMasterJVM implements MasterRemote {
     }
   }
   
-  /**
-   * Quits slave JVM.  If a slave is not currently started and running, blocks until that state is reached.
-   * @throws IllegalStateException  If this object has been disposed.
-   */
+  /** Quits slave JVM.  If a slave is not currently started and running, blocks until that state is reached.
+    * @throws IllegalStateException  If this object has been disposed.
+    */
   protected final void quitSlave() {
     transition(State.RUNNING, State.QUITTING);
     attemptQuit(_slave);
@@ -212,14 +205,15 @@ public abstract class AbstractMasterJVM implements MasterRemote {
     //debug.log("Entered state " + State.FRESH);
   }
     
-  /** Make a best attempt to invoke {@code slave.quit()}.  Log an error if it fails. */
+  /** Make a best attempt to invoke {@code slave.quit()}.  Log an error if it fails.
+   * @param slave link to the slave JVM
+   */
   private static void attemptQuit(SlaveRemote slave) {
     try { slave.quit(); }
     catch (RemoteException e) { error.log("Unable to complete slave.quit()", e); }
   }
   
-  /**
-   * Free the resources required for this object to respond to RMI invocations (useful for applications -- such as
+  /** Free the resources required for this object to respond to RMI invocations (useful for applications -- such as
    * testing -- that produce a large number of MasterJVMs as a program runs).  Requires the slave to have
    * quit; blocks until that occurs.  After an object has been disposed, it is no longer useful.
    */
@@ -231,12 +225,13 @@ public abstract class AbstractMasterJVM implements MasterRemote {
     }
   }
   
-  /**
-   * Make a thread-safe state transition.  Blocks until the {@code from} state is reached and this
-   * thread is successful in performing the transition (only one thread can do so at a time).  Throws
-   * an IllegalStateException if the DISPOSED state is reached first, since there is never a transition
-   * out of the disposed state (the alternative is to block permanently). 
-   */
+  /** Make a thread-safe state transition.  Blocks until the {@code from} state is reached and this
+    * thread is successful in performing the transition (only one thread can do so at a time).  Throws
+    * an IllegalStateException if the DISPOSED state is reached first, since there is never a transition
+    * out of the disposed state (the alternative is to block permanently). 
+    * @param from state to transition out of
+    * @param to state to transition into
+    */
   private void transition(State from, State to) {
     State s = _monitor.value();
     // watch all state transitions until from->to is successful or the DISPOSED state is reached
@@ -256,3 +251,4 @@ public abstract class AbstractMasterJVM implements MasterRemote {
   
 }
 
+ 

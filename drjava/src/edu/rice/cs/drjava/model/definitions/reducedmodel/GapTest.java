@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -38,16 +38,15 @@ package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
 import edu.rice.cs.drjava.DrJavaTestCase;
 
-/**
- * Tests the functionality of the Gap class.
+/** * Tests the functionality of the Gap class.
  * @version $Id$
  */
 public final class GapTest extends DrJavaTestCase {
   /** Tests the ability to grow a Gap.
    */
   public void testGrow() {
-    Gap gap0 = new Gap(0, ReducedToken.FREE);
-    Gap gap1 = new Gap(1, ReducedToken.FREE);
+    Gap gap0 = new Gap(0, ReducedModelStates.FREE);
+    Gap gap1 = new Gap(1, ReducedModelStates.FREE);
     gap0.grow(5);
     assertEquals(5, gap0.getSize());
     gap0.grow(0);
@@ -59,8 +58,8 @@ public final class GapTest extends DrJavaTestCase {
   /** Tests the ability to shrink a Gap.
    */
   public void testShrink() {
-    Gap gap0 = new Gap(5, ReducedToken.FREE);
-    Gap gap1 = new Gap(1, ReducedToken.FREE);
+    Gap gap0 = new Gap(5, ReducedModelStates.FREE);
+    Gap gap1 = new Gap(1, ReducedModelStates.FREE);
     gap0.shrink(3);
     assertEquals(2, gap0.getSize());
     gap0.shrink(0);

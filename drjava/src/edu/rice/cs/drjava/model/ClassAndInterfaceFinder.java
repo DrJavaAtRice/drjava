@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -94,6 +94,9 @@ public class ClassAndInterfaceFinder {
     * value of the interfaceOK flag.
     * I hate flags but did not see a simpler way to avoid duplicated code.
     * This method has package (rather than private) visibility for testing purposes.
+    * @param interfaceOK true if an interface name can be returned; false if we only
+    *        care about classes
+    * @return the name of the first class or interface in this file
     */
   String getName(boolean interfaceOK) {
     try {
@@ -140,14 +143,18 @@ public class ClassAndInterfaceFinder {
     }
   }
   
-  /** returns true iff the token is a word (as defined by StreamTokenizer)
+  /** @param tt the token to check
+   * @return true iff the token is a word (as defined by StreamTokenizer)
    */
   private static boolean isWord(int tt) { return tt == StreamTokenizer.TT_WORD || isEOF(tt); }
   
   private static boolean isEOF(int tt)  { return tt == StreamTokenizer.TT_EOF; }
   
   
-  /** returns true iff the token is "class" or we're at the end of the file
+  /** @param tt the token to check
+   * @param interfaceOK true if we want to check if tt is either a class or an 
+   *        interface; false if we only care about classes
+   * @return true iff the token is "class" or we're at the end of the file
    */
   private boolean isClassOrInterfaceWord(int tt, boolean interfaceOK) {
     return  isEOF(tt) || 
@@ -155,7 +162,8 @@ public class ClassAndInterfaceFinder {
       (tt == StreamTokenizer.TT_WORD && interfaceOK && tokenizer.sval.equals("interface"));
   }
   
-  /** returns true iff the token is "package" or we're at the end of the file
+  /** @param tt the token to check
+   * @return true iff the token is "package" or we're at the end of the file
    */
   private boolean isPackageWord(int tt) {
     return (tt == StreamTokenizer.TT_WORD && tokenizer.sval.equals("package") ||

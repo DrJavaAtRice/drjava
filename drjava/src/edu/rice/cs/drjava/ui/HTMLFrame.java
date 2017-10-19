@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,7 @@ import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.border.*;
 import javax.swing.text.html.*;
+
 import java.awt.event.*;
 import java.awt.*;
 import java.net.*;
@@ -152,7 +153,7 @@ public class HTMLFrame extends SwingFrame {
   private static JButton makeButton(Action a, int horTextPos, int left, int right) {
     JButton j = new JButton(a);
     j.setHorizontalTextPosition(horTextPos);
-    j.setVerticalTextPosition(JButton.CENTER);
+    j.setVerticalTextPosition(SwingConstants.CENTER);
     //Insets i = j.getMargin();
     //j.setMargin(new Insets(i.top,left,i.bottom,right));
     j.setMargin(new Insets(3,left+3,3,right+3));
@@ -165,12 +166,23 @@ public class HTMLFrame extends SwingFrame {
     _mainDocPane.addHyperlinkListener(linkListener);
   }
   
-  /** Sets up the frame and displays it. */
+  /** Sets up the frame and displays it. 
+   * @param frameName name of the frame
+   * @param introUrl intro URL
+   * @param indexUrl index URL
+   * @param iconString icon string
+   */
   public HTMLFrame(String frameName, URL introUrl, URL indexUrl, String iconString) {
     this(frameName, introUrl, indexUrl, iconString, null);
   }
   
-  /** Sets up the frame and displays it. */
+  /** Sets up the frame and displays it. 
+   * @param frameName name of the frame
+   * @param introUrl intro URL
+   * @param indexUrl index URL
+   * @param iconString icon string
+   * @param baseDir base directory
+   */
   public HTMLFrame(String frameName, URL introUrl, URL indexUrl, String iconString, File baseDir) {
     super(frameName);
     
@@ -189,8 +201,8 @@ public class HTMLFrame extends SwingFrame {
     _splitPaneHolder.add(_splitPane);
     // _splitPane.setBorder(new CompoundBorder(new EmptyBorder(0,5,0,5),_splitPane.getBorder()));
     _closeButton = new JButton(_closeAction);
-    _backButton = makeButton(_backAction,JButton.RIGHT,0,3);
-    _forwardButton = makeButton(_forwardAction,JButton.LEFT,3,0);
+    _backButton = makeButton(_backAction,SwingConstants.RIGHT,0,3);
+    _forwardButton = makeButton(_forwardAction,SwingConstants.LEFT,3,0);
     _backAction.setEnabled(false);
     _forwardAction.setEnabled(false);
     _closePanel = new JPanel(new BorderLayout());
@@ -306,7 +318,9 @@ public class HTMLFrame extends SwingFrame {
     }
   }
   
-  /** Prints an error indicating that the HTML file to load in the main pane could not be found. */
+  /** Prints an error indicating that the HTML file to load in the main pane could not be found. 
+   * @param url URl that caused the error
+   */
   private void _displayMainError(URL url) {
     if (!_linkError) {
       _linkError = true;
@@ -316,7 +330,9 @@ public class HTMLFrame extends SwingFrame {
   }
   
   /** Prints an error indicating that the HTML file to load in the main pane could not be found
-    */
+   * @param url URL that caused the error
+   * @param ex exception that occurred
+   */
   private void _displayMainError(URL url, Exception ex) {
     if (!_linkError) {
       _linkError = true;
@@ -327,17 +343,25 @@ public class HTMLFrame extends SwingFrame {
   
   /** Prints an error indicating that the HTML file to load in the contentes pane
    * could not be found
+   * @param url URL that caused the error
    */
   private void _displayContentsError(URL url) {
     _contentsDocPane.setText(getErrorText(url));
   }
   
-  /** Prints an error indicating that the HTML file to load in the contentes pane could not be found. */
+  /** Prints an error indicating that the HTML file to load in the contentes 
+   * pane could not be found.
+   * @param url URL that caused the error
+   * @param ex exception that occurred
+   */
   private void _displayContentsError(URL url, Exception ex) {
     _contentsDocPane.setText(getErrorText(url) + "\n" + ex);
   }
   
-  /** This method returns the error text to display when something goes wrong. */
+  /** This method returns the error text to display when something goes wrong.
+   * @param url URL that caused the error
+   * @return error text associated with the failure
+   */
   protected String getErrorText(URL url) {
     return "Could not load the specified URL: " + url;
   }

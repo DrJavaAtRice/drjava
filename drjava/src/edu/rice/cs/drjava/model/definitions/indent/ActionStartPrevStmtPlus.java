@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -65,10 +65,9 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
     * runs in the event thread.
     * @param doc AbstractDJDocument containing the line to be indented.
     * @param reason The reason that the indentation is taking place
-    * @return true if the caller should update the current location itself, false if the indenter has already handled it
     */
-  public boolean indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
-    boolean supResult = super.indentLine(doc, reason);
+  public void indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
+    super.indentLine(doc, reason);
     int here = doc.getCurrentLocation();
     
     // Find end of previous statement, immediately enclosing brace, or end of case statement
@@ -81,7 +80,7 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
     // If no preceding delimiter found, align to left margin
     if (prevDelimiterPos <= 0) {
       doc.setTab(_suffix, here);
-      return supResult;
+      return;
     }
     
     try {
@@ -94,9 +93,7 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
           prevDelimiterPos = testPos;                             // if this char is '}' or ')', use it as delimiter
         }
       }
-    } catch (BadLocationException e) {
-      //do nothing
-    }
+    } catch (BadLocationException e) { throw new UnexpectedException(e); /* Should never happen */ }
     
     try {
       // Jump over {-} region if delimiter was a close brace.
@@ -114,7 +111,7 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
           // No matching '{' or '(' preceding this delimiter here
           // but throwing an unexpected exception is not right, because the
           // user may be trying to indent code that is not balanced!
-          return supResult;
+          return;
         }
         prevDelimiterPos -= (delta - 1);  // Position just to right of matching '{' or '('
         doc.setCurrentLocation(here);
@@ -124,7 +121,6 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
       }
     }
     catch (BadLocationException e) { throw new UnexpectedException(e); }
-    
     
     // Get indent of prev statement
     // Include colons as end of statement (ie. "case")
@@ -138,7 +134,6 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
     
     indent = indent + _suffix;
     doc.setTab(indent, here);
-    return supResult;
   }
 }
 

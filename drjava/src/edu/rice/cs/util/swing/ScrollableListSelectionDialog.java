@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -43,8 +43,7 @@ import java.util.*;
 
 import javax.swing.table.AbstractTableModel;
 
-/**
- * <p>The ScrollableListSelectionDialog is a popup dialog with a message
+/** * <p>The ScrollableListSelectionDialog is a popup dialog with a message
  * and a scrollable list of items. Each item may be either selected or
  * unselected. A ScrollableListSelectionDialog should be used when
  * an operation needs to act on a variable number of items, for
@@ -565,8 +564,7 @@ public class ScrollableListSelectionDialog extends JDialog {
     getRootPane().setDefaultButton(okButton);
   }
   
-  /**
-   * Shows the dialog.
+  /** Shows the dialog.
    */
   public void showDialog() {
     pack();
@@ -617,8 +615,7 @@ public class ScrollableListSelectionDialog extends JDialog {
       * listener runs. */
     private final boolean _setToValue;
     
-    /**
-     * Creates a new SelectAllNoneActionListener that will set the state
+    /** Creates a new SelectAllNoneActionListener that will set the state
      * of every item to the given state.
      * 
      * @param setToState The state to set all the items to.
@@ -627,8 +624,7 @@ public class ScrollableListSelectionDialog extends JDialog {
       _setToValue = setToState == SelectionState.SELECTED;
     }
     
-    /**
-     * The code that runs in response to the button's action.
+    /** The code that runs in response to the button's action.
      * This is the code that actually sets the selection state of the
      * items.
      * 

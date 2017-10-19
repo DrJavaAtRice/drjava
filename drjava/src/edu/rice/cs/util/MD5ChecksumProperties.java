@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,6 @@ package edu.rice.cs.util;
 
 import java.io.*;
 import java.util.*;
-import java.util.jar.*;
 import java.security.*;
 
 /** Create a property file with MD5 checksums
@@ -50,12 +49,12 @@ public class MD5ChecksumProperties extends Properties {
   public MD5ChecksumProperties() { super(); }
   public MD5ChecksumProperties(Properties p) { super(p); }
 
-  /**
-   * Return the MD5 checksum for the data in the stream, while copying the data
+  /** Return the MD5 checksum for the data in the stream, while copying the data
    * into the output stream. The output stream is not closed.
    * @param is input stream
    * @param os output stream (or null if no copying desired)
    * @return MD5 checksum
+   * @throws IOException if an IO operation fails
    */
   public static byte[] getMD5(InputStream is, OutputStream os) throws IOException {
     try {
@@ -80,36 +79,36 @@ public class MD5ChecksumProperties extends Properties {
     }
   }
   
-  /**
-   * Return the MD5 checksum for the data in the stream
+  /** Return the MD5 checksum for the data in the stream
    * @param is input stream
    * @return MD5 checksum
+   * @throws IOException if an IO operation fails
    */
   public static byte[] getMD5(InputStream is) throws IOException {
     return getMD5(is, null);
   }
   
-  /**
-   * Return the MD5 checksum as string for the data in the stream, while
+  /** Return the MD5 checksum as string for the data in the stream, while
    * copying the data into the output stream. The output stream is not closed.
    * @param is input stream
    * @param os output stream (or null if no copying desired)
    * @return MD5 checksum string
+   * @throws IOException if an IO operation fails
    */
   public static String getMD5String(InputStream is, OutputStream os) throws IOException {
     byte[] messageDigest = getMD5(is,os);
     StringBuilder hexString = new StringBuilder();
-    for (int i=0;i<messageDigest.length;i++) {
+    for (int i = 0;i<messageDigest.length;i++) {
       String oneByte = "0"+Integer.toHexString(0xFF & messageDigest[i]);
       hexString.append(oneByte.substring(oneByte.length()-2,oneByte.length()));
     }
     return hexString.toString();
   }
   
-  /**
-   * Return the MD5 checksum as string for the data in the stream.
+  /** Return the MD5 checksum as string for the data in the stream.
    * @param is input stream
    * @return MD5 checksum string
+   * @throws IOException if an IO operation fails
    */
   public static String getMD5String(InputStream is) throws IOException {
     return getMD5String(is, null);
@@ -132,86 +131,104 @@ public class MD5ChecksumProperties extends Properties {
   }
   
   /** Add the MD5 checksum for the data in the input stream to the
-    * properties, using the specified key.
-    * @param key key to store the checksum under
-    * @param is input stream with the data
-    * @param os output stream to copy to (or null if not wanted)
-    * @return false if the new MD5 checksum didn't match an existing checksum */
+   * properties, using the specified key.
+   * @param key key to store the checksum under
+   * @param is input stream with the data
+   * @param os output stream to copy to (or null if not wanted)
+   * @return false if the new MD5 checksum didn't match an existing checksum.
+   * @throws IOException if an IO operation fails
+   */
   public boolean addMD5(String key, InputStream is, OutputStream os) throws IOException {
     String md5 = getMD5String(is, os);
     Object prev = setProperty(key,md5);
-    return ((prev==null) || (prev.equals(md5)));
+    return ((prev == null) || (prev.equals(md5)));
   }
 
   /** Add the MD5 checksum for the data in the input stream to the
-    * properties, using the specified key.
-    * @param key key to store the checksum under
-    * @param is input stream with the data
-    * @return false if the new MD5 checksum didn't match an existing checksum */
+   * properties, using the specified key.
+   * @param key key to store the checksum under
+   * @param is input stream with the data
+   * @return false if the new MD5 checksum didn't match an existing checksum 
+   * @throws IOException if an IO operation fails
+   */
   public boolean addMD5(String key, InputStream is) throws IOException {
     return addMD5(key, is, null);
   }
 
   /** Add the MD5 checksum for the data in the file to the
-    * properties, using the specified key.
-    * @param key key to store the checksum under
-    * @param f file with the data
-    * @param os output stream to copy to (or null if not wanted)
-    * @return false if the new MD5 checksum didn't match an existing checksum */
+   * properties, using the specified key.
+   * @param key key to store the checksum under
+   * @param f file with the data
+   * @param os output stream to copy to (or null if not wanted)
+   * @return false if the new MD5 checksum didn't match an existing checksum
+   * @throws IOException if an IO operation fails
+   */
   public boolean addMD5(String key, File f, OutputStream os) throws IOException {
     return addMD5(key, new FileInputStream(f), os);
   }
   
   /** Add the MD5 checksum for the data in the file to the
-    * properties, using the specified key.
-    * @param key key to store the checksum under
-    * @param f file with the data
-    * @return false if the new MD5 checksum didn't match an existing checksum */
+   * properties, using the specified key.
+   * @param key key to store the checksum under
+   * @param f file with the data
+   * @return false if the new MD5 checksum didn't match an existing checksum
+   * @throws IOException if an IO operation fails
+   */
   public boolean addMD5(String key, File f) throws IOException {
     return addMD5(key, f, null);
   }
   
   /** Add the MD5 checksum for the data in the byte array to the
-    * properties, using the specified key.
-    * @param key key to store the checksum under
-    * @param b byte array with the data
-    * @param os output stream to copy to (or null if not wanted)
-    * @return false if the new MD5 checksum didn't match an existing checksum */
+   * properties, using the specified key.
+   * @param key key to store the checksum under
+   * @param b byte array with the data
+   * @param os output stream to copy to (or null if not wanted)
+   * @return false if the new MD5 checksum didn't match an existing checksum
+   * @throws IOException if an IO operation fails
+   */
   public boolean addMD5(String key, byte[] b, OutputStream os) throws IOException {
     return addMD5(key, new ByteArrayInputStream(b), os);
   }
 
   /** Add the MD5 checksum for the data in the byte array to the
-    * properties, using the specified key.
-    * @param key key to store the checksum under
-    * @param b byte array with the data
-    * @return false if the new MD5 checksum didn't match an existing checksum */
+   * properties, using the specified key.
+   * @param key key to store the checksum under
+   * @param b byte array with the data
+   * @return false if the new MD5 checksum didn't match an existing checksum
+   * @throws IOException if an IO operation fails
+   */
   public boolean addMD5(String key, byte[] b) throws IOException {
     return addMD5(key, b, null);
   }
 
   /** Add the MD5 checksum for the data in the input stream to the
-    * properties, using the name of the file as key.
-    * @param f file with the data
-    * @param os output stream to copy to (or null if not wanted)
-    * @return false if the new MD5 checksum didn't match an existing checksum */
+   * properties, using the name of the file as key.
+   * @param f file with the data
+   * @param os output stream to copy to (or null if not wanted)
+   * @return false if the new MD5 checksum didn't match an existing checksum
+   * @throws IOException if an IO operation fails
+   */
   public boolean addMD5(File f, OutputStream os) throws IOException {
     return addMD5(f.getPath().replace('\\','/'), f, os);
   }
 
   /** Add the MD5 checksum for the data in the input stream to the
-    * properties, using the name of the file as key.
-    * @param f file with the data
-    * @return false if the new MD5 checksum didn't match an existing checksum */
+   * properties, using the name of the file as key.
+   * @param f file with the data
+   * @return false if the new MD5 checksum didn't match an existing checksum
+   * @throws IOException if an IO operation fails
+   */
   public boolean addMD5(File f) throws IOException {
     return addMD5(f, null);
   }
   
   /** Main method. Usage:
-    * no arguments --> input file list from standard in, output properties to standard out
-    * <file1> --> input file list from standard in, append output properties to file1
-    * <file1> <file2> --> input file list from file1, append output properties to file 2
-    */
+   * no arguments {@literal -->} input file list from standard in, output properties to standard out
+   * {@literal <file1> -->} input file list from standard in, append output properties to file1
+   * {@literal <file1> <file2> -->} input file list from file1, append output properties to file 2
+   * @param args command-line args
+   * @throws IOException if an IO operation fails
+   */
   public static void main(String[] args) throws IOException {
     InputStream is = System.in;
     OutputStream os = System.out;

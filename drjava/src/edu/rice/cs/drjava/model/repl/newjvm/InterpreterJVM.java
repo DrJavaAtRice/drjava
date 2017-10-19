@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,6 @@
 
 package edu.rice.cs.drjava.model.repl.newjvm;
 
-import java.lang.reflect.*;
 import java.util.*;
 import java.io.*;
 
@@ -51,7 +50,6 @@ import edu.rice.cs.util.InputStreamRedirector;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.newjvm.*;
-import edu.rice.cs.plt.collect.CollectUtil;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.reflect.ReflectUtil;
 import edu.rice.cs.plt.tuple.Option;
@@ -63,9 +61,10 @@ import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.drjava.model.junit.JUnitModelCallback;
 import edu.rice.cs.drjava.model.junit.JUnitTestManager;
 import edu.rice.cs.drjava.model.junit.JUnitError;
+import edu.rice.cs.drjava.model.junit.JUnitResultTuple;
+import edu.rice.cs.drjava.model.coverage.CoverageMetadata;
 import edu.rice.cs.drjava.model.repl.InteractionsPaneOptions;
 
-import edu.rice.cs.dynamicjava.Options;
 import edu.rice.cs.dynamicjava.interpreter.*;
 import edu.rice.cs.dynamicjava.symbol.*;
 import edu.rice.cs.dynamicjava.symbol.type.Type;
@@ -75,6 +74,8 @@ import javax.swing.JDialog;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 import static edu.rice.cs.plt.debug.DebugUtil.error;
+
+import edu.rice.cs.util.swing.Utilities;
 
 /** This is the main class for the interpreter JVM.  All public methods except those involving remote calls (callbacks) 
   * use synchronizazion on _stateLock (unless synchronization has no effect).  The class is not ready for remote
@@ -89,7 +90,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   /** Singleton instance of this class. */
   public static final InterpreterJVM ONLY = new InterpreterJVM();
   
-  // As RMI can lead to parallel threads, all fields must be thread-safe.  Collections are wrapped
+  // As RMI can lead to concurrent threads, all fields must be thread-safe.  Collections are wrapped
   // in synchronized versions.
   
   private final InteractionsPaneOptions _interpreterOptions;
@@ -116,8 +117,9 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   private InterpreterJVM() {
     super("Reset Interactions Thread", "Poll DrJava Thread");
     
+    /* Important singleton objects embedded in an InterpreterJVM */
     _classPathManager = new ClassPathManager(ReflectUtil.SYSTEM_CLASS_PATH);
-    _interpreterLoader = _classPathManager.makeClassLoader(null);
+    _interpreterLoader = _classPathManager.makeClassLoader(InterpreterJVM.class.getClassLoader());
     _junitTestManager = new JUnitTestManager(this, _classPathManager);
 
     // set the thread context class loader, this way NextGen and Mint can use the interpreter's class loader
@@ -222,7 +224,8 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   /** Interprets the given string of source code with the given interpreter. The result is returned to
     * MainJVM via the interpretResult method.
     * @param s Source code to interpret.
-    * @param interpreterName Name of the interpreter to use
+    * @param name Name of the interpreter to use
+    * @return the result of interpretation
     * @throws IllegalArgumentException if the named interpreter does not exist
     */
   public InterpretResult interpret(String s, String name) {
@@ -291,17 +294,24 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     else return new Object[] { arr[0].first() };
   }
   
+  //public JUnitResultTuple getLastJUnitResult() {
+  //  return this._junitTestManager.getFinalResult();
+  //}
+
   /** Gets the value and type string of the variable with the given name in the current interpreter.
-    * Invoked reflectively by the debugger.  To simplify the inter-process exchange,
-    * an array here is used as the return type rather than an {@code Option<Object>} --
-    * an empty array corresponds to "none," and a singleton array corresponds to a "some."
-    */
-  @SuppressWarnings("unchecked")
+   * Invoked reflectively by the debugger.  To simplify the inter-process exchange,
+   * an array here is used as the return type rather than an {@code Option<Object>} --
+   * an empty array corresponds to "none," and a singleton array corresponds to a "some."
+   * @param var the variable to look up
+   * @return the value and type string of var
+   */
+  @SuppressWarnings({"unchecked","rawtypes"})
   public Pair<Object,String>[] getVariable(String var) {
     synchronized(_stateLock) {
       InterpretResult ir = interpret(var);
       return ir.apply(new InterpretResult.Visitor<Pair<Object,String>[]>() {
         public Pair<Object,String>[] fail() { return new Pair[0]; }
+//        public Pair<Object,String>[] fail() { return (Pair<Object,String>[]) new Pair<?,?>[0]; }
         public Pair<Object,String>[] value(Object val) {
           return new Pair[] { new Pair<Object,String>(val, getClassName(val.getClass())) };
         }
@@ -338,8 +348,10 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     }
   }
 
-  /** @return the name of the class, with the right number of array suffixes "[]" and while being ambiguous
-    * about boxed and primitive types. */
+  /** @param c the class to get the name of
+   * @return the name of the class, with the right number of array suffixes 
+   *         "[]" and while being ambiguous about boxed and primitive types. 
+   */
   public static String getClassName(Class<?> c) {
     StringBuilder sb = new StringBuilder();
     boolean isArray = c.isArray();
@@ -358,11 +370,11 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
       if (c.equals(Double.class))    { return "double"+sb.toString()+" or "+c.getSimpleName()+sb.toString(); }
       if (c.equals(Boolean.class))   { return "boolean"+sb.toString()+" or "+c.getSimpleName()+sb.toString(); }
       if (c.equals(Character.class)) { return "char"+sb.toString()+" or "+c.getSimpleName()+sb.toString(); }
-      else return c.getName()+sb.toString();
+      else return c.getName() + sb.toString();
     }
     else {
       // if it's an array, we can distinguish boxed types and primitive types
-      return c.getName()+sb.toString();
+      return c.getName() + sb.toString();
     }
   }
   
@@ -518,8 +530,9 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     * @param files the associated file
     * @return the class names that are actually test cases
     */
-  public List<String> findTestClasses(List<String> classNames, List<File> files) throws RemoteException {
-    return _junitTestManager.findTestClasses(classNames, files);
+  public List<String> findTestClasses(List<String> classNames, 
+    List<File> files, CoverageMetadata coverageMetadata) throws RemoteException {
+    return _junitTestManager.findTestClasses(classNames, files, coverageMetadata);
   }
   
   /** Runs JUnit test suite already cached in the Interpreter JVM.  Unsynchronized because it contains a remote call

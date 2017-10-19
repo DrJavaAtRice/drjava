@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -38,8 +38,7 @@ package edu.rice.cs.drjava.model.definitions.indent;
 
 import javax.swing.text.BadLocationException;
 
-/**
- * Test class according to the JUnit protocol. Tests the action
+/** * Test class according to the JUnit protocol. Tests the action
  * that aligns the indentation of the current line to the character
  * that opened the most recent block or expression list that contains
  * the beginning of the current line. Optional additional whitespaces 
@@ -75,8 +74,7 @@ public final class ActionBracePlusTest extends IndentRulesTestCase {
   }
   
 
-  public void testSpaceSuffix() throws BadLocationException
-  {
+  public void testSpaceSuffix() throws BadLocationException {
     _action = new ActionBracePlus(1);
     
     // (2) 
@@ -164,8 +162,7 @@ public final class ActionBracePlusTest extends IndentRulesTestCase {
 
   }
   
-  public void testLargeSuffix() throws BadLocationException
-  {
+  public void testLargeSuffix() throws BadLocationException {
     _action = new ActionBracePlus(3);
     
     // (6) 
@@ -188,8 +185,7 @@ public final class ActionBracePlusTest extends IndentRulesTestCase {
     assertEquals("Line aligned to open paren.", _aligned, _doc.getText());
   }
   
-  public void testComment() throws BadLocationException
-  {
+  public void testComment() throws BadLocationException {
     _action = new ActionBracePlus(3);
     
     // (7) 

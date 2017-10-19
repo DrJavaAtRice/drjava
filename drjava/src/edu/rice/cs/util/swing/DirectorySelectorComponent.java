@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -38,6 +38,7 @@ package edu.rice.cs.util.swing;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -145,13 +146,13 @@ public class DirectorySelectorComponent extends JPanel {
     super.setEnabled(isEnabled);
   }
   
-  /** Returns the file text field. */
+  /** @return the file text field. */
   public JTextField getFileField() { return _fileField; }
   
-  /** Returns the file chooser. */
+  /** @return the file chooser. */
   public DirectoryChooser getFileChooser() { return _chooser; }
   
-  /** Returns the file currently typed into the file field. THE SIDE EFFECTS OF THIS METHOD ARE OBSCENE!  Corky 2/5/06 */
+  /** @return the file currently typed into the file field. THE SIDE EFFECTS OF THIS METHOD ARE OBSCENE!  Corky 2/5/06 */
   public File getFileFromField() {
     String txt = _fileField.getText().trim();
     if (txt.equals("")) _file = FileOps.NULL_FILE;
@@ -186,10 +187,14 @@ public class DirectorySelectorComponent extends JPanel {
     _chooserButton.setToolTipText(text);
   }
   
-  /** Adds a filter to decide if a directory can be chosen. */
+  /** Adds a filter to decide if a directory can be chosen. 
+   * @param filter filter to be added
+   */
   public void addChoosableFileFilter(FileFilter filter) { _chooser.addChoosableFileFilter(filter); }
   
-  /** Removes the given filefilter from the chooser. */
+  /** Removes the given filefilter from the chooser.
+   * @param filter filter to be removed
+   */
   public void removeChoosableFileFilter(FileFilter filter) { _chooser.removeChoosableFileFilter(filter); }
   
   public void clearChoosableFileFilters() { _chooser.resetChoosableFileFilters(); }
@@ -233,7 +238,7 @@ public class DirectorySelectorComponent extends JPanel {
     
     // Get the file from the chooser
     int returnValue = _chooser.showDialog(_file);
-    if (returnValue == DirectoryChooser.APPROVE_OPTION) {
+    if (returnValue == JFileChooser.APPROVE_OPTION) {
       File chosen = _chooser.getSelectedDirectory();
       if (chosen != null) setFileField(chosen);
     }

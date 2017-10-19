@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -42,8 +42,7 @@ import java.util.Arrays;
 
 import javax.swing.JOptionPane;
 
-/**
- * A JUnit test case class that tests {@link ScrollableListDialog}.
+/** * A JUnit test case class that tests {@link ScrollableListDialog}.
  * 
  * @author Chris Warrington
  * @version $Id$
@@ -54,8 +53,7 @@ public class ScrollableListDialogTest extends TestCase {
   private static final String LEADER = "DIALOG LEADER";
   private static final java.util.List<String> DATA = Arrays.asList("hello", "there");
   
-  /**
-   * Tests that all the valid message types are accepted and that they
+  /** Tests that all the valid message types are accepted and that they
    * are the only message types accepted.
    */
   public void testValidMessageTypes() {

@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -36,8 +36,6 @@
 
 package edu.rice.cs.drjava.config;
 
-import edu.rice.cs.util.swing.Utilities;
-
 import java.util.ResourceBundle;
 import java.util.MissingResourceException;
 import java.io.*;
@@ -67,7 +65,7 @@ public class ResourceBundleConfiguration extends FileConfiguration {
     _shadowed = shadowed;
     map = new OptionMap() {
       public <T> T getOption(OptionParser<T> o) {
-        if (o==null) return _shadowed.getOptionMap().getOption(o);
+        if (o == null) return _shadowed.getOptionMap().getOption(o);
         try {
           String str = _bundle.getString(o.getName());
           return o.parse(str); // defined in resource bundle
@@ -79,9 +77,9 @@ public class ResourceBundleConfiguration extends FileConfiguration {
       }
       
       public <T> T setOption(Option<T> o, T val) {
-        if (o==null) return _shadowed.getOptionMap().setOption(o, val);
+        if (o == null) return _shadowed.getOptionMap().setOption(o, val);
         try {
-          String str = _bundle.getString(o.getName());
+          _bundle.getString(o.getName());
           return null; // defined in resource bundle, can't be set
         }
         catch(MissingResourceException mre) {
@@ -91,7 +89,7 @@ public class ResourceBundleConfiguration extends FileConfiguration {
       }
       
       public <T> String getString(OptionParser<T> o) {
-        if (o==null) return _shadowed.getOptionMap().getString(o);
+        if (o == null) return _shadowed.getOptionMap().getString(o);
         try {
           String str = _bundle.getString(o.getName());
           return str; // defined in resource bundle
@@ -103,9 +101,9 @@ public class ResourceBundleConfiguration extends FileConfiguration {
       }
       
       public <T> void setString(OptionParser<T> o, String s) {
-        if (o==null) _shadowed.getOptionMap().setString(o, s);
+        if (o == null) _shadowed.getOptionMap().setString(o, s);
         try {
-          String str = _bundle.getString(o.getName());
+          _bundle.getString(o.getName());
           return; // defined in resource bundle, can't be set
         }
         catch(MissingResourceException mre) {
@@ -115,9 +113,9 @@ public class ResourceBundleConfiguration extends FileConfiguration {
       }
       
       public <T> T removeOption(OptionParser<T> o) {
-        if (o==null) return _shadowed.getOptionMap().removeOption(o);
+        if (o == null) return _shadowed.getOptionMap().removeOption(o);
         try {
-          String str = _bundle.getString(o.getName());
+          _bundle.getString(o.getName());
           return null; // defined in resource bundle, can't be removed
         }
         catch(MissingResourceException mre) {
@@ -145,9 +143,9 @@ public class ResourceBundleConfiguration extends FileConfiguration {
     * @param value New value for the option
     */
   public <T> T setSetting(final Option<T> op, final T value) {
-    if (op==null) return _shadowed.setSetting(op, value);
+    if (op == null) return _shadowed.setSetting(op, value);
     try {
-      String str = _bundle.getString(op.getName());
+      _bundle.getString(op.getName());
       return null; // defined in resource bundle, can't be set
     }
     catch(MissingResourceException mre) {
@@ -158,7 +156,7 @@ public class ResourceBundleConfiguration extends FileConfiguration {
   
   /** Gets the current value of the given Option. */
   public <T> T getSetting(Option<T> op) {
-    if (op==null) return _shadowed.getSetting(op);
+    if (op == null) return _shadowed.getSetting(op);
     try {
       String str = _bundle.getString(op.getName());
       return op.parse(str); // defined in resource bundle
@@ -171,9 +169,9 @@ public class ResourceBundleConfiguration extends FileConfiguration {
 
   /** Return true if the option is editable. If it was defined in the resource bundle, it is not editable. */
   public <T> boolean isEditable(Option<T> op) {
-    if (op==null) return _shadowed.isEditable(op);
+    if (op == null) return _shadowed.isEditable(op);
     try {
-      String str = _bundle.getString(op.getName());
+      _bundle.getString(op.getName());
       return false; // defined, not editable
     }
     catch(MissingResourceException mre) {

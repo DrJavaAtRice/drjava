@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -153,7 +153,9 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
 //    });
 //  }
     
-  /** Tests that the errors array contains all encountered failures and error in the right order. */
+  /** Tests that the errors array contains all encountered failures and error in the right order. 
+   * @throws Exception if something goes wrong
+   */
   public void testErrorsArrayInOrder_NOJOIN() throws Exception {
     debug.logStart();
     _log.log("testErrorArrayInOrder_NOJOIN started");
@@ -233,6 +235,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
    * simply causing JUnit to blow up.  Note that this test will hang if
    * the error is not reported correctly, because the JUnitTestManager will
    * blow up in the other JVM and never notify us that it's finished.
+   * @throws Exception if something goes wrong
    */
   public void testVerifyErrorHandledCorrectly_NOJOIN() throws Exception {
     _log.log("testVerifyErrorHandledCorrectly_NOJOIN started");
@@ -332,7 +335,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
 //    
 //    listener.assertJUnitStartCount(1);
 //    
-//    // Clear document so we can make sure it's written to after startJUnit
+//// Clear document so we can make sure it's written to after startJUnit
 //    _model.getJUnitModel().getJUnitDocument().remove(0, _model.getJUnitModel().getJUnitDocument().getLength() - 1);
 //    
 //    _m = _model.getJUnitModel().getJUnitErrorModel();
@@ -343,7 +346,9 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
 //    debug.logEnd();
 //  }
   
-  /** Test errors that occur in superclass. */
+  /** Test errors that occur in superclass.
+   * @throws Exception if something goes wrong
+   */
   public void testErrorInSuperClass_NOJOIN() throws Exception {
     _log.log("testErrorInSuperClass_NOJOIN started");
     debug.logStart();

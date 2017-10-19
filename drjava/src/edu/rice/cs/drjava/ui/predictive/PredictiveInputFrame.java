@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,7 @@ import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.Keymap;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.util.Collection;
@@ -53,9 +54,9 @@ import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.plt.lambda.LambdaUtil;
-
 import edu.rice.cs.util.swing.SwingFrame;
 import edu.rice.cs.util.swing.Utilities;
+
 import edu.rice.cs.drjava.DrJavaRoot;
 
 /** Frame with predictive string input based on a list of strings. */
@@ -194,15 +195,16 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
   private volatile PredictiveInputModel.MatchingStrategy<T> _currentStrategy;
 
   /** Create a new predictive string input frame.
-   *  @param owner owner frame
-   *  @param force true if the user is forced to select one of the items
-   *  @param ignoreCase true if case should be ignored
-   *  @param info information supplier to use for additional information display
-   *  @param strategies array of matching strategies
-   *  @param actions actions to be performed when the user closes the frame, e.g. "OK" and "Cancel"; "Cancel" has to be last
-   *  @param items list of items
-   */
-
+    * @param owner owner frame
+    * @param title frame title
+    * @param force true if the user is forced to select one of the items
+    * @param ignoreCase true if case should be ignored
+    * @param info information supplier to use for additional information display
+    * @param strategies array of matching strategies
+    * @param actions actions to be performed when the user closes the frame, e.g. "OK" and "Cancel"; "Cancel" has to be last
+    * @param cancelIndex cancel index
+    * @param items list of items
+    */
   public PredictiveInputFrame(SwingFrame owner, String title, boolean force, boolean ignoreCase, InfoSupplier<? super T> info, 
                               java.util.List<PredictiveInputModel.MatchingStrategy<T>> strategies,
                               java.util.List<CloseAction<T>> actions, int cancelIndex, Collection<T> items) {
@@ -210,7 +212,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     _strategies = strategies;
     @SuppressWarnings("unchecked")
     PredictiveInputModel.MatchingStrategy<T>[] strategyArray =  // UGLY
-      (PredictiveInputModel.MatchingStrategy<T>[]) IterUtil.toArray(_strategies, PredictiveInputModel.MatchingStrategy.class);
+      IterUtil.toArray(_strategies, PredictiveInputModel.MatchingStrategy.class);
     _strategyBox = new JComboBox<PredictiveInputModel.MatchingStrategy<T>>(strategyArray);
     _currentStrategy = _strategies.get(0);
     _pim = new PredictiveInputModel<T>(ignoreCase, _currentStrategy, items);
@@ -229,13 +231,17 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
   }
   
   /** Create a new predictive string input frame.
-   *  @param owner owner frame
-   *  @param force true if the user is forced to select one of the items
-   *  @param info information supplier to use for additional information display
-   *  @param strategies array of matching strategies
-   *  @param actions actions to be performed when the user closes the frame, e.g. "OK" and "Cancel"; "Cancel" has to be last
-   *  @param items varargs/array of items
-   */
+    * @param owner owner frame
+    * @param title frame title
+    * @param force true if the user is forced to select one of the items
+    * @param ignoreCase whether or not to ignore case
+    * @param info information supplier to use for additional information display
+    * @param strategies array of matching strategies
+    * @param actions actions to be performed when the user closes the frame, e.g. "OK" and "Cancel"; "Cancel" has to be last
+    * @param cancelIndex cancel index
+    * @param items varargs/array of items
+    */
+  @SuppressWarnings({"unchecked", "varargs"}) // @SafeVarargs does not work here
   public PredictiveInputFrame(SwingFrame owner, String title, boolean force, boolean ignoreCase, InfoSupplier<? super T> info, 
                               List<PredictiveInputModel.MatchingStrategy<T>> strategies,
                               java.util.List<CloseAction<T>> actions, int cancelIndex, T... items) {
@@ -287,7 +293,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
       //int xs = (int)parentDim.getWidth()/3;
       int ys = (int) parentDim.getHeight()/4;
       // in line below, parentDim was _owner.getSize(); changed because former could generate NullPointerException
-      setSize(new Dimension((int)getSize().getWidth(), (int) Math.min(parentDim.getHeight(), Math.max(ys, 300))));
+      setSize(new Dimension((int)getSize().getWidth(), (int) Math.min(parentDim.getHeight(), Math.max(ys, 500))));
       if (_owner!=null) { setLocationRelativeTo(_owner); }
       _currentStrategy = _strategies.get(0);
       _strategyBox.setSelectedIndex(0);
@@ -304,6 +310,8 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     * @param pim predictive input model
     */
   public void setModel(boolean ignoreCase, PredictiveInputModel<T> pim) {
+    String trace = Arrays.toString(Thread.currentThread().getStackTrace());
+//    Utilities.show("PI model set to " + pim + "\nBacktrace:\n" + trace);
     _pim = new PredictiveInputModel<T>(ignoreCase, pim);
     removeListener();
     updateTextField();
@@ -341,7 +349,9 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     * @param ignoreCase true if case should be ignored
     * @param items varargs/array of items
     */
-  public void setItems(boolean ignoreCase, T... items) {
+  @SuppressWarnings({"unchecked", "varargs"})  // @SafeVarargs does not work here
+  public final void setItems(boolean ignoreCase, T... items) {
+//    Utilities.show("matching items in PIM set to: " + items);
     _pim = new PredictiveInputModel<T>(ignoreCase, _currentStrategy, items);
     removeListener();
     updateTextField();
@@ -380,7 +390,6 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     */
   public String getText() {
     if (_force) {
-      @SuppressWarnings("unchecked") 
       T item = _matchList.getSelectedValue();
       return (item == null) ? "" : _currentStrategy.force(item,_textField.getText());
     }
@@ -392,7 +401,6 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     */
   public T getItem() {
     if (!_force && _pim.getMatchingItems().size() == 0) return null;
-    @SuppressWarnings("unchecked") 
     T item = _matchList.getSelectedValue();
     return item;
   }
@@ -591,8 +599,8 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
 
     c.fill = GridBagConstraints.BOTH;
     c.weighty = 1.0;
-    contentPane.add(new JScrollPane(_matchList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
-                                    JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED), 
+    contentPane.add(new JScrollPane(_matchList, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, 
+                                    ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED), 
                     c);
     
     c.anchor = GridBagConstraints.SOUTHWEST;
@@ -637,9 +645,9 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
 
     pack();
 //    Dimension parentDim = (_owner != null) ? _owner.getSize() : getToolkit().getScreenSize();
-//    //int xs = (int) parentDim.getWidth()/3;
+////int xs = (int) parentDim.getWidth()/3;
 //    int ys = (int) parentDim.getHeight()/4;
-//    // in line below, parentDim was _owner.getSize(); changed because former could generate NullPointerException
+//// in line below, parentDim was _owner.getSize(); changed because former could generate NullPointerException
 //    setSize(new Dimension((int) getSize().getWidth(), (int)Math.min(parentDim.getHeight(), Math.max(ys, 300)))); 
     if (_owner!=null) { setLocationRelativeTo(_owner); }
 
@@ -649,12 +657,16 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     updateList();
   }
   
-  /** Creates the optional components. Should be overridden. */
+  /** Creates the optional components. Should be overridden. 
+   * @return the optional components
+   */
   protected JComponent[] makeOptions() {        
     return new JComponent[0];    
   }
   
-  /** Creates the panel with the optional components. */
+  /** Creates the panel with the optional components. 
+   * @param components the optional components
+   */
   private void _setupOptionsPanel(JComponent[] components) {
     JPanel mainButtons = new JPanel();
     JPanel emptyPanel = new JPanel();
@@ -761,7 +773,6 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
   private void updateInfo() {
     if (_info == null) return;
     if (_matchList.getModel().getSize() > 0) {
-      @SuppressWarnings("unchecked") 
       T item = _matchList.getSelectedValue();
       _infoLabel.setText("Path:   " + _info.value(item));
       _infoLabel.setToolTipText(_info.value(item));
@@ -774,7 +785,9 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     buttonPressed(_actions.get(_cancelIndex));
   }
   
-  /** Handle button pressed. */
+  /** Handle button pressed. 
+   * @param a the button press action being handled
+   */
   private void buttonPressed(CloseAction<T> a) {
     _buttonPressed = a.getName();
     _lastState = new FrameState(PredictiveInputFrame.this);

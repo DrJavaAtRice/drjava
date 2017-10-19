@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,6 @@ import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.config.OptionListener;
 import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.model.compiler.CompilerModel;
-import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
 import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
 import edu.rice.cs.drjava.model.compiler.CompilerInterface;
 import edu.rice.cs.util.UnexpectedException;
@@ -150,7 +149,10 @@ public class CompilerErrorPanel extends ErrorPanel {
     reset();
   }
   
-  /** Reset the errors to the current error information immediately following compilation. */
+  /** Reset the errors to the current error information immediately following 
+   * compilation. 
+   * @param excludedFiles files to set as excluded
+   */
   public void reset(File[] excludedFiles) {
     _excludedFiles = excludedFiles;
     reset();

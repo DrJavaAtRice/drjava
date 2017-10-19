@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -39,8 +39,7 @@ package edu.rice.cs.util;
 import java.util.List;
 import java.util.LinkedList;
 
-/**
- * Utility class which can tokenize a String into a list of String arguments,
+/** * Utility class which can tokenize a String into a list of String arguments,
  * with behavior similar to parsing command line arguments to a program.
  * Quoted Strings are treated as single arguments, and escaped characters
  * are translated so that the tokenized arguments have the same meaning.
@@ -189,6 +188,8 @@ public abstract class ArgumentTokenizer {
   /** Inserts backslashes before any occurrences of a backslash or
    * quote in the given string.  Also converts any special characters
    * appropriately.
+   * @param s string to escape
+   * @return escaped string
    */
   protected static String _escapeQuotesAndBackslashes(String s) {
     final StringBuilder buf = new StringBuilder(s);

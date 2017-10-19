@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -73,7 +73,7 @@ public class QuestionStartAfterOpenBrace extends IndentRuleQuestion {
       return false;
     int bracePos = lineStart - info.distance();    
     
-//    // Get brace's end of line
+//// Get brace's end of line
     int braceEndLinePos = doc._getLineEndPos(bracePos);
     
     // Get position of next non-WS char (not in comments)

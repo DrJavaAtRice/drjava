@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -36,22 +36,16 @@
 
 package edu.rice.cs.drjava.model.compiler;
 
-import java.awt.EventQueue;
 import java.io.File;
-import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.FileReader;
 
 import java.util.List;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.TreeMap;
 
 import edu.rice.cs.drjava.model.GlobalModel;
-import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.DrJavaFileUtils;
-import edu.rice.cs.util.swing.Utilities;
 
 /** Class used to get TreeMaps with dj* to java line number (and vise versa) conversions */
 public class LanguageLevelStackTraceMapper {
@@ -79,10 +73,12 @@ public class LanguageLevelStackTraceMapper {
     return new StackTraceElement(s.getClassName(), s.getMethodName(), d.getName(), lll);
   }
   
-  /** Converts java file and line number to corresponding dj* file name and line number in a given stacktrace element.
-    * @param s the StackTraceElement to do be converted
-    * @param d the dj* file whose name and line numbers are required in the StackTraceElement
-    */
+  /** Converts java file and line number to corresponding dj* file name and 
+   * line number in a given stacktrace element.
+   * @param s the StackTraceElement to do be converted
+   * @param d the dj* file whose name and line numbers are required in the StackTraceElement
+   * @return the newly-converted stack trace element
+   */
   public StackTraceElement replaceStackTraceElement(StackTraceElement s, File d) {
       
 // If the file name in s matches d, check if n already exists in the cache.
@@ -107,9 +103,10 @@ public class LanguageLevelStackTraceMapper {
   }
 
   /** Replaces the dj* file name and line numbers in a given stacktrace element.
-    * @param s the StackTraceElement to do the replacing in
-    * @param ds a list of the dj* file whose names and line numbers need replacing in the StackTraceElement
-    */
+   * @param s the StackTraceElement to do the replacing in
+   * @param ds a list of the dj* file whose names and line numbers need replacing in the StackTraceElement
+   * @return the newly-converted stack trace element
+   */
   public StackTraceElement replaceStackTraceElement(StackTraceElement s, List<File> ds) {
     for (int i = 0; i < ds.size(); i++) {
       s = replaceStackTraceElement(s, ds.get(i)); 
@@ -120,9 +117,10 @@ public class LanguageLevelStackTraceMapper {
 // file name and map the numbers for all files
   
   /** Replaces the dj* file names and line numbers in the given stacktrace elements.
-    * @param ss an array of StackTraceElement to do the replacing in
-    * @param ds a list of the dj* file whose names and line numbers need replacing in the StackTraceElement
-    */
+   * @param ss an array of StackTraceElement to do the replacing in
+   * @param ds a list of the dj* file whose names and line numbers need replacing in the StackTraceElement
+   * @return the newly-converted stack trace element
+   */
   public StackTraceElement[] replaceStackTrace(StackTraceElement[] ss, List<File> ds) {
     for(int i = 0; i < ss.length; i++) {
       ss[i] = replaceStackTraceElement(ss[i], ds);
@@ -138,11 +136,13 @@ public class LanguageLevelStackTraceMapper {
     cache = new HashMap<String,TreeMap<Integer,Integer>>();
   }
   
-  /** Ensures the given file and StackTraceElement match.  The extension on the file f may be a LL extension while the
-    * extension in the StackTraceElement is the corresponding .java file. 
-    * @param f the file
-    * @param s the StackTraceElement
-    */
+  /** Ensures the given file and StackTraceElement match.  The extension on 
+   * the file f may be a LL extension while the extension in the 
+   * StackTraceElement is the corresponding .java file. 
+   * @param f the file
+   * @param s the StackTraceElement
+   * @return true if there's a match; false otherwise
+   */
   private boolean matches(File f, StackTraceElement s) {
     LOG.log("matches(" + f + ", " + s + ")");
     if (s.getFileName() == null) return false;
@@ -187,8 +187,7 @@ public class LanguageLevelStackTraceMapper {
     int lineNo = 1;
     oneToOne.put(lineNo,lineNo);
     try {
-      String rdLine;
-      while((rdLine = bufReader.readLine()) != null) {
+      while(bufReader.readLine() != null) {
         ++lineNo;
         oneToOne.put(lineNo,lineNo);
       }
@@ -198,8 +197,9 @@ public class LanguageLevelStackTraceMapper {
   }
     
   /** Reads the LanguageLevel header from a LL file and pulls the line number conversion map out.
-    * @return <java line, dj* line>
-    */
+   * @param LLFile the language-level file to be read
+   * @return {@literal <java line, dj* line>}
+   */
   public TreeMap<Integer, Integer> readLLLineBlock(File LLFile){
     
     BufferedReader bufReader = null;
@@ -253,8 +253,9 @@ public class LanguageLevelStackTraceMapper {
   
   
   /** Reads the LanguageLevel header from a LL file and pulls the line number conversion map out.
-    * @return <dj* line, java line>
-    */
+   * @param LLFile the language-level file to be read
+   * @return {@literal <dj* line, java line>}
+   */
   public TreeMap<Integer, Integer> readLLBlock(File LLFile) {
     
     BufferedReader bufReader = null;
@@ -301,8 +302,12 @@ public class LanguageLevelStackTraceMapper {
     return map;
   }
   
-  /** Helper method to read the next comment line in a file.  Returns null if no new comment line exists. 
-    * Line is trimmed and padded by a single blank on the end. */
+  /** Helper method to read the next comment line in a file.  Returns null if 
+   * no new comment line exists. 
+   * Line is trimmed and padded by a single blank on the end. 
+   * @param br buffer from which to read the next comment line
+   * @return the next comment line
+   */
   private String readNextLLBlockLine(BufferedReader br) {
     String line = "";
     try { line = br.readLine(); } catch(java.io.IOException e){ }

@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -66,8 +66,7 @@ public class StreamRedirectThread extends Thread {
     * waits for a signal, which is set in setInputStream(). */
   private volatile CompletionMonitor cm = new CompletionMonitor();
   
-  /**
-   * Constructor
+  /** Constructor
    *
    * @param name thread name
    * @param in   stream to copy from
@@ -78,8 +77,7 @@ public class StreamRedirectThread extends Thread {
     this(name,in,out,close,false/*keepRunning*/);
   }
   
-  /**
-   * Constructor
+  /** Constructor
    *
    * @param name  thread name
    * @param in    stream to copy from
@@ -89,8 +87,7 @@ public class StreamRedirectThread extends Thread {
   public StreamRedirectThread(String name, InputStream in, OutputStream out, ThreadGroup tg) {
     this(name,in,out,true/*close*/,tg,false/*keepRunning*/);
   }
-  /**
-   * Constructor
+  /** Constructor
    *
    * @param name  thread name
    * @param in    stream to copy from
@@ -102,8 +99,7 @@ public class StreamRedirectThread extends Thread {
     this(name,in,out,close,tg,false/*keepRunning*/);
   }
 
-  /**
-   * Constructor
+  /** Constructor
    *
    * @param name  thread name
    * @param in    stream to copy from
@@ -113,8 +109,7 @@ public class StreamRedirectThread extends Thread {
     this(name,in,out,true/*close*/,false/*keepRunning*/);
   }
   
-  /**
-   * Constructor
+  /** Constructor
    *
    * @param name thread name
    * @param in   stream to copy from
@@ -131,8 +126,7 @@ public class StreamRedirectThread extends Thread {
     setPriority(Thread.MAX_PRIORITY - 1);
   }
   
-  /**
-   * Constructor
+  /** Constructor
    * @param name         thread name
    * @param in           stream to copy from
    * @param out          stream to copy to
@@ -143,8 +137,7 @@ public class StreamRedirectThread extends Thread {
     this(name,in,out,true,tg,keepRunning);
   }
   
-  /**
-   * Constructor
+  /** Constructor
    *
    * @param name         thread name
    * @param in           stream to copy from
@@ -162,8 +155,7 @@ public class StreamRedirectThread extends Thread {
     setPriority(Thread.MAX_PRIORITY - 1);
   }
   
-  /**
-   * Set a new input stream.
+  /** Set a new input stream.
    * @param in new input stream to read from
    */
   public void setInputStream(InputStream in) {
@@ -171,8 +163,7 @@ public class StreamRedirectThread extends Thread {
     cm.signal();
   }
   
-  /**
-   * Copy.
+  /** Copy.
    */
   public void run() {
     do {
@@ -219,8 +210,7 @@ public class StreamRedirectThread extends Thread {
     }
   }
   
-  /**
-   * Tell the thread to stop copying.
+  /** Tell the thread to stop copying.
    */
   public void setStopFlag() {
     stop = true;

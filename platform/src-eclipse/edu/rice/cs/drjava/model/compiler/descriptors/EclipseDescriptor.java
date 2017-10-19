@@ -44,34 +44,32 @@ import java.util.Collections;
 import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.plt.iter.IterUtil;
 
-import edu.rice.cs.drjava.model.JDKDescriptor;
+import edu.rice.cs.drjava.model.JDKDescriptor;  // Util is a static inner class of this class
 
 /** The description of the Eclipse JDK. */
 public class EclipseDescriptor extends JDKDescriptor {
-  public String getName() {
-    return "Eclipse";
-  }
+  /* Also constructed using reflection, so ONLY is a misnomer.  TODO: eliminate reflection use. */
+  public static EclipseDescriptor ONLY = new EclipseDescriptor();
+  public String getName() { return "Eclipse"; }
   
-  /** Packages to shadow when loading a new tools.jar.  If we don't shadow these classes, we won't
-    * be able to load distinct versions for each tools.jar library.  These should be verified whenever
-    * a new Java version is released.  (We can't just shadow *everything* because some classes, at 
-    * least in OS X's classes.jar, can only be loaded by the JVM.)
-    * 
+  /** Packages to shadow when loading an Eclipse compiler.  Since we only load one Eclipse compiler and
+    * Eclipse compilers do not have any tools classes (verify?) in common with Oracle and OpenJDK compilers,
+    * no such shadowing is necessary.
     * @return set of packages that need to be shadowed
     */
   public Set<String> getToolsPackages() {
     HashSet<String> set = new HashSet<String>();
-    Collections.addAll(set, new String[] {
-      // Additional from 6 tools.jar:
-      "com.sun.codemodel",
-        "com.sun.istack.internal.tools", // other istack packages are in rt.jar
-        "com.sun.istack.internal.ws",
-        "com.sun.source",
-        "com.sun.xml.internal.dtdparser", // other xml.internal packages are in rt.jar
-        "com.sun.xml.internal.rngom",
-        "com.sun.xml.internal.xsom",
-        "org.relaxng"
-    });
+//    Collections.addAll(set, new String[] {
+//      // Additional from 6 tools.jar:
+//      "com.sun.codemodel",
+//        "com.sun.istack.internal.tools", // other istack packages are in rt.jar
+//        "com.sun.istack.internal.ws",
+//        "com.sun.source",
+//        "com.sun.xml.internal.dtdparser", // other xml.internal packages are in rt.jar
+//        "com.sun.xml.internal.rngom",
+//        "com.sun.xml.internal.xsom",
+//        "org.relaxng"
+//    });
     return set;
   }
 
@@ -98,7 +96,7 @@ public class EclipseDescriptor extends JDKDescriptor {
   /** Return true if the file (jar file or directory) contains the compiler.
     * @return true if the file contains the compiler */
   public boolean containsCompiler(File f) {
-    return Util.exists(f, "org/eclipse/jdt/internal/compiler/tool/EclipseCompiler.class");
+    return JDKDescriptor.Util.exists(f, "/org/eclipse/jdt/internal/compiler/tool/EclipseCompiler.class");
   }
   
   /** Return the class name of the compiler adapter.
@@ -123,5 +121,14 @@ public class EclipseDescriptor extends JDKDescriptor {
     return IterUtil.empty();
   }
 
-  public String toString() { return getClass().getSimpleName()+" --> "+getAdapterForCompiler(); }
+  @Override
+  public String getDescription(JavaVersion.FullVersion version) {
+    String javaVersion = System.getProperty("java.version");
+    return "Eclipse Compiler Library running in JRE " + javaVersion + " with no debugger and no javadoc tool";
+  }
+  
+  @Override
+  public String toString() { 
+    return "Eclipse Compiler Library"; 
+  }
 }

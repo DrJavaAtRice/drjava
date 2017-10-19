@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -87,6 +87,7 @@ public class FileDisplay {
    * there is no way to determine what the new child string of the path should be.
    * However, if the user is creating a new node in the tree, they will be able 
    * to edit it.
+   * @return whether this is editable
    */
   public boolean isEditable() { return (_isNew || (_file.canWrite() && _rep.equals(_file.getName()))); }
   

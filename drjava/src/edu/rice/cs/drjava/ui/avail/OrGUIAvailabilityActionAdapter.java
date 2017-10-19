@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -36,13 +36,9 @@
 
 package edu.rice.cs.drjava.ui.avail;
 
-import edu.rice.cs.drjava.model.EventNotifier;
-
-import java.util.HashMap;
 import javax.swing.Action;
 
-/**
- * Adapter from Action to OrGUIAvailabilityListener.
+/** * Adapter from Action to OrGUIAvailabilityListener.
  *
  * @version $Id$
  */
@@ -50,7 +46,10 @@ public class OrGUIAvailabilityActionAdapter extends OrGUIAvailabilityListener {
   protected final Action _adaptee;
   
   /** Create a listener that responds to changes in availability of several GUI components.
-    * @param components components that must be available */
+   * @param adaptee an Action
+   * @param notifier a GUIAvailabilityNotifier
+   * @param components components that must be available 
+   */
   public OrGUIAvailabilityActionAdapter(Action adaptee,
                                         GUIAvailabilityNotifier notifier, ComponentType... components) {
     super(notifier, components);

@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -41,8 +41,7 @@ import edu.rice.cs.drjava.DrJavaTestCase;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * Tests that an ArgumentTokenizer can correctly divide up a string
+/** * Tests that an ArgumentTokenizer can correctly divide up a string
  * into command line-style arguments.  Tries to follow the precedent
  * set by a Unix bash shell in most cases.
  * @version $Id$
@@ -50,6 +49,7 @@ import java.util.List;
 public class ArgumentTokenizerTest extends DrJavaTestCase {
 
   /** Creates a new ArgumentTokenizer to be used in every test.
+   * @param name test name
    */
   public ArgumentTokenizerTest(String name) {
     super(name);

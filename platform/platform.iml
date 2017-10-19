@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <exclude-output />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/src-eclipse" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src-hj" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src-jdk5" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src-jdk6" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src-jdk7" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src-mac" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src-mint" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src-nextgen" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src-openjdk6" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src-windows" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/testFiles" isTestSource="false" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="buildlib6" level="project" />
+    <orderEntry type="library" name="lib4" level="project" />
+    <orderEntry type="library" name="buildlib" level="project" />
+    <orderEntry type="library" name="junit" level="project" />
+    <orderEntry type="library" name="lib5" level="project" />
+    <orderEntry type="library" name="buildlib4" level="project" />
+    <orderEntry type="library" name="input" level="project" />
+    <orderEntry type="library" name="buildlib7" level="project" />
+    <orderEntry type="library" name="buildlib1" level="project" />
+    <orderEntry type="library" name="lib" level="project" />
+    <orderEntry type="library" name="buildlib2" level="project" />
+    <orderEntry type="library" name="buildlib3" level="project" />
+    <orderEntry type="library" name="lib1" level="project" />
+    <orderEntry type="module" module-name="drjava" />
+    <orderEntry type="module" module-name="plt" />
+  </component>
+</module>

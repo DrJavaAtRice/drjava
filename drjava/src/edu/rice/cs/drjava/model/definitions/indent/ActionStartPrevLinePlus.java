@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -55,10 +55,9 @@ class ActionStartPrevLinePlus extends IndentRuleAction {
     * to 0.  Only runs in event thread.
     * @param doc AbstractDJDocument containing the line to be indented.
     * @param reason The reason that the indentation is taking place
-    * @return true if the caller should update the current location, false if the indenter has already done it
     */
-  public boolean indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
-    boolean supResult = super.indentLine(doc, reason);
+  public void indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
+    super.indentLine(doc, reason);
     try {
       // Find start of line
       int here = doc.getCurrentLocation();
@@ -76,8 +75,6 @@ class ActionStartPrevLinePlus extends IndentRuleAction {
       
       if (AbstractDJDocument.hasOnlySpaces(prefix)) doc.setTab(prefix.length(), here);
       else doc.setTab(prefix, here);
-      
-      return supResult;
     }
     catch (BadLocationException e) { throw new UnexpectedException(e); } // Shouldn't happen
   }

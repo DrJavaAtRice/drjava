@@ -46,6 +46,7 @@ import edu.rice.cs.javalanglevels.*;
 import edu.rice.cs.javalanglevels.parser.*;
 import edu.rice.cs.javalanglevels.tree.*;
 import edu.rice.cs.javalanglevels.util.Log;
+import edu.rice.cs.javalanglevels.util.UnexpectedException;
 import edu.rice.cs.javalanglevels.util.Utilities;
 
 import edu.rice.cs.plt.iter.*;
@@ -63,6 +64,9 @@ public class LanguageLevelConverter {
   
   public static final Log _log = new Log("LLConverter.txt", false);
   
+  /* TODO: get rid of all the static dreck (except constants) used in this class and its affiliated
+   * classes.  Ugly, ugly, ugly ...  Corky 11-11-14 */
+  
   /** Hashtable for a shared symbolTable.  Since this field is static, only one instance of
     * LanguageLevelConverter should exist at a time.  If we create a
     * LanguageLevelConverter instance for each translation, we must drop the static attribute. */
@@ -77,6 +81,8 @@ public class LanguageLevelConverter {
   /**Number of line number mappings (from dj* to java) per line. */
   public static final int LINE_NUM_MAPPINGS_PER_LINE = 8;
   
+  public static final SymbolData OBJECT;  // initialized in static initialization block
+  
   /** Stores all the SymbolDatas (and corresponding visitors) created as in course of conversion.  If we create a
     * LanguageLevelConverter instance for each translation, we must drop the static attribute. */
   public static final Hashtable<SymbolData, LanguageLevelVisitor> _newSDs = 
@@ -90,7 +96,8 @@ public class LanguageLevelConverter {
   
   /* Relying on default constructor. */
   
-  /** Ensures that the symbol table contains essential symbols.  Should be done in the symbol table class. */
+  /** Ensures that the symbol table contains essential symbols.  Executed as part of LanguageLevelVisitor init
+    * and typechecker inits (TryCatchBodyTypeChecker, TypeChecker, ExpressionTypeChecker). */
   public static void loadSymbolTable() {
 
     if (symbolTable.get("java.lang.Object") == null)    _classFile2SymbolData("java.lang.Object");
@@ -108,8 +115,8 @@ public class LanguageLevelConverter {
     SymbolData objectSD = symbolTable.get("java.lang.Object");   
     SymbolData integerSD = symbolTable.get("java.lang.Integer");
     assert objectSD != null && integerSD != null;
-    assert integerSD.isAssignableTo(objectSD, JavaVersion.JAVA_5);
-    assert SymbolData.INT_TYPE.isAssignableTo(objectSD, JavaVersion.JAVA_5);
+    assert integerSD.isAssignableTo(objectSD, true);
+    assert SymbolData.INT_TYPE.isAssignableTo(objectSD, true);
   }
   
     /** We'll use this class loader to look up resources (*not* to load classes) */
@@ -144,28 +151,35 @@ public class LanguageLevelConverter {
     return new ModifiersAndVisibility(SourceInfo.NONE, strings.toArray(new String[strings.size()]));
   }
   
-  /** Defines library classes assuming they are available to the PathClassLoader. */
+  /** Defines library or already compiled classes assuming they are available to the PathClassLoader. */
   public static SymbolData _classFile2SymbolData(String qualifiedClassName) { 
     return _classFile2SymbolData(qualifiedClassName, null);
   }
   
   /** Uses the ASM class reader to read the class file corresponding to the class in the specified directory, and uses
     * the information from ASM to build a SymbolData corresponding to the class.  Ensures that the returned SymbolData
-    * (if any) is inserted in the symbolTable.
+    * (if any) is inserted in the symbolTable.  Silently fails returning null instead of throwing an exception.
+    * Relies on fact that a static variable, namely LanguageLevelConverter.symbolTable holds the symbol table. UGHH!!
+    * There should be a symbol table object and this method should be an instance method of that object!!
     * @param qualifiedClassName  The fully qualified class name of the class we are looking up
     * @param programRoot  The directory where the class is located.
     * @return The SymbolData for the class file if the class file was found; null otherwise.
     */
   public static SymbolData _classFile2SymbolData(final String qualifiedClassName, final String programRoot) {
- 
+    _log.log("***** _classFile2SymbolData(" + qualifiedClassName + ", " + programRoot + ") called");
+    
     ClassReader reader = null;
     try {
       String fileName = qualifiedClassName.replace('.', '/') + ".class";
+      _log.log("***** reading class file: " + fileName);
       InputStream stream = RESOURCES.value().getResourceAsStream(fileName);
       if (stream == null && programRoot != null) {
         stream = PathClassLoader.getResourceInPathAsStream(fileName, new File(programRoot));
       }
-      if (stream == null) { return null; }
+      if (stream == null) { 
+        _log.log("***** class file was empty! *****");
+        return null; 
+      }
       // Let IOUtil handle the stream here, because it closes it when it's done, unlike ASM.
       reader = new ClassReader(IOUtil.toByteArray(stream));
     }
@@ -173,9 +187,11 @@ public class LanguageLevelConverter {
     
     // Class file found; create the symbol table entry
     final SymbolData sd;
-//    if (qualifiedClassName.equals("java.lang.Object")) 
+//    if (qualifiedClassName.equals("java.lang.Object")) { 
 //      System.err.println("***SHOUT*** java.lang.Object is being added to symbolTable from class file");
+//    }
     SymbolData sdLookup = LanguageLevelConverter.symbolTable.get(qualifiedClassName); 
+    
     if (sdLookup == null)  { // create a continuation for sd
       sd = new SymbolData(qualifiedClassName); 
       LanguageLevelConverter.symbolTable.put(qualifiedClassName, sd);
@@ -193,7 +209,7 @@ public class LanguageLevelConverter {
     
     // TODO !!! Use classFile2SymbolData directly.  Should class files have their supertypes defined anywhere but in 
     // class files?
-    ClassVisitor extractData = new ClassVisitor() {
+    ClassVisitor extractData = new ClassVisitor(Opcodes.ASM4) {
       
       public void visit(int version, int access, String name, String sig, String sup, String[] interfaces) {
         sd.setMav(_createMav(access));
@@ -235,6 +251,7 @@ public class LanguageLevelConverter {
       public FieldVisitor visitField(int access, String name, String desc, String sig, Object value) {
         /* Private fields cannot be ignored because they are used in code augmentation for generating constructors,
          * equals, and hashCode. */
+        _log.log("visitField(" + access + ", " + name + ", " + desc + ", " + sig + ", " + value + ") called");
         String typeString = org.objectweb.asm.Type.getType(desc).getClassName();
         SymbolData type = getSymbolDataForClassFile(typeString, programRoot);
         if (type != null) { sd.addVar(new VariableData(name, _createMav(access), type, true, sd)); }
@@ -283,7 +300,7 @@ public class LanguageLevelConverter {
       public void visitEnd() {}
       
     };
-//    System.err.println("####### Loading file system class " + qualifiedClassName + " and all of its unloaded supertypes");
+    _log.log("***** Loading member signatures for file system class " + qualifiedClassName + " and all of its unloaded supertypes");
     reader.accept(extractData, ClassReader.SKIP_CODE);
 //    System.err.println("####### Finished loading " + qualifiedClassName);
     
@@ -306,6 +323,7 @@ public class LanguageLevelConverter {
     */
   public static SymbolData getSymbolDataForClassFile(String className, String programRoot) {
  
+    _log.log("getSymbolDataForClassFile(" + className + ", " + programRoot + ") called");
     // Check for primitive types. 
     SymbolData sd = _getPrimitiveSymbolData(className);
     if (sd != null) { return sd; }
@@ -333,6 +351,12 @@ public class LanguageLevelConverter {
     else if (className.equals("null"))   return SymbolData.NULL_TYPE;
 //    System.err.println("***** className " + className + " did not match primitive names");
     return null;
+  }
+  
+  /**** Static initialization block ***/
+  static {
+    loadSymbolTable();
+    OBJECT = symbolTable.get("java.lang.Object");
   }
   
   /***Add the parse exception to the list of parse exceptions*/
@@ -400,7 +424,7 @@ public class LanguageLevelConverter {
 //    /* The number of files to compile may change if one file references another one.
 //     We don't want to visit these newly referenced files because they've already
 //     been visited. */
-//    // WHAT DOES VISIT MEAN?
+//    // WHAT DOES VISIT MEAN?  Apply this to them?
 //    int originalNumOfFiles = files.length;
     
     /* Find the files in the File[] array files that are LL, advanced or Full Java files. Do the parsing and conformance 
@@ -435,37 +459,44 @@ public class LanguageLevelConverter {
         if (isAdvancedFile(f))  advanced.addLast(f);
         else if (isFullJavaFile(f)) javaFiles.addLast(f);
         
-        if (isJavaFile(f)) {  /* a .dj0, .dj1, .dj2,, .dj, or .java file */
+        if (isJavaFile(f)) {  /* a .dj0, .dj1, .dj2,, .dj, or .java file; all but .dj and .java are legacy */
           System.out.flush();
-          SourceFile sf;
+          SourceFile sf = null;
           JExprParser jep = new JExprParser(f);
           try { 
-//            System.err.println("Parsing " + f);
             _log.log("Parsing " + f);
-            sf = jep.SourceFile();
-//            System.err.println("Completed parsing " + f);
+            sf = jep.SourceFile();  // Does the SourceFile method parse the file f embedded in jep?  NO!
+            // Parse the classes in sf
             final Set<String> topLevelClasses = new HashSet<String>();
+            final SourceFile fsf = sf;
             for (TypeDefBase t: sf.getTypes()) {
               t.visit(new JExpressionIFAbstractVisitor<Void>() {
-                public Void forClassDef(ClassDef that) { topLevelClasses.add(that.getName().getText()); return null; }
+                public Void forClassDef(ClassDef that) {
+                  String className = that.getName().getText();
+                  _log.log("Class '" + className + "' found in file " + fsf);
+                  topLevelClasses.add(className); 
+                  return null; 
+                }
                 public Void defaultCase(JExpressionIF that) { return null; }
               });
             }
             sourceToTopLevelClassMap.put(f, topLevelClasses);
+            _log.log("Completed parsing " + f);
           } 
           catch (ParseException pe) {
             // If there is a ParseException, go to next file.
             _addParseException(pe);
-            _log.log("GENERATED ParseException for file " + f);
+            _log.log("GENERATED (non-Parse) exception in parsing file " + sf);
             continue;
           }
+          catch (Exception pe) { throw new UnexpectedException(pe); }  // catch any other Exceptions thrown in parsing
           
           LinkedList<String> importedPackageBase = new LinkedList<String>();
           importedPackageBase.add("java.lang");
             
           // Now create a LanguageLevelVisitor to do the first pass over the file.
           LanguageLevelVisitor llv;
-          if (isLanguageLevelFile(f)) {
+          if (isLanguageLevelFile(f)) { // Intermediate is the only language level other than full Java.
             llv = new IntermediateVisitor(f,
                                           importedPackageBase,
                                           new LinkedList<Pair<String, JExpressionIF>>(),
@@ -474,7 +505,7 @@ public class LanguageLevelConverter {
                                           languageLevelVisitedFiles);
           }
           else {
-            assert isAdvancedFile(f) || isFullJavaFile(f);
+            assert isAdvancedFile(f) || isFullJavaFile(f);  // Advanced files are treated exactly like full Java.
             llv = new FullJavaVisitor(f,
                                       importedPackageBase,
                                       new LinkedList<Pair<String, JExpressionIF>>(),
@@ -485,7 +516,7 @@ public class LanguageLevelConverter {
           
           // Conformance checking pass
           sf.visit(llv);
-          _log.log("\nDUMPING SYMBOLTABLE AFTER PHASE 1 PROCESSING OF " + f + "\n\n" + symbolTable + "\n");
+//          _log.log("\nDUMPING SYMBOLTABLE AFTER PHASE 1 PROCESSING OF " + f + "\n\n" + symbolTable + "\n");
           visited.add(new Triple<LanguageLevelVisitor, SourceFile, File>(llv, sf, f));
           _log.log("\nCONTINUATIONS AFTER PHASE 1 PROCESSING OF " + f + "\n\n" + llv.continuations + "\n");
           _log.log("\nERRORS AFTER PHASE 1 PROCESSING OF " + f + "\n\n" + llv.errors + "\n");
@@ -506,7 +537,7 @@ public class LanguageLevelConverter {
      * getSymbolData with a flag; create a new method for resolving continuations.  Use a common helper.  */
     LanguageLevelVisitor.errors = new LinkedList<Pair<String, JExpressionIF>>(); //clear out error list
     
-    _log.log("\nDUMPING SYMBOLTABLE BEFORE CONTINUATION RESOLUTION\n\n" + symbolTable + "\n");
+//    _log.log("\nDUMPING SYMBOLTABLE BEFORE CONTINUATION RESOLUTION\n\n" + symbolTable + "\n");  // redundant
 //    System.err.println("Resolving continuations " + continuations);
     _log.log("Resolving continuations: " + continuations + "\n");
     while (! continuations.isEmpty()) {
@@ -532,7 +563,7 @@ public class LanguageLevelConverter {
       }
     }
     
-    _log.log("\nDUMPING SYMBOLTABLE AFTER PASS 1\n\n" + symbolTable + "\n");
+//    _log.log("\nDUMPING SYMBOLTABLE AFTER PASS 1\n\n" + symbolTable + "\n");
     
         
     // Execute fixups; must be done before creating constructors because some symbols required for constructor
@@ -671,20 +702,20 @@ public class LanguageLevelConverter {
               // write out the line number map and the augmented java file
               PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(augmentedFile)));
               SortedMap<Integer,Integer> lineNumberMap = a.getLineNumberMap();
-              pw.println("// Language Level Converter line number map: dj*->java. Entries: "+lineNumberMap.size());
+              pw.println("// Language Level Converter line number map: dj*->java. Entries: " +lineNumberMap.size());
               // We print out LINE_NUM_MAPPINGS_PER_LINE mappings per line, so we need numLines
               // at the top of the file, and one more for a descriptive comment.
               // That means we need to increase the line numbers in the generated java file by numLines+1
-              int numLines = (int)Math.ceil(((double)lineNumberMap.size())/LINE_NUM_MAPPINGS_PER_LINE);
+              int numLines = (int)Math.ceil(((double)lineNumberMap.size()) / LINE_NUM_MAPPINGS_PER_LINE);
               int mapCount = 0;
               for(Map.Entry<Integer,Integer> e: lineNumberMap.entrySet()) {
                 // e.getKey(): dj* line number; e.getValue(): java line number (must be increased by numLines)
-                if (mapCount%LINE_NUM_MAPPINGS_PER_LINE==0) pw.print("//");
+                if (mapCount % LINE_NUM_MAPPINGS_PER_LINE == 0) pw.print("//");
                 pw.printf(" %5d->%-5d", e.getKey(), (e.getValue()+numLines+1));
-                if (mapCount%LINE_NUM_MAPPINGS_PER_LINE==LINE_NUM_MAPPINGS_PER_LINE-1) pw.println();
+                if (mapCount % LINE_NUM_MAPPINGS_PER_LINE ==  LINE_NUM_MAPPINGS_PER_LINE - 1) pw.println();
                 ++mapCount;
               }
-              if (mapCount%LINE_NUM_MAPPINGS_PER_LINE!=0) pw.println(); // print a newline unless we just printed one
+              if (mapCount % LINE_NUM_MAPPINGS_PER_LINE != 0) pw.println(); // print a newline unless we just printed one
               
               String augmented = sw.toString();
               pw.write(augmented, 0, augmented.length());
@@ -733,25 +764,18 @@ public class LanguageLevelConverter {
     return new File(augmentedFilePath + ".java"); //replace it with .java
   }
   
-  /**Only certain versions of the java compiler support autoboxing*/
-  public static boolean versionSupportsAutoboxing(JavaVersion version) {
-    return version.supports(JavaVersion.JAVA_5);
-    // If we care to support it, also allows JSR-14
-  }
+  /**All versions of the java compiler since Java 5 support autoboxing. */
+  public static boolean versionSupportsAutoboxing(JavaVersion version) { return true; }
   
-  /**Only certain versions of the java compiler support generics*/
-  public static boolean versionSupportsGenerics(JavaVersion version) {
-    return version.supports(JavaVersion.JAVA_5);
-    // If we care to support it, also allows JSR-14
-  }
+  /**All versions of the java compiler since Java 5 support generics. */
+  public static boolean versionSupportsGenerics(JavaVersion version) { return true; }
   
-  /**Only 1.5 supports for each*/
-  public static boolean versionSupportsForEach(JavaVersion version) {
-    return version.supports(JavaVersion.JAVA_5);
-  }
+  /**All version of the java compiler since Java 5 support foreach. */
+  public static boolean versionSupportsForEach(JavaVersion version) { return true; }
   
-  /* @return true if the compiler version is 1.5 */
-  public static boolean versionIs15(JavaVersion version) { return version.supports(JavaVersion.JAVA_5); }
+  /* The following method is archaic and no longer usedd. */
+//  /* @return true if the compiler corresponds to Java 5 or later.  */
+//  public static boolean versionIs15(JavaVersion version) { return true; }
   
   /**Do a conversion from the command line, to allow quick testing*/
   public static void main(String[] args) {
@@ -771,7 +795,7 @@ public class LanguageLevelConverter {
     }
     
     Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result = 
-      llc.convert(files, new Options(JavaVersion.JAVA_5,
+      llc.convert(files, new Options(JavaVersion.JAVA_8,
                                      IOUtil.parsePath(System.getProperty("java.class.path", ""))));
     System.out.println(result.getFirst().size() + result.getSecond().size() + " errors.");
     for(JExprParseException p : result.getFirst()) {

@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -36,8 +36,7 @@
 
 package edu.rice.cs.drjava.model;
 
-/**
- * Special DocumentClosedException to signify when a document's file no longer
+/** * Special DocumentClosedException to signify when a document's file no longer
  *  exists on disk where it once was, and as a result of the prompt given to the user, the 
  * document is closed
  */
@@ -45,14 +44,15 @@ public class DocumentClosedException extends RuntimeException {
   private OpenDefinitionsDocument _document;
   
   /** Creates a DocumentClosedException for the given file
+   * @param d the document 
+   * @param s the error message
    */
   public DocumentClosedException(OpenDefinitionsDocument d, String s) {
     super(s);
     _document = d;
   }
   
-  /** Get the document which caused this exception.
-   */
+  /** @return the document which caused this exception. */
   public OpenDefinitionsDocument getDocument() {
     return _document;
   }

@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -41,10 +41,7 @@ import java.util.List;
 
 import edu.rice.cs.drjava.model.EventNotifier;
 
-import static edu.rice.cs.plt.debug.DebugUtil.debug;
-
-/**
- * Keeps track of all listeners to a CompilerModel, and has the ability
+/** * Keeps track of all listeners to a CompilerModel, and has the ability
  * to notify them of some event.
  * <p>
  *

@@ -10,7 +10,7 @@ options {
   */
   DEBUG_PARSER = false;
   STATIC = false;
-  JDK_VERSION = "1.5";
+  JDK_VERSION = "1.6";
 }
 
 PARSER_BEGIN(JExprParser)
@@ -120,9 +120,14 @@ public class JExprParser {
   private void _throwParseException(String message) throws ParseException {
     // The error typically occurs on the next token.
     Token t = token;
-    if (token.next != null) {
-      t = token.next;
-    }
+/* The following three lines are commented out as a wild guess as to what is going wrong in parsing erroneous .dj files.
+ * Corky 11-11-14 after encountering NullPointerExceptions in the testShouldBeErrors test methods in ElementaryLevelTest 
+ * IntermediateLevelTest.  The initialise method in the generated parser appeared to performing this next operation as well,
+ * generating the NullPoinerException in some cases.  This fix appears to work.  Amazing ...
+ */
+//    if (token.next != null) {
+//      t = token.next;
+//    }
     // If a certain token or sequence of tokens is expected, display it.
     ParseException pe = generateParseException();
 //    if (pe.expectedTokenSequences.length == 1) {

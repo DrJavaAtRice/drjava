@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -45,8 +45,10 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.Toolkit;
+
 import javax.swing.*;
 import javax.swing.text.*;
+
 import java.io.*;
 import java.util.List;
 
@@ -55,11 +57,9 @@ import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.repl.InteractionsDocumentTest.TestBeep;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.plt.io.IOUtil;
-import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.*;
 import edu.rice.cs.util.text.*;
 import edu.rice.cs.util.swing.Utilities;
-import edu.rice.cs.drjava.model.compiler.CompilerListener;
 
 /** Test functions of MainFrame.
   * @version $Id$
@@ -114,22 +114,25 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   }
   
   JButton _but;
-  /** Tests that the returned JButton of <code>createManualToolbarButton</code>:
+  /** Tests that the returned JButton of <code>createManualToolBarButton</code>:
     * 1. Is disabled upon return.
     * 2. Inherits the tooltip of the Action parameter <code>a</code>.
     */
-  public void testCreateManualToolbarButton() {
+  public void testCreateManualToolBarButton() {
     final Action a = new AbstractAction("Test Action") { public void actionPerformed(ActionEvent ae) { } };
     
     a.putValue(Action.LONG_DESCRIPTION, "test tooltip");
-    Utilities.invokeAndWait(new Runnable() { public void run() { _but = _frame._createManualToolbarButton(a); } });
+    Utilities.invokeAndWait(new Runnable() { public void run() { _but = _frame._createManualToolBarButton(a); } });
     
     assertTrue("Returned JButton is enabled.", ! _but.isEnabled());
     assertEquals("Tooltip text not set.", "test tooltip", _but.getToolTipText());
     _log.log("testCreateManualToobarButton completed");
   }
   
-  /** Tests that the current location of a document is equal to the caret Position after switching to another document and back. */
+  /** Tests that the current location of a document is equal to the caret 
+   * Position after switching to another document and back. 
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testDocLocationAfterSwitch() throws BadLocationException {
     final DefinitionsPane pane = _frame.getCurrentDefPane();
     final OpenDefinitionsDocument doc = pane.getOpenDefDocument();
@@ -176,7 +179,11 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   
   private String _data;
   
-  /** Tests that the clipboard is unmodified after a "clear line" action. */
+  /** Tests that the clipboard is unmodified after a "clear line" action.
+   * @throws BadLocationException if attempts to reference an invalid location
+   * @throws UnsupportedFlavorException if an invalid DataFlavor is used
+   * @throws IOException if an IO operation fails
+   */
   public void testClearLine() throws BadLocationException, UnsupportedFlavorException, IOException {
     // First, copy some data out of the main document.
     final DefinitionsPane pane = _frame.getCurrentDefPane();
@@ -237,9 +244,10 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   }
   
   /** Tests that the clipboard is modified after a "cut line" action.
-    * NOTE: Commented out for commit because of failures, despite proper behavior in GUI.
-    *       This may not work unless ActionEvents are dropped in the event queue
-    */
+   * NOTE: Commented out for commit because of failures, despite proper behavior in GUI.
+   *       This may not work unless ActionEvents are dropped in the event queue
+   * @throws BadLocationException if attempts to reference an invalid location
+   */
   public void testCutLine() throws BadLocationException {
     // First, copy some data out of the main document.
     
@@ -310,13 +318,16 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     assertTrue("UI's int. doc. should equals Model's int. doc.", pane.getDocument() == doc);
     
     int origLength = doc.getLength();
-    doc.insertText(1, "typed text", InteractionsDocument.DEFAULT_STYLE);
+    doc.insertText(1, "typed text", ConsoleDocument.DEFAULT_STYLE);
     Utilities.clearEventQueue();
     assertEquals("Document should not have changed.", origLength, doc.getLength());
     _log.log("testCorrectInteractionsDocument completed");
   }
   
-  /** Tests that undoing/redoing a multi-line indent will restore the caret position. */
+  /** Tests that undoing/redoing a multi-line indent will restore the caret position.
+   * @throws BadLocationException if attempts to reference an invalid location
+   * @throws InterruptedException if execution is interrupted unexpectedly
+   */
   public void testMultilineIndentAfterScroll() throws BadLocationException, InterruptedException {
     final String text =
       "public class stuff {\n" +
@@ -341,7 +352,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     final DefinitionsPane pane = _frame.getCurrentDefPane();
     final OpenDefinitionsDocument doc = pane.getOpenDefDocument();
     
-    setConfigSetting(OptionConstants.INDENT_LEVEL, Integer.valueOf(2));
+    setConfigSetting(OptionConstants.INDENT_INC, Integer.valueOf(2));
 
     Utilities.invokeAndWait(new Runnable() { 
       public void run() { 
@@ -440,7 +451,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   }
   
   private KeyEvent makeFindKeyEvent(Component c, long when) {
-    return new KeyEvent(c, KeyEvent.KEY_PRESSED, when, KeyEvent.CTRL_MASK, KeyEvent.VK_F, 'F');
+    return new KeyEvent(c, KeyEvent.KEY_PRESSED, when, InputEvent.CTRL_MASK, KeyEvent.VK_F, 'F');
   }
   
   /** Ensure that all key events are disabled when the glass pane is up. */
@@ -481,7 +492,9 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   }
   
   
-  /** Tests that the save button does not set itself as enabled immediately after opening a file. */
+  /** Tests that the save button does not set itself as enabled immediately after opening a file. 
+   * @throws IOException if an IO operation fails
+   */
   public void testSaveButtonEnabled() throws IOException {
     String user = System.getProperty("user.name");
     _tempDir = IOUtil.createAndMarkTempDirectory("DrJava-test-" + user, "");
@@ -519,10 +532,11 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   }
   
   /** A Test to guarantee that the Dancing UI bug will not rear its ugly head again.
-    * Basically, add a component listener to the leftComponent of _docSplitPane and
-    * make certain its size does not change while compiling a class which depends on
-    * another class.
-    */
+   * Basically, add a component listener to the leftComponent of _docSplitPane and
+   * make certain its size does not change while compiling a class which depends on
+   * another class.
+   * @throws IOException if an IO operation fails
+   */
   public void testDancingUIFileOpened() throws IOException {
     //System.out.println("DEBUG: Entering messed up test");
     /** Maybe this sequence of calls should be incorporated into one function createTestDir(), which would get 
@@ -642,15 +656,17 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     _log.log("File saved and compiled");
     
     if (! IOUtil.deleteRecursively(_tempDir))
-      System.out.println("Couldn't fully delete directory " + _tempDir.getAbsolutePath() + "\nDo it by hand.\n");
+      System.err.println("Couldn't fully delete directory " + _tempDir.getAbsolutePath() + "\nDo it by hand.\n");
     
     _log.log("testDancingUIFileOpened completed");
   }
   
-  /** A Test to guarantee that the Dancing UI bug will not rear its ugly head again. Basically, add a component listener
-    * to the leftComponent of _docSplitPane and make certain its size does not change while closing an 
-    * OpenDefinitionsDocument outside the event thread.
-    */
+  /** A Test to guarantee that the Dancing UI bug will not rear its ugly head 
+   * again. Basically, add a component listener to the leftComponent of 
+   * _docSplitPane and make certain its size does not change while closing an 
+   * OpenDefinitionsDocument outside the event thread.
+   * @throws IOException if an IO operation fails
+   */
   public void testDancingUIFileClosed() throws IOException {
     /** Maybe this sequence of calls should be incorporated into one function createTestDir(), which would get the 
       * username and create the temporary directory. Only sticky part is deciding where to put it, in FileOps maybe?
@@ -710,7 +726,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     }
     
     if (! IOUtil.deleteRecursively(_tempDir)) {
-      System.out.println("Couldn't fully delete directory " + _tempDir.getAbsolutePath() + "\nDo it by hand.\n");
+      System.err.println("Couldn't fully delete directory " + _tempDir.getAbsolutePath() + "\nDo it by hand.\n");
     }
     _log.log("testDancingUIFileClosed completed");
   }
@@ -763,14 +779,20 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     @Override public void activeDocumentChanged(OpenDefinitionsDocument active) { }
   }
   
-  /** Create a new temporary file in _tempDir. */
+  /** Create a new temporary file in _tempDir. 
+   * @param fileName the name of the file to create
+   * @return the newly-created file
+   * @throws IOException if an IO operation fails
+   */
   protected File tempFile(String fileName) throws IOException {
     File f =  File.createTempFile(fileName, ".java", _tempDir).getCanonicalFile();
     f.deleteOnExit();
     return f;
   }
   
-  /** Tests that "go to file under cursor" works if unique. */
+  /** Tests that "go to file under cursor" works if unique.
+   * @throws IOException if an IO operation fails
+   */
   public void testGotoFileUnderCursor() throws IOException {
 //    Utilities.show("Running testGotoFileUnderCursor");
     String user = System.getProperty("user.name");
@@ -832,7 +854,9 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     _log.log("gotoFileUnderCursor completed");
   }
   
-  /** Tests that "go to file under cursor" works if unique after appending ".java" */
+  /** Tests that "go to file under cursor" works if unique after appending ".java"
+   * @throws IOException if an IO operation fails
+   */
   public void testGotoFileUnderCursorAppendJava() throws IOException {
     String user = System.getProperty("user.name");
     _tempDir = IOUtil.createAndMarkTempDirectory("DrJava-test-" + user, "");
@@ -898,7 +922,9 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     _log.log("gotoFileUnderCursorAppendJava completed");
   }
   
-  /** Tests that "go to file under cursor" displays the dialog if choice is not unique */
+  /** Tests that "go to file under cursor" displays the dialog if choice is not unique
+   * @throws IOException if an IO operation fails
+   */
   public void testGotoFileUnderCursorShowDialog() throws IOException {
 //    Utilities.show("Running testGotoFileUnderCursorShowDialog()");
     String user = System.getProperty("user.name");

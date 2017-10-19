@@ -44,25 +44,25 @@ import edu.rice.cs.javalanglevels.parser.JExprParser;
 /** Abstract class epresenting the data for a given braced body: a class, interface, method, or just a body. */
 public abstract class Data {
   
-  /** The fully qualified name of this data. */
+  /** The fully qualified name of this data. ?? Does it always exist? */
   protected String _name;
   
-  /** The vars defined in the lexical scope of this data.*/
+  /** The vars defined in the lexical scope of this data.  ?? Excludes inner scopes? */
   protected LinkedList<VariableData> _vars;
   
-  /** All enclosing data are in this list. */
+  /** All enclosing data are in this list. ?? What are enclosing data?  An environment?? How is it ordered? */
   protected LinkedList<Data> _enclosingData;
   
   /** The modifiers and visibility of this data.*/
   protected ModifiersAndVisibility _modifiersAndVisibility;
   
-  /** The outer data--what directly encloses this data.*/
+  /** The outer data--what directly encloses this data.  ?? The last(?) item in _enclosingData chain? */
   protected Data _outerData;
   
   /** Any inner classes that are defined in this data.*/
   protected LinkedList<SymbolData> _innerClasses;
   
-  /** All blocks defined within this data, in lexical order.*/
+  /** All blocks defined within this data, in lexical order. ?? What about individual entries like method definitions? */
   protected LinkedList<BlockData> _blocks;
   
   /** Iterator over _blocks*/
@@ -78,6 +78,7 @@ public abstract class Data {
     _outerData = outerData;
     if (outerData != null) {
       _enclosingData.addLast(_outerData); // We add superclasses and interfaces to the front of this _enclosingData.
+      /** This is really bogus.  The environment bindings for the innermost enclosing context should be FIRST not LAST! */
     }
     _innerClasses = new LinkedList<SymbolData>();
     _blocks = new LinkedList<BlockData>();
@@ -87,24 +88,26 @@ public abstract class Data {
   /** @return the name of this data.*/
   public String getName() { return _name; }
   
-  /** Set the fully qualified name of this data.
+  /** Set the fully qualified name of this data.  ?? What is the name for an arbitrary Data?  Not well-defined.
     * @param name  The new fully qualified name of this data.
     */
   void setName(String name) { _name = name; }
   
-  public Boolean isAnonymousClass() {
-    int lastIndex = _name.lastIndexOf('$');
-    try { return (lastIndex < 0) && Integer.parseInt(_name.substring(lastIndex+1)) >= 0; }
-    catch(NumberFormatException e) { return false; /* suffix is not an anonymous class index */ }
-  }
-  
-  public Boolean isDoublyAnonymous() {
-    if (! isAnonymousClass()) return false;
-    for (Data d: getEnclosingData()) {
-      if (d.isAnonymousClass()) return true;
-    }
-    return false;
-  }
+//  // analyzes name to determine if this Data represents an anonymous class.  Is this Data an Instance or Symbol?
+//  public Boolean isAnonymousClass() {
+//    int lastIndex = _name.lastIndexOf('$');
+//    try { return (lastIndex < 0) && Integer.parseInt(_name.substring(lastIndex+1)) >= 0; }
+//    // What?  If lastIndex < 0, then '$' does not appear and the name does NOT correspond to an anonymous class!
+//    catch(NumberFormatException e) { return false; /* suffix is not an anonymous class index */ }
+//  }
+//  
+//  public Boolean isDoublyAnonymous() {
+//    if (! isAnonymousClass()) return false;
+//    for (Data d: getEnclosingData()) {
+//      if (d.isAnonymousClass()) return true;
+//    }
+//    return false;
+//  }
      
   /** Set vars to the specified linked list of vars, the variables that are defined in the scope of this data. */
   void setVars(LinkedList<VariableData> vars) { _vars = vars; }

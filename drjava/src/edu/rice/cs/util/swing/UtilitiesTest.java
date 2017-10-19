@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -36,16 +36,7 @@
 
 package edu.rice.cs.util.swing;
 
-import java.awt.EventQueue;
-import java.awt.*;
-import java.awt.event.*;
 import javax.swing.*;
-import java.awt.datatransfer.*;
-
-import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.StringOps;
-
-import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
 
 import junit.framework.*;
 

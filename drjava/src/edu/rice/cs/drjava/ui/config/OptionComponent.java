@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -37,8 +37,8 @@
 package edu.rice.cs.drjava.ui.config;
 
 import javax.swing.*;
-import java.awt.*;
 
+import java.awt.*;
 import java.io.Serializable;
 import java.util.Vector;
 
@@ -64,7 +64,7 @@ public abstract class OptionComponent<T,C extends JComponent> implements Seriali
     _option = option;
     _labelText = labelText;
     _label = new JLabel(_labelText);
-    _label.setHorizontalAlignment(JLabel.RIGHT);
+    _label.setHorizontalAlignment(SwingConstants.RIGHT);
     _parent = parent;
     if (option != null) {
       DrJava.getConfig().addOptionListener(option, new OptionListener<T>() {
@@ -87,7 +87,7 @@ public abstract class OptionComponent<T,C extends JComponent> implements Seriali
   
   public boolean useEntireColumn() { return _entireColumn; }
   
-  /** Returns the JComponent to display for this OptionComponent. */
+  /** @return the JComponent to display for this OptionComponent. */
   public C getComponent() { return _guiComponent; }
   
   /** Set the JComponent to display for this OptionComponent.
@@ -109,13 +109,15 @@ public abstract class OptionComponent<T,C extends JComponent> implements Seriali
    */
   public abstract void setDescription(String description);
 
-  /** Whether the component should occupy the entire column. */
+  /** @param entireColumn whether the component should occupy the entire column.
+   * @return this
+   */
   public OptionComponent<T,C> setEntireColumn(boolean entireColumn) { 
     _entireColumn = entireColumn; 
     return this; 
   }
 
-  /** Whether the component should occupy the entire column. */
+  /** @return whether the component should occupy the entire column. */
   public boolean getEntireColumn() { return _entireColumn; }
   
   /** Updates the appropriate configuration option with the new value if different from the old one and legal. Any 
@@ -138,7 +140,9 @@ public abstract class OptionComponent<T,C extends JComponent> implements Seriali
     }
   }
   
-  /** Sets the value that is currently displayed by this component. */
+  /** Sets the value that is currently displayed by this component. 
+   * @param value the value to set
+   */
   public abstract void setValue(T value);
   
   public void showErrorMessage(String title, OptionParseException e) { showErrorMessage(title, e.value, e.message); }
@@ -169,13 +173,9 @@ public abstract class OptionComponent<T,C extends JComponent> implements Seriali
   /** Notify all change listeners of a change. Notification performed in the event thread. */
   protected void notifyChangeListeners() {
     assert _parent.duringInit() || Utilities.TEST_MODE || EventQueue.isDispatchThread();
-//    Utilities.invokeLater(new Runnable() {
-//      public void run() { 
-      // Make a copy of _changeListeners to prevent potential ConcurrentModificationException
-      ChangeListener[] listeners = _changeListeners.toArray(new ChangeListener[_changeListeners.size()]);
+    // Make a copy of _changeListeners to prevent potential ConcurrentModificationException
+    ChangeListener[] listeners = _changeListeners.toArray(new ChangeListener[_changeListeners.size()]);
     for (ChangeListener l: listeners)  l.value(OptionComponent.this); 
-//      }
-//    });
   }
   
   /** List of change listeners.  A volatile Vector is used here because a race involving operations on this field was 

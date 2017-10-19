@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -84,7 +84,7 @@ public interface JUnitModelCallback {
     */
   public File getFileForClassName(String className);
   
-  /** Returns the accumulated classpath in use by all Java interpreters */
+  /** @return the accumulated classpath in use by all Java interpreters */
   public Iterable<File> getClassPath();
   
   /** Called when the JVM used for unit tests has registered. */

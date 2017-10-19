@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -60,7 +60,6 @@ import javax.swing.InputMap;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 import javax.swing.border.Border;
-import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.MutableAttributeSet;
@@ -85,8 +84,6 @@ import edu.rice.cs.drjava.model.repl.InteractionsDJDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsListener;
 import edu.rice.cs.drjava.model.repl.InteractionsModel;
 
-import edu.rice.cs.drjava.config.OptionConstants;
-
 import edu.rice.cs.util.swing.DelegatingAction;
 
 import edu.rice.cs.plt.lambda.Lambda;
@@ -94,7 +91,6 @@ import edu.rice.cs.plt.concurrent.CompletionMonitor;
 import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.UnexpectedException;
 
-import static edu.rice.cs.plt.debug.DebugUtil.debug;
 /* TODO: clean up mixed references to _adapter and _doc which point to almost the same thing (an 
  * InteractionsDJDocument versus an InteractionsDocument. */
 
@@ -219,7 +215,7 @@ public class InteractionsController extends AbstractConsoleController {
           StyleConstants.setComponent(inputAttributes, _box);
           
           /* Insert box in document. */
-          _doc.insertBeforeLastPrompt(" ", InteractionsDocument.DEFAULT_STYLE);
+          _doc.insertBeforeLastPrompt(" ", ConsoleDocument.DEFAULT_STYLE);
           
           // bind INPUT_BOX_STYLE to inputAttributes in the associated InteractionsDJDocument 
           _interactionsDJDocument.setDocStyle(INPUT_BOX_STYLE, inputAttributes);
@@ -227,7 +223,7 @@ public class InteractionsController extends AbstractConsoleController {
           // and insert the symbol for the input box with the correct style (identifying it as our InputBox)
           _doc.insertBeforeLastPrompt(INPUT_BOX_SYMBOL, INPUT_BOX_STYLE);
           
-          _doc.insertBeforeLastPrompt("\n", InteractionsDocument.DEFAULT_STYLE);
+          _doc.insertBeforeLastPrompt("\n", ConsoleDocument.DEFAULT_STYLE);
           
           _box.setVisible(true);
           EventQueue.invokeLater(new Runnable() { public void run() { _box.requestFocusInWindow(); } });
@@ -269,9 +265,10 @@ public class InteractionsController extends AbstractConsoleController {
   };
   
   /** Glue together the given model and a new view.
-    * @param model An InteractionsModel
-    * @param adapter InteractionsDJDocument being used by the model's doc
-    */
+   * @param model An InteractionsModel
+   * @param adapter InteractionsDJDocument being used by the model's doc
+   * @param disableCloseSystemInMenuItemCommand command
+   */
   public InteractionsController(final InteractionsModel model,
                                 InteractionsDJDocument adapter,
                                 Runnable disableCloseSystemInMenuItemCommand) {
@@ -283,10 +280,11 @@ public class InteractionsController extends AbstractConsoleController {
   }
   
   /** Glue together the given model and view.
-    * @param model An InteractionsModel
-    * @param adapter InteractionsDJDocument being used by the model's doc
-    * @param pane An InteractionsPane
-    */
+   * @param model An InteractionsModel
+   * @param adapter InteractionsDJDocument being used by the model's doc
+   * @param pane An InteractionsPane
+   * @param disableCloseSystemInMenuItemCommand command
+   */
   public InteractionsController(InteractionsModel model,
                                 InteractionsDJDocument adapter,
                                 InteractionsPane pane,
@@ -346,7 +344,9 @@ public class InteractionsController extends AbstractConsoleController {
     for(ConsoleStateListener listener : _consoleStateListeners) { listener.consoleInputCompleted(text, this); }
   }
   
-  /** Sets the end of stream flag. */
+  /** Sets the end of stream flag. 
+   * @param tf value of flag to be set
+   */
   public void setEndOfStream(boolean tf) {
     _endOfStream = tf;
     if (_box != null) { _box.setEndOfStream(tf); }
@@ -359,7 +359,7 @@ public class InteractionsController extends AbstractConsoleController {
     */
   public InputListener getInputListener() { return _inputListener; }
   
-  /** Forces console input to complete without the user hitting <Enter>.  Called by MainFrame when reset is called so 
+  /** Forces console input to complete without the user hitting {@literal <Enter>}.  Called by MainFrame when reset is called so 
     * that this lock is released.  This method is thread safe.
     * @throws UnsupportedOperationException If the interactions pane is not receiving console input
     */
@@ -381,7 +381,7 @@ public class InteractionsController extends AbstractConsoleController {
     */
   public ConsoleDocument getConsoleDoc() { return _doc; }
   
-  /** Accessor method for the InteractionsDocument. */
+  /** @return the InteractionsDocument. */
   public InteractionsDocument getDocument() { return _doc; }
   
   /** Adds AttributeSets as named styles to the document adapter. */
@@ -473,7 +473,11 @@ public class InteractionsController extends AbstractConsoleController {
     });
   }
   
-  /** Sets the commands used to manipulate the console input process.  Only runs in the event thread. */
+  /** Sets the commands used to manipulate the console input process.  
+   * Only runs in the event thread. 
+   * @param inputCompletionCommand input completion command to be set
+   * @param insertTextCommand insert text command to be set
+   */
   private void _setConsoleInputCommands(Runnable inputCompletionCommand, Lambda<String,String> insertTextCommand) {
     _insertTextCommand = insertTextCommand;
     _inputCompletionCommand = inputCompletionCommand;
@@ -511,7 +515,7 @@ public class InteractionsController extends AbstractConsoleController {
 //    _notifyInteractionStarted();
 //    _doc.setInProgress(true);
 //    _model.setAddToHistory(text); // _document.addToHistory(text);
-//    //Do not add to history immediately in case the user is not finished typing when they press return
+////Do not add to history immediately in case the user is not finished typing when they press return
 //  }
 //  
 //  /** Appends a newLine to _document assuming that the Write Lock is already held. Must run in the event thread. */
@@ -563,10 +567,13 @@ public class InteractionsController extends AbstractConsoleController {
     }
   };
   
-  /** Tests whether or not to move into the history.  Should be executed in the event thread to ensure
-    * that caret and prompt positions are in consistent states.
-    * @return true iff there are no "\n" characters between the start and the end
-    */  
+  /** Tests whether or not to move into the history.  
+   * Should be executed in the event thread to ensure
+   * that caret and prompt positions are in consistent states.
+   * @param start lower bound (index) on the text
+   * @param end upper bound (index) on the text
+   * @return true iff there are no "\n" characters between the start and the end
+   */  
   private boolean _shouldGoIntoHistory(int start, int end) {
     if (_isCursorAfterPrompt() && end >= start) {
       String text = "";
@@ -668,7 +675,9 @@ public class InteractionsController extends AbstractConsoleController {
   private final DelegatingAction _redoAction = new DelegatingAction();
   private final ArrayList<FocusListener> _undoRedoInteractionFocusListeners = new ArrayList<FocusListener>();
   
-  /** Add a focus listener to the Interactions Pane and the Input Box. */
+  /** Add a focus listener to the Interactions Pane and the Input Box. 
+   * @param listener listener to be added
+   */
   public void addFocusListener(FocusListener listener) {
     _pane.addFocusListener(listener);
     // we need to store the focus listeners, because they need to be added to future
@@ -819,13 +828,15 @@ public class InteractionsController extends AbstractConsoleController {
       for(KeyStroke ks: DrJava.getConfig().getSetting(OptionConstants.KEY_REDO)) { im.put(ks, REDO_NAME); }
     }
     
-    /** Returns true if this stream has been closed. */
+    /** @return true if this stream has been closed. */
     public boolean isEndOfStream() { return _endOfStream; }
 
-    /** Setter for end of stream flag. */
+    /** Setter for end of stream flag. 
+     * @param tf value of the flag to be set
+     */
     public void setEndOfStream(boolean tf) { _endOfStream = tf; }
     
-    /** Was Enter pressed? */
+    /** @return true if ernter was pressed; false otherwise */
     public boolean wasClosedWithEnter() { return _closedWithEnter; }
     
     private Border _createBorder() {
@@ -836,7 +847,9 @@ public class InteractionsController extends AbstractConsoleController {
       return BorderFactory.createCompoundBorder(outerouter, temp);
     }
     
-    /** Enable anti-aliased text by overriding paintComponent. */
+    /** Enable anti-aliased text by overriding paintComponent. 
+     * @param g Graphics object to be used
+     */
     protected void paintComponent(Graphics g) {
       if (_antiAliasText && g instanceof Graphics2D) {
         Graphics2D g2d = (Graphics2D) g;
@@ -845,7 +858,9 @@ public class InteractionsController extends AbstractConsoleController {
       super.paintComponent(g);
     }
     
-    /** Specifies what to do when the <Enter> or <Ctrl+D> keys are hit. */
+    /** Specifies what to do when the {@literal <Enter> or <Ctrl+D>} keys are hit. 
+     * @param command command to be set
+     */
     void setInputCompletionCommand(final Runnable command) {
       final InputMap im = getInputMap(WHEN_FOCUSED);
       im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,0), INPUT_ENTERED_NAME);
@@ -911,14 +926,16 @@ public class InteractionsController extends AbstractConsoleController {
   public interface ConsoleStateListener extends EventListener {
     
     /** Called when the input console is started in the interactions pane. <p>
-      * This method is called from the thread that initiated the console input,
-      */
+     * This method is called from the thread that initiated the console input,
+     * @param c reference to the controller
+     */
     public void consoleInputStarted(InteractionsController c);
     
     /** Called when the console input is complete. <p>
-      * This method is called from the thread that initiated the console input.
-      * @param result The text that was inputted to the console
-      */
+     * This method is called from the thread that initiated the console input.
+     * @param result The text that was inputted to the console
+     * @param c reference to the controller
+     */
     public void consoleInputCompleted(String result, InteractionsController c);
     
   }

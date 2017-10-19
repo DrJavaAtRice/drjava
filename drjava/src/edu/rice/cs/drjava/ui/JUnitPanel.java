@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,7 @@ import edu.rice.cs.util.swing.RightClickMouseAdapter;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.text.*;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -174,7 +175,9 @@ public class JUnitPanel extends ErrorPanel {
     repaint();
   }
   
-  /** Resets the progress bar to start counting the given number of tests. */
+  /** Resets the progress bar to start counting the given number of tests. 
+   * @param numTests number of tests to be counted
+   */
   public void progressReset(int numTests) {
     _progressBar.reset();
     _progressBar.start(numTests);
@@ -247,7 +250,9 @@ public class JUnitPanel extends ErrorPanel {
       else throw new IllegalArgumentException("Name does not contain any parens: " + name);
     }
     
-    /** Provides the ability to display the name of the test being run. */
+    /** Provides the ability to display the name of the test being run. 
+     * @param name the name of the test being run
+     */
     public void testStarted(String name) {
       if (name.indexOf('(') < 0) return;
       
@@ -279,7 +284,11 @@ public class JUnitPanel extends ErrorPanel {
       }
     }
     
-    /** Displays the results of a test that has finished. */
+    /** Displays the results of a test that has finished. 
+     * @param name the name of the test
+     * @param wasSuccessful whether the test was successful
+     * @param causedError whether the test caused an error
+     */
     public void testEnded(String name, boolean wasSuccessful, boolean causedError) {
       if (name.indexOf('(')<0) return;
 
@@ -360,8 +369,9 @@ public class JUnitPanel extends ErrorPanel {
     }
     
     /** Replaces the "Testing in progress..." text with the given message.  Only runs in event thread.
-      * @param msg the text to insert
-      */
+     * @param msg the text to insert
+     * @throws BadLocationException if attempts to reference an invalid location
+     */
     public void _replaceInProgressText(String msg) throws BadLocationException {
       assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();
       int start = 0;
@@ -391,7 +401,7 @@ public class JUnitPanel extends ErrorPanel {
       setCaretPosition(0);
     }
     
-//    /** Checks the document being tested to see if it's in sync. If not,
+///** Checks the document being tested to see if it's in sync. If not,
 //      * displays a message in the document in the test output pane.
 //      */
 //    private void _checkSync(Document doc) {
@@ -419,8 +429,8 @@ public class JUnitPanel extends ErrorPanel {
       _stackTextArea.setEditable(false);
       _stackTextArea.setLineWrap(false);
       JScrollPane scroll = new BorderlessScrollPane(_stackTextArea,
-                                                    JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-                                                    JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+                                                    ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+                                                    ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
       
       ActionListener closeListener = new ActionListener() {
         public void actionPerformed(ActionEvent e) {
@@ -463,7 +473,7 @@ public class JUnitPanel extends ErrorPanel {
       _showStackTraceButton.setEnabled(false);
     }
     
-//    /** Updates the UI to a new look and feel.  Need to update the contained popup menu as well.
+///** Updates the UI to a new look and feel.  Need to update the contained popup menu as well.
 //      * Currently, we don't support changing the look and feel on the fly, so this is disabled.
 //      */     
 //    public void updateUI() {

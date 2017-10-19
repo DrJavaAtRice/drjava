@@ -36,67 +36,74 @@ package edu.rice.cs.plt.reflect;
 
 import java.net.URL;
 import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.util.Log;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
-/**
- * A class loader that hides a set of classes and related resources.  This allows classes 
- * with the same name (but perhaps a different implementation) to be cleanly loaded by a child loader.
- */
+/** A class loader that hides a set of classes and related resources.  This allows classes 
+  * with the same name (but perhaps a different implementation) to be cleanly loaded by a child loader.
+  */
 public class ShadowingClassLoader extends ClassLoader {
+  
+  private static final Log _log = new Log("JUnitTestManager.txt", false);
   
   private final Iterable<? extends String> _prefixes;
   private final boolean _blackList;
   private final boolean _filterBootClasses;
   
-  /**
-   * Create a ShadowingClassLoader that will hide non-bootstrap classes matching the given prefixes.
-   * @param parent  The parent loader
-   * @param excludePrefixes  A set of class name prefixes to match.  Each prefix must be a package or class
-   *                         name (partial names, like {@code "java.lang.Stri"}, will not match the full class
-   *                         name).
-   */
+  /** Create a ShadowingClassLoader that will hide non-bootstrap classes matching the given prefixes.
+    * @param parent  The parent loader
+    * @param excludePrefixes  A set of class name prefixes to match.  Each prefix must be a package or class
+    *                         name (partial names, like {@code "java.lang.Stri"}, will not match the full class
+    *                         name).
+    */
+  public static ShadowingClassLoader blackList(ClassLoader parent, Iterable<String> excludePrefixes) {
+    return new ShadowingClassLoader(parent, true, excludePrefixes, false);
+  }
   public static ShadowingClassLoader blackList(ClassLoader parent, String... excludePrefixes) {
     return new ShadowingClassLoader(parent, true, IterUtil.asIterable(excludePrefixes), false);
   }
-    
-  /**
-   * Create a ShadowingClassLoader that will hide all non-bootstrap classes except those matching the
-   * given prefixes.
-   * @param parent  The parent loader
-   * @param includePrefixes  A set of class name prefixes to match.  Each prefix must be a package or class
-   *                         name (partial names, like {@code "java.lang.Stri"}, will not match the full class
-   *                         name).
-   */
+
+  /** Create a ShadowingClassLoader that will hide all non-bootstrap classes except those matching the
+    * given prefixes.
+    * @param parent  The parent loader
+    * @param includePrefixes  A set of class name prefixes to match.  Each prefix must be a package or class
+    *                         name (partial names, like {@code "java.lang.Stri"}, will not match the full class
+    *                         name).
+    */
+  public static ShadowingClassLoader whiteList(ClassLoader parent, Iterable<String> includePrefixes) {
+    return new ShadowingClassLoader(parent, false, includePrefixes, false);
+  }
   public static ShadowingClassLoader whiteList(ClassLoader parent, String... includePrefixes) {
     return new ShadowingClassLoader(parent, false, IterUtil.asIterable(includePrefixes), false);
   }
   
-  /**
-   * @param parent  The parent loader
-   * @param blackList  If {@code true}, classes matching {@code prefixes} are prevented from loading; otherwise,
-   *                   all classes <em>except</em> those matching {@code prefixes} are prevented from loading.
-   * @param prefixes  A set of class name prefixes to which class names will be compared.  Each prefix must
-   *                  be a package or class name (partial names, like {@code "java.lang.Stri"}, will not 
-   *                  match the full class name).
-   * @param filterBootClasses  Whether classes and resources available to the bootstrap class loader should
-   *                           be hidden.  If {@code true}, care must be taken to ensure that essential
-   *                           classes (like {@code java.lang.Object}) are available when needed.
-   */
+  /** @param parent  The parent loader
+    * @param blackList  If {@code true}, classes matching {@code prefixes} are prevented from loading; otherwise,
+    *                   all classes <em>except</em> those matching {@code prefixes} are prevented from loading.
+    * @param prefixes  A set of class name prefixes to which class names will be compared.  Each prefix must
+    *                  be a package or class name (partial names, like {@code "java.lang.Stri"}, will not 
+    *                  match the full class name).
+    * @param filterBootClasses  Whether classes and resources available to the bootstrap class loader should
+    *                           be hidden.  If {@code true}, care must be taken to ensure that essential
+    *                           classes (like {@code java.lang.Object}) are available when needed.
+    */
   public ShadowingClassLoader(ClassLoader parent, boolean blackList, Iterable<? extends String> prefixes,
                               boolean filterBootClasses) {
     super(parent);
     _blackList = blackList;
     _prefixes = prefixes;
     _filterBootClasses = filterBootClasses;
+    _log.log("Constructing ShadowingClassLoader with parent '" + parent + "' blackList = " + _blackList + " filterBootClasses = " + _filterBootClasses);
   }
   
-  /**
-   * If the given class is shadowed, a {@code ClassNotFoundException} will
-   * occur; otherwise, the method delegates to the parent class loader.
-   */
+  /** If the given class is shadowed, a {@code ClassNotFoundException} will occur; otherwise, the method delegates to 
+    * the parent class loader.
+    */
   @Override protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+    _log.log("ShadowingClassLoader.loadClass(" + name + ", " + resolve + ") called");
     if ((_filterBootClasses || !isBootClass(name)) && matchesPrefixes(name) == _blackList) {
+      _log.log("Class " + name + " is being shadowed");
       throw new ClassNotFoundException(name + " is being shadowed");
     }
     else {

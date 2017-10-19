@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -1419,8 +1419,10 @@ public class DrJavaPropertySetup implements OptionConstants {
           // now let's check if it contains DrJava
           if (jf.getJarEntry(edu.rice.cs.drjava.DrJava.class.getName().replace('.', '/') + ".class") != null) {
             found = f;
+            jf.close();
             break;
           }
+          jf.close();
         }
       }
       catch(IOException e) { /* ignore, we'll continue with the next classpath item */ }

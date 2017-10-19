@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -39,8 +39,7 @@ import edu.rice.cs.drjava.DrJavaTestCase;
 import java.io.Reader;
 import java.io.StringReader;
 
-/**
- * ClassAndInterfaceFinderTest for unit testing ClassAndInterfaceFinder.  Uses
+/** * ClassAndInterfaceFinderTest for unit testing ClassAndInterfaceFinder.  Uses
  * junit for testing.
  *
  * @author <a href="mailto:jasonbs@rice.edu">Jason Schiller</a>

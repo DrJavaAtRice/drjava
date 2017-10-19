@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -39,8 +39,6 @@ package edu.rice.cs.util.text;
 import java.io.*;
 import java.awt.EventQueue;
 import java.awt.print.*;
-import java.awt.EventQueue;
-
 import edu.rice.cs.drjava.model.print.DrJavaBook;
 
 import edu.rice.cs.drjava.model.FileSaveSelector;
@@ -55,7 +53,7 @@ import edu.rice.cs.util.FileOps;
 /** A GUI-toolkit agnostic interface to a console document.  This class assumes that the embedded document supports 
   * readers/writers locking and uses that locking protocol to ensure the integrity of the data added in this class
   * WHY is prompt considered part of a console document rather than an interactions document?
-  * @version $Id: ConsoleDocument.java 5236 2010-04-27 01:43:36Z mgricken $ */
+  * @version $Id$ */
 
 public class ConsoleDocument implements ConsoleDocumentInterface {
   
@@ -110,7 +108,7 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
   
   public void setHasPrompt(boolean val) { _document.setHasPrompt(val); }
   
-  /** Accessor for the string used for the prompt. */
+  /** @return the string used for the prompt. */
   public String getPrompt() { return _prompt; }
   
   /** Sets the string to use for the prompt.
@@ -118,7 +116,7 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     */
   public void setPrompt(String prompt) { _prompt = prompt; }
   
-  /** Returns the length of the prompt string. */
+  /** @return the length of the prompt string. */
   public int getPromptLength() { return _prompt.length(); }
   
   /** Gets the object which determines whether an insert/remove edit should be applied based on the inputs.
@@ -131,7 +129,7 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     */
   public void setEditCondition(DocumentEditCondition condition) { _document.setEditCondition(condition); }
   
-  /** Returns the first location in the document where editing is allowed. */
+  /** @return the first location in the document where editing is allowed. */
   public int getPromptPos() { return _promptPos; }
   
   /** Sets the prompt position. Only used in tests.
@@ -146,7 +144,9 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     */
   public void setBeep(Runnable beep) { _beep = beep; }
   
-  /** Resets the document to a clean state. Only runs in the event thread. */
+  /** Resets the document to a clean state. Only runs in the event thread. 
+    * @param banner the value to which to set the banner
+    */
   public void reset(String banner) {
     assert EventQueue.isDispatchThread();
     try {
@@ -191,8 +191,10 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     catch (EditDocumentException e) { throw new UnexpectedException(e); }
   }
   
-  /** Gets the position immediately before the prompt, or the doc length if there is no prompt.  Only runs in the event
-    * thread. */
+  /** Gets the position immediately before the prompt, or the doc length if there is no prompt.  Only runs in the event 
+    * thread. 
+    * @return the position immediately before the prompt, or the doc length if there is no prompt
+    */
   private int _getPositionBeforePrompt() {
     int len = _document.getLength();
     if (_document.hasPrompt()) {
@@ -202,12 +204,13 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     return len;
   }
   
-  /** Inserts the given string with the given attributes just before the most recent prompt.
+  /** Inserts the given string with the given attributes just before the most recent prompt.  Only runs in event thread
+    * except for legacy test code.
     * @param text String to insert
     * @param style name of style to format the string
     */
   public void insertBeforeLastPrompt(String text, String style) {
-/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     try {
       int pos = _getPositionBeforePrompt();
 //      System.err.println("_promptPos before update = " + _promptPos);
@@ -255,7 +258,11 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     _document.forceInsertText(offs, str, style);
   }
   
-  /** Adds style specifier to _stylelists. Only runs in event thread. */
+  /** Adds style specifier to _stylelists. Only runs in event thread. 
+   * @param offs offset
+   * @param str string
+   * @param style style
+   */
   private void _addToStyleLists(int offs, String str, String style) {
     if (_document instanceof SwingDocument)
       ((SwingDocument)_document).addColoring(offs, offs + str.length(), style);
@@ -284,20 +291,22 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
   public int getLength() { return _document.getLength(); }
   
   /** Returns a portion of the document.
-    * @param offs First offset of the desired text
-    * @param len Number of characters to return
-    * @throws EditDocumentException if the offset or length are illegal
-    */
+   * @param offs First offset of the desired text
+   * @param len Number of characters to return
+   * @return a portion of the document 
+   * @throws EditDocumentException if the offset or length are illegal
+   */
   public String getDocText(int offs, int len) throws EditDocumentException {
     return _document.getDocText(offs, len);
   }
   
   /** Returns the entire text of the document.  Identical to getText() in AbstractDocumentInterface.
-    * @throws EditDocumentException if the offset or length are illegal
-    */
+   * @return the entire text of the document
+   * @throws EditDocumentException if the offset or length are illegal
+   */
   public String getText() { return _document.getDocText(0, getLength()); }
   
-  /** Returns the string that the user has entered at the current prompt. May contain newline characters. */
+  /** @return the string that the user has entered at the current prompt. May contain newline characters. */
   public String getCurrentInput() {
       try { return getDocText(_promptPos, _document.getLength() - _promptPos); }
       catch (EditDocumentException e) { throw new UnexpectedException(e); }
@@ -354,8 +363,9 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
   }
   
   /** Saves the contents of the document to a file.
-    * @param selector File to save to
-    */
+   * @param selector File to save to
+   * @throws IOException if an IO operation fails
+   */
   public void saveCopy(FileSaveSelector selector) throws IOException {
     assert EventQueue.isDispatchThread();
     try {

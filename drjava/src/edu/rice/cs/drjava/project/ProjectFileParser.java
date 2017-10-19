@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -47,7 +47,7 @@ import java.text.SimpleDateFormat;
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.sexp.*;
-import edu.rice.cs.drjava.model.FileRegion;
+import edu.rice.cs.drjava.model.IRegion;
 import edu.rice.cs.drjava.model.DummyDocumentRegion;
 import edu.rice.cs.drjava.model.debug.DebugWatchData;
 import edu.rice.cs.drjava.model.debug.DebugBreakpointData;
@@ -61,7 +61,7 @@ import edu.rice.cs.drjava.model.debug.DebugBreakpointData;
  *  store the new info.  <li> The interface for the DocumentInfoGetter should be expanded to allow for the new
  *  data to be retrieved.  <li> Add a new clause to the else-if ladder in the FilePropertyVisitor.  <li> 
  *  Add the new information to the DocFile form the DocumentInfoGetter in the ProjectFileBuilder's 
- *  addSourceDocument method.</p>
+ *  addSourceDocument method.</menu>
  * 
  *  <p> If the change is at the top level, you must modify the evaluateExpression method in this parser and add the 
  *  corresponding methods to the ProjectFileIR, ProjectFileIRImpl, and ProjectFileBuilder</p>
@@ -105,11 +105,14 @@ public class ProjectFileParser extends ProjectFileParserFacade {
     return pfir;
   }
   
-  /** Given a top-level s-expression, this method checks the name of the node and configures the given pfir 
-    * appropriately.  If the expression is empty, it is ignored.
-    * @param e the top-level s-expression to check
-    * @param pfir the ProjectFileIR to update
-    */
+  /** Given a top-level s-expression, this method checks the name of the node 
+   * and configures the given pfir 
+   * appropriately.  If the expression is empty, it is ignored.
+   * @param e the top-level s-expression to check
+   * @param pfir the ProjectFileIR to update
+   * @param flv visitor
+   * @throws IOException if an IO operation fails
+   */
   private void evaluateExpression(SEList e, ProjectFileIR pfir, DocFileListVisitor flv) throws IOException {
     if (e == Empty.ONLY) return;
     Cons exp = (Cons) e; // If it's not empty, it's a cons
@@ -198,14 +201,16 @@ public class ProjectFileParser extends ProjectFileParserFacade {
       pfir.setWatches(sList);
     }
     else if (name.compareToIgnoreCase("bookmarks") == 0) {
-       List<FileRegion> bmList = exp.getRest().accept(bookmarkListVisitor);
+       List<IRegion> bmList = exp.getRest().accept(bookmarkListVisitor);
        pfir.setBookmarks(bmList);
     }
   } 
   
-  /** Parses out the labeled node (a non-empty list) into a DocFile. The node must have the "file" label on it.
-   *  @param s the non-empty list expression
-   *  @return the DocFile described by this s-expression
+  /** Parses out the labeled node (a non-empty list) into a DocFile. The node 
+   * must have the "file" label on it.
+   * @param s the non-empty list expression
+   * @param pathRoot root of the path to the file being parsed
+   * @return the DocFile described by this s-expression
    */
   DocFile parseFile(SExp s, String pathRoot) {
     String name = s.accept(NameVisitor.ONLY);
@@ -263,16 +268,16 @@ public class ProjectFileParser extends ProjectFileParserFacade {
         return c.getRest().accept(this);
       }
   
-      public List<Integer> forBoolAtom(BoolAtom b) {
+      public List<Integer> forBoolAtom(Atom.Bool b) {
         throw new PrivateProjectException("unexpected boolean found, int expected");
       }
       
-      public List<Integer> forNumberAtom(NumberAtom n) {
+      public List<Integer> forNumberAtom(Atom.Number n) {
         intList.add(Integer.valueOf(n.intValue()));
         return intList;
       }
       
-      public List<Integer> forTextAtom(TextAtom t) {
+      public List<Integer> forTextAtom(Atom.Text t) {
         throw new PrivateProjectException("unexpected string found where number expected: " + t.getText());
       }
       
@@ -282,7 +287,10 @@ public class ProjectFileParser extends ProjectFileParserFacade {
     else throw new PrivateProjectException("expected a list of 2 ints for select, found list of size " + li.size());
   }
 
-    /** Takes input of form "(str str)" and returns the second string. */
+    /** Takes input of form "(str str)" and returns the second string. 
+     * @param n an expression of the form "(str str)"
+     * @return the second string in n
+     */
     private String parseStringNode(SExp n) {
       if (n instanceof Cons) 
         return ((Cons)n).getRest().accept(NameVisitor.ONLY);
@@ -387,13 +395,13 @@ public class ProjectFileParser extends ProjectFileParserFacade {
       throw new PrivateProjectException("Found an empty node, expected a labeled node");
     }
     public String forCons(Cons c) { return c.getFirst().accept(this); }
-    public String forBoolAtom(BoolAtom b) {
+    public String forBoolAtom(Atom.Bool b) {
       throw new PrivateProjectException("Found a boolean, expected a label");
     }
-    public String forNumberAtom(NumberAtom n) {
+    public String forNumberAtom(Atom.Number n) {
       throw new PrivateProjectException("Found a number, expected a label");
     }
-    public String forTextAtom(TextAtom t) { return t.getText(); }
+    public String forTextAtom(Atom.Text t) { return t.getText(); }
   };
   
   /** Retrieves the number of a node.  The node should either be a list with its first element being a number atom, 
@@ -407,11 +415,11 @@ public class ProjectFileParser extends ProjectFileParserFacade {
       throw new PrivateProjectException("Found an empty node, expected an integer");
     }
     public Integer forCons(Cons c) { return c.getFirst().accept(this); }
-    public Integer forBoolAtom(BoolAtom b) {
+    public Integer forBoolAtom(Atom.Bool b) {
       throw new PrivateProjectException("Found a boolean, expected an integer");
     }
-    public Integer forNumberAtom(NumberAtom n) { return n.intValue(); }
-    public Integer forTextAtom(TextAtom t) {
+    public Integer forNumberAtom(Atom.Number n) { return n.intValue(); }
+    public Integer forTextAtom(Atom.Text t) {
       throw new PrivateProjectException("Found a string '" + t + "', expected an integer");
     }
   };
@@ -447,9 +455,11 @@ public class ProjectFileParser extends ProjectFileParserFacade {
     }
   };
     
-  /** Parses out the labeled node (a non-empty list) into a breakpoint. The node must have the "breakpoint" label on it.
-   *  @param s the non-empty list expression
-   *  @return the breakpoint described by this s-expression
+  /** Parses out the labeled node (a non-empty list) into a breakpoint. 
+   * The node must have the "breakpoint" label on it.
+   * @param s the non-empty list expression
+   * @param pathRoot the root path to the file being parsed
+   * @return the breakpoint described by this s-expression
    */
   DebugBreakpointData parseBreakpoint(SExp s, String pathRoot) {
     String name = s.accept(NameVisitor.ONLY);
@@ -511,21 +521,23 @@ public class ProjectFileParser extends ProjectFileParserFacade {
   // === bookmarks ===
   
   /** Parses out a list of bookmark nodes. */
-  private class BookmarkListVisitor implements SEListVisitor<List<FileRegion>> {
-    public List<FileRegion> forEmpty(Empty e) { return new ArrayList<FileRegion>(); }
-    public List<FileRegion> forCons(Cons c) {
-      List<FileRegion> list = c.getRest().accept(this);
-      FileRegion tmp = ProjectFileParser.ONLY.parseBookmark(c.getFirst(), _srcFileBase);
+  private class BookmarkListVisitor implements SEListVisitor<List<IRegion>> {
+    public List<IRegion> forEmpty(Empty e) { return new ArrayList<IRegion>(); }
+    public List<IRegion> forCons(Cons c) {
+      List<IRegion> list = c.getRest().accept(this);
+      IRegion tmp = ProjectFileParser.ONLY.parseBookmark(c.getFirst(), _srcFileBase);
       list.add(0, tmp); // add to the end
       return list;
     }
   };
     
-  /** Parses out the labeled node (a non-empty list) into a bookmark. The node must have the "bookmark" label on it.
-   *  @param s the non-empty list expression
-   *  @return the bookmark described by this s-expression
+  /** Parses out the labeled node (a non-empty list) into a bookmark. 
+   * The node must have the "bookmark" label on it.
+   * @param s the non-empty list expression
+   * @param pathRoot the root path to the file being parsed
+   * @return the bookmark described by this s-expression
    */
-  FileRegion parseBookmark(SExp s, String pathRoot) {
+  IRegion parseBookmark(SExp s, String pathRoot) {
     String name = s.accept(NameVisitor.ONLY);
     if (name.compareToIgnoreCase("bookmark") != 0)
       throw new PrivateProjectException("Expected a bookmark tag, found: " + name);
@@ -538,9 +550,9 @@ public class ProjectFileParser extends ProjectFileParserFacade {
   }
   
   
-  /** Traverses the list of expressions found after "bookmark" tag and returns the DocumentRegion
+  /** Traverses the list of expressions found after "bookmark" tag and returns the StaticDocumentRegion
    *  described by those properties. */
-  private static class BookmarkPropertyVisitor implements SEListVisitor<FileRegion> {
+  private static class BookmarkPropertyVisitor implements SEListVisitor<IRegion> {
     private String fname = null;
     private Integer startOffset = null;
     private Integer endOffset = null;
@@ -548,7 +560,7 @@ public class ProjectFileParser extends ProjectFileParserFacade {
     private String pathRoot;
     public BookmarkPropertyVisitor(String pr) { pathRoot = pr; }
     
-    public FileRegion forCons(Cons c) {
+    public IRegion forCons(Cons c) {
       String name = c.getFirst().accept(NameVisitor.ONLY); 
       if (name.compareToIgnoreCase("name") == 0) { fname = ProjectFileParser.ONLY.parseFileName(c.getFirst()); }
       else if (name.compareToIgnoreCase("start") == 0) { startOffset = ProjectFileParser.ONLY.parseInt(c.getFirst()); }
@@ -557,7 +569,7 @@ public class ProjectFileParser extends ProjectFileParserFacade {
       return c.getRest().accept(this);
     }
     
-    public FileRegion forEmpty(Empty c) {
+    public IRegion forEmpty(Empty c) {
       if ((fname == null) || (startOffset == null) || (endOffset == null)) {
         throw new PrivateProjectException("Bookmark information incomplete, need name, start offset and end offset");
       }

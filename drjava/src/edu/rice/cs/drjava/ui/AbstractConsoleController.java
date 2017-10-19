@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -39,8 +39,6 @@ package edu.rice.cs.drjava.ui;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.Color;
-import java.awt.Font;
-
 import javax.swing.*;
 import javax.swing.text.*;
 
@@ -51,7 +49,6 @@ import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionListener;
 import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.model.repl.*;
-import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.drjava.model.ClipboardHistoryModel;
 import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.text.EditDocumentInterface;
@@ -59,7 +56,7 @@ import edu.rice.cs.util.text.EditDocumentInterface;
 
 /** Abstract class that hooks a Swing console/interactions document with its Swing pane.
   * TODO: move interactions specific functionality to InteractionsController by creating ConsoleDJDocument class
-  * @version $Id: AbstractConsoleController.java 5360 2010-08-13 22:36:42Z mgricken $
+  * @version $Id$
   */
 public abstract class AbstractConsoleController /* implements Serializable */ {
   
@@ -84,8 +81,10 @@ public abstract class AbstractConsoleController /* implements Serializable */ {
   /** Action to change focus to next pane. */
   volatile Action switchToNextPaneAction;
 
-  /** Initializes the Swing console document and Swing interactions pane. Subclasses *must* call _init() at the end 
-   *  of their constructors.
+  /** Initializes the Swing console document and Swing interactions pane. 
+   * Subclasses *must* call _init() at the end of their constructors.
+   * @param doc the Swing console document
+   * @param pane the interactions pane
    */
   protected AbstractConsoleController(InteractionsDJDocument doc, InteractionsPane pane) {
     _interactionsDJDocument = doc;
@@ -95,7 +94,7 @@ public abstract class AbstractConsoleController /* implements Serializable */ {
     _systemErrStyle = new SimpleAttributeSet();
   }
 
-  /** Gets the console document for this console.*/
+  /** @return the console document for this console.*/
   public abstract ConsoleDocument getConsoleDoc();
 
   /** Initialization method.  *Must* be called in constructor by all subclasses. */
@@ -108,7 +107,7 @@ public abstract class AbstractConsoleController /* implements Serializable */ {
   /** Adds AttributeSets as named styles to the Swing console document. */
   protected void _addDocumentStyles() {
     // Default
-    _interactionsDJDocument.setDocStyle(InteractionsDocument.DEFAULT_STYLE, _defaultStyle);
+    _interactionsDJDocument.setDocStyle(ConsoleDocument.DEFAULT_STYLE, _defaultStyle);
     
     // System.out
     _systemOutStyle.addAttributes(_defaultStyle);
@@ -209,10 +208,10 @@ public abstract class AbstractConsoleController /* implements Serializable */ {
     }
   };
 
-  /** Accessor method for the InteractionsDJDocument. */
+  /** @return the InteractionsDJDocument. */
   public InteractionsDJDocument getDocumentAdapter() { return _interactionsDJDocument; }
 
-  /** Accessor method for the InteractionsPane. */
+  /** @return the InteractionsPane. */
   public InteractionsPane getPane() { return _pane; }
 
   /** Determines if the associated console pane is currently computing.

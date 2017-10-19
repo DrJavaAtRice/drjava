@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -56,10 +56,7 @@ import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.FileOps;
 import edu.rice.cs.drjava.model.DrJavaFileUtils;
-
-import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /** Startup class for DrJava consisting entirely of static members.  The main method reads the .drjava file (creating 
   * one if none exists) to get the critical information required to start the main JVM for DrJava: 
@@ -154,10 +151,10 @@ public class DrJava {
   /** Name of the resource bundle that controls whether options are editable or not. */
   public static final String RESOURCE_BUNDLE_NAME = "edu.rice.cs.drjava.config.options";
   
-  /** Returns the properties file used by the configuration object. */
+  /** @return the properties file used by the configuration object */
   public static File getPropertiesFile() { return _propertiesFile; }
   
-  /** Returns the configuration object with all customized and default values. */
+  /** @return the configuration object with all customized and default values. */
   public static synchronized FileConfiguration getConfig() {
     if (_config == null) {
       _config = _initConfig();  // read specified .djrava file into _config
@@ -168,7 +165,9 @@ public class DrJava {
   /** @return an array of the files that were passed on the command line. */
   public static synchronized String[] getFilesToOpen() { return _filesToOpen.toArray(new String[0]); }
   
-  /** Add a file to the list of files to open. */
+  /** Add a file to the list of files to open. 
+   * @param s name of the file to be added to the list of files to open
+   */
   public static synchronized void addFileToOpen(String s) {
     _filesToOpen.add(s);
     boolean isProjectFile =
@@ -386,15 +385,17 @@ public class DrJava {
     }
     catch(Throwable t) {
       // Show any errors to the System.err and in an DrJavaErrorHandler
-      System.out.println(t.getClass().getName() + ": " + t.getMessage());
-      t.printStackTrace(System.err);System.out.println("error thrown");
+      System.err.println(t.getClass().getName() + ": " + t.getMessage());
+      t.printStackTrace(System.err);
+      System.err.println("error thrown");
       DrJavaErrorHandler.record(t);
     }
   }
   
   /** Handles any command line arguments that have been specified.
-    * @return true if DrJava should load, false if not
-    */
+   * @param args command-line arguments
+   * @return true if DrJava should load, false if not
+   */
   static boolean handleCommandLineArgs(String[] args) {
     boolean heapSizeGiven = false;  // indicates whether args includes an argument of the form -Xmx<number>
     
@@ -495,18 +496,20 @@ public class DrJava {
     System.out.println("  -jll [ARGS]           invoke the Java Language Level converter, specify files in ARGS");
   }
   
-  /** Switches the config object to use a custom config file. Ensures that Java source files aren't 
-    * accidentally used.
-    */
+  /** Switches the config object to use a custom config file. Ensures that Java 
+   * source files aren't accidentally used.
+   * @param fileName path to the new properties file
+   */
   static void setPropertiesFile(String fileName) {
     if (!DrJavaFileUtils.isSourceFile(fileName))  _propertiesFile = new File(fileName);
   }
   
   /** Initializes the configuration object with the current notion of the properties file.
-    * @throws IllegalStateException if config has already been assigned
-    */
+   * @return the configuration object
+   * @throws IllegalStateException if config has already been assigned
+   */
   static FileConfiguration _initConfig() throws IllegalStateException {
-//    // Make sure someone doesn't try to change the config object.
+//// Make sure someone doesn't try to change the config object.
 //    if (_config != null) throw new IllegalStateException("Can only call initConfig once!");
     
     FileConfiguration config;
@@ -551,7 +554,7 @@ public class DrJava {
 //    String selectedVersion = _getToolsJarVersion(selectedFile);
 //    
 //    final String[] text;
-//    if (selectedVersion==null) {
+//    if (selectedVersion == null) {
 //      text = new String[] {
 //        "The file you chose did not appear to be the correct 'tools.jar'",
 //        "that is compatible with the version of Java that is used to",
@@ -593,7 +596,9 @@ public class DrJava {
     // Do not set _config or _propertiesFile to null because THEY ARE static
   }
 
-  /** Warn if this system is Linux with Compiz. */
+  /** Warn if this system is Linux with Compiz. 
+   * @return true if is Linux with Compiz; false otherwise
+   */
   public static boolean warnIfLinuxWithCompiz() {
     try {
       if (!System.getProperty("os.name").equals("Linux")) return false; // not Linux

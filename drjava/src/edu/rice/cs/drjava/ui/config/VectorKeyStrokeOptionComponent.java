@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -40,15 +40,9 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.table.*;
-import javax.swing.*;
-
 import java.util.*;
 
-import edu.rice.cs.drjava.*;
-import edu.rice.cs.drjava.ui.*;
 import edu.rice.cs.drjava.config.*;
-import edu.rice.cs.util.swing.SwingFrame;
-import edu.rice.cs.util.swing.CheckBoxJList;
 import edu.rice.cs.util.swing.SwingFrame;
 import edu.rice.cs.util.swing.Utilities;
 
@@ -80,13 +74,24 @@ public class VectorKeyStrokeOptionComponent extends VectorOptionComponent<KeyStr
     for(KeyStroke k: getKeyStrokes()) _keyToKSOC.put(k, this);
   }
   
-  /** Constructor that allows for a tooltip description. */
+  /** Constructor that allows for a tooltip description. 
+   * @param opt the option to display
+   * @param text descriptive text to put in label
+   * @param parent the parent frame
+   * @param description tooltip text
+   */
   public VectorKeyStrokeOptionComponent (VectorOption<KeyStroke> opt, String text, SwingFrame parent, String description) {
     this(opt, text, parent, description, false);
     for(KeyStroke k: getKeyStrokes()) _keyToKSOC.put(k, this);
   }
 
-  /** Constructor with flag for move buttons. */
+  /** Constructor with flag for move buttons. 
+   * @param opt the option to display
+   * @param text descriptive text to put in label
+   * @param parent the parent frame
+   * @param description tooltip text
+   * @param moveButtonEnabled whether or not move buttons are enabled
+   */
   public VectorKeyStrokeOptionComponent (VectorOption<KeyStroke> opt, String text, SwingFrame parent,
                                          String description, boolean moveButtonEnabled) {
     super(opt, text, parent, new String[] { }, description, moveButtonEnabled);  // creates all four buttons

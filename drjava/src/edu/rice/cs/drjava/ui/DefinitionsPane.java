@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,7 @@ import javax.swing.*;
 import javax.swing.undo.*;
 import javax.swing.event.*;
 import javax.swing.text.*;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.util.List;
@@ -60,7 +61,6 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelState;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.debug.Breakpoint;
-
 import static edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelStates.*;
 
 /** The pane in which work on a given OpenDefinitionsDocument occurs. A DefinitionsPane is tied to a single document,
@@ -113,7 +113,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
 
   /** Maximum character width of the current main font. */
   private static volatile int _maxCharWidth = 0;
-  
+    
   /** Color of the right margin. */
   private volatile Color _rightMarginColor = Color.red;
   
@@ -158,7 +158,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   public static final String INDENT_KEYMAP_NAME = "INDENT_KEYMAP";
   
   /** Updates match highlights.  Only runs in the event thread. 
-    * @param offset   caret position immediately following some form of brace; hence offset > 0. 
+    * @param offset   caret position immediately following some form of brace; hence offset {@literal >} 0. 
     * @param opening  true if the the preceding brace is "opening" 
     */
   protected void matchUpdate(int offset, boolean opening) { 
@@ -384,8 +384,10 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     /** Whether to perform the indent if the caret is in a String or comment. */
     private final boolean _indentNonCode;
 
-    /** Creates an IndentKeyAction which only invokes indent if the caret is in code, and not Strings or 
-     *  comments.
+    /** Creates an IndentKeyAction which only invokes indent if the caret is 
+     * in code, and not Strings or comments.
+     * @param key the key
+     * @param defaultAction the default action
      */
     IndentKeyAction(String key, Action defaultAction) {
       this(key, defaultAction, false);
@@ -403,7 +405,8 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     }
 
     /** This method tells what the reason should be for spawning this indent event
-     *  Defaults to Indenter.IndentReason.OTHER
+     * Defaults to Indenter.IndentReason.OTHER
+     * @return the reason for spawning this indent event
      */
     protected Indenter.IndentReason getIndentReason() { return Indenter.IndentReason.OTHER; }
 
@@ -475,7 +478,8 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   final Keymap ourMap;
   
   /** Standard Constructor.  Sets up all the defaults.
-   *  @param mf the parent window
+   * @param mf the parent window
+   * @param doc the document
    */
   public DefinitionsPane(MainFrame mf, final OpenDefinitionsDocument doc) {
     super(new SwingDocument());
@@ -765,14 +769,11 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
    */
   public static void setEditorKit(DefinitionsEditorKit editorKit) { EDITOR_KIT = editorKit; }
 
-  /** Update the maximum character width of the current font. We can make this static, because DrJava
-    * only supports one font for all panes anyway. */
+  /** Update the maximum character width of the current font where "_" is used as the widest character.  In monospaced
+    * fonts, it spans the entire width of a character box.
+    */
   public static void updateMaxCharWidth(FontMetrics metrics) {
-    int[] widths = metrics.getWidths();
-    _maxCharWidth = 0;
-    for(int w: widths) {
-      if (w > _maxCharWidth) { _maxCharWidth = w; }
-    }
+    _maxCharWidth = metrics.stringWidth("_");
   }
   
   /** Enable anti-aliased text by overriding paintComponent. */
@@ -919,15 +920,16 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   /** @return the redo action. */
   public RedoAction getRedoAction() { return  _redoAction; }
 
-  /** Get the OpenDefinitionsDocument contained in this DefinitionsPane. */
+  /** @return the OpenDefinitionsDocument contained in this DefinitionsPane. */
   public OpenDefinitionsDocument getOpenDefDocument() { return _doc; }
   
   /** Get the DJDocument (OpenDefinitionsDocument) contained in this pane.
-   *  Required by the super class AbstractDJPane.
+   * Required by the super class AbstractDJPane.
+   * @return the document contained in this pane
    */
   public DJDocument getDJDocument() { return _doc; }
 
-  /** Access to the pane's HighlightManager */
+  /** @return the pane's HighlightManager */
   public HighlightManager getHighlightManager() { return _highlightManager; }
   
   /** Set the caret position and also scroll to make sure the location is visible.  Should only run in the event
@@ -943,8 +945,9 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     catch (BadLocationException ble) { throw new UnexpectedException(ble); }
   }
 
-  /** Override JEditorPane's setDocument to make sure only the Document in our final OpenDefinitionsDocument 
-   *  can be used.
+  /** Override JEditorPane's setDocument to make sure only the Document in our 
+   * final OpenDefinitionsDocument can be used.
+   * @param d the document to be set
    */
   public void setDocument(Document d) {
     if (_doc != null) {  // When can _doc be null?
@@ -959,17 +962,22 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     return testVariable;
   }
   
-  /** Add a ErrorCaretListener to this pane, keeping it accessible so its error model can be updated later. */
+  /** Add a ErrorCaretListener to this pane, keeping it accessible so its error 
+   * model can be updated later. 
+   * @param eListener the listener to be added
+   */
   public void addErrorCaretListener(ErrorCaretListener eListener) {
     _errorListener = eListener;
     addCaretListener(eListener);
   }
 
-  /** Gets the ErrorCaretListener for this pane. */
+  /** @return the ErrorCaretListener for this pane. */
   public ErrorCaretListener getErrorCaretListener() { return _errorListener; }
 
   /** Switches the location of the error highlight in the document if there was one. Otherwise adds the 
-   *  highlight. The invariant is that there are zero or one error highlights at any time.
+   * highlight. The invariant is that there are zero or one error highlights at any time.
+   * @param from start position for error highlighting
+   * @param to end position for error highlighting
    */
   public void addErrorHighlight(int from, int to)  {
     removeErrorHighlight();
@@ -1071,8 +1079,8 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     _scrollPane.getVerticalScrollBar().setValue(_savedVScroll);
     _scrollPane.getHorizontalScrollBar().setValue(_savedHScroll);
     // Explicitly set scrollbar policies fixing bug #1445898 
-    _scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-    _scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    _scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+    _scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
   }
   
   // if the pane is inactive, use the state stored in the fields, otherwise use the super method
@@ -1097,7 +1105,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   }
   
   /** Returns the current line of the definitions pane. This is a 1-based number.
-    * @return current line of the definitions pane, >=1 */
+    * @return current line of the definitions pane, {@literal >=} 1 */
   public int getCurrentLine() { return _doc.getLineOfOffset(getCaretPosition())+1; }
 //    try {
 //      int pos = getCaretPosition();
@@ -1112,7 +1120,10 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
 //    }
 //  }
 
-  /** Determines current line using logic in DefinitionsDocument.  Does it differ from getCurrentLine()? */
+  /** Determines current line using logic in DefinitionsDocument.  
+   * Does it differ from getCurrentLine()? 
+   * @return the current line
+   */
   public int getCurrentLinefromDoc() { return _doc.getCurrentLine(); }  
   
   public int getCurrentCol() { return _doc.getCurrentCol(); }
@@ -1125,7 +1136,9 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
 //  public void addSetSizeListener(ActionListener listener) { _setSizeListener = listener; }
 //  public void removeSetSizeListener() { _setSizeListener = null; }
 
-  /** Centers the view (pane) on the specified offset. */
+  /** Centers the view (pane) on the specified offset. 
+   * @param offset offset on which to center the view
+   */
   public void centerViewOnOffset(int offset) {
     assert EventQueue.isDispatchThread();
     try {
@@ -1299,7 +1312,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     }
 
     /** What to do when user chooses to undo.
-     *  @param e
+     *  @param e the event performed
      */
     public void actionPerformed(ActionEvent e) {
       try {
@@ -1347,7 +1360,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     }
 
     /** In the event that the user chooses to redo something, this is what's called.
-     *  @param e
+     *  @param e the event performed
      */
     public void actionPerformed(ActionEvent e) {
       try {

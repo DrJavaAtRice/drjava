@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -38,14 +38,8 @@ package edu.rice.cs.drjava.ui.config;
 
 
 import java.awt.event.*;
-import java.io.File;
-import javax.swing.filechooser.FileFilter;
 import javax.swing.*;
 
-import java.util.Vector;
-import java.util.List;
-
-import edu.rice.cs.drjava.ui.*;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.util.swing.SwingFrame;
 
@@ -56,12 +50,23 @@ public class VectorStringOptionComponent extends VectorOptionComponent<String> i
     this(opt, text, parent, null);
   }
   
-  /** Constructor that allows for a tooltip description. */
+  /** Constructor that allows for a tooltip description. 
+   * @param opt the option
+   * @param text the label to display
+   * @param parent the parent frame
+   * @param description tooltip text
+   */
   public VectorStringOptionComponent(VectorOption<String> opt, String text, SwingFrame parent, String description) {
     this(opt, text, parent, description, false);
   }
 
-  /** Constructor with flag for move buttons. */
+  /** Constructor with flag for move buttons. 
+   * @param opt the option
+   * @param text the label to display
+   * @param parent the parent frame
+   * @param description tooltip text
+   * @param moveButtonEnabled true if the move buttons should be enabled
+   */
   public VectorStringOptionComponent(VectorOption<String> opt, String text, SwingFrame parent,
                                      String description, boolean moveButtonEnabled) {
     super(opt, text, parent, new String[] { }, description, moveButtonEnabled);  // creates all four buttons

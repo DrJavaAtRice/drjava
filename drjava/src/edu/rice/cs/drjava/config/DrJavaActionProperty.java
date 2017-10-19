@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -42,10 +42,18 @@ package edu.rice.cs.drjava.config;
  *  @version $Id$
  */
 public abstract class DrJavaActionProperty extends DrJavaProperty {  
-  /** Create a property. */
+
+  /** Create a property. 
+   * @param name name of the property
+   * @param help help text for the property
+   */
   public DrJavaActionProperty(String name, String help) { super(name,help); }
 
-  /** Create a property. */
+  /** Create a property.
+   * @param name name of the property
+   * @param value value of the property
+   * @param help help text for the property
+   */
   public DrJavaActionProperty(String name, String value, String help) { super(name, value, help); }
   
   /** Return the value of the property. If it is not current, update first.

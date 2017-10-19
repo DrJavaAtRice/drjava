@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -60,13 +60,15 @@ public abstract class SwingWorker {
 
   private volatile ThreadVar _threadVar;
 
-  /** Gets the value produced by the worker thread, or null if it hasn't been constructed yet. */
+  /** @return the value produced by the worker thread, or null if it hasn't been constructed yet. */
   protected Object getValue() { return _value; }
 
-  /** Sets the value produced by worker thread. */
+  /** Sets the value produced by worker thread. 
+   * @param x the value to set
+   */
   private void setValue(Object x) { _value = x; }
 
-  /** Compute the value to be returned by the <code>get</code> method. */
+  /** @return the value to be returned by the <code>get</code> method. */
   public abstract Object construct();
 
   /** Called from the event dispatching thread (not on the worker thread) after the <code>construct</code> method

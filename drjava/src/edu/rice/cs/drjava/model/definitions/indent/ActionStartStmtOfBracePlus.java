@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -58,11 +58,10 @@ public class ActionStartStmtOfBracePlus extends IndentRuleAction {
     * line with the appropriate spacing or characters.   Assumes read lock is already held.
     * @param doc AbstractDJDocument containing the line to be indented.
     * @param reason The reason that the indentation is taking place
-    * @return true if the caller should update the current location itself, false if the indenter has already handled it
     */
-  public boolean indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
+  public void indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
 
-    boolean supResult = super.indentLine(doc, reason); // This call does nothing other than record some indent tracing
+    super.indentLine(doc, reason); // This call does nothing other than record some indent tracing
     int pos = doc.getCurrentLocation();
 //    Utilities.show("indentLine in ActionStartStmtOfBracePlus called on doc:\n" + doc.getText() + "'\nat location " + pos);
     // Get distance to brace
@@ -75,7 +74,7 @@ public class ActionStartStmtOfBracePlus extends IndentRuleAction {
     // If there is no brace, align to left margin; can't happen when called from rule 19
     if (distToLineEnclosingBrace == -1) {
       doc.setTab(_suffix, pos);
-      return supResult;
+      return;
     }
 
     // Get the absolute position of (the left edge of) the line enclosing brace
@@ -85,8 +84,6 @@ public class ActionStartStmtOfBracePlus extends IndentRuleAction {
 //    System.err.println("indent = " + doc._getIndentOfCurrStmt(bracePos));
 
     doc.setTab(indent, pos);
-    
-    return supResult;
   }
 
 }

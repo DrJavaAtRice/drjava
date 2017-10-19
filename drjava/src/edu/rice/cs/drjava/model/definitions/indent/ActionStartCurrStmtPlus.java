@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2016, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -57,11 +57,9 @@ public class ActionStartCurrStmtPlus extends IndentRuleAction {
     * of the line with the appropriate spacing or characters.
     * @param doc AbstractDJDocument containing the line to be indented.
     * @param reason The reason that the indentition is taking place
-    * @return true if the caller should update the current location itself,
-    * false if the indenter has already handled this
     */
-  public boolean indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
-    boolean supResult = super.indentLine(doc, reason);
+  public void indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
+    super.indentLine(doc, reason);
 
     /** This method is simply a call to getIndentOfCurrStmt, which is fully tested in IndentHelperTest, so no additional
       * tests are provided for this class.
@@ -75,7 +73,5 @@ public class ActionStartCurrStmtPlus extends IndentRuleAction {
 
     indent = indent + _suffix;
     doc.setTab(indent, doc.getCurrentLocation());
-    
-    return supResult;
   }
 }
