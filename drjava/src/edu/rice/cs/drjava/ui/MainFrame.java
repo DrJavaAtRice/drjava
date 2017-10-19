@@ -2093,9 +2093,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _tabbedPane.setSelectedIndex(INTERACTIONS_TAB);
     updateStatusField("Resetting Interactions");
     _interactionsPane.discardUndoEdits();
-    MainJVM._log.log("MainFrame invoking DefaultGlobalModel.ResetInterpreter");
+    MainJVM._log.log("***** In MainJVM, invoking DefaultGlobalModel.ResetInterpreter");
     _model.resetInterpreter();
-    MainJVM._log.log("DefaultGlobalModel.ResetInterpreter complete");
+    MainJVM._log.log("***** In MainJVM, DefaultGlobalModel.ResetInterpreter complete");
     _closeSystemInAction.setEnabled(true);
 //    _enableInteractionsPane(); // already done in interpreterReady()
   }
@@ -2105,10 +2105,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _tabbedPane.setSelectedIndex(INTERACTIONS_TAB);
     updateStatusField("Hard Resetting Interactions");
     _interactionsPane.discardUndoEdits();
-    _log.log("MainFrame invoking DefaultGlobalModel.hardResetInterpreter");
+    _log.log("***** In MainFrame, invoking DefaultGlobalModel.hardResetInterpreter");
     /* The following immediately delegates to the InteractionsModel, but controls synchronization */
     _model.hardResetInterpreter(_model.getWorkingDirectory());
-    _log.log("In MainFrame, DefaultGlobalModel.hardResetInterpreter complete");
+    _log.log("***** In MainFrame, DefaultGlobalModel.hardResetInterpreter complete");
     _closeSystemInAction.setEnabled(true);
 //    _enableInteractionsPane();  // already done in interpreterReady()
   }
@@ -2969,7 +2969,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       
       _mainSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true, _docSplitPane, _tabbedPane);
       
-      _log.log("Global Model started by MainFrame");
+      _log.log("***** In MainFrame, Global Model creation started");
       
       _model.getDocumentNavigator().asContainer().addKeyListener(_historyListener);
       _model.getDocumentNavigator().asContainer().addFocusListener(_focusListenerForRecentDocs);
@@ -4407,6 +4407,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     * @param openSelector the selector that returns the files to open
     */
   public void open(FileOpenSelector openSelector) {
+    _log.log("***** In MainFrame, open(" + openSelector + ") called");
     try {
       hourglassOn();
       _model.openFiles(openSelector);
@@ -7649,7 +7650,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Ensures that the interactions pane is editable after an interaction completes or the interpreter resets. */
   protected void _enableInteractionsPane() { 
     assert EventQueue.isDispatchThread();
-    _log.log("MainFrame._enableInteractionsPane() called");
     
     _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
     _interactionsPane.setEditable(true);
@@ -7657,6 +7657,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
 //    _model.getInteractionsDocument().reset(generateBanner(_model.getWorkingDirectory())); 
     if (_interactionsPane.hasFocus()) _interactionsPane.getCaret().setVisible(true);
     if (_interactionsScriptController != null) _interactionsScriptController.setActionsEnabled();
+    _log.log("***** In MainFrame, _enableInteractionsPane() complete");
   }
   
   /** Comment current selection using wing commenting.  public for testing purposes only. Runs in event thread. */
@@ -8231,7 +8232,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     public void interactionEnded() {
       assert EventQueue.isDispatchThread();
-      _log.log("interactionEnded()");
+      _log.log("*** In MainFrame.ModelListener, interactionEnded()");
       final InteractionsModel im = _model.getInteractionsModel();
       final String lastError = im.getLastError();
       final FileConfiguration config = DrScala.getConfig();
@@ -8254,7 +8255,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }    
     
     public void compileEnded(File workDir, final List<? extends File> excludedFiles) {
-      assert EventQueue.isDispatchThread();    
+      assert EventQueue.isDispatchThread(); 
+      
+      _log.log("In MainFrame, compileEnded called");
       
       _guiNotifier.available(GUIAvailabilityListener.ComponentType.COMPILER);
       
@@ -8266,10 +8269,15 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _model.refreshActiveDocument();
     }
     
-    /** Called if a compilation is aborted. */
+    /** Called if a compilation is aborted.  Runs in place of compileStarted and compileEnded. */
     public void compileAborted(Exception e) {
+      assert EventQueue.isDispatchThread();
+       _log.log("In MainFrame, compileAborted called");
+       showTab(_compilerErrorPanel, true); 
+       
       /* Should probably display a simple popup */
-      _guiNotifier.available(GUIAvailabilityListener.ComponentType.COMPILER);      
+      _guiNotifier.available(GUIAvailabilityListener.ComponentType.COMPILER);
+      _compilerErrorPanel.reset(new File[0]);
     }
     
     public void prepareForRun(final OpenDefinitionsDocument doc) {
@@ -8436,6 +8444,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public void interpreterReady() {
       assert duringInit() || EventQueue.isDispatchThread();
       
+      _log.log("*** In MainFrame.ModelListener, interpreterReady() called");
+      
 //      interactionEnded();
       /*  Enable interactions pane. */
       _guiNotifier.available(GUIAvailabilityListener.ComponentType.INTERACTIONS);
@@ -8445,6 +8455,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
        * InteractionsController between interpreterResetting and interpreterReady. Fixes bug #917054 
        * "Interactions Reset Bug". */
       _interactionsController.interruptConsoleInput();
+      
+      _log.log("*** In MainFrame.ModelListener, interpreterReady() complete");
+      
     }
     
     public void consoleReset() { }
@@ -8783,6 +8796,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
     
     public void projectClosed() {
+      assert Utilities.TEST_MODE || EventQueue.isDispatchThread();  // serializes all event listener code
       _model.getDocumentNavigator().asContainer().addKeyListener(_historyListener);
       _model.getDocumentNavigator().asContainer().addFocusListener(_focusListenerForRecentDocs);
       _model.getDocumentNavigator().asContainer().addMouseListener(_resetFindReplaceListener);
@@ -8811,6 +8825,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
     
     public void projectRunnableChanged() {
+      assert Utilities.TEST_MODE || EventQueue.isDispatchThread();  // serializes all event listener code
       MainFrame.this.projectRunnableChanged();
     }
     

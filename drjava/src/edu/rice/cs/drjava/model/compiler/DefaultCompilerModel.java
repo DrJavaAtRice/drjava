@@ -66,7 +66,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 public class DefaultCompilerModel implements CompilerModel {
   
   /** for logging debug info */
-  private static edu.rice.cs.util.Log _log = new edu.rice.cs.util.Log("GlobalModel.txt", false);
+  private static edu.rice.cs.util.Log _log = new edu.rice.cs.util.Log("GlobalModel.txt", true);
   
   /** The available compilers; degenerate in Scala since there is only one compiler available */
   private final List<CompilerInterface> _compilers;
@@ -160,7 +160,12 @@ public class DefaultCompilerModel implements CompilerModel {
     */
   public void compileAll() throws IOException {
     if (_prepareForCompile()) { _doCompile(_model.getOpenDefinitionsDocuments()); }
-    else _notifier.compileAborted(new UnexpectedException("Some modified open files are unsaved"));
+    else {
+      Utilities.invokeLater(new Runnable() {
+        public void run() {
+          _notifier.compileAborted(new UnexpectedException("Some modified open files are unsaved"));
+        }});
+    }
   }
   
   /** Compiles all documents in the project source tree.  Assumes DrScala currently contains an active project.
@@ -180,7 +185,12 @@ public class DefaultCompilerModel implements CompilerModel {
       throw new UnexpectedException("compileProject invoked when DrScala is not in project mode");
     
     if (_prepareForCompile()) { _doCompile(_model.getProjectDocuments()); }
-    else _notifier.compileAborted(new UnexpectedException("Project contains unsaved modified files"));
+    else {
+      Utilities.invokeLater(new Runnable() {
+        public void run() {
+          _notifier.compileAborted(new UnexpectedException("Project contains unsaved modified files"));
+        }});
+    }
   }
   
   /** Compiles all of the given files.
@@ -196,7 +206,12 @@ public class DefaultCompilerModel implements CompilerModel {
     */
   public void compile(List<OpenDefinitionsDocument> defDocs) throws IOException {
     if (_prepareForCompile()) { _doCompile(defDocs); }
-    else _notifier.compileAborted(new UnexpectedException("The files to be compiled include unsaved modified files"));
+    else {
+      Utilities.invokeLater(new Runnable() {
+        public void run() {
+          _notifier.compileAborted(new UnexpectedException("The files to be compiled include unsaved modified files"));
+        }});
+    }
   }
   
   /** Compiles the given file.
@@ -213,12 +228,18 @@ public class DefaultCompilerModel implements CompilerModel {
   public void compile(OpenDefinitionsDocument doc) throws IOException {
     try {
       if (_prepareForCompile()) { _doCompile(Arrays.asList(doc)); }
-      else _notifier.compileAborted(new UnexpectedException(doc + "is modified but unsaved"));
+      else {
+        Utilities.invokeLater(new Runnable() {
+          public void run() {
+            _notifier.compileAborted(new UnexpectedException(doc + "is modified but unsaved"));
+          }});
+      }
     }
     catch(UnexpectedException e) {  
     // When a project is active, _doCompile throws an UnexpectedException when no buildFile is available
       Throwable cause = e.getCause();
-      if (cause instanceof IOException) _notifier.compileAborted(e);
+      if (cause instanceof IOException) 
+        _notifier.compileAborted(e);
     }                        
   }
   
@@ -253,25 +274,47 @@ public class DefaultCompilerModel implements CompilerModel {
         
         try { dir = doc.getSourceRoot(); }
         catch (InvalidPackageException e) {
+          _log.log("***** In DefaultCompilerModel. InvalidPackageException thrown");
           prelimErrors.add(new DJError(f, e.getMessage(), false));
+          _distributeErrors(prelimErrors);
+          Utilities.invokeLater(new Runnable() {
+            public void run() {
+              _notifier.compileAborted(new UnexpectedException("Package name is inconsistent with the location of source file " + f));
+            }});
+//         throw new UnexpectedException(e);  // exits this method
         }
       }
       else excludedFiles.add(doc.getFile());
     }
        
     _log.log("Files to compile = " + filesToCompile);
-    if (filesToCompile.size() == 0) 
+    if (filesToCompile.size() == 0) {
       prelimErrors.add(new DJError("None of the documents in " + docs + " is a valid source file!", false));
+      _distributeErrors(prelimErrors);
+      Utilities.invokeLater(new Runnable() {
+        public void run() {
+          _notifier.compileAborted(new UnexpectedException("No valid source documents to compile"));
+        }});
+//      return; // exit from this method
+    }
     
     /* NOTE: in flat file mode, buildDir is typically null or FileOps.NULL_FILE. */
-    if (! prelimErrors.isEmpty()) { _distributeErrors(prelimErrors); }
+    if (! prelimErrors.isEmpty()) { 
+      _log.log("***** In DefaultCompilerModel._doCompile, distributing preliminary Errors; prelimErrors = " + prelimErrors);
+      _distributeErrors(prelimErrors);
+      Utilities.invokeLater(new Runnable() {
+        public void run() {
+          _notifier.compileAborted(new UnexpectedException("Preliminary errors inhibited compilation"));
+        }});
+     /* return from this method by falling through */
+    }
     else try {
       File buildDir = _model.getBuildDirectory();
       if (_model.isProjectActive()) {
         if (buildDir == null || buildDir == FileOps.NULL_FILE)
           throw new IOException("Cannot compile this project because the build directory is not defined");
         if (! buildDir.exists() && ! buildDir.mkdirs())
-          throw new IOException("Could not create build directory: " + buildDir);
+          throw new IOException("Could not create build directory: " + buildDir);  // exits this method
       }
       else /* Flat file model */ if (buildDir == null || buildDir == FileOps.NULL_FILE) buildDir = dir;
       assert buildDir != null;
@@ -280,55 +323,17 @@ public class DefaultCompilerModel implements CompilerModel {
       Utilities.invokeLater(new Runnable() {
         public void run() { _notifier.compileEnded(_model.getWorkingDirectory(), excludedFiles); }
       });
+      /* return from this method by falling through */
     }
     catch (Throwable t) {
       _log.log("Catching Throwable: " + t);
       DJError err = new DJError(t.toString(), false);
-      _log.log("Distributing errors in catch clause");
+      _log.log("In DefaultCompilerModel._doCompiler, distributing errors in catch clause");
       _distributeErrors(Arrays.asList(err));
       throw new UnexpectedException(t);
     }
   }
-  /* The preceding code replaced (lifted from the current DrJava build on 27 Aug 2016 with 
-     packageErrors => prelimErrors) the following mess: */
-//      try {
-//      if (! prelimErrors.isEmpty()) { 
-////        System.err.println("Preliminary errors found in compilation");
-//        _distributeErrors(prelimErrors); 
-//      }
-//      else
-//        try {
-//        // Determine output directory (buildDir)
-//        File buildDir = _model.getBuildDirectory();
-//        _log.log("Initial value for buildDir is: " + buildDir);
-//        if (buildDir != null && buildDir != FileOps.NULL_FILE && ! buildDir.exists() && ! buildDir.mkdirs())
-//          throw new IOException("Could not create build directory: " + buildDir);
-//        
-//        
-////        File buildDir = _model.isProjectActive() ? _model.getBuildDirectory() : sourceRoot;
-//        if (buildDir == null || buildDir == FileOps.NULL_FILE) {  // flat file mode or unset build directory in a project 
-//          buildDir = _model.getProjectRoot();
-//          _model.setBuildDirectory(buildDir);
-//          
-//        _log.log("In flat file mode, buildDir is: " + buildDir);
-//          
-//          _log.log("Calling _compileFiles(" + filesToCompile + ", " + buildDir + ")");
-//          _compileFiles(filesToCompile, buildDir);
-//        }
-//      }
-//      catch (Throwable t) {
-//        DJError err = new DJError(t.toString(), false);
-//        _distributeErrors(Arrays.asList(err));
-//        throw new UnexpectedException(t);
-//      }
-//    }
-//    finally {
-//      Utilities.invokeLater(new Runnable() {
-//        public void run() { _notifier.compileEnded(_model.getWorkingDirectory(), excludedFiles); }
-//      });
-//    }
-//  }
-  
+
   /** Compile the given files and update the model with any errors that result.  Does not notify listeners.  
     * All public compile methods delegate to this method so this method is the only one that uses synchronization to 
     * prevent compiling and unit testing at the same time.
@@ -337,13 +342,10 @@ public class DefaultCompilerModel implements CompilerModel {
     */
   private void _compileFiles(List<File> files, File buildDir) throws IOException {
     _log.log("DefaultCompilerModel._compileFiles called with files = " + files + " and buildDir = " + buildDir);
-//    Utilities.show("DefaultCompilerModel._compileFiles called with files = " + files + " and buildDir = " + buildDir);
     
     assert ! files.isEmpty();
     
-    /* Canonicalize buildDir */
-//    if (buildDir == FileOps.NULL_FILE) buildDir = null; // compiler interface wants null pointer if no build directory
-    if (buildDir != null) buildDir = IOUtil.attemptCanonicalFile(buildDir);
+    if (buildDir != null && buildDir != FileOps.NULL_FILE) buildDir = IOUtil.attemptCanonicalFile(buildDir);
     
     _buildDir = buildDir;  // Cache build directory in this compiler model so it can displayed in CompilerErrorPanel
     
@@ -361,11 +363,11 @@ public class DefaultCompilerModel implements CompilerModel {
     
     // Mutual exclusion with JUnit code that finds all test classes (in DefaultJUnitModel)
     synchronized(_compilerLock) {
-      _log.log("Grabbing _compilerLocak and compiling: \n  files = " + files + "\n classPath = '" + classPath +
+      _log.log("In DefaultCompilerModel, grabbing _compilerLocak and compiling: \n  files = " + files + "\n classPath = '" + classPath +
                "'\n buildDir = '" + buildDir + "'\n  bootClassPath = '" + bootClassPath + "'");
       errors.addAll(compiler.compile(files, classPath, null, buildDir, bootClassPath, null, true));
       _distributeErrors(errors);
-      _log.log("Releasing _compilerLock");
+      _log.log("In DefaultCompilerModel, releasing _compilerLock");
     }
   }
   
@@ -385,7 +387,7 @@ public class DefaultCompilerModel implements CompilerModel {
     * appropriate OpenDefinitionsDocument, opening files if necessary.  Called immediately after compilations finishes.
     */
   private void _distributeErrors(List<? extends DJError> errors) throws IOException {
-//    resetCompilerErrors();  // Why is this done?
+    resetCompilerErrors();  // Why is this done?  Can old errors persist?
     _log.log("Preparing to construct CompilerErrorModel for errors: " + errors);
     _compilerErrorModel = new CompilerErrorModel(errors.toArray(new DJError[0]), _model);
     _model.setNumCompilerErrors(_compilerErrorModel.getNumCompilerErrors());  // cache number of compiler errors in global model
@@ -409,6 +411,7 @@ public class DefaultCompilerModel implements CompilerModel {
   /** Resets the compiler error state to have no errors. */
   public void resetCompilerErrors() {
     // TODO: see if we can get by without this function
+    _log.log("***** In DefaultCompilerModel, resetCompilerErrors() called");
     _compilerErrorModel = new CompilerErrorModel(new DJError[0], _model);
   }
   

@@ -206,7 +206,7 @@ public class ProjectProfile implements ProjectFileIR {
   public void addSourceFile(DocFile df) { _sourceFiles.add(df); }
   
   public void addSourceFile(DocumentInfoGetter getter) {
-    if (!getter.isUntitled()) {
+    if (! getter.isUntitled()) {
       try { addSourceFile(docFileFromGetter(getter)); }
       catch(IOException e) { throw new UnexpectedException(e); }
     }

@@ -29,6 +29,7 @@
 package edu.rice.cs.drjava.model.repl;
 
 import edu.rice.cs.drjava.DrScalaTestCase;
+import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.EditDocumentException;
 
 /** Tests the functionality of the InteractionsDocument.  Most history functionality is tested in HistoryTest.
@@ -44,7 +45,8 @@ public final class InteractionsDocumentTest extends DrScalaTestCase {
     super.setUp();
     // Use System.getProperty("user.dir") as working directory here and in call on reset(...) below
     _doc = new InteractionsDocument(new InteractionsDJDocument());
-    _doc.setBanner(TEST_BANNER);
+    /* The following code must run in the event thread and complete before any test methods are run. */
+    Utilities.invokeAndWait(new Runnable() { public void run() { _doc.setBanner(TEST_BANNER); } });
   }
 
   /** Tests that the document prevents editing before the prompt, and beeps if you try. */

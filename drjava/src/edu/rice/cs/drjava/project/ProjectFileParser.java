@@ -171,7 +171,7 @@ public class ProjectFileParser extends ProjectFileParserFacade {
           
           return;
         }
-      }catch(Exception exc){ }
+      } catch(Exception exc){ }
       
       String mainClass = exp.getRest().accept(NameVisitor.ONLY);
       pfir.setMainClass(mainClass);

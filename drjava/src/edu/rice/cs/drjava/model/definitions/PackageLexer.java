@@ -31,11 +31,15 @@ package edu.rice.cs.drjava.model.definitions;
 import java.io.IOException;
 import java.io.StringReader;
 
+import edu.rice.cs.util.Log;
 import edu.rice.cs.util.swing.Utilities;
 
-/** The simple lexer class for extracting package names from Java and Scala files.  Only the first package name is
-  * returned.  This name may be divided across CONSECUTIVE, cumulative package statements as is legal in Scala. */
+/** The simple lexer class for extracting package names from Scala files. This name may be divided across 
+  * cumulative package statements as is legal in Scala.  If code for multiple packages is included in the
+  * document, the returned value will be garbled.*/
 public class PackageLexer extends java.io.StreamTokenizer {
+  
+  public static Log _log = new Log("GlobalModel.txt", false);
   
   /* inherited fields:
    *   String sval    // WARNING: sval is NOT interned so == comparison on sval DOES NOT WORK
@@ -66,30 +70,47 @@ public class PackageLexer extends java.io.StreamTokenizer {
   
   public String getPackageName() {
     
+    _log.log("getPackageName() called on " + _text);
+    
+    StringBuilder name = new StringBuilder();
+    String dot = "";  // dot is bound to the empty string only for the first iteration
+    
     try {
-      
-      StringBuilder name = new StringBuilder();
-      
-      // read longest token stream of the form { package <name> }*, concatenating the names to form
-      
-      String prefix = "";
-      int token = nextToken();
 
-      while (token == TT_WORD && sval.equals("package")) {
-//        System.err.println("Performing loop iteration");
-        token = nextToken();
-        if (token != TT_WORD || sval.startsWith(".") || sval.endsWith(".") || sval.contains("..")) break;
-        name.append(prefix).append(sval);
-        prefix = ".";  // This is horrible imperative hack; in tail recursive form it is an extra argument
-        token = nextToken();
+      /* Concatenate the <name> tokens from the first token sequence of the form { package <name>}* using dot as the 
+       * separator. Note that dot is the empty string on the first iteration and that period (dot) is a legal character
+       * in a TT_WORD (identifier). */
+      
+      while (true) {
+        
+        /* Get the first token of the remaining text. */
+        int token = nextToken();
+        _log.log("token = " + token);
+     
+        
+        /* Skip all tokens until the package keyword or EOF is found, perhaps skipping over import statements */
+        while ((token != TT_EOF) && (token != TT_WORD || ! sval.equals("package"))) token = nextToken();
+               
+        if (token == TT_EOF) break;
+        else { /* token is the package keyword */ 
+        
+          /* Get the token following the package keyword */
+          token = nextToken();
+               
+          /* Break if an improperly formed package name is encountered */
+          if (token != TT_WORD || sval.startsWith(".") || sval.endsWith(".") || sval.contains("..")) break;
+               
+          name.append(dot).append(sval);
+          dot = ".";  // the separator character is "."
+        }
       }
-      String result = name.toString();
-//      Utilities.show("Given\n" + _text + "\nPackageLexer.getPackageName() returned '" + result + "'");
-      return result;
     }
     catch(IOException e) { 
-//      Utilities.show("Given\n" + _text + "\nPackageLexer.getPackageName() returned ''");
-      return ""; 
+      /* An I/O error aborts the loop */
     }
+      
+    String result = name.toString();
+    _log.log("Given\n" + _text + "\nPackageLexer.getPackageName() returned '" + result + "'");
+    return result;
   }
 }

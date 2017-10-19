@@ -350,11 +350,14 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** @param state the new file grouping state. */
   public void setFileGroupingState(FileGroupingState state) {
     _state = state;
-    _notifier.projectRunnableChanged();
-    _notifier.projectBuildDirChanged();
-    _notifier.projectWorkDirChanged();
-    
-//    _notifier.projectModified();  // not currently used
+    Utilities.invokeLater(new Runnable() {
+      public void run() {
+        _notifier.projectRunnableChanged();
+        _notifier.projectBuildDirChanged();
+        _notifier.projectWorkDirChanged();
+//        _notifier.projectModified();  // not currently used
+      }
+    });
   }
   
   /** Adds a document to the list of auxiliary files within _state.  The LinkedList class is not thread safe, so
@@ -413,6 +416,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   /** Sets the class with the project's main method. */
   public void setMainClass(String f) {
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();  // serializes all event listener code
     _state.setMainClass(f);
     _notifier.projectRunnableChanged();
     setProjectChanged(true);
@@ -1171,7 +1175,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     * @return The new open document
     */
   public OpenDefinitionsDocument newFile(File parentDir, String text) {
-///* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     final ConcreteOpenDefDoc doc = _createOpenDefinitionsDocument(new NullFile());
     try {
       if (text.length() > 0) {
@@ -1185,7 +1188,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     finally {
       doc.setParentDirectory(parentDir);
       addDocToNavigator(doc);
-      _notifier.newFileCreated(doc);
+      /* The listener methods invoked by the following code must run in the event dispatch thread. The following is the
+       * only call in the code base on this method (located in GlobalEventNotifier). */
+      Utilities.invokeLater(new Runnable() { public void run() { _notifier.newFileCreated(doc); }});
     }
     return doc;
   }
@@ -2829,7 +2834,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         for (String p : IterUtil.reverse(IterUtil.asIterable(packages))) {
           if (dir == null || ! dir.getName().equals(p)) {
             String m = "File is in the wrong directory or is declared part of the wrong package.  " +
-              "Directory name " + ((dir == null) ? "(root)" : "'" + dir.getName() + "'") +
+              "Enclosing directory name " + ((dir == null) ? "(root)" : "'" + dir.getName() + "'") +
               " does not match package name '" + p + "'.";
             throw new InvalidPackageException(-1, m);
           }
@@ -2994,7 +2999,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
           
           //  Set document property to write out document using newLine conventions of the host platform.
           newDefDoc.putProperty(DefaultEditorKit.EndOfLineStringProperty, StringOps.EOL);
-//          _log.log("Reading from image for " + _file + " containing " + _image.length() + " chars");    
+          _log.log("Reading from image for " + _file + " containing " + _image.length() + " chars");    
           
           _loc = Math.min(_loc, image.length()); // make sure not past end
           _loc = Math.max(_loc, 0); // make sure not less than 0
@@ -3013,6 +3018,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
           
           //            tempDoc.setUndoManager(_undo);
           assert ! newDefDoc.isModifiedSinceSave();
+
           _packageName = newDefDoc.getPackageName();
           _log.log("Setting _packageName for " + newDefDoc + " in make() to '" + _packageName + "'");
           return newDefDoc;

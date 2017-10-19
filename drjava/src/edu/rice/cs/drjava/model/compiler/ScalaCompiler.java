@@ -221,9 +221,10 @@ public class ScalaCompiler extends Javac160FilteringCompiler implements /* Scala
   public static final HashSet<String> SCALA_KEYWORDS = new HashSet<String>();
   static {
     SCALA_KEYWORDS.addAll(JAVA_KEYWORDS);
+    SCALA_KEYWORDS.remove("const");
     final String[] words =  {
       "val", "var", "def", "implicit", "override", "yield", "trait", "type", "sealed", "lazy", "object", "forSome", 
-      "match", "=>", "<-", "->"
+      "match", "=>", "<-", "->", "assume", "require"
     };
     for(String s: words) { SCALA_KEYWORDS.add(s); }
   }

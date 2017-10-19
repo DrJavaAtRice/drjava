@@ -38,6 +38,7 @@ import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.OperationCanceledException;
+import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.ConsoleDocumentInterface;
 import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.util.text.ConsoleDocument;

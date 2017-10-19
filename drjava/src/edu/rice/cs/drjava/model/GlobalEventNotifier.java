@@ -168,6 +168,7 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener> impl
     */
   @Deprecated
   public boolean pollListeners(Poller p) {
+    _log.log("In GlobalEventNotifier, TEST_MODE = " + Utilities.TEST_MODE);
     assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     for (GlobalModelListener l: _listeners) { if (! p.poll(l)) return false; }
     return true; 

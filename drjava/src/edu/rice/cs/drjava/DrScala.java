@@ -32,6 +32,7 @@ import static edu.rice.cs.drjava.config.OptionConstants.*;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -93,7 +94,7 @@ import edu.rice.cs.drjava.model.DrScalaFileUtils;
   * @version $Id: DrScala.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class DrScala {
-  public static volatile Log _log = new Log("GlobalModel.txt", false);
+  public static volatile Log _log = new Log("GlobalModel.txt", true);
   
   private static final String DEFAULT_MAX_HEAP_SIZE_ARG = "-Xmx256M";
   
@@ -170,14 +171,13 @@ public class DrScala {
   }
   
   /** Clear the list of files to open. */
-  public static synchronized void clearFilesToOpen() {
-    _filesToOpen.clear();
-  }
+  public static synchronized void clearFilesToOpen() { _filesToOpen.clear(); }
   
   /** Starts running DrScala.
     * @param args Command line argument array
     */
-  public static void main(final String[] args) {    
+  public static void main(final String[] args) { 
+    _log.log("***** In DrScala, main method invoked with args = " + Arrays.toString(args));
     // handleCommandLineArgs will return true if DrScala should be loaded
     if (handleCommandLineArgs(args)) {
       // Platform-specific UI setUp.

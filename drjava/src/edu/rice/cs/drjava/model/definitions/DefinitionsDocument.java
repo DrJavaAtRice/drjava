@@ -266,9 +266,11 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     * this functionality.
     */
   public void insertString(int offset, String str, AttributeSet a) throws BadLocationException {
+    _log.log("In DefinitionsDocument, insertString(" + offset + ", " + str + ", " + a + ") called");
     if (_tabsRemoved) str = _removeTabs(str);
     _setModifiedSinceSave();
     super.insertString(offset, str, a);
+    _log.log("insertString(...) complete");
   }
   
   /** Removes a block of text from the specified location. We don't update the reduced model here; that happens
@@ -299,11 +301,12 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     * Assumes that write lock is already held. 
     */
   private void _setModifiedSinceSave() {
-    /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     if (! _isModifiedSinceSave) {
       _log.log("Setting modification for " + this);
       _isModifiedSinceSave = true;
       if (_odd != null) _odd.documentModified();  // null test required for some unit tests
+      _log.log("Modification complete");
     }    
   }
   
