@@ -75,7 +75,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
  */
 public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   
-  public static final Log _log = new Log("/home/cork/GlobalModelTest.txt", false);
+  public static final Log _log = new Log("GlobalModel.txt", false);
 
   protected volatile DefaultGlobalModel _model;
   protected volatile InteractionsController _interactionsController;
@@ -1027,7 +1027,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   }
   
   public static class InteractionListener extends TestListener {
-    public static Log _log = new Log("/home/cork/GlobalModelTest.txt", false);
+    public static Log _log = new Log("GlobalModel.txt", false);
     private static final int WAIT_TIMEOUT = 20000; // time to wait for _interactionDone or _resetDone 
     private volatile CompletionMonitor _interactionDone;
     private volatile CompletionMonitor _resetDone;

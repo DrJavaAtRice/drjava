@@ -45,7 +45,7 @@ import edu.rice.cs.util.swing.Utilities;
   */
 public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   
-  private static Log _log = new Log("/home/cork/GlobalModelJUnitTest.txt", true);
+  private static Log _log = new Log("GlobalModel.txt", true);
   
   /** Whether or not to print debugging output. */
   static final boolean printMessages = true;
