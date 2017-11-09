@@ -271,25 +271,17 @@ public class ConfigFrame extends SwingFrame {
   }
   
   private void enableChangeListeners() {
-    DrJava.getConfig().addOptionListener(OptionConstants.JUNIT_LOCATION_ENABLED,
-                                         _junitLocationEnabledListener);
-    DrJava.getConfig().addOptionListener(OptionConstants.JUNIT_LOCATION,
-                                         _junitLocationListener);
-    DrJava.getConfig().addOptionListener(OptionConstants.CONCJUNIT_CHECKS_ENABLED,
-                                         _concJUnitChecksEnabledListener);
-    DrJava.getConfig().addOptionListener(OptionConstants.RT_CONCJUNIT_LOCATION,
-                                         _rtConcJUnitLocationListener);
+    DrJava.getConfig().addOptionListener(OptionConstants.JUNIT_LOCATION_ENABLED, _junitLocationEnabledListener);
+    DrJava.getConfig().addOptionListener(OptionConstants.JUNIT_LOCATION, _junitLocationListener);
+    DrJava.getConfig().addOptionListener(OptionConstants.CONCJUNIT_CHECKS_ENABLED, _concJUnitChecksEnabledListener);
+    DrJava.getConfig().addOptionListener(OptionConstants.RT_CONCJUNIT_LOCATION, _rtConcJUnitLocationListener);
   }
 
   private void disableChangeListeners() {
-    DrJava.getConfig().removeOptionListener(OptionConstants.JUNIT_LOCATION_ENABLED,
-                                            _junitLocationEnabledListener);
-    DrJava.getConfig().removeOptionListener(OptionConstants.JUNIT_LOCATION,
-                                            _junitLocationListener);
-    DrJava.getConfig().removeOptionListener(OptionConstants.CONCJUNIT_CHECKS_ENABLED,
-                                            _concJUnitChecksEnabledListener);
-    DrJava.getConfig().removeOptionListener(OptionConstants.RT_CONCJUNIT_LOCATION,
-                                            _rtConcJUnitLocationListener);
+    DrJava.getConfig().removeOptionListener(OptionConstants.JUNIT_LOCATION_ENABLED, _junitLocationEnabledListener);
+    DrJava.getConfig().removeOptionListener(OptionConstants.JUNIT_LOCATION, _junitLocationListener);
+    DrJava.getConfig().removeOptionListener(OptionConstants.CONCJUNIT_CHECKS_ENABLED, _concJUnitChecksEnabledListener);
+    DrJava.getConfig().removeOptionListener(OptionConstants.RT_CONCJUNIT_LOCATION, _rtConcJUnitLocationListener);
   }
 
   /** @return the current master working directory, or the user's current directory if none is set. */

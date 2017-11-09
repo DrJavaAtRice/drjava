@@ -98,7 +98,7 @@ import org.jacoco.core.runtime.RuntimeData;
   */
 public class JUnitTestManager {
   
-  protected static final Log _log = new Log("JUnitTestManager.txt", false);
+  protected static final Log _log = new Log("GlobalModel.txt", false);
   
   /** The interface to the master JVM via RMI. */
   private final JUnitModelCallback _jmc;

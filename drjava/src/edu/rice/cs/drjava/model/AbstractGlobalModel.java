@@ -1885,7 +1885,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
                                                       auxFiles, excludedFiles, projectClassPaths, createJarFile, 
                                                       createJarFlags, autoRefresh, manifest, storedPreferences));
     
-    resetInteractions(getWorkingDirectory());  // Reset interactions pane in new working directory
+    resetInteractions(getWorkingDirectory());  // Reset interactions pane in new working directory with new classpath
     
     ArrayList<DocFile> projFiles = new ArrayList<DocFile>();
     DocFile active = null;

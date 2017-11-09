@@ -45,10 +45,14 @@ import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.plt.reflect.PathClassLoader;
 
+import edu.rice.cs.util.Log;
+
 /** Maintains a dynamic class path, allowing entries to be incrementally added in the appropriate
   * place in the list.  This class is used in the interpreter JVM, and may be accessed concurrently.
   */
 public class ClassPathManager implements Lambda<ClassLoader, ClassLoader> {
+  
+  public static final Log _log = new Log("GlobalModel.txt", false);
   
   // For thread safety, all accesses to these lists are synchronized on this, and when they are made available
   // to others (via getters or in the class loader), a snapshot is used.
@@ -79,6 +83,7 @@ public class ClassPathManager implements Lambda<ClassLoader, ClassLoader> {
     // lazily map the lists to their snapshots -- the snapshot code executes every time
     // _fullPath is traversed
     _fullPath = IterUtil.collapse(IterUtil.map(allPaths, _makeSafeSnapshot));
+    _log.log("ClassPathManager created in new JVM with _fullPath = " + _fullPath);
     updateProperty();
   }
   

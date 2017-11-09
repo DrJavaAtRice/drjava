@@ -42,6 +42,7 @@ import java.rmi.server.UnicastRemoteObject;
 import java.io.Serializable;
 import java.util.Map;
 
+import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.plt.collect.CollectUtil;
 import edu.rice.cs.plt.concurrent.ConcurrentUtil;
@@ -69,6 +70,9 @@ import static edu.rice.cs.plt.debug.DebugUtil.error;
  * @version $Id$
  */
 public abstract class AbstractMasterJVM implements MasterRemote {
+  
+  /** Debugging log. */
+  public static final Log _log  = new Log("GlobalModel.txt", false);
   
   /** Synchronization strategy: compare-and-swap guarantees that only one thread enters a STARTING, or
    * QUITTING, or DISPOSED state.  After that, the only state transitions out of STARTING/QUITTING occur 

@@ -63,7 +63,7 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
 //  public static final String INPUT_REQUIRED_MESSAGE =
 //    "Please enter input in the Console tab." + _newLine;
   
-  public static final Log _log = new Log("InteractionsModel.txt", false);
+  public static final Log _log = new Log("GlobalModel.txt", false);
   
   /** The global model that includes this interactions model.  Provides access to interpreter and console. */
   protected final DefaultGlobalModel _model;
@@ -153,9 +153,9 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
     * This method may run outside the event thread. 
     */
   public void interpreterReady(File wd) {
+    _log.log("****In DefaultInteractionsModel, interpreterReady(" + wd + ") called, resetting interactionsClassPath");
     _model.resetInteractionsClassPath();  // Done here rather than in the superclass because _model is available here.
     super.interpreterReady(wd);
-    _log.log("****Event: interpreterReady(" + wd +") called");
   }
   
   /** In the event thread, notifies listeners that an interaction has started. */

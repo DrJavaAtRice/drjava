@@ -135,7 +135,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     public void interpreterReady(File wd) {
       File buildDir = _state.getBuildDirectory();
       if (buildDir != null) {
-        //        System.out.println("adding for reset: " + _state.getBuildDirectory().getAbsolutePath());
+        _log.log("adding buildDir for reset: " + _state.getBuildDirectory().getAbsolutePath());
         _jvm.addBuildDirectoryClassPath(IOUtil.attemptAbsoluteFile(buildDir));
       }
     }
@@ -459,7 +459,6 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     assert _interactionsModel._pane != null;
     
     _log.log("DefaultGlobalModel.resetInteractions(" + wd + ", " + forceReset + ") called");
-//    debug.logStart();
     File workDir = _interactionsModel.getWorkingDirectory();
     if (wd == null) { wd = workDir; }
     forceReset |= isClassPathChanged();
@@ -471,7 +470,6 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
 //    log.log("_interactionsModel.resetInteractions(" + wd + ", " + forceReset + ") called");
     _interactionsModel.resetInterpreter(wd, forceReset);
     _log.log("DefaultGlobalModel.resetInteractions(" + wd + ", " + forceReset + ") complete");
-//    debug.logEnd();
   }
   
   /** Interprets the current given text at the prompt in the interactions pane. */
@@ -872,10 +870,13 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
 //    System.err.println("Resetting interactions class path");
     Iterable<AbsRelFile> projectExtras = getExtraClassPath();
     //System.out.println("Adding project classpath vector to interactions classpath: " + projectExtras);
-    if (projectExtras != null)  for (File cpE : projectExtras) { _interactionsModel.addProjectClassPath(cpE); }
-    
+    if (projectExtras != null)  {
+      _log.log("Adding the following files to ProjectClassPath: " + projectExtras);
+      for (File cpE : projectExtras) { _interactionsModel.addProjectClassPath(cpE); }
+    }
     Vector<File> cp = DrJava.getConfig().getSetting(EXTRA_CLASSPATH);
     if (cp != null) {
+      _log.log("Adding following files to ExtraClassPath: " + cp);
       for (File f : cp) { _interactionsModel.addExtraClassPath(f); }
     }
     

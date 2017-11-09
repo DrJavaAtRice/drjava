@@ -44,9 +44,9 @@ import java.rmi.*;
 // NOTE: Do NOT import/use the config framework in this class!
 //  (This class runs in a different JVM, and will not share the config object)
 
-
-import edu.rice.cs.util.OutputStreamRedirector;
 import edu.rice.cs.util.InputStreamRedirector;
+import edu.rice.cs.util.Log;
+import edu.rice.cs.util.OutputStreamRedirector;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.newjvm.*;
@@ -86,6 +86,8 @@ import edu.rice.cs.util.swing.Utilities;
   * @version $Id$
   */
 public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRemoteI, JUnitModelCallback {
+  
+  public static final Log _log = new Log("GlobalModel.txt", false);
   
   /** Singleton instance of this class. */
   public static final InterpreterJVM ONLY = new InterpreterJVM();
