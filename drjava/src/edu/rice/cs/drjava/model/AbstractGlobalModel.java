@@ -2491,8 +2491,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 //    DrJava.getConfig().addOptionListener(BACKUP_FILES, new BackUpFileOptionListener());
 //    Boolean makeBackups = DrJava.getConfig().getSetting(BACKUP_FILES);
 //    FileOps.DefaultFileSaver.setBackupsEnabled(makeBackups.booleanValue ());
-    
-    DrJava.getConfig().addOptionListener(DYNAMICJAVA_ACCESS_CONTROL, new OptionListener<String>() {
+
+    //TODO: need access control, private access, semicolon, variable type, etc. option listeners for JavaREPL?
+    /*DrJava.getConfig().addOptionListener(DYNAMICJAVA_ACCESS_CONTROL, new OptionListener<String>() {
       public void optionChanged(OptionEvent<String> oce) {
         boolean enforceAllAccess = DrJava.getConfig().getSetting(OptionConstants.DYNAMICJAVA_ACCESS_CONTROL)
           .equals(OptionConstants.DynamicJavaAccessControlChoices.PRIVATE_AND_PACKAGE); // "all"
@@ -2514,7 +2515,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       public void optionChanged(OptionEvent<Boolean> oce) {
         getInteractionsModel().setRequireVariableType(oce.value);
       }
-    });
+    });*/
   }
   
   /** Appends a string to the given document using a particular attribute set (identified by a String key). Also waits

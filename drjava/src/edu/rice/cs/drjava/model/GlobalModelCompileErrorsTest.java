@@ -290,15 +290,12 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     
     debug.logEnd();
   }
-  
-  
-  
-  /** Tests the compiler errors have the correct line numbers.
-   * TODO: rewrite this test for the new error model interface
-   * @throws BadLocationException if attempts to reference an invalid location
-   * @throws IOException if an IO operation fails
-   * @throws InterruptedException if execution is interrupted unexpectedly
-   */
+
+  /** Tests the compiler errors have the correct line numbers. TODO: rewrite this test for the new error model interface
+    * @throws BadLocationException if attempts to reference an invalid location
+    * @throws IOException if an IO operation fails
+    * @throws InterruptedException if execution is interrupted unexpectedly
+    */
   public void testCompileFailsCorrectLineNumbers() throws BadLocationException, IOException, InterruptedException {
     debug.logStart();
     
@@ -346,13 +343,13 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
   }
   
   /** Tests compiling an invalid file and checks to make sure the class file was not created.  
-   * @throws BadLocationException if attempts to reference an invalid location
-   * @throws IOException if an IO operation fails
-   * @throws InterruptedException if execution is interrupted unexpectedly
-   */
+    * @throws BadLocationException if attempts to reference an invalid location
+    * @throws IOException if an IO operation fails
+    * @throws InterruptedException if execution is interrupted unexpectedly
+    */
   public void testCompileEndWhileParsing() throws BadLocationException, IOException, InterruptedException {
     debug.logStart();
-    
+    _log.log("Starting testCompileWhileParsing");
     final OpenDefinitionsDocument doc = setupDocument(COMPILER_ERRORS_2872797_TEXT);
     final File dir = tempDirectory();
     final File file = new File(dir, "CompilerErrors.java");
@@ -360,10 +357,11 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     
     CompileShouldFailListener listener = new CompileShouldFailListener();
     _model.addListener(listener);
-    
+    _log.log("Ready to compile document");
     testStartCompile(doc);
-    
+    _log.log("Compilation started in test code; waiting until compiler finishes");
     listener.waitCompileDone();
+    _log.log("Compilation complete in test code");
     assertCompileErrorsPresent(_name(), true);
     listener.checkCompileOccurred();
     

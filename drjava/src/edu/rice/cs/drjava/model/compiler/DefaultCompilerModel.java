@@ -325,15 +325,15 @@ public class DefaultCompilerModel implements CompilerModel {
   }
   
   /** Compile the given files and update the model with any errors that result. 
-   * Does not notify listeners.  
-   * All public compile methods delegate to this one so this method is the 
-   * only one that uses synchronization to prevent compiling and unit testing 
-   * at the same time.
-   * @param files The files to be compiled
-   * @param buildDir The output directory for all the .class files; @code{null} 
-   *        means output to the same directory as the source file
-   * @throws IOException if an IO operation fails
-   */
+    * Does not notify listeners.  
+    * All public compile methods delegate to this one so this method is the 
+    * only one that uses synchronization to prevent compiling and unit testing 
+    * at the same time.
+    * @param files The files to be compiled
+    * @param buildDir The output directory for all the .class files; @code{null} 
+    *        means output to the same directory as the source file
+    * @throws IOException if an IO operation fails
+    */
   private void _compileFiles(List<File> files, File buildDir) throws IOException {
     if (! files.isEmpty()) {
       /* Canonicalize buildDir */

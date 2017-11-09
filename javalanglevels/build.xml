@@ -31,6 +31,7 @@
   
   <property environment="env" />
   <property name="drjava-jar" value="${env.DRJAVA_JAR}" />
+  <echo message = "drjava-jar = ${drjava-jar}"/>
   <property name="java8-home"  value="${env.JAVA8_HOME}" />
   <property name="javacc-home" value="${env.JAVACC_HOME}" />
   <property name="clover-jar"  value="${env.CLOVER_JAR}" />
@@ -400,6 +401,7 @@
       <classpath>
         <pathelement location="lib/buildlib/junit.jar" />
         <pathelement location="lib/buildlib/plt-ant.jar" /> <!-- required for custom formatter -->
+        <pathelement location="${drjava-jar}" />
         <pathelement location="${clover-jar}" />
         <pathelement location="classes/test" />
         <pathelement location="classes/base" />
