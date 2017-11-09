@@ -9,13 +9,10 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="lib" level="project" />
     <orderEntry type="library" name="buildlib" level="project" />
-<<<<<<< HEAD
-=======
     <orderEntry type="module" module-name="dynamicjava" />
     <orderEntry type="module" module-name="plt" />
     <orderEntry type="module" module-name="javalanglevels" />
     <orderEntry type="module" module-name="platform" />
     <orderEntry type="module" module-name="java-repl" />
->>>>>>> a970aabad4e410baafba5193413c154d82643b8f
   </component>
 </module>
