@@ -53,14 +53,17 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.border.MatteBorder;
 
+import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.config.Option;
+import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.drjava.config.OptionEvent;
+import edu.rice.cs.drjava.config.OptionListener;
 import edu.rice.cs.drjava.model.MovingDocumentRegion;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.RegionManager;
 import edu.rice.cs.drjava.model.RegionManagerListener;
-import edu.rice.cs.drjava.config.*;
-import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.plt.tuple.Pair;
-import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.util.swing.Utilities;
 
 /** Panel for displaying find results. This class is a swing class which should only be accessed from the event thread.
   * @version $Id$
@@ -206,8 +209,9 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     }
   }
   
-  /** Creates the buttons for controlling the regions. Should be overridden. */
-  protected JComponent[] makeButtons() {    
+  /** Creates the buttons for controlling the regions. */
+  @Override protected JComponent[] makeButtons() {
+    assert EventQueue.isDispatchThread() || Utilities.TEST_MODE;
     Action findAgainAction = new AbstractAction("Find Again") {
       public void actionPerformed(ActionEvent ae) { _findAgain(); }
     };
@@ -252,11 +256,11 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     _colorBox.setRenderer(new ColorComboRenderer());
     _colorBox.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        if (_lastIndex<OptionConstants.FIND_RESULTS_COLORS.length) {
+        if (_lastIndex < OptionConstants.FIND_RESULTS_COLORS.length) {
           --DefinitionsPane.FIND_RESULTS_PAINTERS_USAGE[_lastIndex];
         }
         _lastIndex = _colorBox.getSelectedIndex();
-        if (_lastIndex<OptionConstants.FIND_RESULTS_COLORS.length) {
+        if (_lastIndex < OptionConstants.FIND_RESULTS_COLORS.length) {
           ++DefinitionsPane.FIND_RESULTS_PAINTERS_USAGE[_lastIndex];
           highlightPanel.setBackground(DrJava.getConfig().getSetting(OptionConstants.FIND_RESULTS_COLORS[_lastIndex]));
         }

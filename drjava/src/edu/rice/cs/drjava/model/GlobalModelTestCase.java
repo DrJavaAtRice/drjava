@@ -1107,9 +1107,12 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     private volatile boolean _compileDone = false;        // records when compilaton is done
     private final Object _compileLock = new Object();     // lock for _compileDone
     
-    public synchronized void logCompileStart() { 
-      logInteractionStart();
-      _compileDone = false; 
+    public void logCompileStart() { 
+//      logInteractionStart();
+      synchronized (_compileLock) {
+        _log.log("In CSSL, logCompileStart called");
+        _compileDone = false; 
+      }
     }
     
     public void compile(OpenDefinitionsDocument doc) throws IOException, InterruptedException {
@@ -1183,11 +1186,14 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     private final Object _compileLock = new Object();     // lock for _compileDone
     
     public void logCompileStart() {
-      synchronized(_compileLock) { _compileDone = false; }
+      synchronized (_compileLock) { 
+        _log.log("In CSFL, logCompileStart called");
+        _compileDone = false; 
+      }
     }
     
     public void waitCompileDone() throws InterruptedException {
-      synchronized(_compileLock) {
+      synchronized (_compileLock) {
         while (! _compileDone) {
 //        System.err.println("Waiting for JUnit to complete");
           _compileLock.wait();
@@ -1203,6 +1209,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     
     private void _notifyCompileDone() {
       synchronized(_compileLock) {
+        _log.log("In CSFL, compilation done notification");
         _compileDone = true;
         _compileLock.notify();
       }

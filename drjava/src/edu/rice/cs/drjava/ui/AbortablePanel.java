@@ -123,12 +123,11 @@ public abstract class AbortablePanel extends TabbedPanel {
   /** Update button state and text. Should be overridden if additional buttons are added besides "Go To", "Remove" and "Remove All". */
   protected void updateButtons() { }  
 
-  /** Creates the buttons for controlling the regions. Should be overridden. 
-   * @return the newly-created buttons
-   */
-  protected JComponent[] makeButtons() {
-    return new JComponent[0];    
-  }
+  /** Creates the buttons for controlling the regions.  This definition is NOT an override since parent is TabbedPanel 
+    * rather than RegionsTreePanel.
+    * @return the newly-created buttons
+    */
+  protected JComponent[] makeButtons() { return new JComponent[0]; }
   
   /** Creates the buttons for controlling the regions. */
   private void _setupButtonPanel() {

@@ -477,7 +477,7 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
   /** Action performed when the Enter key is pressed. Should be overridden. */
   protected void performDefaultAction() { }
   
-  /** Creates the buttons for controlling the regions. Should be overridden. 
+  /** Creates the buttons for controlling the regions.  Should be overridden in dervied classes.
    * @return the newly-created buttons
    */
   protected JComponent[] makeButtons() {  return new JComponent[0];  }

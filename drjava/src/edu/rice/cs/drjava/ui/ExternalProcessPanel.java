@@ -437,8 +437,8 @@ public class ExternalProcessPanel extends AbortablePanel {
     _runAgainButton.setEnabled((_is == null) || (_erris == null) || (ended));
   }  
 
-  /** Creates the buttons for controlling the regions. Should be overridden. */
-  protected JComponent[] makeButtons() {
+  /** Creates the buttons for controlling the regions. */
+  @Override protected JComponent[] makeButtons() {
     _updateNowButton = new JButton("Update");
     _updateNowButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) { 
