@@ -617,7 +617,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     
     final OpenDefinitionsDocument oldDoc = _machine.getDocument();
     final OpenDefinitionsDocument oldFirstDoc = _machine.getFirstDoc();
-    final String oldFindWord = _machine.getFindWord();
+//    final String oldFindWord = _machine.getFindWord();
     final boolean oldSearchAll = _machine.getSearchAllDocuments();
     final boolean oldSearchSelectionOnly = _machine.getSearchSelectionOnly();
     final boolean oldMatchCase = _machine.getMatchCase();
@@ -656,11 +656,11 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
       _frame.hourglassOff(); 
       _model.refreshActiveDocument();
     } 
-    /* Restore state of FindReplaceMachine */
+    /* Restore state of FindReplaceMachine except for _findWord and _replaceWord. */
     _log.log("Restoring FindReplaceMachine");
     _machine.setDocument(oldDoc);
     _machine.setFirstDoc(oldFirstDoc);
-    _machine.setFindWord(oldFindWord);
+//    _machine.setFindWord(oldFindWord);
     _machine.setSearchAllDocuments(oldSearchAll);
     _machine.setSearchSelectionOnly(oldSearchSelectionOnly);
     _machine.setMatchCase(oldMatchCase);
@@ -752,7 +752,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     
     final OpenDefinitionsDocument oldDoc = _machine.getDocument();
     final OpenDefinitionsDocument oldFirstDoc = _machine.getFirstDoc();
-    final String oldFindWord = _machine.getFindWord();
+//    final String oldFindWord = _machine.getFindWord();
     final boolean oldSearchAll = _machine.getSearchAllDocuments();
     final boolean oldSearchSelectionOnly = _machine.getSearchSelectionOnly();
     final boolean oldMatchCase = _machine.getMatchCase();
@@ -798,12 +798,13 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     finally { 
       _frame.hourglassOff(); 
       _model.refreshActiveDocument();
-    } 
-    /* Restore state of FindReplaceMachine */
+    }
+    
+    /* Restore state of FindReplaceMachine, except for _findWord and _replaceWord */
     _log.log("Restoring FindReplaceMachine");
     _machine.setDocument(oldDoc);
     _machine.setFirstDoc(oldFirstDoc);
-    _machine.setFindWord(oldFindWord);
+//    _machine.setFindWord(oldFindWord);
     _machine.setSearchAllDocuments(oldSearchAll);
     _machine.setSearchSelectionOnly(oldSearchSelectionOnly);
     _machine.setMatchCase(oldMatchCase);
@@ -939,7 +940,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
       _machine.setFindWord(_findField.getText());
       _machine.setReplaceWord(_replaceField.getText());
       _frame.clearStatusMessage(); // _message.setText(""); // JL
-      if (! _machine.onMatch() || _findField.getText().equals("")) {
+      if (! _machine.onFindWordMatch() || _findField.getText().equals("")) {
         _replaceAction.setEnabled(false);
         _replaceFindNextAction.setEnabled(false);
         _replaceFindPreviousAction.setEnabled(false);
@@ -1273,18 +1274,29 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     * @param searchString the string to check the region against
     * @return whether or not the text in r matches searchString
     */
-  public boolean isMatch(MovingDocumentRegion r, String searchString) {
+  public boolean isSearchStringMatch(MovingDocumentRegion r, String searchString) {
     final OpenDefinitionsDocument doc = r.getDocument();
     final int startPos = r.getStartOffset();
     final int endPos = r.getEndOffset();
 
-    if ((endPos - startPos == searchString.length()) && (_machine != null)) {
-       _machine.setFindWord(searchString);
-       _machine.setDocument(doc);
-       _machine.setPosition(endPos);
-      return _machine.onMatch();
+    if ((endPos - startPos == searchString.length()) && (_machine != null)) {  /* preserves the state of the FRM! */
+      /* save state of FRM */
+      final String oldFindWord = _machine.getFindWord();
+      final OpenDefinitionsDocument oldDoc = _machine.getDocument();
+      final int oldPos = _machine.getCurrentOffset();
+      
+      try {
+        _machine.setFindWord(searchString);  
+        _machine.setDocument(doc);
+        _machine.setPosition(endPos); 
+        return _machine.onFindWordMatch();
+      } 
+      finally { /* restore state of FRM */
+        _machine.setFindWord(oldFindWord);
+        _machine.setDocument(oldDoc);
+        _machine.setPosition(oldPos);
+      }
     }
-
     return false;
   }
 

@@ -94,33 +94,31 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   private final LinkedList<Pair<Option<Color>, OptionListener<Color>>> _colorOptionListeners = 
     new LinkedList<Pair<Option<Color>, OptionListener<Color>>>();
   
-  /** Constructs a new find results panel. This is swing class which should 
-   * only be accessed from the event thread.
-   * @param frame the MainFrame
-   * @param regionManager the region manager associated with this panel
-   * @param region the region associated with this panel
-   * @param title for the panel
-   * @param searchString string that was searched for
-   * @param searchAll whether all files were searched
-   * @param searchSelectionOnly whether the selection within the document was searched
-   * @param matchCase whether the search was case-sensitive
-   * @param wholeWord whether the search was looking for a match on the whole word
-   * @param noComments whether the search ignored comments
-   * @param noTestCases whether the search ignored test cases
-   * @param doc weak reference to the document in which the search occurred (or started, if all documents were searched)
-   * @param findReplace the FindReplacePanel that created this FindResultsPanel
-   */
-  public FindResultsPanel(MainFrame frame, 
-    RegionManager<MovingDocumentRegion> regionManager, 
-    MovingDocumentRegion region, String title, String searchString, 
-    boolean searchAll, boolean searchSelectionOnly, boolean matchCase, 
-    boolean wholeWord, boolean noComments, boolean noTestCases, 
-    WeakReference<OpenDefinitionsDocument> doc, FindReplacePanel findReplace) {
+  /** Constructs a new find results panel. This is swing class which should only be accessed from the event thread.
+    * @param frame the MainFrame
+    * @param regionManager the region manager associated with this panel
+    * @param region the region associated with this panel
+    * @param title for the panel
+    * @param searchString string that was searched for
+    * @param searchAll whether all files were searched
+    * @param searchSelectionOnly whether the selection within the document was searched
+    * @param matchCase whether the search was case-sensitive
+    * @param wholeWord whether the search was looking for a match on the whole word
+    * @param noComments whether the search ignored comments
+    * @param noTestCases whether the search ignored test cases
+    * @param doc weak reference to the document in which the search occurred (or started, if all documents were searched)
+    * @param findReplace the FindReplacePanel that created this FindResultsPanel
+    */
+  public FindResultsPanel(final MainFrame frame, final RegionManager<MovingDocumentRegion> regionManager, 
+    final MovingDocumentRegion region, final String title, final String searchString, 
+    final boolean searchAll, final boolean searchSelectionOnly, final boolean matchCase, 
+    final boolean wholeWord, final boolean noComments, final boolean noTestCases, 
+    final WeakReference<OpenDefinitionsDocument> doc, final FindReplacePanel findReplacePanel) {
 
     super(frame, title, regionManager);
     
 //  _regionManager is inherited from RegionsTreePanel
-    _region = region;
+    _region       = region;
     _searchString = searchString;
     _searchAll    = searchAll;
     _searchSelectionOnly = searchSelectionOnly;
@@ -129,15 +127,17 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     _noComments   = noComments;
     _noTestCases  = noTestCases;
     _doc          = doc;
-    _findReplace  = findReplace;
+    _findReplace  = findReplacePanel;
     
     // set "Find Again" button tooltip
-    StringBuilder sb = new StringBuilder();
+    final StringBuilder sb = new StringBuilder();
     sb.append("<html>Find '").append(title);
-    if (!title.equals(_searchString)) sb.append("...");
+    if (! title.equals(_searchString)) sb.append("...");
     sb.append("'");
+    
     if (_searchAll) sb.append(" in all files");
     else if (_searchSelectionOnly) sb.append(" only in original selection.");
+    
     sb.append(".");
     if (_matchCase) sb.append("<br>Case must match.");
     if (_wholeWord) sb.append("<br>Whole words only.");
@@ -146,9 +146,6 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     sb.append("</html>");
     _findAgainButton.setToolTipText(sb.toString());
 
-    final FindReplacePanel findReplaceRef = findReplace;
-    final String searchStringRef = searchString;
-
     // Similar (but NOT identical) code found in BookmarksPanel and BreakpointsPanel
     getRegionManager().addListener(new RegionManagerListener<MovingDocumentRegion>() {      
       public void regionAdded(MovingDocumentRegion r) { addRegion(r); }
@@ -156,9 +153,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
         regionRemoved(r);
 
         /* Only re-add the region if it is still a match. */
-        if (findReplaceRef.isMatch(r, searchStringRef)) {
-          regionAdded(r);
-        }
+        if (findReplacePanel.isSearchStringMatch(r, searchString)) { regionAdded(r); }
       }
       public void regionRemoved(MovingDocumentRegion r) { removeRegion(r); }
     });
@@ -170,7 +165,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
       _colorOptionListeners.add(pair);
       DrJava.getConfig().addOptionListener(OptionConstants.FIND_RESULTS_COLORS[i], listener);
     }
-  }
+  }  // end constructor
   
   class ColorComboRenderer extends JPanel implements ListCellRenderer<Color> {
     private volatile Color _color = 
@@ -202,7 +197,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
       return renderer;
     }
     
-    public void paint(Graphics g) {
+    public void paint(final Graphics g) {
       setBackground(_color);
       setBorder(_compoundBorder);
       super.paint(g);

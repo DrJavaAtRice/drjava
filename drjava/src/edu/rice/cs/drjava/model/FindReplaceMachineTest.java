@@ -168,7 +168,7 @@ public class FindReplaceMachineTest extends DrJavaTestCase {
     _frm.setFindWord("evil");
     _testFindNextSucceeds(_frm, 0, 12);
     _doc.insertString(9, "-", null);
-    assertTrue("no longer on find text", !_frm.onMatch());
+    assertTrue("no longer on find text", !_frm.onFindWordMatch());
 //    System.err.println("testFindNextAndFailIsOnMatch completed");
   }
   
@@ -179,7 +179,7 @@ public class FindReplaceMachineTest extends DrJavaTestCase {
     _frm.setFindWord("Hear");
     _testFindNextSucceeds(_frm, 0, 4);
     _doc.insertString(1, "-", null);
-    assertTrue("no longer on find text", ! _frm.onMatch());
+    assertTrue("no longer on find text", ! _frm.onFindWordMatch());
 //    System.err.println("testFindNextAndFailIsOnMatch completed");
   }
   
@@ -191,7 +191,7 @@ public class FindReplaceMachineTest extends DrJavaTestCase {
     _frm.setFindWord("Hear");
     _testFindNextSucceeds(_frm, 0, 0);
     _doc.insertString(1, "-", null);
-    assertTrue("no longer on find text", ! _frm.onMatch());
+    assertTrue("no longer on find text", ! _frm.onFindWordMatch());
 //    System.err.println("testFindNextAndFailIsOnMatch completed");
   }
   
@@ -665,7 +665,7 @@ public class FindReplaceMachineTest extends DrJavaTestCase {
     assertEquals("documents should equal", doc.toString(), frm.getDocument().toString());
     assertEquals("findNext return value", found, _result.getFoundOffset());
     _assertOffsets(frm, start, found);
-    assertTrue("on find text", frm.onMatch());
+    assertTrue("on find text", frm.onFindWordMatch());
   } 
   
   private void _testFindNextSucceeds(final FindReplaceMachine frm, int start, int found) {
@@ -677,7 +677,7 @@ public class FindReplaceMachineTest extends DrJavaTestCase {
     });
     assertEquals("findNext return value", found, _offset);
     _assertOffsets(frm, start, found);
-    assertTrue("on find text", frm.onMatch());
+    assertTrue("on find text", frm.onFindWordMatch());
   }
   
   private void _testFindNextFails(final FindReplaceMachine frm, int start, int current) {

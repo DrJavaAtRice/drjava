@@ -61,9 +61,7 @@ import edu.rice.cs.util.UnexpectedException;
 public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends 
   EventNotifier<RegionManagerListener<R>> implements RegionManager<R> {
 
-  /** Whether or not this manager should be notified if the underlying 
-    * RegionSet detects a change in the underlying document. 
-    */
+  /** Whether this manager should be notified if the underlying RegionSet detects a change in the underlying document. */
   private boolean _notifyOnSetChange = false;
   
   /** Mapping of documents to collections of regions.  Primitive operations are thread safe. */
@@ -273,29 +271,23 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends
 //    return match;  // last region in revHead was the best match
 //  }
   
-  /** Returns the set of regions in the given document that overlap the 
-   * specified interval [startOffset, endOffset), including degenerate 
-   * regions [offset, offset) where [offset, offset] is a subset of 
-   * (startOffset, endOffset).
-   * 
-   * Assumes that all regions in the document are disjoint.  Note: degenerate 
-   * empty regions with form [offset, offset) vacuously satisfy this property.  
-   * Only executes in the event thread.
-   * 
-   * Note: this method could be implemented more cleanly using a 
-   * revserseIterator on the headSet containing all regions preceding or 
-   * equal to the selection. but this functionality was not added to TreeSet 
-   * until Java 6.0.
-   * 
-   * @param odd the document
-   * @param startOffset  the left end of the specified interval
-   * @param endOffset  the right end of the specified interval
-   * @return the {@code Collection<StaticDocumentRegion>} of regions overlapping the interval.
-   */
-  public Collection<R> getRegionsOverlapping(OpenDefinitionsDocument odd, 
-                                             int startOffset, int endOffset) {
+  /** Returns the set of regions in the given document that overlap the specified interval [startOffset, endOffset), 
+    * including degenerate regions [offset, offset) where [offset, offset] is a subset of (startOffset, endOffset).
+    * 
+    * Assumes that all regions in the document are disjoint.  Note: degenerate  empty regions with form [offset, offset) 
+    * vacuously satisfy this property.  Only executes in the event thread.
+    * 
+    * Note: this method could be implemented more cleanly using a revserseIterator on the headSet containing all regions
+    * preceding or equal to the selection. but this functionality was not added to TreeSet until Java 6.0.
+    * 
+    * @param odd the document
+    * @param startOffset  the left end of the specified interval
+    * @param endOffset  the right end of the specified interval
+    * @return the {@code Collection<StaticDocumentRegion>} of regions overlapping the interval.
+    */
+  public Collection<R> getRegionsOverlapping(OpenDefinitionsDocument odd, int startOffset, int endOffset) {
     
-    /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     LinkedList<R> result = new LinkedList<R>();
     if (startOffset == endOffset) return result;
     
@@ -328,14 +320,10 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends
       _documents.add(odd);
       docRegions = new RegionSet<R>(); 
 
-      /* 
-       * If this wants to be notified on changes, then the RegionSet needs a 
-       * reference to this so that it knows *who* to notify.
-       */
+      /* The RegionSet needs a reference to 'this' so 'this' is notified on changes. */
       if (this._notifyOnSetChange) {
         @SuppressWarnings("unchecked")
-        ConcreteRegionManager<OrderedDocumentRegion> thisRef = 
-          (ConcreteRegionManager<OrderedDocumentRegion>)this;
+        ConcreteRegionManager<OrderedDocumentRegion> thisRef = (ConcreteRegionManager<OrderedDocumentRegion>)this;
         docRegions.setManager(thisRef);
       }
 
@@ -432,16 +420,14 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends
     return regions;
   }
   
-  /** @return all regions, in the form of DummyDocumentRegions */
+  /** @return all regions, in the form of IRegions */
   public ArrayList<IRegion> getFileRegions() {
     ArrayList<IRegion> regions = new ArrayList<IRegion>();
     for (OpenDefinitionsDocument odd: _documents) {
       File f = odd.getRawFile();
       for (R r: _regions.get(odd)) {
         try {
-          regions.add(new DocumentFileRegion(f, 
-                                             odd.createPosition(r.getStartOffset()), 
-                                             odd.createPosition(r.getEndOffset())));
+          regions.add(new DocumentFileRegion(f, odd.createPosition(r.getStartOffset()), odd.createPosition(r.getEndOffset())));
         } catch (BadLocationException e) {
           /* Should never get here */
           throw new UnexpectedException(e);
