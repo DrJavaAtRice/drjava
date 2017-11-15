@@ -561,19 +561,19 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
   private void _findAll() {
     
     _findLabelBot.setText("Next");
-    String searchStr = _findField.getText();
-    String title = searchStr;
-    OpenDefinitionsDocument startDoc = _defPane.getOpenDefDocument();
-    boolean searchAll = _machine.getSearchAllDocuments();
-    boolean searchSelectionOnly = _machine.getSearchSelectionOnly();
+    final String searchStr = _findField.getText();
+    final String title = searchStr;
+    final OpenDefinitionsDocument startDoc = _defPane.getOpenDefDocument();
+    final boolean searchAll = _machine.getSearchAllDocuments();
+    final boolean searchSelectionOnly = _machine.getSearchSelectionOnly();
 
-    String tabLabel = (title.length() <= 20) ? title : title.substring(0,20);
-    RegionManager<MovingDocumentRegion> rm = _model.createFindResultsManager();
+    final String tabLabel = (title.length() <= 20) ? title : title.substring(0,20);
+    final RegionManager<MovingDocumentRegion> rm = _model.createFindResultsManager();
 
-    MovingDocumentRegion region = new MovingDocumentRegion(startDoc, 
-      _defPane.getSelectionStart(), _defPane.getSelectionEnd(), 
-      startDoc._getLineStartPos(_defPane.getSelectionStart()),
-      startDoc._getLineEndPos(_defPane.getSelectionEnd()));
+    final MovingDocumentRegion region = 
+      new MovingDocumentRegion(startDoc, _defPane.getSelectionStart(), _defPane.getSelectionEnd(), 
+                               startDoc._getLineStartPos(_defPane.getSelectionStart()),
+                               startDoc._getLineEndPos(_defPane.getSelectionEnd()));
 
     final FindResultsPanel panel = 
       _frame.createFindResultsPanel(rm, region, tabLabel, searchStr, searchAll, searchSelectionOnly, _machine.getMatchCase(),
@@ -617,7 +617,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     
     final OpenDefinitionsDocument oldDoc = _machine.getDocument();
     final OpenDefinitionsDocument oldFirstDoc = _machine.getFirstDoc();
-    final String oldFindWord = _machine.getFindWord();
+//    final String oldFindWord = _machine.getFindWord();
     final boolean oldSearchAll = _machine.getSearchAllDocuments();
     final boolean oldSearchSelectionOnly = _machine.getSearchSelectionOnly();
     final boolean oldMatchCase = _machine.getMatchCase();
@@ -656,11 +656,11 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
       _frame.hourglassOff(); 
       _model.refreshActiveDocument();
     } 
-    /* Restore state of FindReplaceMachine */
+    /* Restore state of FindReplaceMachine except for _findWord and _replaceWord. */
     _log.log("Restoring FindReplaceMachine");
     _machine.setDocument(oldDoc);
     _machine.setFirstDoc(oldFirstDoc);
-    _machine.setFindWord(oldFindWord);
+//    _machine.setFindWord(oldFindWord);
     _machine.setSearchAllDocuments(oldSearchAll);
     _machine.setSearchSelectionOnly(oldSearchSelectionOnly);
     _machine.setMatchCase(oldMatchCase);
@@ -703,9 +703,13 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
   }
   
   /** Performs the "replace all" command. */
+  
   private void _replaceAll() {
     
+    _findLabelBot.setText("Next");
+    
     final String searchStr = _findField.getText();
+    final String replaceStr = _replaceField.getText();
     final String title = searchStr;
     final OpenDefinitionsDocument startDoc = _defPane.getOpenDefDocument();
     final boolean searchAll = _machine.getSearchAllDocuments();
@@ -720,6 +724,27 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
                                startDoc._getLineStartPos(_defPane.getSelectionStart()),
                                startDoc._getLineEndPos(_defPane.getSelectionEnd()));
     
+    replaceAll(searchStr, replaceStr, searchAll, searchSelectionOnly, _machine.getMatchCase(),  _machine.getMatchWholeWord(), 
+            _machine.getIgnoreCommentsAndStrings(), _ignoreTestCases.isSelected(), startDoc, region);
+  }
+  
+  /** Performs the "replace all" with the specified options. 
+    * @param searchStr string to search for
+    * @param replaceStr string to be used as replacement
+    * @param searchAll true if we should search all documents
+    * @param searchSelectionOnly true if we should search only the current selection
+    * @param matchCase true if search should be case-sensitive
+    * @param wholeWord true if we want to match the whole word
+    * @param noComments true if we want to ignore comments
+    * @param noTestCases true if we want to ignore test cases
+    * @param startDoc first document to search within
+    * @param region a MovingDocumentRegion
+    */
+  public void replaceAll(final String searchStr, final String replaceStr, final boolean searchAll, final boolean searchSelectionOnly, 
+                         final boolean matchCase, final boolean wholeWord, final boolean noComments, final boolean noTestCases, 
+                         final OpenDefinitionsDocument startDoc, final MovingDocumentRegion region) {
+
+    
     _machine.setSearchBackwards(false);
 
     final int searchLen = searchStr.length();
@@ -727,7 +752,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     
     final OpenDefinitionsDocument oldDoc = _machine.getDocument();
     final OpenDefinitionsDocument oldFirstDoc = _machine.getFirstDoc();
-    final String oldFindWord = _machine.getFindWord();
+//    final String oldFindWord = _machine.getFindWord();
     final boolean oldSearchAll = _machine.getSearchAllDocuments();
     final boolean oldSearchSelectionOnly = _machine.getSearchSelectionOnly();
     final boolean oldMatchCase = _machine.getMatchCase();
@@ -748,16 +773,23 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     _machine.setIgnoreTestCases(noTestCases);
 
     _machine.setFindWord(searchStr);
-    final String replaceStr = _replaceField.getText();
     _machine.setReplaceWord(replaceStr);
+    _log.log("In FindReplacePanel, setting _findWord (in FRM) to '" + searchStr + "' and _replaceWord to '" + replaceStr + "'");
 
-    _frame.updateStatusField("Replacing All");
+    _frame.setStatusMessage("Replacing All");
+    repaint();
     
     _frame.hourglassOn();
     int count = 0;
-    /* Code snippet to replace matched String (findWord) with replaceWord loaded into FindReplaceMachine*/
+    /* Code snippet to replace matched String (findWord) with replaceWord loaded into FindReplaceMachine.
+     * fr is ignored because the machine state implicitly contains this information. 
+     * Aborts if an attempt is made to replace a string that does not match _findWord (searchStr).
+     */
     Runnable1<FindResult> replaceMatchingString = new Runnable1<FindResult>() { 
-      public void run(FindResult fr) { _machine.replaceCurrent(); }
+      public void run(FindResult fr) { 
+        boolean success =_machine.replaceCurrent();
+        if (! success) throw new UnexpectedException("Replace All command aborted because current does not match search string");
+      }
     };
     try {
       /* Replace all matching strings in region (which may be entire project). */
@@ -766,12 +798,13 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     finally { 
       _frame.hourglassOff(); 
       _model.refreshActiveDocument();
-    } 
-    /* Restore state of FindReplaceMachine */
+    }
+    
+    /* Restore state of FindReplaceMachine, except for _findWord and _replaceWord */
     _log.log("Restoring FindReplaceMachine");
     _machine.setDocument(oldDoc);
     _machine.setFirstDoc(oldFirstDoc);
-    _machine.setFindWord(oldFindWord);
+//    _machine.setFindWord(oldFindWord);
     _machine.setSearchAllDocuments(oldSearchAll);
     _machine.setSearchSelectionOnly(oldSearchSelectionOnly);
     _machine.setMatchCase(oldMatchCase);
@@ -907,7 +940,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
       _machine.setFindWord(_findField.getText());
       _machine.setReplaceWord(_replaceField.getText());
       _frame.clearStatusMessage(); // _message.setText(""); // JL
-      if (! _machine.onMatch() || _findField.getText().equals("")) {
+      if (! _machine.onFindWordMatch() || _findField.getText().equals("")) {
         _replaceAction.setEnabled(false);
         _replaceFindNextAction.setEnabled(false);
         _replaceFindPreviousAction.setEnabled(false);
@@ -1241,18 +1274,29 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     * @param searchString the string to check the region against
     * @return whether or not the text in r matches searchString
     */
-  public boolean isMatch(MovingDocumentRegion r, String searchString) {
+  public boolean isSearchStringMatch(MovingDocumentRegion r, String searchString) {
     final OpenDefinitionsDocument doc = r.getDocument();
     final int startPos = r.getStartOffset();
     final int endPos = r.getEndOffset();
 
-    if ((endPos - startPos == searchString.length()) && (_machine != null)) {
-       _machine.setFindWord(searchString);
-       _machine.setDocument(doc);
-       _machine.setPosition(endPos);
-      return _machine.onMatch();
+    if ((endPos - startPos == searchString.length()) && (_machine != null)) {  /* preserves the state of the FRM! */
+      /* save state of FRM */
+      final String oldFindWord = _machine.getFindWord();
+      final OpenDefinitionsDocument oldDoc = _machine.getDocument();
+      final int oldPos = _machine.getCurrentOffset();
+      
+      try {
+        _machine.setFindWord(searchString);  
+        _machine.setDocument(doc);
+        _machine.setPosition(endPos); 
+        return _machine.onFindWordMatch();
+      } 
+      finally { /* restore state of FRM */
+        _machine.setFindWord(oldFindWord);
+        _machine.setDocument(oldDoc);
+        _machine.setPosition(oldPos);
+      }
     }
-
     return false;
   }
 

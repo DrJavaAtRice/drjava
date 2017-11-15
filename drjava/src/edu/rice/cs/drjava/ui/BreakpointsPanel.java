@@ -101,8 +101,8 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
   /** Action performed when the Enter key is pressed. Should be overridden. */
   protected void performDefaultAction() { goToRegion(); }
   
-  /** Creates the buttons for controlling the regions. Should be overridden. */
-  protected JComponent[] makeButtons() {    
+  /** Creates the buttons for controlling the regions. */
+  @Override protected JComponent[] makeButtons() {    
     Action goToAction = new AbstractAction("Go to") {
       public void actionPerformed(ActionEvent ae) {
         goToRegion();

@@ -126,7 +126,7 @@ public class FindReplaceMachine {
     if (_isForward == searchBackwards) {
       // If we switch from searching forward to searching backwards or vice versa, isOnMatch is true, and _findword is
       // the same as the _lastFindWord, we know the user just found _findWord, so skip over this match.
-      if (onMatch() && _findWord.equals(_lastFindWord)) _skipText = true;
+      if (onFindWordMatch() && _findWord.equals(_lastFindWord)) _skipText = true;
       else _skipText = false;
     }
     _isForward = ! searchBackwards;
@@ -195,7 +195,7 @@ public class FindReplaceMachine {
     * have been updated.
     * @return true if the current position is right after an instance of the find word.
     */
-  public boolean onMatch() {
+  public boolean onFindWordMatch() {
     
     // Should be fixed now because of invokeAndWait in MainFrame constructor
     // (was: this invariant doesn't hold.  See DrJava bug #2321815)
@@ -233,7 +233,7 @@ public class FindReplaceMachine {
     
     assert EventQueue.isDispatchThread() || Utilities.TEST_MODE;
     
-    if (! onMatch()) return false;
+    if (! onFindWordMatch()) return false;
     try {
 //      boolean atStart = false;
       int offset = getCurrentOffset();

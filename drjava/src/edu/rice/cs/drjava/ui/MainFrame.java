@@ -2785,18 +2785,18 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
    * @param noComments whether comments should be ignored
    * @param noTestCases whether test cases should be ignored
    * @param doc weak reference to document in which search occurred (or started, if all documents were searched)
-   * @param findReplace the FindReplacePanel that created this FindResultsPanel
+   * @param findReplacePanel the FindReplacePanel that created this FindResultsPanel
    * @return new find results tab.
    */
   public FindResultsPanel createFindResultsPanel(final RegionManager<MovingDocumentRegion> rm,
-    MovingDocumentRegion region, String title, String searchString, 
-    boolean searchAll, boolean searchSelectionOnly, boolean matchCase, 
-    boolean wholeWord, boolean noComments, boolean noTestCases, 
-    WeakReference<OpenDefinitionsDocument> doc, FindReplacePanel findReplace) {
+    final MovingDocumentRegion region, final String title, final String searchString, 
+    final boolean searchAll, final boolean searchSelectionOnly, final boolean matchCase, 
+    final boolean wholeWord, final boolean noComments, final boolean noTestCases, 
+    final WeakReference<OpenDefinitionsDocument> doc, final FindReplacePanel findReplacePanel) {
     
     final FindResultsPanel panel = new FindResultsPanel(this, rm, region, 
       title, searchString, searchAll, searchSelectionOnly, matchCase, 
-      wholeWord, noComments, noTestCases, doc, findReplace);
+      wholeWord, noComments, noTestCases, doc, findReplacePanel);
 
     final AbstractMap<MovingDocumentRegion, HighlightManager.HighlightInfo> highlights =
       new IdentityHashMap<MovingDocumentRegion, HighlightManager.HighlightInfo>();
@@ -2804,8 +2804,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       new Pair<FindResultsPanel, Map<MovingDocumentRegion, HighlightManager.HighlightInfo>>(panel, highlights);
     _findResults.add(pair);
     
-    final FindReplacePanel findReplaceRef = findReplace;
-    final String searchStringRef = searchString;
+//    final FindReplacePanel findReplacePanel = findReplacePanel;
+//    final String searchStringRef = searchString;
 
     // hook highlighting listener to find results manager
     rm.addListener(new RegionManagerListener<MovingDocumentRegion>() { 
@@ -2822,7 +2822,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         regionRemoved(r);
 
         /* Only re-add region if it is still a match. */
-        if (findReplaceRef.isMatch(r, searchStringRef)) {
+        if (findReplacePanel.isSearchStringMatch(r, searchString)) {
           regionAdded(r);
         }
       }
