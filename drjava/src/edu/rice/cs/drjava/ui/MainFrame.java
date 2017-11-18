@@ -2822,9 +2822,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         regionRemoved(r);
 
         /* Only re-add region if it is still a match. */
-        if (findReplacePanel.isSearchStringMatch(r, searchString)) {
-          regionAdded(r);
-        }
+        if (findReplacePanel.isSearchStringMatch(r, searchString)) { regionAdded(r); }
       }
 
       public void regionRemoved(MovingDocumentRegion r) {
