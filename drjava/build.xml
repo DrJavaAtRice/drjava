@@ -8,7 +8,6 @@
 
   <property name="readable-project-name" value="DrJava" />
   <property name="src-working-dir" value="src/edu/rice/cs/drjava" />
-  <property name="junit-jar-to-include" value="lib/concutest-junit-4.7-withrt-nodep.jar" />
   <property name="md5-temp-name" value="classes/md5.properties" />
   <property name="md5-properties-path" value="edu/rice/cs/drjava/md5.properties" />
   <property name="main-class" value="edu.rice.cs.drjava.DrJava" />
@@ -62,15 +61,12 @@
   <property name="coverage-report-dir" value="coverage_report"/>
   <property name="coverage-exec" value="jacoco.exec"/>
 
-<!--  <extendclasspath path="lib/buildlib/junit.jar" /> -->
-
   <fileset id="libs" dir="lib" includes="*.jar" /> <!-- Only include jars that are at the top level (not in buildlib) -->
   <fileset id="jrelibs" dir="${java.home}/lib" includes="*.jar" /> 
   <echo message="libs = ${toString:libs}" />
   <echo message="jrelibs = ${toString:jrelibs}" />
   <fileset id="extlibs" dir="${java.home}/lib/ext" includes="*.jar" /> 
   <echo message="extlibs = ${toString:extlibs}" />
-  <property name="use-concjunit" value="false" />
   <!-- ************
        Help Targets
        ************ -->
@@ -140,7 +136,6 @@
     <echo message="       popup)" />
     <echo message="drjava.test.config: Location of the DrJava configuration file to use" />
     <echo message="                    in tests (default: testFiles/drjava.basic.config)" />
-    <echo message="use-concjunit: Set to true to test ConcJUnit instead of JUnit." />
   </target>
   
   <!-- ************
@@ -335,17 +330,14 @@
     <antcall target="iterate-tests">
       <param name="test-jvm" value="java" />
       <param name="test-tools" value="${current-tools}" />
-      <param name="test-force-disable-concjunit" value="false" />
     </antcall>
   </target>
 
   <target name="test-8" depends="compile, resolve-java8-exec, resolve-java8-tools" unless="skip-test"
           description="Run all tests under Java 8 (after compiling); use -Dtest-spec=... to filter">
-    <echo message="ConcJUnit is currently incompatible with Java 8."/>
     <antcall target="iterate-tests">
       <param name="test-jvm" value="${java8-exec}" />
       <param name="test-tools" value="${java8-tools}" />
-      <param name="test-force-disable-concjunit" value="true" />
     </antcall>
   </target>
 
@@ -434,9 +426,8 @@
   </target>
   
   
-  <target name="do-test" depends="resolve-jvm-args, resolve-junit-jar">
+  <target name="do-test" depends="resolve-jvm-args">
     <echo message="Running all tests matching '${test-filter-string}' with command '${test-jvm}', using '${junit-jar}' and '${test-tools}'" />
-<!--    <extendclasspath path="${junit-jar}" /> -->
     <jacoco:coverage xmlns:jacoco="antlib:org.jacoco.ant">
     <junit haltonfailure="${test-halt}" failureproperty="test-failed"
            fork="yes" forkmode="perTest" maxmemory="2G" jvm="${test-jvm}" dir="${basedir}">
@@ -457,7 +448,7 @@
         <propertyref prefix="drjava." />
         <!-- Add any properties that should be passed on -->
       </syspropertyset>
-      <jvmarg line="${jvm-args} ${concjunit-bootclasspath}" />
+      <jvmarg line="${jvm-args}" />
       <formatter classname="${test-formatter-class}" usefile="${test-output-to-file}" />
       <batchtest fork="true">
         <fileset dir="classes/test">
@@ -665,7 +656,7 @@
        Clean Targets
        ************* -->
        
-  <target name="clean" depends="clean-intermediate, clean-coverage-report, clean-products, clean-concjunit" description="Remove all build products; the result should match the intended Subversion contents">
+  <target name="clean" depends="clean-intermediate, clean-coverage-report, clean-products" description="Remove all build products; the result should match the intended Subversion contents">
   </target>
 
   <target name="clean-intermediate" unless="skip-clean">
@@ -719,13 +710,6 @@
       </fileset>
     </delete>
 	
-  </target>
-  
-  <target name="clean-concjunit" unless="skip-clean">
-    <echo message="Deleting ConcJUnit artifacts" />
-    
-    <delete file="instr.concjunit.txt" failonerror="${clean-can-fail}" />
-    <delete file="rt.concjunit.jar" failonerror="${clean-can-fail}" />	
   </target>
   
   <!-- ***************
@@ -1174,54 +1158,5 @@
     -->
     <available file="${generate-dir}" property="already-generated" />
   </target>
-
-  
-  
-  <!-- *****************
-       ConcJUnit Targets
-       ***************** -->
-  <target name="resolve-junit-jar">
-    <if>
-      <and>
-        <istrue value="${use-concjunit}" />
-        <isfalse value="${test-force-disable-concjunit}" />
-      </and>
-      <then>
-        <property name="junit-jar-1" location="lib/buildlib/concutest-junit-4.7-withrt-nodep.jar" />
-        <available property="junit-jar" value="${junit-jar-1}" file="${junit-jar-1}" />
-
-        <fail message="Can't find concutest-junit-4.7-withrt-nodep.jar in the lib/buildlib directory" unless="junit-jar" />
-
-        <property name="concjunitrt-jar-1" location="lib/buildlib/concjunitrt.jar" />
-        <available property="concjunitrt-jar" value="${concjunitrt-jar-1}" file="${concjunitrt-jar-1}" />
-
-        <fail message="Can't find concjunitrt.jar in the lib/buildlib directory" unless="concjunitrt-jar" />
-
-        <property name="rt-concjunit-jar-1" location="rt.concjunit.jar" />
-
-        <if>
-          <not>
-            <available file="${rt-concjunit-jar-1}" />
-          </not>
-          <then>
-            <echo message="Instrumenting Java runtime (no changes made to original), java=${test-jvm}" />
-            <java jar="${concjunitrt-jar}" jvm="${test-jvm}" fork="yes" inputstring="Y"/>
-          </then>
-          <else>
-            <echo message="${rt-concjunit-jar-1} already exists, not instrumenting." />
-          </else>
-        </if>
-        <available property="concjunit-bootclasspath" value="-Xbootclasspath/p:'${rt-concjunit-jar-1}'" file="${rt-concjunit-jar-1}" />
-        <echo message="boot classpath: ${concjunit-bootclasspath}" />
-      </then>
-      <else>
-        <property name="junit-jar-1" location="lib/buildlib/junit.jar" />
-        <available property="junit-jar" value="${junit-jar-1}" file="${junit-jar-1}" />
-        <available property="concjunit-bootclasspath" value="" file="${junit-jar-1}" />
-        <fail message="Can't find junit.jar in the lib/buildlib directory" unless="junit-jar" />
-      </else>
-    </if>
-  </target>
-
 </project>
 

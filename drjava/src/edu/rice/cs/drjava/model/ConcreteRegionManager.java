@@ -321,8 +321,8 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends
       docRegions = new RegionSet<R>(); 
 
       /* The RegionSet needs a reference to 'this' so 'this' is notified on changes. */
-      if (this._notifyOnSetChange) {
-        @SuppressWarnings("unchecked")
+      if (this._notifyOnSetChange) {  
+        @SuppressWarnings("unchecked") // What an ugly hack; the elements in ConcreteRegionManager have type R
         ConcreteRegionManager<OrderedDocumentRegion> thisRef = (ConcreteRegionManager<OrderedDocumentRegion>)this;
         docRegions.setManager(thisRef);
       }
