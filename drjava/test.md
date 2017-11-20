@@ -4,11 +4,34 @@
 
 <!----------------------------------------------------------------------------->
 
+## Vu's system
+
+```
+vu@Vu-Gazelle:~/github$ lsb_release -a
+No LSB modules are available.
+Distributor ID:	Ubuntu
+Description:	Ubuntu 17.10
+Release:	17.10
+Codename:	artful
+```
+
+```
+vu@Vu-Gazelle:~/github$ java -version
+java version "1.8.0_151"
+Java(TM) SE Runtime Environment (build 1.8.0_151-b12)
+Java HotSpot(TM) 64-Bit Server VM (build 25.151-b12, mixed mode)
+```
+
+<!----------------------------------------------------------------------------->
+
 ## Dr. Cartwright's `~/.drjava` file
 
 ```
 vu@Vu-Gazelle:~/github/drjava/drjava$ date
 Sun Nov 19 15:59:19 CST 2017
+```
+
+```
 vu@Vu-Gazelle:~/github/drjava/drjava$ ant clean test
 Buildfile: /home/vu/github/drjava/drjava/build.xml
      [echo] libs = docs.jar;dynamicjava-base.jar;ecj-4.5.1.jar;hamcrest-core.jar;jacocoagent.jar;jacocoant.jar;javalanglevels-base.jar;javarepl-dev.build.jar;jgoodies-common-1.8.1.jar;jgoodies-forms-1.9.0.jar;jgoodies-looks-2.7.0.jar;jsoup-1.8.1.jar;junit.jar;org.jacoco.agent-0.7.10.201707180856.jar;org.jacoco.ant-0.7.10.201707180856.jar;org.jacoco.core-0.7.10.201707180856.jar;org.jacoco.core-0.7.3.201409180205.jar;org.jacoco.report-0.7.10.201707180856.jar;org.jacoco.report-0.7.3.201409180205.jar;platform.jar;plt.jar;seaglasslookandfeel-0.2.jar
@@ -605,6 +628,9 @@ do-test:
     [junit] HistoryTest                                  0.43 sec
 ^Z
 [1]+  Stopped                 ant clean test
+```
+
+```
 vu@Vu-Gazelle:~/github/drjava/drjava$ date
 Sun Nov 19 16:11:30 CST 2017
 ```
