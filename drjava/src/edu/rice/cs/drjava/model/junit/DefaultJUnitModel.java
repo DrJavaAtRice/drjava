@@ -44,6 +44,7 @@ import java.rmi.RemoteException;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -326,7 +327,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     for (OpenDefinitionsDocument doc: lod) /* for all nonEmpty documents in lod */ {
       if (doc.isSourceFile())  { // excludes Untitled documents and open non-source files
         try {
-//          System.err.println("Processing " + doc);
+          _log.log("Processing " + doc);
           File sourceRoot = doc.getSourceRoot(); // may throw an InvalidPackageException
           
           // doc has valid package name; add it to list of open java source doc files
@@ -346,20 +347,19 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
           
           if (! classDirsAndRoots.containsKey(classFileDir)) {
             classDirsAndRoots.put(classFileDir, sourceDir);
-//            System.err.println("Adding " + classFileDir + " with source root " + sourceRoot + 
-//            " to list of class directories");
+            _log.log("Adding " + classFileDir + " with source root " + sourceRoot + " to list of class directories");
           }
         }
         catch (InvalidPackageException e) { /* Skip the file, since it doesn't have a valid package */ }
       }
     }
 
-//    System.err.println("classDirs = " + classDirsAndRoots.keySet());
+    _log.log("classDirs = " + classDirsAndRoots.keySet());
     
     /** set of dirs potentially containing test classes */
     Set<File> classDirs = classDirsAndRoots.keySet();
     
-    //System.err.println("openDocFiles = " + openDocFiles);
+    _log.log("openDocFiles = " + openDocFiles);
 
     /* Names of test classes. */
     final ArrayList<String> classNames = new ArrayList<String>();
@@ -375,11 +375,11 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     
     try {
       for (File dir: classDirs) { // foreach class file directory
-//        System.err.println("Examining directory " + dir);
+        _log.log("Examining directory " + dir);
         
         File[] listing = dir.listFiles();
         
-//        System.err.println("Directory contains the files: " + Arrays.asList(listing));
+        _log.log("Directory contains the files: " + Arrays.asList(listing));
         
         if (listing != null) { // listFiles may return null if there's an IO error
           for (File entry : listing) { /* for each class file in the build directory */        
