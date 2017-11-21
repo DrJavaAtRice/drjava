@@ -10,6 +10,7 @@
   <property name="src-working-dir" value="src/edu/rice/cs/drjava" />
   <property name="md5-temp-name" value="classes/md5.properties" />
   <property name="md5-properties-path" value="edu/rice/cs/drjava/md5.properties" />
+  <property name="junit-jar-to-include" value="lib/junit.jar" />
   <property name="main-class" value="edu.rice.cs.drjava.DrJava" />
 
   <!-- Properties loaded from a file -->
