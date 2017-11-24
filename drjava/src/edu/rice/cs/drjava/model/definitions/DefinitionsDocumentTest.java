@@ -37,7 +37,7 @@
 package edu.rice.cs.drjava.model.definitions;
 
 import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.model.MultiThreadedTestCase;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.GlobalEventNotifier;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.BraceReduction;
@@ -55,7 +55,7 @@ import java.util.List;
 /** Tests the functionality of the definitions document.
   * @version $Id$
   */
-public final class DefinitionsDocumentTest extends DrJavaTestCase implements ReducedModelStates {
+public final class DefinitionsDocumentTest extends MultiThreadedTestCase implements ReducedModelStates {
   private DefinitionsDocument _doc;
   private GlobalEventNotifier _notifier;
   

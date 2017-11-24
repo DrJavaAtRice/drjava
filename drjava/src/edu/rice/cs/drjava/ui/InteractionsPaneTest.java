@@ -40,7 +40,7 @@ package edu.rice.cs.drjava.ui;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.model.MultiThreadedTestCase;
 import edu.rice.cs.drjava.model.repl.InteractionsDJDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsDocumentTest.TestBeep;
@@ -57,7 +57,7 @@ import java.util.Date;
 /** Test functions of InteractionsPane.
   * @version $Id$
   */
-public final class InteractionsPaneTest extends DrJavaTestCase {
+public final class InteractionsPaneTest extends MultiThreadedTestCase {
   
   private static final char UNDEFINED = KeyEvent.CHAR_UNDEFINED;
   private static final int PRESSED = KeyEvent.KEY_PRESSED;

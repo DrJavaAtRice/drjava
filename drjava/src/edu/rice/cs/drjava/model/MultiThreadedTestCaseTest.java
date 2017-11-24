@@ -40,7 +40,7 @@ import edu.rice.cs.drjava.DrJavaTestCase;
 import junit.framework.*;
 
 /** Tests for MultiThreadedTestCase. */
-public class MultiThreadedTestCaseTest extends DrJavaTestCase {
+public class MultiThreadedTestCaseTest extends DrJavaTestCase{
   public MultiThreadedTestCaseTest() { super(); }
   public MultiThreadedTestCaseTest(String name) { super(name); }
   

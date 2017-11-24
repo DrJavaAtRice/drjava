@@ -36,7 +36,7 @@
 
 package edu.rice.cs.util.newjvm;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.model.MultiThreadedTestCase;
 
 import edu.rice.cs.plt.concurrent.CompletionMonitor;
 import edu.rice.cs.plt.concurrent.JVMBuilder;
@@ -46,7 +46,7 @@ import java.rmi.RemoteException;
 /** Test cases for the master/slave jvm control framework.
   * @version $Id$
   */
-public class IntegratedMasterSlaveTest extends DrJavaTestCase {
+public class IntegratedMasterSlaveTest extends MultiThreadedTestCase {
   
   volatile TestMasterJVM _testMaster;
   

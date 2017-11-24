@@ -37,11 +37,12 @@
 package edu.rice.cs.drjava;
 
 import junit.framework.*;
+import edu.rice.cs.drjava.model.MultiThreadedTestCase;
 
 /** Test that ensures all external dependencies are met!
  *  @version $Id$
  */
-public final class DependenciesTest extends DrJavaTestCase {
+public final class DependenciesTest extends MultiThreadedTestCase {
   public static final String REQUIRED_UTIL_VERSION = "20040521-1616";
 
   /** Constructor.

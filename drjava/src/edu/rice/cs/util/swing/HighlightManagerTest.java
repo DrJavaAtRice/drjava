@@ -36,7 +36,7 @@
 
 package edu.rice.cs.util.swing;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.model.MultiThreadedTestCase;
 import edu.rice.cs.drjava.ui.ReverseHighlighter;
 
 import javax.swing.*;
@@ -48,7 +48,7 @@ import java.awt.*;
  * Every method starting with the word "test" will be called when running
  * the test with JUnit.
  */
-public class HighlightManagerTest extends DrJavaTestCase {
+public class HighlightManagerTest extends MultiThreadedTestCase {
   
   /** A test method.
    * (Replace "X" with a name describing the test.  You may write as

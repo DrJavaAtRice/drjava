@@ -36,12 +36,12 @@
 
 package edu.rice.cs.drjava.config;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.model.MultiThreadedTestCase;
 
 /** Class according to the JUnit protocol. Tests the proper functionality of the class StringOption.
  *  @version $Id$
  */
-public final class StringOptionTest extends DrJavaTestCase {
+public final class StringOptionTest extends MultiThreadedTestCase {
   /** @param name The name of this test case. */
   public StringOptionTest(String name) { super(name); }
   

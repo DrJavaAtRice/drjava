@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.ui;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.model.MultiThreadedTestCase;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.project.DocFile;
@@ -56,7 +56,7 @@ import java.io.*;
 import java.util.List;
 
 /** Test functions of Project Facility working through the main frame and model. */
-public final class ProjectMenuTest extends DrJavaTestCase {
+public final class ProjectMenuTest extends MultiThreadedTestCase {
   
   private volatile MainFrame _frame;
   

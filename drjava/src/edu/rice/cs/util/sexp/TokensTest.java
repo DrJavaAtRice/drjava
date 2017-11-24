@@ -37,6 +37,8 @@ package edu.rice.cs.util.sexp;
 
 import junit.framework.TestCase;
 
+import edu.rice.cs.drjava.model.MultiThreadedTestCase;
+
 /** Test class for Tokens.java in this package. */
 public class TokensTest extends TestCase {
   

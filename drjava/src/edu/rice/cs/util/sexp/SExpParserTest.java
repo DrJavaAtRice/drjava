@@ -36,7 +36,7 @@
 
 package edu.rice.cs.util.sexp;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.model.MultiThreadedTestCase;
 
 import java.io.*;
 import java.util.List;
@@ -44,7 +44,7 @@ import java.util.List;
 /** A JUnit test case class. Every method starting with the word "test" will be called when running
  *  the test with JUnit.
  */
-public class SExpParserTest extends DrJavaTestCase {
+public class SExpParserTest extends MultiThreadedTestCase {
   
   /** Creates a temporary file and writes the given string to that file
    * @param fname the name of the file to create

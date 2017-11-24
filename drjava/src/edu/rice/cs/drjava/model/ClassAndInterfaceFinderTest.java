@@ -34,7 +34,7 @@
  * 
  * END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model;
-import edu.rice.cs.drjava.DrJavaTestCase;
+//import edu.rice.cs.drjava.model.MultiThreadedTestCase;
 
 import java.io.Reader;
 import java.io.StringReader;
@@ -46,7 +46,7 @@ import java.io.StringReader;
  * @version $Id$
  */
 
-public class ClassAndInterfaceFinderTest extends DrJavaTestCase {
+public class ClassAndInterfaceFinderTest extends MultiThreadedTestCase {
   
   
   /** Tests to see if string input is properly parsed to obtain interface name.

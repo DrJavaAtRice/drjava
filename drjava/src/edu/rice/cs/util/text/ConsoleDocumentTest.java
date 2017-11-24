@@ -39,13 +39,13 @@ package edu.rice.cs.util.text;
 import javax.swing.text.BadLocationException;
 
 import edu.rice.cs.drjava.model.repl.InteractionsDJDocument;
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.model.MultiThreadedTestCase;
 import edu.rice.cs.util.swing.Utilities;
 
 /** Tests ConsoleDocument.
   * @version $Id$
   */
-public class ConsoleDocumentTest extends DrJavaTestCase {
+public class ConsoleDocumentTest extends MultiThreadedTestCase {
   protected ConsoleDocument _doc;
   
   public void setUp() throws Exception {

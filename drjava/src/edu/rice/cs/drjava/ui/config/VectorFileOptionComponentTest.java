@@ -37,7 +37,7 @@
 package edu.rice.cs.drjava.ui.config;
 
 import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.model.MultiThreadedTestCase;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.util.swing.DefaultSwingFrame;
 import edu.rice.cs.util.swing.Utilities;
@@ -46,7 +46,7 @@ import java.io.File;
 import java.util.Vector;
 
 /** Tests functionality of this OptionComponent */
-public final class VectorFileOptionComponentTest extends DrJavaTestCase {
+public final class VectorFileOptionComponentTest extends MultiThreadedTestCase {
   private static VectorFileOptionComponent _option;
 
   protected void setUp() throws Exception {

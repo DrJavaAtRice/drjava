@@ -36,14 +36,14 @@
 
 package edu.rice.cs.util.text;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.model.MultiThreadedTestCase;
 
 import javax.swing.text.BadLocationException;
 
 /** Tests the SwingDocument.
   * @version $Id$
   */
-public class SwingDocumentTest extends DrJavaTestCase {
+public class SwingDocumentTest extends MultiThreadedTestCase {
   protected SwingDocument _doc;
   
   public void setUp() throws Exception {

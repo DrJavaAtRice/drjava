@@ -42,7 +42,7 @@ import java.util.List;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 import edu.rice.cs.util.OperationCanceledException;
 
-/** * Tests the indenting functionality on the level of the GlobalModel.
+/** Tests the indenting functionality on the level of the GlobalModel.
  * Not only are we testing that the document turns out right, but also
  * that the cursor position in the document is consistent with a standard.
  * @version $Id$

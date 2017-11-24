@@ -54,7 +54,7 @@ public abstract class MultiThreadedTestCase extends DrJavaTestCase {
   /** Initialize test state to not failed. 
     * @throws Exception  This convention is mandated by the JUnit TestCase class which is an ancestor of this class. 
     */
-  public void setUp() throws Exception {
+  protected void setUp() throws Exception {
     super.setUp();
     _testFailed = false;
     ExceptionHandler.ONLY.reset();
@@ -62,7 +62,7 @@ public abstract class MultiThreadedTestCase extends DrJavaTestCase {
   }
 
   /** If any test failed, print a message saying that some test failed in another thread (not the testing thread). */
-  public void tearDown() throws Exception {
+  protected void tearDown() throws Exception {
     ExceptionHandler.ONLY.rethrow();
     if (_testFailed) fail("test failed in another thread");
     DefinitionsPaneTest._log.log("MultithreadedTestCase.tearDown() calling super.tearDown()");

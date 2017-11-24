@@ -36,15 +36,12 @@
 package edu.rice.cs.drjava.model;
 import edu.rice.cs.drjava.DrJavaTestCase;
 
-/** * DummyOpenDefDocTest for unit testing DummyOpenDefDoc.  Uses
- * JUnit for testing.
- *
- * @author <a href="mailto:jasonbs@rice.edu">Jason Schiller</a>
- * @version $Id$
- */
+/** DummyOpenDefDocTest for unit testing DummyOpenDefDoc.  Uses JUnit for testing.
+  * @author <a href="mailto:jasonbs@rice.edu">Jason Schiller</a>
+  * @version $Id$
+  */
 
 public class DummyOpenDefDocTest extends DrJavaTestCase {
-  
   
   /** Creates a DummyOpenDefDoc and ensures that it properly
    * throws UnsupportedOperationException by calling isModifiedOnDisk().

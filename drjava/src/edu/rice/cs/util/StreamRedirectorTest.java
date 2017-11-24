@@ -72,7 +72,7 @@
 
 package edu.rice.cs.util;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.model.MultiThreadedTestCase;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -80,7 +80,7 @@ import java.io.InputStreamReader;
 
 /** * Test suite over InputStreamRedirector.
  */
-public class StreamRedirectorTest extends DrJavaTestCase {
+public class StreamRedirectorTest extends MultiThreadedTestCase {
 
   /** Tests that an InputStreamRedirector correctly interprets empty input as end of stream. 
    * @throws IOException if an IO operation fails

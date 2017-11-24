@@ -36,9 +36,10 @@
 
 package edu.rice.cs.util.docnavigation;
 
+import edu.rice.cs.drjava.model.MultiThreadedTestCase;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.model.MultiThreadedTestCase;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
@@ -46,7 +47,7 @@ import java.io.File;
 import java.util.HashSet;
 import java.util.Iterator;
 
-public class JTreeSortNavigatorTest extends DrJavaTestCase {
+public class JTreeSortNavigatorTest extends MultiThreadedTestCase {
   
   protected JTreeSortNavigator<DummyINavigatorItem> tree;
   protected DefaultMutableTreeNode root;

@@ -36,12 +36,12 @@
 
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.model.MultiThreadedTestCase;
 
 /** * Tests the functionality of the ModelList list class.
  * @version $Id$
  */
-public final class ModelListTest extends DrJavaTestCase {
+public final class ModelListTest extends MultiThreadedTestCase {
   protected ModelList<Integer> fEmpty;
   protected ModelList<Integer> fFull;
 

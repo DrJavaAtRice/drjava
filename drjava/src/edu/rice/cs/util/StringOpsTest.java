@@ -36,7 +36,7 @@
 
 package edu.rice.cs.util;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.model.MultiThreadedTestCase;
 import edu.rice.cs.drjava.config.*;
 
 import edu.rice.cs.plt.tuple.Pair;
@@ -45,7 +45,7 @@ import java.io.PrintWriter;
 import java.util.List;
 
 /** Test functions of StringOps. */
-public class StringOpsTest extends DrJavaTestCase {
+public class StringOpsTest extends MultiThreadedTestCase {
   /** Test the replace() method of StringOps class. */
   public void testReplace() {
     String test = "aabbccdd";

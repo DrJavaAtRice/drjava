@@ -36,12 +36,12 @@
 
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.model.MultiThreadedTestCase;
 
 /** * Tests the functionality of the Gap class.
  * @version $Id$
  */
-public final class GapTest extends DrJavaTestCase {
+public final class GapTest extends MultiThreadedTestCase {
   /** Tests the ability to grow a Gap.
    */
   public void testGrow() {

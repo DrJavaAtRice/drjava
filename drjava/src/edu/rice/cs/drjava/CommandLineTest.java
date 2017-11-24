@@ -42,6 +42,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 
+import edu.rice.cs.drjava.model.MultiThreadedTestCase;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.drjava.ui.MainFrame;
@@ -53,7 +54,7 @@ import edu.rice.cs.util.swing.Utilities;
 /** Tests opening/creating files specified as command line arguments.
   * @version $Id$
   */
-public final class CommandLineTest extends DrJavaTestCase {
+public final class CommandLineTest extends MultiThreadedTestCase {
   /** File separator, i.e. '/' or '\\'. */
   private static final char FS = File.separatorChar;
   

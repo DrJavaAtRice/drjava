@@ -37,12 +37,12 @@
 package edu.rice.cs.drjava.config;
 import java.io.*;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.model.MultiThreadedTestCase;
 
 /**Tests the OptionMapLoader.
  * @version $Id$
  */
-public final class OptionMapLoaderTest extends DrJavaTestCase implements OptionConstants {
+public final class OptionMapLoaderTest extends MultiThreadedTestCase implements OptionConstants {
   
   public OptionMapLoaderTest(String s) { super(s); }
   

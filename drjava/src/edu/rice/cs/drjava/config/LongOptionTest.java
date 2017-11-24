@@ -36,12 +36,12 @@
 
 package edu.rice.cs.drjava.config;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.model.MultiThreadedTestCase;
 
 /** Class according to the JUnit protocol. Tests the proper functionality of the class LongOption.
  *  @version $Id$
  */
-public final class LongOptionTest extends DrJavaTestCase {
+public final class LongOptionTest extends MultiThreadedTestCase {
   
   /** @param name The name of this test case. */
   public LongOptionTest(String name) { super(name); }

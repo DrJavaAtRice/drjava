@@ -36,12 +36,12 @@
 
 package edu.rice.cs.drjava.config;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.model.MultiThreadedTestCase;
 
 /** Class according to the JUnit protocol. Tests the proper functionality of the class NonNegativeIntegerOption.
  *  @version $Id$
  */
-public final class NonNegativeIntegerOptionTest extends DrJavaTestCase {
+public final class NonNegativeIntegerOptionTest extends MultiThreadedTestCase {
   /** @param name The name of this test case. */
   public NonNegativeIntegerOptionTest(String name) { super(name); }
   

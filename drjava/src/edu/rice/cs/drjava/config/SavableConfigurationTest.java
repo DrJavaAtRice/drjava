@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.config;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.model.MultiThreadedTestCase;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -48,7 +48,7 @@ import java.util.Date;
   * @author <a href="mailto:chrisw@rice.edu">Chris Warrington</a>
   * @version $Id$
   */
-public class SavableConfigurationTest extends DrJavaTestCase {
+public class SavableConfigurationTest extends MultiThreadedTestCase {
   /** This is the date format the Date.toString() uses.
    */
   SimpleDateFormat dateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy");

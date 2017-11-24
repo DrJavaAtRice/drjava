@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.ui;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.model.MultiThreadedTestCase;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.plt.io.IOUtil;
 import junit.framework.Test;
@@ -50,7 +50,7 @@ import java.util.Vector;
 /** Test functions of RecentFileManager.
   * @version $Id$
   */
-public final class RecentFileManagerTest extends DrJavaTestCase {
+public final class RecentFileManagerTest extends MultiThreadedTestCase {
   
   protected static final String FOO_TEXT = "class DrJavaTestFoo {}";
   protected static final String BAR_TEXT = "class DrJavaTestBar {}";

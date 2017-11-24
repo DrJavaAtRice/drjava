@@ -1,6 +1,6 @@
 package edu.rice.cs.drjava.model;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.model.MultiThreadedTestCase;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.plt.io.IOUtil;
 
@@ -9,7 +9,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Position;
 
 /** Trivial JUnit test case class for StaticDocumentRegion. */
-public class DocumentRegionTest extends DrJavaTestCase {
+public class DocumentRegionTest extends MultiThreadedTestCase {
   private volatile OpenDefinitionsDocument _doc;  // working document accessible across threads
   private static final AbstractGlobalModel _model = new AbstractGlobalModel();
   private volatile File _tempDir;

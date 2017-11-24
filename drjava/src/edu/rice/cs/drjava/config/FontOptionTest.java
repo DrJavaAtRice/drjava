@@ -36,14 +36,14 @@
 
 package edu.rice.cs.drjava.config;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.model.MultiThreadedTestCase;
 import java.awt.Font;
 
 /** * Class according to the JUnit protocol. Tests
  * the proper functionality of the class FontOption.
  * @version $Id$
  */
-public final class FontOptionTest extends DrJavaTestCase {
+public final class FontOptionTest extends MultiThreadedTestCase {
 
   public void testParse() {
     FontOption fo = new FontOption("font.test1", Font.decode(null));

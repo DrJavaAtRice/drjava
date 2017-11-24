@@ -46,14 +46,14 @@ import java.io.IOException;
 import javax.swing.text.Position;
 
 import edu.rice.cs.drjava.model.*;
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.model.MultiThreadedTestCase;
 import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.swing.Utilities;
 
 /** Tests the CompilerErrorModel.
  *  @version $Id$
  */
-public final class CompilerErrorModelTest extends DrJavaTestCase {
+public final class CompilerErrorModelTest extends MultiThreadedTestCase {
   private File[] files;
   private String[] texts;
   private TestDocGetter getter;       // subclass of DummyGlobalModel

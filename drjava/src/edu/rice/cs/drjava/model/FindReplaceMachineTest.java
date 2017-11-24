@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.model;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+//import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.util.StringOps;
@@ -49,7 +49,7 @@ import java.io.File;
 /** Tests the FindReplaceMachine.
   * @version $Id$
   */
-public class FindReplaceMachineTest extends DrJavaTestCase {
+public class FindReplaceMachineTest extends MultiThreadedTestCase {
   private volatile OpenDefinitionsDocument _doc;  // working document accessible across threads
   private volatile OpenDefinitionsDocument _docPrev;
   private volatile OpenDefinitionsDocument _docNext;

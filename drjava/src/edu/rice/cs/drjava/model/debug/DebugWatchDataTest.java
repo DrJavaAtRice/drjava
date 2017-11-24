@@ -72,12 +72,12 @@
 
 package edu.rice.cs.drjava.model.debug;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.model.MultiThreadedTestCase;
 
 /** * Tests that the DebugWatchData class can display state correctly.
  * @version $Id$
  */
-public final class DebugWatchDataTest extends DrJavaTestCase {
+public final class DebugWatchDataTest extends MultiThreadedTestCase {
  
   /** Tests the state of a watch after its creation.
    */
