@@ -29,14 +29,14 @@
 
 package edu.rice.cs.drjava.config;
 
-import edu.rice.cs.drjava.model.MultiThreadedTestCase;
+import edu.rice.cs.drjava.DrJavaTestCase;
 
 import java.awt.*;
 
 /** Class according to the JUnit protocol. Tests the proper functionality of the class ColorOption.
   * @version $Id$
   */
-public final class ColorOptionTest extends MultiThreadedTestCase {
+public final class ColorOptionTest extends DrJavaTestCase {
   
   /** @param name The name of this test case.*/
   public ColorOptionTest(String name) { super(name); }

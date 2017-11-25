@@ -255,14 +255,12 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     super.tearDown();
   }
   
-  /** Ensures that the given object will wait for n notifications. Callers must 
-   * call o.wait() AFTER this is called.  Use _notifyLock instead of 
-   * o.notify() when using this method. Only one object (o) can use this 
-   * synchronization protocol at a time, since it uses a field to store the 
-   * number of pending notifications.
-   * @param n The number of times to be "notified" through _notifyLock
-   * @throws InterruptedException if execution is interrupted unexpectedly
-   */
+  /** Ensures that the given object will wait for n notifications. Callers must  call o.wait() AFTER this is called.  
+    * Use _notifyLock instead of o.notify() when using this method. Only one object (o) can use this  synchronization 
+    * protocol at a time, since it uses a field to store the number of pending notifications.
+    * @param n The number of times to be "notified" through _notifyLock
+    * @throws InterruptedException if execution is interrupted unexpectedly
+    */
   protected void _setPendingNotifies(int n) throws InterruptedException {
     synchronized(_notifierLock) {
       _log.log("Waiting for " + n + " notifications ...");

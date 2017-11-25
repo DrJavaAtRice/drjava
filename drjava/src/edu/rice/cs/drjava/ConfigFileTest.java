@@ -38,7 +38,7 @@ package edu.rice.cs.drjava;
 
 import edu.rice.cs.drjava.config.FileConfiguration;
 import edu.rice.cs.drjava.config.OptionConstants;
-import edu.rice.cs.drjava.model.MultiThreadedTestCase;
+import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.plt.io.IOUtil;
 
@@ -49,7 +49,7 @@ import java.io.IOException;
 /** * Tests that a custom config file can be specified.
  * @version $Id$
  */
-public final class ConfigFileTest extends MultiThreadedTestCase {
+public final class ConfigFileTest extends DrJavaTestCase {
   private static final String CUSTOM_PROPS =
     "indent.level = 5\n" +
     "history.max.size = 1\n" +

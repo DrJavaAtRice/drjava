@@ -36,7 +36,7 @@
 
 package edu.rice.cs.util;
 
-import edu.rice.cs.drjava.model.MultiThreadedTestCase;
+import edu.rice.cs.drjava.DrJavaTestCase;
 
 import java.util.Arrays;
 import java.util.List;
@@ -46,7 +46,7 @@ import java.util.List;
  * set by a Unix bash shell in most cases.
  * @version $Id$
  */
-public class ArgumentTokenizerTest extends MultiThreadedTestCase {
+public class ArgumentTokenizerTest extends DrJavaTestCase {
 
   /** Creates a new ArgumentTokenizer to be used in every test.
    * @param name test name

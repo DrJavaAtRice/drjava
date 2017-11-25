@@ -37,7 +37,7 @@
 package edu.rice.cs.drjava.model.repl;
 
 import edu.rice.cs.drjava.model.repl.newjvm.*;
-import edu.rice.cs.drjava.model.MultiThreadedTestCase;
+import edu.rice.cs.drjava.DrJavaTestCase;
 
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.tuple.OptionVisitor;
@@ -48,7 +48,7 @@ import edu.rice.cs.dynamicjava.interpreter.*;
 /** Tests the functionality of the repl interpreter.
   * @version $Id$
   */
-public class JavaInterpreterTest extends MultiThreadedTestCase {
+public class JavaInterpreterTest extends DrJavaTestCase {
   
   // ***************************
   // TODO: These are useful tests, but they don't belong here.  They're testing the

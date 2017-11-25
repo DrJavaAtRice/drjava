@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.config;
 
-import edu.rice.cs.drjava.model.MultiThreadedTestCase;
+import edu.rice.cs.drjava.DrJavaTestCase;
 
 import java.util.ArrayList;
 
@@ -44,7 +44,7 @@ import java.util.ArrayList;
  * the proper functionality of the class ForcedChoiceOption.
  * @version $Id$
  */
-public final class ForcedChoiceOptionTest extends MultiThreadedTestCase {
+public final class ForcedChoiceOptionTest extends DrJavaTestCase {
   /** @param name The name of this test case.
    */
   public ForcedChoiceOptionTest(String name) { super(name); }

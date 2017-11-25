@@ -36,12 +36,12 @@
 
 package edu.rice.cs.util.docnavigation;
 
-import edu.rice.cs.drjava.model.MultiThreadedTestCase;
+import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.util.swing.Utilities;
 
 import java.util.*;
 
-public class JListSortNavigatorTest extends MultiThreadedTestCase {
+public class JListSortNavigatorTest extends DrJavaTestCase {
   
   protected JListSortNavigator<DummyINavigatorItem> list;
   protected DummyINavigatorItem i1, i2, i3, i4;

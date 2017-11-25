@@ -36,18 +36,17 @@
 
 package edu.rice.cs.drjava.model;
 
-//import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrJavaTestCase;
 
 import java.io.File;
 import java.io.IOException;
 
 
 /** JUnit test class for testing TestDocGetter.
- *
  *  @author <a href="mailto:ericc@rice.edu">Eric Shao-yu Cheng</a>
  *  @version $Id$
  */
-public class TestDocGetterTest extends MultiThreadedTestCase {
+public class TestDocGetterTest extends DrJavaTestCase {
   
   /** Creates a new empty TestDocGetter instance, calls getDocumentForFile() with an empty File and ensures it throws
    *  an IllegalStateException. 

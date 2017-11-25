@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.model.repl;
 
-import edu.rice.cs.drjava.model.MultiThreadedTestCase;
+import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.repl.newjvm.MainJVM;
 import edu.rice.cs.drjava.model.FileSaveSelector;
@@ -61,7 +61,7 @@ import java.rmi.RemoteException;
   * TODO: completely revise this class.
   * @version $Id$
   */
-public final class InteractionsModelTest extends MultiThreadedTestCase {
+public final class InteractionsModelTest extends DrJavaTestCase {
   
   private static Log _log = new Log("InteractionsModelTest.txt", false);
   protected InteractionsDJDocument _adapter;

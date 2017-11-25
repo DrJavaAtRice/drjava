@@ -37,7 +37,7 @@
 package  edu.rice.cs.drjava.model.definitions;
 
 import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.model.MultiThreadedTestCase;
+import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.DJDocument;
 import edu.rice.cs.drjava.model.GlobalEventNotifier;
@@ -47,7 +47,7 @@ import javax.swing.text.BadLocationException;
 /** Test the comment lines / uncomment lines functionality.
   * @version $Id$
   */
-public final class CommentTest extends MultiThreadedTestCase {
+public final class CommentTest extends DrJavaTestCase {
   protected DefinitionsDocument doc;
   private Integer _indentLevel = Integer.valueOf(2);
   private GlobalEventNotifier _notifier;

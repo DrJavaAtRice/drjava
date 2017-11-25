@@ -37,7 +37,7 @@
 package edu.rice.cs.drjava.ui.config;
 
 import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.model.MultiThreadedTestCase;
+import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.util.swing.DefaultSwingFrame;
 import edu.rice.cs.util.swing.Utilities;
@@ -47,7 +47,7 @@ import java.awt.*;
 /** Tests functionality of this OptionComponent
   * @version $Id:
   */
-public final class ColorOptionComponentTest extends MultiThreadedTestCase {
+public final class ColorOptionComponentTest extends DrJavaTestCase {
 
   private static ColorOptionComponent _option;
 

@@ -130,7 +130,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
         }
       }
     });
-    Utilities.clearEventQueue(); // Let some pending event queue operations complete
+//    Utilities.clearEventQueue(); // Let some pending event queue operations complete
     _model.setResetAfterCompile(false);
     
     _log.log("Completed (GlobalModelTestCase) set up of " + this);

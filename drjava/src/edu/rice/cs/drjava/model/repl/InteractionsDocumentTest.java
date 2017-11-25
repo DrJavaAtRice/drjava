@@ -36,14 +36,14 @@
 
 package edu.rice.cs.drjava.model.repl;
 
-import edu.rice.cs.drjava.model.MultiThreadedTestCase;
+import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.text.EditDocumentException;
 
 /** Tests the functionality of the InteractionsDocument.  Most history functionality is tested in HistoryTest.
  *  @version $Id$
  */
-public final class InteractionsDocumentTest extends MultiThreadedTestCase {
+public final class InteractionsDocumentTest extends DrJavaTestCase {
   protected InteractionsDocument _doc;
   
   static final String TEST_BANNER = "This is a test banner";

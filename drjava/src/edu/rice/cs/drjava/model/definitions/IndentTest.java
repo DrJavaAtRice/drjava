@@ -44,7 +44,7 @@ import  javax.swing.text.BadLocationException;
 //import java.io.IOException;
 
 import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.model.MultiThreadedTestCase;
+import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.model.DJDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.BraceInfo;
 import edu.rice.cs.drjava.config.*;
@@ -59,7 +59,7 @@ import static edu.rice.cs.drjava.model.definitions.reducedmodel.BraceInfo.*;
 /** Class that tests the tab/enter/curly indenting functionality.
   * @version $Id$
   */
-public final class IndentTest extends MultiThreadedTestCase {
+public final class IndentTest extends DrJavaTestCase {
   protected DefinitionsDocument _doc;
   
   private Integer indentLevel = Integer.valueOf(2);

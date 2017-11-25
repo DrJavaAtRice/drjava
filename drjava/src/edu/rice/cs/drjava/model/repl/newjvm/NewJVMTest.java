@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.model.repl.newjvm;
 
-import edu.rice.cs.drjava.model.MultiThreadedTestCase;
+import edu.rice.cs.drjava.DrJavaTestCase;
 
 import edu.rice.cs.plt.concurrent.CompletionMonitor;
 import edu.rice.cs.plt.io.IOUtil;
@@ -54,8 +54,8 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 /** Tests the functionality of the new JVM manager.
  *  @version $Id$
  */
-public final class NewJVMTest extends MultiThreadedTestCase  {
-  private static final Log _log  = new Log("MasterSlave.txt", true);
+public final class NewJVMTest extends DrJavaTestCase  {
+  private static final Log _log  = new Log("MasterSlave.txt", false);
   
   private static volatile TestJVMExtension _jvm;
   

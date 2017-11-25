@@ -36,12 +36,12 @@
 
 package edu.rice.cs.drjava.config;
 
-import edu.rice.cs.drjava.model.MultiThreadedTestCase;
+import edu.rice.cs.drjava.DrJavaTestCase;
 
 /** Class according to the JUnit protocol. Tests the proper functionality of the class IntegerOption.
  *  @version $Id$
  */
-public final class IntegerOptionTest extends MultiThreadedTestCase {
+public final class IntegerOptionTest extends DrJavaTestCase {
   
   /** @param name The name of this test case. */
   public IntegerOptionTest(String name) { super(name); }

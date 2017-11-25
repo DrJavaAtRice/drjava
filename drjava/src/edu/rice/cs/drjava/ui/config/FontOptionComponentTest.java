@@ -37,7 +37,7 @@
 package edu.rice.cs.drjava.ui.config;
 
 import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.model.MultiThreadedTestCase;
+import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.util.swing.DefaultSwingFrame;
 import edu.rice.cs.util.swing.Utilities;
@@ -46,7 +46,7 @@ import java.awt.*;
 
 /** * Tests functionality of this OptionComponent
  */
-public final class FontOptionComponentTest extends MultiThreadedTestCase {
+public final class FontOptionComponentTest extends DrJavaTestCase {
   private static FontOptionComponent _option;
 
   protected void setUp() throws Exception {

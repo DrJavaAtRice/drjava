@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.model;
 
-//import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.util.StringOps;
@@ -49,7 +49,7 @@ import java.io.File;
 /** Tests the FindReplaceMachine.
   * @version $Id$
   */
-public class FindReplaceMachineTest extends MultiThreadedTestCase {
+public class FindReplaceMachineTest extends DrJavaTestCase {
   private volatile OpenDefinitionsDocument _doc;  // working document accessible across threads
   private volatile OpenDefinitionsDocument _docPrev;
   private volatile OpenDefinitionsDocument _docNext;
@@ -59,12 +59,9 @@ public class FindReplaceMachineTest extends MultiThreadedTestCase {
   private volatile int _offset;
   private static final AbstractGlobalModel _model = new AbstractGlobalModel();
   
-  private static final String EVIL_TEXT =
-    "Hear no evil, see no evil, speak no evil.";
-  private static final String EVIL_TEXT_PREV =
-    "Hear no evilprev, see no evilprev, speak no evilprev.";
-  private static final String EVIL_TEXT_NEXT =
-    "Hear no evilnext, see no evilnext, speak no evilnext.";
+  private static final String EVIL_TEXT = "Hear no evil, see no evil, speak no evil.";
+  private static final String EVIL_TEXT_PREV = "Hear no evilprev, see no evilprev, speak no evilprev.";
+  private static final String EVIL_TEXT_NEXT = "Hear no evilnext, see no evilnext, speak no evilnext.";
   private static final String FIND_WHOLE_WORD_TEST_1 =
     "public class Foo\n" +
     "{\n" +

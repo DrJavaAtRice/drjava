@@ -38,13 +38,13 @@ package edu.rice.cs.drjava.model;
 
 import java.io.File;
 
-import edu.rice.cs.drjava.model.MultiThreadedTestCase;
+import edu.rice.cs.drjava.DrJavaTestCase;
 
 /** DummyGetDocumentsTest for unit testing DummyGetDocuments.  Uses JUnit for testing.
   * @author <a href="mailto:ericc@rice.edu">Eric Shao-yu Cheng</a>
   * @version $Id$
   */
-public class DummyGlobalModelTest extends MultiThreadedTestCase {
+public class DummyGlobalModelTest extends DrJavaTestCase {
   
   /** Creates a new instance of DummyGetDocuments, calls
     * getDocumentsForFile() and ensures the method throws an

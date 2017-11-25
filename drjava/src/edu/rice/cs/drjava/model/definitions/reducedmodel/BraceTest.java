@@ -37,13 +37,13 @@
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
 import junit.framework.*;
-import edu.rice.cs.drjava.model.MultiThreadedTestCase;
+import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.BraceException;
 
 /** * Tests the Brace class.
  * @version $Id$
  */
-public final class BraceTest extends MultiThreadedTestCase implements ReducedModelStates {
+public final class BraceTest extends DrJavaTestCase implements ReducedModelStates {
   protected Brace rparen;
   protected Brace lparen;
 

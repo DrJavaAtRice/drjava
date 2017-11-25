@@ -36,15 +36,16 @@
 
 package edu.rice.cs.util;
 
-import edu.rice.cs.drjava.model.MultiThreadedTestCase;
+import edu.rice.cs.drjava.DrJavaTestCase;
 
 /** Attempts to test the correctness of the ReaderWriterLock class, which allows multiple reader and writer threads to
   * safely access a shared resource.  (Multiple readers can be active at a time, but only one writer can be active, 
   * during which time no readers can be active.)  This can be difficult to test because there is little control over 
-  * how the threads are actually scheduled.
+  * how the threads are actually scheduled.  Extends DrJavaTestCase because all JUnit assertXXX calls are executed in
+  * the main test thread.
   * @version $Id$
   */
-public class ReaderWriterLockTest extends MultiThreadedTestCase {
+public class ReaderWriterLockTest extends DrJavaTestCase {
 
   protected volatile ReaderWriterLock _lock;
 

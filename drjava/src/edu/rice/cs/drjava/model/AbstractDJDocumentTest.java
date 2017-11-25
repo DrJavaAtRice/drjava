@@ -36,11 +36,11 @@
 
 package edu.rice.cs.drjava.model;
 
-//import edu.rice.cs.drjava.model.MultiThreadedTestCase;
+import edu.rice.cs.drjava.DrJavaTestCase;
 
 /** This class contains tests for AbstractDJDocument.
   */
-public class AbstractDJDocumentTest extends MultiThreadedTestCase {
+public class AbstractDJDocumentTest extends DrJavaTestCase {
   public void testIsNum() {
     assertTrue(AbstractDJDocument._isNum("0"));
     assertTrue(AbstractDJDocument._isNum("1"));

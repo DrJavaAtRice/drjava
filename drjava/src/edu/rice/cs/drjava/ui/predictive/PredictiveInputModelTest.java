@@ -36,14 +36,14 @@
 
 package edu.rice.cs.drjava.ui.predictive;
 
-import edu.rice.cs.drjava.model.MultiThreadedTestCase;
+import edu.rice.cs.drjava.DrJavaTestCase;
 
 import java.util.List;
 import java.util.Set;
 
 /** * Unit tests for PredictiveInputModel class.
  */
-public class PredictiveInputModelTest extends MultiThreadedTestCase {
+public class PredictiveInputModelTest extends DrJavaTestCase {
   public void testInitial() {
     PredictiveInputModel<String> pim = new PredictiveInputModel<String>(false,
                                                                         new PredictiveInputModel.PrefixStrategy<String>(),

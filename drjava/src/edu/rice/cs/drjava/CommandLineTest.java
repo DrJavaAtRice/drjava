@@ -42,7 +42,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 
-import edu.rice.cs.drjava.model.MultiThreadedTestCase;
+import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.drjava.ui.MainFrame;
@@ -51,10 +51,11 @@ import edu.rice.cs.util.Log;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.Utilities;
 
-/** Tests opening/creating files specified as command line arguments.
+/** Tests opening/creating files specified as command line arguments.  Does not use MultiThreadedTestCase because
+  * all JUnit assertXXX calls run in the main test thread.
   * @version $Id$
   */
-public final class CommandLineTest extends MultiThreadedTestCase {
+public final class CommandLineTest extends DrJavaTestCase {
   /** File separator, i.e. '/' or '\\'. */
   private static final char FS = File.separatorChar;
   
@@ -87,7 +88,6 @@ public final class CommandLineTest extends MultiThreadedTestCase {
   private volatile String f8_name;
   private volatile String f8_contents;
   
-  
   /** Files that do not exist (constructor deletes them), and their filenames. */
   private volatile File nof1;
   private volatile File nof2;
@@ -111,7 +111,6 @@ public final class CommandLineTest extends MultiThreadedTestCase {
   public void setUp() throws Exception {
     super.setUp();
     
-//    _log.log("INVOKing DrJava._initConfig() for " + this);
 //  Perform Swing initialization in event thread because the event thread is already running
     Utilities.invokeAndWait(new Runnable() { 
       public void run() {

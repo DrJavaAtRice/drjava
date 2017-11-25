@@ -37,7 +37,7 @@
 package edu.rice.cs.drjava.model.repl;
 
 import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.model.MultiThreadedTestCase;
+import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.config.FileConfiguration;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.GlobalModelTestCase.OverwriteException;
@@ -52,7 +52,7 @@ import java.io.IOException;
 /** Tests the functionality of the repl History.
  *  @version $Id$
  */
-public final class HistoryTest extends MultiThreadedTestCase implements OptionConstants{
+public final class HistoryTest extends DrJavaTestCase implements OptionConstants{
   private History _history;
   private File _tempDir;
 

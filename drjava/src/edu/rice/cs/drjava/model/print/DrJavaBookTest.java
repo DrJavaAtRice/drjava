@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.model.print;
 
-import edu.rice.cs.drjava.model.MultiThreadedTestCase;
+import edu.rice.cs.drjava.DrJavaTestCase;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -48,7 +48,7 @@ import java.awt.print.Printable;
 /** * Test functions of DrJavaBook
  *
  */
-public final class DrJavaBookTest extends MultiThreadedTestCase {
+public final class DrJavaBookTest extends DrJavaTestCase {
   /** The DrJavaBook instance we will be testing. */
   private DrJavaBook book = null;
   

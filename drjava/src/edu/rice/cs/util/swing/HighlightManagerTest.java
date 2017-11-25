@@ -36,7 +36,7 @@
 
 package edu.rice.cs.util.swing;
 
-import edu.rice.cs.drjava.model.MultiThreadedTestCase;
+import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.ui.ReverseHighlighter;
 
 import javax.swing.*;
@@ -44,11 +44,10 @@ import javax.swing.text.Highlighter;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 
-/** * A JUnit test case class for the class HighlightManager.
- * Every method starting with the word "test" will be called when running
- * the test with JUnit.
+/** A JUnit test case class for the class HighlightManager.  Extends DrJavaTestCase because all JUnit assertXXX calls 
+  * are executed in the main test thread.
  */
-public class HighlightManagerTest extends MultiThreadedTestCase {
+public class HighlightManagerTest extends DrJavaTestCase {
   
   /** A test method.
    * (Replace "X" with a name describing the test.  You may write as

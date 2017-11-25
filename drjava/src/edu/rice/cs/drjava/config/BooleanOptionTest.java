@@ -29,19 +29,17 @@
 
 package edu.rice.cs.drjava.config;
 
-import edu.rice.cs.drjava.model.MultiThreadedTestCase;
+import edu.rice.cs.drjava.DrJavaTestCase;
 
 /** * Class according to the JUnit protocol. Tests
  * the proper functionality of the class BooleanOption.
  * @version $Id$
  */
-public final class BooleanOptionTest extends MultiThreadedTestCase {
-  /** @param name The name of this test case.
-   */
+public final class BooleanOptionTest extends DrJavaTestCase {
+  /** @param name The name of this test case. */
   public BooleanOptionTest(String name) { super(name); }
   
-  public void testGetName()
-  {
+  public void testGetName() {
     BooleanOption bo1 = new BooleanOption("enable JUnit",null);
     BooleanOption bo2 = new BooleanOption("use menu icons",null);
     
@@ -49,8 +47,7 @@ public final class BooleanOptionTest extends MultiThreadedTestCase {
     assertEquals("use menu icons",   bo2.getName());
   }
   
-  public void testParse()
-  {
+  public void testParse() {
     BooleanOption bo = new BooleanOption("enable JUnit",null);
     
     assertEquals(Boolean.TRUE, bo.parse("true"));
@@ -64,8 +61,7 @@ public final class BooleanOptionTest extends MultiThreadedTestCase {
     catch (OptionParseException e) { }
   }
   
-  public void testFormat()
-  {
+  public void testFormat() {
     BooleanOption bo1 = new BooleanOption("max_files",null);
     BooleanOption bo2 = new BooleanOption("indent_size",null);
     

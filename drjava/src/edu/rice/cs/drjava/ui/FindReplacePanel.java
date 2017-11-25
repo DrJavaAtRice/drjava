@@ -589,7 +589,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
       public void run() {
         _model.refreshActiveDocument();  // Rationale: a giant findAll left the definitions pane is a strange state
         panel.requestFocusInWindow();
-//        panel.getRegTree().scrollRowToVisible(0);
+        panel.getRegTree().scrollRowToVisible(0);
       }});
   }
   

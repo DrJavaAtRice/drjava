@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.project;
 
-import edu.rice.cs.drjava.model.MultiThreadedTestCase;
+import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.iter.IterUtil;
@@ -53,7 +53,7 @@ import java.io.FileReader;
 import java.io.IOException;
 
 /** Test class for project files */
-public class ProjectTest extends MultiThreadedTestCase {
+public class ProjectTest extends DrJavaTestCase {
   
   File base;
   File parent;

@@ -36,7 +36,7 @@
 
 package edu.rice.cs.util.jar;
 
-import edu.rice.cs.drjava.model.MultiThreadedTestCase;
+import edu.rice.cs.drjava.DrJavaTestCase;
 
 import java.io.*;
 import java.util.Arrays;
@@ -47,7 +47,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 
-public class JarCreationTest extends MultiThreadedTestCase {
+public class JarCreationTest extends DrJavaTestCase {
   /** Tests the creation of manifest files through the ManifestWriter class
    */
   public void testCreateManifest() {

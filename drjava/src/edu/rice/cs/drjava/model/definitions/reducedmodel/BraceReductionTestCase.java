@@ -36,13 +36,13 @@
 
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
-import edu.rice.cs.drjava.model.MultiThreadedTestCase;
+import edu.rice.cs.drjava.DrJavaTestCase;
 
 /** Test cases which test the implementation of BraceReduction may extend this abstract class to acquire a convenience
   * function for determining the state of the current token.
   * @version $Id$
   */
-public abstract class BraceReductionTestCase extends MultiThreadedTestCase {
+public abstract class BraceReductionTestCase extends DrJavaTestCase {
   protected volatile ReducedModelControl model0;
   protected volatile ReducedModelControl model1;
   protected volatile ReducedModelControl model2;

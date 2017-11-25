@@ -37,7 +37,7 @@
 package edu.rice.cs.drjava.ui.config;
 
 import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.model.MultiThreadedTestCase;
+import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.config.OptionConstants;
 
 import edu.rice.cs.util.FileOps;
@@ -48,7 +48,7 @@ import javax.swing.*;
 import java.io.File;
 
 /** Tests functionality of this OptionComponent. */
-public final class FileOptionComponentTest extends MultiThreadedTestCase {
+public final class FileOptionComponentTest extends DrJavaTestCase {
 
   private static FileOptionComponent _option;
 

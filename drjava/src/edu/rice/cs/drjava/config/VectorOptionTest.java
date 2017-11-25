@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.config;
 
-import edu.rice.cs.drjava.model.MultiThreadedTestCase;
+import edu.rice.cs.drjava.DrJavaTestCase;
 
 import java.util.Vector;
 
@@ -44,7 +44,7 @@ import java.util.Vector;
 /** Class according to the JUnit protocol.  Tests the proper functionality of the class VectorOption.
  *  @version $Id$
  */
-public final class VectorOptionTest extends MultiThreadedTestCase {
+public final class VectorOptionTest extends DrJavaTestCase {
   private VectorOption<String> _svo;
   private VectorOption<Integer> _ivo;
   private VectorOption<Boolean> _bvo;
