@@ -49,7 +49,8 @@ import java.lang.ref.WeakReference;
 
 import static org.netbeans.test.MemoryTestUtils.*;
 
-/** Tests the Definitions Pane
+/** Tests the Definitions Pane.  The MultiThreadedTestCase frameworks ensures that runtime errors in auxiliary threads
+  * are detected.
   * @version $Id$
   */
 public final class DefinitionsPaneMemoryLeakTest extends MultiThreadedTestCase {

@@ -59,12 +59,9 @@ public class FindReplaceMachineTest extends DrJavaTestCase {
   private volatile int _offset;
   private static final AbstractGlobalModel _model = new AbstractGlobalModel();
   
-  private static final String EVIL_TEXT =
-    "Hear no evil, see no evil, speak no evil.";
-  private static final String EVIL_TEXT_PREV =
-    "Hear no evilprev, see no evilprev, speak no evilprev.";
-  private static final String EVIL_TEXT_NEXT =
-    "Hear no evilnext, see no evilnext, speak no evilnext.";
+  private static final String EVIL_TEXT = "Hear no evil, see no evil, speak no evil.";
+  private static final String EVIL_TEXT_PREV = "Hear no evilprev, see no evilprev, speak no evilprev.";
+  private static final String EVIL_TEXT_NEXT = "Hear no evilnext, see no evilnext, speak no evilnext.";
   private static final String FIND_WHOLE_WORD_TEST_1 =
     "public class Foo\n" +
     "{\n" +

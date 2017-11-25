@@ -54,30 +54,32 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 /** Tests the functionality of the new JVM manager.
  *  @version $Id$
  */
-public final class NewJVMTest extends DrJavaTestCase {
+public final class NewJVMTest extends DrJavaTestCase  {
   private static final Log _log  = new Log("MasterSlave.txt", false);
   
   private static volatile TestJVMExtension _jvm;
   
-  public NewJVMTest(String name) { super(name); }
-
-  public static Test suite() {
-    TestSuite suite = new TestSuite(NewJVMTest.class);
-    TestSetup setup = new TestSetup(suite) {
-      protected void setUp() throws Exception { 
-        super.setUp();
-        _jvm = new TestJVMExtension(); 
-      }
-      protected void tearDown() throws Exception { _jvm.dispose(); }
-    };
-
-    return setup;
+  public NewJVMTest(String name) throws RemoteException { 
+    super(name); 
+    _jvm = new TestJVMExtension();
   }
+
+//  public static Test suite() {
+//    TestSuite suite = new TestSuite(NewJVMTest.class);
+//    TestSetup setup = new TestSetup(suite) {
+//      protected void setUp() throws Exception { 
+//        super.setUp();
+//        _jvm = new TestJVMExtension(); 
+//      }
+//      protected void tearDown() throws Exception { _jvm.dispose(); }
+//    };
+//
+//    return setup;
+//  }
 
 
   public void testPrintln() throws Throwable {
-    debug.logStart();
-    _log.log("NewJVMTest.testPrintln executing");
+    _log.log("$$$ NewJVMTest.testPrintln executing");
     
     _jvm.resetFlags();
     assertTrue(_jvm.interpret("System.err.print(\"err\");"));
@@ -94,23 +96,21 @@ public final class NewJVMTest extends DrJavaTestCase {
     assertEquals("system out buffer", "out", _jvm.outBuf());
     assertEquals("void return flag", true, _jvm.voidReturnFlag());
     
-    debug.logEnd();
+    _log.log("$$$ NewJVMTest.testPrintln completed"); 
   }
 
   public void testReturnConstant() throws Throwable {
-    debug.logStart();
-   _log.log("NewJVMTest.testReturnConstant executing");
+   _log.log("$$ NewJVMTest.testReturnConstant executing");
 
    _jvm.resetFlags();
    assertTrue(_jvm.interpret("5"));
    assertEquals("result", "5", _jvm.returnBuf());
 
-   debug.logEnd();
+    _log.log("$$$ NewJVMTest.testReturnConstant completed");
   }
 
   public void testWorksAfterRestartConstant() throws Throwable {
-    debug.logStart();
-    _log.log("NewJVMTest.testWorksAfterRestartConstant executing");
+    _log.log("$$$ NewJVMTest.testWorksAfterRestartConstant executing");
 
     // Check that a constant is returned
     _jvm.resetFlags();
@@ -125,24 +125,22 @@ public final class NewJVMTest extends DrJavaTestCase {
     assertTrue(_jvm.interpret("4"));
     assertEquals("result", "4", _jvm.returnBuf());
     
-    debug.logEnd();
+    _log.log("$$$ NewJVMTest.testWorksAfterRestartConstant completed");
   }
 
 
   public void testThrowRuntimeException() throws Throwable {
-    debug.logStart();
-    _log.log("NewJVMTest.testThrowRuntimeException executing");
+    _log.log("$$$ NewJVMTest.testThrowRuntimeException executing");
     
     _jvm.resetFlags();
     assertTrue(_jvm.interpret("throw new RuntimeException();"));
     assertTrue("exception message", _jvm.exceptionMsgBuf().startsWith("java.lang.RuntimeException"));
 
-    debug.logEnd();
+    _log.log("$$$ NewJVMTest.testThrowRuntimeException completed");
   }
 
   public void testToStringThrowsRuntimeException() throws Throwable {
-    debug.logStart();
-    _log.log("NewJVMTest.testToStringThrowsRuntimeException executing");
+    _log.log("$$$ NewJVMTest.testToStringThrowsRuntimeException executing");
     
     _jvm.resetFlags();
     assertTrue(_jvm.interpret("class A { public String toString() { throw new RuntimeException(); } };" +
@@ -150,13 +148,13 @@ public final class NewJVMTest extends DrJavaTestCase {
     assertTrue("exception should have been thrown by toString",
                _jvm.exceptionMsgBuf() != null);
     
-    debug.logEnd();
+    _log.log("$$$ NewJVMTest.testToStringThrowsRuntimeException completed");
   }
 
   /** Ensure that switching to a non-existant interpreter throws an Exception.
    */
   public void testSwitchToNonExistantInterpreter() {
-    debug.logStart();
+    _log.log("$$$ NewJVMTest.testSwitchToNonExistantInterpreter executing");
     try {
       _jvm.setActiveInterpreter("thisisabadname");
 //      System.err.println("outbuf: " + _jvm.outBuf);
@@ -165,7 +163,7 @@ public final class NewJVMTest extends DrJavaTestCase {
     catch (IllegalArgumentException e) {
       // good, that's what should happen
     }
-    debug.logEnd();
+    _log.log("$$$ NewJVMTest.testSwitchToNonExistantInterpreter completed");
   }
 
   /** Ensure that MainJVM can correctly switch the active interpreter used by
@@ -173,7 +171,7 @@ public final class NewJVMTest extends DrJavaTestCase {
    * @throws InterruptedException if execution was interrupted unexpectedly
    */
   public void testSwitchActiveInterpreter() throws InterruptedException {
-    debug.logStart();
+    _log.log("$$$ NewJVMTest.testSwitchActiveInterpreter executing");
     
     assertTrue(_jvm.interpret("int x = 6;"));
     _jvm.addInterpreter("monkey");
@@ -203,8 +201,7 @@ public final class NewJVMTest extends DrJavaTestCase {
 //       _jvm.interpret("x + ");
 //       assertTrue("syntax error was reported",
 //                  ! _jvm.syntaxErrorMsgBuf.equals("") );
-//     }
-    debug.logEnd();
+    _log.log("$$$ NewJVMTest.testSwitchActiveInterpreter executing");
   }
 
   private static class TestJVMExtension extends MainJVM {

@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.config;
 
-import edu.rice.cs.drjava.model.MultiThreadedTestCase;
+import edu.rice.cs.drjava.DrJavaTestCase;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.util.*;
@@ -46,7 +46,7 @@ import java.io.*;
 /** * Tests for the variables and language constructs that can be used in external processes.
  * @author Mathias Ricken
  */
-public class DrJavaPropertySetupTest extends MultiThreadedTestCase {
+public class DrJavaPropertySetupTest extends DrJavaTestCase {
   public final String PS = File.pathSeparator; // path separator
   public final String FS = File.separator; // path separator
   public final String TMPDIR = System.getProperty("java.io.tmpdir")+

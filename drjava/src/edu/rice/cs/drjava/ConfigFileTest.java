@@ -38,6 +38,7 @@ package edu.rice.cs.drjava;
 
 import edu.rice.cs.drjava.config.FileConfiguration;
 import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.plt.io.IOUtil;
 

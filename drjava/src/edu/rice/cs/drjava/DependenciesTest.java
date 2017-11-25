@@ -37,6 +37,7 @@
 package edu.rice.cs.drjava;
 
 import junit.framework.*;
+import edu.rice.cs.drjava.DrJavaTestCase;
 
 /** Test that ensures all external dependencies are met!
  *  @version $Id$

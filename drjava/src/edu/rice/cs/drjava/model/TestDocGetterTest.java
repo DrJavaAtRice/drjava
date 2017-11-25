@@ -43,7 +43,6 @@ import java.io.IOException;
 
 
 /** JUnit test class for testing TestDocGetter.
- *
  *  @author <a href="mailto:ericc@rice.edu">Eric Shao-yu Cheng</a>
  *  @version $Id$
  */

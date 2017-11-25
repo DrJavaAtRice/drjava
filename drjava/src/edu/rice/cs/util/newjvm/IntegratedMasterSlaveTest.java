@@ -43,7 +43,8 @@ import edu.rice.cs.plt.concurrent.JVMBuilder;
 
 import java.rmi.RemoteException;
 
-/** Test cases for the master/slave jvm control framework.
+/** Test cases for the master/slave jvm control framework.  Extends DrJavaTestCase because all JUnit assertXXX calls
+  * are executed in the main test thread.
   * @version $Id$
   */
 public class IntegratedMasterSlaveTest extends DrJavaTestCase {

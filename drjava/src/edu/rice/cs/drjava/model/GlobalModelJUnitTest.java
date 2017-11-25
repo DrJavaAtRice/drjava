@@ -44,8 +44,8 @@ import java.util.List;
   * @version $Id$
   */
 public final class GlobalModelJUnitTest extends GlobalModelTestCase {
-  
-  private static Log _log = new Log("GlobalModel.txt", true);
+
+  private static Log _log = new Log("GlobalModel.txt", false);
 
   /** Whether or not to print debugging output. */
   static final boolean printMessages = true;

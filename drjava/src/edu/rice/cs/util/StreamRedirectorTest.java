@@ -78,7 +78,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-/** * Test suite over InputStreamRedirector.
+/** * Test suite over InputStreamRedirector.  Extends DrJavaTestCase
  */
 public class StreamRedirectorTest extends DrJavaTestCase {
 

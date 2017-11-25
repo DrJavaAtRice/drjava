@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.ui;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.model.MultiThreadedTestCase;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.project.DocFile;
@@ -55,8 +55,9 @@ import java.awt.EventQueue;
 import java.io.*;
 import java.util.List;
 
-/** Test functions of Project Facility working through the main frame and model. */
-public final class ProjectMenuTest extends DrJavaTestCase {
+/** Test functions of Project Facility working through the main frame and model. Must use MultiThreadedTestCase instead
+  * of DrJavaTestCase because some JUnit assertXXX statements are executed in the event dispatch thread. */
+public final class ProjectMenuTest extends MultiThreadedTestCase {
   
   private volatile MainFrame _frame;
   
@@ -76,9 +77,9 @@ public final class ProjectMenuTest extends DrJavaTestCase {
   
   private volatile String _projFileText = null;
   
-  /** Invokes setUp() in MultiThreadedTestCase.  Accessible from anonymous inner classes. 
-   * @throws Exception if something goes wrong
-   */
+  /** Invokes setUp() in DrJavaTestCase.  This superclass is accessible from anonymous inner classes. 
+    * @throws Exception if something goes wrong
+    */
   private void superSetUp() throws Exception { super.setUp(); }
   
   /** Setup method for each JUnit test case in this Test class.

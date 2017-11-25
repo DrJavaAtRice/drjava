@@ -36,12 +36,10 @@ import edu.rice.cs.drjava.DrJavaTestCase;
  * @version $Id$
  */
 public final class BooleanOptionTest extends DrJavaTestCase {
-  /** @param name The name of this test case.
-   */
+  /** @param name The name of this test case. */
   public BooleanOptionTest(String name) { super(name); }
   
-  public void testGetName()
-  {
+  public void testGetName() {
     BooleanOption bo1 = new BooleanOption("enable JUnit",null);
     BooleanOption bo2 = new BooleanOption("use menu icons",null);
     
@@ -49,8 +47,7 @@ public final class BooleanOptionTest extends DrJavaTestCase {
     assertEquals("use menu icons",   bo2.getName());
   }
   
-  public void testParse()
-  {
+  public void testParse() {
     BooleanOption bo = new BooleanOption("enable JUnit",null);
     
     assertEquals(Boolean.TRUE, bo.parse("true"));
@@ -64,8 +61,7 @@ public final class BooleanOptionTest extends DrJavaTestCase {
     catch (OptionParseException e) { }
   }
   
-  public void testFormat()
-  {
+  public void testFormat() {
     BooleanOption bo1 = new BooleanOption("max_files",null);
     BooleanOption bo2 = new BooleanOption("indent_size",null);
     

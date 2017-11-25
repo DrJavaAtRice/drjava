@@ -49,7 +49,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
-/** This used to extend GlobalModelTestCase, but now it extends just TestCase.  Perhaps it should be changed back. */
+/** This test case formerly extended GlobalModelTestCase.  Perhaps it should be changed back. */
 public class DocumentCacheTest extends DrJavaTestCase {
   
   private DefaultGlobalModel _model;

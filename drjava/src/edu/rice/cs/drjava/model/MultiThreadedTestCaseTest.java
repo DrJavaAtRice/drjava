@@ -40,7 +40,7 @@ import edu.rice.cs.drjava.DrJavaTestCase;
 import junit.framework.*;
 
 /** Tests for MultiThreadedTestCase. */
-public class MultiThreadedTestCaseTest extends DrJavaTestCase {
+public class MultiThreadedTestCaseTest extends DrJavaTestCase { 
   public MultiThreadedTestCaseTest() { super(); }
   public MultiThreadedTestCaseTest(String name) { super(name); }
   
@@ -52,13 +52,13 @@ public class MultiThreadedTestCaseTest extends DrJavaTestCase {
         public void run() { throw new RuntimeException(); }
       });
       t.start();
-      join(t);
+      join(t);  // waits for the new thread to finish
     }
   }
   
   /** Uncaught exception in spawned thread. */
   public void testUncaught() {
-    TestResult tr = new Uncaught().run();
+    TestResult tr = new Uncaught().run();  // runs the tesXXX methods in the Uncaught TestCase object
     assertEquals(1, tr.runCount());
     assertEquals(1, tr.failureCount());
   }    

@@ -48,7 +48,7 @@ import javax.swing.JOptionPane;
  * @version $Id$
  * @since 2007-03-06
  */
-public class ScrollableListSelectionDialogTest extends TestCase {
+public class ScrollableListSelectionDialogTest extends  TestCase {
   private static final String TITLE = "DIALOG TITLE";
   private static final String LEADER = "DIALOG LEADER";
   private static final java.util.List<String> DATA = Arrays.asList("hello", "there");

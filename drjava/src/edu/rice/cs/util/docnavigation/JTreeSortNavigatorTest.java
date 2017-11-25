@@ -36,6 +36,7 @@
 
 package edu.rice.cs.util.docnavigation;
 
+import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.drjava.DrJavaTestCase;
