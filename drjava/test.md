@@ -22,20 +22,6 @@ Java HotSpot(TM) 64-Bit Server VM (build 25.151-b12, mixed mode)
 
 <!----------------------------------------------------------------------------->
 
-## commit
-
-```
-vu@Vu-Gazelle:~/github/drjava/drjava$ git log
-commit 0886cf16da57b40012734584f089b7b0f4f474da (HEAD -> master)
-Merge: 6a479a389 046954c0a
-Author: Vu <vuphan314@users.noreply.github.com>
-Date:   Tue Nov 21 12:21:36 2017 -0600
-
-    Merge branch master github.com/DrJavaAtRice/drjava
-```
-
-<!----------------------------------------------------------------------------->
-
 ## `objectweb`
 
 ```
@@ -214,18 +200,9 @@ vu@Vu-Gazelle:~/github/drjava/drjava$
 
 <!----------------------------------------------------------------------------->
 
-## 4 failed tests
-
-```
-GlobalModelJUnitTest
-GlobalModelOtherTest
-SingleDisplayModelTest
-JUnitErrorModelTest
-```
-
-<!----------------------------------------------------------------------------->
-
 ## Dr. Cartwright's `~/.drjava` file
+
+`commit 0886cf16da57b40012734584f089b7b0f4f474da`
 
 ```
 vu@Vu-Gazelle:~/github/drjava/drjava$ date
@@ -795,4 +772,518 @@ do-test:
 ```
 vu@Vu-Gazelle:~/github/drjava/drjava$ date
 Tue Nov 21 12:38:17 CST 2017
+```
+
+<!----------------------------------------------------------------------------->
+
+## Vu's `~/.drjava` file
+
+`commit ed17cbaef63890495a2d72b97e019c5641a43834`
+
+```
+vu@Vu-Gazelle:~/github/drjava/drjava$ ant test
+Buildfile: /home/vu/github/drjava/drjava/build.xml
+     [echo] libs = asm-6.0.jar;docs.jar;dynamicjava-base.jar;ecj-4.5.1.jar;hamcrest-core.jar;jacocoagent.jar;jacocoant.jar;javalanglevels-base.jar;jgoodies-common-1.8.1.jar;jgoodies-forms-1.9.0.jar;jgoodies-looks-2.7.0.jar;jsoup-1.8.1.jar;junit.jar;org.jacoco.agent-0.7.10.201707180856.jar;org.jacoco.ant-0.7.10.201707180856.jar;org.jacoco.core-0.7.10.201707180856.jar;org.jacoco.report-0.7.10.201707180856.jar;platform.jar;plt.jar;seaglasslookandfeel-0.2.jar
+     [echo] jrelibs = charsets.jar;deploy.jar;javaws.jar;jce.jar;jfr.jar;jfxswt.jar;jsse.jar;management-agent.jar;plugin.jar;resources.jar;rt.jar
+     [echo] extlibs = cldrdata.jar;dnsns.jar;jaccess.jar;jfxrt.jar;localedata.jar;nashorn.jar;sunec.jar;sunjce_provider.jar;sunpkcs11.jar;zipfs.jar
+
+resolve-development-value:
+
+resolve-version-tag:
+
+generate-source:
+     [echo] Processing src/edu/rice/cs/drjava/CodeStatus.orig
+     [copy] Copying 1 file to /home/vu/github/drjava/drjava/src/edu/rice/cs/drjava
+     [echo] Processing src/edu/rice/cs/drjava/Version.orig
+     [copy] Copying 1 file to /home/vu/github/drjava/drjava/src/edu/rice/cs/drjava
+
+resolve-java8-runtime:
+     [echo] java8-runtime = /usr/lib/jvm/java-8-oracle/jre/lib/rt.jar
+
+resolve-java8-tools:
+
+do-compile:
+     [echo] Compiling src directory to classes/base and classes/test with command 'javac'
+     [move] Moving 498 files to /home/vu/github/drjava/drjava/classes/base
+     [echo] jrelibs=charsets.jar;deploy.jar;javaws.jar;jce.jar;jfr.jar;jfxswt.jar;jsse.jar;management-agent.jar;plugin.jar;resources.jar;rt.jar
+    [javac] Compiling 608 source files to /home/vu/github/drjava/drjava/classes/base
+     [move] Moving 499 files to /home/vu/github/drjava/drjava/classes/test
+
+copy-resources:
+     [copy] Copying 58 files to /home/vu/github/drjava/drjava/classes/base
+
+unjar-libs:
+     [echo] libs = asm-6.0.jar;docs.jar;dynamicjava-base.jar;ecj-4.5.1.jar;hamcrest-core.jar;jacocoagent.jar;jacocoant.jar;javalanglevels-base.jar;jgoodies-common-1.8.1.jar;jgoodies-forms-1.9.0.jar;jgoodies-looks-2.7.0.jar;jsoup-1.8.1.jar;junit.jar;org.jacoco.agent-0.7.10.201707180856.jar;org.jacoco.ant-0.7.10.201707180856.jar;org.jacoco.core-0.7.10.201707180856.jar;org.jacoco.report-0.7.10.201707180856.jar;platform.jar;plt.jar;seaglasslookandfeel-0.2.jar
+     [echo] jrelibs = charsets.jar;deploy.jar;javaws.jar;jce.jar;jfr.jar;jfxswt.jar;jsse.jar;management-agent.jar;plugin.jar;resources.jar;rt.jar
+     [echo] extlibs = cldrdata.jar;dnsns.jar;jaccess.jar;jfxrt.jar;localedata.jar;nashorn.jar;sunec.jar;sunjce_provider.jar;sunpkcs11.jar;zipfs.jar
+
+check-generate-dir-from-dir:
+
+do-unjar-libs:
+
+compile:
+
+resolve-current-tools:
+
+test:
+     [echo] libs = asm-6.0.jar;docs.jar;dynamicjava-base.jar;ecj-4.5.1.jar;hamcrest-core.jar;jacocoagent.jar;jacocoant.jar;javalanglevels-base.jar;jgoodies-common-1.8.1.jar;jgoodies-forms-1.9.0.jar;jgoodies-looks-2.7.0.jar;jsoup-1.8.1.jar;junit.jar;org.jacoco.agent-0.7.10.201707180856.jar;org.jacoco.ant-0.7.10.201707180856.jar;org.jacoco.core-0.7.10.201707180856.jar;org.jacoco.report-0.7.10.201707180856.jar;platform.jar;plt.jar;seaglasslookandfeel-0.2.jar
+     [echo] jrelibs = charsets.jar;deploy.jar;javaws.jar;jce.jar;jfr.jar;jfxswt.jar;jsse.jar;management-agent.jar;plugin.jar;resources.jar;rt.jar
+     [echo] extlibs = cldrdata.jar;dnsns.jar;jaccess.jar;jfxrt.jar;localedata.jar;nashorn.jar;sunec.jar;sunjce_provider.jar;sunpkcs11.jar;zipfs.jar
+
+resolve-test-formatter-class:
+
+iterate-tests:
+     [echo] Executing iterate-tests
+     [echo] libs = asm-6.0.jar;docs.jar;dynamicjava-base.jar;ecj-4.5.1.jar;hamcrest-core.jar;jacocoagent.jar;jacocoant.jar;javalanglevels-base.jar;jgoodies-common-1.8.1.jar;jgoodies-forms-1.9.0.jar;jgoodies-looks-2.7.0.jar;jsoup-1.8.1.jar;junit.jar;org.jacoco.agent-0.7.10.201707180856.jar;org.jacoco.ant-0.7.10.201707180856.jar;org.jacoco.core-0.7.10.201707180856.jar;org.jacoco.report-0.7.10.201707180856.jar;platform.jar;plt.jar;seaglasslookandfeel-0.2.jar
+     [echo] jrelibs = charsets.jar;deploy.jar;javaws.jar;jce.jar;jfr.jar;jfxswt.jar;jsse.jar;management-agent.jar;plugin.jar;resources.jar;rt.jar
+     [echo] extlibs = cldrdata.jar;dnsns.jar;jaccess.jar;jfxrt.jar;localedata.jar;nashorn.jar;sunec.jar;sunjce_provider.jar;sunpkcs11.jar;zipfs.jar
+
+resolve-jvm-args:
+
+do-test:
+     [echo] Running all tests matching '*' with command 'java', using '${junit-jar}' and '/usr/lib/jvm/java-8-oracle/lib/tools.jar'
+[jacoco:coverage] Enhancing junit with coverage
+    [junit] CommandLineTest                              10.127 sec
+    [junit] ConfigFileTest                               0.322 sec
+    [junit] DependenciesTest                             0.265 sec
+    [junit] BooleanOptionTest                            0.259 sec
+    [junit] ColorOptionTest                              0.282 sec
+    [junit] DrJavaPropertySetupTest                      0.404 sec
+    [junit] FontOptionTest                               0.252 sec
+    [junit] ForcedChoiceOptionTest                       0.242 sec
+    [junit] IntegerOptionTest                            0.248 sec
+    [junit] KeyStrokeOptionTest                          0.479 sec
+    [junit] LongOptionTest                               0.275 sec
+    [junit] NonNegativeIntegerOptionTest                 0.274 sec
+    [junit] OptionMapLoaderTest                          0.254 sec
+    [junit] RecursiveFileListPropertyTest                0.018 sec
+    [junit] SavableConfigurationTest                     0.268 sec
+    [junit] StringOptionTest                             0.306 sec
+    [junit] VectorOptionTest                             0.289 sec
+    [junit] AbstractDJDocumentTest                       0.308 sec
+    [junit] ClassAndInterfaceFinderTest                  0.266 sec
+    [junit] ClipboardHistoryModelTest                    0.006 sec
+    [junit] DocumentRegionTest                           0.218 sec
+    [junit] DummyGlobalModelTest                         0.283 sec
+    [junit] DummyOpenDefDocTest                          0.273 sec
+    [junit] EventNotifierTest                            0.29 sec
+    [junit] FindReplaceMachineTest                       0.351 sec
+    [junit] GlobalIndentTest                             4.932 sec
+    [junit] GlobalModelCompileErrorsTest                 4.431 sec
+    [junit] GlobalModelCompileIOTest                     6.583 sec
+    [junit] GlobalModelCompileSuccessOptionsTest         2.412 sec
+    [junit] GlobalModelCompileSuccessTest                2.925 sec
+    [junit] GlobalModelCompileTest                       4.373 sec
+    [junit] GlobalModelIOTest                            16.913 sec
+    [junit] GlobalModelJUnitTest                         9.325 sec
+    [junit] Testsuite: edu.rice.cs.drjava.model.GlobalModelJUnitTest
+    [junit] Tests run: 14, Failures: 1, Errors: 13
+    [junit] ------------- Standard Output ---------------
+    [junit] Compiler is using classPath = '[/tmp/DrJava-test-vu1918369028699505376, /usr/lib/jvm/java-8-oracle/lib/tools.jar, /home/vu/github/drjava/drjava/lib/buildlib/plt-ant.jar, /home/vu/github/drjava/drjava/lib/buildlib/netbeans-memory-leak-utils.jar, /home/vu/github/drjava/drjava/classes/test, /home/vu/github/drjava/drjava/classes/base, /home/vu/github/drjava/drjava/classes/lib, /usr/share/ant/lib/junit.jar, /usr/share/java/ant-launcher-1.9.9.jar, /usr/share/ant/lib/ant.jar, /usr/share/ant/lib/ant-junit.jar, /usr/share/ant/lib/ant-junit4.jar, /tmp/jacocoagent5784881752619445294.jar]';  bootClassPath = 'null'
+    [junit] Compiler is using classPath = '[/tmp/DrJava-test-vu7160294357563295171, /usr/lib/jvm/java-8-oracle/lib/tools.jar, /home/vu/github/drjava/drjava/lib/buildlib/plt-ant.jar, /home/vu/github/drjava/drjava/lib/buildlib/netbeans-memory-leak-utils.jar, /home/vu/github/drjava/drjava/classes/test, /home/vu/github/drjava/drjava/classes/base, /home/vu/github/drjava/drjava/classes/lib, /usr/share/ant/lib/junit.jar, /usr/share/java/ant-launcher-1.9.9.jar, /usr/share/ant/lib/ant.jar, /usr/share/ant/lib/ant-junit.jar, /usr/share/ant/lib/ant-junit4.jar, /tmp/jacocoagent5784881752619445294.jar]';  bootClassPath = 'null'
+    [junit] Compiler is using classPath = '[/tmp/DrJava-test-vu5044273328837132015, /usr/lib/jvm/java-8-oracle/lib/tools.jar, /home/vu/github/drjava/drjava/lib/buildlib/plt-ant.jar, /home/vu/github/drjava/drjava/lib/buildlib/netbeans-memory-leak-utils.jar, /home/vu/github/drjava/drjava/classes/test, /home/vu/github/drjava/drjava/classes/base, /home/vu/github/drjava/drjava/classes/lib, /usr/share/ant/lib/junit.jar, /usr/share/java/ant-launcher-1.9.9.jar, /usr/share/ant/lib/ant.jar, /usr/share/ant/lib/ant-junit.jar, /usr/share/ant/lib/ant-junit4.jar, /tmp/jacocoagent5784881752619445294.jar]';  bootClassPath = 'null'
+    [junit] Compiler is using classPath = '[/tmp/DrJava-test-vu1441146025600376517, /usr/lib/jvm/java-8-oracle/lib/tools.jar, /home/vu/github/drjava/drjava/lib/buildlib/plt-ant.jar, /home/vu/github/drjava/drjava/lib/buildlib/netbeans-memory-leak-utils.jar, /home/vu/github/drjava/drjava/classes/test, /home/vu/github/drjava/drjava/classes/base, /home/vu/github/drjava/drjava/classes/lib, /usr/share/ant/lib/junit.jar, /usr/share/java/ant-launcher-1.9.9.jar, /usr/share/ant/lib/ant.jar, /usr/share/ant/lib/ant-junit.jar, /usr/share/ant/lib/ant-junit4.jar, /tmp/jacocoagent5784881752619445294.jar]';  bootClassPath = 'null'
+    [junit] Compiler is using classPath = '[/tmp/DrJava-test-vu5002683804843107450, /usr/lib/jvm/java-8-oracle/lib/tools.jar, /home/vu/github/drjava/drjava/lib/buildlib/plt-ant.jar, /home/vu/github/drjava/drjava/lib/buildlib/netbeans-memory-leak-utils.jar, /home/vu/github/drjava/drjava/classes/test, /home/vu/github/drjava/drjava/classes/base, /home/vu/github/drjava/drjava/classes/lib, /usr/share/ant/lib/junit.jar, /usr/share/java/ant-launcher-1.9.9.jar, /usr/share/ant/lib/ant.jar, /usr/share/ant/lib/ant-junit.jar, /usr/share/ant/lib/ant-junit4.jar, /tmp/jacocoagent5784881752619445294.jar]';  bootClassPath = 'null'
+    [junit] Compiler is using classPath = '[/tmp/DrJava-test-vu6327281938329492736, /usr/lib/jvm/java-8-oracle/lib/tools.jar, /home/vu/github/drjava/drjava/lib/buildlib/plt-ant.jar, /home/vu/github/drjava/drjava/lib/buildlib/netbeans-memory-leak-utils.jar, /home/vu/github/drjava/drjava/classes/test, /home/vu/github/drjava/drjava/classes/base, /home/vu/github/drjava/drjava/classes/lib, /usr/share/ant/lib/junit.jar, /usr/share/java/ant-launcher-1.9.9.jar, /usr/share/ant/lib/ant.jar, /usr/share/ant/lib/ant-junit.jar, /usr/share/ant/lib/ant-junit4.jar, /tmp/jacocoagent5784881752619445294.jar]';  bootClassPath = 'null'
+    [junit] Compiler is using classPath = '[/tmp/DrJava-test-vu3192354518768567107, /usr/lib/jvm/java-8-oracle/lib/tools.jar, /home/vu/github/drjava/drjava/lib/buildlib/plt-ant.jar, /home/vu/github/drjava/drjava/lib/buildlib/netbeans-memory-leak-utils.jar, /home/vu/github/drjava/drjava/classes/test, /home/vu/github/drjava/drjava/classes/base, /home/vu/github/drjava/drjava/classes/lib, /usr/share/ant/lib/junit.jar, /usr/share/java/ant-launcher-1.9.9.jar, /usr/share/ant/lib/ant.jar, /usr/share/ant/lib/ant-junit.jar, /usr/share/ant/lib/ant-junit4.jar, /tmp/jacocoagent5784881752619445294.jar]';  bootClassPath = 'null'
+    [junit] Compiler is using classPath = '[/tmp/DrJava-test-vu1483773352364003025, /usr/lib/jvm/java-8-oracle/lib/tools.jar, /home/vu/github/drjava/drjava/lib/buildlib/plt-ant.jar, /home/vu/github/drjava/drjava/lib/buildlib/netbeans-memory-leak-utils.jar, /home/vu/github/drjava/drjava/classes/test, /home/vu/github/drjava/drjava/classes/base, /home/vu/github/drjava/drjava/classes/lib, /usr/share/ant/lib/junit.jar, /usr/share/java/ant-launcher-1.9.9.jar, /usr/share/ant/lib/ant.jar, /usr/share/ant/lib/ant-junit.jar, /usr/share/ant/lib/ant-junit4.jar, /tmp/jacocoagent5784881752619445294.jar]';  bootClassPath = 'null'
+    [junit] Compiler is using classPath = '[/tmp/DrJava-test-vu1483773352364003025, /usr/lib/jvm/java-8-oracle/lib/tools.jar, /home/vu/github/drjava/drjava/lib/buildlib/plt-ant.jar, /home/vu/github/drjava/drjava/lib/buildlib/netbeans-memory-leak-utils.jar, /home/vu/github/drjava/drjava/classes/test, /home/vu/github/drjava/drjava/classes/base, /home/vu/github/drjava/drjava/classes/lib, /usr/share/ant/lib/junit.jar, /usr/share/java/ant-launcher-1.9.9.jar, /usr/share/ant/lib/ant.jar, /usr/share/ant/lib/ant-junit.jar, /usr/share/ant/lib/ant-junit4.jar, /tmp/jacocoagent5784881752619445294.jar]';  bootClassPath = 'null'
+    [junit] edu.rice.cs.util.UnexpectedException: java.lang.IllegalArgumentException
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel._rawJUnitOpenDefDocs(DefaultJUnitModel.java:471)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel.access$200(DefaultJUnitModel.java:86)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel$1$2.run(DefaultJUnitModel.java:282)
+    [junit] 	at java.awt.event.InvocationEvent.dispatch(InvocationEvent.java:311)
+    [junit] 	at java.awt.EventQueue.dispatchEventImpl(EventQueue.java:756)
+    [junit] 	at java.awt.EventQueue.access$500(EventQueue.java:97)
+    [junit] 	at java.awt.EventQueue$3.run(EventQueue.java:709)
+    [junit] 	at java.awt.EventQueue$3.run(EventQueue.java:703)
+    [junit] 	at java.security.AccessController.doPrivileged(Native Method)
+    [junit] 	at java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:80)
+    [junit] 	at java.awt.EventQueue.dispatchEvent(EventQueue.java:726)
+    [junit] 	at java.awt.EventDispatchThread.pumpOneEventForFilters(EventDispatchThread.java:201)
+    [junit] 	at java.awt.EventDispatchThread.pumpEventsForFilter(EventDispatchThread.java:116)
+    [junit] 	at java.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThread.java:105)
+    [junit] 	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:101)
+    [junit] 	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:93)
+    [junit] 	at java.awt.EventDispatchThread.run(EventDispatchThread.java:82)
+    [junit] Caused by: java.lang.IllegalArgumentException
+    [junit] 	at org.objectweb.asm.ClassReader.<init>(Unknown Source)
+    [junit] 	at org.objectweb.asm.ClassReader.<init>(Unknown Source)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel._rawJUnitOpenDefDocs(DefaultJUnitModel.java:414)
+    [junit] 	... 16 more
+    [junit] Compiler is using classPath = '[/tmp/DrJava-test-vu6774191600952707322, /usr/lib/jvm/java-8-oracle/lib/tools.jar, /home/vu/github/drjava/drjava/lib/buildlib/plt-ant.jar, /home/vu/github/drjava/drjava/lib/buildlib/netbeans-memory-leak-utils.jar, /home/vu/github/drjava/drjava/classes/test, /home/vu/github/drjava/drjava/classes/base, /home/vu/github/drjava/drjava/classes/lib, /usr/share/ant/lib/junit.jar, /usr/share/java/ant-launcher-1.9.9.jar, /usr/share/ant/lib/ant.jar, /usr/share/ant/lib/ant-junit.jar, /usr/share/ant/lib/ant-junit4.jar, /tmp/jacocoagent5784881752619445294.jar]';  bootClassPath = 'null'
+    [junit] Compiler is using classPath = '[/tmp/DrJava-test-vu4173846329794562127, /usr/lib/jvm/java-8-oracle/lib/tools.jar, /home/vu/github/drjava/drjava/lib/buildlib/plt-ant.jar, /home/vu/github/drjava/drjava/lib/buildlib/netbeans-memory-leak-utils.jar, /home/vu/github/drjava/drjava/classes/test, /home/vu/github/drjava/drjava/classes/base, /home/vu/github/drjava/drjava/classes/lib, /usr/share/ant/lib/junit.jar, /usr/share/java/ant-launcher-1.9.9.jar, /usr/share/ant/lib/ant.jar, /usr/share/ant/lib/ant-junit.jar, /usr/share/ant/lib/ant-junit4.jar, /tmp/jacocoagent5784881752619445294.jar]';  bootClassPath = 'null'
+    [junit] edu.rice.cs.util.UnexpectedException: java.lang.IllegalArgumentException
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel._rawJUnitOpenDefDocs(DefaultJUnitModel.java:471)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel.access$200(DefaultJUnitModel.java:86)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel$1$2.run(DefaultJUnitModel.java:282)
+    [junit] 	at java.awt.event.InvocationEvent.dispatch(InvocationEvent.java:311)
+    [junit] 	at java.awt.EventQueue.dispatchEventImpl(EventQueue.java:756)
+    [junit] 	at java.awt.EventQueue.access$500(EventQueue.java:97)
+    [junit] 	at java.awt.EventQueue$3.run(EventQueue.java:709)
+    [junit] 	at java.awt.EventQueue$3.run(EventQueue.java:703)
+    [junit] 	at java.security.AccessController.doPrivileged(Native Method)
+    [junit] 	at java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:80)
+    [junit] 	at java.awt.EventQueue.dispatchEvent(EventQueue.java:726)
+    [junit] 	at java.awt.EventDispatchThread.pumpOneEventForFilters(EventDispatchThread.java:201)
+    [junit] 	at java.awt.EventDispatchThread.pumpEventsForFilter(EventDispatchThread.java:116)
+    [junit] 	at java.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThread.java:105)
+    [junit] 	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:101)
+    [junit] 	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:93)
+    [junit] 	at java.awt.EventDispatchThread.run(EventDispatchThread.java:82)
+    [junit] Caused by: java.lang.IllegalArgumentException
+    [junit] 	at org.objectweb.asm.ClassReader.<init>(Unknown Source)
+    [junit] 	at org.objectweb.asm.ClassReader.<init>(Unknown Source)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel._rawJUnitOpenDefDocs(DefaultJUnitModel.java:414)
+    [junit] 	... 16 more
+    [junit] Compiler is using classPath = '[/tmp/DrJava-test-vu9099470852520677516, /usr/lib/jvm/java-8-oracle/lib/tools.jar, /home/vu/github/drjava/drjava/lib/buildlib/plt-ant.jar, /home/vu/github/drjava/drjava/lib/buildlib/netbeans-memory-leak-utils.jar, /home/vu/github/drjava/drjava/classes/test, /home/vu/github/drjava/drjava/classes/base, /home/vu/github/drjava/drjava/classes/lib, /usr/share/ant/lib/junit.jar, /usr/share/java/ant-launcher-1.9.9.jar, /usr/share/ant/lib/ant.jar, /usr/share/ant/lib/ant-junit.jar, /usr/share/ant/lib/ant-junit4.jar, /tmp/jacocoagent5784881752619445294.jar]';  bootClassPath = 'null'
+    [junit] Compiler is using classPath = '[/tmp/DrJava-test-vu7480289164142289245, /usr/lib/jvm/java-8-oracle/lib/tools.jar, /home/vu/github/drjava/drjava/lib/buildlib/plt-ant.jar, /home/vu/github/drjava/drjava/lib/buildlib/netbeans-memory-leak-utils.jar, /home/vu/github/drjava/drjava/classes/test, /home/vu/github/drjava/drjava/classes/base, /home/vu/github/drjava/drjava/classes/lib, /usr/share/ant/lib/junit.jar, /usr/share/java/ant-launcher-1.9.9.jar, /usr/share/ant/lib/ant.jar, /usr/share/ant/lib/ant-junit.jar, /usr/share/ant/lib/ant-junit4.jar, /tmp/jacocoagent5784881752619445294.jar]';  bootClassPath = 'null'
+    [junit] Compiler is using classPath = '[/tmp/DrJava-test-vu4349069243474249640, /usr/lib/jvm/java-8-oracle/lib/tools.jar, /home/vu/github/drjava/drjava/lib/buildlib/plt-ant.jar, /home/vu/github/drjava/drjava/lib/buildlib/netbeans-memory-leak-utils.jar, /home/vu/github/drjava/drjava/classes/test, /home/vu/github/drjava/drjava/classes/base, /home/vu/github/drjava/drjava/classes/lib, /usr/share/ant/lib/junit.jar, /usr/share/java/ant-launcher-1.9.9.jar, /usr/share/ant/lib/ant.jar, /usr/share/ant/lib/ant-junit.jar, /usr/share/ant/lib/ant-junit4.jar, /tmp/jacocoagent5784881752619445294.jar]';  bootClassPath = 'null'
+    [junit] Compiler is using classPath = '[/tmp/DrJava-test-vu4767760733522007123, /usr/lib/jvm/java-8-oracle/lib/tools.jar, /home/vu/github/drjava/drjava/lib/buildlib/plt-ant.jar, /home/vu/github/drjava/drjava/lib/buildlib/netbeans-memory-leak-utils.jar, /home/vu/github/drjava/drjava/classes/test, /home/vu/github/drjava/drjava/classes/base, /home/vu/github/drjava/drjava/classes/lib, /usr/share/ant/lib/junit.jar, /usr/share/java/ant-launcher-1.9.9.jar, /usr/share/ant/lib/ant.jar, /usr/share/ant/lib/ant-junit.jar, /usr/share/ant/lib/ant-junit4.jar, /tmp/jacocoagent5784881752619445294.jar]';  bootClassPath = 'null'
+    [junit] ------------- ---------------- ---------------
+    [junit] Testcase: testResultOfNonPublicTestCase_NOJOIN(edu.rice.cs.drjava.model.GlobalModelJUnitTest):	Caused an ERROR
+    [junit] java.lang.IllegalArgumentException
+    [junit] edu.rice.cs.util.UnexpectedException: java.lang.IllegalArgumentException
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel._rawJUnitOpenDefDocs(DefaultJUnitModel.java:471)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel.junitOpenDefDocs(DefaultJUnitModel.java:299)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel.junit(DefaultJUnitModel.java:231)
+    [junit] 	at edu.rice.cs.drjava.model.DefaultGlobalModel$ConcreteOpenDefDoc.startJUnit(DefaultGlobalModel.java:726)
+    [junit] 	at edu.rice.cs.drjava.model.GlobalModelTestCase$JUnitTestListener.runJUnit(GlobalModelTestCase.java:1279)
+    [junit] 	at edu.rice.cs.drjava.model.GlobalModelJUnitTest.testResultOfNonPublicTestCase_NOJOIN(GlobalModelJUnitTest.java:344)
+    [junit] Caused by: java.lang.IllegalArgumentException
+    [junit] 	at org.objectweb.asm.ClassReader.<init>(Unknown Source)
+    [junit] 	at org.objectweb.asm.ClassReader.<init>(Unknown Source)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel._rawJUnitOpenDefDocs(DefaultJUnitModel.java:414)
+    [junit]
+    [junit]
+    [junit] Testcase: testJUnit4MultiTest_NOJOIN(edu.rice.cs.drjava.model.GlobalModelJUnitTest):	Caused an ERROR
+    [junit] java.lang.IllegalArgumentException
+    [junit] edu.rice.cs.util.UnexpectedException: java.lang.IllegalArgumentException
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel._rawJUnitOpenDefDocs(DefaultJUnitModel.java:471)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel.junitOpenDefDocs(DefaultJUnitModel.java:299)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel.junit(DefaultJUnitModel.java:231)
+    [junit] 	at edu.rice.cs.drjava.model.DefaultGlobalModel$ConcreteOpenDefDoc.startJUnit(DefaultGlobalModel.java:726)
+    [junit] 	at edu.rice.cs.drjava.model.GlobalModelTestCase$JUnitTestListener.runJUnit(GlobalModelTestCase.java:1279)
+    [junit] 	at edu.rice.cs.drjava.model.GlobalModelJUnitTest.testJUnit4MultiTest_NOJOIN(GlobalModelJUnitTest.java:857)
+    [junit] Caused by: java.lang.IllegalArgumentException
+    [junit] 	at org.objectweb.asm.ClassReader.<init>(Unknown Source)
+    [junit] 	at org.objectweb.asm.ClassReader.<init>(Unknown Source)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel._rawJUnitOpenDefDocs(DefaultJUnitModel.java:414)
+    [junit]
+    [junit]
+    [junit] Testcase: testRealError_NOJOIN(edu.rice.cs.drjava.model.GlobalModelJUnitTest):	Caused an ERROR
+    [junit] java.lang.IllegalArgumentException
+    [junit] edu.rice.cs.util.UnexpectedException: java.lang.IllegalArgumentException
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel._rawJUnitOpenDefDocs(DefaultJUnitModel.java:471)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel.junitOpenDefDocs(DefaultJUnitModel.java:299)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel.junit(DefaultJUnitModel.java:231)
+    [junit] 	at edu.rice.cs.drjava.model.DefaultGlobalModel$ConcreteOpenDefDoc.startJUnit(DefaultGlobalModel.java:726)
+    [junit] 	at edu.rice.cs.drjava.model.GlobalModelTestCase$JUnitTestListener.runJUnit(GlobalModelTestCase.java:1279)
+    [junit] 	at edu.rice.cs.drjava.model.GlobalModelJUnitTest.testRealError_NOJOIN(GlobalModelJUnitTest.java:281)
+    [junit] Caused by: java.lang.IllegalArgumentException
+    [junit] 	at org.objectweb.asm.ClassReader.<init>(Unknown Source)
+    [junit] 	at org.objectweb.asm.ClassReader.<init>(Unknown Source)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel._rawJUnitOpenDefDocs(DefaultJUnitModel.java:414)
+    [junit]
+    [junit]
+    [junit] Testcase: testNoJUnitErrors_NOJOIN(edu.rice.cs.drjava.model.GlobalModelJUnitTest):	Caused an ERROR
+    [junit] java.lang.IllegalArgumentException
+    [junit] edu.rice.cs.util.UnexpectedException: java.lang.IllegalArgumentException
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel._rawJUnitOpenDefDocs(DefaultJUnitModel.java:471)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel.junitOpenDefDocs(DefaultJUnitModel.java:299)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel.junit(DefaultJUnitModel.java:231)
+    [junit] 	at edu.rice.cs.drjava.model.DefaultGlobalModel$ConcreteOpenDefDoc.startJUnit(DefaultGlobalModel.java:726)
+    [junit] 	at edu.rice.cs.drjava.model.GlobalModelTestCase$JUnitTestListener.runJUnit(GlobalModelTestCase.java:1279)
+    [junit] 	at edu.rice.cs.drjava.model.GlobalModelJUnitTest.testNoJUnitErrors_NOJOIN(GlobalModelJUnitTest.java:199)
+    [junit] Caused by: java.lang.IllegalArgumentException
+    [junit] 	at org.objectweb.asm.ClassReader.<init>(Unknown Source)
+    [junit] 	at org.objectweb.asm.ClassReader.<init>(Unknown Source)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel._rawJUnitOpenDefDocs(DefaultJUnitModel.java:414)
+    [junit]
+    [junit]
+    [junit] Testcase: testJUnit4NoTest_NOJOIN(edu.rice.cs.drjava.model.GlobalModelJUnitTest):	Caused an ERROR
+    [junit] java.lang.IllegalArgumentException
+    [junit] edu.rice.cs.util.UnexpectedException: java.lang.IllegalArgumentException
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel._rawJUnitOpenDefDocs(DefaultJUnitModel.java:471)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel.junitOpenDefDocs(DefaultJUnitModel.java:299)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel.junit(DefaultJUnitModel.java:231)
+    [junit] 	at edu.rice.cs.drjava.model.DefaultGlobalModel$ConcreteOpenDefDoc.startJUnit(DefaultGlobalModel.java:726)
+    [junit] 	at edu.rice.cs.drjava.model.GlobalModelTestCase$JUnitTestListener.runJUnit(GlobalModelTestCase.java:1279)
+    [junit] 	at edu.rice.cs.drjava.model.GlobalModelJUnitTest.testJUnit4NoTest_NOJOIN(GlobalModelJUnitTest.java:891)
+    [junit] Caused by: java.lang.IllegalArgumentException
+    [junit] 	at org.objectweb.asm.ClassReader.<init>(Unknown Source)
+    [junit] 	at org.objectweb.asm.ClassReader.<init>(Unknown Source)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel._rawJUnitOpenDefDocs(DefaultJUnitModel.java:414)
+    [junit]
+    [junit]
+    [junit] Testcase: testCorrectFilesAfterIncorrectChanges_NOJOIN(edu.rice.cs.drjava.model.GlobalModelJUnitTest):	Caused an ERROR
+    [junit] java.lang.IllegalArgumentException
+    [junit] edu.rice.cs.util.UnexpectedException: java.lang.IllegalArgumentException
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel._rawJUnitOpenDefDocs(DefaultJUnitModel.java:471)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel.junitOpenDefDocs(DefaultJUnitModel.java:299)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel.junitDocs(DefaultJUnitModel.java:212)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel.junitAll(DefaultJUnitModel.java:182)
+    [junit] 	at edu.rice.cs.drjava.model.GlobalModelTestCase$JUnitTestListener.runJUnit(GlobalModelTestCase.java:1287)
+    [junit] 	at edu.rice.cs.drjava.model.GlobalModelJUnitTest.testCorrectFilesAfterIncorrectChanges_NOJOIN(GlobalModelJUnitTest.java:779)
+    [junit] Caused by: java.lang.IllegalArgumentException
+    [junit] 	at org.objectweb.asm.ClassReader.<init>(Unknown Source)
+    [junit] 	at org.objectweb.asm.ClassReader.<init>(Unknown Source)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel._rawJUnitOpenDefDocs(DefaultJUnitModel.java:414)
+    [junit]
+    [junit]
+    [junit] Testcase: testJUnit4TwoMethod1Test_NOJOIN(edu.rice.cs.drjava.model.GlobalModelJUnitTest):	Caused an ERROR
+    [junit] java.lang.IllegalArgumentException
+    [junit] edu.rice.cs.util.UnexpectedException: java.lang.IllegalArgumentException
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel._rawJUnitOpenDefDocs(DefaultJUnitModel.java:471)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel.junitOpenDefDocs(DefaultJUnitModel.java:299)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel.junit(DefaultJUnitModel.java:231)
+    [junit] 	at edu.rice.cs.drjava.model.DefaultGlobalModel$ConcreteOpenDefDoc.startJUnit(DefaultGlobalModel.java:726)
+    [junit] 	at edu.rice.cs.drjava.model.GlobalModelTestCase$JUnitTestListener.runJUnit(GlobalModelTestCase.java:1279)
+    [junit] 	at edu.rice.cs.drjava.model.GlobalModelJUnitTest.testJUnit4TwoMethod1Test_NOJOIN(GlobalModelJUnitTest.java:926)
+    [junit] Caused by: java.lang.IllegalArgumentException
+    [junit] 	at org.objectweb.asm.ClassReader.<init>(Unknown Source)
+    [junit] 	at org.objectweb.asm.ClassReader.<init>(Unknown Source)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel._rawJUnitOpenDefDocs(DefaultJUnitModel.java:414)
+    [junit]
+    [junit]
+    [junit] Testcase: testUnsavedAndUnCompiledChanges(edu.rice.cs.drjava.model.GlobalModelJUnitTest):	Caused an ERROR
+    [junit] null
+    [junit] java.lang.InterruptedException
+    [junit] 	at java.lang.Object.wait(Native Method)
+    [junit] 	at java.lang.Object.wait(Object.java:502)
+    [junit] 	at edu.rice.cs.drjava.model.GlobalModelTestCase$JUnitTestListener.waitJUnitDone(GlobalModelTestCase.java:1292)
+    [junit] 	at edu.rice.cs.drjava.model.GlobalModelTestCase$JUnitTestListener.runJUnit(GlobalModelTestCase.java:1281)
+    [junit] 	at edu.rice.cs.drjava.model.GlobalModelJUnitTest.testUnsavedAndUnCompiledChanges(GlobalModelJUnitTest.java:514)
+    [junit]
+    [junit]
+    [junit] Testcase: testNonTestCaseError_NOJOIN(edu.rice.cs.drjava.model.GlobalModelJUnitTest):	Caused an ERROR
+    [junit] java.lang.IllegalArgumentException
+    [junit] edu.rice.cs.util.UnexpectedException: java.lang.IllegalArgumentException
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel._rawJUnitOpenDefDocs(DefaultJUnitModel.java:471)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel.junitOpenDefDocs(DefaultJUnitModel.java:299)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel.junit(DefaultJUnitModel.java:231)
+    [junit] 	at edu.rice.cs.drjava.model.DefaultGlobalModel$ConcreteOpenDefDoc.startJUnit(DefaultGlobalModel.java:726)
+    [junit] 	at edu.rice.cs.drjava.model.GlobalModelTestCase$JUnitTestListener.runJUnit(GlobalModelTestCase.java:1279)
+    [junit] 	at edu.rice.cs.drjava.model.GlobalModelJUnitTest.testNonTestCaseError_NOJOIN(GlobalModelJUnitTest.java:309)
+    [junit] Caused by: java.lang.IllegalArgumentException
+    [junit] 	at org.objectweb.asm.ClassReader.<init>(Unknown Source)
+    [junit] 	at org.objectweb.asm.ClassReader.<init>(Unknown Source)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel._rawJUnitOpenDefDocs(DefaultJUnitModel.java:414)
+    [junit]
+    [junit]
+    [junit] Testcase: testNoClassFile(edu.rice.cs.drjava.model.GlobalModelJUnitTest):	Caused an ERROR
+    [junit] null
+    [junit] java.lang.InterruptedException
+    [junit] 	at java.lang.Object.wait(Native Method)
+    [junit] 	at java.lang.Object.wait(Object.java:502)
+    [junit] 	at edu.rice.cs.drjava.model.GlobalModelTestCase$JUnitTestListener.waitJUnitDone(GlobalModelTestCase.java:1292)
+    [junit] 	at edu.rice.cs.drjava.model.GlobalModelTestCase$JUnitTestListener.runJUnit(GlobalModelTestCase.java:1281)
+    [junit] 	at edu.rice.cs.drjava.model.GlobalModelJUnitTest.testNoClassFile(GlobalModelJUnitTest.java:402)
+    [junit]
+    [junit]
+    [junit] Testcase: testOneJUnitError_NOJOIN(edu.rice.cs.drjava.model.GlobalModelJUnitTest):	Caused an ERROR
+    [junit] java.lang.IllegalArgumentException
+    [junit] edu.rice.cs.util.UnexpectedException: java.lang.IllegalArgumentException
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel._rawJUnitOpenDefDocs(DefaultJUnitModel.java:471)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel.junitOpenDefDocs(DefaultJUnitModel.java:299)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel.junitDocs(DefaultJUnitModel.java:212)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel.junitAll(DefaultJUnitModel.java:182)
+    [junit] 	at edu.rice.cs.drjava.model.GlobalModelTestCase$JUnitTestListener.runJUnit(GlobalModelTestCase.java:1287)
+    [junit] 	at edu.rice.cs.drjava.model.GlobalModelJUnitTest.testOneJUnitError_NOJOIN(GlobalModelJUnitTest.java:230)
+    [junit] Caused by: java.lang.IllegalArgumentException
+    [junit] 	at org.objectweb.asm.ClassReader.<init>(Unknown Source)
+    [junit] 	at org.objectweb.asm.ClassReader.<init>(Unknown Source)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel._rawJUnitOpenDefDocs(DefaultJUnitModel.java:414)
+    [junit]
+    [junit]
+    [junit] Testcase: testElspethOneJUnitError_NOJOIN(edu.rice.cs.drjava.model.GlobalModelJUnitTest):	Caused an ERROR
+    [junit] java.lang.IllegalArgumentException
+    [junit] edu.rice.cs.util.UnexpectedException: java.lang.IllegalArgumentException
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel._rawJUnitOpenDefDocs(DefaultJUnitModel.java:471)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel.junitOpenDefDocs(DefaultJUnitModel.java:299)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel.junit(DefaultJUnitModel.java:231)
+    [junit] 	at edu.rice.cs.drjava.model.DefaultGlobalModel$ConcreteOpenDefDoc.startJUnit(DefaultGlobalModel.java:726)
+    [junit] 	at edu.rice.cs.drjava.model.GlobalModelTestCase$JUnitTestListener.runJUnit(GlobalModelTestCase.java:1279)
+    [junit] 	at edu.rice.cs.drjava.model.GlobalModelJUnitTest.testElspethOneJUnitError_NOJOIN(GlobalModelJUnitTest.java:255)
+    [junit] Caused by: java.lang.IllegalArgumentException
+    [junit] 	at org.objectweb.asm.ClassReader.<init>(Unknown Source)
+    [junit] 	at org.objectweb.asm.ClassReader.<init>(Unknown Source)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel._rawJUnitOpenDefDocs(DefaultJUnitModel.java:414)
+    [junit]
+    [junit]
+    [junit] Testcase: testInfiniteLoop_NOJOIN(edu.rice.cs.drjava.model.GlobalModelJUnitTest):	FAILED
+    [junit] Aborting unit testing runs recovery code in testing thread; no exception is thrown
+    [junit] junit.framework.AssertionFailedError: Aborting unit testing runs recovery code in testing thread; no exception is thrown
+    [junit] 	at edu.rice.cs.drjava.model.GlobalModelJUnitTest.testInfiniteLoop_NOJOIN(GlobalModelJUnitTest.java:462)
+    [junit]
+    [junit]
+    [junit] Testcase: testJUnit4StyleTestWorks_NOJOIN(edu.rice.cs.drjava.model.GlobalModelJUnitTest):	Caused an ERROR
+    [junit] java.lang.IllegalArgumentException
+    [junit] edu.rice.cs.util.UnexpectedException: java.lang.IllegalArgumentException
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel._rawJUnitOpenDefDocs(DefaultJUnitModel.java:471)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel.junitOpenDefDocs(DefaultJUnitModel.java:299)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel.junit(DefaultJUnitModel.java:231)
+    [junit] 	at edu.rice.cs.drjava.model.DefaultGlobalModel$ConcreteOpenDefDoc.startJUnit(DefaultGlobalModel.java:726)
+    [junit] 	at edu.rice.cs.drjava.model.GlobalModelTestCase$JUnitTestListener.runJUnit(GlobalModelTestCase.java:1279)
+    [junit] 	at edu.rice.cs.drjava.model.GlobalModelJUnitTest.testJUnit4StyleTestWorks_NOJOIN(GlobalModelJUnitTest.java:823)
+    [junit] Caused by: java.lang.IllegalArgumentException
+    [junit] 	at org.objectweb.asm.ClassReader.<init>(Unknown Source)
+    [junit] 	at org.objectweb.asm.ClassReader.<init>(Unknown Source)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel._rawJUnitOpenDefDocs(DefaultJUnitModel.java:414)
+    [junit]
+    [junit]
+    [junit] Test edu.rice.cs.drjava.model.GlobalModelJUnitTest FAILED
+    [junit] GlobalModelOtherTest                         15.454 sec
+    [junit] MultiThreadedTestCaseTest                    0.296 sec
+    [junit] SingleDisplayModelTest                       3.27 sec
+    [junit] TestDocGetterTest                            0.254 sec
+    [junit] DocumentCacheTest                            3.429 sec
+    [junit] CompilerErrorModelTest                       0.386 sec
+    [junit] DebugWatchDataTest                           0.31 sec
+    [junit] CommentTest                                  0.411 sec
+    [junit] DefinitionsDocumentTest                      1.182 sec
+    [junit] IndentHelperTest                             0.451 sec
+    [junit] IndentTest                                   0.542 sec
+    [junit] ActionBracePlusTest                          0.379 sec
+    [junit] ActionDoNothingTest                          0.367 sec
+    [junit] ActionStartPrevLinePlusMultilinePreserveTest 0.37 sec
+    [junit] ActionStartPrevLinePlusTest                  0.361 sec
+    [junit] ActionStartPrevStmtPlusTest                  0.391 sec
+    [junit] ActionStartStmtOfBracePlusTest               0.363 sec
+    [junit] IndentRuleWithTraceTest                      0.348 sec
+    [junit] QuestionBraceIsCurlyTest                     0.324 sec
+    [junit] QuestionBraceIsParenOrBracketTest            0.376 sec
+    [junit] QuestionCurrLineEmptyOrEnterPressTest        0.377 sec
+    [junit] QuestionCurrLineIsWingCommentTest            0.349 sec
+    [junit] QuestionCurrLineStartsWithSkipCommentsTest   0.386 sec
+    [junit] QuestionCurrLineStartsWithTest               0.425 sec
+    [junit] QuestionExistsCharInStmtTest                 0.358 sec
+    [junit] QuestionHasCharPrecedingOpenBraceTest        0.373 sec
+    [junit] QuestionInsideCommentTest                    0.343 sec
+    [junit] QuestionLineContainsTest                     0.361 sec
+    [junit] QuestionNewParenPhraseTest                   0.383 sec
+    [junit] QuestionPrevLineStartsCommentTest            0.45 sec
+    [junit] QuestionPrevLineStartsWithTest               0.396 sec
+    [junit] QuestionStartAfterOpenBraceTest              0.434 sec
+    [junit] QuestionStartingNewStmtTest                  0.331 sec
+    [junit] BackSlashTest                                0.294 sec
+    [junit] BraceInfoTest                                0.355 sec
+    [junit] BraceTest                                    0.278 sec
+    [junit] GapTest                                      0.256 sec
+    [junit] MixedQuoteTest                               0.324 sec
+    [junit] ModelListTest                                0.302 sec
+    [junit] ReducedModelDeleteTest                       0.413 sec
+    [junit] ReducedModelTest                             0.42 sec
+    [junit] SingleQuoteTest                              0.312 sec
+    [junit] JavadocModelTest                             0.414 sec
+    [junit] JUnitErrorModelTest                          2.928 sec
+    [junit] Testsuite: edu.rice.cs.drjava.model.junit.JUnitErrorModelTest
+    [junit] Tests run: 3, Failures: 0, Errors: 3
+    [junit] ------------- Standard Output ---------------
+    [junit] Compiler is using classPath = '[/tmp/DrJava-test-vu1607756968196347723, /usr/lib/jvm/java-8-oracle/lib/tools.jar, /home/vu/github/drjava/drjava/lib/buildlib/plt-ant.jar, /home/vu/github/drjava/drjava/lib/buildlib/netbeans-memory-leak-utils.jar, /home/vu/github/drjava/drjava/classes/test, /home/vu/github/drjava/drjava/classes/base, /home/vu/github/drjava/drjava/classes/lib, /usr/share/ant/lib/junit.jar, /usr/share/java/ant-launcher-1.9.9.jar, /usr/share/ant/lib/ant.jar, /usr/share/ant/lib/ant-junit.jar, /usr/share/ant/lib/ant-junit4.jar, /tmp/jacocoagent5784881752619445294.jar]';  bootClassPath = 'null'
+    [junit] Compiler is using classPath = '[/tmp/DrJava-test-vu2845014186205321158, /usr/lib/jvm/java-8-oracle/lib/tools.jar, /home/vu/github/drjava/drjava/lib/buildlib/plt-ant.jar, /home/vu/github/drjava/drjava/lib/buildlib/netbeans-memory-leak-utils.jar, /home/vu/github/drjava/drjava/classes/test, /home/vu/github/drjava/drjava/classes/base, /home/vu/github/drjava/drjava/classes/lib, /usr/share/ant/lib/junit.jar, /usr/share/java/ant-launcher-1.9.9.jar, /usr/share/ant/lib/ant.jar, /usr/share/ant/lib/ant-junit.jar, /usr/share/ant/lib/ant-junit4.jar, /tmp/jacocoagent5784881752619445294.jar]';  bootClassPath = 'null'
+    [junit] Compiler is using classPath = '[/tmp/DrJava-test-vu1443630559772209437, /usr/lib/jvm/java-8-oracle/lib/tools.jar, /home/vu/github/drjava/drjava/lib/buildlib/plt-ant.jar, /home/vu/github/drjava/drjava/lib/buildlib/netbeans-memory-leak-utils.jar, /home/vu/github/drjava/drjava/classes/test, /home/vu/github/drjava/drjava/classes/base, /home/vu/github/drjava/drjava/classes/lib, /usr/share/ant/lib/junit.jar, /usr/share/java/ant-launcher-1.9.9.jar, /usr/share/ant/lib/ant.jar, /usr/share/ant/lib/ant-junit.jar, /usr/share/ant/lib/ant-junit4.jar, /tmp/jacocoagent5784881752619445294.jar]';  bootClassPath = 'null'
+    [junit] Compiler is using classPath = '[/tmp/DrJava-test-vu1443630559772209437, /usr/lib/jvm/java-8-oracle/lib/tools.jar, /home/vu/github/drjava/drjava/lib/buildlib/plt-ant.jar, /home/vu/github/drjava/drjava/lib/buildlib/netbeans-memory-leak-utils.jar, /home/vu/github/drjava/drjava/classes/test, /home/vu/github/drjava/drjava/classes/base, /home/vu/github/drjava/drjava/classes/lib, /usr/share/ant/lib/junit.jar, /usr/share/java/ant-launcher-1.9.9.jar, /usr/share/ant/lib/ant.jar, /usr/share/ant/lib/ant-junit.jar, /usr/share/ant/lib/ant-junit4.jar, /tmp/jacocoagent5784881752619445294.jar]';  bootClassPath = 'null'
+    [junit] ------------- ---------------- ---------------
+    [junit] Testcase: testErrorsArrayInOrder_NOJOIN(edu.rice.cs.drjava.model.junit.JUnitErrorModelTest):Caused an ERROR
+    [junit] java.lang.IllegalArgumentException
+    [junit] edu.rice.cs.util.UnexpectedException: java.lang.IllegalArgumentException
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel._rawJUnitOpenDefDocs(DefaultJUnitModel.java:471)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel.junitOpenDefDocs(DefaultJUnitModel.java:299)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel.junit(DefaultJUnitModel.java:231)
+    [junit] 	at edu.rice.cs.drjava.model.DefaultGlobalModel$ConcreteOpenDefDoc.startJUnit(DefaultGlobalModel.java:726)
+    [junit] 	at edu.rice.cs.drjava.model.GlobalModelTestCase$JUnitTestListener.runJUnit(GlobalModelTestCase.java:1279)
+    [junit] 	at edu.rice.cs.drjava.model.junit.JUnitErrorModelTest.testErrorsArrayInOrder_NOJOIN(JUnitErrorModelTest.java:190)
+    [junit] Caused by: java.lang.IllegalArgumentException
+    [junit] 	at org.objectweb.asm.ClassReader.<init>(Unknown Source)
+    [junit] 	at org.objectweb.asm.ClassReader.<init>(Unknown Source)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel._rawJUnitOpenDefDocs(DefaultJUnitModel.java:414)
+    [junit]
+    [junit]
+    [junit] Testcase: testErrorInSuperClass_NOJOIN(edu.rice.cs.drjava.model.junit.JUnitErrorModelTest):Caused an ERROR
+    [junit] java.lang.IllegalArgumentException
+    [junit] edu.rice.cs.util.UnexpectedException: java.lang.IllegalArgumentException
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel._rawJUnitOpenDefDocs(DefaultJUnitModel.java:471)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel.junitOpenDefDocs(DefaultJUnitModel.java:299)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel.junit(DefaultJUnitModel.java:231)
+    [junit] 	at edu.rice.cs.drjava.model.DefaultGlobalModel$ConcreteOpenDefDoc.startJUnit(DefaultGlobalModel.java:726)
+    [junit] 	at edu.rice.cs.drjava.model.GlobalModelTestCase$JUnitTestListener.runJUnit(GlobalModelTestCase.java:1279)
+    [junit] 	at edu.rice.cs.drjava.model.junit.JUnitErrorModelTest.testErrorInSuperClass_NOJOIN(JUnitErrorModelTest.java:387)
+    [junit] Caused by: java.lang.IllegalArgumentException
+    [junit] 	at org.objectweb.asm.ClassReader.<init>(Unknown Source)
+    [junit] 	at org.objectweb.asm.ClassReader.<init>(Unknown Source)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel._rawJUnitOpenDefDocs(DefaultJUnitModel.java:414)
+    [junit]
+    [junit]
+    [junit] Testcase: testVerifyErrorHandledCorrectly_NOJOIN(edu.rice.cs.drjava.model.junit.JUnitErrorModelTest):	Caused an ERROR
+    [junit] java.lang.IllegalArgumentException
+    [junit] edu.rice.cs.util.UnexpectedException: java.lang.IllegalArgumentException
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel._rawJUnitOpenDefDocs(DefaultJUnitModel.java:471)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel.junitOpenDefDocs(DefaultJUnitModel.java:299)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel.junit(DefaultJUnitModel.java:231)
+    [junit] 	at edu.rice.cs.drjava.model.DefaultGlobalModel$ConcreteOpenDefDoc.startJUnit(DefaultGlobalModel.java:726)
+    [junit] 	at edu.rice.cs.drjava.model.GlobalModelTestCase$JUnitTestListener.runJUnit(GlobalModelTestCase.java:1279)
+    [junit] 	at edu.rice.cs.drjava.model.junit.JUnitErrorModelTest.testVerifyErrorHandledCorrectly_NOJOIN(JUnitErrorModelTest.java:295)
+    [junit] Caused by: java.lang.IllegalArgumentException
+    [junit] 	at org.objectweb.asm.ClassReader.<init>(Unknown Source)
+    [junit] 	at org.objectweb.asm.ClassReader.<init>(Unknown Source)
+    [junit] 	at edu.rice.cs.drjava.model.junit.DefaultJUnitModel._rawJUnitOpenDefDocs(DefaultJUnitModel.java:414)
+    [junit]
+    [junit]
+    [junit] Test edu.rice.cs.drjava.model.junit.JUnitErrorModelTest FAILED
+    [junit] DrJavaBookTest                               0.331 sec
+    [junit] HistoryTest                                  0.407 sec
+    [junit] InteractionsDJDocumentTest                   4.27 sec
+    [junit] InteractionsDocumentTest                     0.363 sec
+    [junit] InteractionsModelErrorTest                   4.052 sec
+    [junit] InteractionsModelTest                        0.628 sec
+    [junit] JavaInterpreterTest                          0.718 sec
+    [junit] NewJVMTest                                   0.915 sec
+    [junit] ProjectTest                                  0.515 sec
+    [junit] XMLProjectFileParserTest                     0.373 sec
+    [junit] DefinitionsPaneMemoryLeakTest                3.235 sec
+    [junit] DefinitionsPaneTest                          11.59 sec
+    [junit] InteractionsPaneTest                         0.544 sec
+    [junit] MainFrameTest                                16.255 sec
+    [junit] NewJavaClassTest                             0.086 sec
+    [junit] ProjectMenuTest                              9.298 sec
+    [junit] RecentFileManagerTest                        0.363 sec
+    [junit] BooleanOptionComponentTest                   0.336 sec
+    [junit] ColorOptionComponentTest                     0.346 sec
+    [junit] FileOptionComponentTest                      0.406 sec
+    [junit] FontOptionComponentTest                      0.354 sec
+    [junit] ForcedChoiceOptionComponentTest              0.348 sec
+    [junit] IntegerOptionComponentTest                   0.327 sec
+    [junit] KeyStrokeOptionComponentTest                 0.315 sec
+    [junit] VectorFileOptionComponentTest                0.501 sec
+    [junit] VectorKeyStrokeOptionComponentTest           0.517 sec
+    [junit] PredictiveInputModelTest                     0.556 sec
+    [junit] ArgumentTokenizerTest                        0.259 sec
+    [junit] BalancingStreamTokenizerTest                 0.047 sec
+    [junit] FileOpsTest                                  0.523 sec
+    [junit] LogTest                                      0.45 sec
+    [junit] ReaderWriterLockTest                         0.427 sec
+    [junit] StreamRedirectorTest                         0.254 sec
+    [junit] StringOpsTest                                0.425 sec
+    [junit] XMLConfigTest                                0.103 sec
+    [junit] JListSortNavigatorTest                       0.269 sec
+    [junit] JTreeSortNavigatorTest                       0.348 sec
+    [junit] JarCreationTest                              0.33 sec
+    [junit] IntegratedMasterSlaveTest                    4.148 sec
+    [junit] SExpParserTest                               0.329 sec
+    [junit] TokensTest                                   0.005 sec
+    [junit] HighlightManagerTest                         0.297 sec
+    [junit] ScrollableListDialogTest                     0.235 sec
+    [junit] ScrollableListSelectionDialogTest            0.252 sec
+    [junit] UtilitiesTest                                1.081 sec
+    [junit] ConsoleDocumentTest                          0.314 sec
+    [junit] SwingDocumentTest                            0.294 sec
+
+BUILD FAILED
+/home/vu/github/drjava/drjava/build.xml:331: The following error occurred while executing this line:
+/home/vu/github/drjava/drjava/build.xml:364: The following error occurred while executing this line:
+/home/vu/github/drjava/drjava/build.xml:366: /home/vu/github/drjava/drjava/build.xml:367: The following error occurred while executing this line:
+/home/vu/github/drjava/drjava/build.xml:462: One or more unit tests failed.
+
+Total time: 4 minutes 2 seconds
 ```
