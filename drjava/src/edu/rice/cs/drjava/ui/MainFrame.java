@@ -2774,29 +2774,28 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   public void addToBrowserHistoryBefore() { _model.addToBrowserHistory(true); }
   
   /** Create a new find results tab.
-   * @param rm the region manager that will contain the regions
-   * @param region a MovingDocumentRegion
-   * @param title the title for the panel
-   * @param searchString string that was searched for
-   * @param searchAll whether all files were searched
-   * @param searchSelectionOnly whether only the selected file was searched
-   * @param matchCase whether matches must be case-sensitive
-   * @param wholeWord whether matches must be against the whole word
-   * @param noComments whether comments should be ignored
-   * @param noTestCases whether test cases should be ignored
-   * @param doc weak reference to document in which search occurred (or started, if all documents were searched)
-   * @param findReplacePanel the FindReplacePanel that created this FindResultsPanel
-   * @return new find results tab.
-   */
+    * @param rm the region manager that will contain the regions
+    * @param region a MovingDocumentRegion
+    * @param title the title for the panel
+    * @param searchString string that was searched for
+    * @param searchAll whether all files were searched
+    * @param searchSelectionOnly whether only the selected file was searched
+    * @param matchCase whether matches must be case-sensitive
+    * @param wholeWord whether matches must be against the whole word
+    * @param noComments whether comments should be ignored
+    * @param noTestCases whether test cases should be ignored
+    * @param doc weak reference to document in which search occurred (or started, if all documents were searched)
+    * @param findReplacePanel the FindReplacePanel that created this FindResultsPanel
+    * @return new find results tab.
+    */
   public FindResultsPanel createFindResultsPanel(final RegionManager<MovingDocumentRegion> rm,
     final MovingDocumentRegion region, final String title, final String searchString, 
     final boolean searchAll, final boolean searchSelectionOnly, final boolean matchCase, 
     final boolean wholeWord, final boolean noComments, final boolean noTestCases, 
     final WeakReference<OpenDefinitionsDocument> doc, final FindReplacePanel findReplacePanel) {
     
-    final FindResultsPanel panel = new FindResultsPanel(this, rm, region, 
-      title, searchString, searchAll, searchSelectionOnly, matchCase, 
-      wholeWord, noComments, noTestCases, doc, findReplacePanel);
+    final FindResultsPanel panel = new FindResultsPanel(this, rm, region, title, searchString, searchAll, 
+      searchSelectionOnly, matchCase, wholeWord, noComments, noTestCases, doc, findReplacePanel);
 
     final AbstractMap<MovingDocumentRegion, HighlightManager.HighlightInfo> highlights =
       new IdentityHashMap<MovingDocumentRegion, HighlightManager.HighlightInfo>();
