@@ -670,12 +670,12 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
         //       +--doc2--+
         //                +---_lastSelectedRegion
         DefaultMutableTreeNode parent = (DefaultMutableTreeNode)regionNode.getParent();
-        if (parent!=null) {
+        if (parent != null) {
           DefaultMutableTreeNode parentsPrevSibling = parent.getPreviousSibling();
-          if (parentsPrevSibling!=null) {
+          if (parentsPrevSibling != null) {
             try {
               DefaultMutableTreeNode olderCousin = (DefaultMutableTreeNode)parentsPrevSibling.getLastChild();
-              if (olderCousin!=null) {
+              if (olderCousin != null) {
                 @SuppressWarnings("unchecked")
                 RegionTreeUserObj<R> userObject = (RegionTreeUserObj<R>) olderCousin.getUserObject();
                 return userObject.region();
@@ -741,12 +741,12 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
         //       +--doc2--+
         //                +---youngerCousin
         DefaultMutableTreeNode parent = (DefaultMutableTreeNode)regionNode.getParent();
-        if (parent!=null) {
+        if (parent != null) {
           DefaultMutableTreeNode parentsNextSibling = parent.getNextSibling();
-          if (parentsNextSibling!=null) {
+          if (parentsNextSibling != null) {
             try {
               DefaultMutableTreeNode youngerCousin = (DefaultMutableTreeNode)parentsNextSibling.getFirstChild();
-              if (youngerCousin!=null) {
+              if (youngerCousin != null) {
                 @SuppressWarnings("unchecked")
                 RegionTreeUserObj<R> userObject = (RegionTreeUserObj<R>) youngerCousin.getUserObject();
                 return userObject.region();
@@ -921,6 +921,9 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
   protected void closeIfEmpty() {
     if (_regionManager.getDocuments().isEmpty()) _close(); // _regTreeModel.getChildCount(_regTreeModel.getRoot()) == 0
   }
+  
+  /** Return true if the tree is empty. */
+  public boolean isEmpty() { return _regionManager.getDocuments().isEmpty(); }
   
   // Reloads regions between starting and endRegion inclusive.  Assumes startRegion, endRegion are in the same document.
   public void reload(R startRegion, R endRegion) {

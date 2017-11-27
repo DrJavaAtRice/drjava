@@ -70,7 +70,7 @@ import edu.rice.cs.util.swing.Utilities;
   */
 public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
 
-  // The following field has been hoisted into RegionsTreePanel
+  /* The following field has been hoisted into RegionsTreePanel */
 //  protected final RegionManager<MovingDocumentRegion> _regionManager;
   private final String _searchString;
   private final boolean _searchAll;
@@ -360,9 +360,8 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     }
   }
 
-  /** Receives the set of documents that have been closed and removes all of 
-    * their regions; also updates the first document, in case it was one of 
-    * the closed files. 
+  /** Receives the set of documents that have been closed and removes all of their regions; also updates the first 
+    * document, in case it was one of the closed files. 
     * @param docs the documents that were closed 
     */
   public void updateOnClose(List<OpenDefinitionsDocument> docs) {

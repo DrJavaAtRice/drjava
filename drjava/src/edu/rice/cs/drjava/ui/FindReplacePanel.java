@@ -124,8 +124,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
       _replaceFindNextAction.setEnabled(false);
       _replaceFindPreviousAction.setEnabled(false);
       _machine.positionChanged();
-      _caretChanged = true;
-      
+      _caretChanged = true; 
     }
   };
   
@@ -588,8 +587,11 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     EventQueue.invokeLater(new Runnable() {  // execute these actions after all pending Runnables in the EventQueue
       public void run() {
         _model.refreshActiveDocument();  // Rationale: a giant findAll left the definitions pane is a strange state
-        panel.requestFocusInWindow();
-        panel.getRegTree().scrollRowToVisible(0);
+        if (panel.isEmpty()) { requestFocusInWindow(); }// selects _findField as focus }
+        else {
+          panel.requestFocusInWindow();
+          panel.getRegTree().scrollRowToVisible(0);
+        }
       }});
   }
   
@@ -683,6 +685,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
       rm.addRegion(new MovingDocumentRegion(doc, start, end, lineStart, lineEnd));                       
     }
       
+    // show panel in tabbed pane unless it is empty
     if (count > 0) _frame.showFindResultsPanel(panel);
     else panel.freeResources();
     
@@ -1098,12 +1101,10 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
 //    return stretcher;
 //  }
 //
-//  /** Consider a parent container.  Change its layout to GridBagLayout
-//   * with 2 columns, 2 rows.  Consider them quadrants in a coordinate plain.
-//   * put the arguments in their corresponding quadrants, ignoring q3.
-//   */
-//  private static void hookComponents(Container parent, JComponent q1,
-//                                     JComponent q2, JComponent q4) {
+//  /** Consider a parent container.  Change its layout to GridBagLayout with 2 columns, 2 rows.  Consider them 
+//    * quadrants in a coordinate plain.  Put the arguments in their corresponding quadrants, ignoring q3.
+//    */
+//  private static void hookComponents(Container parent, JComponent q1, JComponent q2, JComponent q4) {
 //    GridBagLayout gbl = new GridBagLayout();
 //    GridBagConstraints c = new GridBagConstraints();
 //    parent.setLayout(gbl);
