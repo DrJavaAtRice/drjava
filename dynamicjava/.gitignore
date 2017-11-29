@@ -1,3 +1,4 @@
 classes/
 *.jar
-
+src/edu/rice/cs/dynamicjava/symbol/type/
+src/koala/dynamicjava/parser/impl/
