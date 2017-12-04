@@ -277,7 +277,7 @@ public class JPDADebugger implements Debugger {
       try { _vm.dispose(); }
       catch (VMDisconnectedException vmde) { /* VM was shutdown prematurely */ }
       finally {
-        _model.getInteractionsModel().setToDefaultInterpreter();
+        //_model.getInteractionsModel().setToDefaultInterpreter();
         _vm = null;
         _suspendedThreads = new RandomAccessStack();
         _eventManager = null;
@@ -1538,7 +1538,7 @@ public class JPDADebugger implements Debugger {
       // Set the new interpreter and prompt
       String prompt = _getPromptString(thread);
       _log.log(this + " is setting active interpreter");
-      _model.getInteractionsModel().setActiveInterpreter(interpreterName, prompt);
+      //_model.getInteractionsModel().setActiveInterpreter(interpreterName, prompt);
     }
     catch (IncompatibleThreadStateException e) { throw new DebugException(e); }
     finally {
@@ -1851,12 +1851,12 @@ public class JPDADebugger implements Debugger {
     String oldInterpreterName;
     if (_runningThread != null) {
       oldInterpreterName = _getUniqueThreadName(_runningThread);
-      interactionsModel.removeInterpreter(oldInterpreterName);
+      //interactionsModel.removeInterpreter(oldInterpreterName);
     }
     while (!_suspendedThreads.isEmpty()) {
       ThreadReference threadRef = _suspendedThreads.pop();
       oldInterpreterName = _getUniqueThreadName(threadRef);
-      interactionsModel.removeInterpreter(oldInterpreterName);
+      //interactionsModel.removeInterpreter(oldInterpreterName);
     }
   }
   
@@ -1870,14 +1870,14 @@ public class JPDADebugger implements Debugger {
       _model.getInteractionsModel();
     // switch to next interpreter on the stack
     if (fromStep || _suspendedThreads.isEmpty()) {
-      interactionsModel.setToDefaultInterpreter();
+      //interactionsModel.setToDefaultInterpreter();
     }
     else {
       ThreadReference threadRef = _suspendedThreads.peek();
       _switchToInterpreterForThreadReference(threadRef);
     }
     String oldInterpreterName = _getUniqueThreadName(_runningThread);
-    interactionsModel.removeInterpreter(oldInterpreterName);
+    //interactionsModel.removeInterpreter(oldInterpreterName);
   }
   
   /** Notifies all listeners that the current thread has been resumed.  
@@ -1897,7 +1897,7 @@ public class JPDADebugger implements Debugger {
   private void _switchToInterpreterForThreadReference(ThreadReference threadRef) {
     String threadName = _getUniqueThreadName(threadRef);
     String prompt = _getPromptString(threadRef);
-    _model.getInteractionsModel().setActiveInterpreter(threadName, prompt);
+    //_model.getInteractionsModel().setActiveInterpreter(threadName, prompt);
   }
   
   void threadStarted() {

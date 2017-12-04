@@ -66,13 +66,11 @@ import java.util.List;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /** Base class for tests over the {@link GlobalModel}.
- *
- *  This class provides a number of convenience methods for testing the GlobalModel. It also contains a model instance 
- *  (reset in {@link #setUp} and a temporary directory that's created per test invocation (and subsequently cleaned in
- *  {@link #tearDown}. This reduces the burden for such file management stuff in the test cases themselves.
- *
- *  @version $Id$
- */
+  * This class provides a number of convenience methods for testing the GlobalModel. It also contains a model instance 
+  * (reset in {@link #setUp} and a temporary directory that's created per test invocation (and subsequently cleaned in
+  * {@link #tearDown}. This reduces the burden for such file management stuff in the test cases themselves.
+  * @version $Id$
+  */
 public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   
   public static final Log _log = new Log("GlobalModel.txt", false);
@@ -95,14 +93,8 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   public GlobalModelTestCase() { _log.log("Constructing a " + this); }
 
   /** Setup for each test case, which does the following.
-   *  <OL>
-   *  <LI>
    *  Creates a new GlobalModel in {@link #_model} for each test case run.
-   *  </LI>
-   *  <LI>
    *  Creates a new temporary directory in {@link #_tempDir}.
-   *  </LI>
-   *  </OL>
    */
   public void setUp() throws Exception {
     super.setUp();  // declared to throw Exception
@@ -137,7 +129,6 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     debug.logEnd();
   }
   
-
   /** Teardown for each test case, which recursively deletes the temporary directory created in setUp. */
   public void tearDown() throws Exception {
     debug.logStart();
@@ -162,9 +153,9 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   }
 
   /** Clear all old text and insert the given text. 
-   * @param s the new text to be set
-   * @param doc the document in which to change the text
-   */
+    * @param s the new text to be set
+    * @param doc the document in which to change the text
+    */
   protected void changeDocumentText(final String s, final OpenDefinitionsDocument doc) /*throws BadLocationException */{
     Utilities.invokeAndWait(new Runnable() {
       public void run() {
@@ -357,15 +348,15 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   }
 
   /** Puts the given input into the interactions document and then interprets 
-   * it, returning the result that was put into the interactions document. 
-   * This assumes the interactions document is in a state with no text after 
-   * the prompt. To be sure this is the case, you can reset interactions 
-   * first. This method provides its own listener to synchronized with the 
-   * completion of the interaction.
-   * @param input text to interpret
-   * @return The output from this interpretation, in String form, as it was printed to the interactions document.
-   * @throws EditDocumentException if an error occurs while editing the document
-   */
+    * it, returning the result that was put into the interactions document. 
+    * This assumes the interactions document is in a state with no text after 
+    * the prompt. To be sure this is the case, you can reset interactions 
+    * first. This method provides its own listener to synchronized with the 
+    * completion of the interaction.
+    * @param input text to interpret
+    * @return The output from this interpretation, in String form, as it was printed to the interactions document.
+    * @throws EditDocumentException if an error occurs while editing the document
+    */
   protected String interpret(final String input) throws EditDocumentException {
     
     final InteractionsDocument interactionsDoc = _model.getInteractionsDocument();
@@ -734,31 +725,6 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       String header = "\nTestListener creation stack trace:\n" + StringOps.getStackTrace(_startupTrace);
       MultiThreadedTestCase.listenerFail(message + header);
     }
-    
-// clearEventQueue must not be called from the event queue (?), and assertEquals shouldn't have unexpected side effects    
-//    public void assertEquals(String s, int expected, int actual) {
-//      if (!hasClearedEventQueue) {
-//        Utilities.clearEventQueue();
-//        hasClearedEventQueue = true;
-//      }
-//      Assert.assertEquals(s, expected, actual);
-//    }
-//    
-//    public void assertEquals(String s, boolean expected, boolean actual) {
-//      if (!hasClearedEventQueue) {
-//        Utilities.clearEventQueue();
-//        hasClearedEventQueue = true;
-//      }
-//      Assert.assertEquals(s, expected, actual);
-//    }
-//
-//    public void assertEquals(String s, Object expected, Object actual) {
-//      if (!hasClearedEventQueue) {
-//        Utilities.clearEventQueue();
-//        hasClearedEventQueue = true;
-//      }
-//      Assert.assertEquals(s, expected, actual);
-//    }
 
     public void assertFileNotFoundCount(int i) {
       assertEquals("number of times fileNotFound fired", i, fileNotFoundCount);
@@ -826,11 +792,6 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       assertEquals("number of times interpreterChanged fired", i, interpreterChangedCount);
     }
 
-///** Not used */
-//    public void assertInteractionCaretPositionChangedCount(int i) {
-//      assertEquals("number of times interactionCaretPositionChanged fired", i, interactionCaretPositionChangedCount);
-//    }
-
     public void assertCompileStartCount(int i) {
       assertEquals("number of times compileStarted fired", i, compileStartCount);
     }
@@ -891,13 +852,6 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     public void assertCompileBeforeJavadocCount(int i) {
       assertEquals("number of times compileBeforeJavadoc fired", i, compileBeforeJavadocCount);
     }
-
-///** Not used. */
-//    public void assertSaveBeforeDebugCount(int i) {
-//      assertEquals("number of times saveBeforeDebug fired",
-//                   i,
-//                   saveBeforeDebugCount);
-//    }
 
     public void assertNonTestCaseCount(int i) {
       assertEquals("number of times nonTestCase fired", i,  nonTestCaseCount);
@@ -960,10 +914,6 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 
     public void interpreterChanged(boolean inProgress) { listenerFail("interpreterChanged fired unexpectedly"); }
 
-///**Not used */
-//    public void interactionCaretPositionChanged(int pos) {
-//      listenerFail("interactionCaretPosition fired unexpectedly");
-//    }
 
     public void compileStarted() { listenerFail("compileStarted fired unexpectedly"); }
     public void compileEnded(File workDir, List<? extends File> excludedFiles) { 
@@ -1099,8 +1049,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     
     public int getLastExitStatus() { return _lastExitStatus; }
   };
-  
-  
+    
   /** A model listener for situations expecting a compilation to succeed. */
   public static class CompileShouldSucceedListener extends InteractionListener {
     
@@ -1275,7 +1224,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     public void runJUnit(OpenDefinitionsDocument doc) throws IOException, ClassNotFoundException, 
       InterruptedException {
       logJUnitStart();
-//    System.err.println("Starting JUnit on " + doc);
+      System.err.println("********** Starting JUnit on " + doc);
       doc.startJUnit();
 //    System.err.println("JUnit Started on " + doc);
       waitJUnitDone();

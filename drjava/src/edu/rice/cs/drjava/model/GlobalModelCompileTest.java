@@ -114,8 +114,8 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
 //        System.err.println("Compile failed");
       fail("compile failed: " + getCompilerErrorString());
     }
-    listener.waitResetDone();
-    _log.log("reset confirmed");
+//    listener.waitResetDone();
+//    _log.log("reset confirmed");
 //    System.err.println("Reached end of compilation");
     assertCompileErrorsPresent("compile should succeed", false);
     listener.checkCompileOccurred();
@@ -127,9 +127,9 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
   }
   
   /** If we try to compile an unsaved file, and if we don't save when asked to saveAllBeforeProceeding, it should
-   * not do the compile or any other actions.
-   * @throws Exception if something goes wrong
-   */
+    * not do the compile or any other actions.
+    * @throws Exception if something goes wrong
+    */
   public void testCompileAbortsIfUnsaved() throws Exception {
     final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     

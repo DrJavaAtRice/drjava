@@ -545,12 +545,12 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     
     // Create a new Java interpreter, and set it to be active
     
-    Utilities.invokeAndWait(new Runnable() { 
+    /*Utilities.invokeAndWait(new Runnable() {
       public void run() { 
         dim.addInterpreter("testInterpreter");
         dim.setActiveInterpreter("testInterpreter", "myPrompt>"); 
       }
-    });
+    });*/
     
 //    Utilities.clearEventQueue();
     listener.assertInterpreterChangedCount(1);
