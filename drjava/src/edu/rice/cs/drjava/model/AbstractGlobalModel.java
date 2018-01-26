@@ -3640,8 +3640,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     /** Get the location of the cursor in the definitions according to the definitions document. */
     public int getCurrentLocation() { return getDocument().getCurrentLocation(); }
     
-//    public boolean indentInProgress() { return getDocument().indentInProgress(); }
-    
     /** @return the caret position as set by the view. */
     public int getCaretPosition() { return _caretPosition; }
     

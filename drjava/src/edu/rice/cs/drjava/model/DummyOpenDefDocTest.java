@@ -43,20 +43,294 @@ import edu.rice.cs.drjava.DrJavaTestCase;
 
 public class DummyOpenDefDocTest extends DrJavaTestCase {
   
-  /** Creates a DummyOpenDefDoc and ensures that it properly
-   * throws UnsupportedOperationException by calling isModifiedOnDisk().
-   */
-  public void testProperExceptionThrowing() {
+  /** Creates a DummyOpenDefDoc and ensures that it properly implements isModifiedOnDisk(). */
+  public void testModifiedOnDisk() {
     try {
       DummyOpenDefDoc dummy = new DummyOpenDefDoc();
       dummy.modifiedOnDisk();
-      fail("DummyOpenDefDoc did not throw UnsupportedOperationException");
+      fail("DummyOpenDefDoc.modifiedOnDisk did not throw UnsupportedOperationException");
     }
     catch (UnsupportedOperationException e) {
       //Do nothing, this is expected.
     }
     catch(Exception e) {
-      fail("DummyOpenDefDoc did not throw UnsupportedOperationException, but " + e);
+      fail("DummyOpenDefDoc.modifiedOnDisk did not throw UnsupportedOperationException, but " + e);
+    }
+  }
+  
+  /** Creates a DummyOpenDefDoc and ensures that it properly implements addBrowserRegion(...). */
+  public void testAddBrowserRegion() {
+    try {
+      DummyOpenDefDoc dummy = new DummyOpenDefDoc();
+      dummy.addBrowserRegion(null);
+      fail("DummyOpenDefDoc.addBrowserRegion did not throw UnsupportedOperationException");
+    }
+    catch (UnsupportedOperationException e) {
+      //Do nothing, this is expected.
+    }
+    catch(Exception e) {
+      fail("DummyOpenDefDoc.addBrowserRegion did not throw UnsupportedOperationException, but " + e);
+    }
+  }
+  
+  /** Creates a DummyOpenDefDoc and ensures that it properly implements removeBrowserRegion(...). */
+  public void testRemoveBrowserRegion() {
+    try {
+      DummyOpenDefDoc dummy = new DummyOpenDefDoc();
+      dummy.removeBrowserRegion(null);
+      fail("DummyOpenDefDoc.removeBrowserRegion did not throw UnsupportedOperationException");
+    }
+    catch (UnsupportedOperationException e) {
+      //Do nothing, this is expected.
+    }
+    catch(Exception e) {
+      fail("DummyOpenDefDoc.removeBrowserRegion did not throw UnsupportedOperationException, but " + e);
+    }
+  }
+  
+  /** Creates a DummyOpenDefDoc and ensures that it properly implements saveFile(...). */
+  public void testSaveFile() {
+    try {
+      DummyOpenDefDoc dummy = new DummyOpenDefDoc();
+      dummy.saveFile(null);
+      fail("DummyOpenDefDoc.saveFile did not throw UnsupportedOperationException");
+    }
+    catch (UnsupportedOperationException e) {
+      //Do nothing, this is expected.
+    }
+    catch(Exception e) {
+      fail("DummyOpenDefDoc.saveFile did not throw UnsupportedOperationException, but " + e);
+    }
+  }
+  
+  /** Creates a DummyOpenDefDoc and ensures that it properly implements canAbandonFile(...). */
+  public void testCanAbandonFile() {
+    try {
+      DummyOpenDefDoc dummy = new DummyOpenDefDoc();
+      dummy.canAbandonFile();
+      fail("DummyOpenDefDoc.canAbandonFile did not throw UnsupportedOperationException");
+    }
+    catch (UnsupportedOperationException e) {
+      //Do nothing, this is expected.
+    }
+    catch(Exception e) {
+      fail("DummyOpenDefDoc.canAbandonFile did not throw UnsupportedOperationException, but " + e);
+    }
+  }
+  
+  /** Creates a DummyOpenDefDoc and ensures that it properly implements quitFile(...). */
+  public void testQuitFile() {
+    try {
+      DummyOpenDefDoc dummy = new DummyOpenDefDoc();
+      dummy.quitFile();
+      fail("DummyOpenDefDoc.quitFile did not throw UnsupportedOperationException");
+    }
+    catch (UnsupportedOperationException e) {
+      //Do nothing, this is expected.
+    }
+    catch(Exception e) {
+      fail("DummyOpenDefDoc.quitFile did not throw UnsupportedOperationException, but " + e);
+    }
+  }
+  
+  /** Creates a DummyOpenDefDoc and ensures that it properly implements setCurrentLocation(...). */
+  public void testSetCurrentLocation() {
+    try {
+      DummyOpenDefDoc dummy = new DummyOpenDefDoc();
+      dummy.setCurrentLocation(0);
+      fail("DummyOpenDefDoc.setCurrentLocation did not throw UnsupportedOperationException");
+    }
+    catch (UnsupportedOperationException e) {
+      //Do nothing, this is expected.
+    }
+    catch(Exception e) {
+      fail("DummyOpenDefDoc.setCurrentLocation did not throw UnsupportedOperationException, but " + e);
+    }
+  }
+  
+  /** Creates a DummyOpenDefDoc and ensures that it properly implements getDocument(...). */
+  public void testGetDocument() {
+    try {
+      DummyOpenDefDoc dummy = new DummyOpenDefDoc();
+      dummy.getDocument();
+      fail("DummyOpenDefDoc.getDocument did not throw UnsupportedOperationException");
+    }
+    catch (UnsupportedOperationException e) {
+      //Do nothing, this is expected.
+    }
+    catch(Exception e) {
+      fail("DummyOpenDefDoc.getDocument did not throw UnsupportedOperationException, but " + e);
+    }
+  }
+  
+  /** Creates a DummyOpenDefDoc and ensures that it properly implements isModifiedSinceSave(...). */
+  public void testIsModifiedSinceSave() {
+    try {
+      DummyOpenDefDoc dummy = new DummyOpenDefDoc();
+      dummy.isModifiedSinceSave();
+      fail("DummyOpenDefDoc.isModifiedSinceSave did not throw UnsupportedOperationException");
+    }
+    catch (UnsupportedOperationException e) {
+      //Do nothing, this is expected.
+    }
+    catch(Exception e) {
+      fail("DummyOpenDefDoc.isModifiedSinceSave did not throw UnsupportedOperationException, but " + e);
+    }
+  }
+  
+  /** Creates a DummyOpenDefDoc and ensures that it properly implements balanceForward(...). */
+  public void testBalanceForward() {
+    try {
+      DummyOpenDefDoc dummy = new DummyOpenDefDoc();
+      dummy.balanceForward();
+      fail("DummyOpenDefDoc.balanceForward did not throw UnsupportedOperationException");
+    }
+    catch (UnsupportedOperationException e) {
+      //Do nothing, this is expected.
+    }
+    catch(Exception e) {
+      fail("DummyOpenDefDoc.balanceForward did not throw UnsupportedOperationException, but " + e);
+    }
+  }
+  
+  /** Creates a DummyOpenDefDoc and ensures that it properly implements balanceBackward(...). */
+  public void testBalanceBackward() {
+    try {
+      DummyOpenDefDoc dummy = new DummyOpenDefDoc();
+      dummy.balanceBackward();
+      fail("DummyOpenDefDoc.balanceBackward did not throw UnsupportedOperationException");
+    }
+    catch (UnsupportedOperationException e) {
+      //Do nothing, this is expected.
+    }
+    catch(Exception e) {
+      fail("DummyOpenDefDoc.balanceBackward did not throw UnsupportedOperationException, but " + e);
+    }
+  }
+  
+  /** Creates a DummyOpenDefDoc and ensures that it properly implements getFile(...). */
+  public void testGetFile() {
+    try {
+      DummyOpenDefDoc dummy = new DummyOpenDefDoc();
+      dummy.getFile();
+      fail("DummyOpenDefDoc.getFile did not throw UnsupportedOperationException");
+    }
+    catch (UnsupportedOperationException e) {
+      //Do nothing, this is expected.
+    }
+    catch(Exception e) {
+      fail("DummyOpenDefDoc.getFile did not throw UnsupportedOperationException, but " + e);
+    }
+  }
+  
+  /** Creates a DummyOpenDefDoc and ensures that getRawFile(...) returns null. */
+  public void testGetRawFile() {
+    DummyOpenDefDoc dummy = new DummyOpenDefDoc();
+    assertEquals("getRawFile() does not return null", null, dummy.getRawFile());
+  }
+  
+  /** Creates a DummyOpenDefDoc and ensures that it properly implements getParentDirectory(...). */
+  public void testParentDirectory() {
+    try {
+      DummyOpenDefDoc dummy = new DummyOpenDefDoc();
+      dummy.getParentDirectory();
+      fail("DummyOpenDefDoc.getParentDirectory did not throw UnsupportedOperationException");
+    }
+    catch (UnsupportedOperationException e) {
+      //Do nothing, this is expected.
+    }
+    catch(Exception e) {
+      fail("DummyOpenDefDoc.getParentDirectory did not throw UnsupportedOperationException, but " + e);
+    }
+  }
+  
+  /** Creates a DummyOpenDefDoc and ensures that it properly implements fileExists(...). */
+  public void testFileExists() {
+    try {
+      DummyOpenDefDoc dummy = new DummyOpenDefDoc();
+      dummy.fileExists();
+      fail("DummyOpenDefDoc.fileExists did not throw UnsupportedOperationException");
+    }
+    catch (UnsupportedOperationException e) {
+      //Do nothing, this is expected.
+    }
+    catch(Exception e) {
+      fail("DummyOpenDefDoc.fileExists did not throw UnsupportedOperationException, but " + e);
+    }
+  }
+  
+  /** Creates a DummyOpenDefDoc and ensures that it properly implements verifyExists(...). */
+  public void testVerifyExists() {
+    try {
+      DummyOpenDefDoc dummy = new DummyOpenDefDoc();
+      dummy.verifyExists();
+      fail("DummyOpenDefDoc.verifyExists did not throw UnsupportedOperationException");
+    }
+    catch (UnsupportedOperationException e) {
+      //Do nothing, this is expected.
+    }
+    catch(Exception e) {
+      fail("DummyOpenDefDoc.verifyExists did not throw UnsupportedOperationException, but " + e);
+    }
+  }
+  
+  /** Creates a DummyOpenDefDoc and ensures that it properly implements cleanUpPrintJob(...). */
+  public void testCleanUpPrintJob() {
+    try {
+      DummyOpenDefDoc dummy = new DummyOpenDefDoc();
+      dummy.cleanUpPrintJob();
+      fail("DummyOpenDefDoc.cleanUpPrintJob did not throw UnsupportedOperationException");
+    }
+    catch (UnsupportedOperationException e) {
+      //Do nothing, this is expected.
+    }
+    catch(Exception e) {
+      fail("DummyOpenDefDoc.cleanUpPrintJob did not throw UnsupportedOperationException, but " + e);
+    }
+  }
+  
+  /** Creates a DummyOpenDefDoc and ensures that it properly implements getFirstTopLevelClassName(...). */
+  public void testGetFirstTopLevelClassName() {
+    try {
+      DummyOpenDefDoc dummy = new DummyOpenDefDoc();
+      dummy.getFirstTopLevelClassName();
+      fail("DummyOpenDefDoc.getFirstTopLevelClassName did not throw UnsupportedOperationException");
+    }
+    catch (UnsupportedOperationException e) {
+      //Do nothing, this is expected.
+    }
+    catch(Exception e) {
+      fail("DummyOpenDefDoc.getFirstTopLevelClassName did not throw UnsupportedOperationException, but " + e);
+    }
+  }
+  
+  /** Creates a DummyOpenDefDoc and ensures that it properly implements startCompile(...). */
+  public void testStartCompile() {
+    try {
+      DummyOpenDefDoc dummy = new DummyOpenDefDoc();
+      dummy.startCompile();
+      fail("DummyOpenDefDoc.startCompile did not throw UnsupportedOperationException");
+    }
+    catch (UnsupportedOperationException e) {
+      //Do nothing, this is expected.
+    }
+    catch(Exception e) {
+      fail("DummyOpenDefDoc.startCompile did not throw UnsupportedOperationException, but " + e);
+    }
+  }
+  
+  /** Creates a DummyOpenDefDoc and ensures that it properly implements runMain(...). */
+  public void testRunMain() {
+    try {
+      DummyOpenDefDoc dummy = new DummyOpenDefDoc();
+      dummy.runMain("");
+      fail("DummyOpenDefDoc.runMain did not throw UnsupportedOperationException");
+    }
+    catch (UnsupportedOperationException e) {
+      //Do nothing, this is expected.
+    }
+    catch(Exception e) {
+      fail("DummyOpenDefDoc.runMain did not throw UnsupportedOperationException, but " + e);
     }
   }
 }

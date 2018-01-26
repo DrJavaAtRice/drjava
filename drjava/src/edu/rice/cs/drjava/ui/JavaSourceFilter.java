@@ -40,6 +40,7 @@ import java.io.File;
 import javax.swing.filechooser.FileFilter;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.util.UnexpectedException;
 
 
 /** A file filter for files with extensions ".java" and ".dj?". Used in the file choosers for open and save. 
@@ -57,14 +58,16 @@ public class JavaSourceFilter extends FileFilter {
       switch (DrJava.getConfig().getSetting(OptionConstants.LANGUAGE_LEVEL)) {
         case (OptionConstants.FULL_JAVA):
           return (extension.equals(OptionConstants.JAVA_FILE_EXTENSION));
-        case (OptionConstants.ELEMENTARY_LEVEL):
-          return extension.equals(OptionConstants.OLD_DJ0_FILE_EXTENSION);
-        case (OptionConstants.INTERMEDIATE_LEVEL):
-          return extension.equals(OptionConstants.OLD_DJ1_FILE_EXTENSION);
-        case (OptionConstants.ADVANCED_LEVEL):
-          return extension.equals(OptionConstants.OLD_DJ2_FILE_EXTENSION);
+//        case (OptionConstants.ELEMENTARY_LEVEL):
+//          return extension.equals(OptionConstants.OLD_DJ0_FILE_EXTENSION);
+//        case (OptionConstants.INTERMEDIATE_LEVEL):
+//          return extension.equals(OptionConstants.OLD_DJ1_FILE_EXTENSION);
+//        case (OptionConstants.ADVANCED_LEVEL):
+//          return extension.equals(OptionConstants.OLD_DJ2_FILE_EXTENSION);
         case (OptionConstants.FUNCTIONAL_JAVA_LEVEL):
           return extension.equals(OptionConstants.DJ_FILE_EXTENSION);
+        default: /* Should never happen */ throw 
+          new UnexpectedException("LANGUAGE_LEVEL is " + DrJava.getConfig().getSetting(OptionConstants.LANGUAGE_LEVEL));
       }
     }
     return false;

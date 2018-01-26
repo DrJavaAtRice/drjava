@@ -903,16 +903,10 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   }
 
   /** Comments out the lines contained within the given selection. */
-  private void _commentLines() {
-    _mainFrame.commentLines();
-//    _doc.commentLinesInDefinitions(getSelectionStart(), getSelectionEnd());
-  }
+  private void _commentLines() { _mainFrame.commentLines(); }
 
   /** Uncomments the lines contained within the given selection. */
-  private void _uncommentLines() {
-    _mainFrame.uncommentLines();
-//    _doc.uncommentLinesInDefinitions(getSelectionStart(), getSelectionEnd()); 
-  }
+  private void _uncommentLines() { _mainFrame.uncommentLines(); }
 
   /** @return the undo action. */
   public UndoAction getUndoAction() { return  _undoAction; }

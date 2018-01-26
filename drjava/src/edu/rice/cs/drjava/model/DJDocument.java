@@ -85,10 +85,7 @@ public interface DJDocument extends SwingDocumentInterface {
     * @param dist the distance from the current location to the new location.
     */
   public void move(int dist);
-  
-//  /* Returns whether a block indent operation is in progress on this document. */
-//  public boolean indentInProgress();
-  
+
   /** Finds the match for the closing brace immediately to the left, assuming there is such a brace.
     * @return the relative distance backwards to the offset before the matching brace.
     */

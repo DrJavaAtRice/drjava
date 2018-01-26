@@ -60,11 +60,7 @@ import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.docnavigation.*;
 import edu.rice.cs.util.text.SwingDocument;
 
-public class DummyOpenDefDoc implements OpenDefinitionsDocument { 
-  
-//  public int id() {
-//    throw new UnsupportedOperationException("Dummy method");
-//  }
+public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   
   public int compareTo(OpenDefinitionsDocument d) {
     throw new UnsupportedOperationException("Dummy method");
@@ -72,20 +68,13 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   
   public boolean modifiedOnDisk() { throw new UnsupportedOperationException("Dummy method"); }
   
-  public void addBrowserRegion(BrowserDocumentRegion r) {
-    throw new UnsupportedOperationException("Dummy method");
-  }
+  public void addBrowserRegion(BrowserDocumentRegion r) { throw new UnsupportedOperationException("Dummy method"); }
   
-  public void removeBrowserRegion(BrowserDocumentRegion r) {
-    throw new UnsupportedOperationException("Dummy method");
-  }
+  public void removeBrowserRegion(BrowserDocumentRegion r) { throw new UnsupportedOperationException("Dummy method"); }
+  
   public boolean saveFile(FileSaveSelector com) throws IOException {
     throw new UnsupportedOperationException("Dummy method");
   }
-  
-//  public void uncommentLinesInDefinitions(int selStart, int selEnd) {
-//    throw new UnsupportedOperationException("Dummy method");
-//  }
   
   public boolean canAbandonFile() { throw new UnsupportedOperationException("Dummy method"); }
   
@@ -96,8 +85,6 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   public DefinitionsDocument getDocument() { throw new UnsupportedOperationException("Dummy method"); }
   
   public boolean isModifiedSinceSave() { throw new UnsupportedOperationException("Dummy method"); }
-  
-//  public boolean indentInProgress() { throw new UnsupportedOperationException("Dummy method"); }
   
   public int balanceForward() { throw new UnsupportedOperationException("Dummy method"); }
   
@@ -147,18 +134,6 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   public RegionManager<Breakpoint> getBreakpointManager() { throw new UnsupportedOperationException("Dummy method"); }
 
   public RegionManager<MovingDocumentRegion> getBookmarkManager() { throw new UnsupportedOperationException("Dummy method"); }
-
-//  public List<RegionManager<MovingDocumentRegion>> getFindResultsManagers() {
-//    throw new UnsupportedOperationException("Dummy method");
-//  }
-
-//  public void addFindResultsManager(RegionManager<MovingDocumentRegion> rm) {
-//    throw new UnsupportedOperationException("Dummy method");
-//  }
-//    
-//  public void removeFindResultsManager(RegionManager<MovingDocumentRegion> rm) {
-//    throw new UnsupportedOperationException("Dummy method");
-//  }
   
   public void clearBrowserRegions() { throw new UnsupportedOperationException("Dummy method"); }
   

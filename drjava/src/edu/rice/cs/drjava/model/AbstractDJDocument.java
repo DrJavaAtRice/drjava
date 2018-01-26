@@ -110,9 +110,6 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   
   /*-------- FIELDS ----------*/
   
-//  /** Whether a block indent operation is in progress on this document. */
-//  private volatile boolean _indentInProgress = false;
-  
   /** The reduced model of the document (stored in field _reduced) handles most of the document logic and keeps 
     * track of state.  This field together with _currentLocation function as a virtual object for purposes of 
     * synchronization.  All operations that access or modify this virtual object should be synchronized on _reduced.
@@ -1058,7 +1055,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     final Position endPos = this.createUnwrappedPosition(end);
     // Iterate, line by line, until we get to/past the end
     int walker = start;
-//    _indentInProgress = true;
+    
     while (walker < endPos.getOffset()) {
       setCurrentLocation(walker);
       // Keep pointer to walker position that will stay current regardless of how indentLine changes things
@@ -1078,7 +1075,6 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       // Adding 1 makes us point to the first character AFTER the next newline. We don't actually move the
       // location yet. That happens at the top of the loop, after we check if we're past the end. 
       walker += _reduced.getDistToNextNewline() + 1;
-//      _indentInProgress = false;
     }
     
     // disable the query cache
