@@ -61,7 +61,11 @@
   </taskdef>
   <property name="coverage-report-dir" value="coverage_report"/>
   <property name="coverage-exec" value="jacoco.exec"/>
-  <property name="TestParallel" value="${arg1}"/>
+  <!--property name="TestParallel" value="${arg0}"/>
+  <property name="ThreadCount" value="${arg1}"/-->
+  <condition property="Thread" value="${ThreadCount}" else="4">
+    <isset property="ThreadCount"/>
+  </condition>
   <fileset id="libs" dir="lib" includes="*.jar" /> <!-- Only include jars that are at the top level (not in buildlib) -->
   <fileset id="jrelibs" dir="${java.home}/lib" includes="*.jar" /> 
   <echo message="libs = ${toString:libs}" level="verbose" />
@@ -348,7 +352,7 @@
     <if>
       <equals arg1="${TestParallel}" arg2="true" />
       <then>
-        <echo message="Test in Parallel" />
+        <echo message="Test in Parallel with ${Thread} threads" />
         <property name="do-test-target" value="do-test-for" />
       </then>
       <else>
@@ -443,7 +447,7 @@
 
   <target name="do-test-for" depends="resolve-jvm-args">
     <echo message="Running all tests matching '${test-filter-string}' with command '${test-jvm}', using '${junit-jar}' and '${test-tools}'" />   
-    <for param="fileFullName"   parallel= "true"  threadCount="16">
+    <for param="fileFullName"   parallel= "true"  threadCount="${Thread}">
       <path>
         <fileset dir="classes/test">
           <!--include name="**/*${test-filter-string}*/**" /-->  
