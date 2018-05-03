@@ -50,6 +50,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
+import java.util.concurrent.TimeUnit;
 import java.util.Enumeration;
 import java.util.Arrays;
 
@@ -91,65 +93,33 @@ import org.jacoco.core.instr.Instrumenter;
 import org.jacoco.core.runtime.IRuntime;
 import org.jacoco.core.runtime.LoggerRuntime;
 import org.jacoco.core.runtime.RuntimeData;
+import org.junit.experimental.ParallelComputer;
+import org.junit.runner.JUnitCore;
+import org.junit.runner.Result;
+import org.junit.runner.notification.Failure;
 
 /** Runs in the InterpreterJVM. Runs tests given a classname and formats the results into a (serializable) array of 
   * JUnitError that can be passed back to the MainJVM.
   * @version $Id$
   */
-public class JUnitTestManager {
+public class JUnitParallelTestManager extends JUnitTestManager{
+	public static Log _log = new Log("JUnitParallelTestManager.txt", true);
   
-  /** log for use in debugging */
-  protected static final Log _log = new Log("JUnitTestManager.txt", false);
   
-  /** The interface to the master JVM via RMI. */
-  protected final JUnitModelCallback _jmc;
-  
-  /** A factory producing a ClassLoader for tests with the given parent */
-  protected final ClassPathManager _classPathManager;
   
   /** The current testRunner; initially null.  Each test suite requires a new runner. */
-  protected JUnitTestRunner _testRunner;
+  private JUnitParallelTestRunner _testRunner;
+  /** class of of test cases, used to run test case in parallel*/
+  private Vector<Class<?>>  cls=null;
   
-  /** The accumulated test suite; null if no test is pending. */
-  protected TestSuite _suite = null;
   
-  /** The accumulated list of names of TestCase classes; null if no test is pending. */
-  protected List<String> _testClassNames = null;
-  
-  /** The list of files corresponding to testClassNames; null if no test is pending. */
-  protected List<File> _testFiles = null;
-  
-  // Create and initialize fields for JaCoCo
-  protected String _coverageOutdir = null;
-  protected IRuntime _runtime = null;
-  protected RuntimeData _myData = null;
-  protected List<String> _nonTestClassNames = null;
-  protected JUnitResultTuple _finalResult = new JUnitResultTuple(false, null);
   
   /** Standard constructor 
     * @param jmc a JUnitModelCallback
     * @param loaderFactory factory to create class loaders
     */
-  public JUnitTestManager(JUnitModelCallback jmc, ClassPathManager loaderFactory) {
-    _jmc = jmc;
-    _classPathManager = loaderFactory;
-  }
-  
-  /** @return result of the last JUnit run */  
-  public JUnitResultTuple getFinalResult() { return _finalResult; }
-  
-  /** Used to load class files in the analysis phase of code coverage
-    * @return URLClassLoader with DrJava classpath
-    */
-  protected URLClassLoader newURLLoader() {
-    List<URL> urls = new LinkedList<URL>();
-    for (File f : _classPathManager.getClassPath()) {
-      try { urls.add(f.toURI().toURL()); }
-      catch (IllegalArgumentException e) { error.log(e); }
-      catch (MalformedURLException e) { error.log(e); }
-      // just skip the path element if there's an error
-    }
-    return new URLClassLoader(urls.toArray(new URL[urls.size()]), EmptyClassLoader.INSTANCE);
+  public JUnitParallelTestManager(JUnitModelCallback jmc, ClassPathManager loaderFactory) {
+    super(jmc,loaderFactory);
   }
 
   /** Find the test classes among the given classNames and accumulate them in
@@ -167,7 +137,7 @@ public class JUnitTestManager {
     boolean doCoverage = coverageMetadata.getFlag();
     
     // Set up the loader
-    final ClassLoader defaultLoader = JUnitTestManager.class.getClassLoader();
+    final ClassLoader defaultLoader = JUnitParallelTestManager.class.getClassLoader();
     final ClassLoader loader;
     if (! doCoverage) loader = _classPathManager.value(defaultLoader);
     else {
@@ -194,7 +164,7 @@ public class JUnitTestManager {
     _testFiles = new ArrayList<File>();
     _nonTestClassNames = new ArrayList(classNames.size());
     _suite = new TestSuite();
-
+    cls=new Vector<Class<?>>();
     // Assemble test suite (as _suite) and return list of test class names
     for (Pair<String, File> pair : IterUtil.zip(classNames, files)) {
       String cName = pair.first();
@@ -205,6 +175,7 @@ public class JUnitTestManager {
           _testClassNames.add(cName);
           _testFiles.add(pair.second());
           Test test = new JUnit4TestAdapter(possibleTest);
+          cls.add(possibleTest);
           _suite.addTest(test); 
           _log.log("Adding test " + test + " to test suite"); 
         } else { // cName is a program class that is not a test class
@@ -229,9 +200,10 @@ public class JUnitTestManager {
   
   /** Runs the pending test suite set up by the preceding call to findTestClasses.  Runs in a single auxiliary thread,
     * so no need for explicit synchronization.
+    * @param runTestParallel    set whether we should run the test in parallel
     * @return false if no test suite (even an empty one) has been set up
     */
-  public boolean runTestSuite() {
+  public boolean runTestSuite(Boolean runTestParallel) {
     
     _log.log("runTestSuite() called");
     
@@ -248,34 +220,87 @@ public class JUnitTestManager {
     JUnitError[] faults = new JUnitError[0];
     try {
       _log.log("Calling _testRunner.runSuite(" + _suite + ")");
-      TestResult result = _testRunner.runSuite(_suite);
+
       
-      /* A fault is either an error or a failure. */
-      int faultCount = result.errorCount() + result.failureCount();
-      
-      if (faultCount > 0) {
-        
-        /* NOTE: TestFailure, a JUnit class, is misnamed; it should have been called TestFault with TestFailure
-         * and TestError as disjoint subtypes (e.g., classes) */
-        faults = new JUnitError[faultCount];
-        Enumeration<TestFailure> failures = result.failures();
-        Enumeration<TestFailure> errors = result.errors();
-        
-        int i = 0;
-        
-        // faults should be called faults!  and makeJUnitError should be makeJUnitFault!
-        while (errors.hasMoreElements()) {
-          TestFailure error = errors.nextElement();
-          faults[i] = _makeJUnitError(error, _testClassNames, true, _testFiles);
-          i++;
-        }
-        
-        while (failures.hasMoreElements()) {
-          TestFailure failure = failures.nextElement();
-          faults[i] = _makeJUnitError(failure, _testClassNames, false, _testFiles);
-          i++;
-        }
-      }
+    //This is the result of runSuite  
+    Result result=null;
+    int faultCount=0;
+    long startTime = System.nanoTime();
+    long estimatedTime = System.nanoTime() - startTime;
+    _log.log("isParallel= "+runTestParallel);
+			if (runTestParallel == true) {
+				@SuppressWarnings("rawtypes")
+				Class[] clsArray = new Class[cls.size()];
+				cls.copyInto(clsArray);
+				_testRunner.setCountTestCases(_suite);
+				startTime = System.nanoTime();
+				result = _testRunner.runClass(clsArray);
+				estimatedTime = System.nanoTime() - startTime;
+				long Second=TimeUnit.SECONDS.convert(estimatedTime, TimeUnit.NANOSECONDS);
+				_log.log("when testing in parallel, testing time is :" + estimatedTime +" in nanoseconds");
+				_log.log("when testing in parallel, testing time is :" + Second +" in second");
+
+				faultCount = result.getFailureCount();
+				_log.log("faultCount= " + faultCount);
+				if (faultCount > 0) {
+
+					faults = new JUnitError[faultCount];
+					List<Failure> failure = result.getFailures();
+					int i = 0;
+					for (Failure failureIterator : failure) {
+						// TestFailure error = failure.
+						_log.log("failureIterator.getDescription() is " + failureIterator.getDescription());
+						String testMethodName = failureIterator.getDescription().getMethodName();
+						_log.log("failureIterator.getDescription().getTestClass()  is "
+								+ failureIterator.getDescription().getTestClass());
+						Test test = new JUnit4TestAdapter(failureIterator.getDescription().getTestClass());
+						_log.log("test is " + test);
+						_log.log("testName is " + testMethodName);
+						TestFailure testFailure = new TestFailure(test, failureIterator.getException());
+						faults[i] = _makeJUnitError(testFailure, _testClassNames, true, _testFiles, testMethodName);
+						i++;
+					}
+
+				}
+
+			}
+			else {
+				
+				startTime = System.nanoTime();
+				TestResult testResult = _testRunner.runSuite(_suite);
+				estimatedTime = System.nanoTime() - startTime;
+				long Second=TimeUnit.SECONDS.convert(estimatedTime, TimeUnit.NANOSECONDS);
+				_log.log("when testing in sequential, testing time is :" + estimatedTime +" in nanoseconds");
+				_log.log("when testing in sequential, testing time is :" + Second +" in second");
+				/* A fault is either an error or a failure. */
+				faultCount = testResult.errorCount() + testResult.failureCount();
+				if (faultCount > 0) {
+
+					/*
+					 * NOTE: TestFailure, a JUnit class, is misnamed; it should have been called
+					 * TestFault with TestFailure and TestError as disjoint subtypes (e.g., classes)
+					 */
+					faults = new JUnitError[faultCount];
+					Enumeration<TestFailure> failures = testResult.failures();
+					Enumeration<TestFailure> errors = testResult.errors();
+
+					int i = 0;
+
+					// faults should be called faults! and makeJUnitError should be makeJUnitFault!
+					while (errors.hasMoreElements()) {
+						TestFailure error = errors.nextElement();
+						faults[i] = _makeJUnitError(error, _testClassNames, true, _testFiles);
+						i++;
+					}
+
+					while (failures.hasMoreElements()) {
+						TestFailure failure = failures.nextElement();
+						faults[i] = _makeJUnitError(failure, _testClassNames, false, _testFiles);
+						i++;
+					}
+				}
+			}
+
 
       _log.log("Testing doCoverage");
       
@@ -331,7 +356,7 @@ public class JUnitTestManager {
       _reset();
       _jmc.testSuiteEnded(faults);
     }
-    
+    //TODO  change error of line
     catch (Exception e) { 
       faults = new JUnitError[] { 
         new JUnitError(null, -1, -1, e.getMessage(), false, "", "", e.toString(), e.getStackTrace())
@@ -352,57 +377,31 @@ public class JUnitTestManager {
     _log.log("test manager state reset");
   }
   
-  /** Determines if the given class is a junit Test.  This determination is not completely accurate.  Any
-    * method that is annotated with a property corresponding to org.junit.Test.class is classified as a
-    * test metthod.  Hence the annotaion @ignore is not recognized.
-    * @param c the class to check
-    * @return true iff the given class is an instance of junit.framework.Test
-    */
-  protected boolean _isJUnitTest(Class<?> c) {
-    _log.log("Testing class " + c + " to determine if it is a JUnit test class");
 
-    // test first for JUnit 4 annotated test methods
-    for (Method method : c.getDeclaredMethods()) {
-      if (method.isAnnotationPresent(org.junit.Test.class)) return true;
-    };
-    // now test for conventional JUnit 3 test classes (which must extend org.junit.Test.class
-    boolean isAbstract = Modifier.isAbstract(c.getModifiers());
-    boolean isInterface = Modifier.isInterface(c.getModifiers());
-    if (isAbstract || isInterface) return false;
-    return (Test.class.isAssignableFrom(c));
-  }
-  
   /** Constructs a new JUnitError from a TestFailure
     * @param failure A given TestFailure
     * @param classNames The classes that were used for this test suite
     * @param isError The passed TestFailure may signify either an error or a failure
     * @param files The files that were used for this test suite
+    * @param testMethodName   name of tested method
     * @return JUnitError
     */
-  protected JUnitError _makeJUnitError(TestFailure failure, List<String> classNames, boolean isError, List<File> files) {
+  private JUnitError _makeJUnitError(TestFailure failure, List<String> classNames, boolean isError, List<File> files,String testMethodName) {
     
-//    _log.log("_makeJUnitError called with failure " + failure + " failedTest = " + failure.failedTest());
+   _log.log("_makeJUnitError called with failure " + failure + " failedTest = " + failure.failedTest());
     Test failedTest = failure.failedTest();
     _log.log("failedTest " + failedTest);
-    String testName;
-    if (failedTest instanceof JUnit4TestCaseFacade) {
-      testName = ((JUnit4TestCaseFacade) failedTest).toString(); 
-      testName = testName.substring(0,testName.indexOf('(')); //shaves off the class from TestName string
-    }
-    else testName = failedTest.getClass().getName();
-    
+    _log.log("failure.exceptionMessage " + failure.exceptionMessage());
+    _log.log("failure.toString " + failure.toString());
+   
     String testString = failure.toString();
-    int firstIndex = testString.indexOf('(') + 1;
-    int secondIndex = testString.indexOf(')');
     
     /** junit can return a string in two different formats; we parse both formats, and then decide which one to use. */
-    _log.log("testString " + testString +" testName "+testName);
-    String className;
-    if (firstIndex != secondIndex)
-      className = testString.substring(firstIndex, secondIndex);
-    else
-      className = testString.substring(0, firstIndex-1);
-    
+
+     //needtodo
+    String className=failedTest.toString();
+    String testName=testMethodName;
+    _log.log("className " + className +" testName "+testName);
     
     String classNameAndTest = className + "." + testName;
 //   _log.log("classNameAndTest = " + classNameAndTest);
@@ -423,10 +422,12 @@ public class JUnitTestManager {
     }
     String combined = sb.toString();
     int lineNum = -1;
-    
+    _log.log("start  to  cal lineNum");
+	
     if (combined.indexOf(classNameAndTest) == -1) {
       /* get the stack trace of the junit error */
       String trace = failure.trace();
+      _log.log("failure.trace is " +trace);
       /* knock off the first line of the stack trace.
        * now the string will look like
        * at my.package.class(file.java:line)
@@ -435,9 +436,10 @@ public class JUnitTestManager {
        */
       trace = trace.substring(trace.indexOf('\n')+1);
       if (trace.trim().length()>0) {
-        while (trace.indexOf("junit.framework.Assert") != -1 &&
-               trace.indexOf("junit.framework.Assert") < trace.indexOf("(")) {
+        while (trace.indexOf("junit.framework") != -1 &&
+               trace.indexOf("junit.framework") < trace.indexOf("(")) {
           /* the format of the trace will have "at junit.framework.Assert..."
+           * and "junit.framework.TestCase..."
            * on each line until the line of the actual source file.
            * if the exception was thrown from the test case (so the test failed
            * without going through assert), then the source file will be on
@@ -445,8 +447,13 @@ public class JUnitTestManager {
            */
           trace = trace.substring(trace.indexOf('\n') + 1);
         }
-        trace = trace.substring(trace.indexOf('(')+1);
+        
+        _log.log("trace after junit.framework.Assert is " +trace);
+        _log.log("testName is " +testName);
+        trace = trace.substring(trace.indexOf(testName)+2);
         trace = trace.substring(0, trace.indexOf(')'));
+        
+        _log.log("trace after substring " +trace);
         // If the exception occurred in a subclass of the test class, then update our
         // concept of the class and test name. Otherwise, we're only here to pick up the
         // line number.
@@ -459,12 +466,13 @@ public class JUnitTestManager {
         }
         
         try {
+        	_log.log("trace is " +trace);
           lineNum = Integer.parseInt(trace.substring(trace.indexOf(':') + 1)) - 1;
         }
         catch (NumberFormatException e) { lineNum = 0; } // may be native method
       }      
     }
-    
+    _log.log("lineNum is " +lineNum);
     if (lineNum < 0) {
       lineNum = _lineNumber(combined, classNameAndTest);
     }
@@ -512,36 +520,14 @@ public class JUnitTestManager {
     return new JUnitError(file, lineNum, 0, message, !isFailure, testName, className, exception, stackTrace);
   }
   
-  /** Parses the line number out of the stack trace in the given class name. 
-    * @param sw stack trace
-    * @param classname class in which stack trace was generated
-    * @return the line number
-    */
-  protected int _lineNumber(String sw, String classname) {
-    // TODO: use stack trace elements to find line number
-    int lineNum;
-    int idxClassname = sw.indexOf(classname);
-    if (idxClassname == -1) return -1;
-    
-    String theLine = sw.substring(idxClassname, sw.length());
-    
-    theLine = theLine.substring(theLine.indexOf(classname), theLine.length());
-    theLine = theLine.substring(theLine.indexOf("(") + 1, theLine.length());
-    theLine = theLine.substring(0, theLine.indexOf(")"));
-    
-    try {
-      int i = theLine.indexOf(":") + 1;
-      lineNum = Integer.parseInt(theLine.substring(i, theLine.length())) - 1;
-    }
-    catch (NumberFormatException e) { lineNum = 0; } // may be native method
-    
-    return lineNum;
-  }
+
+
+  
   
   /** @param loader current template for the runner's class loader
-    * @return a fresh JUnitTestRunner with its own class loader instance. 
-    */
-  protected JUnitTestRunner makeRunner(ClassLoader loader) {
-    return new JUnitTestRunner(_jmc, loader);
-  }
+   * @return a fresh JUnitTestRunner with its own class loader instance. 
+   */
+ protected JUnitParallelTestRunner makeRunner(ClassLoader loader) {
+   return new JUnitParallelTestRunner(_jmc, loader);
+ }
 }

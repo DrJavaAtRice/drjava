@@ -40,6 +40,7 @@ import java.io.File;
 import java.io.Serializable;
 
 import edu.rice.cs.util.FileOps;
+import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 
 
@@ -48,6 +49,10 @@ import edu.rice.cs.util.UnexpectedException;
   * @version $Id$
   */
 public class DJError implements Comparable<DJError>, Serializable {
+	
+  /** Debugging log. */
+  public static Log _log = new Log("DJError.txt", false);
+
   private volatile File _file;
   
   /** zero-based line number. */
@@ -78,6 +83,9 @@ public class DJError implements Comparable<DJError>, Serializable {
     _startColumn = startColumn;
     _message = message;
     _isWarning = isWarning;
+    //TODO
+    _log.log("_lineNumber= "+_lineNumber);
+    _log.log("_file= "+_file);
     if (lineNumber < 0) _noLocation = true;
   }
   
@@ -127,7 +135,11 @@ public class DJError implements Comparable<DJError>, Serializable {
   /** Sets the line number.
     * @param ln line number
     */
-  public void setLineNumber(int ln) { _lineNumber = ln; }
+  public void setLineNumber(int ln) {
+	//TODO
+	    _log.log("in setLineNumber  _lineNumber= "+_lineNumber);
+	  _lineNumber = ln;
+	  }
   
   /** Gets the column where the error begins.
     * @return the starting column

@@ -59,6 +59,7 @@ import edu.rice.cs.plt.text.TextUtil;
 
 import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.drjava.model.junit.JUnitModelCallback;
+import edu.rice.cs.drjava.model.junit.JUnitParallelTestManager;
 import edu.rice.cs.drjava.model.junit.JUnitTestManager;
 import edu.rice.cs.drjava.model.junit.JUnitError;
 import edu.rice.cs.drjava.model.junit.JUnitResultTuple;
@@ -86,8 +87,8 @@ import edu.rice.cs.util.swing.Utilities;
   * @version $Id$
   */
 public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRemoteI, JUnitModelCallback {
-  
-  public static final Log _log = new Log("GlobalModel.txt", false);
+  /** log for use in debugging */
+  public static final Log _log = new Log("InterpreterJVM.txt", false);
   
   /** Singleton instance of this class. */
   public static final InterpreterJVM ONLY = new InterpreterJVM();
@@ -110,7 +111,8 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   private final Object _stateLock = new Object();
   
   /** Responsible for running JUnit tests in this JVM. */
-  private final JUnitTestManager _junitTestManager;
+  private final JUnitParallelTestManager _junitTestManager;
+  
   
   /** Remote reference to the MainJVM class in DrJava's primary JVM.  Assigned ONLY once. */
   private volatile MainJVMRemoteI _mainJVM;
@@ -122,7 +124,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     /* Important singleton objects embedded in an InterpreterJVM */
     _classPathManager = new ClassPathManager(ReflectUtil.SYSTEM_CLASS_PATH);
     _interpreterLoader = _classPathManager.makeClassLoader(InterpreterJVM.class.getClassLoader());
-    _junitTestManager = new JUnitTestManager(this, _classPathManager);
+    _junitTestManager = new JUnitParallelTestManager(this, _classPathManager);
 
     // set the thread context class loader, this way NextGen and Mint can use the interpreter's class loader
     Thread.currentThread().setContextClassLoader(_interpreterLoader);
@@ -541,7 +543,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     * and does not involve mutable local state.
     * @return false if no test suite is cached; true otherwise
     */
-  public boolean runTestSuite() throws RemoteException { return _junitTestManager.runTestSuite(); }
+  public boolean runTestSuite(Boolean runTestParallel) throws RemoteException { return _junitTestManager.runTestSuite(runTestParallel); }
   
   /** Notifies Main JVM that JUnit has been invoked on a non TestCase class.  Unsynchronized because it contains a 
     * remote call and does not involve mutable local state.

@@ -937,4 +937,3 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     _log.log("testJUnit4TwoMethod1Test completed");
   }
 }
-

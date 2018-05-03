@@ -51,19 +51,19 @@ public class JUnitTestRunner extends BaseTestRunner {
   protected static final Log _log = new Log("JUnitTestManager.txt", false);
   
   /** Receives updates on the test suite's progress. */
-  private JUnitModelCallback _jmc;
+  protected JUnitModelCallback _jmc;
 
   /** Class loader that uses DrJava's classpath. */
-  private ClassLoader _loader;
+  protected ClassLoader _loader;
 
   /** The JUnit TestResult being accumulated. */
-  private TestResult _result;
+  protected TestResult _result;
 
   /** The current number of errors in the result. */
-  private int _errorCount;
+  protected int _errorCount;
 
   /** The current number of failures in the result. */
-  private int _failureCount;
+  protected int _failureCount;
   
   
 

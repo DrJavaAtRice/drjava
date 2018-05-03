@@ -40,6 +40,7 @@ import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.model.DJError;
 import edu.rice.cs.drjava.model.junit.JUnitError;
 import edu.rice.cs.drjava.model.junit.JUnitErrorModel;
+import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.BorderlessScrollPane;
 import edu.rice.cs.util.swing.RightClickMouseAdapter;
@@ -59,6 +60,10 @@ import java.util.HashMap;
   * @version $Id$
   */
 public class JUnitPanel extends ErrorPanel {
+  
+  /** Debugging log. */
+  public static Log _log = new Log("JUnitPanel.txt", false);
+
   private static final String START_JUNIT_MSG = "Testing in progress.  Please wait ...\n";
   private static final String JUNIT_FINISHED_MSG = "All tests completed successfully.\n";
   private static final String NO_TESTS_MSG = "";
@@ -254,11 +259,15 @@ public class JUnitPanel extends ErrorPanel {
      * @param name the name of the test being run
      */
     public void testStarted(String name) {
+    	_log.log("testStarted name= " + name  );
+
       if (name.indexOf('(') < 0) return;
       
       String testName = _getTestFromName(name);
       String className = _getClassFromName(name);
       String fullName = className + "." + testName;
+  	_log.log(" fullName= "  + fullName  );
+
       if (fullName.equals(JUNIT_WARNING)) return;
       ErrorDocument doc = getErrorDocument();
       try {
@@ -290,6 +299,7 @@ public class JUnitPanel extends ErrorPanel {
      * @param causedError whether the test caused an error
      */
     public void testEnded(String name, boolean wasSuccessful, boolean causedError) {
+    	_log.log("testEnded(" + name + ", " + wasSuccessful + ", " + causedError + ")");
       if (name.indexOf('(')<0) return;
 
       String testName = _getTestFromName(name);
@@ -327,10 +337,14 @@ public class JUnitPanel extends ErrorPanel {
     
     /** Used to show that testing was unsuccessful. */
     protected void _updateWithErrors() throws BadLocationException {
+   
       //DefaultStyledDocument doc = new DefaultStyledDocument();
       ErrorDocument doc = getErrorDocument();
+      _log.log("doc is "+doc.getText());
 //      _checkSync(doc);
       _updateWithErrors("test", "failed", doc);
+      _log.log("doc is "+doc.getText());
+
     }
     
     /** Gets the message indicating the number of errors and warnings.*/

@@ -53,7 +53,7 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
   public List<String> findTestClasses(List<String> classNames, 
     List<File> files, CoverageMetadata coverageMetadata) throws RemoteException;
   
-  public boolean runTestSuite() throws RemoteException;
+  public boolean runTestSuite(Boolean runTestParallel) throws RemoteException;
 
   //public JUnitResultTuple getLastJUnitResult();
 

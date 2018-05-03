@@ -58,6 +58,7 @@ import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
 
 import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.util.FileOps;
+import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.iter.IterUtil;
@@ -94,6 +95,9 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
   */
 public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   
+  /** Debugging log. */
+  public static Log _log = new Log("MainJVM.txt", false);
+	
   /** Number of slave startup failures allowed before aborting the startup process. */
   private static final int MAX_STARTUP_FAILURES = 3;
   
@@ -479,13 +483,17 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   
   /** Runs the JUnit test suite already cached in the Interpreter JVM.  
     * Blocks until the remote JVM is available.
+    * @param runTestParallel Set whether we should run the test in parallel
     * @return {@code false} if no test suite is cached, the remote JVM is 
     *         unavailable, or an error occurs; true otherwise.
     */
-  public boolean runTestSuite() { 
+  public boolean runTestSuite(boolean runTestParallel) { 
     InterpreterJVMRemoteI remote = _state.value().interpreter(true);
     if (remote == null) { return false; }
-    try { return remote.runTestSuite(); }
+    try { 
+    	_log.log("runTestParallel= "+runTestParallel); 
+    	return remote.runTestSuite(runTestParallel); 	
+    }
     catch (RemoteException e) { _handleRemoteException(e); return false; }
   }
   

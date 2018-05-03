@@ -43,7 +43,12 @@ import edu.rice.cs.util.text.SwingDocument;
 
 public interface JUnitModel {
   
+
   //-------------------------- Field Setters --------------------------------//
+  
+  /** @param runTestParallel true if we run the test in parallel
+   */
+ public void setRunTestParallel(boolean testParallel);
   
   /** @param c true if a coverage report is desired; false otherwise
     * @param p value to set the outdir path to

@@ -91,6 +91,7 @@ import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.drjava.model.definitions.NoSuchDocumentException;
 import edu.rice.cs.drjava.model.debug.*;
 import edu.rice.cs.drjava.model.repl.*;
+import edu.rice.cs.drjava.model.repl.newjvm.MainJVM;
 import edu.rice.cs.drjava.model.javadoc.JavadocModel;
 import edu.rice.cs.drjava.ui.config.ConfigFrame;
 import edu.rice.cs.drjava.ui.coverage.CoverageFrame;
@@ -131,6 +132,7 @@ import static edu.rice.cs.drjava.ui.predictive.PredictiveInputModel.*;
 import static edu.rice.cs.util.XMLConfig.XMLConfigException;
 import static edu.rice.cs.drjava.ui.MainFrameStatics.*;
 
+import edu.rice.cs.drjava.model.junit.JUnitParallelTestManager;
 import edu.rice.cs.drjava.model.junit.JUnitResultTuple;
 
 /** DrJava's main window. */
@@ -779,8 +781,19 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                  GUIAvailabilityListener.ComponentType.JUNIT,
                                  GUIAvailabilityListener.ComponentType.COMPILER,
                                  GUIAvailabilityListener.ComponentType.INTERACTIONS); }
-    public final void actionPerformed(ActionEvent ae) { _junitFolder(); }
+    public final void actionPerformed(ActionEvent ae) { _junitFolder(false); }
   };
+  
+  
+  /** Tests all the files in a folder in parallel. */
+  private volatile AbstractAction _junitPararrelFolderAction = new AbstractAction("Test Folder in parallel") {
+    { _addGUIAvailabilityListener(this,
+                                 GUIAvailabilityListener.ComponentType.JUNIT,
+                                 GUIAvailabilityListener.ComponentType.COMPILER,
+                                 GUIAvailabilityListener.ComponentType.INTERACTIONS); }
+    public final void actionPerformed(ActionEvent ae) { _junitFolder(true); }
+  };
+  
   
   /** Saves the current document. */
   private final Action _saveAction = new AbstractAction("Save") {
@@ -1021,7 +1034,19 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                  GUIAvailabilityListener.ComponentType.INTERACTIONS); }
     public void actionPerformed(ActionEvent ae) { 
       if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) _mainSplit.resetToPreferredSizes();
-      _junit(); 
+      _junit(false); 
+    }
+  };
+  
+  /** Runs JUnit on the document in the definitions pane in parallel. */
+  private volatile AbstractAction _junitActionParallel = new AbstractAction("Test Current Document in parallel") {
+    { _addGUIAvailabilityListener(this,                                             // init
+                                 GUIAvailabilityListener.ComponentType.JUNIT,
+                                 GUIAvailabilityListener.ComponentType.COMPILER,
+                                 GUIAvailabilityListener.ComponentType.INTERACTIONS); }
+    public void actionPerformed(ActionEvent ae) { 
+      if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) _mainSplit.resetToPreferredSizes();
+      _junit(true); 
     }
   };
   
@@ -1033,11 +1058,27 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                  GUIAvailabilityListener.ComponentType.INTERACTIONS); }
     public void actionPerformed(ActionEvent e) {
       if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) _mainSplit.resetToPreferredSizes();
-      _junitAll();
+      _junitAll(false);
       _findReplace.updateFirstDocInSearch();
     }
     
   };
+  
+  /** Runs JUnit over all open JUnit tests. */
+  private volatile AbstractAction _junitAllActionParallel = new AbstractAction("Test All Documents in Parallel") {
+    { _addGUIAvailabilityListener(this,                                             // init
+                                 GUIAvailabilityListener.ComponentType.JUNIT,
+                                 GUIAvailabilityListener.ComponentType.COMPILER,
+                                 GUIAvailabilityListener.ComponentType.INTERACTIONS); }
+    public void actionPerformed(ActionEvent e) {
+      if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) _mainSplit.resetToPreferredSizes();
+      _junitAll(true);
+      _findReplace.updateFirstDocInSearch();
+    }
+    
+  };
+  
+  
   
   /** Runs JUnit over all open JUnit tests in the project directory. */
   private volatile AbstractAction _junitProjectAction = new AbstractAction("Test Project") {
@@ -1048,7 +1089,21 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                  GUIAvailabilityListener.ComponentType.INTERACTIONS); }
     public void actionPerformed(ActionEvent e) {
       if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) _mainSplit.resetToPreferredSizes();
-      _junitProject();
+      _junitProject(false);
+      _findReplace.updateFirstDocInSearch();
+    }
+  };
+  
+  /** Runs JUnit over all open JUnit tests in the project directory. */
+  private volatile AbstractAction _junitProjectActionParallel = new AbstractAction("Test Project in Parallel") {
+    { _addGUIAvailabilityListener(this,                                             // init
+                                 GUIAvailabilityListener.ComponentType.PROJECT,
+                                 GUIAvailabilityListener.ComponentType.JUNIT,
+                                 GUIAvailabilityListener.ComponentType.COMPILER,
+                                 GUIAvailabilityListener.ComponentType.INTERACTIONS); }
+    public void actionPerformed(ActionEvent e) {
+      if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) _mainSplit.resetToPreferredSizes();
+      _junitProject(true);
       _findReplace.updateFirstDocInSearch();
     }
   };
@@ -5933,7 +5988,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     catch (IOException ioe) { MainFrameStatics.showIOError(MainFrame.this, ioe); }
   }
   
-  private void _junit() {
+  private void _junit(Boolean runTestParallel) {
     /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
     hourglassOn(); // turned off in junitStarted/nonTestCase/_junitInterrupted  
@@ -5944,12 +5999,16 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
 
     // now also works with multiple documents
 //        hourglassOn();  // moved into the prelude before this thread start  
-    try { _model.getJUnitModel().junitDocs(_model.getDocumentNavigator().getSelectedDocuments()); }
+    try {
+  	  if(runTestParallel==true)	    	  
+  	    _model.getJUnitModel().setRunTestParallel(true);
+  	  _model.getJUnitModel().junitDocs(_model.getDocumentNavigator().getSelectedDocuments()); 
+  	  }
     catch(UnexpectedException e) { _junitInterrupted(e); }
     catch(Exception e) { _junitInterrupted(new UnexpectedException(e)); }
   }
   
-  private void _junitFolder() {
+  private void _junitFolder(Boolean runTestParallel) {
     updateStatusField("Running Unit Tests in Current Folder");
     hourglassOn();  // turned off in junitStarted/nonTestCase/_junitInterrupted
     // moved this back into the event thread to fix bug 2848696
@@ -5964,28 +6023,39 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       for (OpenDefinitionsDocument doc: docs) {
         if (_model.getDocumentNavigator().isSelectedInGroup(doc)) l.add(doc);
       }
-      try { _model.getJUnitModel().junitDocs(l); }  // hourglassOn executed by junitStarted()
+      try {
+    	  if(runTestParallel==true)	    	  
+    	    _model.getJUnitModel().setRunTestParallel(true);
+    	  _model.getJUnitModel().junitDocs(l); }  // hourglassOn executed by junitStarted()
       catch(UnexpectedException e) { _junitInterrupted(e); }
       catch(Exception e) { _junitInterrupted(new UnexpectedException(e)); }
     }
   }
   
   /** Tests the documents in the project source tree. Assumes that DrJava is in project mode. */
-  private void _junitProject() {
+  private void _junitProject(boolean runTestParallel) {
     updateStatusField("Running JUnit Tests in Project");
     hourglassOn();  // turned off in junitStarted/nonTestCase/_junitInterrupted
     _guiAvailabilityNotifier.junitStarted(); // JUNIT and COMPILER
-    try { _model.getJUnitModel().junitProject(); } 
+    try { 
+    	  if(runTestParallel==true)	    	  
+    	    _model.getJUnitModel().setRunTestParallel(true);
+    	  _model.getJUnitModel().junitProject(); 
+    	} 
     catch(UnexpectedException e) { _junitInterrupted(e); }
     catch(Exception e) { _junitInterrupted(new UnexpectedException(e)); }
   }
   
   /** Tests all open documents. */
-  public void _junitAll() {
+  public void _junitAll(boolean runTestParallel) {
     updateStatusField("Running All Open Unit Tests");
     hourglassOn();  // turned off in junitStarted/nonTestCase/_junitInterrupted
     _guiAvailabilityNotifier.junitStarted(); // JUNIT and COMPILER
-    try { _model.getJUnitModel().junitAll(); } 
+    try { 
+  	  if(runTestParallel==true)	    	  
+  	    _model.getJUnitModel().setRunTestParallel(true);
+    	_model.getJUnitModel().junitAll(); 
+    	} 
     catch(UnexpectedException e) { _junitInterrupted(e); }
     catch(Exception e) { _junitInterrupted(new UnexpectedException(e)); }
   }
@@ -6531,7 +6601,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     _setUpAction(_junitAction, "Test Current", "Run JUnit over the current document");
     _setUpAction(_junitAllAction, "Test", "Run JUnit over all open JUnit tests");
-
+    _setUpAction(_junitAllActionParallel, "Test in Parallel", "Run JUnit over all open JUnit tests in Parallel");
     _setUpAction(_coverageAction, "Code Coverage", "Generate code coverage reports");
 
     if (_model.getJavadocModel().isAvailable()) {
@@ -6959,6 +7029,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _addMenuItem(toolsMenu, _compileAction, KEY_COMPILE, updateKeyboardManager);
     _addMenuItem(toolsMenu, _junitAllAction, KEY_TEST_ALL, updateKeyboardManager);
     _addMenuItem(toolsMenu, _junitAction, KEY_TEST, updateKeyboardManager);
+    _addMenuItem(toolsMenu, _junitAllActionParallel, KEY_TEST_ALL_PARALLEL, updateKeyboardManager);
+    _addMenuItem(toolsMenu, _junitActionParallel, KEY_TEST_PARALLEL, updateKeyboardManager);
     toolsMenu.addSeparator();
     
     // Run
@@ -7129,6 +7201,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     // run project
     _addMenuItem(projectMenu, _compileProjectAction, KEY_COMPILE_PROJECT, updateKeyboardManager);
     _addMenuItem(projectMenu, _junitProjectAction, KEY_JUNIT_PROJECT, updateKeyboardManager);
+    _addMenuItem(projectMenu, _junitProjectActionParallel, KEY_JUNIT_PROJECT_PARALLEL, updateKeyboardManager);
     _addMenuItem(projectMenu, _runProjectAction, KEY_RUN_PROJECT, updateKeyboardManager);
     _addMenuItem(projectMenu, _cleanAction, KEY_CLEAN_PROJECT, updateKeyboardManager);
     _addMenuItem(projectMenu, _autoRefreshAction, KEY_AUTO_REFRESH_PROJECT, updateKeyboardManager);
@@ -7472,6 +7545,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     _toolBar.add(_runButton = _createToolBarButton(_runAction));
     _toolBar.add(_junitButton = _createToolBarButton(_junitAllAction));
+    _toolBar.add(_junitButton = _createToolBarButton(_junitAllActionParallel));
     _toolBar.add(_createToolBarButton(_javadocAllAction));
     _toolBar.add(_coverageButton = _createToolBarButton(_coverageAction));    
 
@@ -7991,6 +8065,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
             m.add(_compileProjectAction);
             m.add(_runProjectAction);
             m.add(_junitProjectAction);
+            m.add(_junitProjectActionParallel);
             m.add(_projectPropertiesAction);
           }
           if (folderSelected) {
@@ -8007,6 +8082,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
               m.add(_closeFolderAction);
               m.add(_compileFolderAction);
               m.add(_junitFolderAction);
+              m.add(_junitPararrelFolderAction);
             }
             else if (groupSelectedCount>1) {
               if (!externalBinSelected && !auxiliaryBinSelected) {
@@ -8021,6 +8097,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                       createDelegateAction("Compile All Folders ("+groupSelectedCount+")", _compileFolderAction));
               m.add(Utilities.
                       createDelegateAction("Test All Folders ("+groupSelectedCount+")", _junitFolderAction));
+              m.add(Utilities.
+                      createDelegateAction("Test All Folders in parallel ("+groupSelectedCount+")", _junitPararrelFolderAction));
               
             }
           }
@@ -8038,6 +8116,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
               m.add(Utilities.createDelegateAction("Print File Preview...", _printDefDocPreviewAction));
               m.add(Utilities.createDelegateAction("Compile File", _compileAction));
               m.add(Utilities.createDelegateAction("Test File", _junitAction));
+              m.add(Utilities.createDelegateAction("Test File in Parallel", _junitActionParallel));
               m.add(Utilities.createDelegateAction("Preview Javadoc for File", _javadocCurrentAction));
               m.add(Utilities.createDelegateAction("Run File", _runAction));
               m.add(Utilities.createDelegateAction("Run File as Applet", _runAppletAction));
@@ -8080,6 +8159,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
             m.add(Utilities.createDelegateAction("Close All Files", _closeFolderAction));
             m.add(Utilities.createDelegateAction("Compile All Files", _compileFolderAction));
             m.add(Utilities.createDelegateAction("Test All Files", _junitFolderAction));
+            m.add(Utilities.createDelegateAction("Test All Files in parallel", _junitPararrelFolderAction));
+
+            
           }
           if (externalBinSelected && !auxiliaryBinSelected) {
             // external bin selected

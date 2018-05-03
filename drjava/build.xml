@@ -61,13 +61,13 @@
   </taskdef>
   <property name="coverage-report-dir" value="coverage_report"/>
   <property name="coverage-exec" value="jacoco.exec"/>
-
+  <property name="TestParallel" value="${arg1}"/>
   <fileset id="libs" dir="lib" includes="*.jar" /> <!-- Only include jars that are at the top level (not in buildlib) -->
   <fileset id="jrelibs" dir="${java.home}/lib" includes="*.jar" /> 
-  <echo message="libs = ${toString:libs}" />
-  <echo message="jrelibs = ${toString:jrelibs}" />
+  <echo message="libs = ${toString:libs}" level="verbose" />
+  <echo message="jrelibs = ${toString:jrelibs}" level="verbose"/>
   <fileset id="extlibs" dir="${java.home}/lib/ext" includes="*.jar" /> 
-  <echo message="extlibs = ${toString:extlibs}" />
+  <echo message="extlibs = ${toString:extlibs}" level="verbose"/>
   <!-- ************
        Help Targets
        ************ -->
@@ -345,7 +345,19 @@
   <target name="iterate-tests" depends="resolve-test-formatter-class">
     <!-- Calls do-test, unless that is overridden by the caller -->
     <echo message="Executing iterate-tests" />
-    <property name="do-test-target" value="do-test" />
+    <if>
+      <equals arg1="${TestParallel}" arg2="true" />
+      <then>
+        <echo message="Test in Parallel" />
+        <property name="do-test-target" value="do-test-for" />
+      </then>
+      <else>
+        <echo message="Test in Sequential" />
+        <property name="do-test-target" value="do-test" />
+      </else>
+    </if>
+
+    
     <condition property="test-iteration-message">
       <not>
         <equals arg1="${test-repeat}" arg2="1" />
@@ -425,8 +437,50 @@
     </if>
     
   </target>
+
+
+
+
+  <target name="do-test-for" depends="resolve-jvm-args">
+    <echo message="Running all tests matching '${test-filter-string}' with command '${test-jvm}', using '${junit-jar}' and '${test-tools}'" />   
+    <for param="fileFullName"   parallel= "true"  threadCount="16">
+      <path>
+        <fileset dir="classes/test">
+          <!--include name="**/*${test-filter-string}*/**" /-->  
+          <include name="**/*Test.class" />
+    	</fileset>
+      </path>
+      <sequential>
+        <echo message="file= @{fileFullName}" level="verbose"/>  
+        <antcall target="execute-one-test" inheritRefs="true"  inheritall="true">
+          <param name="fileFullName" value="@{fileFullName}"/>
+        </antcall>
+      </sequential>
+    </for>
+    <antcall target="generate-cover" />
+  </target>
+
+  <target name="do-test-foreach" depends="resolve-jvm-args">
+    <echo message="Running all tests matching '${test-filter-string}' with command '${test-jvm}', using '${junit-jar}' and '${test-tools}'" />   
+    <foreach
+    target="execute-one-test"
+    maxthreads="16"
+    inheritall="true"
+    inheritrefs="true"
+    parallel="true"
+    param="fileFullName">
+      <path>
+	<fileset dir="classes/test">
+	  <!--include name="**/*${test-filter-string}*/**" /-->  
+          <include name="**/*Test.class" />
+    	</fileset>
+      </path>
+    </foreach>
+    <antcall target="generate-cover" />
+ </target>
+
   
-  
+
   <target name="do-test" depends="resolve-jvm-args">
     <echo message="Running all tests matching '${test-filter-string}' with command '${test-jvm}', using '${junit-jar}' and '${test-tools}'" />
     <jacoco:coverage xmlns:jacoco="antlib:org.jacoco.ant">
@@ -461,6 +515,44 @@
     </jacoco:coverage>
     <fail if="test-failed" message="One or more unit tests failed."/>
     <antcall target="generate-cover" />
+  </target>
+
+  <target name="execute-one-test">
+    <sequential>
+    <basename property="filename" file="${fileFullName}"/>
+    <echo message="In execute-one-test, we are running '${fileFullName}' with testname ${filename}" level="verbose" />
+    <jacoco:coverage xmlns:jacoco="antlib:org.jacoco.ant">
+    <junit haltonfailure="${test-halt}" failureproperty="test-failed"
+           fork="yes" forkmode="perTest" maxmemory="2G" jvm="${test-jvm}" dir="${basedir}">
+      <classpath>
+        <pathelement location="${test-tools}" />
+        <pathelement location="${junit-jar}" />
+        <pathelement location="lib/buildlib/plt-ant.jar" /> <!-- required for custom formatter -->
+        <pathelement location="lib/buildlib/netbeans-memory-leak-utils.jar" />
+        <pathelement location="classes/test" />
+        <pathelement location="classes/base" />
+        <pathelement location="classes/lib" />
+      </classpath>
+      <assertions>
+        <enable />
+      </assertions>
+      <syspropertyset>
+        <propertyref prefix="plt." />
+        <propertyref prefix="drjava." />
+        <!-- Add any properties that should be passed on -->
+      </syspropertyset>
+      <jvmarg line="${jvm-args}" />
+      <formatter classname="${test-formatter-class}" usefile="${test-output-to-file}" />
+      <!--test name="${test.source.absolute}"/-->
+      <batchtest fork="true">
+        <fileset dir="classes/test">
+          <include name="**/${filename}*" />
+        </fileset>
+      </batchtest>
+    </junit>
+    </jacoco:coverage>
+    <fail if="test-failed" message="One unit test failed."/>
+    </sequential>
   </target>
 
   <target name = "generate-cover" xmlns:jacoco="antlib:org.jacoco.ant">

@@ -84,11 +84,15 @@ import edu.rice.cs.drjava.model.coverage.CoverageMetadata;
   * @version $Id$
   */
 public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
+	
+  /**Set whether we should run the test in parallel, whenever use it, set it back to false*/
+  public static boolean runTestParallel=false;
 
   private CoverageMetadata coverageMetadata = new CoverageMetadata(false, "");
 
   /** log for use in debugging */
-  private static Log _log = new Log("GlobalModel.txt", false);
+  //needtodo
+  private static Log _log = new Log("DefaultJUnitModel.txt", true);
   
   /** Manages listeners to this model. */
   private final JUnitEventNotifier _notifier = new JUnitEventNotifier();
@@ -135,6 +139,11 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   }
   
   //-------------------------- Field Setters --------------------------------//
+  
+  public void setRunTestParallel(boolean testParallel) {
+	  _log.log("setRunTestParallel= "+testParallel);
+	  runTestParallel=testParallel;
+  }
   
   public void setCoverage(boolean coverage, String outdirPath) { 
       this.coverageMetadata = new CoverageMetadata(coverage, outdirPath); 
@@ -344,7 +353,8 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
           File sourceDir = 
             (buildDir == FileOps.NULL_FILE) ? classFileDir : 
                                               new File(IOUtil.attemptCanonicalFile(sourceRoot), packagePath);
-          
+          _log.log("classFileDir= " + classFileDir + " sourceDir= " + sourceDir + " sourceRoot= "+sourceRoot);
+          _log.log("classDirsAndRoots= " + classDirsAndRoots);
           if (! classDirsAndRoots.containsKey(classFileDir)) {
             classDirsAndRoots.put(classFileDir, sourceDir);
             _log.log("Adding " + classFileDir + " with source root " + sourceRoot + " to list of class directories");
@@ -429,7 +439,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
               
               /** The canonical pathname for the file (including the file name) */
               String javaSourceFileName = getCanonicalPath(rootDir) + File.separator + sourceName.value();
- 
+              _log.log("javaSourceFileName= " + javaSourceFileName);
 //              System.err.println("Full java source fileName = " + javaSourceFileName);
               
               /* The index in fileName of the dot preceding the extension ".java", ".dj", ".dj0*, ".dj1", or ".dj2" */
@@ -500,7 +510,9 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
         try {
           _notifyJUnitStarted(); 
           // The false return value could be changed to an exception.
-          boolean testsPresent = _jvm.runTestSuite();
+    	  _log.log("runTestParallel= "+runTestParallel);
+          boolean testsPresent = _jvm.runTestSuite(runTestParallel);
+          runTestParallel=false;
           if (!testsPresent) {
               throw new RemoteException("No unit test classes were passed to the slave JVM");
           }

@@ -431,9 +431,15 @@ public interface OptionConstants {
   public static final VectorOption<KeyStroke> KEY_COMPILE_PROJECT = 
     new VectorOption<KeyStroke>("key.compile.project", new KeyStrokeOption("",null), to.vector());
   
+  /** The key binding for testing a project in parallel. */
+  public static final VectorOption<KeyStroke> KEY_JUNIT_PROJECT_PARALLEL = 
+    new VectorOption<KeyStroke>("key.junit.project", new KeyStrokeOption("",null), to.vector());
+  
+  
   /** The key binding for testing a project. */
   public static final VectorOption<KeyStroke> KEY_JUNIT_PROJECT = 
     new VectorOption<KeyStroke>("key.junit.project", new KeyStrokeOption("",null), to.vector());
+  
   
   /** The key binding for running a project. */
   public static final VectorOption<KeyStroke> KEY_RUN_PROJECT = 
@@ -764,12 +770,20 @@ public interface OptionConstants {
     new VectorOption<KeyStroke>("key.test", 
                                 new KeyStrokeOption("",null), 
                                 to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_T, MASK|SHIFT_MASK)));
+  /** The key binding for testing the current document  in parallel. */
+  public static final VectorOption<KeyStroke> KEY_TEST_PARALLEL =
+    new VectorOption<KeyStroke>("key.reset.interactions", new KeyStrokeOption("",null), to.vector());
+  
   
   /** The key binding for testing all open JUnit test cases. */
   public static final VectorOption<KeyStroke> KEY_TEST_ALL =
     new VectorOption<KeyStroke>("key.test.all", 
                                 new KeyStrokeOption("",null), 
                                 to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_T, MASK)));
+  /** The key binding for testing all open JUnit test cases in parallel. */
+  public static final VectorOption<KeyStroke> KEY_TEST_ALL_PARALLEL =
+    new VectorOption<KeyStroke>("key.reset.interactions", new KeyStrokeOption("",null), to.vector());
+  
   
   /** The key binding for generating javadoc for all documents */
   public static final VectorOption<KeyStroke> KEY_JAVADOC_ALL =
@@ -807,6 +821,8 @@ public interface OptionConstants {
   public static final VectorOption<KeyStroke> KEY_RESET_INTERACTIONS =
     new VectorOption<KeyStroke>("key.reset.interactions", new KeyStrokeOption("",null), to.vector());
   
+  
+
   /** The key binding for viewing the interactions classpath. */
   public static final VectorOption<KeyStroke> KEY_VIEW_INTERACTIONS_CLASSPATH =
     new VectorOption<KeyStroke>("key.view.interactions.classpath", new KeyStrokeOption("",null), to.vector());
