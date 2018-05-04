@@ -1288,6 +1288,13 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       waitJUnitDone();
     }
     
+    public void runJUnitWithoutWait(JUnitModel jm) throws IOException, ClassNotFoundException, InterruptedException {  
+        logJUnitStart();
+//      _log.log("Starting JUnit");
+        jm.junitAll();
+        
+      }
+    
     public void waitJUnitDone() throws InterruptedException {
       synchronized(_junitLock) { while (! _junitDone) { _junitLock.wait(); } }
     }
@@ -1352,6 +1359,13 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       _log.log("junitEnded() called; notifying JUnitDone");
       _notifyJUnitDone();
     }
+	public void runJUnitWithoutWait(OpenDefinitionsDocument doc) throws ClassNotFoundException, IOException {	      
+	          logJUnitStart();
+	          //	        System.err.println("Starting JUnit on " + doc);
+	          doc.startJUnit();
+	          //	        System.err.println("JUnit Started on " + doc);
+	          
+	}
   }
   
   /** Listener class for failing JUnit invocation. */

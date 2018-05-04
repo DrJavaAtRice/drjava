@@ -45,6 +45,7 @@ import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.model.DJError;
 import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
 import edu.rice.cs.drjava.model.ClipboardHistoryModel;
+import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.HighlightManager;
 import edu.rice.cs.util.swing.BorderlessScrollPane;
@@ -77,6 +78,8 @@ import java.io.IOException;
  */
 public abstract class ErrorPanel extends TabbedPanel implements OptionConstants {
   
+  /** Debugging log. */
+  public static Log _log = new Log("ErrorPanel.txt", false);
   protected static final SimpleAttributeSet NORMAL_ATTRIBUTES = _getNormalAttributes();
   protected static final SimpleAttributeSet BOLD_ATTRIBUTES = _getBoldAttributes();
   
@@ -668,6 +671,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     protected void _insertErrorText(DJError error, ErrorDocument doc) throws BadLocationException {
       // Show file and line number
       doc.append("File: ", BOLD_ATTRIBUTES);
+      //TODO
       String fileAndLineNumber = error.getFileMessage() + "  [line: " + error.getLineMessage() + "]";
       doc.append(fileAndLineNumber + "\n", NORMAL_ATTRIBUTES);
       
