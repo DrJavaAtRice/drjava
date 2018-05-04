@@ -92,7 +92,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
 
   /** log for use in debugging */
   //needtodo
-  private static Log _log = new Log("DefaultJUnitModel.txt", true);
+  private static Log _log = new Log("DefaultJUnitModel.txt", false);
   
   /** Manages listeners to this model. */
   private final JUnitEventNotifier _notifier = new JUnitEventNotifier();

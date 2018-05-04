@@ -512,7 +512,7 @@
       <batchtest fork="true">
         <fileset dir="classes/test">
           <filename name="**/*${test-filter-string}*/**" />  
-          <filename name="**/*Test.class" />
+          <include name="**/*Test.class" />
         </fileset>
       </batchtest>
     </junit>

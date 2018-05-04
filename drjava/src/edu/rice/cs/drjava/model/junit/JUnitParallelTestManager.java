@@ -103,7 +103,7 @@ import org.junit.runner.notification.Failure;
   * @version $Id$
   */
 public class JUnitParallelTestManager extends JUnitTestManager{
-	public static Log _log = new Log("JUnitParallelTestManager.txt", true);
+	public static Log _log = new Log("JUnitParallelTestManager.txt", false);
   
   
   

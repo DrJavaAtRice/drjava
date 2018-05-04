@@ -543,7 +543,10 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     * and does not involve mutable local state.
     * @return false if no test suite is cached; true otherwise
     */
-  public boolean runTestSuite(Boolean runTestParallel) throws RemoteException { return _junitTestManager.runTestSuite(runTestParallel); }
+  public boolean runTestSuite(Boolean runTestParallel) throws RemoteException { 
+	  _log.log("runTestSuite with runTestParallel= "+runTestParallel);
+	  return _junitTestManager.runTestSuite(runTestParallel); 
+  }
   
   /** Notifies Main JVM that JUnit has been invoked on a non TestCase class.  Unsynchronized because it contains a 
     * remote call and does not involve mutable local state.
