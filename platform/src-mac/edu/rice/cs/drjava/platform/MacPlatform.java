@@ -36,8 +36,9 @@
 
 package edu.rice.cs.drjava.platform;
 
+import java.awt.desktop.*;
 import java.net.URL;
-import com.apple.eawt.*;
+//import com.apple.eawt.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import javax.swing.*;
@@ -96,18 +97,30 @@ class MacPlatform extends DefaultPlatform {
     System.setProperty("apple.laf.useScreenMenuBar","true");
     
     // needs to be done here, otherwise the event gets lost
-    ApplicationListener appListener = new ApplicationAdapter() {
-      public void handleOpenFile(ApplicationEvent event) {
-        if (event.getFilename()!=null) {
-          edu.rice.cs.drjava.DrJavaRoot.handleRemoteOpenFile(new java.io.File(event.getFilename()), -1);
-          event.setHandled(true);
+//    ApplicationListener appListener = new ApplicationAdapter() {
+//      public void handleOpenFile(ApplicationEvent event) {
+//        if (event.getFilename()!=null) {
+//          edu.rice.cs.drjava.DrJavaRoot.handleRemoteOpenFile(new java.io.File(event.getFilename()), -1);
+//          event.setHandled(true);
+//        }
+//      }
+//    };
+//    
+//    // Register the ApplicationListener.
+//    Application appl = new Application();
+//    appl.addApplicationListener(appListener);
+
+    Desktop d = Desktop.getDesktop();
+    d.setOpenFileHandler(new OpenFilesHandler() {
+      @Override
+      public void openFiles(OpenFilesEvent e) {
+        if (e.getSearchTerm()!= null) {
+          edu.rice.cs.drjava.DrJavaRoot.handleRemoteOpenFile(new java.io.File(e.getSearchTerm()), -1);
         }
       }
-    };
-    
-    // Register the ApplicationListener.
-    Application appl = new Application();
-    appl.addApplicationListener(appListener);
+    });
+
+
   }
    
   /**
@@ -118,35 +131,68 @@ class MacPlatform extends DefaultPlatform {
    * @param quit the Action associated with quitting the DrJava application
    */
   public void afterUISetup(final Action about, final Action prefs, final Action quit) {    
-    ApplicationListener appListener = new ApplicationAdapter() {
-      public void handleAbout(ApplicationEvent e) {
+//    ApplicationListener appListener = new ApplicationAdapter() {
+//      public void handleAbout(ApplicationEvent e) {
+//        about.actionPerformed(new ActionEvent(this, 0, "About DrJava"));
+//        e.setHandled(true);
+//      }
+//
+//      public void handlePreferences(ApplicationEvent e) {
+//        prefs.actionPerformed(new ActionEvent(this, 0, "Preferences..."));
+//        e.setHandled(true);
+//      }
+//
+//      public void handleQuit(ApplicationEvent e) {
+//        // Workaround for 2868805:  show modal dialogs in a separate thread.
+//        // This encapsulation is not necessary in 10.2, but will not break either.
+//        final ApplicationEvent ae = e;
+//        SwingUtilities.invokeLater(new Runnable() {
+//          public void run() {
+//            quit.actionPerformed(new ActionEvent(this, 0, "Quit DrJava"));
+//            ae.setHandled(true);
+//          }
+//        });
+//      }
+//    };
+//
+//    // Register the ApplicationListener.
+//    Application appl = new Application();
+//    appl.setEnabledPreferencesMenu(true);
+//    appl.addApplicationListener(appListener);
+    
+    Desktop d = Desktop.getDesktop();
+    d.setAboutHandler(new AboutHandler() {
+      @Override
+      public void handleAbout(AboutEvent e) {
         about.actionPerformed(new ActionEvent(this, 0, "About DrJava"));
-        e.setHandled(true);
       }
-
-      public void handlePreferences(ApplicationEvent e) {
+    });
+    
+    d.setPreferencesHandler(new PreferencesHandler() {
+      @Override
+      public void handlePreferences(PreferencesEvent e) {
         prefs.actionPerformed(new ActionEvent(this, 0, "Preferences..."));
-        e.setHandled(true);
       }
+    });
+    
+    d.setQuitHandler(new QuitHandler() {
+      @Override
+      public void handleQuitRequestWith(QuitEvent e, QuitResponse response) {
 
-      public void handleQuit(ApplicationEvent e) {
-        // Workaround for 2868805:  show modal dialogs in a separate thread.
-        // This encapsulation is not necessary in 10.2, but will not break either.
-        final ApplicationEvent ae = e;
+        final QuitEvent ae = e;
         SwingUtilities.invokeLater(new Runnable() {
           public void run() {
             quit.actionPerformed(new ActionEvent(this, 0, "Quit DrJava"));
-            ae.setHandled(true);
           }
         });
+        
       }
-    };
+    });
     
-    // Register the ApplicationListener.
-    Application appl = new Application();
-    appl.setEnabledPreferencesMenu(true);
-    appl.addApplicationListener(appListener);
+    
+  
   }
+  
   
   /**
    * Returns whether this is a Mac platform.

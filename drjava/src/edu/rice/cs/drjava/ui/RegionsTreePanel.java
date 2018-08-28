@@ -794,7 +794,7 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
 //    }
 //    else {
       @SuppressWarnings("unchecked")
-      Enumeration<DefaultMutableTreeNode> regionNodes = docNode.children();
+      Enumeration<TreeNode> regionNodes = docNode.children();
       
       // Create a new region node in this document node list, where regions are sorted by start offset.
       int startOffset = r.getStartOffset();
@@ -809,7 +809,7 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
 //          _cachedStartOffset = startOffset;
           break;
         }
-        DefaultMutableTreeNode node = regionNodes.nextElement();
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode)regionNodes.nextElement();
         
         @SuppressWarnings("unchecked")
         RegionTreeUserObj<R> userObject = (RegionTreeUserObj<R>) node.getUserObject();

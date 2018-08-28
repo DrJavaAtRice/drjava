@@ -31,10 +31,11 @@
   <property name="error" value="stderr" />
   <property name="plt.error.log" value="${error}" />
   <property name="clean-can-fail" value="yes" /> 
-  <property name="drjava-jar" value="${env.DRJAVA_JAR}" />  
 
   <!-- *** Environment properties that are not needed may be removed *** -->
   <property environment="env" />
+  <echo message="DRJAVA_JAR  = ${env.DRJAVA_JAR}"/>
+  <property name="drjava-jar" value="${env.DRJAVA_JAR}" />  
   <property name="java5-home" value="${env.JAVA5_HOME}" />
   <property name="java6-home" value="${env.JAVA6_HOME}" />
   <property name="java7-home" value="${env.JAVA7_HOME}" />
@@ -231,13 +232,13 @@
     </antcall>
   </target>
   
-  <target name="compile-mac" depends="resolve-java5-runtime" 
+  <target name="compile-mac" depends="" 
           description="Compile the 'mac' sources">
-    <antcall target="do-compile">
+    <antcall target="do-compile-10">
       <param name="platform-tag" value="mac" />
-      <param name="source-version" value="1.5" />
-      <param name="runtime-jar" value="${java5-runtime}" />
-      <param name="extra-classpath" value="${java5-runtime}/../ui.jar" />
+      <!--param name="source-version" value="1.5" /-->
+      <!--param name="runtime-jar" value="${java5-runtime}" /-->
+      <!--param name="extra-classpath" value="${java5-runtime}/../ui.jar" /-->
     </antcall>
   </target>
   
@@ -251,8 +252,8 @@
     </antcall>
   </target>
   
-  
-  <!-- Requires that the properties 'platform-tag', 'source-version', 'runtime-jar', and
+
+    <!-- Requires that the properties 'platform-tag', 'source-version', 'runtime-jar', and
        'extra-classpath' be set -->
   <target name="do-compile" depends="assert-drjava-jar-exists">
   
@@ -271,6 +272,59 @@
     <javac srcdir="src-${platform-tag}" destdir="classes/base-${platform-tag}" 
            source="${source-version}" target="${source-version}"
            bootclasspath="${runtime-jar}" sourcepath="" includeAntRuntime="no"
+           executable="javac" fork="yes" memoryMaximumSize="512M"
+      verbose = 'true'      debug="on" optimize="off" deprecation="on">
+      <classpath>
+        <pathelement path="${extra-classpath}" />
+        <fileset refid="libs" />
+        <pathelement location="lib/buildlib/junit.jar" />
+        <pathelement location="classes/base-${platform-tag}" />
+        <pathelement location="${drjava-jar}" />
+      </classpath>
+      <compilerarg value="-Xlint" />
+      <!-- Ignore serial warnings, because they occur for every Throwable definition (among others) -->
+      <compilerarg value="-Xlint:-serial" /> 
+      <!-- Use the next line to compile against other sources, ignoring any unneeded classes.
+           This can be useful in creating a pruned version of a jar file for the lib directory.
+           (You must also clear the sourcepath="" option.)
+      <include name="${src-working-dir}/**/*.java" /> -->
+    </javac>
+    
+    <move todir="classes/test-${platform-tag}">
+      <fileset dir="classes/base-${platform-tag}">
+        <include name="**/*Test.class" />
+        <include name="**/*Test$*.class" />
+        <include name="**/*TestCase.class" />
+        <include name="**/*TestCase$*.class" />
+        <!-- Additional test classes should be listed here -->
+      </fileset>
+    </move>
+    
+    <antcall target="copy-resources" />
+    <antcall target="unjar-libs" />
+    
+  </target>
+  
+  
+  <!-- Requires that the properties 'platform-tag', 'source-version', 'runtime-jar', and
+       'extra-classpath' be set -->
+  <target name="do-compile-10" depends="">
+  
+    <echo message="Compiling src-${platform-tag} directory to classes/base-${platform-tag} and classes/test-${platform-tag}" />
+    <echo message="with command 'javac'" />
+    
+    <!-- Make the directories if they don't already exist -->
+    <mkdir dir="classes/base-${platform-tag}" />
+    <mkdir dir="classes/test-${platform-tag}" />
+    <!-- To eliminate confusion, we force recompilation whenever this is invoked -->
+    <delete>
+      <fileset dir="classes/base-${platform-tag}" includes="**/*" />  
+      <fileset dir="classes/test-${platform-tag}" includes="**/*" />  
+    </delete>
+    
+    <javac srcdir="src-${platform-tag}" destdir="classes/base-${platform-tag}" 
+           source="${source-version}" target="${source-version}" release="10"
+           sourcepath="" includeAntRuntime="no"
            executable="javac" fork="yes" memoryMaximumSize="512M"
            debug="on" optimize="off" deprecation="on">
       <classpath>
@@ -1067,7 +1121,7 @@
   
   <target name="assert-drjava-jar-exists">
     <available property="drjava-jar-exists" file="${drjava-jar}" />
-    <fail message="${drjava-jar} does not exist" unless="drjava-jar-exists" />
+    <fail message="${drjava-jar} does not exist, env is ${env} enviroment is ${environment}" unless="drjava-jar-exists" />
   </target>
   
   <target name="resolve-development-value">

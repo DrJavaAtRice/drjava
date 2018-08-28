@@ -9,9 +9,13 @@
 *.new
 *.mine
 *.alt
+*.DS_Store
+*.backup
 codecoverage
 drjava/classes
 drjava/drjava.jar
 drjava/build.xml.*
 drjava/coverage_report
+platform/classes/lib/
+platform/classes/test-mac/
 scratch

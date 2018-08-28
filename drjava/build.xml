@@ -71,7 +71,7 @@
   <echo message="libs = ${toString:libs}" level="verbose" />
   <echo message="jrelibs = ${toString:jrelibs}" level="verbose"/>
   <fileset id="extlibs" dir="${java.home}/lib/ext" includes="*.jar" /> 
-  <echo message="extlibs = ${toString:extlibs}" level="verbose"/>
+  <!--echo message="extlibs = ${toString:extlibs}" level="verbose"/-->
   <!-- ************
        Help Targets
        ************ -->
@@ -187,10 +187,64 @@
        ******************* -->
        
   <!-- The following target assumes that javac resolves to a Java 8 compiler -->
-  <target name="compile" depends="generate-source, do-compile, copy-resources, unjar-libs"
+  <target name="compile" depends="generate-source, do-compile-7-to-10, copy-resources, unjar-libs"
           description="Compile all source files (after generating the source)">
   </target>
   
+
+ <!--target name="do-compile-7-to-10" depends="resolve-java8-runtime, resolve-java8-tools"-->
+ <target name="do-compile-7-to-10">
+  
+    <echo message="Compiling src directory to classes/base and classes/test with command 'javac'" />
+    
+    <mkdir dir="classes/base" />
+    <mkdir dir="classes/test" />
+    
+    <!-- Move any test classes back to base to prevent recompilation -->
+    <move todir="classes/base">
+      <fileset dir="classes/test" includes="**/*" />
+    </move>
+    <echo message="jrelibs=${toString:jrelibs}" />    
+    <echo message="libs=${toString:libs}" />    
+    <javac srcdir="src" destdir="classes/base" release="10"
+            sourcepath="" includeAntRuntime="no"
+            fork="yes" memoryMaximumSize="1024M"
+           debug="on" optimize="off" deprecation="on" >
+       <classpath>
+        <!-- TODO: Remove this dependency on tools.jar by refactoring and moving all the dependent
+             debugger code into the "platform" module -->
+        <pathelement location="lib/buildlib/junit.jar" />
+        <fileset refid="libs" />
+	<fileset refid="jrelibs" />
+        <pathelement location="lib/buildlib/netbeans-memory-leak-utils.jar" />
+<!--    <pathelement location="classes/base" />  THIS directory is typically empty at the start of this step -->
+      </classpath>
+      <compilerarg value="-Xlint" />
+      <!-- Ignore serial warnings, because they occur for every Throwable definition (among others) -->
+      <compilerarg value="-Xlint:-serial" /> 
+      <!-- Use the next line to compile against other sources, ignoring any unneeded classes.
+           This can be useful in creating a pruned version of a jar file for the lib directory.
+           (You must also clear the sourcepath="" option.)
+      <include name="${src-working-dir}/**/*.java" /> -->
+    </javac>
+    
+    <mkdir dir="classes/test" /> <!-- May be deleted by the previous move -->
+    <move todir="classes/test">
+      <fileset dir="classes/base">
+        <include name="**/*Test.class" />
+        <include name="**/*Test$*.class" />
+        <include name="**/*TestCase.class" />
+        <include name="**/*TestCase$*.class" />
+        <!-- Additional test classes should be listed here -->
+      </fileset>
+    </move>
+    
+  </target>
+
+
+
+
+
   <target name="do-compile" depends="resolve-java8-runtime, resolve-java8-tools">
   
     <echo message="Compiling src directory to classes/base and classes/test with command 'javac'" />
@@ -330,7 +384,7 @@
        Testing Targets
        *************** -->
   
-  <target name="test" depends="compile, resolve-current-tools" unless="skip-test"
+  <target name="test" depends="compile" unless="skip-test"
           description="Run all tests (after compiling); use -Dtest-spec=... to filter">
     <antcall target="iterate-tests">
       <param name="test-jvm" value="java" />
