@@ -566,7 +566,7 @@
       <batchtest fork="true">
         <fileset dir="classes/test">
           <filename name="**/*${test-filter-string}*/**" />  
-          <include name="**/*Test.class" />
+          <include name="**/XMLConfigTest.class" />
         </fileset>
       </batchtest>
     </junit>

@@ -57,7 +57,7 @@ import java.io.BufferedWriter;
   */
 public class History implements OptionConstants, Serializable {
 
-  public static final edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("History.txt",true);
+  public static final edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("History.txt",false);
 
 
   public static final String INTERACTION_SEPARATOR = "//End of Interaction//";
@@ -175,7 +175,8 @@ public class History implements OptionConstants, Serializable {
     LOG.log("_cursor= "+_cursor);
     LOG.log("_history= "+_history);
     LOG.log("_history.size= "+_history.size());
-    return  _cursor < (_history.size()); 
+    //fixed: if history.size==0, it doesn't have next!
+    return  _cursor < (_history.size()) && (_history.size()>0); 
   }
 
   /** @return whether movePrevious() would succeed right now. */

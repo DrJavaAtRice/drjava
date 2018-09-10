@@ -116,7 +116,7 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
       public void run() { DrJava.getConfig().setSetting(HISTORY_MAX_SIZE, Integer.valueOf(maxLength)); }
     });
 //    Utilities.clearEventQueue();
-    
+
     int i;
     for (i = 0; i < maxLength + 100; i++) {
       _history.add("testing " + i);
@@ -144,12 +144,12 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
     }
 
     assertEquals("History size should be 20", 20, _history.size());
-    
+
 //    System.err.println("Setting HISTORY_MAX_SIZE to 10");
 
     Utilities.invokeAndWait(new Runnable() { public void run() { config.setSetting(HISTORY_MAX_SIZE, 10); } });
 //    Utilities.clearEventQueue();
-    
+
     assertEquals("History size should be 10", 10, _history.size());
     _history.setMaximumSize(100);
 
@@ -169,7 +169,7 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
   /** Tests the getHistoryAsString() method. */
   public void testGetHistoryAsString() {
     final FileConfiguration config = DrJava.getConfig();
-    
+
     Utilities.invokeAndWait(new Runnable() { public void run() { config.setSetting(HISTORY_MAX_SIZE, 10); } });
 //    Utilities.clearEventQueue();
 
@@ -217,7 +217,7 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
     assertEquals("Did not remember the edited entry correctly.", newEntry1, _history.getCurrent());
 
     _history.movePrevious(newEntry1);
-    
+
 //    Utilities.clearEventQueue();
     assertEquals("Did not remember the edited entry correctly.", newEntry2, _history.getCurrent());
   }
@@ -234,12 +234,12 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
     _history.add(newEntry);
 
     _history.movePrevious("");
-    
+
 //    Utilities.clearEventQueue();
     assertEquals("Did not add edited entry to end of history.", newEntry, _history.getCurrent());
 
     _history.movePrevious(newEntry);
-    
+
 //    Utilities.clearEventQueue();
     assertEquals("Did not keep a copy of the original entry.", entry, _history.getCurrent());
   }
@@ -253,12 +253,12 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
     _history.add(entry2);
 
     _history.reverseSearch("s");
-    
+
 //    Utilities.clearEventQueue();
     assertEquals("Did not find the correct entry in history.", entry1, _history.getCurrent());
 
     _history.forwardSearch("b");
-    
+
 //    Utilities.clearEventQueue();
     assertEquals("Did not find the correct entry in history.", entry2, _history.getCurrent());
   }
@@ -286,51 +286,51 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
     _history.add(entry2);
 
     _history.reverseSearch("s");
-    
+
 //    Utilities.clearEventQueue();
     assertEquals("Did not reset cursor correctly.", entry2, _history.getCurrent());
 
     _history.reverseSearch(_history.getCurrent());
-    
+
 //    Utilities.clearEventQueue();
     assertEquals("Did not reset cursor correctly.", entry1, _history.getCurrent());
   }
-  
+
   public void testSanityCheckConstructor() {
-   
+
     History his =  new History(-1);
     his.add("Test String");
     assertEquals("History size is not 0", 0, his.size());
   }
-  
+
   public void testOptionListenerToString() {
-   
+
     History his = new History(10);
     String toS = his.historyOptionListener.toString();
     assertTrue("Did not return correct string representation",toS.startsWith("HISTORY_MAX_SIZE OptionListener #"));
   }
-  
+
   public void testRemoveLast() {
-   
+
     History his = new History(5);
-    
+
     assertEquals("Didn't return null for an empty history",null, his.removeLast());
-    
+
     his.add("test string 1");
     his.add("test string 2");
     his.add("test string 3");
     his.add("test string 4");
     his.add("test string 5");
-    
+
     assertEquals("Did not return expected last value","test string 5",his.removeLast());
-    
+
     his.moveEnd();
-    
+
     assertEquals("Did not return expected last value","test string 4",his.removeLast());
-    
+
     assertEquals("Did not return expected last value","test string 2",his.lastEntry());
   }
-  
+
   public void testMoveMethods() {
     
     History his = new History(0);

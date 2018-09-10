@@ -88,18 +88,18 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
   private volatile ClassLoader _interpreterLoader;
   
   private static Log _log = new Log("InteractionsModelErrorTest.txt", false);
-  
+
   public InteractionsModelErrorTest() {
     super();
 
     _classPathManager = new ClassPathManager(ReflectUtil.SYSTEM_CLASS_PATH);
     _interpreterLoader = _classPathManager.makeClassLoader(InterpreterJVM.class.getClassLoader());
-    
+
     // _interpreterOptions = Options.DEFAULT;
     _interpreterOptions = new InteractionsPaneOptions();
     _interpreter = new Interpreter(_interpreterOptions, _interpreterLoader);
   }
-  
+
   /** Asserts that the results of interpreting the first of each
    * Pair is equal to the second.
    * @param cases an array of Pairs
@@ -111,14 +111,14 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
       assertEquals(cases[i].first() + " interpretation wrong!", cases[i].second(), out);
     }
   }
-  
+
   private Object interpretDirectly(String s) throws InterpreterException {
     return _interpreter.interpret(s).apply(new OptionVisitor<Object, Object>() {
       public Object forNone() { return null; }
       public Object forSome(Object obj) { return obj; }
     });
   }
-  
+
   protected String _name() {
     return "compiler=" + _model.getCompilerModel().getActiveCompiler().getName() + ": ";
   }
@@ -132,7 +132,7 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
   public void testInterpretExtendNonPublic()
     throws BadLocationException, IOException, InterruptedException, InterpreterException {
     _log.log("testInterpretExtendNonPublic started");
-    
+
     OpenDefinitionsDocument doc = setupDocument(UNARY_FUN_NON_PUBLIC_INTERFACE_TEXT);
     final File file = tempFile();
     saveFile(doc, new FileSelector(file));
@@ -145,13 +145,13 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
     listener.checkCompileOccurred();
     _model.removeListener(listener);
     assertCompileErrorsPresent(_name(), false);
-    
+
     // Make sure .class exists
     File compiled = classForJava(file, "UnaryFun");
     assertTrue(_name() + "Class file should exist after compile", compiled.exists());    
-    
+
     _classPathManager.addBuildDirectoryCP(compiled.getParentFile());
-    
+
     try {
       _interpreter.interpret("UnaryFun f = new UnaryFun() { Object apply(Object arg) { return (Integer)arg * (Integer)arg; }}");
       fail("Should fail with 'cannot access its superinterface' exception.");
@@ -160,7 +160,7 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
       assertTrue(ce.getMessage().indexOf("cannot access its superinterface")>=0);
     }
   }
-  
+
   /** Tests that we don't get an error for public classes.
    * @throws BadLocationException if attempts to reference an invalid location
    * @throws IOException if an IO operation fails
@@ -170,7 +170,7 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
   public void testInterpretExtendPublic()
     throws BadLocationException, IOException, InterruptedException, InterpreterException {
     _log.log("testInterpretExtendPublic started");
-    
+
     OpenDefinitionsDocument doc = setupDocument(UNARY_FUN_PUBLIC_INTERFACE_TEXT);
     final File file = createFile("UnaryFun.java");
     saveFile(doc, new FileSelector(file));
@@ -183,16 +183,16 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
     listener.checkCompileOccurred();
     _model.removeListener(listener);
     assertCompileErrorsPresent(_name(), false);
-    
+
     // Make sure .class exists
     File compiled = classForJava(file, "UnaryFun");
     assertTrue(_name() + "Class file should exist after compile", compiled.exists());    
-    
+
     _classPathManager.addBuildDirectoryCP(compiled.getParentFile());
-    
+
     _interpreter.interpret("UnaryFun f = new UnaryFun() { Object apply(Object arg) { return (Integer)arg * (Integer)arg; }}");
   }
-  
+
   /** Tests that we get the correct 'cannot access its superinterface' error for non-public classes.
    * @throws BadLocationException if attempts to reference an invalid location
    * @throws IOException if an IO operation fails
@@ -202,7 +202,7 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
   public void testInterpretExtendNonPublicClass()
     throws BadLocationException, IOException, InterruptedException, InterpreterException {
     _log.log("testInterpretExtendNonPublic started");
-    
+
     OpenDefinitionsDocument doc = setupDocument(UNARY_FUN_NON_PUBLIC_CLASS_TEXT);
     final File file = tempFile();
     saveFile(doc, new FileSelector(file));
@@ -215,13 +215,13 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
     listener.checkCompileOccurred();
     _model.removeListener(listener);
     assertCompileErrorsPresent(_name(), false);
-    
+
     // Make sure .class exists
     File compiled = classForJava(file, "UnaryFun");
     assertTrue(_name() + "Class file should exist after compile", compiled.exists());    
-    
+
     _classPathManager.addBuildDirectoryCP(compiled.getParentFile());
-    
+
     try {
       _interpreter.interpret("UnaryFun f = new UnaryFun() { public Object apply(Object arg) { return (Integer)arg * (Integer)arg; }}");
       fail("Should fail with 'cannot access its superclass' exception.");
@@ -230,7 +230,7 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
       assertTrue(ce.getMessage().indexOf("cannot access its superclass")>=0);
     }
   }
-  
+
   /** Tests that we don't get an error for public classes.
    * @throws BadLocationException if attempts to reference an invalid location
    * @throws IOException if an IO operation fails
@@ -240,7 +240,7 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
   public void testInterpretExtendPublicClass()
     throws BadLocationException, IOException, InterruptedException, InterpreterException {
     _log.log("testInterpretExtendPublic started");
-    
+
     OpenDefinitionsDocument doc = setupDocument(UNARY_FUN_PUBLIC_CLASS_TEXT);
     final File file = createFile("UnaryFun.java");
     saveFile(doc, new FileSelector(file));
@@ -253,16 +253,16 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
     listener.checkCompileOccurred();
     _model.removeListener(listener);
     assertCompileErrorsPresent(_name(), false);
-    
+
     // Make sure .class exists
     File compiled = classForJava(file, "UnaryFun");
     assertTrue(_name() + "Class file should exist after compile", compiled.exists());    
-    
+
     _classPathManager.addBuildDirectoryCP(compiled.getParentFile());
-    
+
     _interpreter.interpret("UnaryFun f = new UnaryFun() { public Object apply(Object arg) { return (Integer)arg * (Integer)arg; }}");
   }
-  
+
   /** Test that we get the right package using getPackage().
    * @throws BadLocationException if attempts to reference an invalid location
    * @throws IOException if an IO operation fails
@@ -272,7 +272,7 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
   public void testInterpretGetPackageClass()
     throws BadLocationException, IOException, InterruptedException, InterpreterException {
     _log.log("testInterpretGetPackageClass started");
-    
+
     OpenDefinitionsDocument doc = setupDocument(CLASS_IN_PACKAGE_CLASS_TEXT);
 
     final File dir = tempDirectory();
@@ -289,13 +289,13 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
     listener.checkCompileOccurred();
     _model.removeListener(listener);
     assertCompileErrorsPresent(_name(), false);
-    
+
     // Make sure .class exists
     File compiled = classForJava(file, "Bar");
     assertTrue(_name() + "Class file should exist after compile", compiled.exists());    
-    
+
     _classPathManager.addBuildDirectoryCP(compiled.getParentFile().getParentFile());
-    
+
     Object out = interpretDirectly("new foo.Bar().getClass().getPackage().getName()");
     assertEquals("Package of foo.Bar should be foo", "foo", out);
   }
@@ -309,9 +309,14 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
   public void testInterpretGetPackageAnonymous()
     throws BadLocationException, IOException, InterruptedException, InterpreterException {
     _log.log("testInterpretGetPackageAnonymous started");
-
     Object out = interpretDirectly("new Runnable() { public void run() { } }.getClass().getPackage()");
-    assertEquals("Package of $1 should be null", null, out);
+    _log.log("out= "+out);
+    _log.log("out.getClass= "+out.getClass());
+    _log.log("out.toString= "+out.toString());
+    _log.log("out.getName= "+((Package)out).getName());
+    //assertEquals("Package of $1 should be null", null, out);
+    //Fixed: If you do not use a package statement, your type ends up in an unnamed package
+    assertEquals("Package name of $1 should be unamed Package", "", ((Package) out).getName());
     
     out = interpretDirectly("package foo; new Runnable() { public void run() { } }.getClass().getPackage().getName()");
     assertEquals("Package of foo.$1 should be foo", "foo", out);
