@@ -81,7 +81,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   private static final String ELSPETH_ERROR_TEXT =
     "import java.io._ \n" +
     "import junit.framework._ \n" +
-    "import junit.framework.Assert._ \n" +
+    "import org.junit.Assert._ \n" +
     "class Elspeth extends TestCase { \n" +
     "  def testMe() { \n" +
     "    val s = \"elspeth\" \n" +
@@ -101,7 +101,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   private static final String MONKEYTEST_PASS_TEXT =
     "import java.io._ \n" +
     "import junit.framework._ \n" +
-    "import junit.framework.Assert._ \n" +
+    "import org.junit.Assert._ \n" +
     "class MonkeyTestPass extends TestCase { \n" +
     "  def testShouldPass() { \n" +
     "    assertEquals(\"monkey\", \"monkey\") \n" +
@@ -121,7 +121,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   private static final String MONKEYTEST_PASS_ALT_TEXT =
     "import java.io._ \n" +
     "import junit.framework._ \n" +
-    "import junit.framework.Assert._ \n" +
+    "import org.junit.Assert._ \n" +
     "class MonkeyTestPass extends TestCase { \n" +
     "  def testShouldPass() { \n" +
     "    assertEquals(\"monkeys\", \"monkeys\") \n" +
@@ -138,7 +138,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   
   private static final String MONKEYTEST_FAIL_TEXT =
     "import junit.framework._ \n" +
-    "import junit.framework.Assert._ \n" +
+    "import org.junit.Assert._ \n" +
     "class MonkeyTestFail extends TestCase { \n" +
     "  def testShouldFail() { \n" +
     "    assertEquals(\"monkey\", \"baboon\") " +
@@ -216,7 +216,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
 
   private static final String HAS_MULTIPLE_TESTS_PASS_TEXT =
     "import junit.framework._ \n" +
-    "import junit.framework.Assert._ \n" +
+    "import org.junit.Assert._ \n" +
     "class HasMultipleTestsPass extends TestCase { \n" +
     "  def testShouldPass() { \n" +
     "    assertEquals(\"monkey\", \"monkey\") \n" +
@@ -268,7 +268,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   
   private static final String MULTI_CLASSES_IN_FILE_TEXT = 
     "import junit.framework._ \n" + /* last char index: 25 */
-    "import junit.framework.Assert._ \n" + /* last char index: 58 */
+    "import org.junit.Assert._ \n" + /* last char index: 58 */
     " class A { } \n" + /* last char index: 72 */
     " class B /* with syntax error */ { def foo(x: Int) { } } \n" + /* 'def' starts at 108 */
     " class DJTest extends TestCase { \n" + 
