@@ -120,11 +120,27 @@ public class XMLConfigTest extends TestCase {
                                                     + "  <bar>abc</bar>\n"
                                                     + "  <fum fee=\"xyz\">def</fum>\n"
                                                     + "</foo>"));
-    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>" + NL +
-                             "<foo a=\"foo.a\">" + NL +
-                             "  <bar>abc</bar>" + NL +
-                             "  <fum fee=\"xyz\">def</fum>" + NL +
-                             "</foo>" + NL), xc.toString());
+
+    
+    String expectString;
+    //Since java9, the behavior of javax.xml.transform.Transformer changed, it will add strange   newline and  spaces between nodes
+    // see https://github.com/CodeFX-org/java-9-wtf/blob/master/xml-transformer/README.md
+    //So the result XMLConfig are different.
+    if ((System.getProperty("java.version").startsWith("9")) ||
+            (System.getProperty("java.version").startsWith("10"))) 
+        expectString="<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>" + NL +
+              "<foo a=\"foo.a\">" + NL+"    " +NL+
+              "  <bar>abc</bar>" + NL+"    " +NL+
+              "  <fum fee=\"xyz\">def</fum>" + NL+"  " +NL+
+              "</foo>" + NL;
+
+    else 
+        expectString="<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>" + NL +
+            "<foo a=\"foo.a\">" + NL +
+            "  <bar>abc</bar>" + NL +
+            "  <fum fee=\"xyz\">def</fum>" + NL +
+            "</foo>" + NL;
+    assertEquals(remove16XML(expectString), xc.toString());
   }
   public void testSetNodeFromEmpty() throws Exception {
     XMLConfig xc = new XMLConfig();
@@ -500,12 +516,26 @@ public class XMLConfigTest extends TestCase {
                                                           + "  <fum fee=\"xyz\">def</fum>\n"
                                                           + "</foo>"));
     XMLConfig xc = new XMLConfig(xcParent, xcParent.getNodes("foo").get(0));
-    
-    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>" + NL +
-                             "<foo a=\"foo.a\">" + NL +
-                             "  <bar>abc</bar>" + NL +
-                             "  <fum fee=\"xyz\">def</fum>" + NL +
-                             "</foo>" + NL), xc.toString());
+
+    String expectString;
+    //Since java9, the behavior of javax.xml.transform.Transformer changed, it will add strange   newline and  spaces between nodes
+    // see https://github.com/CodeFX-org/java-9-wtf/blob/master/xml-transformer/README.md
+    //So the result XMLConfig are different.
+    if ((System.getProperty("java.version").startsWith("9")) ||
+            (System.getProperty("java.version").startsWith("10")))
+      expectString="<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>" + NL +
+              "<foo a=\"foo.a\">" + NL+"    " +NL+
+              "  <bar>abc</bar>" + NL+"    " +NL+
+              "  <fum fee=\"xyz\">def</fum>" + NL+"  " +NL+
+              "</foo>" + NL;
+
+    else
+      expectString="<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>" + NL +
+              "<foo a=\"foo.a\">" + NL +
+              "  <bar>abc</bar>" + NL +
+              "  <fum fee=\"xyz\">def</fum>" + NL +
+              "</foo>" + NL;
+    assertEquals(remove16XML(expectString), xc.toString());
   }
   public void testSetNodeFromEmptyDelegate() throws Exception {
     XMLConfig xcParent = new XMLConfig();
