@@ -117,7 +117,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
   
   
   /** Checks that System.exit is handled appropriately from interactions pane. */
-  public void testExitInteractions() throws EditDocumentException, InterruptedException {
+  public void testExitInteractions() throws Exception {
 //    debug.logStart();
     _log.log("Starting testExitInteractions");
         
@@ -149,8 +149,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
   /** Creates a new class, compiles it and then checks that the REPL can see it.  Then checks that a compiled class
     * file in another directory can be both accessed and extended if it is on the "extra.class.path" config option.
     */
-  public void testInteractionsCanSeeCompiledClasses() throws BadLocationException, EditDocumentException,
-    IOException, InterruptedException {
+  public void testInteractionsCanSeeCompiledClasses() throws Exception {
 //    debug.logStart();
     
     _log.log("Starting testInteractionsCanSeeCompiledClasses");
@@ -203,8 +202,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     * variable with an identical name (but a lowercase first letter).  Catches SF bug #689026 ("DynamicJava can't handle
     * certain variable names")
     */
-  public void testInteractionsVariableWithLowercaseClassName() throws BadLocationException, EditDocumentException,
-    IOException, InterruptedException {
+  public void testInteractionsVariableWithLowercaseClassName() throws Exception {
 //    debug.logStart();
     
     _log.log("Starting testInteractionsVariableWithLowerCaseClassName");
@@ -221,8 +219,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
   }
   
   /** Checks that updating a class and recompiling it is visible from the REPL. */
-  public void testInteractionsCanSeeChangedClass() throws BadLocationException, EditDocumentException,
-    IOException, InterruptedException {
+  public void testInteractionsCanSeeChangedClass() throws Exception {
 //    debug.logStart();
     _log.log("Starting testInteractionsCanSeeChangedClass");
     
@@ -245,8 +242,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
   }
   
   /** Checks that an anonymous inner class can be defined in the repl! */
-  public void testInteractionsDefineAnonymousInnerClass() throws BadLocationException, EditDocumentException,
-    IOException, InterruptedException {
+  public void testInteractionsDefineAnonymousInnerClass() throws Exception {
 //    debug.logStart();
     
     _log.log("Starting testInteractionsDefineAnonymousInnerClass");
@@ -267,7 +263,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
 //    debug.logEnd();
   }
   
-  public void testGetSourceRootDefaultPackage() throws BadLocationException, IOException {
+  public void testGetSourceRootDefaultPackage() throws Exception {
 //    debug.logStart();
     
     _log.log("Starting testGetSourceRootDefaultPackage");
@@ -302,7 +298,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
 //    debug.logEnd();
   }
   
-  public void testGetSourceRootPackageThreeDeepValid() throws BadLocationException, IOException {
+  public void testGetSourceRootPackageThreeDeepValid() throws Exception {
 //    debug.logStart();
     _log.log("Starting testGetSourceRootPackageThreeDeepValid");
     // Create temp directory
@@ -333,7 +329,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
   }
   
   /** Tests that getSourceRoot works with a relative path when a package name is present. */
-  public void testGetSourceRootPackageThreeDeepValidRelative() throws BadLocationException, IOException {
+  public void testGetSourceRootPackageThreeDeepValidRelative() throws Exception {
 //    debug.logStart();
     
     _log.log("Starting testGetSourceRootPackageThreeDeepValidRelative");
@@ -365,7 +361,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
 //    debug.logEnd();
   }
   
-  public void testGetSourceRootPackageThreeDeepInvalid() throws BadLocationException, IOException {
+  public void testGetSourceRootPackageThreeDeepInvalid() throws Exception {
 //    debug.logStart();
     
     _log.log("Starting testGetSourceRootPackageThreeDeepInvalid");
@@ -394,7 +390,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
 //    debug.logEnd();
   }
   
-  public void testGetSourceRootPackageOneDeepValid() throws BadLocationException, IOException {
+  public void testGetSourceRootPackageOneDeepValid() throws Exception {
 //    debug.logStart();
     
     _log.log("Starting testGetSourceRootPackageOneDeepValid");
@@ -423,7 +419,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
   }
   
   
-  public void testGetMultipleSourceRootsDefaultPackage() throws BadLocationException, IOException {
+  public void testGetMultipleSourceRootsDefaultPackage() throws Exception {
 //    debug.logStart();
     
     _log.log("Starting testGetMultipleSourceRootsDefaultPackage");
@@ -475,8 +471,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
   }
   
   /** Creates a new class, compiles it and then checks that the REPL can see it. */
-  public void testInteractionsLiveUpdateClassPath() throws BadLocationException, EditDocumentException,
-    IOException, InterruptedException {
+  public void testInteractionsLiveUpdateClassPath() throws Exception {
 //    debug.logStart();
     _log.log("Starting testInteractionsLiveUpdateClassPath");
     

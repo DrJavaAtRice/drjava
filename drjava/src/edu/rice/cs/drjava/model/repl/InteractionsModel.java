@@ -270,6 +270,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     */
   public abstract Pair<String,String> getVariableToString(String var);
   
+  /* Resets _document, clearing it and generating a banner; only runs in dispatch thread. */
   public void documentReset() { 
     assert EventQueue.isDispatchThread();
     _log.log("invoking documentReset()");

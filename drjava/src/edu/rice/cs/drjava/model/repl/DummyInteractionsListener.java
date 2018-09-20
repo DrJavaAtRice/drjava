@@ -37,9 +37,11 @@
 package edu.rice.cs.drjava.model.repl;
 
 import java.io.File;
+import java.util.concurrent.TimeoutException;
 
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.plt.concurrent.CompletionMonitor;
+
 
 //TODO: this class should be renamed NullInteractionsListener as should all of the other "dummy" classes.  
 /** An InteractionsListener that does nothing other than support a waitUntilDone method that blocks until
@@ -89,11 +91,12 @@ public class DummyInteractionsListener implements InteractionsListener {
   public void interactionIncomplete() { }
   
   /* Waits until interpreterReady has been called and resets the completion monitor when that event happens. */
-  public void waitResetDone() {
+  public void waitResetDone() throws TimeoutException {
     boolean wasDone = _resetDone.attemptEnsureSignaled(WAIT_TIMEOUT);
-    if (! wasDone) 
-      throw new UnexpectedException("Interactions pane failed to reset within " + WAIT_TIMEOUT + " milliseconds");
-    _resetDone.reset();  // 
+    if (! wasDone) {
+      _resetDone.reset();  // 
+      throw new TimeoutException("Interactions pane failed to reset within " + WAIT_TIMEOUT + " milliseconds");
+    }
   }
 }
 

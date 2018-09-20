@@ -656,12 +656,12 @@ public abstract class FileOps {
     * backup will be destroyed (because the backup is written before saving begins, then moved back over the original 
     * file when saving fails).  Since the old backup would have been destroyed anyway if saving had succeeded, this
     * behavior is appropriate.
+    * TODO: Is this method thread safe?
     * @param fileSaver  Keeps track of the name of the file to write, whether to back up the file, and has 
     *                   a method that actually performs the writing of the file
     * @throws IOException if the saving or backing up of the file fails for any reason
     */
   public static void saveFile(FileSaver fileSaver) throws IOException {
-    
     
     boolean makeBackup = fileSaver.shouldBackup();
     boolean success = false;
@@ -770,13 +770,11 @@ public abstract class FileOps {
     /** This method is called to tell the file saver that a backup was successfully made. */
     public abstract void backupDone();
     
-    /**
-     * This method actually writes info to a file.  NOTE: It is important that this
-     * method write to the stream it is passed, not the target file.  If you write
-     * directly to the target file, the target file will be destroyed if saving fails.
-     * Also, it is important that when saving fails this method throw an IOException
-     * @throws IOException when saving fails for any reason
-     */
+    /** This method actually writes info to a file.  NOTE: It is important that this method write to the stream it is 
+      * passed, not the target file.  If you write directly to the target file, the target file will be destroyed if 
+      * saving fails. Also, it is important that when saving fails this method throw an IOException
+      * @throws IOException when saving fails for any reason
+      */
     public abstract void saveTo(OutputStream os) throws IOException;
     
     /** This method specifies the file for saving.  It should return the canonical name of the file, resolving symlinks.

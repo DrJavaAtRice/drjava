@@ -125,6 +125,7 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
     * @param t The Throwable thrown by System.exit
     */
   protected void _interpreterResetFailed(final Throwable t) {
+    /** GUI operation must run in Dispatch Thread */
     Utilities.invokeLater(new Runnable() { 
       public void run() {
         _log.log("Reset Failed! See the console tab for details.");
@@ -137,6 +138,7 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   }   
   
   protected void _interpreterWontStart(final Exception e) {
+    /** GUI operation must run in Dispatch Thread */
     Utilities.invokeLater(new Runnable() { 
       public void run() {
         String output = "JVM failed to start.  Make sure a firewall is not blocking " +
@@ -158,65 +160,40 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
     _log.log("In InteractionsModel, Event: interpreterReady() called");
   }
   
-  /** In the event thread, notifies listeners that an interaction has started. */
+  /** Notifies listeners that an interaction has started. */
   public void _notifyInteractionStarted() { 
-    Utilities.invokeLater(new Runnable() { public void run() { 
-      _notifier.interactionStarted(); 
-      _log.log("In InteractionsModel, Event: an interaction has started");
-    } });
+    _notifier.interactionStarted(); 
+    _log.log("In InteractionsModel, Event: an interaction has started");
   }
   
-  /** In the event thread, notifies listeners that an interaction has ended. */
+  /** Notifies listeners that an interaction has ended. */
   protected void _notifyInteractionEnded() { 
-    Utilities.invokeLater(new Runnable() { public void run() { 
-      _notifier.interactionEnded();
-      _log.log("In InteractionsModel, Event: the current interaction has ended");
-    } });
+    _notifier.interactionEnded();
+    _log.log("In InteractionsModel, Event: the current interaction has ended");
   }
   
-  /** In the event thread, notifies listeners that an error was present in the interaction. */
+  /** Notifies listeners that an error was present in the interaction. */
   protected void _notifySyntaxErrorOccurred(final int offset, final int length) {
-    Utilities.invokeLater(new Runnable() { public void run() { 
-      _notifier.interactionErrorOccurred(offset,length);
-      _log.log("In InteractionsModel, Event: a syntax error occurred in the interactions model");
-    } });
+    _notifier.interactionErrorOccurred(offset,length);
+    _log.log("In InteractionsModel, Event: a syntax error occurred in the interactions model");
   }
   
-//  /** In the event thread, notifies listeners that the interpreter is ready. Sometimes called from outside the event
-//    * thread. */
-//  public void _notifyInterpreterReady(final File wd) {   /* TODO  rename this method */
-//    _log.log("Asynchronously notifying interpreterReady event listeners");  // DEBUG
-//    Utilities.invokeLater(new Runnable() { 
-//      public void run() { 
-////        _notifier.interpreterReady(wd);
-//        _notifier.interpreterReady();
-//        _log.log("In InteractionsModel, Event: the interpreter is ready with wd " + wd);
-//        _document.clearColoring();  // _document is inherited from the abstract superclass InteractionsModel
-//      } 
-//    });
-//  }
-  
-  /** In the event thread, notifies listeners that the interpreter is ready. Sometimes called from outside the event
-    * thread. */
+  /** Notifies listeners that the interpreter is ready. */
   public void _notifyInterpreterReady() {   /* TODO  rename this method */
-    _log.log("Asynchronously notifying interpreterReady event listeners");  // DEBUG
-    Utilities.invokeLater(new Runnable() { 
-      public void run() { 
-        _notifier.interpreterReady(); 
-        _log.log("In InteractionsModel, Event: the interpreter is ready with existing working directory");
-        _document.clearColoring();  // _document is inherited from the abstract superclass InteractionsModel
-      } 
+    _log.log("Notifying interpreterReady event listeners");  // DEBUG
+    _notifier.interpreterReady(); 
+    _log.log("In InteractionsModel, Event: the interpreter is ready with existing working directory");
+    EventQueue.invokeLater(new Runnable() { // _document is inherited from the abstract superclass InteractionsModel
+      public void run() { _document.clearColoring(); } 
     });
   }
   
-  /** In the event thread, notifies listeners that the interpreter has exited unexpectedly.
+  /** Notifies listeners that the interpreter has exited unexpectedly.
     * @param status Status code of the dead process
     */
   protected void _notifyInterpreterExited(final int status) {
-    Utilities.invokeLater(new Runnable() { public void run() { 
-      _notifier.interpreterExited(status); 
-      _log.log("In InteractionsModel, Event: the interpreter exited unexpectedly with status = " + status);
-    } });
+    _notifier.interpreterExited(status); 
+    _log.log("In InteractionsModel, Event: the interpreter exited unexpectedly with status = " + status);
   }
   
   /** In the event thread, notifies listeners that the interpreter reset failed.

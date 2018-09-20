@@ -8795,22 +8795,21 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _lastFocusOwner = _interactionsContainer;
     }
     
-    /** Only runs in event thread. */
+    /** fired from _notifier using readers/writers locking. */
     public void junitStarted() {
-      assert EventQueue.isDispatchThread();
       /* Note: hourglassOn() is done by various junit commands (other than junitClasses); hourglass must be off 
        * for actual testing; the balancing simpleHourglassOff() is located here and in nonTestCase */
-      
-      try { showTab(_junitPanel, true);
+      try { 
+        showTab(_junitPanel, true);
         _junitPanel.setJUnitInProgress();
       }
       finally { 
-//        Utilities.show("Turning hourglassOff");
+        _log.log("Turning hourglassOff");
         hourglassOff();
       }  
     }
     
-    /** We are junit'ing a specific list of classes given their source files. */
+    /** We are applying JUnit to a specific list of classes given their source files. */
     public void junitClassesStarted() {
       assert EventQueue.isDispatchThread();
       // Only change GUI from event-dispatching thread

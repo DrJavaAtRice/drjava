@@ -39,6 +39,7 @@ package edu.rice.cs.drjava.model.repl;
 import java.util.ArrayList;
 import java.util.HashMap;
 import edu.rice.cs.util.FileOps;
+import edu.rice.cs.util.Log;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.DrScala;
@@ -59,6 +60,8 @@ import java.io.BufferedWriter;
 public class History implements OptionConstants, Serializable {
 
   public static final String INTERACTION_SEPARATOR = "//End of Interaction//";
+  
+  public static final Log _log = new Log("GlobalModel.txt", true);
 
   // Not final because it may be updated by config
   private volatile int _maxSize;
@@ -218,7 +221,9 @@ public class History implements OptionConstants, Serializable {
     * @param selector File to save to
     */
   public void writeToFile(FileSaveSelector selector) throws IOException {
-    writeToFile(selector, getHistoryAsStringWithSemicolons());
+    String history = getHistoryAsStringWithSemicolons();
+    _log.log("In History, writing the following string to file:\n[" + history + "]");
+    writeToFile(selector, history);
   }
 
   /** Writes this History to the file selected in the FileSaveSelector. The saved file will still include
@@ -226,7 +231,7 @@ public class History implements OptionConstants, Serializable {
     * @param selector File to save to
     * @param editedVersion The edited version of the text to be saved (which already uses proper EOL string)
     */
-  public static void writeToFile(FileSaveSelector selector, final String editedVersion) throws IOException {
+  public static void writeToFile(final FileSaveSelector selector, final String editedVersion) throws IOException {
     File c;
     
     try { c = selector.getFile(); }
@@ -238,13 +243,14 @@ public class History implements OptionConstants, Serializable {
         FileOps.DefaultFileSaver saver = new FileOps.DefaultFileSaver(c) {
           public void saveTo(OutputStream os) throws IOException {
 
-            OutputStreamWriter osw = new OutputStreamWriter(os);
-            BufferedWriter bw = new BufferedWriter(osw);
-            String file = HISTORY_FORMAT_VERSION_2 + editedVersion;
+            final OutputStreamWriter osw = new OutputStreamWriter(os);
+            final BufferedWriter bw = new BufferedWriter(osw);
+            final String file = HISTORY_FORMAT_VERSION_2 + editedVersion;
             bw.write(file, 0, file.length());
             bw.close();
           }
         };
+        _log.log("In History, writing to file '" + c + "' using FileSlector " + selector + " and saver " + saver);
         FileOps.saveFile(saver);
       }
     }

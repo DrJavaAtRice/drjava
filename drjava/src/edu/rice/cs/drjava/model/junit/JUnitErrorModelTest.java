@@ -41,6 +41,8 @@ import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.Log;
 
+
+import java.awt.EventQueue;
 import java.io.File;
 import javax.swing.text.BadLocationException;
 
@@ -134,35 +136,33 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     final OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_FAIL_TEXT);
     _log.log("doc setUp");
     
-    Utilities.invokeAndWait(new Runnable() {
-      public void run() { 
-        try {
-          _m = new JUnitErrorModel(new JUnitError[0], _model, false);
+    _m = new JUnitErrorModel(new JUnitError[0], _model, false);
 
-          final File file = new File(_tempDir, "MonkeyTestFail.scala");
-          saveFile(doc, new FileSelector(file));
-          
-          _model.addListener(listener);
-          
-          testStartCompile(doc);
-          _log.log("Compile started");
-          
-          listener.waitCompileDone();
-          _log.log("Compile done");
-          
-          if (_model.getCompilerModel().getNumErrors() > 0) fail("compile failed: " + getCompilerErrorString());
-          listener.checkCompileOccurred();
-          _log.log("Done with first block");
-        }
-        catch(Exception e) { fail("The following exception was thrown in the first block of testErrorsArrayInOrder: \n" + e); }
+    EventQueue.invokeLater(new Runnable() { 
+      public void run() { 
+        final File file = new File(_tempDir, "MonkeyTestFail.scala"); 
+        saveFile(doc, new FileSelector(file));
       }
     });
+    
+    _model.addListener(listener);
+    
+    testStartCompile(doc);
+    _log.log("Compile started");
+    
+    listener.waitCompileDone();
+    _log.log("Compile done");
+    
+    if (_model.getCompilerModel().getNumErrors() > 0) fail("compile failed: " + getCompilerErrorString());
+    listener.checkCompileOccurred();
+    _log.log("Done with first block");
          
     listener.runJUnit(doc);
     // runJUnit waits until the thread started in DefaultJUnitModel._rawJUnitOpenDefDocs has called notify
     
     listener.assertJUnitStartCount(1);
     
+    /* GUI code must run in Dispatch Thread. */
     Utilities.invokeAndWait(new Runnable() {
       public void run() { 
         try {     
@@ -171,13 +171,15 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
           // Performing the clear operation atomically in the event thread.
           
           _model.getJUnitModel().getJUnitDocument().remove(0, _model.getJUnitModel().getJUnitDocument().getLength() - 1);
-          assertEquals("Confirm document is empty", 0, _model.getJUnitModel().getJUnitDocument().getLength());
-          _log.log("JUnitDocument is empty");
         }
         catch(BadLocationException e) { fail("BadLocationException in clearing JUnitDocument"); }
         catch(Exception e) { fail("The following exception was thrown in testErrorsArrayInOrder: \n" + e); }
+       
       }
     });
+   assertEquals("Confirm document is empty", 0, _model.getJUnitModel().getJUnitDocument().getLength());
+   _log.log("JUnitDocument is empty");
+
     
     // Wait until events triggered by running unit tests have cleared ? (should be done by code above)
 //    Utilities.clearEventQueue();
@@ -215,6 +217,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     final OpenDefinitionsDocument doc2 = setupDocument(ABC_TEST);
     final File file2 = new File(_tempDir, "ABCTest.scala");
     
+    /* saveFile must run in Dispatch Thread */
     Utilities.invokeAndWait(new Runnable() {
       public void run() { 
         try {     
@@ -224,17 +227,18 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
           // Compile the correct ABC and the test
 //          JUnitTestListener listener = new JUnitTestListener(false);
 //          System.out.println("compiling all");
-          _model.getCompilerModel().compileAll();
         }
         catch(Exception e) { fail("The following exception was thrown in testVerifyErrorHandledCorrectly_NOJOIN location 1: \n" + e); }
       } 
     });
+    _model.getCompilerModel().compileAll();
     
    _log.log("First compile in  testVerifyErrorHandledCorrectly_NOJOIN comlete");
    
     final OpenDefinitionsDocument doc3 = setupDocument(ABC_CLASS_TWO);
     final File file3 = new File(_tempDir, "ABC2.scala");
     
+    /* saveFile must run in Dispatch Thread */
     Utilities.invokeAndWait(new Runnable() {
       public void run() { saveFile(doc3, new FileSelector(file3)); }
     });
@@ -245,12 +249,9 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     
     _model.addListener(listener);
     
-    Utilities.invokeAndWait(new Runnable() {
-      public void run() { 
-        try { listener.compile(doc3); }
-        catch(Exception e) { fail("The following exception was thrown in testVerifyErrorHandledCorrectly_NOJOIN location 2: \n" + e); }
-      }
-    });
+    
+    try { listener.compile(doc3); }
+    catch(Exception e) { fail("The following exception was thrown in testVerifyErrorHandledCorrectly_NOJOIN location 2: \n" + e); }
     
     _log.log("Second compile complete");
     if (_model.getCompilerModel().getNumErrors() > 0) {
@@ -285,6 +286,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     final File file1 = new File(_tempDir, "TestOne.scala");
     final File file2 = new File(_tempDir, "TestTwo.scala");
     
+    /* saveFile must run in Dispatch Thread */
     Utilities.invokeAndWait(new Runnable() {
       public void run() {
         try {
@@ -297,14 +299,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     JUnitTestListener listener = new JUnitTestListener(true);
     _model.addListener(listener);
     
-    Utilities.invokeAndWait(new Runnable() {
-      public void run() { 
-        try { _model.getCompilerModel().compileAll(); }
-        catch(Exception e) { fail("The following exception was thrown in testErrorInSuperClass_NOJOIN location 12: \n" + e); }
-      }
-    });
-//        doc1.startCompile();
-//        doc2.startCompile();
+    _model.getCompilerModel().compileAll();
     
     listener.waitCompileDone();
     

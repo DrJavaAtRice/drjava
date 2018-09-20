@@ -61,9 +61,11 @@ import javax.swing.text.BadLocationException;
 import java.io.File;
 import java.io.IOException;
 import java.rmi.UnmarshalException;
-import java.util.regex.*;
 import java.util.List;
-import junit.framework.Assert;
+import java.util.concurrent.TimeoutException;
+import java.util.regex.*;
+
+import org.junit.Assert;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
@@ -77,7 +79,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
  */
 public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   
-  public static final Log _log = new Log("GlobalModel.txt", false);
+  public static final Log _log = new Log("GlobalModel.txt", true);
 
   protected volatile DefaultGlobalModel _model;
   protected volatile InteractionsController _interactionsController;
@@ -279,10 +281,8 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   }
   
   protected void safeLoadHistory(final FileSelector fs) {
-    Utilities.invokeAndWait(new Runnable() { public void run() {
-      _log.log("Loading history using fileSelector " + fs);
-      _model.loadHistory(fs); 
-    } });
+    _log.log("Loading history using fileSelector " + fs);
+    _model.loadHistory(fs); // operation runs in dispatch thread but method waits until complete
   }
   
   protected void safeSaveHistory(final FileSelector fs) {
@@ -309,7 +309,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
    *  @param file File to save the class in
    *  @return Document after it has been saved and compiled
    */
-  protected synchronized OpenDefinitionsDocument doCompile(String text, File file) throws IOException, 
+  protected synchronized OpenDefinitionsDocument doCompile(String text, File file) throws Exception, 
     BadLocationException, InterruptedException {
     
     OpenDefinitionsDocument doc = setupDocument(text);
@@ -323,7 +323,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
    *  @param doc Document containing the code to be compiled
    *  @param file File to save the class in
    */
-  protected void doCompile(final OpenDefinitionsDocument doc, File file) throws IOException,  InterruptedException {
+  protected void doCompile(final OpenDefinitionsDocument doc, File file) throws Exception {
     saveFile(doc, new FileSelector(file));
 
     // Perform a mindless interpretation to force interactions to reset (only to simplify this method)
@@ -491,7 +491,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     assertEquals("document contents", s, doc.getText());
   }
   
-    /** Invokes doc.saveFile from within the event thread. */
+  /** Invokes doc.saveFile from within the event thread. */
   protected void saveFile(final OpenDefinitionsDocument doc, final FileSaveSelector fss) {
     Utilities.invokeAndWait(new Runnable() { 
       public void run() { 
@@ -1040,9 +1040,9 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
                  _interactionDone.attemptEnsureSignaled(WAIT_TIMEOUT));
     }
     
-    public void waitResetDone() throws InterruptedException {
-      assertTrue("Reset did not complete before timeout",
-                 _resetDone.attemptEnsureSignaled(WAIT_TIMEOUT));
+    public void waitResetDone() throws InterruptedException, TimeoutException {
+      if (! _resetDone.attemptEnsureSignaled(WAIT_TIMEOUT)) 
+        throw new TimeoutException("Interpreter evaluation exceeded allowed time");
     }
     
     public int getLastExitStatus() { return _lastExitStatus; }
@@ -1086,7 +1086,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     
     @Override public void compileStarted() {
       _log.log("compileStarted called in CSSListener");
-      assert EventQueue.isDispatchThread();
+//      assert EventQueue.isDispatchThread();
       assertCompileStartCount(0);
       assertCompileEndCount(0);
       
@@ -1157,7 +1157,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     }
     
     @Override public void compileStarted() {
-      assert EventQueue.isDispatchThread();
+//      assert EventQueue.isDispatchThread();
       assertCompileStartCount(0);
       assertCompileEndCount(0);
       
@@ -1193,8 +1193,12 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   
   public static class JUnitTestListener extends CompileShouldSucceedListener {
     
-    protected volatile boolean _junitDone = false;
-    protected final Object _junitLock = new Object();
+//    protected volatile boolean _junitDone = false;
+    
+    private static final int WAIT_TIMEOUT = 10000; // time to wait for _interactionDone or _resetDone 
+    private volatile CompletionMonitor _junitDone;
+    
+//    protected final Object _junitLock = new Object();
     
     // handle System.out's separately but default to outer class's printMessage value
     protected volatile boolean printMessages = GlobalModelJUnitTest.printMessages;
@@ -1208,12 +1212,12 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     
     public synchronized void logJUnitStart() { 
 //      logCompileStart();
-      _junitDone = false; 
+      _junitDone = new CompletionMonitor();
     }
     
     /** Runs JUnit on doc to completion. */
     public void runJUnit(OpenDefinitionsDocument doc) throws IOException, ClassNotFoundException, 
-      InterruptedException {
+      TimeoutException {
       logJUnitStart();
 //    System.err.println("Starting JUnit on " + doc);
       doc.startJUnit();
@@ -1221,23 +1225,17 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       waitJUnitDone();
     }
     
-    public void runJUnit(JUnitModel jm) throws IOException, ClassNotFoundException, InterruptedException {  
+    public void runJUnit(JUnitModel jm) throws IOException, ClassNotFoundException, TimeoutException {  
       logJUnitStart();
 //    System.err.println("Starting JUnit");
       jm.junitAll();
       waitJUnitDone();
     }
     
-    public void waitJUnitDone() throws InterruptedException {
-      synchronized(_junitLock) { while (! _junitDone) { _junitLock.wait(); } }
-    }
+    public void waitJUnitDone() throws TimeoutException { _junitDone.attemptEnsureSignaled(WAIT_TIMEOUT); }
     
-    protected void _notifyJUnitDone() {  // access in subclass JUnitNonTestListener
-      synchronized(_junitLock) {
-        _junitDone = true;
-        _junitLock.notifyAll();
-      }
-    }
+    /* Signal junitDone event; accessed in subclass JUnitNonTestListener */
+    protected void _notifyJUnitDone() { _junitDone.signal(); }
     
     public void resetCompileCounts() { 
       compileStartCount = 0; 

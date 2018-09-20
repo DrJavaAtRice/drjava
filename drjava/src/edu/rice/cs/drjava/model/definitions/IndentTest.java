@@ -37,6 +37,7 @@
 package  edu.rice.cs.drjava.model.definitions;
 
 import  junit.framework.*;
+import junit.framework.AssertionFailedError;
 import  javax.swing.text.BadLocationException;
 //import java.io.File;
 //import java.io.FileReader;

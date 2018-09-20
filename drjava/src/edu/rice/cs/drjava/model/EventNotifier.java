@@ -35,15 +35,18 @@
  * END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model;
+import edu.rice.cs.util.Log;
+import edu.rice.cs.util.ReaderWriterLock;
 
 import java.util.LinkedList;
-import edu.rice.cs.util.ReaderWriterLock;
 
 /** Base class for all component-specific EventNotifiers.  This class provides common methods to 
   * manage listeners of a specific type.  T the type of the listener class to be managed.
   * @version $Id: EventNotifier.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public abstract class EventNotifier<T> {
+  
+  public static final Log _log = new Log("GlobalModel.txt", false);
   /** All T Listeners that are listening to the model.  Accesses to this collection are protected by the 
     * ReaderWriterLock. The collection must be synchronized, since multiple readers could access it at once.
     */

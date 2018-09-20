@@ -121,7 +121,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   private CompilerListener _clearInteractionsListener = new DummyCompilerListener() {
     
     public void compileStarted() {
-      assert EventQueue.isDispatchThread();
+//      assert EventQueue.isDispatchThread();
       final InteractionsDocument iDoc = _interactionsModel.getDocument();
       iDoc.insertBeforeLastPrompt("Resetting Interaction ...", InteractionsDocument.ERROR_STYLE);
       _log.log("In _clearInteractionsListener.compileEnded, calling resetInteractions in _clearInteractionsListener");
@@ -133,7 +133,8 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     public void compileEnded(File workDir, List<? extends File> excludedFiles) {
       // Only clear interactions if there were no errors and unit testing is not in progress
       _log.log("In _clearInteractionsListener.compileEnded, waiting for interactions pane to reset");
-      _interactionsListener.waitResetDone();  // this call also resets the _resetDone CompletionMonitor
+      try { _interactionsListener.waitResetDone(); } // this call also resets the _resetDone CompletionMonitor
+      catch(Exception e) { throw new UnexpectedException(e); }
     }
   };
 
@@ -402,7 +403,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     */
   public void resetInteractions(File wd) {
     assert _interactionsModel._pane != null;
-    assert EventQueue.isDispatchThread();
+//    assert EventQueue.isDispatchThread();
     
     _log.log("DefaultGlobalModel.resetInteractions(" + wd + ") called.");
   
@@ -426,7 +427,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       }
       catch(InterpreterBusyException e) {
         _log.log("resetInterpreter threw InterpreterBusy exception forcing hard reset.");
-        hardResetInteractions(wd);
+        hardResetInteractions(wd);  
       }
     }
     else {
@@ -459,7 +460,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     _log.log("performing a hard reset of interactions pane");
     // Reset interactions class path before creating new interpreter JVM
 //    updateInteractionsClassPath();  /* should be unnecessary */
-    _interactionsModel.setUpNewInterpreter();
+    _interactionsModel.setUpNewInterpreter();  // creates dispatchThread task
     _log.log("Slave JVM including interpreter restarted");
   }
     
@@ -467,10 +468,10 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   public void interpretCurrentInteraction() { _interactionsModel.interpretCurrentInteraction(); }
   
   /** Interprets file selected in the FileOpenSelector. Assumes strings have no trailing whitespace. Interpretation is
-    * aborted after the first error.
+    * aborted after the first error.  Waits until operation completes.
     */
   public void loadHistory(final FileOpenSelector selector) { 
-    Utilities.invokeLater(new Runnable() { 
+    Utilities.invokeAndWait(new Runnable() { 
       public void run() { 
         try {_interactionsModel.loadHistory(selector); } 
         catch(IOException e) { throw new UnexpectedException(e); }
@@ -485,21 +486,35 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   }
   
   /** Clears the interactions history */
-  public void clearHistory() { _interactionsModel.getDocument().clearHistory(); }
+  public void clearHistory() {  
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() { _interactionsModel.getDocument().clearHistory(); }
+    });
+  }
   
   /** Saves the unedited version of the current history to a file
     * @param selector File to save to
     */
   public void saveHistory(FileSaveSelector selector) throws IOException {
-    _interactionsModel.getDocument().saveHistory(selector);
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() {
+        try { _interactionsModel.getDocument().saveHistory(selector); }
+        catch(IOException e) { throw new UnexpectedException(e); }
+      }
+    });
   }
 
   /** Saves the unedited version of the current history to a file
     * @param doc Document to save
     * @param selector File to save to
     */
-  public void saveConsoleCopy(ConsoleDocument doc, FileSaveSelector selector) throws IOException {
-    doc.saveCopy(selector);
+  public void saveConsoleCopy(ConsoleDocument doc, FileSaveSelector selector) {
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() { 
+        try {doc.saveCopy(selector); }
+        catch(IOException e) { throw new UnexpectedException(e); }
+      }
+    });
   }
   
   /** Saves the edited version of the current history to a file
@@ -507,8 +522,13 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     * @param editedVersion Edited verison of the history which will be saved to file instead of the lines saved in 
     *        the history. The saved file will still include any tags needed to recognize it as a history file.
     */
-  public void saveHistory(FileSaveSelector selector, String editedVersion) throws IOException {
-    _interactionsModel.getDocument().saveHistory(selector, editedVersion);
+  public void saveHistory(FileSaveSelector selector, String editedVersion) {
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() { 
+        try {_interactionsModel.getDocument().saveHistory(selector, editedVersion); }
+        catch(IOException e) { throw new UnexpectedException(e); }
+      }
+    });
   }
   
   /** Returns the entire history as a String with semicolons as needed. */
@@ -558,8 +578,6 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     /** Runs the main method in this document in the interactions pane after resetting interactions with the source
       * root for this document as the working directory.  Warns the use if the class files for the doucment are not 
       * up to date.  Fires an event to signal when execution is about to begin.
-      * NOTE: this code normally runs in the event thread; it cannot block waiting for an event that is triggered by
-      * event thread execution!
       * NOTE: the command to run is constructed using {@link java.text.MessageFormat}. That means that certain characters,
       * single quotes and curly braces, for example, are special. To write single quotes, you need to double them.
       * To write curly braces, you need to enclose them in single quotes. Example:
@@ -575,22 +593,24 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     protected void _runInInteractions(final String command, String qualifiedClassName) 
       throws ClassNameNotFoundException, IOException {
       
-      assert EventQueue.isDispatchThread();
+//      assert EventQueue.isDispatchThread();
       
       _notifier.prepareForRun(ConcreteOpenDefDoc.this);
       
-      String tempClassName = null;
+//      String tempClassName = null;
+//      
+//      if(qualifiedClassName == null)
+//        tempClassName = getDocument().getQualifiedClassName();
+//      else
+//        tempClassName = qualifiedClassName;
       
-      if(qualifiedClassName == null)
-        tempClassName = getDocument().getQualifiedClassName();
-      else
-        tempClassName = qualifiedClassName;
-      
-      // Get the class name for this document, the first top level class in the document.
-      final String className = tempClassName;
+//      // Get the class name for this document, the first top level class in the document.
+//      final String className = tempClassName;
       final InteractionsDocument iDoc = _interactionsModel.getDocument();
       if (! checkIfClassFileInSync()) {
-        iDoc.insertBeforeLastPrompt(DOCUMENT_OUT_OF_SYNC_MSG, InteractionsDocument.ERROR_STYLE);
+        EventQueue.invokeLater(new Runnable() {
+          public void run() { iDoc.insertBeforeLastPrompt(DOCUMENT_OUT_OF_SYNC_MSG, InteractionsDocument.ERROR_STYLE); }
+        });
         return;
       }
       

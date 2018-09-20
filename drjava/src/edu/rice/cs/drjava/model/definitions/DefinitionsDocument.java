@@ -1400,7 +1400,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     return (matchIndex < 0) ? subject.length() : matchIndex;
   }
     
-  /** Returns true if one of the words 'class', 'trait', or 'object', 'interface' or 'enum', is found in non-comment text.  This
+  /** Returns true if one of the words 'class', 'trait', 'object', 'interface' or 'enum', is found in non-comment text.  This
     * method is intended to return true for Scala AND Java source files. */
   /** TODO: check reduced model locking! */
   public boolean containsSource() throws BadLocationException {

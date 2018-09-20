@@ -477,7 +477,7 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener> impl
     * not continue with JUnit if the user doesn't recompile!
     */
   public void compileBeforeJUnit(final CompilerListener cl, List<OpenDefinitionsDocument> outOfSync) {
-//    Utilities.show("compileBeforeJUnit invoked with argument " + cl + " in GlobalEventNotifier " + this);
+    _log.log("compileBeforeJUnit invoked with argument " + cl + " in GlobalEventNotifier " + this);
     _lock.startRead();
     try { for (GlobalModelListener l : _listeners) { l.compileBeforeJUnit(cl, outOfSync); } }
     finally { _lock.endRead(); }

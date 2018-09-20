@@ -281,12 +281,11 @@ public class DefaultCompilerModel implements CompilerModel {
           throw new IOException("Could not create build directory: " + buildDir);
       }
       else /* Flat file model */ if (buildDir == null || buildDir == FileOps.NULL_FILE) buildDir = dir;
+      
       assert buildDir != null;
-      Utilities.invokeLater(new Runnable() { public void run() { _notifier.compileStarted(); } });
+      _notifier.compileStarted();
       _compileFiles(filesToCompile, buildDir);
-      Utilities.invokeLater(new Runnable() {
-        public void run() { _notifier.compileEnded(_model.getWorkingDirectory(), excludedFiles); }
-      });
+      _notifier.compileEnded(_model.getWorkingDirectory(), excludedFiles);
     }
     catch (Throwable t) {
       _log.log("Catching Throwable: " + t);
@@ -368,7 +367,7 @@ public class DefaultCompilerModel implements CompilerModel {
     
     // Mutual exclusion with JUnit code that finds all test classes (in DefaultJUnitModel)
     synchronized(_compilerLock) {
-      _log.log("Grabbing _compilerLocak and compiling: \n  files = " + files + "\n classPath = '" + classPath +
+      _log.log("Grabbing _compilerLock and compiling: \n  files = " + files + "\n classPath = '" + classPath +
                "'\n buildDir = '" + buildDir + "'\n  bootClassPath = '" + bootClassPath + "'");
       errors.addAll(compiler.compile(files, classPath, null, buildDir, bootClassPath, null, true));
       _distributeErrors(errors);

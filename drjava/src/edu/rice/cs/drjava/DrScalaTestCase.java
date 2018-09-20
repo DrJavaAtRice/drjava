@@ -59,7 +59,7 @@ public class DrScalaTestCase extends TestCase {
     */
   public DrScalaTestCase(String name) { super(name); }
   
-  private static Log _log = new Log("DrScalaTestCase.txt", false);
+  protected static final Log _log = new Log("GlobalModel.txt", true);
   
   /** Set up for every test.
     * @throws Exception  This convention is mandated by JUnit.TestCase, the superclass of this class.

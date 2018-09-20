@@ -187,7 +187,7 @@ public final class NewJVMTest extends DrScalaTestCase {
         assertEquals("result", "x: Int = 5\n", _jvm.returnBuffer());
         
         // Now restart interpreter
-        _jvm.restartInterpreterJVM();
+        _jvm.restartInterpreterJVM(); // only runs in dispatch thread
         
         // Now evaluate another constant
         _jvm.resetState();

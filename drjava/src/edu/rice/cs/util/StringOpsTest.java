@@ -44,6 +44,8 @@ import edu.rice.cs.plt.lambda.Lambda;
 import java.io.PrintWriter;
 import java.util.List;
 
+import junit.framework.AssertionFailedError;
+
 /** Test functions of StringOps. */
 public class StringOpsTest extends DrScalaTestCase {
   /** Test the replace() method of StringOps class. */
@@ -1208,12 +1210,12 @@ public class StringOpsTest extends DrScalaTestCase {
       assertEquals("abcbarxyz", StringOps.replaceVariables("abc${xxx;attr2=\"yyy\"}xyz",props,PropertyMaps.GET_LAZY));
       fail("Forgot to set attr1, should fail.");
     }
-    catch(junit.framework.AssertionFailedError afe) { /* ignore, this is expected */ }
+    catch(AssertionFailedError afe) { /* ignore, this is expected */ }
     try {
       StringOps.replaceVariables("abc${xxx;attr1=\"abc${var}xyz\";attr2=\"yyy\"}xyz",props,PropertyMaps.GET_LAZY);
       fail("Forgot to set attr1, should fail.");
     }
-    catch(junit.framework.AssertionFailedError afe) { /* ignore, this is expected */ }
+    catch(AssertionFailedError afe) { /* ignore, this is expected */ }
     
     assertEquals("${notfound}", StringOps.replaceVariables("${notfound}",props,PropertyMaps.GET_LAZY));
 

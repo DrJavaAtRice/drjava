@@ -133,7 +133,7 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
     Utilities.invokeLater(new Runnable() {
       public void run() {
         _log.log("RMIInteractionsModel.setUpNewInterpreter called");
-        _jvm.restartInterpreterJVM();
+        _jvm.restartInterpreterJVM();  // only runs in dispatch thread
         _log.log("Interpreter JVM replaced");
         _notifier.interpreterReady();
         EventQueue.invokeLater(new Runnable() { public void run() { documentReset(); }});
@@ -141,19 +141,20 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
     });
   }
   
-  /** Updates the prompt and status of the document after an interpreter change. Must run in event thread. 
-    * (TODO: is it okay that related RMI calls occur in the event thread?)
-    * @param prompt New prompt to display
-    */
-  private void _updateDocument(String prompt) {
-    assert EventQueue.isDispatchThread();
-    _document.setPrompt(prompt);
-    _document.insertNewline(_document.getLength());
-    _document.insertPrompt();
-//            int len = _document.getPromptLength();  
-//            advanceCaret(len);
-    scrollToCaret();
-  }
+  /* No longer used. */
+//  /** Updates the prompt and status of the document after an interpreter change. Only runs in dispatch thread. 
+//    * (TODO: is it okay that related RMI calls occur in the dispatch thread?)
+//    * @param prompt New prompt to display
+//    */
+//  private void _updateDocument(String prompt) {
+//    assert EventQueue.isDispatchThread();
+//    _document.setPrompt(prompt);
+//    _document.insertNewline(_document.getLength());
+//    _document.insertPrompt();
+////            int len = _document.getPromptLength();  
+////            advanceCaret(len);
+//    scrollToCaret();
+//  }
 
   /** Sets whether or not the interpreter should enforce access to all members.  Disabled in DrScala */
 //  public void setEnforceAllAccess(boolean enforce) { _jvm.setEnforceAllAccess(enforce); }

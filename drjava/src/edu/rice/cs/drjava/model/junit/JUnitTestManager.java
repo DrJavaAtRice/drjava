@@ -285,9 +285,9 @@ public class JUnitTestManager {
        */
       trace = trace.substring(trace.indexOf('\n')+1);
       if (trace.trim().length()>0) {
-        while (trace.indexOf("junit.framework.Assert") != -1 &&
-               trace.indexOf("junit.framework.Assert") < trace.indexOf("(")) {
-          /* the format of the trace will have "at junit.framework.Assert..."
+        while (trace.indexOf("org.junit.Assert") != -1 &&
+               trace.indexOf("org.junit.Assert") < trace.indexOf("(")) {
+          /* the format of the trace will have "at org.junit.Assert..."
            * on each line until the line of the actual source file.
            * if the exception was thrown from the test case (so the test failed
            * without going through assert), then the source file will be on

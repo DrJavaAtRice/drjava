@@ -58,6 +58,10 @@ public final class CommandLineTest extends DrScalaTestCase {
   /** File separator, i.e. '/' or '\\'. */
   private static final char FS = File.separatorChar;
   
+  /*  inherited from DrScala Test Case:
+   *  protected static final Log _log;
+   */
+  
   /** The MainFrame we're working with. */
   private MainFrame _mf;
   
@@ -381,10 +385,15 @@ public final class CommandLineTest extends DrScalaTestCase {
     // OK, we have to create a directory with a hard-coded name in the current working directory, so we'll make it
     // strange. If this directory happens to exist, it'll be deleted.
     File newDirectory = new File(funnyName);
-    if (newDirectory.exists()) IOUtil.deleteOnExitRecursively(newDirectory);
-//    System.err.println("newDirectory.exists() = " + newDirectory.exists());
-    assertTrue("directory created OK", newDirectory.mkdir());
-//    _log.log("Temporary directory " + funnyName + " created");
+    _log.log("newDirectory name = '" + newDirectory + "'");
+    if (newDirectory.exists()) { 
+      IOUtil.deleteOnExitRecursively(newDirectory);
+      _log.log("newDirectory already exists");
+    }
+    _log.log("New directory = " + newDirectory);
+    boolean flag = newDirectory.mkdir();
+    assertTrue("directory created OK", flag);
+    _log.log("Temporary directory " + funnyName + " created");
     return newDirectory;
   }
   

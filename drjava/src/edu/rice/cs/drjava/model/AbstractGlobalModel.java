@@ -1145,7 +1145,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     * @param pos2 second selection position */
   public void toggleBookmark(int pos1, int pos2) { _toggleBookmark(pos1, pos2); }
   
-  /** Raw version of toggleBookmark.  Only runs in event thread.
+  /** Raw version of toggleBookmark.  Only runs in dispatch thread.
     * @param pos1 first selection position
     * @param pos2 second selection position */
   public void _toggleBookmark(int pos1, int pos2) {
@@ -1246,22 +1246,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     buf.append("(name: String) extends TestCase(name) {\n\n");
 
 // TODO (williamf): Add setup and teardown methods for Scala
-//    if (makeSetUp) {
-//      buf.append("/**\n");
-//      buf.append("* This method is called before each test method, to perform any common\n");
-//      buf.append("* setup if necessary.\n");
-//      buf.append("*/\n");
-//      if (! elementary) buf.append("public ");
-//      buf.append("void setUp() throws Exception {\n}\n\n");
-//    }
-//    if (makeTearDown) {
-//      buf.append("/**\n");
-//      buf.append("* This method is called after each test method, to perform any common\n");
-//      buf.append("* clean-up if necessary.\n");
-//      buf.append("*/\n");
-//      if (! elementary) buf.append("public ");
-//      buf.append("void tearDown() throws Exception {\n}\n\n");
-//    }
     buf.append("/**\n");
     buf.append("* A test method.\n");
     buf.append("* (Replace \"X\" with a name describing the test.  You may write as\n");
@@ -1269,7 +1253,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     buf.append("* one will be called when running JUnit over this class.)\n");
     buf.append("*/\n");
 //    if (! elementary) buf.append("public ");
-    buf.append("def testX() {\n}\n\n");
+    buf.append("def testX():Unit = {\n}\n\n");
     buf.append("/** Sample test method which tests no program code. */\n");
     buf.append("def testNothing() {\n");
     buf.append("assertTrue(\"Dummy Test\", true)\n");
@@ -1314,9 +1298,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     if (closeUntitled) closeFileHelper(oldDoc);
 //    Utilities.showDebug("DrScala has opened" + openedDoc + " and is setting it active");
 //    addToBrowserHistory();
+    try { if (openedDoc.containsSource()) addDocToClassPath(openedDoc); }// add new source doc to class path
+    catch(BadLocationException e) { throw new UnexpectedException(e); }
     setActiveDocument(openedDoc);
     setProjectChanged(true);
-//    Utilities.showDebug("active doc set; openFile returning");
+//    Utilities.showDebug("active doc set; openFile returning"); 
     return openedDoc;
   }
   
@@ -1588,7 +1574,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     */
   public void createNewProject(File projFile) { setFileGroupingState(new ProjectFileGroupingState(projFile)); }
   
-  /** Configures a new project (created by createNewProject) and writes it to disk; only runs in event thread. */
+  /** Configures a new project (created by createNewProject) and writes it to disk; only runs in dispatch thread. */
   public void configNewProject() throws IOException {
     
     assert EventQueue.isDispatchThread();
@@ -1762,7 +1748,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   /** Loads the specified project into the document navigator and opens all of the files (if not already open).
-    * Assumes that any prior project has been closed.  Only runs in event thread.
+    * Assumes that any prior project has been closed.  Only runs in dispatch thread.
     * @param ir The project file to load
     */
   private void _loadProject(final ProjectFileIR ir) throws IOException {
@@ -2545,7 +2531,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     addToBrowserHistory(false);
   }
   
-  /** Add the current location to the browser history.  Only runs in event thread. Assumes that doc is not null.
+  /** Add the current location to the browser history.  Only runs in dispatch thread. Assumes that doc is not null.
     * @param before true if the location should be inserted before the current region */
   public void addToBrowserHistory(boolean before) {
     assert EventQueue.isDispatchThread();
@@ -3110,7 +3096,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       * user for one.  It is up to the caller to decide what needs to be done to choose a file to save to.  Once
       * the file has been saved succssfully, this method fires fileSave(File).  If the save fails for any
       * reason, the event is not fired. This is synchronized against the compiler model to prevent saving and
-      * compiling at the same time- this used to freeze drjava.
+      * compiling at the same time which used to freeze drjava.  Only runs is dispatch thread, which does not ensure
+      * mutual exclusion because compilation does not run in the dispatch thread.
       * @param com a selector that picks the file name.
       * @throws IOException if the save fails due to an IO error
       * @return true if the file was saved, false if the operation was canceled
@@ -3507,7 +3494,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
     
     /** Fires the quit(File) event if isModifiedSinceSave() is true.  The quitFile() event asks the user if the
-      * the file should be saved before quitting.  Only executes in event thread.
+      * the file should be saved before quitting.  Only executes in the dispatch thread.
       * @return true if quitting should continue, false if the user cancelled
       */
     public boolean quitFile() {

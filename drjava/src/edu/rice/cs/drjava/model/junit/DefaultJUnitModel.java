@@ -225,15 +225,14 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   /** Runs JUnit on the current document.  Forces the user to compile all open documents before proceeding. */
   public void junit(OpenDefinitionsDocument doc) throws ClassNotFoundException, IOException {
     
-    debug.logStart("junit(doc)");
+    _log.log("In DJM, junit(" + doc + ")");
     
-//    new ScrollableDialog(null, "junit(" + doc + ") called in DefaultJunitModel", "", "").show();
     File testFile;
     try { 
       testFile = doc.getFile(); 
-      if (testFile == null) {  // document is untitiled: abort unit testing and return
+      if (testFile == null) {  // document is untitled: abort unit testing and return
         nonTestCase(false, false);
-        debug.logEnd("junit(doc): no corresponding file");
+        _log.log("In DJM, junit(" + doc + "): no corresponding file");
         return;
       }
     } 
@@ -250,7 +249,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   private void junitOpenDefDocs(final List<OpenDefinitionsDocument> lod, final boolean allTests) {
     // If a test is running, don't start another one.
 
-    _log.log("junitOpenDefDocs(" + lod + ", " + allTests + ", " + _testInProgress + ")");
+    _log.log("junitOpenDefDocs(" + lod + ", " + allTests + "); _testInProgress = " + _testInProgress + ")");
     
     // Check_testInProgress flag
     if (_testInProgress) return;
@@ -272,13 +271,9 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
           // gets called if there are modified files and the user chooses NOT to save the files
           // see bug report 2582488: Hangs If Testing Modified File, But Choose "No" for Saving
           final CompilerListener listenerThis = this;
-          try {
-            nonTestCase(allTests, false);
-          }
+          try { nonTestCase(allTests, false); }
           finally {  // always remove this listener after its first execution
-            EventQueue.invokeLater(new Runnable() { 
-              public void run() { _compilerModel.removeListener(listenerThis); }
-            });
+            _compilerModel.removeListener(listenerThis);
           }
         }
         
@@ -290,14 +285,10 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
               nonTestCase(allTests, _model.getNumCompilerErrors() > 0);
               return;
             }
-            EventQueue.invokeLater(new Runnable() {  // defer running this code; would prefer to waitForInterpreter
-              public void run() { _rawJUnitOpenDefDocs(lod, allTests); }
-            });
+            _rawJUnitOpenDefDocs(lod, allTests); // wait for interpreter ?
           }
           finally {  // always remove this listener after its first execution
-            EventQueue.invokeLater(new Runnable() { 
-              public void run() { _compilerModel.removeListener(listenerThis); }
-            });
+           _compilerModel.removeListener(listenerThis);
           }
         }
       };
@@ -416,10 +407,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
                 public void visit(int version, int access, String name, String sig, String sup, String[] inters) {
                   className.set(name.replace('/', '.'));
                 }
-                public void visitSource(String source /*, String debug */) {
-                  sourceName.set(source);
-                }
-                
+                public void visitSource(String source, String debug) { sourceName.set(source); }
                 public void visitOuterClass(String owner, String name, String desc) { }
                 public AnnotationVisitor visitAnnotation(String desc, boolean visible) { return null; }
                 public void visitAttribute(Attribute attr) { }
@@ -435,26 +423,6 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
               String sourceFileName = getCanonicalPath(rootDir) + File.separator + sourceName.value();
               _log.log("Full source fileName = " + sourceFileName);
               
-//              /* The index in fileName of the dot preceding the extension ".java" or ".scala" */
-//              int indexOfExtDot = sourceFileName.lastIndexOf('.');
-//              _log.log("indexOfExtDot = " + indexOfExtDot);
-//              if (indexOfExtDot == -1) continue;  // RMI stub class files return source file names without extensions
-//              
-//              /* Determine if this source file is a .java or a .scala file. */
-//              String strippedName = sourceFileName.substring(0, indexOfExtDot);
-//              _log.log("Stripped name = " + strippedName);
-//              
-//              String name = null;
-//              
-//              if (openDocFiles.contains(sourceFileName)) name = sourceFileName;
-//              else if (openDocFiles.contains(strippedName + OptionConstants.SCALA_FILE_EXTENSION))
-//                name = strippedName + OptionConstants.SCALA_FILE_EXTENSION;
-//              else if (openDocFiles.contains(strippedName + OptionConstants.JAVA_FILE_EXTENSION))
-//                name = strippedName + OptionConstants.JAVA_FILE_EXTENSION;
-//
-//              else continue; // no matching source file is open
-              
-              _log.log("File found in openDocFiles = "  + openDocFiles.contains(sourceFileName));
               File sourceFile = new File(sourceFileName);
               classNames.add(className.value());
               files.add(sourceFile);
@@ -516,28 +484,23 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
 //-------------------------------- Helpers --------------------------------//
   
   /** Helper method to notify JUnitModel listeners that JUnit test suite execution has started. */
-  private void _notifyJUnitStarted() { 
-    // Use EventQueue.invokeLater so that notification is deferred when running in the event thread.
-    EventQueue.invokeLater(new Runnable() { public void run() { _notifier.junitStarted(); } });
-  }
+  private void _notifyJUnitStarted() { _notifier.junitStarted(); }
   
   /** Helper method to notify JUnitModel listeners that JUnit test suite execution has just ended. */
-  private void _notifyJUnitEnded() { 
-    // Use EventQueue.invokeLater so that notification is deferred when running in the event thread.
-    EventQueue.invokeLater(new Runnable() { public void run() { _notifier.junitEnded(); } });
+  private void _notifyJUnitEnded() {
+    _testInProgress = false;
+    _notifier.junitEnded();
   }
   
   /** Helper method to notify JUnitModel listeners that all open files must be compiled before JUnit is run. */
   private void _notifyCompileBeforeJUnit(final CompilerListener testAfterCompile, 
                                          final List<OpenDefinitionsDocument> outOfSync) { 
-    Utilities.invokeLater(new Runnable() { 
-      public void run() { _notifier.compileBeforeJUnit(testAfterCompile, outOfSync); } 
-    });
+    _notifier.compileBeforeJUnit(testAfterCompile, outOfSync);
   }
   
   /** Helper method to notify JUnitModel listeners that JUnit aborted before any tests could be run. */
   private void _notifyNonTestCase(final boolean testAll, final boolean didCompileFail) { 
-    Utilities.invokeLater(new Runnable() { public void run() { _notifier.nonTestCase(testAll, didCompileFail); } });
+    _notifier.nonTestCase(testAll, didCompileFail);
   }
   
   private String getCanonicalPath(File f) throws IOException {
@@ -570,23 +533,17 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   /** Called to indicate that an illegal class file was encountered
     * @param e the ClassFileObject describing the error.
     */
-  public void classFileError(final ClassFileError e) { 
-    Utilities.invokeLater(new Runnable() { public void run() {_notifier.classFileError(e); } });
-  }
+  public void classFileError(final ClassFileError e) { _notifier.classFileError(e); }
   
   /** Called to indicate that a suite of tests has started running.
     * @param numTests The number of tests in the suite to be run.
     */
-  public void testSuiteStarted(final int numTests) { 
-    Utilities.invokeLater(new Runnable() { public void run() { _notifier.junitSuiteStarted(numTests); } });
-  }
+  public void testSuiteStarted(final int numTests) { _notifier.junitSuiteStarted(numTests); }
   
   /** Called when a particular test is started.
     * @param testName The name of the test being started.
     */
-  public void testStarted(final String testName) { 
-    Utilities.invokeLater(new Runnable() { public void run() { _notifier.junitTestStarted(testName); } });
-  }
+  public void testStarted(final String testName) { _notifier.junitTestStarted(testName); }
   
   /** Called when a particular test has ended.
     * @param testName The name of the test that has ended.
@@ -594,24 +551,18 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     * @param causedError If not successful, whether the test caused an error or simply failed.
     */
   public void testEnded(final String testName, final boolean wasSuccessful, final boolean causedError) {
-    EventQueue.invokeLater(new Runnable() { 
-      public void run() { _notifier.junitTestEnded(testName, wasSuccessful, causedError); }
-    });
+    _notifier.junitTestEnded(testName, wasSuccessful, causedError);
   }
   
-  /** Called when a full suite of tests has finished running.  Does not necessarily run in event thread.
+  /** Called when a full suite of tests has finished running.  Does not run in event thread.
     * @param errors The array of errors from all failed tests in the suite.
     */
   public void testSuiteEnded(final JUnitError[] errors) {
-//    new ScrollableDialog(null, "DefaultJUnitModel.testSuiteEnded(...) called", "", "").show();
-   
-    Utilities.invokeLater(new Runnable() { public void run() {
-
-      _junitErrorModel = new JUnitErrorModel(errors, _model, true);
-      _notifyJUnitEnded();
-      _testInProgress = false;
-//    new ScrollableDialog(null, "DefaultJUnitModel.testSuiteEnded(...) finished", "", "").show();
-    }});
+    _log.log("DefaultJUnitModel.testSuiteEnded(...) called");
+    _junitErrorModel = new JUnitErrorModel(errors, _model, true);
+    _notifyJUnitEnded();
+    _testInProgress = false;
+    _log.log("DefaultJUnitModel.testSuiteEnded(...) finished");
   }
 
   
@@ -626,14 +577,12 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   
   /** Called when the JVM used for unit tests has registered.  Does not necessarily run in event thread. */
   public void junitJVMReady() {
-    Utilities.invokeLater(new Runnable() { public void run() { 
-      if (! _testInProgress) return;
-      
-      JUnitError[] errors = new JUnitError[1];
-      errors[0] = new JUnitError("Previous test suite was interrupted", true, "");
-      _junitErrorModel = new JUnitErrorModel(errors, _model, true);
-      _notifyJUnitEnded();
-      _testInProgress = false;
-    }});
+    if (! _testInProgress) return;
+    
+    JUnitError[] errors = new JUnitError[1];
+    errors[0] = new JUnitError("Previous test suite was interrupted", true, "");
+    _junitErrorModel = new JUnitErrorModel(errors, _model, true);
+    _notifyJUnitEnded();
+    _testInProgress = false;
   }
 }

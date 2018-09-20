@@ -115,7 +115,7 @@ public class Log {
       if (_writer == null) {
         _init();
       }
-      _writer.println(DATE_FORMAT.format(new Date()) + ": " + message);
+      _writer.println("[" + Thread.currentThread().getId() + "]" + DATE_FORMAT.format(new Date()) + ": " + message);
       _writer.flush();
     }
   }

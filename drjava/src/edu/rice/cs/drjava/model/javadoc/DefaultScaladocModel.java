@@ -222,17 +222,7 @@ public class DefaultScaladocModel implements ScaladocModel {
         // This will throw an IllegalStateException if no file can be found
         File docFile = _getFileFromDocument(doc, saver);
         final File file = IOUtil.attemptCanonicalFile(docFile);
-        
-        // Java language levels is disabled
-//        // If this is a language level file, make sure it has been compiled
-//        if (DrJavaFileUtils.isLLFile(file)) {
-//          // Utilities.showDebug("isLLFile=true: "+file);
-//          llDocs.add(doc);
-//          docFiles.add(DrJavaFileUtils.getJavaForLLFile(file).getPath());
-//        }
-//        else {
         docFiles.add(file.getPath());
-//        }
       }
       catch (IllegalStateException e) {
         // Something wrong with _getFileFromDocument; ignore
@@ -244,64 +234,51 @@ public class DefaultScaladocModel implements ScaladocModel {
     
     // Don't attempt to create Scaladoc if no files are open, or if open file is unnamed.
     if (docFiles.size() == 0) {
-      // Use EventQueue.invokeLater so that notification is deferred when running in the event thread.
-      EventQueue.invokeLater(new Runnable() { public void run() { _notifier.scaladocEnded(false, destDirFile, true); } });
+      _notifier.scaladocEnded(false, destDirFile, true); 
       return;
     }
     
-    Utilities.invokeLater(new Runnable() { public void run() {
-      if (_model.hasOutOfSyncDocuments(llDocs)) {
-        // Utilities.showDebug("out of date");
-        CompilerListener scaladocAfterCompile = new DummyCompilerListener() {
-          @Override public void compileAborted(Exception e) {
-            // gets called if there are modified files and the user chooses NOT to save the files
-            // see bug report 2582488: Hangs If Testing Modified File, But Choose "No" for Saving
-            final CompilerListener listenerThis = this;
-            // Utilities.showDebug("compile aborted");
-            // always remove this listener after its first execution
-            EventQueue.invokeLater(new Runnable() { 
-              public void run() {
-                _model.getCompilerModel().removeListener(listenerThis);
-                // fail Scaladoc
-                _notifier.scaladocEnded(false, destDirFile, true);
-              }
-            });
-          }
-          @Override public void compileEnded(File workDir, List<? extends File> excludedFiles) {
-            final CompilerListener listenerThis = this;
-            try {
-              // Utilities.showDebug("compile ended");
-              if (_model.hasOutOfSyncDocuments(llDocs) || _model.getNumCompilerErrors() > 0) {
-                // Utilities.showDebug("still out of date, fail");
-                // fail Scaladoc
-                EventQueue.invokeLater(new Runnable() { public void run() { _notifier.scaladocEnded(false, destDirFile, true); } });
-                return;
-              }
-              EventQueue.invokeLater(new Runnable() {  // defer running this code; would prefer to waitForInterpreter
-                public void run() {
-                  // Utilities.showDebug("running Scaladoc");
-                  // Run the actual Scaladoc process
-                  _runScaladoc(docFiles, destDirFile, IterUtil.<String>empty(), true);
-                }
-              });
+ 
+    if (_model.hasOutOfSyncDocuments(llDocs)) {
+      // Utilities.showDebug("out of date");
+      CompilerListener scaladocAfterCompile = new DummyCompilerListener() {
+        @Override public void compileAborted(Exception e) {
+          // gets called if there are modified files and the user chooses NOT to save the files
+          // see bug report 2582488: Hangs If Testing Modified File, But Choose "No" for Saving
+          final CompilerListener listenerThis = this;
+          // Utilities.showDebug("compile aborted");
+          // always remove this listener after its first execution
+          
+          _model.getCompilerModel().removeListener(listenerThis);
+          // fail Scaladoc
+          _notifier.scaladocEnded(false, destDirFile, true);
+        }
+        @Override public void compileEnded(File workDir, List<? extends File> excludedFiles) {
+          final CompilerListener listenerThis = this;
+          try {
+            // Utilities.showDebug("compile ended");
+            if (_model.hasOutOfSyncDocuments(llDocs) || _model.getNumCompilerErrors() > 0) {
+              // Utilities.showDebug("still out of date, fail");
+              // fail Scaladoc
+              EventQueue.invokeLater(new Runnable() { public void run() { _notifier.scaladocEnded(false, destDirFile, true); } });
+              return;
             }
-            finally {  // always remove this listener after its first execution
-              EventQueue.invokeLater(new Runnable() { 
-                public void run() { _model.getCompilerModel().removeListener(listenerThis); }
-              });
-            }
+            // Run the actual Scaladoc process
+            _runScaladoc(docFiles, destDirFile, IterUtil.<String>empty(), true);
           }
-        };
-        
-        _notifyCompileBeforeScaladoc(scaladocAfterCompile);
-        return;
-      }
+          finally {  // always remove this listener after its first execution
+            _model.getCompilerModel().removeListener(listenerThis);
+          }
+        }
+      };
       
-      // Run the actual Scaladoc process
-      _runScaladoc(docFiles, destDirFile, IterUtil.<String>empty(), true);
-    } });
+      _notifyCompileBeforeScaladoc(scaladocAfterCompile);
+      return;
+    }
+      
+    // Run the actual Scaladoc process
+    _runScaladoc(docFiles, destDirFile, IterUtil.<String>empty(), true);
   }
-  
   
   
   // -------------------- Scaladoc Current Document --------------------

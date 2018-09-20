@@ -221,7 +221,7 @@ public class DrScalaRoot {
   
   private static void _openCommandLineFiles(final MainFrame mf, String[] filesToOpen, int len, boolean jump) {
     // Assertion commented out because it doesn't hold at startup.  See Drjava bug 2321815.
-    /* assert EventQueue.isDispatchThread(); */
+    // assert EventQueue.isDispatchThread();
 //    Utilities.showDebug("Files to open: " + Arrays.toString(filesToOpen));
     anyLineNumbersSpecified = false;
     for (int i = 0; i < len; i++) {
