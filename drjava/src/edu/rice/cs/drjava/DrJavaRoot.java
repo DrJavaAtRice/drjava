@@ -45,7 +45,7 @@ import java.lang.reflect.InvocationTargetException;
 
 import javax.swing.UIManager;
 import javax.swing.*;
-
+import edu.rice.cs.util.Log;
 import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.UnexpectedException;
@@ -71,7 +71,9 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 /** Main class for DrJava.
   * @version $Id$
   */
-public class DrJavaRoot {  
+public class DrJavaRoot {
+  public static volatile Log _log = new Log("DrJava.txt", true);
+
   /** Class to probe to see if the debugger is available */
   public static final String TEST_DEBUGGER_CLASS = "com.sun.jdi.Bootstrap";
   
@@ -95,6 +97,8 @@ public class DrJavaRoot {
   
   public static void main(final String[] args) {
     debug.log("Starting up");
+    _log.log("Starting up DrJavaRoot.main");
+    
     // Platform-specific UI setup.
     PlatformFactory.ONLY.beforeUISetup();
     
@@ -191,6 +195,7 @@ public class DrJavaRoot {
 //      Utilities.showDebug("showDebugConsole flag = " + DrJava.getShowDebugConsole());
       // Show debug console if enabled
       if (DrJava.getShowDebugConsole()) showDrJavaDebugConsole(_mainFrame);
+      _log.log("end try in DrJavaRoot.main");
     }
     catch(Throwable t) {
       error.log(t);

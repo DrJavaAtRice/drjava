@@ -115,7 +115,10 @@ public abstract class JDKDescriptor {
     * if a version of the HJ compiler requires JDK6, it should guess JDK6.
     * @param f the file to guess the version of
     * @return guessed version */
-  public JavaVersion.FullVersion guessVersion(File f) {
+  public JavaVersion.FullVersion guessVersion(File f, Boolean isJmod) {
+    if(isJmod)
+      return edu.rice.cs.drjava.model.JmodJDKToolsLibrary.guessVersion(f, this);
+    else
       return edu.rice.cs.drjava.model.JarJDKToolsLibrary.guessVersion(f, this);
   }
 

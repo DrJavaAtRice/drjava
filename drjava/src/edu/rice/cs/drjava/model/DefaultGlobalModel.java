@@ -351,7 +351,10 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     }
     else { JDKToolsLibrary._log.log("From config: not set"); }
     
-    Iterable<JarJDKToolsLibrary> fromSearch = JarJDKToolsLibrary.search(this);
+    //Iterable<JarJDKToolsLibrary> fromSearch = JarJDKToolsLibrary.search(this);
+    //todo
+    Iterable<JmodJDKToolsLibrary> fromSearch = JmodJDKToolsLibrary.search(this);
+
     for (JDKToolsLibrary t : fromSearch) {
       JavaVersion.FullVersion tVersion = t.version();
       JDKToolsLibrary._log.log("From search: " + t);
