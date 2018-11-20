@@ -351,11 +351,11 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     }
     else { JDKToolsLibrary._log.log("From config: not set"); }
     
-    //Iterable<JarJDKToolsLibrary> fromSearch = JarJDKToolsLibrary.search(this);
+    Iterable<JarJDKToolsLibrary> jarLibfromSearch = JarJDKToolsLibrary.search(this);
     //todo
-    Iterable<JmodJDKToolsLibrary> fromSearch = JmodJDKToolsLibrary.search(this);
+    Iterable<JmodJDKToolsLibrary> jmodLibfromSearch = JmodJDKToolsLibrary.search(this);
 
-    for (JDKToolsLibrary t : fromSearch) {
+    for (JDKToolsLibrary t : jarLibfromSearch) {
       JavaVersion.FullVersion tVersion = t.version();
       JDKToolsLibrary._log.log("From search: " + t);
       JavaVersion.FullVersion coarsenedVersion = coarsenVersion(tVersion);
@@ -365,6 +365,24 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       // give a lower priority to built-in compilers
       int priority = (edu.rice.cs.util.FileOps.getDrJavaFile().equals(tVersion.location())) ?
         LibraryKey.PRIORITY_BUILTIN : LibraryKey.PRIORITY_SEARCH;
+      if (! results.containsKey(getLibraryKey(priority, t))) {
+        JDKToolsLibrary._log.log("\tadded ");
+        results.put(getLibraryKey(priority, t), t);
+      }
+      else { JDKToolsLibrary._log.log("\tduplicate"); }
+    }
+
+
+    for (JDKToolsLibrary t : jmodLibfromSearch) {
+      JavaVersion.FullVersion tVersion = t.version();
+      JDKToolsLibrary._log.log("From search: " + t);
+      JavaVersion.FullVersion coarsenedVersion = coarsenVersion(tVersion);
+      JDKToolsLibrary._log.log("\tVersion: " + tVersion+" " + tVersion.vendor());
+      JDKToolsLibrary._log.log("\tCoarsened Version: " + coarsenedVersion + " " + coarsenedVersion.vendor());
+
+      // give a lower priority to built-in compilers
+      int priority = (edu.rice.cs.util.FileOps.getDrJavaFile().equals(tVersion.location())) ?
+              LibraryKey.PRIORITY_BUILTIN : LibraryKey.PRIORITY_SEARCH;
       if (! results.containsKey(getLibraryKey(priority, t))) {
         JDKToolsLibrary._log.log("\tadded ");
         results.put(getLibraryKey(priority, t), t);

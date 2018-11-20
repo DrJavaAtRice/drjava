@@ -110,9 +110,9 @@ public class JDKToolsLibrary {
     switch (version.majorVersion()) {
       case FUTURE: return "edu.rice.cs.drjava.model.compiler.Javac170Compiler";
       // TODO
-      // case JAVA_11: return "edu.rice.cs.drjava.model.compiler.Javac170Compiler";
-      case JAVA_10: return "edu.rice.cs.drjava.model.compiler.Javac170Compiler";
-      case JAVA_9: return "edu.rice.cs.drjava.model.compiler.Javac170Compiler";
+      case JAVA_11: return "edu.rice.cs.drjava.model.compiler.Javac9Compiler";
+      case JAVA_10: return "edu.rice.cs.drjava.model.compiler.Javac9Compiler";
+      case JAVA_9: return "edu.rice.cs.drjava.model.compiler.Javac9Compiler";
       case JAVA_8: return "edu.rice.cs.drjava.model.compiler.Javac170Compiler";
       case JAVA_7: return "edu.rice.cs.drjava.model.compiler.Javac170Compiler";
       case JAVA_6: {

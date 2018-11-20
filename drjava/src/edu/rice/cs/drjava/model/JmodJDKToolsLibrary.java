@@ -233,7 +233,13 @@ public class JmodJDKToolsLibrary extends JDKToolsLibrary {
                                                                                          sig, args);
           JDKToolsLibrary.msg("attempt= "+attempt.getName()+" "+attempt.getDescription());
 
+          JDKToolsLibrary.msg(" in makeFromFile beform  attempt.isAvailable()");
+          JDKToolsLibrary.msg(" attempt.isAvailable() " +attempt.isAvailable());
+          JDKToolsLibrary.msg(" attempt.getClass().getName() " +attempt.getClass().getName());
+
           if (attempt.isAvailable()) { compiler = attempt; }
+          JDKToolsLibrary.msg(" compiler = "+ compiler);
+
         }
         catch (ReflectException e) { /* can't load */ }
         catch (LinkageError e) { /* can't load */ }

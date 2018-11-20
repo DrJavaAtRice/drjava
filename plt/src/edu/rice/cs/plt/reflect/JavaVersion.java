@@ -178,6 +178,8 @@ public enum JavaVersion {
                                              String java_runtime_name,
                                              String java_vm_vendor,
                                              File location) {
+    
+    //todo parse java11
     VendorType vendor = VendorType.UNKNOWN;
     String vendorString = null;
     
