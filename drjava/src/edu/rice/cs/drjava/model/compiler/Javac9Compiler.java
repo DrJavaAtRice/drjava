@@ -93,7 +93,11 @@ public class Javac9Compiler extends JavacCompiler { // Javac170FilteringCompiler
       //TODO 
       // THERE is not Javacompiler class in com.sun.tools.javac.main in JAVA 9, so change it to
       // Class.forName("com.sun.tools.javac.main.JavaCompiler");
-      // Class.forName("com.sun.tools.javac.Main");
+      _log.log(" this.getClass().getClassLoader() "+ this.getClass().getClassLoader());
+
+      
+      // Class.forName("com.sun.source.util.DocTreePath");
+      
       // _log.log(" get JavaCompiler");
 
       // This is the class that javax.tools.ToolProvider.getSystemJavaCompiler() uses
@@ -107,6 +111,7 @@ public class Javac9Compiler extends JavacCompiler { // Javac170FilteringCompiler
       return (compiler != null);
 //      return true;
     }
+    //e.printStackTrace();
     catch (Exception e) {  _log.log(" Exception= "+e);return false; }
     catch (LinkageError e) {  _log.log(" LinkageError= "+e); return false; }
   }
@@ -134,6 +139,12 @@ public class Javac9Compiler extends JavacCompiler { // Javac170FilteringCompiler
     Iterable<String> options = _createOptions(classPath, sourcePath, destination, bootClassPath, sourceVersion, showWarnings);
     LinkedList<DJError> errors = new LinkedList<DJError>();
 
+    _log.log("in compiler() bootClassPath = " +bootClassPath);
+    _log.log("in compiler() classPath = " +classPath);
+    _log.log("in compiler() sourceVersion = " +sourceVersion);
+
+    
+    
     // This is the class that javax.tools.ToolProvider.getSystemJavaCompiler() uses.
     // We create an instance of that class directly, bypassing ToolProvider, because ToolProvider returns null
     // if DrJava is started with just the JRE, instead of with the JDK, even if tools.jar is later made available

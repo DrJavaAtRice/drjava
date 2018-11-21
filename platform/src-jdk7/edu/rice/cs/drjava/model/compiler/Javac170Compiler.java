@@ -141,6 +141,15 @@ public class Javac170Compiler extends JavacCompiler { // Javac170FilteringCompil
     JavaCompiler compiler = null;
     try {
       compiler = (JavaCompiler)(Class.forName("com.sun.tools.javac.api.JavacTool").newInstance());
+      // todo
+      _log.log("after compile= (JavaCompiler)(Class.forName(\"com.sun.tools.javac.api.JavacTool\").newInstance());");
+      _log.log("compiler.getClass().getName()= "+compiler.getClass().getName());
+      _log.log("compiler.getClass().getClassLoader()= " +compiler.getClass().getClassLoader());
+
+//      compiler= ToolProvider.getSystemJavaCompiler();
+//      _log.log("after compile= ToolProvider.getSystemJavaCompiler();");
+//      _log.log("compiler.getClass().getName()= "+compiler.getClass().getName());
+//      _log.log("compiler.getClass().getClassLoader()= " +compiler.getClass().getClassLoader());
     }
     catch(ClassNotFoundException e) {
       errors.addFirst(new DJError("Compile exception: " + e, false));

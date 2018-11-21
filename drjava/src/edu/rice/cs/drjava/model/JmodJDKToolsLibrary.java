@@ -183,7 +183,7 @@ public class JmodJDKToolsLibrary extends JDKToolsLibrary {
         // determine boot class path
         File libDir = null;
         //TODO tools.jar
-        if (f.getName().equals("java.base.jmod")) { libDir = f.getParentFile(); }
+        if (f.getName().equals("jdk.compiler.jmod")) { libDir = f.getParentFile(); }
         else if (f.getName().equals("tools.jar")) {
           File jdkLibDir = f.getParentFile();
           if (jdkLibDir != null) {
@@ -227,6 +227,9 @@ public class JmodJDKToolsLibrary extends JDKToolsLibrary {
           JDKToolsLibrary.msg("loader= "+loader);
           JDKToolsLibrary.msg("compilerAdapter= "+compilerAdapter);
           JDKToolsLibrary.msg("path= "+path);
+          
+          JDKToolsLibrary.msg("after Class.forName"+Class.forName("com.sun.tools.javac.api.JavacTool").getModule());
+
           // JDKToolsLibrary._log.log("classpath for compiler: " + IterUtil.multilineToString(path));
           // JDKToolsLibrary._log.log("boot classpath for compiler: " + IterUtil.multilineToString(bootClassPath));                
           CompilerInterface attempt = (CompilerInterface) ReflectUtil.loadLibraryAdapter(loader, path, compilerAdapter, 
@@ -242,7 +245,9 @@ public class JmodJDKToolsLibrary extends JDKToolsLibrary {
 
         }
         catch (ReflectException e) { /* can't load */ }
-        catch (LinkageError e) { /* can't load */ }
+        catch (LinkageError e) { /* can't load */ } catch (ClassNotFoundException e) {
+          e.printStackTrace();
+        }
       }
       
       String debuggerAdapter = desc.getAdapterForDebugger(version);
@@ -311,7 +316,7 @@ public class JmodJDKToolsLibrary extends JDKToolsLibrary {
         JDKToolsLibrary.msg("parsedVersion= "+parsedVersion);
         result = JavaVersion.parseFullVersion(parsedVersion, vendor, vendor, f);
       }
-      else if (name.startsWith("jdk")) {
+      else if (name.startsWith("jdk")  && !name.contains("jmod")) {
         parsedVersion = name.substring(3); 
         result = JavaVersion.parseFullVersion(parsedVersion, vendor, vendor, f);
         JDKToolsLibrary.msg("For name starting with 'jdk', parsedVersion = '" + parsedVersion + "' result = '" + result + "'");
@@ -523,10 +528,10 @@ public class JmodJDKToolsLibrary extends JDKToolsLibrary {
       for (File subdir : IOUtil.attemptListFilesAsIterable(root.getKey(), subdirFilter)) {
         JDKToolsLibrary.msg("Looking at subdirectory: " + subdir);
         //todo 
-        addIfFile(new File(subdir, "lib/java.base.jmod"), root.getValue(), jmods);
+        addIfFile(new File(subdir, "lib/jdk.compiler.jmod"), root.getValue(), jmods);
 //        addIfFile(new File(subdir, "Classes/classes.jar"), root.getValue(), jmods);
 //        addIfFile(new File(subdir, "Contents/Classes/classes.jar"), root.getValue(), jmods);
-        addIfFile(new File(subdir, "Contents/Home/jmods/java.base.jmod"), root.getValue(), jmods);
+        addIfFile(new File(subdir, "Contents/Home/jmods/jdk.compiler.jmod"), root.getValue(), jmods);
       }
     }
   }
