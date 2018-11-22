@@ -50,7 +50,6 @@ import edu.rice.cs.plt.io.IOUtil;
  *  @version $Id$
  */
 public class LogTest extends MultiThreadedTestCase {
-  
   public static final int TOL = 2000;
   
   // Relying on default constructor
@@ -218,7 +217,9 @@ public class LogTest extends MultiThreadedTestCase {
   
   private static final int NUM_THREADS = 50;
   private static final int DELAY = 100;
-  // private static final Log ltl = new Log("logtest.txt", false);
+  
+  //TODO task
+  private static final Log ltl = new Log("logtest.txt", false);
   
   /** Attempts to test Log's behavior when called concurrently from several sources.  Spawns NUM_THREADS LogTestThreads 
     * (see above)that wait a random number between 0 and DELAY milliseconds and then log a message.  The function tests
@@ -247,9 +248,9 @@ public class LogTest extends MultiThreadedTestCase {
     Date now = new Date();
     String s0 = fin.readLine();
     Date time0 = log3.parse(s0);
-    //ltl.log("earlier = " + earlier);
-    //ltl.log("now     = " + now);
-    //ltl.log("time0   = " + time0);
+    ltl.log("earlier = " + earlier);
+    ltl.log("now     = " + now);
+    ltl.log("time0   = " + time0);
     assertTrue("Log not opened after 'earlier' and before 'now'", withinTolerance(earlier, time0, now));
     
     String log3OpenMsg = "Log '" + file3.getName() + "' opened: ";
@@ -258,6 +259,7 @@ public class LogTest extends MultiThreadedTestCase {
     for (int i = 0; i < NUM_THREADS; i++) {
       String s1 = fin.readLine();
       Date time1 = log3.parse(s1);
+      ltl.log("time1   = " + time1);
       assertTrue("Date of message not after 'earlier' and before 'now'", withinTolerance(earlier, time1, now));
       assertTrue("Date of message not after 'previous time' and before 'now'", withinTolerance(time0, time1, now));
       assertEquals("Log message", "Test message", getStringAfterDate(s1));

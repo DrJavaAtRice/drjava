@@ -102,7 +102,7 @@ import edu.rice.cs.drjava.model.DrJavaFileUtils;
   * @version $Id$
   */
 public class DrJava {
-  public static volatile Log _log = new Log("DrJava.txt", false);
+  public static volatile Log _log = new Log("DrJava.txt", true);
   
   private static final String DEFAULT_MAX_HEAP_SIZE_ARG = "-Xmx128M";
   
@@ -242,9 +242,9 @@ public class DrJava {
     if (handleCommandLineArgs(args)) {
       // Platform-specific UI setup.
       PlatformFactory.ONLY.beforeUISetup();
-      
+      _log.log("before configureAndLoadDrJavaRoot");
 //    Utilities.showDebug("Calling configureAndLoadDrJavaRoot with args = " + args);
-      configureAndLoadDrJavaRoot(args); 
+      configureAndLoadDrJavaRoot(args);
     }
   }
   
@@ -286,7 +286,7 @@ public class DrJava {
           clearFilesToOpen();
           _log.log("_filesToOpen copied into class arguments, clearing _filesToOpen");
         }
-        
+        _log.log("_doRestart before if statement: "+_doRestart);
         if (_doRestart) {
           if (DrJava.getConfig().getSetting(OptionConstants.REMOTE_CONTROL_ENABLED)) {
             // at this time, OUR remote control server hasn't been started yet
@@ -403,7 +403,8 @@ public class DrJava {
     int argIndex = 0;
     int len = args.length;
     _log.log("handleCommandLineArgs. _filesToOpen: " + _filesToOpen);
-    
+    _log.log("handleCommandLineArgs args are : " + java.util.Arrays.toString(args));
+
     while(argIndex < len) {
       String arg = args[argIndex++];
       

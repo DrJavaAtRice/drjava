@@ -305,7 +305,7 @@ public class CoverageFrame extends SwingFrame {
     private void startJUnit(){
          _model.getJUnitModel().setCoverage(true, 
              this._outputDirSelector.getFileFromField().getPath());
-         _mainFrame._junitAll(); 
+         _mainFrame._junitAll(false); 
          CoverageFrame.this.setVisible(false);
     }
 

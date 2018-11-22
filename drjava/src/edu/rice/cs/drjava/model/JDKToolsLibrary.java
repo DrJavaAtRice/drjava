@@ -76,7 +76,8 @@ public class JDKToolsLibrary {
   private final JavadocModel _javadoc;
   private final JDKDescriptor _jdkDescriptor; // JDKDescriptor.NONE if none
   
-  /* package private */ static Log _log = new Log("JDKToolsLibrary.txt", false);
+  //todo
+  /* package private */ static Log _log = new Log("JDKToolsLibrary.txt", true);
   
   protected JDKToolsLibrary(FullVersion version, JDKDescriptor jdkDescriptor, CompilerInterface compiler, 
                             Debugger debugger, JavadocModel javadoc) {
@@ -105,8 +106,13 @@ public class JDKToolsLibrary {
   public String toString() { return _jdkDescriptor.getDescription(_version); }
   
   public static String adapterForCompiler(JavaVersion.FullVersion version) {
+    _log.log(" in adapterForCompiler, version.majorVersion()= "+version.majorVersion());
     switch (version.majorVersion()) {
       case FUTURE: return "edu.rice.cs.drjava.model.compiler.Javac170Compiler";
+      // TODO
+      case JAVA_11: return "edu.rice.cs.drjava.model.compiler.Javac9Compiler";
+      case JAVA_10: return "edu.rice.cs.drjava.model.compiler.Javac9Compiler";
+      case JAVA_9: return "edu.rice.cs.drjava.model.compiler.Javac9Compiler";
       case JAVA_8: return "edu.rice.cs.drjava.model.compiler.Javac170Compiler";
       case JAVA_7: return "edu.rice.cs.drjava.model.compiler.Javac170Compiler";
       case JAVA_6: {

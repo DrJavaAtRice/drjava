@@ -75,10 +75,15 @@ import edu.rice.cs.drjava.model.javadoc.JavadocModel;
 import edu.rice.cs.drjava.model.javadoc.DefaultJavadocModel;
 import edu.rice.cs.drjava.model.javadoc.NoJavadocAvailable;
 import edu.rice.cs.drjava.model.JDKDescriptor;
+import edu.rice.cs.util.Log;
 
 /** A JDKToolsLibrary that was loaded from a specific jar file. */
 public class JarJDKToolsLibrary extends JDKToolsLibrary {
   
+  //todo
+  /* package private */ static Log _log = new Log("JarJDKToolsLibrary.txt", true);
+
+
   /** Packages to shadow when loading a new tools.jar.  If we don't shadow these classes, we won't
     * be able to load distinct versions for each tools.jar library.  These should be verified whenever
     * a new Java version is released.  (We can't just shadow *everything* because some classes, at 
@@ -162,7 +167,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     Debugger debugger = NoDebuggerAvailable.ONLY;
     JavadocModel javadoc = new NoJavadocAvailable(model);
     
-    FullVersion version = desc.guessVersion(f);
+    FullVersion version = desc.guessVersion(f,false);
     JDKToolsLibrary.msg("makeFromFile: " + f + " --> " + version + ", vendor: " + version.vendor());
     JDKToolsLibrary.msg("    desc = " + desc);
     
@@ -179,7 +184,8 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       // not all additional compiler files were found
       isSupported = false;
     }
-    
+    JDKToolsLibrary.msg("  isSupported " + isSupported);
+
     // We can't execute code that was possibly compiled for a later Java API version.
     List<File> bootClassPath = null;
     if (isSupported) {
@@ -191,7 +197,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       });
       
       String compilerAdapter = desc.getAdapterForCompiler(version);
-      
+      JDKToolsLibrary.msg("  compilerAdapter " + compilerAdapter);
       if (compilerAdapter != null) {
         // determine boot class path
         File libDir = null;
@@ -209,6 +215,8 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
             }
           }
         }
+        JDKToolsLibrary.msg("  libDir " + libDir);
+
         bootClassPath = new ArrayList<File>();
         if (libDir != null) {
           File[] jars = IOUtil.attemptListFiles(libDir, IOUtil.extensionFilePredicate("jar"));
@@ -222,14 +230,30 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         }
         if (additionalBootClassPath != null) { bootClassPath.addAll(additionalBootClassPath); }
         if (bootClassPath.isEmpty()) { bootClassPath = null; } // null defers to the compiler's default behavior
-
+        for(int i=0;i<bootClassPath.size();i++)
+        {
+          JDKToolsLibrary.msg("bootClassPath[]= "+bootClassPath.get(i));
+        }
         try {
           Class<?>[] sig = { FullVersion.class, String.class, List.class };
           Object[] args = { version, f.toString(), bootClassPath };
+          JDKToolsLibrary.msg("sig= "+sig);
+          for(int i=0;i<sig.length;i++)
+            JDKToolsLibrary.msg("sig[]= "+sig[i]);
+          JDKToolsLibrary.msg("args= "+args);
+          for(int i=0;i<args.length;i++)
+            JDKToolsLibrary.msg("args[]= "+args[i]);
+          JDKToolsLibrary.msg("loader= "+loader);
+          JDKToolsLibrary.msg("compilerAdapter= "+compilerAdapter);
+          JDKToolsLibrary.msg("path= "+path);
+
           // JDKToolsLibrary._log.log("classpath for compiler: " + IterUtil.multilineToString(path));
-          // JDKToolsLibrary._log.log("boot classpath for compiler: " + IterUtil.multilineToString(bootClassPath));                
+          // JDKToolsLibrary._log.log("boot classpath for compiler: " + IterUtil.multilineToString(bootClassPath));    
+          //TODO
           CompilerInterface attempt = (CompilerInterface) ReflectUtil.loadLibraryAdapter(loader, path, compilerAdapter, 
                                                                                          sig, args);
+          JDKToolsLibrary.msg("attempt= "+attempt.getName()+" "+attempt.getDescription());
+
           if (attempt.isAvailable()) { compiler = attempt; }
         }
         catch (ReflectException e) { /* can't load */ }

@@ -427,4 +427,3 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
      _log.log("testErrorInSuperClass_NOJOIN complete");
   }
 }
-

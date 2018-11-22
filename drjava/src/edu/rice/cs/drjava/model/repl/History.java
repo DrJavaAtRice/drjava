@@ -44,7 +44,6 @@ import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.util.OperationCanceledException;
-
 import java.io.Serializable;
 import java.io.IOException;
 import java.io.File;
@@ -57,6 +56,9 @@ import java.io.BufferedWriter;
   * @version $Id$
   */
 public class History implements OptionConstants, Serializable {
+
+  public static final edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("History.txt",false);
+
 
   public static final String INTERACTION_SEPARATOR = "//End of Interaction//";
 
@@ -162,22 +164,30 @@ public class History implements OptionConstants, Serializable {
     * @param entry the current entry (perhaps edited from what is in history)
     */
   public void moveNext(String entry) {
+    LOG.log("entry= "+entry);
     if (! hasNext()) throw  new ArrayIndexOutOfBoundsException();
     setEditedEntry(entry);
     _cursor++;
   }
 
   /** @return whether moveNext() would succeed right now. */
-  public boolean hasNext() { return  _cursor < (_history.size()); }
+  public boolean hasNext() {
+    LOG.log("_cursor= "+_cursor);
+    LOG.log("_history= "+_history);
+    LOG.log("_history.size= "+_history.size());
+    //fixed: if history.size==0, it doesn't have next!
+    return  _cursor < (_history.size()) && (_history.size()>0); 
+  }
 
   /** @return whether movePrevious() would succeed right now. */
   public boolean hasPrevious() { return  _cursor > 0; }
 
   /** @return item in history at current position; returns "" if no current item exists. */
   public String getCurrent() {
+    LOG.log("cursor= "+_cursor);
     Integer cursor = Integer.valueOf(_cursor);
     if (_editedEntries.containsKey(cursor))  return _editedEntries.get(cursor);
-
+    LOG.log("_editedEntries= "+_editedEntries);
     if (hasNext()) return _history.get(_cursor);
     return "";
   }

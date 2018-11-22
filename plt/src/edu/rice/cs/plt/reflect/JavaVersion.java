@@ -34,6 +34,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package edu.rice.cs.plt.reflect;
 
+
 import java.io.Serializable;
 import java.io.File;
 
@@ -48,8 +49,11 @@ public enum JavaVersion {
   JAVA_6 { public String versionString() { return "6"; } },
   JAVA_7 { public String versionString() { return "7"; } },
   JAVA_8 { public String versionString() { return "8"; } },
-  FUTURE { public String versionString() { return ">8"; } };
-  
+  JAVA_9 { public String versionString() { return "9"; } },
+  JAVA_10 { public String versionString() { return "10"; } },
+  JAVA_11 { public String versionString() { return "11"; } },
+  FUTURE { public String versionString() { return ">10"; } };
+
   /** The currently-available Java version, based on the {@code "java.class.version"} property.  Ideally, a {@code true}
     * result  for {@code JavaVersion.CURRENT.supports(v)} implies that all APIs associated with that version are
     * available  at runtime.  However, we do not attempt to (and cannot, in general) guarantee that the boot class path
@@ -114,8 +118,12 @@ public enum JavaVersion {
       case 50: return JAVA_6;
       case 51: return JAVA_7;
       case 52: return JAVA_8;
+      case 53: return JAVA_9;
+      case 54: return JAVA_10;
+      case 55: return JAVA_11;
+
     }
-    return (major > 51) ? FUTURE : UNRECOGNIZED;
+    return (major > 55) ? FUTURE : UNRECOGNIZED;
   }
   
   /**
@@ -170,6 +178,8 @@ public enum JavaVersion {
                                              String java_runtime_name,
                                              String java_vm_vendor,
                                              File location) {
+    
+    //todo parse java11
     VendorType vendor = VendorType.UNKNOWN;
     String vendorString = null;
     
@@ -225,7 +235,10 @@ public enum JavaVersion {
           case 6: version = JAVA_6; break;
           case 7: version = JAVA_7; break;
           case 8: version = JAVA_8; break;
-          default: if (feature > 8) { version = FUTURE; } break;
+          case 9: version = JAVA_9; break;
+          case 10: version = JAVA_10; break;
+          case 11: version = JAVA_11; break;
+          default: if (feature > 11) { version = FUTURE; } break;
         }
         return new FullVersion(version, 0, 0, type, typeString, vendor, vendorString, location);
       }
@@ -255,7 +268,19 @@ public enum JavaVersion {
       else { type = ReleaseType.UNRECOGNIZED; }
       
       JavaVersion version = UNRECOGNIZED;
-      if (major == 1) {
+      if(major==10){
+         version = JAVA_10; 
+
+      }
+      else if(major==11){
+        version = JAVA_11;
+
+      }
+      else if(major==9){
+        version = JAVA_9;
+
+      }
+      else if (major == 1) {
         switch (feature) {
           case 1: version = JAVA_1_1; break;
           case 2: version = JAVA_1_2; break;

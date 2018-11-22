@@ -43,6 +43,7 @@ import java.io.Serializable;
 import edu.rice.cs.plt.lambda.*;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.io.IOUtil;
+import edu.rice.cs.util.Log;
 
 import static edu.rice.cs.plt.reflect.ReflectException.*;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
@@ -51,7 +52,10 @@ public final class ReflectUtil {
   
   /** Prevents instance creation */
   private ReflectUtil() {}
-  
+  //TODO
+  private static final Log _log = new Log("ReflectUtil.txt", true);
+
+
   /**
    * A ClassLoader for the bootstrap classes -- those provided by the bootstrap class path in Sun
    * JVMs.  Note that this is not the actual loader used for bootstrap classes, but rather an immediate
@@ -447,8 +451,14 @@ public final class ReflectUtil {
   public static Object loadLibraryAdapter(ClassLoader baseLoader, Iterable<? extends File> libraryPath, 
                                           String adapterName, Class<?>[] constructorSig, Object... constructorArgs) 
     throws ReflectException {
+    //TODO
     ClassLoader libraryLoader = new PathClassLoader(baseLoader, libraryPath);
+    _log.log("libraryLoader is "+libraryLoader  );
+    _log.log("libraryPath is "+libraryPath );
     ClassLoader adapterLoader = new PreemptingClassLoader(libraryLoader, adapterName);
+    _log.log("adapterLoader is "+adapterLoader );
+    _log.log("adapterName is "+adapterName );
+
     return loadObject(adapterLoader, adapterName, constructorSig, constructorArgs);
   }
   

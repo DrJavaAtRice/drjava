@@ -38,10 +38,8 @@ import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Iterator;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 // Uses JDK 1.7.0 tools classes
 import javax.tools.JavaFileObject;
@@ -56,6 +54,7 @@ import edu.rice.cs.drjava.model.DJError;
 
 import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.plt.io.IOUtil;
+import edu.rice.cs.util.Log;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 import static edu.rice.cs.plt.debug.DebugUtil.error;
@@ -67,12 +66,28 @@ import static edu.rice.cs.plt.debug.DebugUtil.error;
  */
 public class Javac170Compiler extends JavacCompiler { // Javac170FilteringCompiler {
   
+  
+  //todo 
+  public static final Log _log = new Log("Javac170Compiler.txt", true);
+
   public Javac170Compiler(JavaVersion.FullVersion version, String location, List<? extends File> defaultBootClassPath) {
     super(version, location, defaultBootClassPath);
   }
   
   public boolean isAvailable() {
+
     try {
+      
+      // TODO
+//      _log.log("start of isAvailable ");
+//      File _file= new File("Javac170Compiler.txt");
+//      FileWriter w = new FileWriter(_file.getAbsolutePath(), true);
+//      PrintWriter _writer = new PrintWriter(w);
+//      SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("d MMM yyyy H:mm:ss z");
+//      _writer.println(DATE_FORMAT.format(new Date()) + ": " + "this is for test");
+//      _writer.flush();
+//      //TODO 
+//      return true;
       // Diagnostic was introduced in the Java 1.6 compiler
       Class<?> diagnostic = Class.forName("javax.tools.Diagnostic");
       diagnostic.getMethod("getKind");
@@ -88,8 +103,9 @@ public class Javac170Compiler extends JavacCompiler { // Javac170FilteringCompil
       // if DrJava is started with just the JRE, instead of with the JDK, even if tools.jar is later made available
       // to the class loader.
       JavaCompiler compiler = (JavaCompiler)(Class.forName("com.sun.tools.javac.api.JavacTool").newInstance());
-      
+      //TODO 
       return (compiler != null);
+//      return true;
     }
     catch (Exception e) { return false; }
     catch (LinkageError e) { return false; }
@@ -125,6 +141,15 @@ public class Javac170Compiler extends JavacCompiler { // Javac170FilteringCompil
     JavaCompiler compiler = null;
     try {
       compiler = (JavaCompiler)(Class.forName("com.sun.tools.javac.api.JavacTool").newInstance());
+      // todo
+      _log.log("after compile= (JavaCompiler)(Class.forName(\"com.sun.tools.javac.api.JavacTool\").newInstance());");
+      _log.log("compiler.getClass().getName()= "+compiler.getClass().getName());
+      _log.log("compiler.getClass().getClassLoader()= " +compiler.getClass().getClassLoader());
+
+//      compiler= ToolProvider.getSystemJavaCompiler();
+//      _log.log("after compile= ToolProvider.getSystemJavaCompiler();");
+//      _log.log("compiler.getClass().getName()= "+compiler.getClass().getName());
+//      _log.log("compiler.getClass().getClassLoader()= " +compiler.getClass().getClassLoader());
     }
     catch(ClassNotFoundException e) {
       errors.addFirst(new DJError("Compile exception: " + e, false));

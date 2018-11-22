@@ -98,32 +98,33 @@ import org.jacoco.core.runtime.RuntimeData;
   */
 public class JUnitTestManager {
   
-  protected static final Log _log = new Log("GlobalModel.txt", false);
+  /** log for use in debugging */
+  protected static final Log _log = new Log("JUnitTestManager.txt", false);
   
   /** The interface to the master JVM via RMI. */
-  private final JUnitModelCallback _jmc;
+  protected final JUnitModelCallback _jmc;
   
   /** A factory producing a ClassLoader for tests with the given parent */
-  private final ClassPathManager _classPathManager;
+  protected final ClassPathManager _classPathManager;
   
   /** The current testRunner; initially null.  Each test suite requires a new runner. */
-  private JUnitTestRunner _testRunner;
+  protected JUnitTestRunner _testRunner;
   
   /** The accumulated test suite; null if no test is pending. */
-  private TestSuite _suite = null;
+  protected TestSuite _suite = null;
   
   /** The accumulated list of names of TestCase classes; null if no test is pending. */
-  private List<String> _testClassNames = null;
+  protected List<String> _testClassNames = null;
   
   /** The list of files corresponding to testClassNames; null if no test is pending. */
-  private List<File> _testFiles = null;
+  protected List<File> _testFiles = null;
   
   // Create and initialize fields for JaCoCo
-  private String _coverageOutdir = null;
-  private IRuntime _runtime = null;
-  private RuntimeData _myData = null;
-  private List<String> _nonTestClassNames = null;
-  private JUnitResultTuple _finalResult = new JUnitResultTuple(false, null);
+  protected String _coverageOutdir = null;
+  protected IRuntime _runtime = null;
+  protected RuntimeData _myData = null;
+  protected List<String> _nonTestClassNames = null;
+  protected JUnitResultTuple _finalResult = new JUnitResultTuple(false, null);
   
   /** Standard constructor 
     * @param jmc a JUnitModelCallback
@@ -140,7 +141,7 @@ public class JUnitTestManager {
   /** Used to load class files in the analysis phase of code coverage
     * @return URLClassLoader with DrJava classpath
     */
-  private URLClassLoader newURLLoader() {
+  protected URLClassLoader newURLLoader() {
     List<URL> urls = new LinkedList<URL>();
     for (File f : _classPathManager.getClassPath()) {
       try { urls.add(f.toURI().toURL()); }
@@ -357,7 +358,7 @@ public class JUnitTestManager {
     * @param c the class to check
     * @return true iff the given class is an instance of junit.framework.Test
     */
-  private boolean _isJUnitTest(Class<?> c) {
+  protected boolean _isJUnitTest(Class<?> c) {
     _log.log("Testing class " + c + " to determine if it is a JUnit test class");
 
     // test first for JUnit 4 annotated test methods
@@ -378,10 +379,11 @@ public class JUnitTestManager {
     * @param files The files that were used for this test suite
     * @return JUnitError
     */
-  private JUnitError _makeJUnitError(TestFailure failure, List<String> classNames, boolean isError, List<File> files) {
+  protected JUnitError _makeJUnitError(TestFailure failure, List<String> classNames, boolean isError, List<File> files) {
     
 //    _log.log("_makeJUnitError called with failure " + failure + " failedTest = " + failure.failedTest());
     Test failedTest = failure.failedTest();
+    _log.log("failedTest " + failedTest);
     String testName;
     if (failedTest instanceof JUnit4TestCaseFacade) {
       testName = ((JUnit4TestCaseFacade) failedTest).toString(); 
@@ -394,7 +396,7 @@ public class JUnitTestManager {
     int secondIndex = testString.indexOf(')');
     
     /** junit can return a string in two different formats; we parse both formats, and then decide which one to use. */
-    
+    _log.log("testString " + testString +" testName "+testName);
     String className;
     if (firstIndex != secondIndex)
       className = testString.substring(firstIndex, secondIndex);
@@ -515,7 +517,7 @@ public class JUnitTestManager {
     * @param classname class in which stack trace was generated
     * @return the line number
     */
-  private int _lineNumber(String sw, String classname) {
+  protected int _lineNumber(String sw, String classname) {
     // TODO: use stack trace elements to find line number
     int lineNum;
     int idxClassname = sw.indexOf(classname);
@@ -539,7 +541,7 @@ public class JUnitTestManager {
   /** @param loader current template for the runner's class loader
     * @return a fresh JUnitTestRunner with its own class loader instance. 
     */
-  private JUnitTestRunner makeRunner(ClassLoader loader) {
+  protected JUnitTestRunner makeRunner(ClassLoader loader) {
     return new JUnitTestRunner(_jmc, loader);
   }
 }
