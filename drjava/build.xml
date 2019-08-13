@@ -429,13 +429,13 @@
   
   
   <target name="do-test" depends="resolve-jvm-args">
-    <echo message="Running all tests matching '${test-filter-string}' with command '${test-jvm}', using '${junit-jar}' and '${test-tools}'" />
+    <echo message="Running all tests matching '${test-filter-string}' with command '${test-jvm}', using '${junit-jar-to-include}' and '${test-tools}'" />
     <jacoco:coverage xmlns:jacoco="antlib:org.jacoco.ant">
     <junit haltonfailure="${test-halt}" failureproperty="test-failed"
            fork="yes" forkmode="perTest" maxmemory="2G" jvm="${test-jvm}" dir="${basedir}">
       <classpath>
         <pathelement location="${test-tools}" />
-        <pathelement location="${junit-jar}" />
+        <pathelement location="${junit-jar-to-include}" />
         <pathelement location="lib/buildlib/plt-ant.jar" /> <!-- required for custom formatter -->
         <pathelement location="lib/buildlib/netbeans-memory-leak-utils.jar" />
         <pathelement location="classes/test" />
