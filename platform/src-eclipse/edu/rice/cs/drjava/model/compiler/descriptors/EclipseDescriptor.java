@@ -109,7 +109,7 @@ public class EclipseDescriptor extends JDKDescriptor {
   
   /** Return the minimum Java version required to use this JDK.
     * @return minimum version */
-  public JavaVersion getMinimumMajorVersion() { return JavaVersion.JAVA_6; }
+  public JavaVersion getMinimumMajorVersion() { return JavaVersion.JAVA_8; }
 
   /** Return the list of additional files required to use the compiler.
     * The compiler was found in the specified file. This method may have to search the user's hard drive, e.g.
@@ -128,7 +128,5 @@ public class EclipseDescriptor extends JDKDescriptor {
   }
   
   @Override
-  public String toString() { 
-    return "Eclipse Compiler Library"; 
-  }
+  public String toString() { return "Eclipse Compiler Library"; }
 }

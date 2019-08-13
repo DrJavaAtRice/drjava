@@ -31,14 +31,19 @@
   <property name="error" value="stderr" />
   <property name="plt.error.log" value="${error}" />
   <property name="clean-can-fail" value="yes" /> 
-  <property name="drjava-jar" value="${env.DRJAVA_JAR}" />  
 
   <!-- *** Environment properties that are not needed may be removed *** -->
   <property environment="env" />
+  <!-- Java 5,6,7 are archaic and are not installed.  These definitions
+       reman so that static checking of the build script does not break,
+       but any target mentioned them must be modified before it will run -->
   <property name="java5-home" value="${env.JAVA5_HOME}" />
   <property name="java6-home" value="${env.JAVA6_HOME}" />
-  <property name="java7-home" value="${env.JAVA7_HOME}" />
   <property name="openjdk6-home" value="${env.OPENJDK6_HOME}" />
+  <property name="java7-home" value="${env.JAVA7_HOME}" />
+  <property name="java8-home" value="${env.JAVA8_HOME}" />
+  <property name="drjava-jar" value="${env.DRJAVA_JAR}" />  
+
   <property name="mint-home" value="${env.MINT_HOME}" />
   <property name="nextgen-home" value="${env.NGC_HOME}" />
   <property name="hj-home" value="${env.HJ_HOME}" />
@@ -85,6 +90,7 @@
     <echo message="JAVA5_HOME: Home folder of the Java 5 JDK" />
     <echo message="JAVA6_HOME: Home folder of the Java 6 JDK" />
     <echo message="JAVA7_HOME: Home folder of the Java 7 JDK" />
+    <echo message="JAVA8_HOME: Home folder of the Java 8 JDK" />
     <echo message="OPENJDK6_HOME: Home folder of the OpenJDK 6" />
     <echo message="MINT_HOME: Home folder of the Mint distribution" />
     <echo message="NEXTGEN_HOME: Home folder of the NextGen distribution" />
@@ -221,13 +227,13 @@
     </antcall>
   </target>
 
-  <target name="compile-eclipse" depends="resolve-java6-runtime, resolve-java6-tools, unjar-libs" 
+  <target name="compile-eclipse" depends="resolve-java8-runtime, resolve-java8-tools, unjar-libs" 
           description="Compile the 'eclipse' sources">
     <antcall target="do-compile">
       <param name="platform-tag" value="eclipse" />
-      <param name="source-version" value="1.6" />
-      <param name="runtime-jar" value="${java6-runtime}" />
-      <param name="extra-classpath" value="${java6-tools}" />
+      <param name="source-version" value="1.8" /> 
+      <param name="runtime-jar" value="${java8-runtime}" />
+      <param name="extra-classpath" value="${java8-tools}" />
     </antcall>
   </target>
   
@@ -268,6 +274,7 @@
       <fileset dir="classes/test-${platform-tag}" includes="**/*" />  
     </delete>
     
+    <echo message="runtime-jar = ${runtime-jar}" />
     <javac srcdir="src-${platform-tag}" destdir="classes/base-${platform-tag}" 
            source="${source-version}" target="${source-version}"
            bootclasspath="${runtime-jar}" sourcepath="" includeAntRuntime="no"
@@ -891,6 +898,7 @@
     <fail message="Can't find rt.jar in the Java 7 home: ${java7-home}" unless="java7-runtime" />
   </target>
   
+
   <target name="resolve-java7-exec">
     <!-- We rely on "location" to generate a platform-specific path -->
 
@@ -923,6 +931,40 @@
     <available property="java7-tools" value="${java7-tools-3}" file="${java7-tools-3}" />
 
     <fail message="Can't find tools.jar in the Java 7 home: ${java7-home}" unless="java7-tools" />
+  </target>
+
+
+  <target name="resolve-java8-runtime">
+    <!-- We rely on "location" to generate a platform-specific path; note that properties
+         are immutable and so java8-runtime will only be set the *first* time. -->
+
+    <property name="java8-runtime-1" location="${java8-home}/lib/rt.jar" />
+    <available property="java8-runtime" value="${java8-runtime-1}" file="${java8-runtime-1}" />
+
+    <property name="java8-runtime-2" location="${java8-home}/jre/lib/rt.jar" />
+    <available property="java8-runtime" value="${java8-runtime-2}" file="${java8-runtime-2}" />
+
+    <property name="java8-runtime-3" location="${java8-home}/../Classes/classes.jar" />
+    <available property="java8-runtime" value="${java8-runtime-3}" file="${java8-runtime-3}" />
+
+    <echo message="java8-runtime = ${java8-runtime}" />
+
+    <fail message="Can't find rt.jar in the Java 8 home: ${java8-home}" unless="java8-runtime" />
+  </target>
+
+  <target name="resolve-java8-tools">
+    <property name="java8-tools-1" location="${java8-home}/lib/tools.jar" />
+    <available property="java8-tools" value="${java8-tools-1}" file="${java8-tools-1}" />
+
+    <property name="java8-tools-2" location="${java8-home}/../lib/tools.jar" />
+    <available property="java8-tools" value="${java8-tools-2}" file="${java8-tools-2}" />
+
+    <property name="java8-tools-3" location="${java8-home}/../Classes/classes.jar" />
+    <available property="java8-tools" value="${java8-tools-3}" file="${java8-tools-3}" />
+
+    <echo message="java8-tools = ${java8-tools}" />
+
+    <fail message="Can't find tools.jar in the Java 8 home: ${java8-home}" unless="java8-tools" />
   </target>
 
   <target name="resolve-openjdk6-runtime">
@@ -1061,11 +1103,13 @@
   </target>
   
   <target name="assert-jar-exists">
+    <echo message="ant.project.name jar file = ${ant.project.name}.jar" />
     <available property="jar-exists" file="${ant.project.name}.jar" />
     <fail message="Can't find ${ant.project.name}.jar" unless="jar-exists" />
   </target>
   
   <target name="assert-drjava-jar-exists">
+    <echo message="drjava.jar = ${drjava-jar}" />
     <available property="drjava-jar-exists" file="${drjava-jar}" />
     <fail message="${drjava-jar} does not exist" unless="drjava-jar-exists" />
   </target>

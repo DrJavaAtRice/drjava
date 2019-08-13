@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2017, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2019, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -299,14 +299,12 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     else _rawJUnitOpenDefDocs(lod, allTests);
   }
   
-  /** Runs all TestCases in the document list lod; assumes all documents have 
-   * been compiled. It finds the TestCase classes by searching the build 
-   * directories for the documents.  Note: caller must respond to thrown 
-   * exceptions by invoking _junitUnitInterrupted (to run hourglassOff() and 
-   * reset the unit testing UI).
-   * @param lod list of open documents
-   * @param allTests true if all tests are to be run
-   */
+  /** Runs all TestCases in the document list lod; assumes all documents have been compiled. It finds the TestCase 
+    * classes by searching the build directories for the class files.  Note: caller must respond to thrown exceptions by
+    * invoking _junitUnitInterrupted (to run hourglassOff() and resetting the unit testing UI).
+    * @param lod list of open documents
+    * @param allTests true if all tests are to be run
+    */
   private void _rawJUnitOpenDefDocs(List<OpenDefinitionsDocument> lod, final boolean allTests) {
 
     File buildDir = _model.getBuildDirectory();
@@ -458,7 +456,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
               File sourceFile = new File(sourceFileName);
               classNames.add(className.value());
               files.add(sourceFile);
-              _log.log("Class " + className + "added to classNames.   File " + sourceFileName + " added to files.");
+              _log.log("Class " + className + " added to classNames.   File " + sourceFileName + " added to files.");
             }
             catch(IOException e) { /* ignore it; can't read class file */ }
           }
@@ -579,23 +577,17 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   /** Called to indicate that an illegal class file was encountered
     * @param e the ClassFileObject describing the error.
     */
-  public void classFileError(final ClassFileError e) { 
-    Utilities.invokeLater(new Runnable() { public void run() {_notifier.classFileError(e); } });
-  }
+  public void classFileError(final ClassFileError e) { _notifier.classFileError(e); }
   
   /** Called to indicate that a suite of tests has started running.
     * @param numTests The number of tests in the suite to be run.
     */
-  public void testSuiteStarted(final int numTests) { 
-    Utilities.invokeLater(new Runnable() { public void run() { _notifier.junitSuiteStarted(numTests); } });
-  }
+  public void testSuiteStarted(final int numTests) { _notifier.junitSuiteStarted(numTests); }
   
   /** Called when a particular test is started.
     * @param testName The name of the test being started.
     */
-  public void testStarted(final String testName) { 
-    Utilities.invokeLater(new Runnable() { public void run() { _notifier.junitTestStarted(testName); } });
-  }
+  public void testStarted(final String testName) {  _notifier.junitTestStarted(testName); }
   
   /** Called when a particular test has ended.
     * @param testName The name of the test that has ended.
@@ -603,9 +595,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     * @param causedError If not successful, whether the test caused an error or simply failed.
     */
   public void testEnded(final String testName, final boolean wasSuccessful, final boolean causedError) {
-    EventQueue.invokeLater(new Runnable() { 
-      public void run() { _notifier.junitTestEnded(testName, wasSuccessful, causedError); }
-    });
+    _notifier.junitTestEnded(testName, wasSuccessful, causedError); 
   }
   
   /** Called when a full suite of tests has finished running.  Does not necessarily run in event thread.
@@ -613,27 +603,25 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     */
   public void testSuiteEnded(final JUnitError[] errors) {
 //    new ScrollableDialog(null, "DefaultJUnitModel.testSuiteEnded(...) called", "", "").show();
-    Utilities.invokeLater(new Runnable() { public void run() { 
-      List<File> files = new ArrayList<File>();
-      for(OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()) { files.add(odd.getRawFile()); }
+    List<File> files = new ArrayList<File>();
+    for(OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()) { files.add(odd.getRawFile()); }
 //    Utilities.show("errors.length = " + errors.length + " files = " + files);
-      for(JUnitError e: errors) {
-        try {
-          e.setStackTrace(_compilerModel.getLLSTM().replaceStackTrace(e.stackTrace(),files));
-        } catch(Exception ex) { DrJavaErrorHandler.record(ex); }
-        File f = e.file();
-        if ((f != null) && (DrJavaFileUtils.isLLFile(f))) {
-          String dn = DrJavaFileUtils.getJavaForLLFile(f.getName());
-          StackTraceElement ste = new StackTraceElement(e.className(), "", dn, e.lineNumber());
-          ste = _compilerModel.getLLSTM().replaceStackTraceElement(ste, f);
-          e.setLineNumber(ste.getLineNumber());
-        }
+    for(JUnitError e: errors) {
+      try {
+        e.setStackTrace(_compilerModel.getLLSTM().replaceStackTrace(e.stackTrace(),files));
+      } catch(Exception ex) { DrJavaErrorHandler.record(ex); }
+      File f = e.file();
+      if ((f != null) && (DrJavaFileUtils.isLLFile(f))) {
+        String dn = DrJavaFileUtils.getJavaForLLFile(f.getName());
+        StackTraceElement ste = new StackTraceElement(e.className(), "", dn, e.lineNumber());
+        ste = _compilerModel.getLLSTM().replaceStackTraceElement(ste, f);
+        e.setLineNumber(ste.getLineNumber());
       }
-      _junitErrorModel = new JUnitErrorModel(errors, _model, true);
-      _notifyJUnitEnded();
-      _testInProgress = false;
+    }
+    _junitErrorModel = new JUnitErrorModel(errors, _model, true);
+    _notifyJUnitEnded();
+    _testInProgress = false;
 //    new ScrollableDialog(null, "DefaultJUnitModel.testSuiteEnded(...) finished", "", "").show();
-    }});
   }
 
   

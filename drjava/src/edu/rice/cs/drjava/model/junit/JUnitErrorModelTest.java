@@ -1,39 +1,31 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2017, JavaPLT group at Rice University (drjava@rice.edu)
- * All rights reserved.
+ * Copyright (c) 2001-2019, JavaPLT group at Rice University (drjava@rice.edu).  All rights reserved.
  * 
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *    * Redistributions of source code must retain the above copyright
- *      notice, this list of conditions and the following disclaimer.
- *    * Redistributions in binary form must reproduce the above copyright
- *      notice, this list of conditions and the following disclaimer in the
- *      documentation and/or other materials provided with the distribution.
- *    * Neither the names of DrJava, the JavaPLT group, Rice University, nor the
- *      names of its contributors may be used to endorse or promote products
- *      derived from this software without specific prior written permission.
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the 
+ * following conditions are met:
+ *    * Redistributions of source code must retain the above copyright notice, this list of conditions and the following
+ *      disclaimer.
+ *    * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the 
+ *      following disclaimer in the documentation and/or other materials provided with the distribution.
+ *    * Neither the names of DrJava, the JavaPLT group, Rice University, nor the names of its contributors may be used 
+ *      to endorse or promote products derived from this software without specific prior written permission.
  * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * This software is Open Source Initiative approved Open Source Software.
- * Open Source Initative Approved is a trademark of the Open Source Initiative.
+ * This software is Open Source Initiative approved Open Source Software. Open Source Initative Approved is a trademark
+ * of the Open Source Initiative.
  * 
- * This file is part of DrJava.  Download the current version of this project
- * from http://www.drjava.org/ or http://sourceforge.net/projects/drjava/
+ * This file is part of DrJava.  Download the current version of this project from http://www.drjava.org/ or 
+ * http://sourceforge.net/projects/drjava/
  * 
  * END_COPYRIGHT_BLOCK*/
-
 package edu.rice.cs.drjava.model.junit;
 
 import edu.rice.cs.drjava.model.GlobalModelTestCase;
@@ -210,25 +202,17 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     
     // Wait until events triggered by running unit tests have cleared ? (should be done by code above)
 //    Utilities.clearEventQueue();
-    _log.log("Event queue cleared");
+//    _log.log("Event queue cleared");
     _m = _model.getJUnitModel().getJUnitErrorModel();
     
-    //JUnitError[] errorsWithPositions = _m.getErrorsWithPositions();
-    //JUnitError[] errorsWithoutPositions = _m.getErrorsWithoutPositions();
-    //assertTrue("testResults should not be null", testResults != null);
-    
     assertEquals("the test results should have one error and one failure " + _m.getNumErrors(), 2, _m.getNumErrors());
-    
     assertEquals("test case has one error reported" + _m.getError(0).message(), _m.getError(0).isWarning(), false);
-    
     assertEquals("test case has one failure reported" + _m.getError(1).message(), _m.getError(1).isWarning(), true);
     //_model.setResetAfterCompile(true);
     
     //final TestResult testResults = doc.startJUnit();
     
     _log.log("testErrorArrayInOrder complete");
-    //_m = new JUnitErrorModel(doc.getDocument(), "MonkeyTestFail", testResults);
-    debug.logEnd();
   }
   
   /** Tests that a VerifyError is reported as an error, rather than

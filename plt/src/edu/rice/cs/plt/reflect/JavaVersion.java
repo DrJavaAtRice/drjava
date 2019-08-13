@@ -136,9 +136,7 @@ public enum JavaVersion {
     }
   }
   
-  /**
-   * Produce the {@code JavaVersion} corresponding to the given class file.
-   */
+  /** Produce the {@code JavaVersion} corresponding to the given class file. */
   public static JavaVersion parseClassVersion(java.io.InputStream is) {
     java.io.DataInputStream dis = null;
     try {
@@ -151,7 +149,7 @@ public enum JavaVersion {
     }
     catch(java.io.IOException ioe) { return UNRECOGNIZED; }
     finally {
-      if (dis!=null) {
+      if (dis != null) {
         try { dis.close(); }
         catch(java.io.IOException ioe) { /* ignore */ }
       }

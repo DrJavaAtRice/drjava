@@ -1,39 +1,31 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2017, JavaPLT group at Rice University (drjava@rice.edu)
- * All rights reserved.
+ * Copyright (c) 2001-2019, JavaPLT group at Rice University (drjava@rice.edu).  All rights reserved.
  * 
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *    * Redistributions of source code must retain the above copyright
- *      notice, this list of conditions and the following disclaimer.
- *    * Redistributions in binary form must reproduce the above copyright
- *      notice, this list of conditions and the following disclaimer in the
- *      documentation and/or other materials provided with the distribution.
- *    * Neither the names of DrJava, the JavaPLT group, Rice University, nor the
- *      names of its contributors may be used to endorse or promote products
- *      derived from this software without specific prior written permission.
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the 
+ * following conditions are met:
+ *    * Redistributions of source code must retain the above copyright notice, this list of conditions and the following
+ *      disclaimer.
+ *    * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the 
+ *      following disclaimer in the documentation and/or other materials provided with the distribution.
+ *    * Neither the names of DrJava, the JavaPLT group, Rice University, nor the names of its contributors may be used 
+ *      to endorse or promote products derived from this software without specific prior written permission.
  * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * This software is Open Source Initiative approved Open Source Software.
- * Open Source Initative Approved is a trademark of the Open Source Initiative.
+ * This software is Open Source Initiative approved Open Source Software. Open Source Initative Approved is a trademark
+ * of the Open Source Initiative.
  * 
- * This file is part of DrJava.  Download the current version of this project
- * from http://www.drjava.org/ or http://sourceforge.net/projects/drjava/
+ * This file is part of DrJava.  Download the current version of this project from http://www.drjava.org/ or 
+ * http://sourceforge.net/projects/drjava/
  * 
  * END_COPYRIGHT_BLOCK*/
-
 package edu.rice.cs.drjava.model;
 
 import java.io.File;
@@ -158,11 +150,11 @@ public abstract class JDKDescriptor {
   }
   
   /** Singleton representing a JDK that doesn't have a descriptor. */
-  public static final JDKDescriptor NONE = new None();
+  public static final JDKDescriptor JDK_DEFAULT = new Default();
     
-  /** Class for the singleton representing a JDK that doesn't have a descriptor. */
-  private static final class None extends JDKDescriptor {
-    public String getName() { return "none"; }
+  /** Class for the singleton representing a JDK with the default descriptor. */
+  private static final class Default extends JDKDescriptor {
+    public String getName() { return "default"; }
     public String getDescription(JavaVersion.FullVersion version) {
       switch(version.vendor()) {
         case ORACLE:
@@ -172,7 +164,7 @@ public abstract class JDKDescriptor {
         case APPLE:
           return "Apple JDK library " + version.toString();
         default:
-          return "JDK library " + version.toString();
+          return "Default OpenJDK library " + version.toString();
       }
     }
     public Set<String> getToolsPackages() { return Collections.emptySet(); }
@@ -189,7 +181,7 @@ public abstract class JDKDescriptor {
       return JDKToolsLibrary.adapterForDebugger(guessedVersion);
     }
     public boolean containsCompiler(File f) { return true; }
-    public JavaVersion getMinimumMajorVersion() { return JavaVersion.JAVA_6; }
+    public JavaVersion getMinimumMajorVersion() { return JavaVersion.JAVA_7; }
     public Iterable<File> getAdditionalCompilerFiles(File compiler) throws FileNotFoundException {
       return IterUtil.empty();
     }

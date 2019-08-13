@@ -75,15 +75,15 @@ import static edu.rice.cs.plt.debug.DebugUtil.error;
   *  @version $Id$
   */
 
-public class EclipseCompiler extends JavacCompiler { 
+public class EclipseCompiler extends Javac170Compiler { 
   
   public EclipseCompiler(JavaVersion.FullVersion version, String location, List<? extends File> defaultBootClassPath) {
     super(version, location, defaultBootClassPath);
   }
 
 
-  public static final String COMPILER_VERSION = "4.5";
-  public static final Log _log = new Log("EclipseCompiler.txt",true);
+  public static final String COMPILER_VERSION = "4.6.3";
+  public static final Log _log = new Log("EclipseCompiler.txt",false);
   
   public String getName() { return "Eclipse Compiler " + COMPILER_VERSION; }
   

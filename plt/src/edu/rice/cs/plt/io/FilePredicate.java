@@ -38,9 +38,7 @@ import java.io.FileFilter;
 import java.io.File;
 import edu.rice.cs.plt.lambda.Predicate;
 
-/**
- * An object that is both a {@code FileFilter} and a {@code Predicate<File>}, 
- * for convenient use with code that requires one or the other.
- */
-public interface FilePredicate extends FileFilter, Predicate<File> {
-}
+/** An object that is both a {@code FileFilter} and a {@code Predicate<File>}, 
+  * for convenient use with code that requires one or the other.
+  */
+public interface FilePredicate extends FileFilter, Predicate<File> { }

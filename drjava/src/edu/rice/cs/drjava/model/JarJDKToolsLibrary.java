@@ -1,6 +1,6 @@
 /* BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2017, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2019, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -226,8 +226,8 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         try {
           Class<?>[] sig = { FullVersion.class, String.class, List.class };
           Object[] args = { version, f.toString(), bootClassPath };
-          // JDKToolsLibrary._log.log("classpath for compiler: " + IterUtil.multilineToString(path));
-          // JDKToolsLibrary._log.log("boot classpath for compiler: " + IterUtil.multilineToString(bootClassPath));                
+          // JDKToolsLibrary.msg("classpath for compiler: " + IterUtil.multilineToString(path));
+          // JDKToolsLibrary.msg("boot classpath for compiler: " + IterUtil.multilineToString(bootClassPath));                
           CompilerInterface attempt = (CompilerInterface) ReflectUtil.loadLibraryAdapter(loader, path, compilerAdapter, 
                                                                                          sig, args);
           if (attempt.isAvailable()) { compiler = attempt; }
@@ -416,14 +416,13 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     String envJavaHome = null;
     String programFiles = null;
     String systemDrive = null;
-    if (JavaVersion.CURRENT.supports(JavaVersion.JAVA_5)) {
+    if (JavaVersion.CURRENT.supports(JavaVersion.JAVA_7)) {  /* formerly JavaVersion.JAVA_5 */
       // System.getenv is deprecated under 1.3 and 1.4, and may throw a java.lang.Error (!),
       // which we'd rather not have to catch
       envJavaHome = System.getenv("JAVA_HOME");
       programFiles = System.getenv("ProgramFiles");
       systemDrive = System.getenv("SystemDrive");
     }
-    // To do: add OS query and filter additions depending on OS
     
     // unwind out of potential JRE subdirectory
     if (javaHome != null) {
@@ -447,6 +446,10 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       addIfDir(new File(programFiles), roots);
     }
     
+    /* The following two lines were added to support OpenJDK8 on Windows 10. */
+    addIfDir(new File("/C:/Program Files/Zulu/zulu-8"), roots);
+    addIfDir(new File("/C:/Program Files (x86)/Zulu/zulu-8"), roots);
+      
     addIfDir(new File("/C:/Program Files/Java"), roots);
     addIfDir(new File("/C:/Program Files (x86)/Java"), roots);
     addIfDir(new File("/C:/Program Files"), roots);
@@ -484,6 +487,8 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
 
 //    addIfDir(new File("/home/javaplt/java/Linux-i686"), roots);
     
+   JDKToolsLibrary.msg("getDefaultSearchRoots() returning " + roots);
+    
     return roots;
   }
   
@@ -496,7 +501,8 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     Predicate<File> subdirFilter = LambdaUtil.or(IOUtil.regexCanonicalCaseFilePredicate("j2sdk.*"),
                                                  IOUtil.regexCanonicalCaseFilePredicate("jdk.*"),
                                                  LambdaUtil.or(IOUtil.regexCanonicalCaseFilePredicate("\\d+\\.\\d+\\.\\d+.*"),
-                                                               IOUtil.regexCanonicalCaseFilePredicate("java-.*"))); 
+                                                               IOUtil.regexCanonicalCaseFilePredicate("java-.*"),
+                                                               IOUtil.regexCanonicalCaseFilePredicate("zulu-.*"))); 
     for (Map.Entry<File,Set<JDKDescriptor>> root : roots.entrySet()) {
       JDKToolsLibrary.msg("Searching root (for jar files): " + root.getKey());
       for (File subdir : IOUtil.attemptListFilesAsIterable(root.getKey(), subdirFilter)) {
@@ -509,13 +515,12 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     }
   }
   
-  /** Check which jars are valid JDKs, and determine if they are compound or 
-   * full (non-compound) JDKs. 
-   * @param model the global model
-   * @param jars the jar files
-   * @param results container for valid full JDKs; populated by this function
-   * @param compoundResults container for valid compound JDKs; populated by this function
-   */
+  /** Check which jars are valid JDKs, and determine if they are compound or full (non-compound) JDKs. 
+    * @param model the global model
+    * @param jars the jar files
+    * @param results container for valid full JDKs; populated by this function
+    * @param compoundResults container for valid compound JDKs; populated by this function
+    */
   protected static void collectValidResults(GlobalModel model,
                                             LinkedHashMap<File,Set<JDKDescriptor>> jars,
                                             Map<FullVersion, Iterable<JarJDKToolsLibrary>> results,
@@ -548,12 +553,12 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
   }
   
   /** Get completed compound JDKs by going through the list of compound JDKs 
-   * and finding full JDKs that complete them. 
-   * @param model the global model
-   * @param collapsed iterator over collapsed JDKs
-   * @param compoundCollapsed iterator over collapsed compound JDKs
-   * @return completed compound JDKs
-   */
+    * and finding full JDKs that complete them. 
+    * @param model the global model
+    * @param collapsed iterator over collapsed JDKs
+    * @param compoundCollapsed iterator over collapsed compound JDKs
+    * @return completed compound JDKs
+    */
   protected static Map<FullVersion, Iterable<JarJDKToolsLibrary>>
     getCompletedCompoundResults(GlobalModel model, Iterable<JarJDKToolsLibrary> collapsed,
                                 Iterable<JarJDKToolsLibrary> compoundCollapsed) {
@@ -616,13 +621,12 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     return completedResults;
   }
   
-  /** Produce a list of tools libraries discovered on the file system.  
-   * A variety of locations are searched; only those files that can produce a
-   * valid library (see {@link #isValid} are returned.  The result is sorted
-   * by version.  Where one library of the same version might be preferred
-   * over another, the preferred library appears earlier in the result list.
-   * @param model the global model
-   * @return list of tools libraries discovered on the file system
+  /** Produce a list of tools libraries discovered on the file system.  A variety of locations are searched; only those
+    * files that can produce a valid library (see {@link #isValid} are returned.  The result is sorted by version.  
+    * Where one library of the same version might be preferred over another, the preferred library appears earlier in 
+    * the result list.
+    * @param model the global model
+    * @return list of tools libraries discovered on the file system
     */
   public static Iterable<JarJDKToolsLibrary> search(GlobalModel model) {
     JDKToolsLibrary.msg("---- Searching for Libraries ----");
@@ -688,7 +692,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
    * @param map map to which to add f
    */
   private static void addIfDir(File f, Map<? super File, Set<JDKDescriptor>> map) {
-    addIfDir(f, JDKDescriptor.NONE, map);
+    addIfDir(f, JDKDescriptor.JDK_DEFAULT, map);
   }
   
   /** Add a canonicalized {@code f} to the given set if it is an existing directory or link 
@@ -715,7 +719,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
    * @param map map to which to add f
    */
   private static void addIfFile(File f, Map<? super File,Set<JDKDescriptor>> map) {
-    addIfFile(f, JDKDescriptor.NONE, map);
+    addIfFile(f, JDKDescriptor.JDK_DEFAULT, map);
   }
   
   /** Add a canonicalized {@code f} to the given set if it is an existing file 
@@ -726,12 +730,12 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
   private static void addIfFile(File f, JDKDescriptor c, Map<? super File,Set<JDKDescriptor>> map) {
     addIfFile(f, Collections.singleton(c), map);
   }
-
+  
   /** Add a canonicalized {@code f} to the given set if it is an existing file 
-   * @param f file to be added
-   * @param cs set of JDKDescriptors
-   * @param map map to which to add f
-   */
+    * @param f file to be added
+    * @param cs set of JDKDescriptors
+    * @param map map to which to add f
+    */
   private static void addIfFile(File f, Set<JDKDescriptor> cs, Map<? super File,Set<JDKDescriptor>> map) {
     f = IOUtil.attemptCanonicalFile(f);
     if (IOUtil.attemptIsFile(f)) {
@@ -755,14 +759,14 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
   private static Iterable<JDKDescriptor> searchForJDKDescriptors() {
     JDKToolsLibrary.msg("---- Searching for descriptors ----");
     long t0 = System.currentTimeMillis();
-    JDKToolsLibrary.msg("ms: "+t0);
+    JDKToolsLibrary.msg("ms: " + t0);
     Iterable<JDKDescriptor> descriptors = IterUtil.empty();
     try {
       File f = edu.rice.cs.util.FileOps.getDrJavaFile();
       JDKToolsLibrary.msg("drjava.jar: " + f);
       if (f.isFile()) {
         JarFile jf = new JarFile(f);
-        JDKToolsLibrary.msg("jar file: " + jf);
+        JDKToolsLibrary.msg("jar file: " + jf.getManifest());
         Enumeration<JarEntry> entries = jf.entries();
         while (entries.hasMoreElements()) {
           JarEntry je = entries.nextElement();

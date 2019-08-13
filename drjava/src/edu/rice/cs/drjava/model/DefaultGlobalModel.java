@@ -1,39 +1,31 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2017, JavaPLT group at Rice University (drjava@rice.edu)
- * All rights reserved.
+ * Copyright (c) 2001-2019, JavaPLT group at Rice University (drjava@rice.edu).  All rights reserved.
  * 
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *    * Redistributions of source code must retain the above copyright
- *      notice, this list of conditions and the following disclaimer.
- *    * Redistributions in binary form must reproduce the above copyright
- *      notice, this list of conditions and the following disclaimer in the
- *      documentation and/or other materials provided with the distribution.
- *    * Neither the names of DrJava, the JavaPLT group, Rice University, nor the
- *      names of its contributors may be used to endorse or promote products
- *      derived from this software without specific prior written permission.
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the 
+ * following conditions are met:
+ *    * Redistributions of source code must retain the above copyright notice, this list of conditions and the following
+ *      disclaimer.
+ *    * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the 
+ *      following disclaimer in the documentation and/or other materials provided with the distribution.
+ *    * Neither the names of DrJava, the JavaPLT group, Rice University, nor the names of its contributors may be used 
+ *      to endorse or promote products derived from this software without specific prior written permission.
  * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * This software is Open Source Initiative approved Open Source Software.
- * Open Source Initative Approved is a trademark of the Open Source Initiative.
+ * This software is Open Source Initiative approved Open Source Software. Open Source Initative Approved is a trademark
+ * of the Open Source Initiative.
  * 
- * This file is part of DrJava.  Download the current version of this project
- * from http://www.drjava.org/ or http://sourceforge.net/projects/drjava/
+ * This file is part of DrJava.  Download the current version of this project from http://www.drjava.org/ or 
+ * http://sourceforge.net/projects/drjava/
  * 
  * END_COPYRIGHT_BLOCK*/
-
 package edu.rice.cs.drjava.model;
 
 
@@ -53,8 +45,8 @@ import edu.rice.cs.drjava.config.BooleanOption;
 import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.drjava.model.JDKDescriptor;
 import edu.rice.cs.drjava.model.compiler.DummyCompilerListener;
-import edu.rice.cs.drjava.model.compiler.EclipseCompiler;
-import edu.rice.cs.drjava.model.compiler.descriptors.EclipseDescriptor;
+//import edu.rice.cs.drjava.model.compiler.EclipseCompiler;
+//import edu.rice.cs.drjava.model.compiler.descriptors.EclipseDescriptor;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.drjava.model.debug.Breakpoint;
@@ -196,15 +188,15 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     Iterable<? extends JDKToolsLibrary> tools = findLibraries();
     List<CompilerInterface> compilers = new LinkedList<CompilerInterface>();
     
-    /* Note: the only debugger used in DrJava is JPDADebugger in the DrJava code base.  But this debugger relies
-     * on machinery provided by tools.jar library included in every Java JDK. If no tools.jar library is found,
-     * DrJava creates a degenerate library containing the Eclipse compiler and no debugger or javadoc tool.
+    /* Note: the only debugger used in DrJava is JPDADebugger in the DrJava code base which relies
+     * on machinery provided by the tools.jar library included in every Java JDK (up through JDK 8).  A copy of the
+     * tools.jar library from Java 8 Open JDK is included in the drjava.jar file.
      */
     _debugger = null;
     _javadocModel = null;
     for (JDKToolsLibrary t : tools) {
 //      Utilities.show("Found tools.jar library: " + t);
-      if (t.compiler().isAvailable() && t.version().supports(JavaVersion.JAVA_6)) compilers.add(t.compiler());
+      if (t.compiler().isAvailable() && t.version().supports(JavaVersion.JAVA_7)) compilers.add(t.compiler());
       if (_debugger == null && t.debugger().isAvailable()) { _debugger = t.debugger(); }
       if (_javadocModel == null && t.javadoc().isAvailable()) { _javadocModel = t.javadoc(); }
     }
@@ -285,7 +277,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
           (_priority == cast._priority) &&
           (_first == null ? cast._first == null : _first.equals(cast._first)) &&
           (_second == null ? cast._second == null :
-             ((_second==JDKDescriptor.NONE) && (cast._second==JDKDescriptor.NONE)));
+             ((_second==JDKDescriptor.JDK_DEFAULT) && (cast._second==JDKDescriptor.JDK_DEFAULT)));
       }
     }
     
@@ -304,8 +296,8 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
         result = _first.compareTo(o._first);
       }
       if (result == 0) {
-        if (_second == JDKDescriptor.NONE) { // identity
-          if (o._second == JDKDescriptor.NONE) { // identity
+        if (_second == JDKDescriptor.JDK_DEFAULT) { // identity
+          if (o._second == JDKDescriptor.JDK_DEFAULT) { // identity
             result = 0;
           }
           else {
@@ -313,7 +305,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
             result = 1;
           }
         }
-        else if (o._second == JDKDescriptor.NONE) { // identity
+        else if (o._second == JDKDescriptor.JDK_DEFAULT) { // identity
           // other is NONE, this is something else; prefer NONE
           result = -1;
         }
@@ -330,11 +322,9 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     return new LibraryKey(priority, coarsenVersion(lib.version()), lib.jdkDescriptor());
   }
   
+  /** Fills the results Map with available tools.jar files located within found JDK distributions. */
   private Iterable<JDKToolsLibrary> findLibraries() {
     // Order to return: config setting, runtime (if different version), from search (if different versions)
-    
-    // We could give priority to libraries that have both available compilers and debuggers, but since this will 
-    // almost always be true, it seems like more trouble than it is worth
     
     // map is sorted by version, lowest-to-highest
     Map<LibraryKey, JDKToolsLibrary> results = new TreeMap<LibraryKey, JDKToolsLibrary>();
@@ -342,55 +332,49 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     File configTools = DrJava.getConfig().getSetting(JAVAC_LOCATION);
     if (configTools != FileOps.NULL_FILE) {
       // TODO: reference to subclass in next line is a code smell!
-      JDKToolsLibrary fromConfig = JarJDKToolsLibrary.makeFromFile(configTools, this, JDKDescriptor.NONE);
+      JDKToolsLibrary fromConfig = JarJDKToolsLibrary.makeFromFile(configTools, this, JDKDescriptor.JDK_DEFAULT);
       if (fromConfig.isValid()) { 
-        JDKToolsLibrary._log.log("From config: " + fromConfig);
+        JDKToolsLibrary.msg("From config: " + fromConfig);
         results.put(getLibraryKey(LibraryKey.PRIORITY_CONFIG, fromConfig), fromConfig);
       }
-      else { JDKToolsLibrary._log.log("From config: invalid " + fromConfig); }
+      else { JDKToolsLibrary.msg("From config: invalid " + fromConfig); }
     }
-    else { JDKToolsLibrary._log.log("From config: not set"); }
-    
+     
     Iterable<JarJDKToolsLibrary> fromSearch = JarJDKToolsLibrary.search(this);
     for (JDKToolsLibrary t : fromSearch) {
       JavaVersion.FullVersion tVersion = t.version();
-      JDKToolsLibrary._log.log("From search: " + t);
+      JDKToolsLibrary.msg("From search: " + t);
       JavaVersion.FullVersion coarsenedVersion = coarsenVersion(tVersion);
-      JDKToolsLibrary._log.log("\tVersion: " + tVersion+" " + tVersion.vendor());
-      JDKToolsLibrary._log.log("\tCoarsened Version: " + coarsenedVersion + " " + coarsenedVersion.vendor());
+      JDKToolsLibrary.msg("\tVersion: " + tVersion+" " + tVersion.vendor());
+      JDKToolsLibrary.msg("\tCoarsened Version: " + coarsenedVersion + " " + coarsenedVersion.vendor());
 
       // give a lower priority to built-in compilers
       int priority = (edu.rice.cs.util.FileOps.getDrJavaFile().equals(tVersion.location())) ?
         LibraryKey.PRIORITY_BUILTIN : LibraryKey.PRIORITY_SEARCH;
       if (! results.containsKey(getLibraryKey(priority, t))) {
-        JDKToolsLibrary._log.log("\tadded ");
+        JDKToolsLibrary.msg("\tadded ");
         results.put(getLibraryKey(priority, t), t);
       }
-      else { JDKToolsLibrary._log.log("\tduplicate"); }
+      else { JDKToolsLibrary.msg("\tduplicate"); }
     }
     
-    // Only create a JDKToolslibrary for the embedded Eclipse compiler if the list of results is otherwise empty.  
-    // This library does not include javadoc since Eclipse relies on the javadoc tool bundled in a Sun/Oracle/OpenJDK
-    // tools.jar.
+    /* Removed when OPEN JDK 8 tools.jar (unjarred) was added to drjava.jar */
+//    // Only create a default JDKToolslibrary for the embedded tools.jar file if the list of results is otherwise empty.  
+//    
+//    if (results.isEmpty()) {
+//      JDKToolsLibrary defaultLibrary = 
+//        JarJDKToolsLibrary.makeFromFile(FileOps.getDrJavaFile(), this, JDKDescriptor.JDK_DEFAULT);
+//      JDKToolsLibrary.msg("Returning default library: " + defaultLibrary);
+//      return IterUtil.singleton(defaultLibrary);
+//    }
     
-    if (results.isEmpty()) {
-      /* Build a JDKToolsLibrary from this JVM runtime (which has DrJava.jar on the classpath) using the embedded Eclipse compiler, no
-       * debugger and no javadoc.  The latter two tools are provided by the tools.jar library in a Java JDK.  No JDK is available.
-       */
-      String path = System.getProperty("sun.boot.class.path");
-      List<File> bootClassPath = CollectUtil.makeList(IOUtil.parsePath(path));
-      JDKDescriptor descriptor = EclipseDescriptor.ONLY; 
-      CompilerInterface compiler = new EclipseCompiler(JavaVersion.CURRENT_FULL, null /* on runtime class path */, bootClassPath); 
-      Debugger debugger = NoDebuggerAvailable.ONLY;
-      JavadocModel javadoc = new NoJavadocAvailable(this);  // TODO: convert this class to a singleton
-      JDKToolsLibrary eclipseLibrary = new JDKToolsLibrary(JavaVersion.CURRENT_FULL, descriptor , compiler, debugger, javadoc);
-      
-      JDKToolsLibrary._log.log("Returning library: " + eclipseLibrary);
-      return IterUtil.singleton(eclipseLibrary);
-    }
+    // Add embedded tools.jar (unjarred) to libraries 
+    JDKToolsLibrary defaultLibrary = JarJDKToolsLibrary.makeFromFile(FileOps.getDrJavaFile(), this, JDKDescriptor.JDK_DEFAULT);
+    results.put(getLibraryKey(LibraryKey.PRIORITY_BUILTIN, defaultLibrary), defaultLibrary);
+    JDKToolsLibrary.msg("Adding default library: " + defaultLibrary);
     
     Iterable<JDKToolsLibrary> libraries = IterUtil.reverse(results.values());
-    JDKToolsLibrary._log.log("Returning libraries: " + libraries);
+    JDKToolsLibrary.msg("findLibraries() returning libraries: " + libraries);
     return libraries;
   }
   

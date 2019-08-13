@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!-- DrJava Build Script -->
 
 <!-- This build script is based on the template located at "trunk/misc/build-template.xml"
@@ -988,24 +989,6 @@
     <fail message="Can't find rt.jar in the Java 8 home: ${java8-home}" unless="java8-runtime" />
   </target>
 
-  <target name="resolve-java7-runtime">
-    <!-- We rely on "location" to generate a platform-specific path; note that properties
-         are immutable and so java7-runtime will only be set the *first* time. -->
-
-    <property name="java7-runtime-1" location="${java7-home}/lib/rt.jar" />
-    <available property="java7-runtime" value="${java7-runtime-1}" file="${java7-runtime-1}" />
-
-    <property name="java7-runtime-2" location="${java7-home}/jre/lib/rt.jar" />
-    <available property="java7-runtime" value="${java7-runtime-2}" file="${java7-runtime-2}" />
-
-    <property name="java7-runtime-3" location="${java7-home}/../Classes/classes.jar" />
-    <available property="java7-runtime" value="${java7-runtime-3}" file="${java7-runtime-3}" />
-
-    <echo message="java7-runtime = ${java7-runtime}" />
-
-    <fail message="Can't find rt.jar in the Java 7 home: ${java7-home}" unless="java7-runtime" />
-  </target>
-  
   <target name="resolve-java8-exec">
     <!-- We rely on "location" to generate a platform-specific path -->
 

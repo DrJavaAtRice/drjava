@@ -1,39 +1,31 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2017, JavaPLT group at Rice University (drjava@rice.edu)
- * All rights reserved.
+ * Copyright (c) 2001-2019, JavaPLT group at Rice University (drjava@rice.edu).  All rights reserved.
  * 
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *    * Redistributions of source code must retain the above copyright
- *      notice, this list of conditions and the following disclaimer.
- *    * Redistributions in binary form must reproduce the above copyright
- *      notice, this list of conditions and the following disclaimer in the
- *      documentation and/or other materials provided with the distribution.
- *    * Neither the names of DrJava, the JavaPLT group, Rice University, nor the
- *      names of its contributors may be used to endorse or promote products
- *      derived from this software without specific prior written permission.
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the 
+ * following conditions are met:
+ *    * Redistributions of source code must retain the above copyright notice, this list of conditions and the following
+ *      disclaimer.
+ *    * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the 
+ *      following disclaimer in the documentation and/or other materials provided with the distribution.
+ *    * Neither the names of DrJava, the JavaPLT group, Rice University, nor the names of its contributors may be used 
+ *      to endorse or promote products derived from this software without specific prior written permission.
  * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * This software is Open Source Initiative approved Open Source Software.
- * Open Source Initative Approved is a trademark of the Open Source Initiative.
+ * This software is Open Source Initiative approved Open Source Software. Open Source Initative Approved is a trademark
+ * of the Open Source Initiative.
  * 
- * This file is part of DrJava.  Download the current version of this project
- * from http://www.drjava.org/ or http://sourceforge.net/projects/drjava/
+ * This file is part of DrJava.  Download the current version of this project from http://www.drjava.org/ or 
+ * http://sourceforge.net/projects/drjava/
  * 
  * END_COPYRIGHT_BLOCK*/
-
 package edu.rice.cs.drjava.model.junit;
 
 import java.io.File;
@@ -115,6 +107,9 @@ public class JUnitTestManager {
   /** The accumulated list of names of TestCase classes; null if no test is pending. */
   private List<String> _testClassNames = null;
   
+  /** The accumulated list of names of nonTestCase classes. */
+  private List<String> _nonTestClassNames = null;
+  
   /** The list of files corresponding to testClassNames; null if no test is pending. */
   private List<File> _testFiles = null;
   
@@ -122,7 +117,6 @@ public class JUnitTestManager {
   private String _coverageOutdir = null;
   private IRuntime _runtime = null;
   private RuntimeData _myData = null;
-  private List<String> _nonTestClassNames = null;
   private JUnitResultTuple _finalResult = new JUnitResultTuple(false, null);
   
   /** Standard constructor 
@@ -175,7 +169,6 @@ public class JUnitTestManager {
       _runtime = new LoggerRuntime();
       _myData = new RuntimeData();
       loader = new JacocoClassLoader(_classPathManager.getClassPath(), new Instrumenter(_runtime), defaultLoader);
-      _nonTestClassNames = new ArrayList(classNames.size());
       try { _runtime.startup(_myData); }
       catch (Exception e) {
         _log.log("In code coverage startup, throwing the wrapped exception " + e);
@@ -189,9 +182,9 @@ public class JUnitTestManager {
     _log.log("Preparing to run test cases");
     _testRunner = makeRunner(loader);
     
-    _testClassNames = new ArrayList<String>();
+    _testClassNames = new ArrayList<String>(classNames.size());
     _testFiles = new ArrayList<File>();
-    _nonTestClassNames = new ArrayList(classNames.size());
+    _nonTestClassNames = new ArrayList<String>(classNames.size());
     _suite = new TestSuite();
 
     // Assemble test suite (as _suite) and return list of test class names
@@ -203,9 +196,8 @@ public class JUnitTestManager {
         if (_isJUnitTest(possibleTest)) {
           _testClassNames.add(cName);
           _testFiles.add(pair.second());
-          Test test = new JUnit4TestAdapter(possibleTest);
-          _suite.addTest(test); 
-          _log.log("Adding test " + test + " to test suite"); 
+          _suite.addTest(new JUnit4TestAdapter(possibleTest)); 
+          _log.log("Adding test " + possibleTest + " to test suite"); 
         } else { // cName is a program class that is not a test class
           _nonTestClassNames.add(cName);
           _log.log("adding " + cName + " to nonTestClassNames");
@@ -351,9 +343,9 @@ public class JUnitTestManager {
     _log.log("test manager state reset");
   }
   
-  /** Determines if the given class is a junit Test.  This determination is not completely accurate.  Any
-    * method that is annotated with a property corresponding to org.junit.Test.class is classified as a
-    * test metthod.  Hence the annotaion @ignore is not recognized.
+  /** Determines if the given class is a junit Test.  This determination is not completely accurate.  Any method that is
+    * annotated with a property corresponding to org.junit.Test.class is classified as a test metthod.  Hence the 
+    * annotation @ignore is not recognized.
     * @param c the class to check
     * @return true iff the given class is an instance of junit.framework.Test
     */

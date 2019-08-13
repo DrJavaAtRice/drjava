@@ -40,46 +40,36 @@ import java.io.IOException;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.io.IOUtil;
 
-/**
- * <p>A class loader that provides a helper method definePackageForClass.</p>  
- */
+/** <p>A class loader that provides a helper method definePackageForClass.</p> */
 public abstract class AbstractClassLoader extends ClassLoader {
-  /**
-   * Creates a new class loader using the <tt>ClassLoader</tt> returned by
-   * the method {@link #getSystemClassLoader()
-   * <tt>getSystemClassLoader()</tt>} as the parent class loader.
-   *
-   * <p> If there is a security manager, its {@link
-   * SecurityManager#checkCreateClassLoader()
-   * <tt>checkCreateClassLoader</tt>} method is invoked.  This may result in
-   * a security exception.  </p>
-   *
-   * @throws  SecurityException
-   *          If a security manager exists and its
-   *          <tt>checkCreateClassLoader</tt> method doesn't allow creation
-   *          of a new class loader.
-   */  
+  /** Creates a new class loader using the <tt>ClassLoader</tt> returned by the method {@link #getSystemClassLoader()
+    * <tt>getSystemClassLoader()</tt>} as the parent class loader.
+    *
+    * <p> If there is a security manager, its {@link
+    * SecurityManager#checkCreateClassLoader()
+    * <tt>checkCreateClassLoader</tt>} method is invoked.  This may result in
+    * a security exception.  </p>
+    *
+    * @throws  SecurityException
+    *          If a security manager exists and its
+    *          <tt>checkCreateClassLoader</tt> method doesn't allow creation
+    *          of a new class loader.
+    */  
   protected AbstractClassLoader() { super(); }
   
-  /**
-   * Creates a new class loader using the specified parent class loader for
-   * delegation.
-   *
-   * <p> If there is a security manager, its {@link
-   * SecurityManager#checkCreateClassLoader()
-   * <tt>checkCreateClassLoader</tt>} method is invoked.  This may result in
-   * a security exception.  </p>
-   *
-   * @param  parent
-   *         The parent class loader
-   *
-   * @throws  SecurityException
-   *          If a security manager exists and its
-   *          <tt>checkCreateClassLoader</tt> method doesn't allow creation
-   *          of a new class loader.
-   *
-   * @since  1.2
-   */
+  /** Creates a new class loader using the specified parent class loader for delegation.
+    *
+    * <p> If there is a security manager, its {@link SecurityManager#checkCreateClassLoader()
+    * <tt>checkCreateClassLoader</tt>} method is invoked.  This may result in a security exception.  </p>
+    *
+    * @param  parent
+    *         The parent class loader
+    *
+    * @throws  SecurityException
+    *          If a security manager exists and its <tt>checkCreateClassLoader</tt> method doesn't allow creation
+    *          of a new class loader.
+    * @since  1.2
+    */
   protected AbstractClassLoader(ClassLoader parent) { super(parent); }
   
   /** Defines a package for a class, unless it has been defined already. This must be done before
