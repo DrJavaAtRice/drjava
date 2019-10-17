@@ -744,17 +744,17 @@ public class ExpressionEvaluator extends AbstractVisitor<Object> implements Lamb
   };
   
   public static final Lambda2<Object, Object, Object> DIVIDE = new MatchingPrimitiveBinaryOperation() {
-    @Override public Object value(int l, int r) { return l / r; }
-    @Override public Object value(long l, long r) { return l / r; }
-    @Override public Object value(float l, float r) { return l / r; }
-    @Override public Object value(double l, double r) { return l / r; }
+    @Override public Object value(int l, int r) { return ((r != 0) ? (l / r) : 0); }
+    @Override public Object value(long l, long r) { return ((r != 0) ? (l / r) : 0); }
+    @Override public Object value(float l, float r) { return ((r != 0) ? (l / r) : 0); }
+    @Override public Object value(double l, double r) { return ((r != 0) ? (l / r) : 0); }
   };
   
   public static final Lambda2<Object, Object, Object> REMAINDER = new MatchingPrimitiveBinaryOperation() {
-    @Override public Object value(int l, int r) { return l % r; }
-    @Override public Object value(long l, long r) { return l % r; }
-    @Override public Object value(float l, float r) { return l % r; }
-    @Override public Object value(double l, double r) { return l % r; }
+    @Override public Object value(int l, int r) { return ((r != 0) ? (l % r) : 0); }
+    @Override public Object value(long l, long r) { return ((r != 0) ? (l % r) : 0); }
+    @Override public Object value(float l, float r) { return ((r != 0) ? (l % r) : 0); }
+    @Override public Object value(double l, double r) { return ((r != 0) ? (l % r) : 0); }
   };
   
   public static final Lambda2<Object, Object, Object> LESS = new MatchingPrimitiveBinaryOperation() {

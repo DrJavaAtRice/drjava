@@ -160,7 +160,10 @@ public final class RemoteControlServer {
       }
     }
     
-    protected void finalize() { if (socket != null) socket.close(); }
+    protected void finalize() { 
+      if (socket != null) socket.close(); 
+      super.finalize();
+    }
   }
   
   /** Main method for test purposes. 
