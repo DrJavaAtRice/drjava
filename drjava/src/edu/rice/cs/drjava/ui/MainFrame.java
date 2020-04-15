@@ -6960,9 +6960,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _addMenuItem(toolsMenu, _resetInteractionsAction, KEY_RESET_INTERACTIONS, updateKeyboardManager);
     toolsMenu.addSeparator();
 
- // Code Coverage
- _addMenuItem(toolsMenu, _coverageAction, KEY_CODE_COVERAGE, updateKeyboardManager);
- toolsMenu.addSeparator();
+    // Code Coverage
+    _addMenuItem(toolsMenu, _coverageAction, KEY_CODE_COVERAGE, updateKeyboardManager);
+    toolsMenu.addSeparator();
     
     // Javadoc
     final JMenu javadocMenu = _newJMenu("Javadoc");

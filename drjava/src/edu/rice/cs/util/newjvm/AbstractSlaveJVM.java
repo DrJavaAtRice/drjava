@@ -88,8 +88,8 @@ public abstract class AbstractSlaveJVM implements SlaveRemote {
           ConcurrentUtil.sleep(CHECK_MAIN_VM_ALIVE_SECONDS*1000);
           try { master.checkStillAlive(); }
           catch (RemoteException e) {
-            // TODO: This should always be an exceptional situation, but for now
-            // many tests abandon the slave without quitting cleanly.
+            // TODO: This should always be an exceptional situation, but for now many tests abandon the slave without 
+            // quitting cleanly.
             // error.log("Master is no longer available", e);
             quit();
           }

@@ -58,7 +58,7 @@
   
   <!-- For code coverage report -->
   <taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml">
-      <classpath path="lib/jacocoant.jar"/>
+      <classpath path="lib/buildlib/jacocoant.jar"/>
   </taskdef>
   <property name="coverage-report-dir" value="coverage_report"/>
   <property name="coverage-exec" value="jacoco.exec"/>
@@ -755,7 +755,7 @@
   </target>
        
   <target name="release"
-          depends="build, jar-app, mac-app, windows-app, javadoc-zip" 
+          depends="build, jar-app, javadoc-zip" 
           description="Make a development release">
     <delete dir="${version-tag}" />
   </target>
@@ -765,6 +765,7 @@
     <copy file="${ant.project.name}.jar" tofile="${version-tag}.jar" />
   </target>
 
+<!--
   <target name="mac-app" depends="jar, assert-jar-exists, resolve-version-tag">
     <echo message="Creating ${version-tag}-osx.zip" />
     <taskdef name="bundleapp"
@@ -789,7 +790,9 @@
                   includes="${readable-project-name}.app/Contents/MacOS/JavaAppLauncher" />
     </zip>
   </target>
+-->
   
+<!--
   <target name="windows-app" depends="assert-launch4j-exists, jar, assert-jar-exists, resolve-version-tag">
     <echo message="Creating ${version-tag}.exe" />
     <taskdef name="launch4j" classname="net.sf.launch4j.ant.Launch4jTask">
@@ -815,8 +818,9 @@
     <copy file="${ant.project.name}.jar" todir="${windows-app-dir}" />
     <launch4j configfile="${windows-app-dir}/launch4j-config.xml" />
   </target>
+-->
 
-  <target name="javadoc-zip" depends="javadoc, resolve-version-tag" unless="skip-javadoc">
+<target name="javadoc-zip" depends="javadoc, resolve-version-tag" unless="skip-javadoc">
     <echo message="Creating ${version-tag}-javadoc.zip" />
     <zip destfile="${version-tag}-javadoc.zip">
       <zipfileset dir="docs/javadoc" prefix="${version-tag}/javadoc" />
