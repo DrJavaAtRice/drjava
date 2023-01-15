@@ -1497,7 +1497,7 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
       VariableData vd = accessorMappings.get(i).getFirst();
       MethodData md = accessorMappings.get(i).getSecond();
       boolean canSeeMethod =
-        TypeChecker.checkAccess(new NullLiteral(SourceInfo.NONE), md.getMav(), md.getName(), 
+        d.checkAccess(new NullLiteral(SourceInfo.NONE), md.getMav(), md.getName(), 
                                        md.getSymbolData(), currClass, "method", false);
       //TODO: it is okay to throw Runtime exceptions or Errors) {
       if (canSeeMethod && (! md.hasModifier("static")) && md.getThrown().length == 0 &&

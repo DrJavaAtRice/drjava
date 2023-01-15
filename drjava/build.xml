@@ -316,6 +316,7 @@
     <!-- Delete "classes/lib" in case it exists (but is out of date) -->
     <delete dir="classes/lib" />
     <mkdir dir="classes/lib" />
+    <echo message="jar files are: ${toString:libs}" />
     <unjar dest="classes/lib">
       <fileset refid="libs" />
       <patternset excludes="META-INF/**" />

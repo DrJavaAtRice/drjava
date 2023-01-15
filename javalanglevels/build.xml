@@ -55,7 +55,7 @@
   <extendclasspath path="lib/buildlib/junit.jar" />
 
   <fileset id="libs" dir="lib" includes="*.jar" /> <!-- Only include jars that are at the top level (not in buildlib) -->
-  <echo message="libs=${libs}" />
+  <echo message="libs=${toString:libs}" />
     
   <!-- ************
        Help Targets
@@ -274,6 +274,7 @@
     <!-- Delete "classes/lib" in case it exists (but is out of date) -->
     <delete dir="classes/lib" />
     <mkdir dir="classes/lib" />
+    <echo message="jar files are: ${toString:libs}" />
     <unjar dest="classes/lib">
       <fileset refid="libs" />
       <patternset excludes="META-INF/**" />
@@ -286,14 +287,7 @@
        Testing Targets
        *************** -->
   
-  <target name="test" depends="compile" unless="skip-test"
-          description="Run all tests (after compiling); use -Dtest-spec=... to filter">
-    <antcall target="iterate-tests">
-      <param name="test-jvm" value="java" />
-    </antcall>
-  </target>
-
-  <target name="test-8" depends="compile, resolve-java8-exec" unless="skip-test"
+  <target name="test" depends="compile, resolve-java8-exec" unless="skip-test"
           description="Run all tests under Java 8 (after compiling); use -Dtest-spec=... to filter">
     <antcall target="iterate-tests">
       <param name="test-jvm" value="${java8-exec}" />
@@ -383,24 +377,14 @@
     
   </target>
   
-  
   <target name="do-test" depends="resolve-jvm-args">
-    <!-- touch the class files in testFiles to make sure they have
-         a more recent time stamp than their source files;
-         otherwise, the unit tests will fail with a confusing
-         "should not be null" failure -->
-    <touch>
-        <fileset dir="testFiles">
-          <filename name="**/*.class" />
-        </fileset>
-    </touch>
     <echo message="Running all tests matching '${test-filter-string}' with command '${test-jvm}'" />
     <junit haltonfailure="${test-halt}" failureproperty="test-failed"
-           fork="yes" forkmode="perTest" maxmemory="512M" jvm="${test-jvm}" dir="${basedir}">
+           fork="yes" forkmode="perTest" maxmemory="2G" jvm="${test-jvm}" dir="${basedir}">
       <classpath>
         <pathelement location="lib/buildlib/junit.jar" />
         <pathelement location="lib/buildlib/plt-ant.jar" /> <!-- required for custom formatter -->
-        <pathelement location="${clover-jar}" />
+	<pathelement location="${drjava-jar}" />
         <pathelement location="classes/test" />
         <pathelement location="classes/base" />
         <pathelement location="classes/lib" />
@@ -487,38 +471,6 @@
     </javadoc>
   </target>
   
-  
-  <target name="clover" depends="clean, setup-clover, test, report-clover" 
-          description="Generate a Clover test coverage report" />
-  
-  <target name="clover-8" depends="clean, setup-clover, test-8, report-clover" 
-          description="Generate a Clover test coverage report under Java 8" />
-  
-  <target name="report-clover" depends="resolve-version-tag">
-    <echo message="Generating Clover report" />
-    <clover-report>
-      <current outfile="docs/clover" title="${readable-project-name} Test Coverage (${version-tag})">
-        <format type="html" />
-      </current>
-    </clover-report>
-    <antcall target="clean-intermediate"> <!-- Remove instrumented class files -->
-      <param name="clean-can-fail" value="no" />
-    </antcall>
-  </target>
-
-  <target name="setup-clover" depends="assert-clover-jar-exists">
-    <extendclasspath path="${clover-jar}" />
-    <taskdef resource="clovertasks" classpath="${clover-jar}" />
-    <mkdir dir="cloverdb" />
-    <clover-setup initString="cloverdb/clover.db">
-      <files>
-        <exclude name="**/*Test.java" />
-        <exclude name="**/*TestCase.java" />
-        <!-- Additional test sources should be listed here -->
-      </files>
-    </clover-setup>
-  </target>
-
 
   <target name="findbugs" depends="assert-findbugs-exists, compile"
 	      description="Generate a findbugs report (after compiling)">
@@ -562,7 +514,6 @@
     <echo message="Deleting all intermediate build products" />
     
     <delete dir="classes" failonerror="${clean-can-fail}" />
-    <delete dir="cloverdb" failonerror="${clean-can-fail}" />
 
     <delete includeemptydirs="true" failonerror="${clean-can-fail}">
       <fileset dir="testFiles">
@@ -800,11 +751,6 @@
   <target name="assert-jar-exists">
     <available property="jar-exists" file="${ant.project.name}.jar" />
     <fail message="Can't find ${ant.project.name}.jar" unless="jar-exists" />
-  </target>
-  
-  <target name="assert-clover-jar-exists">
-    <available property="clover-jar-exists" file="${clover-jar}" />
-    <fail message="${clover-jar} does not exist" unless="clover-jar-exists" />
   </target>
   
   <target name="assert-findbugs-exists">
