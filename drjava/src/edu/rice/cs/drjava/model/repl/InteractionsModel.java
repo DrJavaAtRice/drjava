@@ -685,7 +685,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     if (! _waitingForFirstInterpreter) {
       Utilities.invokeLater(new Runnable() {
         public void run() {
-          _document.insertBeforeLastPrompt(" Resetting Interactions ...\n", InteractionsDocument.ERROR_STYLE);
+          _document.insertBeforeLastPrompt(" Resetting Interactions and Clearing Console ...\n", InteractionsDocument.ERROR_STYLE);
           _document.setInProgress(true);
         }
       });

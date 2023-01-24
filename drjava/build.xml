@@ -253,7 +253,7 @@
       <fileset dir="classes/test" includes="**/*" />
     </move>
     
-    <javac srcdir="src" destdir="classes/base" source="1.6" target="1.6"
+    <javac srcdir="src" destdir="classes/base"
            bootclasspath="${java8-runtime}" sourcepath="" includeAntRuntime="no"
            executable="javac" fork="yes" memoryMaximumSize="1024M"
            debug="on" optimize="off" deprecation="on"	>

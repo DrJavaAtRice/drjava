@@ -2329,7 +2329,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   };
   
   /** Resets the Interactions pane. */
-  private final Action _resetInteractionsAction = new AbstractAction("Reset Interactions") {
+  private final Action _resetInteractionsAction = new AbstractAction("Reset Interactions and Clear Console") {
     public void actionPerformed(ActionEvent ae) {
       if (! DrJava.getConfig().getSetting(INTERACTIONS_RESET_PROMPT).booleanValue()) {
         _doResetInteractions();
@@ -2354,11 +2354,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   private void _doResetInteractions() {
     _tabbedPane.setSelectedIndex(INTERACTIONS_TAB);
-    updateStatusField("Resetting Interactions");
+    updateStatusField("Resetting Interactions and Clearing Console");
     // Lots of work, so use another thread
     _interactionsPane.discardUndoEdits();
     new Thread(new Runnable() { 
       public void run() {
+        _model.resetConsole();
         _model.resetInteractions(_model.getWorkingDirectory(), true);
         _closeSystemInAction.setEnabled(true);
       }
