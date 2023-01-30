@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <!-- DrJava Build Script -->
 
 <!-- This build script is based on the template located at "trunk/misc/build-template.xml"
@@ -84,8 +83,7 @@
     <echo message="variables may need to be defined (depending on the target invoked):" />
     <echo message="PATH: The 'javac' command is used for compilation;" />
     <echo message="      the 'java' command is used by default in testing/running; " />
-    <echo message="JAVA8_HOME: Home folder of the Java 8 JRE or JDK (required for" />
-    <echo message="            '-8' targets)" />
+    <echo message="JAVA8_HOME: Home folder of the Java 8 JRE or JDK." />
     <echo message="LAUNCH4J_HOME: Location of the Launch4j installation (used to " />
     <echo message="               release a Windows application)" />
     <echo message="FINDBUGS_HOME: Location of the FindBugs installation" />
@@ -237,57 +235,6 @@
     
   </target>
 
-  <target name="compile-8" depends="generate-source, do-compile-8, copy-resources, unjar-libs"
-          description="Compile all source files (after generating the source)">
-  </target>
-  
-  <target name="do-compile-8" depends="resolve-java8-runtime, resolve-java8-tools">
-  
-    <echo message="Compiling src directory to classes/base and classes/test with command 'javac'" />
-    
-    <mkdir dir="classes/base" />
-    <mkdir dir="classes/test" />
-    
-    <!-- Move any test classes back to base to prevent recompilation -->
-    <move todir="classes/base">
-      <fileset dir="classes/test" includes="**/*" />
-    </move>
-    
-    <javac srcdir="src" destdir="classes/base"
-           bootclasspath="${java8-runtime}" sourcepath="" includeAntRuntime="no"
-           executable="javac" fork="yes" memoryMaximumSize="1024M"
-           debug="on" optimize="off" deprecation="on"	>
-      <classpath>
-        <!-- TODO: Remove this dependency on tools.jar by refactoring and moving all the dependent
-             debugger code into the "platform" module -->
-        <pathelement location="${java8-tools}" />
-        <fileset refid="libs" />
-        <pathelement location="lib/buildlib/junit.jar" />
-        <pathelement location="lib/buildlib/netbeans-memory-leak-utils.jar" />
-        <pathelement location="classes/base" />
-      </classpath>
-      <compilerarg value="-Xlint" />
-      <!-- Ignore serial warnings, because they occur for every Throwable definition (among others) -->
-      <compilerarg value="-Xlint:-serial" /> 
-      <!-- Use the next line to compile against other sources, ignoring any unneeded classes.
-           This can be useful in creating a pruned version of a jar file for the lib directory.
-           (You must also clear the sourcepath="" option.)
-      <include name="${src-working-dir}/**/*.java" /> -->
-    </javac>
-    
-    <mkdir dir="classes/test" /> <!-- May be deleted by the previous move -->
-    <move todir="classes/test">
-      <fileset dir="classes/base">
-        <include name="**/*Test.class" />
-        <include name="**/*Test$*.class" />
-        <include name="**/*TestCase.class" />
-        <include name="**/*TestCase$*.class" />
-        <!-- Additional test classes should be listed here -->
-      </fileset>
-    </move>
-    
-  </target>
-
   <target name="copy-resources">
     <copy todir="classes/base">
       <fileset dir="src">
@@ -333,14 +280,6 @@
     <antcall target="iterate-tests">
       <param name="test-jvm" value="java" />
       <param name="test-tools" value="${current-tools}" />
-    </antcall>
-  </target>
-
-  <target name="test-8" depends="compile, resolve-java8-exec, resolve-java8-tools" unless="skip-test"
-          description="Run all tests under Java 8 (after compiling); use -Dtest-spec=... to filter">
-    <antcall target="iterate-tests">
-      <param name="test-jvm" value="${java8-exec}" />
-      <param name="test-tools" value="${java8-tools}" />
     </antcall>
   </target>
 
@@ -493,13 +432,6 @@
     </antcall>
   </target>
   
-  <target name="run-8" depends="compile, resolve-java8-exec"
-          description="Run the main class under Java 8 (after compiling)">
-    <antcall target="do-run">
-      <param name="run-jvm" value="${java8-exec}" />
-    </antcall>
-  </target>
-
   <target name="do-run" depends="resolve-jvm-args">
     <echo message="Running ${main-class} with command '${run-jvm}'" />
     <java classname="${main-class}" jvm="${run-jvm}" fork="yes" spawn="yes">
@@ -525,12 +457,6 @@
     </antcall>
   </target>
   
-  <target name="run-jar-8" depends="jar, resolve-java8-exec"
-          description="Run the jar file under Java 8 (after building it)">
-    <antcall target="do-run-jar">
-      <param name="run-jvm" value="${java8-exec}" />
-    </antcall>
-  </target>
 
   <target name="do-run-jar" depends="resolve-jvm-args">
     <echo message="Running ${ant.project.name}.jar with command '${run-jvm}'" />
@@ -648,7 +574,7 @@
       <auxclasspath>
         <pathelement location="${java8-tools}" />
         <pathelement location="classes/lib" />
-        <pathelement location="lib/buildlib/junit.jar" />
+        <pathelement location="lib/buildlib/ojunit.jar" />
         <pathelement location="lib/buildlib/netbeans-memory-leak-utils.jar" />
       </auxclasspath>
     </findbugs>
