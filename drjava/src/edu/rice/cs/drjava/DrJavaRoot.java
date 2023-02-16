@@ -260,7 +260,7 @@ public class DrJavaRoot {
       };
       try {
         if (isProjectFile) mf.openProject(command);
-        else if (currFileName.endsWith(OptionConstants.EXTPROCESS_FILE_EXTENSION)) MainFrame.openExtProcessFile(file);
+//        else if (currFileName.endsWith(OptionConstants.EXTPROCESS_FILE_EXTENSION)) MainFrame.openExtProcessFile(file);
         else {
           if (jump && (lineNo >= 0)) {
             /* if a line number has been specified, open the file using MainFrame.open and jump to lineNo using 

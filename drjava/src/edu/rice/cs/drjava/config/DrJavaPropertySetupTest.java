@@ -949,8 +949,8 @@ public class DrJavaPropertySetupTest extends DrJavaTestCase {
     // process.separator
     p = pm.getProperty("Config","process.separator");
     
-    // enclosing.djapp.file
-    p = pm.getProperty("Misc","enclosing.djapp.file");
+//    // enclosing.djapp.file
+//    p = pm.getProperty("Misc","enclosing.djapp.file");
     
     // drjava.file
     // during testing, this is the classes/base directory

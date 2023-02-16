@@ -56,8 +56,6 @@ import edu.rice.cs.util.swing.SwingFrame;
 import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.plt.lambda.LambdaUtil;
 
-
-
 public class EditExternalDialog extends SwingFrame implements OptionConstants {
   private static final int FRAME_WIDTH = 503;
   private static final int FRAME_HEIGHT = 318;
@@ -125,26 +123,26 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
   protected CompletionMonitor _editExternalDialogMonitor = new CompletionMonitor();
   
   /** Filter for drjava external process files (.djapp) */
-  private final FileFilter _extProcFilter = new javax.swing.filechooser.FileFilter() {
-    public boolean accept(File f) {
-      return f.isDirectory() || 
-        f.getPath().endsWith(OptionConstants.EXTPROCESS_FILE_EXTENSION);
-    }
-    public String getDescription() { 
-      return "DrJava External Process Files (*" + EXTPROCESS_FILE_EXTENSION + ")";
-    }
-  };
+//  private final FileFilter _extProcFilter = new javax.swing.filechooser.FileFilter() {
+//    public boolean accept(File f) {
+//      return f.isDirectory() || 
+//        f.getPath().endsWith(OptionConstants.EXTPROCESS_FILE_EXTENSION);
+//    }
+//    public String getDescription() { 
+//      return "DrJava External Process Files (*" + EXTPROCESS_FILE_EXTENSION + ")";
+//    }
+//  };
 
-  /** Filter for drjava project files (.djapp only) */
-  private final FileFilter _saveExtProcFilter = new javax.swing.filechooser.FileFilter() {
-    public boolean accept(File f) {
-      return f.isDirectory() || 
-        f.getPath().endsWith(OptionConstants.EXTPROCESS_FILE_EXTENSION);
-    }
-    public String getDescription() { 
-      return "DrJava External Process Files (*" + PROJECT_FILE_EXTENSION + ")";
-    }
-  };
+//  /** Filter for drjava project files (.djapp only) */
+//  private final FileFilter _saveExtProcFilter = new javax.swing.filechooser.FileFilter() {
+//    public boolean accept(File f) {
+//      return f.isDirectory() || 
+//        f.getPath().endsWith(OptionConstants.EXTPROCESS_FILE_EXTENSION);
+//    }
+//    public String getDescription() { 
+//      return "DrJava External Process Files (*" + PROJECT_FILE_EXTENSION + ")";
+//    }
+//  };
 
   /** For opening files.  We have a persistent dialog to keep track of the last directory from which we opened. */
   private JFileChooser _importChooser;
@@ -297,7 +295,7 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
       }
     };
     _importChooser.setPreferredSize(new Dimension(650, 410));
-    _importChooser.setFileFilter(_extProcFilter);
+//    _importChooser.setFileFilter(_extProcFilter);
     _importChooser.setMultiSelectionEnabled(false);
 
     _exportChooser = new JFileChooser() {
@@ -308,10 +306,10 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
       }
     };
     _exportChooser.setPreferredSize(new Dimension(650, 410));
-    _exportChooser.setFileFilter(_saveExtProcFilter);
+//    _exportChooser.setFileFilter(_saveExtProcFilter);
   }
 
-  /** Method that handels the OK button */
+  /** Method that handles the OK button */
   private void _ok() {
     _lastState = new FrameState(this);
     DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_COUNT,
@@ -346,7 +344,7 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
     }).start();
   }
 
-  /** Method that handels the remove button */
+  /** Method that handles the remove button */
   private void _remove() {
     int count = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT);
     final int selectedIndex = _list.getSelectedIndex();
@@ -369,9 +367,9 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
     v.remove(selectedIndex);
     DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS,v);
 
-    v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES);
-    v.remove(selectedIndex);
-    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES,v);
+//    v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES);
+//    v.remove(selectedIndex);
+//    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES,v);
 
     --count;
     DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_COUNT, count);
@@ -404,10 +402,10 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
     v.add(selectedIndex-1,s);
     DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS,v);
 
-    v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES);
-    s = v.remove(selectedIndex);
-    v.add(selectedIndex-1,s);
-    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES,v);
+//    v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES);
+//    s = v.remove(selectedIndex);
+//    v.add(selectedIndex-1,s);
+//    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES,v);
 
     DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_COUNT, count);
     updateList(Math.max(0,selectedIndex-1));
@@ -439,10 +437,10 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
     v.add(selectedIndex+1,s);
     DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS,v);
 
-    v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES);
-    s = v.remove(selectedIndex);
-    v.add(selectedIndex+1,s);
-    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES,v);
+//    v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES);
+//    s = v.remove(selectedIndex);
+//    v.add(selectedIndex+1,s);
+//    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES,v);
 
     DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_COUNT, count);
     updateList(Math.max(0,selectedIndex+1));
@@ -460,17 +458,17 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
       }
       
       case JFileChooser.APPROVE_OPTION: {
-        File[] chosen = _importChooser.getSelectedFiles();
-        if (chosen == null) {
-          return;
-        } 
-        // If this is a single-selection dialog, getSelectedFiles() will always
-        // return a zero-size array -- handle it differently.
-        if (chosen.length == 0) {
-          File f = _importChooser.getSelectedFile();
-          MainFrame.openExtProcessFile(f);
-          updateList(DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT)-1);
-        }
+//        File[] chosen = _importChooser.getSelectedFiles();
+//        if (chosen == null) {
+//          return;
+//        } 
+//        // If this is a single-selection dialog, getSelectedFiles() will always
+//        // return a zero-size array -- handle it differently.
+//        if (chosen.length == 0) {
+//          File f = _importChooser.getSelectedFile();
+//          MainFrame.openExtProcessFile(f);
+//          updateList(DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT)-1);
+//        }
         return;
       }
         
@@ -505,9 +503,9 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
         // return a zero-size array -- handle it differently.
         if (chosen.length == 0) {
           File f = _exportChooser.getSelectedFile();
-          if (!f.getName().endsWith(OptionConstants.EXTPROCESS_FILE_EXTENSION)) {
-            f = new File(f.getAbsolutePath()+OptionConstants.EXTPROCESS_FILE_EXTENSION);
-          }
+//          if (!f.getName().endsWith(OptionConstants.EXTPROCESS_FILE_EXTENSION)) {
+//            f = new File(f.getAbsolutePath()+OptionConstants.EXTPROCESS_FILE_EXTENSION);
+//          }
           //System.out.println("\tindex=" + _list.getSelectedIndex() + ", file=" + f);
           ExecuteExternalDialog.saveToFile(_list.getSelectedIndex(), f);
         }

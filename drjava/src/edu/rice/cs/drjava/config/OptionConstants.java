@@ -79,8 +79,8 @@ public interface OptionConstants {
   /** The alternative extension for a DrJava project file */
   public static final String PROJECT_FILE_EXTENSION2 = ".xml";
   
-  /** The extension for stand-alone DrJava external process file. */
-  public static final String EXTPROCESS_FILE_EXTENSION = ".djapp";
+//  /** The extension for stand-alone DrJava external process file. */
+//  public static final String EXTPROCESS_FILE_EXTENSION = ".djapp";
 
   /** The extension for a Java source file */
   public static final String JAVA_FILE_EXTENSION = ".java";
@@ -112,8 +112,8 @@ public interface OptionConstants {
       OLD_DJ2_FILE_EXTENSION, // = .dj2
       DJ_FILE_EXTENSION }; // = .dj
   
-  /** The configuration XML file that DrJava looks for inside a .djapp file */
-  public static final String EXTPROCESS_FILE_NAME_INSIDE_JAR = "process" + EXTPROCESS_FILE_EXTENSION;
+//  /** The configuration XML file that DrJava looks for inside a .djapp file */
+//  public static final String EXTPROCESS_FILE_NAME_INSIDE_JAR = "process" + EXTPROCESS_FILE_EXTENSION;
 
   /** The extension for a text file */
   public static final String TEXT_FILE_EXTENSION = ".txt";
@@ -1797,11 +1797,11 @@ public interface OptionConstants {
                              new StringOption("",""),
                              new Vector<String>());
   
-  /** The script file (or "" if none) of saved external processes. */
-  public static final VectorOption<String> EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES =
-    new VectorOption<String>(EXTERNAL_SAVED_PREFIX + "enclosingdjappfiles",
-                             new StringOption("",""),
-                             new Vector<String>());
+//  /** The script file (or "" if none) of saved external processes. */
+//  public static final VectorOption<String> EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES =
+//    new VectorOption<String>(EXTERNAL_SAVED_PREFIX + "enclosingdjappfiles",
+//                             new StringOption("",""),
+//                             new Vector<String>());
   
   /** Notification of new versions. */
   public static final ArrayList<String> NEW_VERSION_NOTIFICATION_CHOICES =

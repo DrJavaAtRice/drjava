@@ -1081,26 +1081,26 @@ public class ConfigFrame extends SwingFrame {
    */
   private void _setupFileTypesPanel(ConfigPanel panel) {
     if (PlatformFactory.ONLY.canRegisterFileExtensions()) {
-      addOptionComponent(panel, new LabelComponent("<html>Assign DrJava project files and DrJava extensions<br>"+
-                                                   "(with the extensions .drjava and .djapp) to DrJava.<br>"+
+      addOptionComponent(panel, new LabelComponent("<html>Assign DrJava project files"+
+                                                   "(with the extension .drjava) to DrJava.<br>"+
                                                    "When double-clicking on a .drjava file, DrJava will open it.</html>", this, true));
       
       panel.addComponent(new ButtonComponent(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           if (PlatformFactory.ONLY.registerDrJavaFileExtensions()) {
             JOptionPane.showMessageDialog(ConfigFrame.this,
-                                          "Successfully set .drjava and .djapp file associations.",
+                                          "Successfully set .drjava file associations.",
                                           "Success",
                                           JOptionPane.INFORMATION_MESSAGE); 
           }
           else {
             JOptionPane.showMessageDialog(ConfigFrame.this,
-                                          "Could not set .drjava and .djapp file associations.",
+                                          "Could not set .drjava file associations.",
                                           "File Types Error",
                                           JOptionPane.ERROR_MESSAGE); 
           }
         }
-      }, "Associate .drjava and .djapp Files with DrJava", this, "This associates .drjava and .djapp files with DrJava."));
+      }, "Associate .drjava Files with DrJava", this, "This associates .drjava files with DrJava."));
 
       addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
       
@@ -1108,18 +1108,18 @@ public class ConfigFrame extends SwingFrame {
         public void actionPerformed(ActionEvent e) {
           if (PlatformFactory.ONLY.unregisterDrJavaFileExtensions()) {
             JOptionPane.showMessageDialog(ConfigFrame.this,
-                                          "Successfully removed .drjava and .djapp file associations.",
+                                          "Successfully removed .drjava file associations.",
                                           "Success",
                                           JOptionPane.INFORMATION_MESSAGE); 
           }
           else {
             JOptionPane.showMessageDialog(ConfigFrame.this,
-                                          "Could not remove .drjava and .djapp file associations.",
+                                          "Could not remove .drjava file associations.",
                                           "File Types Error",
                                           JOptionPane.ERROR_MESSAGE); 
           }
         }
-      }, "Remove .drjava and .djapp File Associations", this, "This removes the association of .drjava and .djapp files with DrJava."));
+      }, "Remove .drjava file associations", this, "This removes the association of .drjava with DrJava."));
       
       addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
       addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));

@@ -3895,7 +3895,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
             public void run() {
               int rc;
               Object[] options = {"Yes", "No", "Always", "Never"};
-              String text = "Do you want to associate .java, .drjava and .djapp files with DrJava?\n" + 
+              String text = "Do you want to associate .java and .drjava files with DrJava?\n" + 
                 "Double-clicking on those files will open them in DrJava.\n\n" +
                 "Select 'Always' to let DrJava do this automatically.\n"+
                 "Select 'Never' if you don't want to be asked again.\n\n"+
@@ -7008,17 +7008,17 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     final int namesCount = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES).size();
     final int cmdlinesCount = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES).size();
     final int workdirsCount = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS).size();
-    final int enclosingFileCount = 
-      DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES).size();
+//    final int enclosingFileCount = 
+//      DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES).size();
     if ((savedCount!=namesCount) ||
         (savedCount!=cmdlinesCount) ||
-        (savedCount!=workdirsCount) ||
-        (savedCount!=enclosingFileCount)) {
+        (savedCount!=workdirsCount) /* ||
+        (savedCount!=enclosingFileCount)*/) {
       DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_COUNT, 0);
       DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_NAMES, new Vector<String>());
       DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES, new Vector<String>());
       DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS, new Vector<String>());
-      DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES, new Vector<String>());
+//      DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES, new Vector<String>());
     }
     
     OptionListener<Integer> externalSavedCountListener =
@@ -7032,22 +7032,22 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           final Vector<String> names = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
           final Vector<String> cmdlines = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
           final Vector<String> workdirs = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
-          final Vector<String> enclosingfiles = 
-            DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES);
+//          final Vector<String> enclosingfiles = 
+//            DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES);
           
-          extMenu.insert(new AbstractAction(names.get(i)) {
-            public void actionPerformed(ActionEvent ae) {
-              try {
-                PropertyMaps pm = PropertyMaps.TEMPLATE.clone();
-                String s = enclosingfiles.get(i).trim();
-                ((MutableFileProperty) pm.getProperty("enclosing.djapp.file")).
-                  setFile(s.length() > 0 ? new File(s) : null);
-                _executeExternalDialog.
-                  runCommand(names.get(i),cmdlines.get(i),workdirs.get(i),enclosingfiles.get(i),pm);
-              }
-              catch(CloneNotSupportedException e) { throw new UnexpectedException(e); }
-            }
-          },i+2);
+//          extMenu.insert(new AbstractAction(names.get(i)) {
+//            public void actionPerformed(ActionEvent ae) {
+//              try {
+//                PropertyMaps pm = PropertyMaps.TEMPLATE.clone();
+//                String s = enclosingfiles.get(i).trim();
+//                ((MutableFileProperty) pm.getProperty("enclosing.djapp.file")).
+//                  setFile(s.length() > 0 ? new File(s) : null);
+//                _executeExternalDialog.
+//                  runCommand(names.get(i),cmdlines.get(i),workdirs.get(i),enclosingfiles.get(i),pm);
+//              }
+//              catch(CloneNotSupportedException e) { throw new UnexpectedException(e); }
+//            }
+//          },i+2);
         }
         if (oce.value > 0) { extMenu.addSeparator(); }
         extMenu.add(_editExternalProcessesAction);
@@ -10435,9 +10435,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           if (file.isFile() && (DrJavaFileUtils.isSourceFile(file) || file.getName().endsWith(".txt"))) {
             filteredFileList.add(file);
           }
-          else if (file.isFile() && file.getName().endsWith(OptionConstants.EXTPROCESS_FILE_EXTENSION)) {
-            openExtProcessFile(file);
-          }
+//          else if (file.isFile() && file.getName().endsWith(OptionConstants.EXTPROCESS_FILE_EXTENSION)) {
+//            openExtProcessFile(file);
+//          }
         }
         final File[] fileArray = filteredFileList.toArray(new File[filteredFileList.size()]);
         FileOpenSelector fs = new FileOpenSelector() {
@@ -10460,48 +10460,48 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }    
   }
   
-  /** Open stand-alone external process file. 
-   * @param file the file to be opened
-   */
-  public static void openExtProcessFile(File file) {
-    try {
-      XMLConfig xc = new XMLConfig(file);
-      String name = xc.get("drjava/extprocess/name");
-      ExecuteExternalDialog.addToMenu(name, xc.get("drjava/extprocess/cmdline"),
-                                      xc.get("drjava/extprocess/workdir"), "");
-      JOptionPane.showMessageDialog(null, "The installation was successful for:\n"+name,
-                                    "Installation Successful", JOptionPane.INFORMATION_MESSAGE);
-      // We override the drjava/extprocess/enclosingfile and set it to the empty string ""
-      // because this external process did not come from a *.djapp file that was a JAR file.
-    }
-    catch(XMLConfigException xce) {
-      // this wasn't an XML file, try to treat it as a jar file
-      openExtProcessJarFile(file);
-    }
-  }
+//  /** Open stand-alone external process file. 
+//   * @param file the file to be opened
+//   */
+//  public static void openExtProcessFile(File file) {
+//    try {
+//      XMLConfig xc = new XMLConfig(file);
+//      String name = xc.get("drjava/extprocess/name");
+//      ExecuteExternalDialog.addToMenu(name, xc.get("drjava/extprocess/cmdline"),
+//                                      xc.get("drjava/extprocess/workdir"), "");
+//      JOptionPane.showMessageDialog(null, "The installation was successful for:\n"+name,
+//                                    "Installation Successful", JOptionPane.INFORMATION_MESSAGE);
+//      // We override the drjava/extprocess/enclosingfile and set it to the empty string ""
+//      // because this external process did not come from a *.djapp file that was a JAR file.
+//    }
+//    catch(XMLConfigException xce) {
+//      // this wasn't an XML file, try to treat it as a jar file
+//      openExtProcessJarFile(file);
+//    }
+//  }
   
-  /** Open external process file in a jar file.
-   * @param file the file to be opened
-   */
-  public static void openExtProcessJarFile(File file) {
-    try {
-      JarFile jf = new JarFile(file);
-      JarEntry je = jf.getJarEntry(EXTPROCESS_FILE_NAME_INSIDE_JAR);
-      InputStream is = jf.getInputStream(je);
-      XMLConfig xc = new XMLConfig(is);
-      String name = xc.get("drjava/extprocess/name");
-      ExecuteExternalDialog.addToMenu(name, xc.get("drjava/extprocess/cmdline"),
-                                      xc.get("drjava/extprocess/workdir"), file.getAbsolutePath());
-      JOptionPane.showMessageDialog(null, "The installation was successful for:\n"+name,
-                                    "Installation Successful", JOptionPane.INFORMATION_MESSAGE);
-      // We override the drjava/extprocess/enclosingfile and set it to the file specified
-      // because this external process came from a *.djapp file that was a JAR file.
-      is.close();
-      jf.close();
-    }
-    catch(IOException ioe) { /* ignore drop */ }
-    catch(XMLConfigException xce) { /* ignore drop */ }
-  }
+//  /** Open external process file in a jar file.
+//   * @param file the file to be opened
+//   */
+//  public static void openExtProcessJarFile(File file) {
+//    try {
+//      JarFile jf = new JarFile(file);
+//      JarEntry je = jf.getJarEntry(EXTPROCESS_FILE_NAME_INSIDE_JAR);
+//      InputStream is = jf.getInputStream(je);
+//      XMLConfig xc = new XMLConfig(is);
+//      String name = xc.get("drjava/extprocess/name");
+//      ExecuteExternalDialog.addToMenu(name, xc.get("drjava/extprocess/cmdline"),
+//                                      xc.get("drjava/extprocess/workdir"), file.getAbsolutePath());
+//      JOptionPane.showMessageDialog(null, "The installation was successful for:\n"+name,
+//                                    "Installation Successful", JOptionPane.INFORMATION_MESSAGE);
+//      // We override the drjava/extprocess/enclosingfile and set it to the file specified
+//      // because this external process came from a *.djapp file that was a JAR file.
+//      is.close();
+//      jf.close();
+//    }
+//    catch(IOException ioe) { /* ignore drop */ }
+//    catch(XMLConfigException xce) { /* ignore drop */ }
+//  }
   
   /** Convert a string with URIs to a list of files.
     * @param data string with URIs
@@ -10529,10 +10529,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     * @param lineNo line number to jump to, or -1 of not specified
     */
   public void handleRemoteOpenFile(final File f, final int lineNo) {
-    if (f.getName().endsWith(OptionConstants.EXTPROCESS_FILE_EXTENSION)) {
-      openExtProcessFile(f);
-    }
-    else {
+//    if (f.getName().endsWith(OptionConstants.EXTPROCESS_FILE_EXTENSION)) {
+//      openExtProcessFile(f);
+//    }
+//   else {
       final FileOpenSelector openSelector = new FileOpenSelector() {
         public File[] getFiles() throws OperationCanceledException {
           return new File[] { f };
@@ -10559,7 +10559,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           }
         });
       }
-    }
+//    }
   }
   
   /** Follow a file. */
