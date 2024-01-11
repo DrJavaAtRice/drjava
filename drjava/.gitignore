@@ -1,5 +1,6 @@
 drjava.jar
 classes/
+out/
 
 # IntelliJ Project Files
 .idea/
