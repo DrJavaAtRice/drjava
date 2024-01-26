@@ -37,7 +37,6 @@
   
   <property environment="env" />
   <property name="java8-home" value="${env.JAVA8_HOME}" />
-  <property name="launch4j-home" value="${env.LAUNCH4J_HOME}" />
   <property name="findbugs-home" value="${env.FINDBUGS_HOME}" />
   
   <property name="is-development" value="yes" /> <!-- Development or stable release -->
@@ -84,8 +83,6 @@
     <echo message="PATH: The 'javac' command is used for compilation;" />
     <echo message="      the 'java' command is used by default in testing/running; " />
     <echo message="JAVA8_HOME: Home folder of the Java 8 JRE or JDK." />
-    <echo message="LAUNCH4J_HOME: Location of the Launch4j installation (used to " />
-    <echo message="               release a Windows application)" />
     <echo message="FINDBUGS_HOME: Location of the FindBugs installation" />
     <echo message="" />
     <echo message="For control over the version of Java used to run Ant, set JAVA_HOME." />
@@ -692,61 +689,6 @@
     <copy file="${ant.project.name}.jar" tofile="${version-tag}.jar" />
   </target>
 
-<!--
-  <target name="mac-app" depends="jar, assert-jar-exists, resolve-version-tag">
-    <echo message="Creating ${version-tag}-osx.zip" />
-    <taskdef name="bundleapp"
-             classname="com.oracle.appbundler.AppBundlerTask"   
-             classpath="lib/buildlib/appbundler-1.0.jar" />
-    <property name="mac-app-dir" value="${version-tag}/osx" />
-    <mkdir dir="${mac-app-dir}" />
-    <bundleapp outputdirectory="${mac-app-dir}"
-        name="DrJava"
-        displayname="DrJava"
-        icon="packaging/mac/DrJava.icns"
-        signature="DrJa"
-        shortversion="${version-tag}"
-        identifier="edu.rice.cs.drjava.DrJava"
-        mainclassname="edu.rice.cs.drjava.DrJava">
-      <classpath file="drjava.jar" />
-    </bundleapp>
-    <zip destfile="${version-tag}-osx.zip">
-      <zipfileset dir="${mac-app-dir}" 
-                  excludes="${readable-project-name}.app/Contents/MacOS/JavaAppLauncher" />
-      <zipfileset dir="${mac-app-dir}" filemode="755"
-                  includes="${readable-project-name}.app/Contents/MacOS/JavaAppLauncher" />
-    </zip>
-  </target>
--->
-  
-<!--
-  <target name="windows-app" depends="assert-launch4j-exists, jar, assert-jar-exists, resolve-version-tag">
-    <echo message="Creating ${version-tag}.exe" />
-    <taskdef name="launch4j" classname="net.sf.launch4j.ant.Launch4jTask">
-      <classpath>
-        <pathelement location="${launch4j-home}/launch4j.jar" />
-        <pathelement location="${launch4j-home}/lib/xstream.jar" />
-      </classpath>
-    </taskdef>
-    <property name="windows-app-dir" value="${version-tag}/windows" />
-    <mkdir dir="${windows-app-dir}" />
-    <copy todir="${windows-app-dir}" >
-      <fileset dir="packaging/windows" />
-    </copy>
-    <copy todir="${windows-app-dir}" overwrite="yes" >
-      <fileset dir="packaging/windows">
-        <include name="**/*.plist" />
-        <include name="**/*.xml" />
-      </fileset>
-      <filterset>
-        <filter token="VERSION" value="${version-tag}" />
-      </filterset>
-    </copy>
-    <copy file="${ant.project.name}.jar" todir="${windows-app-dir}" />
-    <launch4j configfile="${windows-app-dir}/launch4j-config.xml" />
-  </target>
--->
-
 <target name="javadoc-zip" depends="javadoc, resolve-version-tag" unless="skip-javadoc">
     <echo message="Creating ${version-tag}-javadoc.zip" />
     <zip destfile="${version-tag}-javadoc.zip">
@@ -966,11 +908,6 @@
   <target name="assert-jar-exists">
     <available property="jar-exists" file="${ant.project.name}.jar" />
     <fail message="Can't find ${ant.project.name}.jar" unless="jar-exists" />
-  </target>
-  
-  <target name="assert-launch4j-exists">
-    <available property="launch4j-exists" file="${launch4j-home}/launch4j.jar" />
-    <fail message="${launch4j-home}/launch4j.jar does not exist" unless="launch4j-exists" />
   </target>
   
   <target name="assert-findbugs-exists">
