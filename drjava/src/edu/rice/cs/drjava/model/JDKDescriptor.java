@@ -40,8 +40,7 @@ import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.plt.iter.IterUtil;
 
 /** A description of a JDK.
-  * Put subclasses of JDKDescriptor in the edu.rice.cs.drjava.model.compiler.descriptors package for DrJava
-  * to find. */
+  * Put subclasses of JDKDescriptor in the edu.rice.cs.drjava.model.compiler.descriptors package for DrJava to find. */
 public abstract class JDKDescriptor {
   /** Return the name of this JDK.
     * @return name */
@@ -181,7 +180,7 @@ public abstract class JDKDescriptor {
       return JDKToolsLibrary.adapterForDebugger(guessedVersion);
     }
     public boolean containsCompiler(File f) { return true; }
-    public JavaVersion getMinimumMajorVersion() { return JavaVersion.JAVA_7; }
+    public JavaVersion getMinimumMajorVersion() { return JavaVersion.JAVA_8; }
     public Iterable<File> getAdditionalCompilerFiles(File compiler) throws FileNotFoundException {
       return IterUtil.empty();
     }

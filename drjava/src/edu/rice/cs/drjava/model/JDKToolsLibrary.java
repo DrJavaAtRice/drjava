@@ -94,32 +94,36 @@ public class JDKToolsLibrary {
   
   public String toString() { return _jdkDescriptor.getDescription(_version); }
   
-  public static String adapterForCompiler(JavaVersion.FullVersion version) {
-    switch (version.majorVersion()) {
-      case FUTURE: return "edu.rice.cs.drjava.model.compiler.Javac170Compiler";
-      case JAVA_8: return "edu.rice.cs.drjava.model.compiler.Javac170Compiler";
-      case JAVA_7: return "edu.rice.cs.drjava.model.compiler.Javac170Compiler";
-      case JAVA_6: {
-        switch (version.vendor()) {
-          case OPENJDK: return "edu.rice.cs.drjava.model.compiler.Javac160OpenJDKCompiler";
-          case UNKNOWN: return null;
-          default: return "edu.rice.cs.drjava.model.compiler.Javac160Compiler";
-        }
-      }
-      case JAVA_5: return "edu.rice.cs.drjava.model.compiler.Javac150Compiler";
-      default: return null;
-    }
+  public static String adapterForCompiler(JavaVersion.FullVersion version) { 
+    return "edu.rice.cs.drjava.model.compiler.Javac170Compiler";
+    /* formerly the following */
+//    switch (version.majorVersion()) {
+//      case FUTURE: return "edu.rice.cs.drjava.model.compiler.Javac170Compiler";
+//      case JAVA_8: return "edu.rice.cs.drjava.model.compiler.Javac170Compiler";
+//      case JAVA_7: return "edu.rice.cs.drjava.model.compiler.Javac170Compiler";
+//      case JAVA_6: {
+//        switch (version.vendor()) {
+//          case OPENJDK: return "edu.rice.cs.drjava.model.compiler.Javac160OpenJDKCompiler";
+//          case UNKNOWN: return null;
+//          default: return "edu.rice.cs.drjava.model.compiler.Javac160Compiler";
+//        }
+//      }
+//      case JAVA_5: return "edu.rice.cs.drjava.model.compiler.Javac150Compiler";
+//      default: return null;
+//    }
   }
   
-  public static String adapterForDebugger(JavaVersion.FullVersion version) {
-    switch (version.majorVersion()) {
-      case FUTURE:
-      case JAVA_8:
-      case JAVA_7:
-      case JAVA_6:
-      case JAVA_5: return "edu.rice.cs.drjava.model.debug.jpda.JPDADebugger";
-      default: return null;
-    }
+  public static String adapterForDebugger(JavaVersion.FullVersion version) { 
+    return "edu.rice.cs.drjava.model.debug.jpda.JPDADebugger"; 
+    /* formerly */
+//    switch (version.majorVersion()) { 
+//      case FUTURE:
+//      case JAVA_8:
+//      case JAVA_7:
+//      case JAVA_6:
+//      case JAVA_5: return "edu.rice.cs.drjava.model.debug.jpda.JPDADebugger";
+//      default: return null;
+//    }
   }
 
   protected static CompilerInterface getCompilerInterface(String className, FullVersion version) {

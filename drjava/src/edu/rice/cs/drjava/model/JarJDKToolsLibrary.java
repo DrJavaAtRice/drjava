@@ -416,7 +416,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     String envJavaHome = null;
     String programFiles = null;
     String systemDrive = null;
-    if (JavaVersion.CURRENT.supports(JavaVersion.JAVA_7)) {  /* formerly JavaVersion.JAVA_5 */
+    if (JavaVersion.CURRENT.supports(JavaVersion.JAVA_8)) {  /* formerly JavaVersion.JAVA_5 and later JavaVersion.JAVA_7 */
       // System.getenv is deprecated under 1.3 and 1.4, and may throw a java.lang.Error (!),
       // which we'd rather not have to catch
       envJavaHome = System.getenv("JAVA_HOME");
@@ -446,9 +446,10 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       addIfDir(new File(programFiles), roots);
     }
     
-    /* The following two lines were added to support OpenJDK8 on Windows 10. */
+    /* The following three lines were added to support OpenJDK8 on Windows 10/11. */
     addIfDir(new File("/C:/Program Files/Zulu/zulu-8"), roots);
     addIfDir(new File("/C:/Program Files (x86)/Zulu/zulu-8"), roots);
+    addIfDir(new File("/C:/Program Files/Amazon Corretto"), roots);
       
     addIfDir(new File("/C:/Program Files/Java"), roots);
     addIfDir(new File("/C:/Program Files (x86)/Java"), roots);
@@ -479,11 +480,13 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     addIfDir(new File("/usr/lib/jvm"), roots);
     addIfDir(new File("/usr/lib/jvm/java-8-oracle"), roots);
     addIfDir(new File("/usr/lib/jvm/java-8-openjdk"), roots);
-    addIfDir(new File("/usr/lib/jvm/java-7-oracle"), roots);
-    addIfDir(new File("/usr/lib/jvm/java-7-openjdk"), roots);
-    addIfDir(new File("/usr/lib/jvm/java-6-sun"), roots);
-    addIfDir(new File("/usr/lib/jvm/java-6-openjdk"), roots);
-    addIfDir(new File("/usr/lib/jvm/java-1.5.0-sun"), roots);
+    
+    /* Legacy version of Java -- no longer supported */
+//    addIfDir(new File("/usr/lib/jvm/java-7-oracle"), roots);
+//    addIfDir(new File("/usr/lib/jvm/java-7-openjdk"), roots);
+//    addIfDir(new File("/usr/lib/jvm/java-6-sun"), roots);
+//    addIfDir(new File("/usr/lib/jvm/java-6-openjdk"), roots);
+//    addIfDir(new File("/usr/lib/jvm/java-1.5.0-sun"), roots);
 
 //    addIfDir(new File("/home/javaplt/java/Linux-i686"), roots);
     

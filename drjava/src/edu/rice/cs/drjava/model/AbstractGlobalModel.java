@@ -364,7 +364,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   // ----- STATE -----
   
-  /** Specifies the state of the navigator pane.  The global model delegates the compileAll command to the _state.
+  /** Specifies the state of the navigator pane.  
+    * The global model delegates the compileAll command to the _state.
     * FileGroupingState synchronization is handled by the compilerModel (??).
     */
   protected volatile FileGroupingState _state;
@@ -3474,40 +3475,44 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         _log.log("_locateClassFile() failed for " + this + " because getQualifedClassName returned ClassNotFound");
         return FileOps.NULL_FILE;  /* No source class name */ 
       }
-//      _log.log("In _locateClassFile, className = " + className);
+      _log.log("In _locateClassFile, className = " + className);
       String ps = System.getProperty("file.separator");
       // replace periods with the System's file separator
       className = StringOps.replace(className, ".", ps);
       String fileName = className + ".class";
       
-//      _log.log("In _locateClassFile, classfileName = " + fileName);
+      _log.log("In _locateClassFile, classfileName = " + fileName);
       
       // Check source root set (open files)
       ArrayList<File> roots = new ArrayList<File>();
       
-//      _log.log("build directory = " + getBuildDirectory());
+      File bd = getBuildDirectory();
       
-      if (getBuildDirectory() != FileOps.NULL_FILE) roots.add(getBuildDirectory());
+      _log.log("build directory = " + bd);
       
-      // Add the current document to the beginning of the roots list
+      // Place the build directory at the front of the roots list
+      if (bd != FileOps.NULL_FILE) roots.add(getBuildDirectory());  
+      
+      // Add the current document to the end (formerly beginning) of the roots list; in the command line class file
+      // layout, class files reside in same directory as corresponding source files.
       try {
         File root = getSourceRoot();
-//        _log.log("Directory " + root + " added to list of source roots");
-        roots.add(root); 
+        _log.log("Directory " + root + " added to list of class file roots");
+        if (! roots.contains(root)) roots.add(root); 
       }
       catch (InvalidPackageException ipe) {
         try {
-//          _log.log(this + " has no source root, using parent directory instead");
+          _log.log(this + " has no source root, using parent directory of this source document instead");
           File root = getFile().getParentFile();
           if (root != FileOps.NULL_FILE) {
             roots.add(root);
-//            _log.log("Added parent directory " + root + " to list of source roots");
+            _log.log("Added parent directory " + root + " to list of class file roots");
           }
         }
         catch(NullPointerException e) { throw new UnexpectedException(e); }
         catch(FileMovedException fme) {
           // Moved, but we'll add the old file to the set anyway
-          _log.log("File for " + this + "has moved; adding parent directory to list of roots");
+          _log.log("File for " + this + "has moved; adding parent directory of this source document instead");
           File root = fme.getFile().getParentFile();
           if (root != FileOps.NULL_FILE) roots.add(root);
         }
@@ -3515,11 +3520,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       
       File classFile = findFileInPaths(fileName, roots);
       if (classFile != FileOps.NULL_FILE) {
-//        _log.log("Found source file " + classFile + " for " + this);
+        _log.log("Found class file " + classFile + " for " + this);
         return classFile;
       }
       
-//      _log.log(this + " not found on path of source roots");
+      _log.log(fileName + " not found on list of class file roots");
       // Class not on source root set, check system classpath
       classFile = findFileInPaths(fileName, ReflectUtil.SYSTEM_CLASS_PATH);
       

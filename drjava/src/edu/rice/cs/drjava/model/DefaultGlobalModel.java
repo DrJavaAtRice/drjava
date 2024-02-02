@@ -45,8 +45,6 @@ import edu.rice.cs.drjava.config.BooleanOption;
 import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.drjava.model.JDKDescriptor;
 import edu.rice.cs.drjava.model.compiler.DummyCompilerListener;
-//import edu.rice.cs.drjava.model.compiler.EclipseCompiler;
-//import edu.rice.cs.drjava.model.compiler.descriptors.EclipseDescriptor;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.drjava.model.debug.Breakpoint;
@@ -79,10 +77,10 @@ import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.plt.reflect.ReflectUtil;
 import edu.rice.cs.plt.tuple.Pair;
 
+import edu.rice.cs.util.AbsRelFile;
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.NullFile;
-import edu.rice.cs.util.AbsRelFile;
 import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
@@ -185,7 +183,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   /* CONSTRUCTORS */
   /** Constructs a new GlobalModel. Creates a new MainJVM and starts its Interpreter JVM. */
   public DefaultGlobalModel() {
-    Iterable<? extends JDKToolsLibrary> tools = findLibraries();
+    Iterable<? extends JDKToolsLibrary> tools = findLibraries();  // findLibraries should be called findTools
     List<CompilerInterface> compilers = new LinkedList<CompilerInterface>();
     
     /* Note: the only debugger used in DrJava is JPDADebugger in the DrJava code base which relies
@@ -194,9 +192,10 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
      */
     _debugger = null;
     _javadocModel = null;
+    /* Gather tools: a list compilers, a debugger, and a javadoc tool. */
     for (JDKToolsLibrary t : tools) {
 //      Utilities.show("Found tools.jar library: " + t);
-      if (t.compiler().isAvailable() && t.version().supports(JavaVersion.JAVA_7)) compilers.add(t.compiler());
+      if (t.compiler().isAvailable() && t.version().supports(JavaVersion.JAVA_8)) compilers.add(t.compiler());
       if (_debugger == null && t.debugger().isAvailable()) { _debugger = t.debugger(); }
       if (_javadocModel == null && t.javadoc().isAvailable()) { _javadocModel = t.javadoc(); }
     }
@@ -205,7 +204,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     
     File workDir = Utilities.TEST_MODE ? new File(System.getProperty("user.home")) : getWorkingDirectory();
     _jvm = new MainJVM(workDir);
-//    AbstractMasterJVM._log.log(this + " has created a new MainJVM");
+    _log.log(this + " has created a new MainJVM");
     _compilerModel = new DefaultCompilerModel(this, compilers);     
     _junitModel = new DefaultJUnitModel(_jvm, _compilerModel, this);
     _interactionsDocument = new InteractionsDJDocument(_notifier);

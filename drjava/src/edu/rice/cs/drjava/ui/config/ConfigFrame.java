@@ -1353,8 +1353,8 @@ public class ConfigFrame extends SwingFrame {
 
     addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
 
-    boolean javaVersion7 = JavaVersion.CURRENT.supports(JavaVersion.JAVA_7);
-    if (!javaVersion7) {
+    boolean javaVersion8 = JavaVersion.CURRENT.supports(JavaVersion.JAVA_8);
+    if (!javaVersion8) {
       final ForcedChoiceOptionComponent concJUnitChecksEnabledComponent =
         newForcedChoiceOptionComponent(OptionConstants.CONCJUNIT_CHECKS_ENABLED);
       addOptionComponent(panel, concJUnitChecksEnabledComponent);

@@ -1879,49 +1879,54 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       final ProcessingDialog pd =
         new ProcessingDialog(this, "Java API Classes", "Loading, please wait.", false);
       if (! EventQueue.isDispatchThread()) { pd.setVisible(true); }
+      
+      String suffix = "/allclasses-1.8.html";
+      _javaAPISet.addAll(_generateJavaAPISet(suffix));
+      
+      /* Legacy code supporting Java versions prior to Java 8 */
       // generate list
-      String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
-      
-//      // the string that will be ADDED to the beginning of the link to form the full URL
-//      String base = "";
+//      String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
 //      
-//      // the string that will be REMOVED from the beginning of the link to form the fully-qualified class name
-//      String stripPrefix = "";
-      
-      // the HTML file name that contains all the links
-      String suffix = "";
-      if (linkVersion.equals(JAVADOC_AUTO_TEXT)) {
-        // use the compiler's version of the Java API Javadoc
-        JavaVersion ver = _model.getCompilerModel().getActiveCompiler().version();
-        if (ver == JavaVersion.JAVA_6) linkVersion = JAVADOC_1_6_TEXT;
-        else if (ver == JavaVersion.JAVA_7) linkVersion = JAVADOC_1_7_TEXT;
-        else if (ver == JavaVersion.JAVA_8) linkVersion = JAVADOC_1_8_TEXT;
-        else linkVersion = JAVADOC_1_8_TEXT;   // default
-      }
-      if (linkVersion.equals(JAVADOC_1_6_TEXT)) {
-        // at one point, the links in the 1.6 Javadoc were absolute, and this is how we dealt with that
-        // base = ""; // links in 1.6 Javadoc are absolute, so nothing needs to be added to get an absolute URL
-        // // but we do need to strip the absolute part to get correct fully-qualified class names
-        // // and we take the default string here, not what the user entered, because the links in
-        // // our allclasses-1.6.html file go to the original Sun website.
-        // base = DrJava.getConfig().getSetting(JAVADOC_1_6_LINK) + "/";
-        // stripPrefix = ""; // nothing needs to be stripped, links in 1.6 Javadoc are relative
-        suffix = "/allclasses-1.6.html";
-      }
-      else if (linkVersion.equals(JAVADOC_1_7_TEXT)) {
-//        base = DrJava.getConfig().getSetting(JAVADOC_1_7_LINK) + "/";
-//        stripPrefix = ""; // nothing needs to be stripped, links in 1.7 Javadoc are relative
-        suffix = "/allclasses-1.7.html";
-      }
-      else if (linkVersion.equals(JAVADOC_1_8_TEXT)) {
-//        base = DrJava.getConfig().getSetting(JAVADOC_1_8_LINK) + "/";
-//        stripPrefix = ""; // nothing needs to be stripped, links in 1.8 Javadoc are relative
-        suffix = "/allclasses-1.8.html";
-      }
-      if (! suffix.equals("")) _javaAPISet.addAll(_generateJavaAPISet(suffix));
-      else {
-        // no valid Javadoc URL
-      }
+////      // the string that will be ADDED to the beginning of the link to form the full URL
+////      String base = "";
+////      
+////      // the string that will be REMOVED from the beginning of the link to form the fully-qualified class name
+////      String stripPrefix = "";
+//      
+//      // the HTML file name that contains all the links
+//      String suffix = "";
+//      if (linkVersion.equals(JAVADOC_AUTO_TEXT)) {
+//        // use the compiler's version of the Java API Javadoc
+//        JavaVersion ver = _model.getCompilerModel().getActiveCompiler().version();
+//        if (ver == JavaVersion.JAVA_6) linkVersion = JAVADOC_1_6_TEXT;
+//        else if (ver == JavaVersion.JAVA_7) linkVersion = JAVADOC_1_7_TEXT;
+//        else if (ver == JavaVersion.JAVA_8) linkVersion = JAVADOC_1_8_TEXT;
+//        else linkVersion = JAVADOC_1_8_TEXT;   // default
+//      }
+//      if (linkVersion.equals(JAVADOC_1_6_TEXT)) {
+//        // at one point, the links in the 1.6 Javadoc were absolute, and this is how we dealt with that
+//        // base = ""; // links in 1.6 Javadoc are absolute, so nothing needs to be added to get an absolute URL
+//        // // but we do need to strip the absolute part to get correct fully-qualified class names
+//        // // and we take the default string here, not what the user entered, because the links in
+//        // // our allclasses-1.6.html file go to the original Sun website.
+//        // base = DrJava.getConfig().getSetting(JAVADOC_1_6_LINK) + "/";
+//        // stripPrefix = ""; // nothing needs to be stripped, links in 1.6 Javadoc are relative
+//        suffix = "/allclasses-1.6.html";
+//      }
+//      else if (linkVersion.equals(JAVADOC_1_7_TEXT)) {
+////        base = DrJava.getConfig().getSetting(JAVADOC_1_7_LINK) + "/";
+////        stripPrefix = ""; // nothing needs to be stripped, links in 1.7 Javadoc are relative
+//        suffix = "/allclasses-1.7.html";
+//      }
+//      else if (linkVersion.equals(JAVADOC_1_8_TEXT)) {
+////        base = DrJava.getConfig().getSetting(JAVADOC_1_8_LINK) + "/";
+////        stripPrefix = ""; // nothing needs to be stripped, links in 1.8 Javadoc are relative
+//        suffix = "/allclasses-1.8.html";
+//      }
+//      if (! suffix.equals("")) _javaAPISet.addAll(_generateJavaAPISet(suffix));
+//      else {
+//        // no valid Javadoc URL
+//      }
       
       // add JUnit
       Set<JavaAPIListEntry> junitAPIList = _generateJavaAPISet("/allclasses-concjunit4.7.html");
