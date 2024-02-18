@@ -71,6 +71,8 @@ public class NoCompilerAvailable implements CompilerInterface {
   @Override
   public String toString() { return "None"; }
   
+  /** A compiler can instruct DrJava to include additional elements for the boot
+    * class path of the Interactions JVM. This isn't necessary for the Java compilers, though. */
   public List<File> additionalBootClassPathForInteractions() { return Arrays.<File>asList(); }
   
   /** Transform the command line to be interpreted into something the Interactions JVM can use.

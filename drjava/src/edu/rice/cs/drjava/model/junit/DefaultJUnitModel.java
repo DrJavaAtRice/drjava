@@ -232,12 +232,11 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     debug.logEnd("junit(doc)");
   }
   
-  /** Ensures that all documents have been compiled since their last 
-   * modification and then delegates the actual testing to 
-   * _rawJUnitOpenTestDocs. 
-   * @param lod list of open documents
-   * @param allTests true if all tests are to be run
-   */
+  /** Ensures that all documents have been compiled since their last modification and then delegates the actual testing to 
+    * _rawJUnitOpenTestDocs. 
+    * @param lod list of open documents
+    * @param allTests true if all tests are to be run
+    */
   private void junitOpenDefDocs(final List<OpenDefinitionsDocument> lod, final boolean allTests) {
     // If a test is running, don't start another one.
 

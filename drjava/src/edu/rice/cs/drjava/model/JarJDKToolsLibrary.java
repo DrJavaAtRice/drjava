@@ -453,35 +453,35 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       
     addIfDir(new File("/C:/Program Files/Java"), roots);
     addIfDir(new File("/C:/Program Files (x86)/Java"), roots);
-    addIfDir(new File("/C:/Program Files"), roots);
-    addIfDir(new File("/C:/Program Files (x86)"), roots);
+//    addIfDir(new File("/C:/Program Files"), roots);
+//    addIfDir(new File("/C:/Program Files (x86)"), roots);
     
     if (systemDrive != null) {
       addIfDir(new File(systemDrive, "Java"), roots);
       addIfDir(new File(systemDrive), roots);
     }
-    addIfDir(new File("/C:/Java"), roots);
-    addIfDir(new File("/C:"), roots);
+//    addIfDir(new File("/C:/Java"), roots);
+//    addIfDir(new File("/C:"), roots);
     
     /* Entries for Mac OS X */
     addIfDir(new File("/System/Library/Java/JavaVirtualMachines"), roots);
     addIfDir(new File("/Library/Java/JavaVirtualMachines"), roots);
 //    addIfDir(new File("/System/Library/Java/JavaVirtualMachines"), roots);
 
-    /* Entries for Linux */
-    addIfDir(new File("/usr/java"), roots);
-    addIfDir(new File("/usr/j2se"), roots);
-    addIfDir(new File("/usr"), roots);
-    addIfDir(new File("/usr/local/java"), roots);
-    addIfDir(new File("/usr/local/j2se"), roots);
-    addIfDir(new File("/usr/local"), roots);
+//    /* Entries for Linux */
+//    addIfDir(new File("/usr/java"), roots);
+//    addIfDir(new File("/usr/j2se"), roots);
+//    addIfDir(new File("/usr"), roots);
+//    addIfDir(new File("/usr/local/java"), roots);
+//    addIfDir(new File("/usr/local/j2se"), roots);
+//    addIfDir(new File("/usr/local"), roots);
 
     /* Entries for Linux java packages */
     addIfDir(new File("/usr/lib/jvm"), roots);
     addIfDir(new File("/usr/lib/jvm/java-8-oracle"), roots);
     addIfDir(new File("/usr/lib/jvm/java-8-openjdk"), roots);
     
-    /* Legacy version of Java -- no longer supported */
+    /* Legacy versions of Java -- no longer supported */
 //    addIfDir(new File("/usr/lib/jvm/java-7-oracle"), roots);
 //    addIfDir(new File("/usr/lib/jvm/java-7-openjdk"), roots);
 //    addIfDir(new File("/usr/lib/jvm/java-6-sun"), roots);

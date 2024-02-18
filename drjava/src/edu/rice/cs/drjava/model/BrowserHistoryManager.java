@@ -140,7 +140,7 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
   }
   
   /** Remove the last region from the given stack and clean up.
-    * @param stack the non-empty ArrayDeque<BrowserDocumentRegion>() to be shrunk.
+    * @param stack the non-empty ArrayDeque<BrowserDocumentRegion> to be shrunk.
     */
   public void removeLast(final ArrayDeque<BrowserDocumentRegion> stack) {
     assert ! stack.isEmpty();
