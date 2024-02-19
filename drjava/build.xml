@@ -36,7 +36,7 @@
   <property name="drjava.test.config" value="testFiles/drjava.basic.config" />
   
   <property environment="env" />
-  <property name="java8-home" value="${env.JAVA8_HOME}" />
+  <property name="java-home" value="${env.JAVA_HOME}" />
   <property name="findbugs-home" value="${env.FINDBUGS_HOME}" />
   
   <property name="is-development" value="yes" /> <!-- Development or stable release -->
@@ -197,7 +197,7 @@
     <echo message="jrelibs=${toString:jrelibs}" />    
     <javac srcdir="src" destdir="classes/base" source="1.7" target="1.7"
            bootclasspath="${java8-runtime}" sourcepath="" includeAntRuntime="no"
-           executable="${java8-home}/bin/javac" fork="yes" memoryMaximumSize="1024M"
+           executable="${java-home}/bin/javac" fork="yes" memoryMaximumSize="1024M"
            debug="on" optimize="off" deprecation="on" >
       <classpath>
         <!-- TODO: Remove this dependency on tools.jar by refactoring and moving all the dependent
@@ -848,24 +848,24 @@
     <!-- We rely on "location" to generate a platform-specific path; note that properties
          are immutable and so java8-runtime will only be set the *first* time. -->
 
-    <property name="java8-runtime-1" location="${java8-home}/lib/rt.jar" />
+    <property name="java8-runtime-1" location="${java-home}/lib/rt.jar" />
     <available property="java8-runtime" value="${java8-runtime-1}" file="${java8-runtime-1}" />
 
-    <property name="java8-runtime-2" location="${java8-home}/jre/lib/rt.jar" />
+    <property name="java8-runtime-2" location="${java-home}/jre/lib/rt.jar" />
     <available property="java8-runtime" value="${java8-runtime-2}" file="${java8-runtime-2}" />
 
-    <property name="java8-runtime-3" location="${java8-home}/../Classes/classes.jar" />
+    <property name="java8-runtime-3" location="${java-home}/../Classes/classes.jar" />
     <available property="java8-runtime" value="${java8-runtime-3}" file="${java8-runtime-3}" />
 
     <echo message="java8-runtime = ${java8-runtime}" />
 
-    <fail message="Can't find rt.jar in the Java 8 home: ${java8-home}" unless="java8-runtime" />
+    <fail message="Can't find rt.jar in the Java 8 home: ${java-home}" unless="java8-runtime" />
   </target>
 
   <target name="resolve-java8-exec">
     <!-- We rely on "location" to generate a platform-specific path -->
 
-    <property name="java8-exec-1" location="${java8-home}/bin/java.exe" />
+    <property name="java8-exec-1" location="${java-home}/bin/java.exe" />
     <condition property="java8-exec" value="${java8-exec-1}">
       <and>
         <available file="${java8-exec-1}" />
@@ -873,23 +873,23 @@
       </and>
     </condition>
     
-    <property name="java8-exec-2" location="${java8-home}/bin/java" />
+    <property name="java8-exec-2" location="${java-home}/bin/java" />
     <available property="java8-exec" value="${java8-exec-2}" file="${java8-exec-2}" />
 
-    <fail message="Can't find the java executable in the Java 8 home: ${java8-home}" unless="java8-exec" />
+    <fail message="Can't find the java executable in the Java 8 home: ${java-home}" unless="java8-exec" />
   </target>
 
   <target name="resolve-java8-tools">
-    <property name="java8-tools-1" location="${java8-home}/lib/tools.jar" />
+    <property name="java8-tools-1" location="${java-home}/lib/tools.jar" />
     <available property="java8-tools" value="${java8-tools-1}" file="${java8-tools-1}" />
 
-    <property name="java8-tools-2" location="${java8-home}/../lib/tools.jar" />
+    <property name="java8-tools-2" location="${java-home}/../lib/tools.jar" />
     <available property="java8-tools" value="${java8-tools-2}" file="${java8-tools-2}" />
 
-    <property name="java8-tools-3" location="${java8-home}/../Classes/classes.jar" />
+    <property name="java8-tools-3" location="${java-home}/../Classes/classes.jar" />
     <available property="java8-tools" value="${java8-tools-3}" file="${java8-tools-3}" />
 
-    <fail message="Can't find tools.jar in the Java 8 home: ${java8-home}" unless="java8-tools" />
+    <fail message="Can't find tools.jar in the Java 8 home: ${java-home}" unless="java8-tools" />
   </target>
   
   <target name="resolve-current-tools">
