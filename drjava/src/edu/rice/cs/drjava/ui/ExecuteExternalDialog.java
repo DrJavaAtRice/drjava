@@ -148,8 +148,6 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
   DocumentListener _documentListener;
   /** Command line work directory document listener. */
   DocumentListener _workDirDocumentListener;
-//  /** Command line enclosing file document listener. */
-//  DocumentListener _enclosingFileDocumentListener;
   
   /** Directory chooser to open when clicking the "..." button. */
   protected DirectoryChooser _dirChooser;
@@ -231,11 +229,8 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
       }
       final String cmdline = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES).get(editIndex);
       final String workdir = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS).get(editIndex);
-//      final String enclosingFile = 
-//        DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES).get(editIndex);
       _commandLine.setText(cmdline);
       _commandWorkDirLine.setText(workdir);
-//      _commandEnclosingFileLine.setText(enclosingFile);
     }
     initDone(); // call mandated by SwingFrame contract
   }
@@ -480,45 +475,6 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     gridbag.setConstraints(commandWorkDirLinePreviewSP, c);
     main.add(commandWorkDirLinePreviewSP);
 
-//    // enclosing .djapp file
-//    c.weightx = 0.0;
-//    c.weighty = 0.0;
-//    c.gridwidth = 1;
-//    c.insets = labelInsets;
-//    JLabel enclosingFileLabel = new JLabel("Enclosing .djapp file:");
-//    gridbag.setConstraints(enclosingFileLabel, c);
-//    main.add(enclosingFileLabel);
-//    
-//    c.weightx = 1.0;
-//    c.weighty = 8.0;
-//    c.gridwidth = GridBagConstraints.RELATIVE;
-//    c.insets = compInsets;
-//    
-//    _commandEnclosingFileLine = new JTextPane();
-//    // do not allow a newline
-//    _commandEnclosingFileLine.addKeyListener(new KeyListener() {
-//      public void keyPressed(KeyEvent e) {
-//        if (e.getKeyCode() == KeyEvent.VK_ENTER)  e.consume();
-//        else if (e.getKeyCode() == KeyEvent.VK_TAB) {
-//          e.consume();
-//          if (e.isShiftDown()) _commandWorkDirLine.requestFocus();
-//          else {
-//            _insertCommandButton.setEnabled(false);
-//            if (_editMode) {
-//              _saveCommandButton.requestFocus();
-//            }
-//            else _runCommandButton.requestFocus();
-//          }
-//        }
-//      }
-//      public void  keyReleased(KeyEvent e) { }
-//      public void  keyTyped(KeyEvent e) { }
-//    });
-//    JScrollPane commandEnclosingFileLineSP = new JScrollPane(_commandEnclosingFileLine);
-//    commandEnclosingFileLineSP.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-//    gridbag.setConstraints(commandEnclosingFileLineSP, c);
-//    main.add(commandEnclosingFileLineSP);
-    
     c.weightx = 0.0;
     c.weighty = 0.0;
     c.gridwidth = GridBagConstraints.REMAINDER;
@@ -628,36 +584,6 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     _commandWorkDirLine.getDocument().addDocumentListener(_workDirDocumentListener);
     _commandWorkDirLine.setText("${drjava.working.dir}");
     _workDirDocumentListener.changedUpdate(null);
-    
-//    // update the preview of the actual enclosing .djapp file post substitution
-//    _enclosingFileDocumentListener = new DocumentListener() {
-//      public void update(DocumentEvent e) {
-//        assert EventQueue.isDispatchThread();
-//        try {
-//          // preview
-//          _commandEnclosingFileLineDoc.remove(0,_commandEnclosingFileLineDoc.getLength());
-//          String text = StringOps.replaceVariables(_commandEnclosingFileLine.getText(), _props, PropertyMaps.GET_LAZY);
-//          _commandEnclosingFileLineDoc.insertString(0, StringOps.unescapeFileName(text), null);
-//          
-//          // command line
-//          colorVariables(_commandEnclosingFileLine,
-//                         _props,
-//                         this,
-//                         _commandLineCmdAS,
-//                         _varCommandLineCmdStyle,
-//                         _varErrorCommandLineCmdStyle);
-//        }
-//        catch(BadLocationException ble) {
-//          _commandLinePreview.setText("Error: " + ble);
-//        }
-//      }
-//      public void changedUpdate(DocumentEvent e) { update(e); }
-//      public void insertUpdate(DocumentEvent e) { update(e); }
-//      public void removeUpdate(DocumentEvent e)  { update(e); }
-//    };
-//    _commandEnclosingFileLine.getDocument().addDocumentListener(_enclosingFileDocumentListener);
-//    _commandEnclosingFileLine.setText("");
-//    _enclosingFileDocumentListener.changedUpdate(null);
     
     _lastCommandFocus = _commandLine;
     // do not allow preview to have focus
@@ -816,14 +742,11 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     * @param name name of the process
     * @param cmdline the command line to execute, before evaluation
     * @param workdir the work directory, before evaluation
-//    * @param enclosingFile the enclosing .djapp JAR file, or "" if not enclosed
     * @param pm PropertyMaps used for substitution when replacing variables
     * @return ExternalProcessPanel that displays the output of the process
     */
-  public ExternalProcessPanel runCommand(String name, String cmdline, String workdir,
-                                         /* String enclosingFile,*/ PropertyMaps pm) {
-//    ((MutableFileProperty)pm.getProperty("enclosing.djapp.file")).setFile(enclosingFile.length() > 0?
-//                                                                            new File(enclosingFile):null);
+  public ExternalProcessPanel runCommand(String name, String cmdline, String workdir, PropertyMaps pm) {
+
     ProcessCreator pc = new GeneralProcessCreator(cmdline, workdir.trim(), pm);
     String label = "External";
     if (!name.equals("")) { label += ": " + name; }
@@ -842,8 +765,6 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
   
   /** Execute the command line. */
   private void _runCommand() {
-//    _mainFrame.updateStatusField("Executing external process...");
-//    GeneralProcessCreator.LOG.log("_runCommand(): ${enclosing.djapp.file} = " + _commandEnclosingFileLine.getText());
     
     _mainFrame.removeModalWindowAdapter(this);
     if (_commandLinePreview.getText().length() > 0) {
@@ -851,7 +772,6 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
         _props = PropertyMaps.TEMPLATE.clone();
         PropertyMaps pm = _props.clone();
         runCommand("", _commandLine.getText(), _commandWorkDirLine.getText(), pm); 
-//                   _commandEnclosingFileLine.getText().trim(), pm);
       } 
       catch(CloneNotSupportedException e) { throw new edu.rice.cs.util.UnexpectedException(e); }
     }
@@ -876,7 +796,7 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
         if (_cm != null) { _cm.signal(); }
         return;
       }
-      editInMenu(_editIndex, name, _commandLine.getText(), _commandWorkDirLine.getText()/*, _commandEnclosingFileLine.getText()*/);
+      editInMenu(_editIndex, name, _commandLine.getText(), _commandWorkDirLine.getText());
     }
     else {
       int count = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT);
@@ -890,7 +810,7 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
         if (_cm != null) { _cm.signal(); }
         return;
       }
-      addToMenu(name, _commandLine.getText(), _commandWorkDirLine.getText() /*, _commandEnclosingFileLine.getText() */);
+      addToMenu(name, _commandLine.getText(), _commandWorkDirLine.getText());
     }
     
     // Always apply and save settings
@@ -903,18 +823,14 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     * @param name process name
     * @param cmdline command line
     * @param workdir work directory
-//    * @param enclosingFile the enclosing .djapp JAR file, or "" if not enclosed
     * @return number of processes in the menu */
-  public static int addToMenu(String name, String cmdline, String workdir/*, String enclosingFile*/) {
-//    GeneralProcessCreator.LOG.log("addToMenu(): enclosingFile = " + enclosingFile);
+  public static int addToMenu(String name, String cmdline, String workdir) {
     int count = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT);
     ++count;
     final Vector<String> names = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
     final Vector<String> cmdlines = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
     final Vector<String> workdirs = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
-//    final Vector<String> enclosingFiles = 
-//      DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES);
-    
+
     names.add(name);
     DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_NAMES,names);
     
@@ -923,10 +839,6 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     
     workdirs.add(workdir);
     DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS,workdirs);
-    
-//    enclosingFiles.add(enclosingFile);
-//    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES,enclosingFiles);
-    
     DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_COUNT,count);
     
     return count;
@@ -937,14 +849,11 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     * @param name process name
     * @param cmdline command line
     * @param workdir work directory
-    * @param enclosingFile the enclosing .djapp JAR file, or "" if not enclosed
     */
-  public static void editInMenu(int editIndex, String name, String cmdline, String workdir/*, String enclosingFile*/) {
-//    GeneralProcessCreator.LOG.log("editInMenu(): enclosingFile = " + enclosingFile);
+  public static void editInMenu(int editIndex, String name, String cmdline, String workdir) {
     final Vector<String> names = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
     final Vector<String> cmdlines = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
     final Vector<String> workdirs = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
-//    final Vector<String> enclosingFiles = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES);
     
     names.set(editIndex,name);
     DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_NAMES,names);
@@ -954,9 +863,6 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     
     workdirs.set(editIndex,workdir);
     DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS,workdirs);
-    
-//    enclosingFiles.set(editIndex,enclosingFile);
-//    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES,enclosingFiles);
   }
   
   /** Save process to file.
@@ -966,15 +872,11 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     final Vector<String> names = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
     final Vector<String> cmdlines = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
     final Vector<String> workdirs = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
-//    final Vector<String> enclosingFiles = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES);
     
     XMLConfig xc = new XMLConfig();
-//    System.out.println("saveToFile(" + index + ", " + f + ")");
-//    System.out.println("\t" + names.get(index));
     xc.set("drjava/extprocess/name", names.get(index));
     xc.set("drjava/extprocess/cmdline", cmdlines.get(index));
     xc.set("drjava/extprocess/workdir", workdirs.get(index));
-//    xc.set("drjava/extprocess/enlcosingfile", enclosingFiles.get(index));
     xc.save(f);
   }
   
