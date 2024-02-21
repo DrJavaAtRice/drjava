@@ -208,7 +208,7 @@
         <fileset refid="extlibs" />
         <pathelement location="lib/buildlib/junit.jar" />
         <pathelement location="lib/buildlib/netbeans-memory-leak-utils.jar" />
-<!--    <pathelement location="classes/base" />  THIS directory is typically empty at the start of this step -->
+      <!--    <pathelement location="classes/base" />  THIS directory is typically empty at the start of this step -->
       </classpath>
       <compilerarg value="-Xlint" />
       <!-- Ignore serial warnings, because they occur for every Throwable definition (among others) -->
