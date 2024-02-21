@@ -127,8 +127,7 @@ public class JavaxToolsCompiler implements CompilerInterface {
     }
 
     public List<File> additionalBootClassPathForInteractions() {
-        // TODO: figure out what this looks like for javax.tools compiler
-        return new ArrayList<File>();
+        return Collections.emptyList();
     }
 
     /** Transform the command line to be interpreted into something the Interactions JVM can use.
