@@ -76,11 +76,6 @@ public class JavaxToolsCompiler implements CompilerInterface {
             optionList.add("-d");
             optionList.add(destination.getAbsolutePath());
         }
-        if (showWarnings) {
-            optionList.add("-Xlint");
-        } else {
-            optionList.add("-Xlint:none");
-        }
 
         // Prepare a diagnostic collector to collect compile errors
         DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
