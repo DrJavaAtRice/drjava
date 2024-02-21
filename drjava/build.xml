@@ -36,7 +36,7 @@
   <property name="drjava.test.config" value="testFiles/drjava.basic.config" />
   
   <property environment="env" />
-  <property name="java8-home" value="${env.JAVA8_HOME}" />
+  <property name="java-home" value="${env.JAVA_HOME}" />
   <property name="findbugs-home" value="${env.FINDBUGS_HOME}" />
   
   <property name="is-development" value="yes" /> <!-- Development or stable release -->
@@ -82,7 +82,7 @@
     <echo message="variables may need to be defined (depending on the target invoked):" />
     <echo message="PATH: The 'javac' command is used for compilation;" />
     <echo message="      the 'java' command is used by default in testing/running; " />
-    <echo message="JAVA8_HOME: Home folder of the Java 8 JRE or JDK." />
+    <echo message="JAVA_HOME: Home folder of the Java JRE or JDK used for the build." />
     <echo message="FINDBUGS_HOME: Location of the FindBugs installation" />
     <echo message="" />
     <echo message="For control over the version of Java used to run Ant, set JAVA_HOME." />
@@ -183,7 +183,7 @@
           description="Compile all source files (after generating the source)">
   </target>
   
-  <target name="do-compile" depends="resolve-java8-runtime, resolve-java8-tools">
+  <target name="do-compile" depends="resolve-java-runtime, resolve-java-tools">
   
     <echo message="Compiling src directory to classes/base and classes/test with command 'javac'" />
     
@@ -196,19 +196,19 @@
     </move>
     <echo message="jrelibs=${toString:jrelibs}" />    
     <javac srcdir="src" destdir="classes/base" source="1.7" target="1.7"
-           bootclasspath="${java8-runtime}" sourcepath="" includeAntRuntime="no"
-           executable="${java8-home}/bin/javac" fork="yes" memoryMaximumSize="1024M"
+           bootclasspath="${java-runtime}" sourcepath="" includeAntRuntime="no"
+           executable="${java-home}/bin/javac" fork="yes" memoryMaximumSize="1024M"
            debug="on" optimize="off" deprecation="on" >
       <classpath>
         <!-- TODO: Remove this dependency on tools.jar by refactoring and moving all the dependent
              debugger code into the "platform" module -->
-        <pathelement location="${java8-tools}" />
+        <pathelement location="${java-tools}" />
         <fileset refid="libs" />
 	<fileset refid="jrelibs" />
         <fileset refid="extlibs" />
         <pathelement location="lib/buildlib/junit.jar" />
         <pathelement location="lib/buildlib/netbeans-memory-leak-utils.jar" />
-<!--    <pathelement location="classes/base" />  THIS directory is typically empty at the start of this step -->
+      <!--    <pathelement location="classes/base" />  THIS directory is typically empty at the start of this step -->
       </classpath>
       <compilerarg value="-Xlint" />
       <!-- Ignore serial warnings, because they occur for every Throwable definition (among others) -->
@@ -517,7 +517,7 @@
        Documentation Targets
        ********************* -->
   
-  <target name="javadoc" depends="generate-source, resolve-java8-tools, resolve-version-tag"
+  <target name="javadoc" depends="generate-source, resolve-java-tools, resolve-version-tag"
           description="Generate javadocs from the source folder (after generating the source)"
           unless="skip-javadoc">
     <antcall target="do-javadoc">
@@ -533,7 +533,7 @@
     <javadoc sourcepath="src" packagenames="*" destdir="docs/javadoc" maxmemory="512M"
              access="private" Use="yes" Version="yes" Author="yes" Windowtitle="${readable-project-name} API (${version-tag})" linksource="${link-source}">
       <classpath>
-        <pathelement location="${java8-tools}" />
+        <pathelement location="${java-tools}" />
         <fileset refid="libs" />
         <pathelement location="lib/buildlib/junit.jar" />
         <pathelement location="lib/buildlib/netbeans-memory-leak-utils.jar" />
@@ -541,14 +541,14 @@
 
       <link href="http://docs.oracle.com/javase/8/docs/api/"/>
       <link href="http://junit.org/junit4/javadoc/4.12/index.html?org/junit/"/>
-      <link href="http://drjava.org/javadoc/plt/" />
-      <link href="http://drjava.org/javadoc/javalanglevels/" />
-      <link href="http://drjava.org/javadoc/dynamicjava/" />
+      <link href="http://www.cs.rice.edu/~javaplt/drjava/javadoc/plt/" />
+      <link href="http://www.cs.rice.edu/~javaplt/drjava/javadoc/javalanglevels/" />
+      <link href="http://www.cs.rice.edu/~javaplt/drjava/javadoc/dynamicjava/" />
       <!-- Additional external library APIs may be listed here -->
     </javadoc>
   </target>
   
-  <target name="findbugs" depends="assert-findbugs-exists, compile, resolve-java8-tools"
+  <target name="findbugs" depends="assert-findbugs-exists, compile, resolve-java-tools"
 	      description="Generate a findbugs report (after compiling)">
     <taskdef name="findbugs" classpath="lib/buildlib/findbugs-ant.jar"
              classname="edu.umd.cs.findbugs.anttask.FindBugsTask" />
@@ -569,7 +569,7 @@
       <class location="classes/base" />
       <class location="classes/test" />
       <auxclasspath>
-        <pathelement location="${java8-tools}" />
+        <pathelement location="${java-tools}" />
         <pathelement location="classes/lib" />
         <pathelement location="lib/buildlib/junit.jar" />
         <pathelement location="lib/buildlib/netbeans-memory-leak-utils.jar" />
@@ -844,52 +844,52 @@
        Property-resolution Targets 
        *************************** -->
   
-  <target name="resolve-java8-runtime">
+  <target name="resolve-java-runtime">
     <!-- We rely on "location" to generate a platform-specific path; note that properties
-         are immutable and so java8-runtime will only be set the *first* time. -->
+         are immutable and so java-runtime will only be set the *first* time. -->
 
-    <property name="java8-runtime-1" location="${java8-home}/lib/rt.jar" />
-    <available property="java8-runtime" value="${java8-runtime-1}" file="${java8-runtime-1}" />
+    <property name="java-runtime-1" location="${java-home}/lib/rt.jar" />
+    <available property="java-runtime" value="${java-runtime-1}" file="${java-runtime-1}" />
 
-    <property name="java8-runtime-2" location="${java8-home}/jre/lib/rt.jar" />
-    <available property="java8-runtime" value="${java8-runtime-2}" file="${java8-runtime-2}" />
+    <property name="java-runtime-2" location="${java-home}/jre/lib/rt.jar" />
+    <available property="java-runtime" value="${java-runtime-2}" file="${java-runtime-2}" />
 
-    <property name="java8-runtime-3" location="${java8-home}/../Classes/classes.jar" />
-    <available property="java8-runtime" value="${java8-runtime-3}" file="${java8-runtime-3}" />
+    <property name="java-runtime-3" location="${java-home}/../Classes/classes.jar" />
+    <available property="java-runtime" value="${java-runtime-3}" file="${java-runtime-3}" />
 
-    <echo message="java8-runtime = ${java8-runtime}" />
+    <echo message="java-runtime = ${java-runtime}" />
 
-    <fail message="Can't find rt.jar in the Java 8 home: ${java8-home}" unless="java8-runtime" />
+    <fail message="Can't find rt.jar in the Java 8 home: ${java-home}" unless="java-runtime" />
   </target>
 
-  <target name="resolve-java8-exec">
+  <target name="resolve-java-exec">
     <!-- We rely on "location" to generate a platform-specific path -->
 
-    <property name="java8-exec-1" location="${java8-home}/bin/java.exe" />
-    <condition property="java8-exec" value="${java8-exec-1}">
+    <property name="java-exec-1" location="${java-home}/bin/java.exe" />
+    <condition property="java-exec" value="${java-exec-1}">
       <and>
-        <available file="${java8-exec-1}" />
+        <available file="${java-exec-1}" />
         <os family="windows" />
       </and>
     </condition>
     
-    <property name="java8-exec-2" location="${java8-home}/bin/java" />
-    <available property="java8-exec" value="${java8-exec-2}" file="${java8-exec-2}" />
+    <property name="java-exec-2" location="${java-home}/bin/java" />
+    <available property="java-exec" value="${java-exec-2}" file="${java-exec-2}" />
 
-    <fail message="Can't find the java executable in the Java 8 home: ${java8-home}" unless="java8-exec" />
+    <fail message="Can't find the java executable in the Java home: ${java-home}" unless="java-exec" />
   </target>
 
-  <target name="resolve-java8-tools">
-    <property name="java8-tools-1" location="${java8-home}/lib/tools.jar" />
-    <available property="java8-tools" value="${java8-tools-1}" file="${java8-tools-1}" />
+  <target name="resolve-java-tools">
+    <property name="java-tools-1" location="${java-home}/lib/tools.jar" />
+    <available property="java-tools" value="${java-tools-1}" file="${java-tools-1}" />
 
-    <property name="java8-tools-2" location="${java8-home}/../lib/tools.jar" />
-    <available property="java8-tools" value="${java8-tools-2}" file="${java8-tools-2}" />
+    <property name="java-tools-2" location="${java-home}/../lib/tools.jar" />
+    <available property="java-tools" value="${java-tools-2}" file="${java-tools-2}" />
 
-    <property name="java8-tools-3" location="${java8-home}/../Classes/classes.jar" />
-    <available property="java8-tools" value="${java8-tools-3}" file="${java8-tools-3}" />
+    <property name="java-tools-3" location="${java-home}/../Classes/classes.jar" />
+    <available property="java-tools" value="${java-tools-3}" file="${java-tools-3}" />
 
-    <fail message="Can't find tools.jar in the Java 8 home: ${java8-home}" unless="java8-tools" />
+    <fail message="Can't find tools.jar in the Java home: ${java-home}" unless="java-tools" />
   </target>
   
   <target name="resolve-current-tools">

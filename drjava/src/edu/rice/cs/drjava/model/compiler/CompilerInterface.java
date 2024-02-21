@@ -81,8 +81,7 @@ public interface CompilerInterface {
   /** @return string to display in a combo box (generally {@code getName()}) */
   String toString();
   
-  /** A compiler can instruct DrJava to include additional elements for the boot
-   * class path of the Interactions JVM. 
+  /** A compiler can instruct DrJava to include additional elements for the boot class path of the Interactions JVM. 
    * @return list of files on the class path
    */
   List<File> additionalBootClassPathForInteractions();

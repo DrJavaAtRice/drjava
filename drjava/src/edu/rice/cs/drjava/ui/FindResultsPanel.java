@@ -107,7 +107,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     * @param noComments whether the search ignored comments
     * @param noTestCases whether the search ignored test cases
     * @param doc weak reference to the document in which the search occurred (or started, if all documents were searched)
-    * @param findReplace the FindReplacePanel that created this FindResultsPanel
+    * @param findReplacePanel the FindReplacePanel that created this FindResultsPanel
     */
   public FindResultsPanel(final MainFrame frame, final RegionManager<MovingDocumentRegion> regionManager, 
     final MovingDocumentRegion region, final String title, final String searchString, 
