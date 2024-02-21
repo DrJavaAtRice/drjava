@@ -36,6 +36,7 @@ public class JavaxToolsCompiler implements CompilerInterface {
     public List<? extends DJError> compile(List<? extends File> files, List<? extends File> classPath,
                                            List<? extends File> sourcePath, File destination,
                                            List<? extends File> bootClassPath, String sourceVersion, boolean showWarnings) {
+        // TODO: enforce using java8
         // Check if compiler is available
         if (compiler == null) {
             List<DJError> errors = new ArrayList<>();
