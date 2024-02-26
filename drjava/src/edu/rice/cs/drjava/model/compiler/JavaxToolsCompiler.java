@@ -91,8 +91,8 @@ public class JavaxToolsCompiler implements CompilerInterface {
         List<DJError> errors = new ArrayList<>();
         for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics.getDiagnostics()) {
             DJError error = new DJError(new File(diagnostic.getSource().toUri()),
-                    (int) diagnostic.getLineNumber(),
-                    (int) diagnostic.getColumnNumber(),
+                    (int) diagnostic.getLineNumber() - 1, // DJError adds 1 to this number.
+                    (int) diagnostic.getColumnNumber() - 1, // Fixes the cursor position offset.
                     diagnostic.getMessage(null),
                     diagnostic.getKind() == Diagnostic.Kind.ERROR);
             errors.add(error);
