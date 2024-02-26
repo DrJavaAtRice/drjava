@@ -331,7 +331,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     Position p1 = cme.getPosition(ce1);
     Position p2 = cme.getPosition(ce2);
     assertTrue("location of first error should be between 20 and 29 inclusive (line 2), but was " + p1.getOffset(),
-               p1.getOffset() <= 20 && p1.getOffset() <= 29);
+               p1.getOffset() >= 20 && p1.getOffset() <= 29);
     assertTrue("location of error should be after 34 (line 3 or 4)", p2.getOffset() >= 34);
     
     debug.logEnd();
