@@ -33,7 +33,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.File;
 import java.util.Date;
-import java.util.Random;
+import java.security.SecureRandom;
 
 import edu.rice.cs.drjava.model.MultiThreadedTestCase;
 import edu.rice.cs.plt.io.IOUtil;
@@ -228,7 +228,7 @@ public class LogTest extends MultiThreadedTestCase {
     Date earlier = new Date();
     
     Log log3 = new Log(file3, true);
-    Random r = new Random();
+    SecureRandom r = new SecureRandom();
     Thread[] threads = new Thread[NUM_THREADS];
     for (int i = 0; i < NUM_THREADS; i++) threads[i] = new LogTestThread(log3, r.nextInt(DELAY));
     for (int i = 0; i < NUM_THREADS; i++) threads[i].start();
