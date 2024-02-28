@@ -74,8 +74,16 @@ public class JavaxToolsCompiler implements CompilerInterface {
             optionList.add(sourceVersion);
         }
         if (destination != null) {
-            optionList.add("-d");
-            optionList.add(destination.getAbsolutePath());
+            try {
+                fileManager.setLocation(StandardLocation.CLASS_OUTPUT, Collections.singletonList(destination));
+            } catch (IOException e) {
+                List<DJError> errors = new ArrayList<>();
+                errors.add(new DJError("Error setting build directory: " + e.getMessage(), false));
+                return errors;
+            }
+            // This doesn't work for javax.tools compiler
+            // optionList.add("-d");
+            // optionList.add(destination.getAbsolutePath());
         }
 
         // Prepare a diagnostic collector to collect compile errors
