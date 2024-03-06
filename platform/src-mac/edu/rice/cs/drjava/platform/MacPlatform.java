@@ -29,8 +29,10 @@
 
 package edu.rice.cs.drjava.platform;
 
+import com.apple.eawt.Application;
+
+import java.awt.desktop.OpenFilesHandler;
 import java.net.URL;
-import com.apple.eawt.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import javax.swing.*;
@@ -84,21 +86,32 @@ class MacPlatform extends DefaultPlatform {
    * The Mac JDK implementation sets a system property to use the screen menu bar.
    */
   public void beforeUISetup() {
-    System.setProperty("apple.laf.useScreenMenuBar","true");
-    
-    // needs to be done here, otherwise the event gets lost
-    ApplicationListener appListener = new ApplicationAdapter() {
-      public void handleOpenFile(ApplicationEvent event) {
-        if (event.getFilename()!=null) {
-          edu.rice.cs.drjava.DrJavaRoot.handleRemoteOpenFile(new java.io.File(event.getFilename()), -1);
-          event.setHandled(true);
-        }
-      }
+//    System.setProperty("apple.laf.useScreenMenuBar","true");
+//
+//    // needs to be done here, otherwise the event gets lost
+//    ApplicationListener appListener = new ApplicationAdapter() {
+//      public void handleOpenFile(ApplicationEvent event) {
+//        if (event.getFilename()!=null) {
+//          edu.rice.cs.drjava.DrJavaRoot.handleRemoteOpenFile(new java.io.File(event.getFilename()), -1);
+//          event.setHandled(true);
+//        }
+//      }
+//    };
+//
+//    // Register the ApplicationListener.
+//    Application appl = new Application();
+//    appl.addApplicationListener(appListener);
+    System.setProperty("apple.laf.useScreenMenuBar", "true");
+
+    // Use lambda expression for the OpenFilesHandler
+    OpenFilesHandler openFilesHandler = event -> {
+      event.getFiles().forEach(file -> {
+        edu.rice.cs.drjava.DrJavaRoot.handleRemoteOpenFile(file, -1);
+      });
     };
-    
-    // Register the ApplicationListener.
-    Application appl = new Application();
-    appl.addApplicationListener(appListener);
+
+    // Register the OpenFilesHandler.
+    Application.getApplication().setOpenFileHandler(openFilesHandler);
   }
    
   /**
