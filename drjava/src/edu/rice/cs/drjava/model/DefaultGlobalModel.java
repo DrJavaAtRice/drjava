@@ -44,7 +44,7 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.BooleanOption;
 import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.drjava.model.JDKDescriptor;
-import edu.rice.cs.drjava.model.compiler.DummyCompilerListener;
+import edu.rice.cs.drjava.model.compiler.*;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.drjava.model.debug.Breakpoint;
@@ -63,10 +63,6 @@ import edu.rice.cs.drjava.model.repl.InteractionsDJDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsListener;
 import edu.rice.cs.drjava.model.repl.InteractionsScriptModel;
 import edu.rice.cs.drjava.model.repl.newjvm.MainJVM;
-import edu.rice.cs.drjava.model.compiler.CompilerListener;
-import edu.rice.cs.drjava.model.compiler.CompilerModel;
-import edu.rice.cs.drjava.model.compiler.DefaultCompilerModel;
-import edu.rice.cs.drjava.model.compiler.CompilerInterface;
 import edu.rice.cs.drjava.model.junit.DefaultJUnitModel;
 import edu.rice.cs.drjava.model.junit.JUnitModel;
 
@@ -185,7 +181,11 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   public DefaultGlobalModel() {
     Iterable<? extends JDKToolsLibrary> tools = findLibraries();  // findLibraries should be called findTools
     List<CompilerInterface> compilers = new LinkedList<CompilerInterface>();
-    
+
+    // TODO: should this be done a different way?
+    JavaxToolsCompiler javaxCompiler = new JavaxToolsCompiler();
+    compilers.add(javaxCompiler);
+
     /* Note: the only debugger used in DrJava is JPDADebugger in the DrJava code base which relies
      * on machinery provided by the tools.jar library included in every Java JDK (up through JDK 8).  A copy of the
      * tools.jar library from Java 8 Open JDK is included in the drjava.jar file.
