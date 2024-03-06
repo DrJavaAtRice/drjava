@@ -31,7 +31,7 @@ package edu.rice.cs.drjava.platform;
 
 import com.apple.eawt.Application;
 
-import java.awt.desktop.OpenFilesHandler;
+import java.awt.desktop.*;
 import java.net.URL;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -122,34 +122,64 @@ class MacPlatform extends DefaultPlatform {
    * @param quit the Action associated with quitting the DrJava application
    */
   public void afterUISetup(final Action about, final Action prefs, final Action quit) {    
-    ApplicationListener appListener = new ApplicationAdapter() {
-      public void handleAbout(ApplicationEvent e) {
-        about.actionPerformed(new ActionEvent(this, 0, "About DrJava"));
-        e.setHandled(true);
-      }
+//    ApplicationListener appListener = new ApplicationAdapter() {
+//      public void handleAbout(ApplicationEvent e) {
+//        about.actionPerformed(new ActionEvent(this, 0, "About DrJava"));
+//        e.setHandled(true);
+//      }
+//
+//      public void handlePreferences(ApplicationEvent e) {
+//        prefs.actionPerformed(new ActionEvent(this, 0, "Preferences..."));
+//        e.setHandled(true);
+//      }
+//
+//      public void handleQuit(ApplicationEvent e) {
+//        // Workaround for 2868805:  show modal dialogs in a separate thread.
+//        // This encapsulation is not necessary in 10.2, but will not break either.
+//        final ApplicationEvent ae = e;
+//        SwingUtilities.invokeLater(new Runnable() {
+//          public void run() {
+//            quit.actionPerformed(new ActionEvent(this, 0, "Quit DrJava"));
+//            ae.setHandled(true);
+//          }
+//        });
+//      }
+//    };
+//
+//    // Register the ApplicationListener.
+//    Application appl = new Application();
+//    appl.setEnabledPreferencesMenu(true);
+//    appl.addApplicationListener(appListener);
 
-      public void handlePreferences(ApplicationEvent e) {
-        prefs.actionPerformed(new ActionEvent(this, 0, "Preferences..."));
-        e.setHandled(true);
-      }
+    Desktop desktop = Desktop.getDesktop();
 
-      public void handleQuit(ApplicationEvent e) {
-        // Workaround for 2868805:  show modal dialogs in a separate thread.
+    // Handle about action
+    desktop.setAboutHandler(new AboutHandler() {
+      public void handleAbout(AboutEvent e) {
+        about.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "About DrJava"));
+      }
+    });
+
+    // Handle preferences action
+    desktop.setPreferencesHandler(new PreferencesHandler() {
+      public void handlePreferences(PreferencesEvent e) {
+        prefs.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "Preferences..."));
+      }
+    });
+
+    // Handle quit action
+    desktop.setQuitHandler(new QuitHandler() {
+      public void handleQuitRequestWith(QuitEvent e, QuitResponse response) {
+        // Workaround for 2868805: show modal dialogs in a separate thread.
         // This encapsulation is not necessary in 10.2, but will not break either.
-        final ApplicationEvent ae = e;
         SwingUtilities.invokeLater(new Runnable() {
           public void run() {
-            quit.actionPerformed(new ActionEvent(this, 0, "Quit DrJava"));
-            ae.setHandled(true);
+            quit.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "Quit DrJava"));
+            response.cancelQuit();
           }
         });
       }
-    };
-    
-    // Register the ApplicationListener.
-    Application appl = new Application();
-    appl.setEnabledPreferencesMenu(true);
-    appl.addApplicationListener(appListener);
+    });
   }
   
   /**
