@@ -116,7 +116,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   
   /** Remote reference to the MainJVM class in DrJava's primary JVM.  Assigned ONLY once. */
   private volatile MainJVMRemoteI _mainJVM;
-  
+
   /** Private constructor; use the singleton ONLY instance. */
   private InterpreterJVM() {
     super("Reset Interactions Thread", "Poll DrJava Thread");
@@ -131,7 +131,8 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     
     // _interpreterOptions = Options.DEFAULT;
     _interpreterOptions = new InteractionsPaneOptions();
-    _defaultInterpreter = new Interpreter(_interpreterOptions, _interpreterLoader);
+//    _defaultInterpreter = new Interpreter(_interpreterOptions, _interpreterLoader);
+    _defaultInterpreter =
     _interpreters = new HashMap<String,Interpreter>();
     _busyInterpreters = new HashSet<Interpreter>();
 //    _environments = new HashMap<String, Pair<TypeContext, RuntimeBindings>>();
@@ -223,7 +224,10 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     * local state.
     * @param s Source code to interpret.
     */
-  public InterpretResult interpret(String s) { return interpret(s, _activeInterpreter.second()); }
+  public InterpretResult interpret(String s) {
+    System.out.println("INTERPRET!");
+    return interpret(s, _activeInterpreter.second());
+  }
   
   /** Interprets the given string of source code with the given interpreter. The result is returned to
     * MainJVM via the interpretResult method.
@@ -248,9 +252,17 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     
     // set the thread context class loader, this way NextGen and Mint can use the interpreter's class loader
     Thread.currentThread().setContextClassLoader(_interpreterLoader);  // _interpreterLoader is final
-    
+    private JShell js;
+    try {
+      js = JShell.create();
+    } catch (IllegalStateException e) {
+      //Potentially exit system or try to create a new JShell instance
+      System.err.println("JShell is not available in this environment");
+    }
     Option<Object> result = null;
-    try { result = interpreter.interpret(input); }
+    try {
+      result = interpreter.interpret(input);
+    }
     catch (InterpreterException e) { debug.logEnd(); return InterpretResult.exception(e); }
     catch (Throwable e) { debug.logEnd(); return InterpretResult.unexpectedException(e); }
     finally { removeBusyInterpreter(interpreter); }

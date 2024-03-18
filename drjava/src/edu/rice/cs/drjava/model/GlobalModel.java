@@ -78,6 +78,7 @@ import edu.rice.cs.drjava.config.OptionParser;
   *
   * @version $Id$
   */
+
 public interface GlobalModel extends ILoadDocuments {
   
   //-------------------------- Listener Management --------------------------//

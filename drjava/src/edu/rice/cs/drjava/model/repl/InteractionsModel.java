@@ -243,7 +243,10 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   
   /** Interprets the given command.
     * @param toEval command to be evaluated. */
-  public final void interpret(String toEval) { _interpret(toEval); }
+  public final void interpret(String toEval) {
+    System.out.println("toEval: " + toEval);
+    _interpret(toEval);
+  }
   
   /** Interprets the given command.  This should only be called from interpret, never directly.
     * @param toEval command to be evaluated
@@ -600,6 +603,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     */
   public void replReturnedResult(String result, String style) {
 //    Utilities.show("InteractionsModel.replReturned(...) passed '" + result + "'");
+    System.out.println("Returned result: " + result);
     _secondToLastError = _lastError;
     _lastError = null;
     append(result + "\n", style);
