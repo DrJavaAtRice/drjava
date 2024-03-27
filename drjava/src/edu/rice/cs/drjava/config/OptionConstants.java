@@ -303,7 +303,9 @@ public interface OptionConstants {
     /** @return the look-and-feel class name to use by default */
     public static String getDefaultLookAndFeel() {
       if (PlatformFactory.ONLY.isMacPlatform())
-        return UIManager.getSystemLookAndFeelClassName(); // Mac: Let the system decide.
+        return "javax.swing.plaf.nimbus.NimbusLookAndFeel";
+      // TODO: fix this up to work with the proper look and feel -> Mac was causing problems
+//        return UIManager.getSystemLookAndFeelClassName(); // Mac: Let the system decide.
       else // Set CrossPlatform "Nimbus" LookAndFeel
         try {
         for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels())

@@ -42,7 +42,9 @@
   <property name="openjdk6-home" value="${env.OPENJDK6_HOME}" />
   <property name="java7-home" value="${env.JAVA7_HOME}" />
   <property name="java8-home" value="${env.JAVA8_HOME}" />
-  <property name="drjava-jar" value="${env.DRJAVA_JAR}" />  
+  <echo message="DRJAVA_JAR  = ${env.DRJAVA_JAR}"/>
+  <property name="drjava-jar" value="${env.DRJAVA_JAR}" />
+
 
   <property name="mint-home" value="${env.MINT_HOME}" />
   <property name="nextgen-home" value="${env.NGC_HOME}" />
@@ -237,13 +239,13 @@
     </antcall>
   </target>
   
-  <target name="compile-mac" depends="resolve-java5-runtime" 
+  <target name="compile-mac" depends=""
           description="Compile the 'mac' sources">
-    <antcall target="do-compile">
+    <antcall target="do-compile-9">
       <param name="platform-tag" value="mac" />
-      <param name="source-version" value="1.5" />
-      <param name="runtime-jar" value="${java5-runtime}" />
-      <param name="extra-classpath" value="${java5-runtime}/../ui.jar" />
+<!--      <param name="source-version" value="1.9" />-->
+<!--      <param name="runtime-jar" value="${java8-runtime}" />-->
+<!--      <param name="extra-classpath" value="${java8-runtime}/../ui.jar" />-->
     </antcall>
   </target>
   
@@ -279,7 +281,7 @@
            source="${source-version}" target="${source-version}"
            bootclasspath="${runtime-jar}" sourcepath="" includeAntRuntime="no"
            executable="javac" fork="yes" memoryMaximumSize="512M"
-           debug="on" optimize="off" deprecation="on">
+           verbose="true" debug="on" optimize="off" deprecation="on">
       <classpath>
         <pathelement path="${extra-classpath}" />
         <fileset refid="libs" />
@@ -310,7 +312,62 @@
     <antcall target="unjar-libs" />
     
   </target>
-  
+
+  <!-- Requires that the properties 'platform-tag', 'source-version', 'runtime-jar', and
+     'extra-classpath' be set -->
+  <target name="do-compile-9" depends="assert-drjava-jar-exists">
+
+    <echo message="Compiling src-${platform-tag} directory to classes/base-${platform-tag} and classes/test-${platform-tag}" />
+    <echo message="with command 'javac'" />
+
+    <!-- Make the directories if they don't already exist -->
+    <mkdir dir="classes/base-${platform-tag}" />
+    <mkdir dir="classes/test-${platform-tag}" />
+    <!-- To eliminate confusion, we force recompilation whenever this is invoked -->
+    <delete>
+      <fileset dir="classes/base-${platform-tag}" includes="**/*" />
+      <fileset dir="classes/test-${platform-tag}" includes="**/*" />
+    </delete>
+
+    <echo message="runtime-jar = ${runtime-jar}" />
+    <echo message="If this fails, try adding the following to your env: ANT_OPTS=&quot;--add-opens java.base/java.net=ALL-UNNAMED&quot;" />
+    <javac srcdir="src-${platform-tag}" destdir="classes/base-${platform-tag}"
+           source="${source-version}" target="${source-version}" release="9"
+           sourcepath="" includeAntRuntime="no"
+           executable="javac" fork="yes" memoryMaximumSize="512M"
+           debug="on" optimize="off" deprecation="on">
+      <classpath>
+        <pathelement path="${extra-classpath}" />
+        <fileset refid="libs" />
+        <pathelement location="lib/buildlib/junit.jar" />
+        <pathelement location="classes/base-${platform-tag}" />
+        <pathelement location="${drjava-jar}" />
+      </classpath>
+      <compilerarg value="-Xlint" />
+      <!-- Ignore serial warnings, because they occur for every Throwable definition (among others) -->
+      <compilerarg value="-Xlint:-serial" />
+      <!-- Use the next line to compile against other sources, ignoring any unneeded classes.
+           This can be useful in creating a pruned version of a jar file for the lib directory.
+           (You must also clear the sourcepath="" option.)
+      <include name="${src-working-dir}/**/*.java" /> -->
+      <compilerarg value="--add-opens"/>
+      <compilerarg value="java.base/java.net=ALL-UNNAMED"/>
+    </javac>
+
+    <move todir="classes/test-${platform-tag}">
+      <fileset dir="classes/base-${platform-tag}">
+        <include name="**/*Test.class" />
+        <include name="**/*Test$*.class" />
+        <include name="**/*TestCase.class" />
+        <include name="**/*TestCase$*.class" />
+        <!-- Additional test classes should be listed here -->
+      </fileset>
+    </move>
+
+    <antcall target="copy-resources" />
+    <antcall target="unjar-libs" />
+
+  </target>
 
   <!-- Requires the 'platform-tag' property to be set -->
   <target name="copy-resources">

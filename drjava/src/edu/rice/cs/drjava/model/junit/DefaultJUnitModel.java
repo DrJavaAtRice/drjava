@@ -408,7 +408,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
             try {
               final Box<String> className = new SimpleBox<String>();
               final Box<String> sourceName = new SimpleBox<String>();
-              new ClassReader(IOUtil.toByteArray(entry)).accept(new ClassVisitor(Opcodes.ASM4) {
+              new ClassReader(IOUtil.toByteArray(entry)).accept(new ClassVisitor(Opcodes.ASM7) {
                 public void visit(int version, int access, String name, String sig, String sup, String[] inters) {
                   className.set(name.replace('/', '.'));
                 }
