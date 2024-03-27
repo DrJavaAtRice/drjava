@@ -302,18 +302,18 @@ public interface OptionConstants {
     
     /** @return the look-and-feel class name to use by default */
     public static String getDefaultLookAndFeel() {
-      return "javax.swing.plaf.nimbus.NimbusLookAndFeel";
+      if (PlatformFactory.ONLY.isMacPlatform())
+        return "javax.swing.plaf.nimbus.NimbusLookAndFeel";
       // TODO: fix this up to work with the proper look and feel -> Mac was causing problems
-//      if (PlatformFactory.ONLY.isMacPlatform())
 //        return UIManager.getSystemLookAndFeelClassName(); // Mac: Let the system decide.
-//      else // Set CrossPlatform "Nimbus" LookAndFeel
-//        try {
-//        for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels())
-//          if ("Nimbus".equals(info.getName())) return info.getClassName();
-//      } catch (Exception e) {
-//        // If Nimbus is not available, fall through and use CrossPlatformLookAndFeel
-//      }
-//      return UIManager.getCrossPlatformLookAndFeelClassName();
+      else // Set CrossPlatform "Nimbus" LookAndFeel
+        try {
+        for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels())
+          if ("Nimbus".equals(info.getName())) return info.getClassName();
+      } catch (Exception e) {
+        // If Nimbus is not available, fall through and use CrossPlatformLookAndFeel
+      }
+      return UIManager.getCrossPlatformLookAndFeelClassName();
     }
     
     /** Need to ensure that a look-and-feel can be instantiated and is valid.
