@@ -662,6 +662,7 @@
       <fileset dir="classes/base-hj" />
       <fileset dir="classes/base-eclipse" />
       <fileset dir="classes/base-mac" />
+      <fileset dir="classes/base-mac-java-8" />
       <fileset dir="classes/base-windows" />
       <!-- Additional platform types should be listed here -->
     </jar>
@@ -683,6 +684,7 @@
       <fileset dir="classes/base-hj" />
       <fileset dir="classes/base-eclipse" />
       <fileset dir="classes/base-mac" />
+      <fileset dir="classes/base-mac-java-8" />
       <fileset dir="classes/base-windows" />
       <!-- Additional platform types should be listed here -->
     </jar>
@@ -710,6 +712,7 @@
     <delete dir="classes/test-hj" failonerror="${clean-can-fail}" />
     <delete dir="classes/test-eclipse" failonerror="${clean-can-fail}" />
     <delete dir="classes/test-mac" failonerror="${clean-can-fail}" />
+    <delete dir="classes/test-mac-java-8" failonerror="${clean-can-fail}" />
     <delete dir="classes/test-windows" failonerror="${clean-can-fail}" />
     
     <delete includeemptydirs="true" failonerror="${clean-can-fail}">
