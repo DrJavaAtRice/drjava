@@ -158,6 +158,9 @@
        that is not possible, later versions are used.  Note that if there are dependencies on
        later APIs, the DrJava application is responsible for ensuring that those classes are 
        only loaded when the necessary APIs are available. -->
+
+  <target name="compile-all" depends="compile-eclipse, compile-hj, compile-jdk5, compile-jdk6, compile-jdk7, compile-mac, compile-mac-java-8, compile-mint, compile-nextgen, compile-openjdk6, compile-windows"
+          description="Run all compile targets"/>
        
   <target name="compile-jdk5" depends="resolve-java5-runtime, resolve-java5-tools" 
           description="Compile the 'jdk5' sources">
@@ -246,6 +249,16 @@
 <!--      <param name="source-version" value="1.9" />-->
 <!--      <param name="runtime-jar" value="${java8-runtime}" />-->
 <!--      <param name="extra-classpath" value="${java8-runtime}/../ui.jar" />-->
+    </antcall>
+  </target>
+
+  <target name="compile-mac-java-8" depends="resolve-java8-runtime"
+          description="Compile the 'mac-java-8' sources">
+    <antcall target="do-compile">
+      <param name="platform-tag" value="mac-java-8" />
+      <param name="source-version" value="1.8" />
+      <param name="runtime-jar" value="${java8-runtime}" />
+      <param name="extra-classpath" value="${java8-runtime}/../ui.jar" />
     </antcall>
   </target>
   
@@ -491,6 +504,15 @@
     </antcall>
   </target>
 
+  <target name="test-mac-java-8" depends="compile-mac-java-8"
+          description="Run all 'mac' tests (after compiling); use -Dtest-spec=... to filter">
+    <antcall target="iterate-tests">
+      <param name="platform-tag" value="mac-java-8" />
+      <param name="extra-classpath" value="" />
+      <param name="test-jvm" value="java" />
+    </antcall>
+  </target>
+
   <target name="test-windows" depends="compile-windows" 
           description="Run all 'windows' tests (after compiling); use -Dtest-spec=... to filter">
     <antcall target="iterate-tests">
@@ -640,6 +662,7 @@
       <fileset dir="classes/base-hj" />
       <fileset dir="classes/base-eclipse" />
       <fileset dir="classes/base-mac" />
+      <fileset dir="classes/base-mac-java-8" />
       <fileset dir="classes/base-windows" />
       <!-- Additional platform types should be listed here -->
     </jar>
@@ -661,6 +684,7 @@
       <fileset dir="classes/base-hj" />
       <fileset dir="classes/base-eclipse" />
       <fileset dir="classes/base-mac" />
+      <fileset dir="classes/base-mac-java-8" />
       <fileset dir="classes/base-windows" />
       <!-- Additional platform types should be listed here -->
     </jar>
@@ -688,6 +712,7 @@
     <delete dir="classes/test-hj" failonerror="${clean-can-fail}" />
     <delete dir="classes/test-eclipse" failonerror="${clean-can-fail}" />
     <delete dir="classes/test-mac" failonerror="${clean-can-fail}" />
+    <delete dir="classes/test-mac-java-8" failonerror="${clean-can-fail}" />
     <delete dir="classes/test-windows" failonerror="${clean-can-fail}" />
     
     <delete includeemptydirs="true" failonerror="${clean-can-fail}">
