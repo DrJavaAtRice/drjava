@@ -46,8 +46,10 @@ public class PlatformFactory {
     
     // Get OS name string; we expect one of "windows xp", "mac os x", etc.
     String os = System.getProperty("os.name").toLowerCase();
+    String java_version = System.getProperty("java.version").toLowerCase();
     
-    if (os.startsWith("mac os x")) return MacPlatform.ONLY;
+    if (os.startsWith("mac os x") && java_version.startsWith("1.")) return MacPlatform.ONLY;
+    else if (os.startsWith("mac os x")) return MacPlatform.ONLY;
     else if (os.startsWith("windows")) return WindowsPlatform.ONLY;
     else return DefaultPlatform.ONLY; 
   }
