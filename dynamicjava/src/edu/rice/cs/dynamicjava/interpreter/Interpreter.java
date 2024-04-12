@@ -10,7 +10,6 @@ import koala.dynamicjava.interpreter.error.ExecutionError;
 import koala.dynamicjava.parser.wrapper.JavaCCParser;
 import koala.dynamicjava.parser.wrapper.ParseError;
 import edu.rice.cs.dynamicjava.Options;
-
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /** The external interface for the interpreter. */
@@ -38,6 +37,7 @@ public class Interpreter {
   }
   
   public Option<Object> interpret(String code) throws InterpreterException {
+    System.out.println("In Interpreter context: " + code);
     Iterable<Node> tree = parse(code);
     debug.logValue("Parse result", tree);
     TypeContext tcResult = typeCheck(tree);
@@ -76,7 +76,9 @@ public class Interpreter {
       return Pair.make(r.bindings(), r.value());
     }
     catch (WrappedException e) {
-      if (e.getCause() instanceof InterpreterException) { throw (InterpreterException) e.getCause(); }
+      if (e.getCause() instanceof InterpreterException) {
+        throw (InterpreterException) e.getCause();
+      }
       else { throw e; }
     }
   }
