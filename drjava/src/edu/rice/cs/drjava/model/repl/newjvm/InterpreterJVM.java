@@ -113,7 +113,9 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   
   private final ClassPathManager _classPathManager;
   private final ClassLoader _interpreterLoader;
-  private StringBuilder output;
+  private StringBuilder output_buf;
+  private StringBuilder input_buf;
+  private int num_input_braces;
   
   // Lock object for ensuring mutual exclusion on updates and compound accesses
   private final Object _stateLock = new Object();
@@ -147,12 +149,14 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     _activeInterpreter = Pair.make("", _defaultInterpreter);
 
     // Create a StringBuilder to capture the JShell Output
-    output = new StringBuilder();
+    output_buf = new StringBuilder();
+    input_buf = new StringBuilder();
+    num_input_braces = 0;
     // Create a PrintStream that will write to our StringBuilder
     PrintStream printStream = new PrintStream(new OutputStream() {
       @Override
       public void write(int b) {
-        output.append((char) b);
+        output_buf.append((char) b);
       }
     });
 
@@ -273,54 +277,72 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   /**
    * Interprets the given string of code with an instance of JShell and returns the result wrapped in a InterpretResult object
    * Currently does NOT support differentiation between different types of results, only treats them as objects.
-   * Currently does NOT support multiline inputs of code, only single lines. (consider looking at SourceCodeAnalysis for this?)
    * Currently does NOT support printing of basic expressions, i.e. "2 + 2" will not print 4 (but it should)
    * @param code - the code to be interpreted
    * @return InterpretResult - the result of the interpretation
    * @throws InterpreterException - in the case the JShell instance is not available or an error occurs during interpretation
    */
-  private InterpretResult interpretWithJShell(String code) throws InterpreterException {
-    InterpretResult res;
+  private InterpretResult interpretWithJShell(StringBuilder input_buf) throws InterpreterException {
+    InterpretResult res = null;
     //TD set verbosity level so it doesn't freak out over things like semicolons
     if (_js == null) {
       //TODO create InterpretResultException here
       return InterpretResult.exception(new EvaluatorException(new Throwable("An error has occured that has caused the Interpreter to not be available.")));
     }
 
-    List<SnippetEvent> events = _js.eval(code);
+//    System.out.println("Evalulating: " + input_buf.toString());
+    List<SnippetEvent> events = _js.eval(input_buf.toString());
     //getting rid of new line character at the end
-    if (output.length() > 0 && output.charAt(output.length() - 1) == '\n') {
-      output.setLength(output.length() - 1);
+    if (output_buf.length() > 0 && output_buf.charAt(output_buf.length() - 1) == '\n') {
+      output_buf.setLength(output_buf.length() - 1);
     }
 
     //TODO Jshell adds a lot of fluff to the output, try and only get the cause of the error
     for (SnippetEvent e : events) {
       if (e.status() == Snippet.Status.REJECTED) {
         Diag diagnostics = _js.diagnostics(e.snippet()).collect(Collectors.toList()).get(0);
-        output.append(diagnostics.getMessage(Locale.getDefault()));
-        res = InterpretResult.exception(new EvaluatorException(new Throwable(output.toString())));
-        output.setLength(0);
-        return res;
+        output_buf.append(diagnostics.getMessage(Locale.getDefault()));
+        res = InterpretResult.exception(new EvaluatorException(new Throwable(output_buf.toString())));
       }
     }
 
-    //Setting InterpretResult as an object value rather than doing case work as JShell will internally keep track of state, bypassing need for us to do so
-    res = InterpretResult.objectValue(output.toString(), "JShellOutput");
-    output.setLength(0);
+    if (res == null) {
+      //Setting InterpretResult as an object value rather than doing case work as JShell will internally keep track of state, bypassing need for us to do so
+      res = InterpretResult.objectValue(output_buf.toString(), "JShellOutput");
+    }
+
+    output_buf.setLength(0);
+    //clear input after setting multiple lines
+    input_buf.setLength(0);
     return res;
   }
 
   private InterpretResult interpret(String input, Interpreter interpreter) {
+//    System.out.println("Received input: " + input);
     boolean available = addBusyInterpreter(interpreter);
     if (! available) { debug.logEnd(); return InterpretResult.busy(); }
 
     // set the thread context class loader, this way NextGen and Mint can use the interpreter's class loader
     Thread.currentThread().setContextClassLoader(_interpreterLoader);  // _interpreterLoader is final
     InterpretResult result = null;
-//    Option<Object> result = null;
+
+    //Branching based on state of input_buffer to decide if we shoudl evalutate or not (i.e. when we are in a multi-line statement)
+    input_buf.append(input);
+    if (input.trim().endsWith("{")) {
+      num_input_braces += 1;
+    }
+
+    if (num_input_braces > 0) {
+      if (input.endsWith("}")) {
+        num_input_braces -= 1;
+      }
+    }
+
+
     try {
-      result = interpretWithJShell(input);
-//      result = interpreter.interpret(input);
+      if (num_input_braces == 0) {
+        result = interpretWithJShell(input_buf);
+      }
     }
     catch (InterpreterException e) { debug.logEnd(); return InterpretResult.exception(e); }
     catch (Throwable e) { debug.logEnd(); return InterpretResult.unexpectedException(e); }
@@ -332,33 +354,6 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     }
 
     return result;
-//
-//    return result.apply(new OptionVisitor<Object, InterpretResult>() {
-//      public InterpretResult forNone() { return InterpretResult.noValue(); }
-//      public InterpretResult forSome(Object obj) {
-//        if (obj instanceof String) { debug.logEnd(); return InterpretResult.stringValue((String) obj); }
-//        else if (obj instanceof Character) { debug.logEnd(); return InterpretResult.charValue((Character) obj); }
-//        else if (obj instanceof Number) { debug.logEnd(); return InterpretResult.numberValue((Number) obj); }
-//        else if (obj instanceof Boolean) { debug.logEnd(); return InterpretResult.booleanValue((Boolean) obj); }
-//        else {
-//          try {
-//            String resultString = TextUtil.toString(obj);
-//            String resultTypeStr = null;
-//            if (obj!=null) {
-//                Class<?> c = obj.getClass();
-//                resultTypeStr = getClassName(c);
-//            }
-//            debug.logEnd();
-//            return InterpretResult.objectValue(resultString,resultTypeStr);
-//          }
-//          catch (Throwable t) {
-//            // an exception occurred during toString
-//            debug.logEnd();
-//            return InterpretResult.exception(new EvaluatorException(t));
-//          }
-//        }
-//      }
-//    });
   }
   
   /** Gets the value of the variable with the given name in the current interpreter.
