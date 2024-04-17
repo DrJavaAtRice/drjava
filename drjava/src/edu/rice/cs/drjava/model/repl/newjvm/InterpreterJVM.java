@@ -1,31 +1,39 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2019, JavaPLT group at Rice University (drjava@rice.edu).  All rights reserved.
+ * Copyright (c) 2001-2017, JavaPLT group at Rice University (drjava@rice.edu)
+ * All rights reserved.
  * 
- * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the 
- * following conditions are met:
- *    * Redistributions of source code must retain the above copyright notice, this list of conditions and the following
- *      disclaimer.
- *    * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the 
- *      following disclaimer in the documentation and/or other materials provided with the distribution.
- *    * Neither the names of DrJava, the JavaPLT group, Rice University, nor the names of its contributors may be used 
- *      to endorse or promote products derived from this software without specific prior written permission.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *    * Redistributions of source code must retain the above copyright
+ *      notice, this list of conditions and the following disclaimer.
+ *    * Redistributions in binary form must reproduce the above copyright
+ *      notice, this list of conditions and the following disclaimer in the
+ *      documentation and/or other materials provided with the distribution.
+ *    * Neither the names of DrJava, the JavaPLT group, Rice University, nor the
+ *      names of its contributors may be used to endorse or promote products
+ *      derived from this software without specific prior written permission.
  * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
- * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * This software is Open Source Initiative approved Open Source Software. Open Source Initative Approved is a trademark
- * of the Open Source Initiative.
+ * This software is Open Source Initiative approved Open Source Software.
+ * Open Source Initative Approved is a trademark of the Open Source Initiative.
  * 
- * This file is part of DrJava.  Download the current version of this project from http://www.drjava.org/ or 
- * http://sourceforge.net/projects/drjava/
+ * This file is part of DrJava.  Download the current version of this project
+ * from http://www.drjava.org/ or http://sourceforge.net/projects/drjava/
  * 
  * END_COPYRIGHT_BLOCK*/
+
 package edu.rice.cs.drjava.model.repl.newjvm;
 
 import java.util.*;
@@ -61,6 +69,12 @@ import edu.rice.cs.dynamicjava.interpreter.*;
 import edu.rice.cs.dynamicjava.symbol.*;
 import edu.rice.cs.dynamicjava.symbol.type.Type;
 
+//for JShell because dynamicJava does not have support for java9+
+import jdk.jshell.*;
+import java.util.List;
+import java.util.Locale;
+import java.util.stream.Collectors;
+
 // For Windows focus fix
 import javax.swing.JDialog;
 
@@ -78,8 +92,8 @@ import edu.rice.cs.util.swing.Utilities;
   * @version $Id$
   */
 public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRemoteI, JUnitModelCallback {
-  
-  public static final Log _log = new Log("GlobalModel.txt", false);
+  /** log for use in debugging */
+  public static final Log _log = new Log("InterpreterJVM.txt", false);
   
   /** Singleton instance of this class. */
   public static final InterpreterJVM ONLY = new InterpreterJVM();
@@ -92,11 +106,15 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   private final Interpreter _defaultInterpreter;
   private final Map<String, Interpreter> _interpreters;
   private final Set<Interpreter> _busyInterpreters;
+  private final JShell _js;
   // The following variable appears to be useless.
 //  private final Map<String, Pair<TypeContext, RuntimeBindings>> _environments;
   
   private final ClassPathManager _classPathManager;
   private final ClassLoader _interpreterLoader;
+  private StringBuilder output_buf;
+  private StringBuilder input_buf;
+  private int num_input_braces;
   
   // Lock object for ensuring mutual exclusion on updates and compound accesses
   private final Object _stateLock = new Object();
@@ -104,9 +122,10 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   /** Responsible for running JUnit tests in this JVM. */
   private final JUnitTestManager _junitTestManager;
   
+  
   /** Remote reference to the MainJVM class in DrJava's primary JVM.  Assigned ONLY once. */
   private volatile MainJVMRemoteI _mainJVM;
-  
+
   /** Private constructor; use the singleton ONLY instance. */
   private InterpreterJVM() {
     super("Reset Interactions Thread", "Poll DrJava Thread");
@@ -122,10 +141,31 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     // _interpreterOptions = Options.DEFAULT;
     _interpreterOptions = new InteractionsPaneOptions();
     _defaultInterpreter = new Interpreter(_interpreterOptions, _interpreterLoader);
+//    _defaultInterpreter =
     _interpreters = new HashMap<String,Interpreter>();
     _busyInterpreters = new HashSet<Interpreter>();
 //    _environments = new HashMap<String, Pair<TypeContext, RuntimeBindings>>();
     _activeInterpreter = Pair.make("", _defaultInterpreter);
+
+    // Create a StringBuilder to capture the JShell Output
+    output_buf = new StringBuilder();
+    input_buf = new StringBuilder();
+    num_input_braces = 0;
+    // Create a PrintStream that will write to our StringBuilder
+    PrintStream printStream = new PrintStream(new OutputStream() {
+      @Override
+      public void write(int b) {
+        output_buf.append((char) b);
+      }
+    });
+
+    try {
+      _js = JShell.builder().out(printStream).err(printStream).build();
+    } catch(IllegalStateException e) {
+      //Potentially exit system or try to create a new JShell instance
+      System.err.println("JShell is not available in this environment");
+      throw new RuntimeException(e);
+    }
   }
   
   /** Actions to perform when this JVM is started (through its superclass, AbstractSlaveJVM). Not synchronized
@@ -144,11 +184,12 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
         }
       }
     });
-    
-    // redirect stdout
+
     System.setOut(new PrintStream(new OutputStreamRedirector() {
       public void print(String s) {
-        try { _mainJVM.systemOutPrint(s); }
+        try {
+          _mainJVM.systemOutPrint(s);
+        }
         catch (RemoteException re) {
           error.log(re);
           throw new UnexpectedException("Main JVM can't be reached for output.\n" + re);
@@ -213,7 +254,9 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     * local state.
     * @param s Source code to interpret.
     */
-  public InterpretResult interpret(String s) { return interpret(s, _activeInterpreter.second()); }
+  public InterpretResult interpret(String s) {
+    return interpret(s, _activeInterpreter.second());
+  }
   
   /** Interprets the given string of source code with the given interpreter. The result is returned to
     * MainJVM via the interpretResult method.
@@ -229,48 +272,87 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     }
     return interpret(s, i);
   }
-  
+
+  /**
+   * Interprets the given string of code with an instance of JShell and returns the result wrapped in a InterpretResult object
+   * Currently does NOT support differentiation between different types of results, only treats them as objects.
+   * Currently does NOT support printing of basic expressions, i.e. "2 + 2" will not print 4 (but it should)
+   * @param code - the code to be interpreted
+   * @return InterpretResult - the result of the interpretation
+   * @throws InterpreterException - in the case the JShell instance is not available or an error occurs during interpretation
+   */
+  private InterpretResult interpretWithJShell(StringBuilder input_buf) throws InterpreterException {
+    InterpretResult res = null;
+    //TD set verbosity level so it doesn't freak out over things like semicolons
+    if (_js == null) {
+      //TODO create InterpretResultException here
+      return InterpretResult.exception(new EvaluatorException(new Throwable("An error has occured that has caused the Interpreter to not be available.")));
+    }
+
+//    System.out.println("Evalulating: " + input_buf.toString());
+    List<SnippetEvent> events = _js.eval(input_buf.toString());
+    //getting rid of new line character at the end
+    if (output_buf.length() > 0 && output_buf.charAt(output_buf.length() - 1) == '\n') {
+      output_buf.setLength(output_buf.length() - 1);
+    }
+
+    //TODO Jshell adds a lot of fluff to the output, try and only get the cause of the error
+    for (SnippetEvent e : events) {
+      if (e.status() == Snippet.Status.REJECTED) {
+        Diag diagnostics = _js.diagnostics(e.snippet()).collect(Collectors.toList()).get(0);
+        output_buf.append(diagnostics.getMessage(Locale.getDefault()));
+        res = InterpretResult.exception(new EvaluatorException(new Throwable(output_buf.toString())));
+      }
+    }
+
+    if (res == null) {
+      //Setting InterpretResult as an object value rather than doing case work as JShell will internally keep track of state, bypassing need for us to do so
+      res = InterpretResult.objectValue(output_buf.toString(), "JShellOutput");
+    }
+
+    output_buf.setLength(0);
+    //clear input after setting multiple lines
+    input_buf.setLength(0);
+    return res;
+  }
+
   private InterpretResult interpret(String input, Interpreter interpreter) {
-    debug.logStart("Interpret " + input);
-    
+//    System.out.println("Received input: " + input);
     boolean available = addBusyInterpreter(interpreter);
     if (! available) { debug.logEnd(); return InterpretResult.busy(); }
-    
+
     // set the thread context class loader, this way NextGen and Mint can use the interpreter's class loader
     Thread.currentThread().setContextClassLoader(_interpreterLoader);  // _interpreterLoader is final
-    
-    Option<Object> result = null;
-    try { result = interpreter.interpret(input); }
+    InterpretResult result = null;
+
+    //Branching based on state of input_buffer to decide if we shoudl evalutate or not (i.e. when we are in a multi-line statement)
+    input_buf.append(input);
+    if (input.trim().endsWith("{")) {
+      num_input_braces += 1;
+    }
+
+    if (num_input_braces > 0) {
+      if (input.endsWith("}")) {
+        num_input_braces -= 1;
+      }
+    }
+
+
+    try {
+      if (num_input_braces == 0) {
+        result = interpretWithJShell(input_buf);
+      }
+    }
     catch (InterpreterException e) { debug.logEnd(); return InterpretResult.exception(e); }
     catch (Throwable e) { debug.logEnd(); return InterpretResult.unexpectedException(e); }
     finally { removeBusyInterpreter(interpreter); }
-    
-    return result.apply(new OptionVisitor<Object, InterpretResult>() {
-      public InterpretResult forNone() { return InterpretResult.noValue(); }
-      public InterpretResult forSome(Object obj) {
-        if (obj instanceof String) { debug.logEnd(); return InterpretResult.stringValue((String) obj); }
-        else if (obj instanceof Character) { debug.logEnd(); return InterpretResult.charValue((Character) obj); }
-        else if (obj instanceof Number) { debug.logEnd(); return InterpretResult.numberValue((Number) obj); }
-        else if (obj instanceof Boolean) { debug.logEnd(); return InterpretResult.booleanValue((Boolean) obj); }
-        else {
-          try {
-            String resultString = TextUtil.toString(obj);
-            String resultTypeStr = null;
-            if (obj!=null) {
-                Class<?> c = obj.getClass();
-                resultTypeStr = getClassName(c);
-            }
-            debug.logEnd();
-            return InterpretResult.objectValue(resultString,resultTypeStr);
-          }
-          catch (Throwable t) {
-            // an exception occurred during toString
-            debug.logEnd(); 
-            return InterpretResult.exception(new EvaluatorException(t));
-          }
-        }
-      }
-    });
+
+    if (result == null) {
+      //TODO create something more robust here
+      return InterpretResult.noValue();
+    }
+
+    return result;
   }
   
   /** Gets the value of the variable with the given name in the current interpreter.
@@ -533,7 +615,9 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     * and does not involve mutable local state.
     * @return false if no test suite is cached; true otherwise
     */
-  public boolean runTestSuite() throws RemoteException { return _junitTestManager.runTestSuite(); }
+  public boolean runTestSuite() throws RemoteException {
+	  return _junitTestManager.runTestSuite();
+  }
   
   /** Notifies Main JVM that JUnit has been invoked on a non TestCase class.  Unsynchronized because it contains a 
     * remote call and does not involve mutable local state.
