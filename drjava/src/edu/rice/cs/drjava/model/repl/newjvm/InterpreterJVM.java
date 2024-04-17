@@ -296,13 +296,24 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
       output_buf.setLength(output_buf.length() - 1);
     }
 
+    boolean hasError = false;
+
     //TODO Jshell adds a lot of fluff to the output, try and only get the cause of the error
     for (SnippetEvent e : events) {
       if (e.status() == Snippet.Status.REJECTED) {
         Diag diagnostics = _js.diagnostics(e.snippet()).collect(Collectors.toList()).get(0);
         output_buf.append(diagnostics.getMessage(Locale.getDefault()));
         res = InterpretResult.exception(new EvaluatorException(new Throwable(output_buf.toString())));
+        hasError = true;
+      }  else if (e.value() != null) {
+        output_buf.append(e.value()).append("\n");
       }
+    }
+
+    if (!hasError && output_buf.length() > 0) {
+      // Remove the last newline character added
+      output_buf.setLength(output_buf.length() - 1);
+      res = InterpretResult.objectValue(output_buf.toString(), "JShellOutput");
     }
 
     if (res == null) {
