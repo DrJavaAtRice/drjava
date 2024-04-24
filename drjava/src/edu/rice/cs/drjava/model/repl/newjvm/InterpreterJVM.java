@@ -74,9 +74,11 @@ import jdk.jshell.*;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 // For Windows focus fix
 import javax.swing.JDialog;
+import javax.tools.StandardLocation;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 import static edu.rice.cs.plt.debug.DebugUtil.error;
@@ -160,7 +162,11 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     });
 
     try {
-      _js = JShell.builder().out(printStream).err(printStream).build();
+      _js = JShell.builder()
+              .out(printStream)
+              .err(printStream)
+              .compilerOptions("-classpath", getClassPathString())
+              .build();
     } catch(IllegalStateException e) {
       //Potentially exit system or try to create a new JShell instance
       System.err.println("JShell is not available in this environment");
@@ -704,9 +710,16 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   public void addBuildDirectoryClassPath(File f) { _classPathManager.addBuildDirectoryCP(f); }
   public void addProjectFilesClassPath(File f) { _classPathManager.addProjectFilesCP(f); }
   public void addExternalFilesClassPath(File f) { _classPathManager.addExternalFilesCP(f); }
+
   public Iterable<File> getClassPath() {
     // need to make a serializable snapshot
     return IterUtil.snapshot(_classPathManager.getClassPath());
   }
-  
+
+  private String getClassPathString() {
+    Iterable<File> classPathFiles = _classPathManager.getClassPath();
+    return StreamSupport.stream(Spliterators.spliteratorUnknownSize(classPathFiles.iterator(), 0), false) // Convert Iterable<File> to Stream<File>
+            .map(File::getAbsolutePath)
+            .collect(Collectors.joining(";"));
+  }
 }
