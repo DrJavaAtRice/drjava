@@ -30,13 +30,9 @@ package edu.rice.cs.drjava.ui;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.IdentityHashMap;
-import java.util.Iterator;
-import java.util.SortedSet;
-import java.util.NoSuchElementException;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import javax.swing.*;
 import javax.swing.event.*;
@@ -786,8 +782,15 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
 //    }
 //    else {
       @SuppressWarnings("unchecked")
-      Enumeration<DefaultMutableTreeNode> regionNodes = docNode.children();
-      
+      Enumeration<TreeNode> rawNodes = docNode.children();
+      Iterator<DefaultMutableTreeNode> nodeIterator = StreamSupport.stream(Spliterators.spliteratorUnknownSize((Iterator<TreeNode>) rawNodes, 0), false)
+              .map(node -> (DefaultMutableTreeNode) node)
+              .iterator();
+
+      Enumeration<DefaultMutableTreeNode> regionNodes = Collections.enumeration(
+              StreamSupport.stream(Spliterators.spliteratorUnknownSize(nodeIterator, 0), false)
+                      .collect(Collectors.toList()));
+
       // Create a new region node in this document node list, where regions are sorted by start offset.
       int startOffset = r.getStartOffset();
       for (int index = 0; true ; index++) {  // infinite loop incrementing index on each iteration
