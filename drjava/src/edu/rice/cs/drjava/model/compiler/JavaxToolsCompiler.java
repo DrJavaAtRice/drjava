@@ -1,6 +1,9 @@
 package edu.rice.cs.drjava.model.compiler;
 
+import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.DJError;
+import edu.rice.cs.drjava.model.DrJavaFileUtils;
 import edu.rice.cs.drjava.ui.SmartSourceFilter;
 import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.util.ArgumentTokenizer;
@@ -10,37 +13,32 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.*;
-import javax.tools.*;
+import javax.tools.*;  /* including ToolProvider, StandardLocation, DiagnosticCollector */
 
-
+/** The CompilerInterface for the javax.tools compiler embedded in the executing JVM.
+  * Manages the auxiliary naming methods.(?)
+  */
 
 public class JavaxToolsCompiler implements CompilerInterface {
     /** The set of class names that are run as ACM Java Task Force library programs. */
     protected static final Set<String> ACM_PROGRAM_CLASSES = new HashSet<String>();
     static {
-        Collections.addAll(ACM_PROGRAM_CLASSES, new String[] {
-                "acm.program.Program",
-                "acm.graphics.GTurtle"
-        });
+        Collections.addAll(ACM_PROGRAM_CLASSES, new String[] {"acm.program.Program", "acm.graphics.GTurtle"});
     }
     private final JavaCompiler compiler;
 
-    public JavaxToolsCompiler() {
-        this.compiler = ToolProvider.getSystemJavaCompiler();
-    }
+    /** Standard Constructor */
+    public JavaxToolsCompiler() { this.compiler = ToolProvider.getSystemJavaCompiler(); }
 
-    public boolean isAvailable() {
-        return this.compiler != null;
-    }
+    public boolean isAvailable() { return this.compiler != null; }
 
     public List<? extends DJError> compile(List<? extends File> files, List<? extends File> classPath,
                                            List<? extends File> sourcePath, File destination,
                                            List<? extends File> bootClassPath, String sourceVersion, boolean showWarnings) {
-        // TODO: enforce using java8
         // Check if compiler is available
         if (compiler == null) {
             List<DJError> errors = new ArrayList<>();
-            errors.add(new DJError("Compiler is not available", false));
+            errors.add(new DJError("The SystemJavaCompiler is not available", false));
             return errors;
         }
 
@@ -68,6 +66,7 @@ public class JavaxToolsCompiler implements CompilerInterface {
         Iterable<? extends JavaFileObject> compilationUnits = fileManager.getJavaFileObjectsFromFiles(files);
 
         // Prepare the compilation options
+        /* Question (by Corky): is the "-source" option necessary?  The JavaxTools compiler is part of the executing JVM. */
         List<String> optionList = new ArrayList<>();
         if (sourceVersion != null) {
             optionList.add("-source");
@@ -113,33 +112,23 @@ public class JavaxToolsCompiler implements CompilerInterface {
 
         return errors;
     }
+    /* Question (Corky): Shouldn't we retreive the version of this System (JVM). */
+    public JavaVersion version() { return JavaVersion.JAVA_8; }
 
-    public JavaVersion version() {
-        return JavaVersion.JAVA_8;
-    }
+    public String getName() { return "javax.tools"; }
 
-    public String getName() {
-        return "javax.tools";
-    }
+    public String getDescription() { return "Standard compiler in javax.tools"; }
 
-    public String getDescription() {
-        return "Custom compiler implementation using javax.tools";
-    }
+    public String toString() { return getName(); }
 
-    public String toString() {
-        return getName();
-    }
-
-    public List<File> additionalBootClassPathForInteractions() {
-        return Collections.emptyList();
-    }
+    public List<File> additionalBootClassPathForInteractions() { return Collections.emptyList(); }
 
     /** Transform the command line to be interpreted into something the Interactions JVM can use.
-     * This replaces "java MyClass a b c" with Java code to call MyClass.main(new String[]{"a","b","c"}).
-     * "import MyClass" is not handled here.
-     * transformCommands should support at least "run", "java" and "applet".
-     * @param interactionsString unprocessed command line
-     * @return command line with commands transformed */
+      * This replaces "java MyClass a b c" with Java code to call MyClass.main(new String[]{"a","b","c"}).
+      * "import MyClass" is not handled here.
+      * transformCommands should support at least "run", "java" and "applet".
+      * @param interactionsString unprocessed command line
+      * @return command line with commands transformed */
     public String transformCommands(String interactionsString) {
         if (interactionsString.startsWith("java ")) {
             interactionsString = transformJavaCommand(interactionsString);
@@ -342,30 +331,30 @@ public class JavaxToolsCompiler implements CompilerInterface {
     }
 
     /** Assumes a trimmed String. Returns a string of the call that the interpreter can use.
-     * The arguments get formatted as comma-separated list of strings enclosed in quotes.
-     * Example: _transformCommand("java MyClass arg1 arg2 arg3", "{0}.main(new String[]'{'{1}'}');")
-     * returns "MyClass.main(new String[]{\"arg1\",\"arg2\",\"arg3\"});"
-     * NOTE: the command to run is constructed using {@link java.text.MessageFormat}. That means that certain characters,
-     * single quotes and curly braces, for example, are special. To write single quotes, you need to double them.
-     * To write curly braces, you need to enclose them in single quotes. Example:
-     * MessageFormat.format("Abc {0} ''foo'' '{'something'}'", "def") returns "Abc def 'foo' {something}".
-     * @param s the command line, either "java MyApp arg1 arg2 arg3" or "applet MyApplet arg1 arg2 arg3"
-     * @param command the command to execute, with {0} marking the place for the class name and {1} the place for the arguments
-     * @return the transformed command
-     */
+      * The arguments get formatted as comma-separated list of strings enclosed in quotes.
+      * Example: _transformCommand("java MyClass arg1 arg2 arg3", "{0}.main(new String[]'{'{1}'}');")
+      * returns "MyClass.main(new String[]{\"arg1\",\"arg2\",\"arg3\"});"
+      * NOTE: the command to run is constructed using {@link java.text.MessageFormat}. That means that certain characters,
+      * single quotes and curly braces, for example, are special. To write single quotes, you need to double them.
+      * To write curly braces, you need to enclose them in single quotes. Example:
+      * MessageFormat.format("Abc {0} ''foo'' '{'something'}'", "def") returns "Abc def 'foo' {something}".
+      * @param s the command line, either "java MyApp arg1 arg2 arg3" or "applet MyApplet arg1 arg2 arg3"
+      * @param command the command to execute, with {0} marking the place for the class name and {1} the place for the arguments
+      * @return the transformed command
+      */
     protected static String _transformCommand(String s, String command) {
-        if (s.endsWith(";"))  s = _deleteSemiColon(s);
-        List<String> args = ArgumentTokenizer.tokenize(s, true);
-        final String classNameWithQuotes = args.get(1); // this is "MyClass"
-        final String className = classNameWithQuotes.substring(1, classNameWithQuotes.length() - 1); // removes quotes, becomes MyClass
-        final StringBuilder argsString = new StringBuilder();
-        boolean seenArg = false;
-        for (int i = 2; i < args.size(); i++) {
-            if (seenArg) argsString.append(",");
-            else seenArg = true;
-            argsString.append(args.get(i));
-        }
-        return java.text.MessageFormat.format(command, className, argsString.toString());
+      if (s.endsWith(";"))  s = _deleteSemiColon(s);
+      List<String> args = ArgumentTokenizer.tokenize(s, true);
+      final String classNameWithQuotes = args.get(1); // this is "MyClass"
+      final String className = classNameWithQuotes.substring(1, classNameWithQuotes.length() - 1); // removes quotes, becomes MyClass
+      final StringBuilder argsString = new StringBuilder();
+      boolean seenArg = false;
+      for (int i = 2; i < args.size(); i++) {
+        if (seenArg) argsString.append(",");
+        else seenArg = true;
+        argsString.append(args.get(i));
+      }
+      return java.text.MessageFormat.format(command, className, argsString.toString());
     }
 
     /** Deletes the last character of a string.  Assumes semicolon at the end, but does not check.  Helper
@@ -375,32 +364,53 @@ public class JavaxToolsCompiler implements CompilerInterface {
      */
     protected static String _deleteSemiColon(String s) { return  s.substring(0, s.length() - 1); }
 
-
-
+//    public boolean isSourceFileForThisCompiler(File f) {
+//        if (f == null) return false;
+//        String fileName = f.getName();
+//        return fileName.endsWith(".java") || fileName.endsWith(".dj");
+//    }
+    
+    /** .java {@literal -->} true
+      * .dj   {@literal -->} true
+      * .dj0  {@literal -->} true
+      * .dj1  {@literal -->} true
+      * .dj2  {@literal -->} true
+      * otherwise false 
+      * @return true if the specified file is a source file for this compiler. */
     public boolean isSourceFileForThisCompiler(File f) {
-        if (f == null) return false;
-        String fileName = f.getName();
-        return fileName.endsWith(".java");
+      // by default, use DrJavaFileUtils.isSourceFile
+      return DrJavaFileUtils.isSourceFile(f);
     }
 
-    public Set<String> getSourceFileExtensions() {
-        HashSet<String> extensions = new HashSet<String>();
-        extensions.add("java");
-        return extensions;
-    }
+//    public Set<String> getSourceFileExtensions() {
+//        HashSet<String> extensions = new HashSet<String>();
+//        extensions.add("java");
+//        return extensions;
+//    }
+    
+    /** Return the set of source file extensions that this compiler supports.
+      * @return the set of source file extensions that this compiler supports. */
+    public Set<String> getSourceFileExtensions() { return DrJavaFileUtils.getSourceFileExtensions(); }
 
-    public String getSuggestedFileExtension() {
-        return ".java";
-    }
-
-    public FileFilter getFileFilter() {
-        // TODO: this might need to be different... (I think smartsourcefilter includes .dj files which idk ab)
-        return new SmartSourceFilter();
-    }
-
+//    public String getSuggestedFileExtension() { return ".java"; }
+    
+    /** Return the suggested file extension that will be appended to a file without extension.
+      * @return the suggested file extension */
+    public String getSuggestedFileExtension() { return DrJavaFileUtils.getSuggestedFileExtension(); }
+    
+    /** Return a file filter that can be used to open files this compiler supports.
+      * @return file filter for appropriate source files for this compiler */
+    public FileFilter getFileFilter() { return new SmartSourceFilter(); }
+    
+//    public String getOpenAllFilesInFolderExtension() {
+//        // Should we use OptionConstants for this?
+//        return ".java";
+//    }
+    
+    /** Return the extension of the files that should be opened with the "Open Folder..." command.
+      * @return file extension for the "Open Folder..." command for this compiler. */
     public String getOpenAllFilesInFolderExtension() {
-        // Should we use OptionConstants for this?
-        return ".java";
+      return OptionConstants.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(OptionConstants.LANGUAGE_LEVEL)];
     }
 
     /** Return the set of keywords that should be highlighted in the specified file.
@@ -420,8 +430,6 @@ public class JavaxToolsCompiler implements CompilerInterface {
         Collections.addAll(JAVA_KEYWORDS, words);
     }
 
-    public boolean supportsLanguageLevels() {
-        // TODO: should we support LanguageLevels?
-        return false;
-    }
+    /** @return true since this compiler can be used in conjunction with the language level facility. */
+    public boolean supportsLanguageLevels() { return true; }
 }

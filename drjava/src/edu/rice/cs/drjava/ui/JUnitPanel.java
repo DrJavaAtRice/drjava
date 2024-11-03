@@ -82,10 +82,10 @@ public class JUnitPanel extends ErrorPanel {
   
   protected JUnitErrorListPane _errorListPane;
   private final MainFrame _mainFrame;      // only used in assert statements
-  private int _testCount;
-  private boolean _testsSuccessful;
+  private volatile int _testCount;
+  private volatile boolean _testsSuccessful;
   
-  private volatile JUnitProgressBar _progressBar;
+  private final JUnitProgressBar _progressBar;
   
   private Action _showStackTraceAction = new AbstractAction("Show Stack Trace") {
     public void actionPerformed(ActionEvent ae) {

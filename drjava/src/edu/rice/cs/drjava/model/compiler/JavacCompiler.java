@@ -59,12 +59,10 @@ public abstract class JavacCompiler implements CompilerInterface {
   /** The set of class names that are run as ACM Java Task Force library programs. */
   protected static final Set<String> ACM_PROGRAM_CLASSES = new HashSet<String>();
   static {
-    Collections.addAll(ACM_PROGRAM_CLASSES, new String[] {
-      "acm.program.Program",
-        "acm.graphics.GTurtle"
-    });
+    Collections.addAll(ACM_PROGRAM_CLASSES, new String[] {"acm.program.Program", "acm.graphics.GTurtle"});
   }
   
+  /** Standard Constructor */
   protected JavacCompiler(JavaVersion.FullVersion version, String location, List<? extends File> defaultBootClassPath) {
     _version = version;
     _location = location;
