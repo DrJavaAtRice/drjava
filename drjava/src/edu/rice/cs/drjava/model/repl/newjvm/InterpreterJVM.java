@@ -32,6 +32,7 @@ import java.util.*;
 import java.io.*;
 
 import java.rmi.*;
+import java.awt.EventQueue;
 
 // NOTE: Do NOT import/use the config framework in this class!
 //  (This class runs in a different JVM, and will not share the config object)

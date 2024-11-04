@@ -28,9 +28,10 @@
  * END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.repl.newjvm;
 
-import java.rmi.*;
+import java.awt.EventQueue;
 import java.io.*;
 import java.net.SocketException;
+import java.rmi.*;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -257,7 +258,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   /** Called when a particular test is started.  Forwards from the slave JVM to the local JUnit model.
    * @param testName The name of the test being started.
    */
-  public void testStarted(String testName) {
+  public void testStarted(String testName) {;
     _junitModel.testStarted(testName);
   }
  

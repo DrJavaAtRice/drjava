@@ -47,7 +47,8 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.HashMap;
 
-/** The panel that displays all the testing errors.
+/** The panel that displays all the testing errors.  All non-trivial methods in this class other than constructors should
+  * only be called from the dispatch thread, except during set up of MainFrame.
   * @version $Id$
   */
 public class JUnitPanel extends ErrorPanel {
@@ -80,7 +81,7 @@ public class JUnitPanel extends ErrorPanel {
   private static final String TEST_OUT_OF_SYNC =
     "The documents being tested have been modified and should be recompiled!\n";
   
-  protected JUnitErrorListPane _errorListPane;
+  protected volatile JUnitErrorListPane _errorListPane;
   private final MainFrame _mainFrame;      // only used in assert statements
   private volatile int _testCount;
   private volatile boolean _testsSuccessful;
@@ -134,6 +135,7 @@ public class JUnitPanel extends ErrorPanel {
     * @param newSet Style containing new attributes to use.
     */
   protected void _updateStyles(AttributeSet newSet) {
+    assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();
     super._updateStyles(newSet);
     OUT_OF_SYNC_ATTRIBUTES.addAttributes(newSet);
     StyleConstants.setBold(OUT_OF_SYNC_ATTRIBUTES, true);  // should always be bold
@@ -143,6 +145,7 @@ public class JUnitPanel extends ErrorPanel {
   
   /** called when work begins */
   public void setJUnitInProgress() {
+    assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();
     _errorListPane.setJUnitInProgress();
   }
   
@@ -156,6 +159,7 @@ public class JUnitPanel extends ErrorPanel {
   
   /** Reset the errors to the current error information. */
   public void reset() {
+    assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();
     JUnitErrorModel junitErrorModel = getModel().getJUnitModel().getJUnitErrorModel();
     boolean testsHaveRun = false;
     if (junitErrorModel != null) {
@@ -168,9 +172,10 @@ public class JUnitPanel extends ErrorPanel {
   }
   
   /** Resets the progress bar to start counting the given number of tests. 
-   * @param numTests number of tests to be counted
-   */
+    * @param numTests number of tests to be counted
+    */
   public void progressReset(int numTests) {
+    assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();
     _progressBar.reset();
     _progressBar.start(numTests);
     _testsSuccessful = true;
@@ -181,6 +186,7 @@ public class JUnitPanel extends ErrorPanel {
     * @param successful Whether the last test was successful or not.
     */
   public void progressStep(boolean successful) {
+    assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();
     _testCount++;
     _testsSuccessful &= successful;
     _progressBar.step(_testCount, _testsSuccessful);
@@ -189,6 +195,7 @@ public class JUnitPanel extends ErrorPanel {
   public void testStarted(String className, String testName) { }
   
   private void _displayStackTrace (JUnitError e) {
+    assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();
     _errorLabel.setText((e.isWarning() ? "Error: " : "Failure: ") +
                         e.message());
     _fileLabel.setText("File: " + (new File(e.fileName())).getName());
@@ -242,10 +249,11 @@ public class JUnitPanel extends ErrorPanel {
       else throw new IllegalArgumentException("Name does not contain any parens: " + name);
     }
     
-    /** Provides the ability to display the name of the test being run. 
+    /** Provides the the name of the test being run to the JUnitPanel.
      * @param name the name of the test being run
      */
     public void testStarted(String name) {
+      assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();
       if (name.indexOf('(') < 0) return;
       
       String testName = _getTestFromName(name);
@@ -253,6 +261,7 @@ public class JUnitPanel extends ErrorPanel {
       String fullName = className + "." + testName;
       if (fullName.equals(JUNIT_WARNING)) return;
       ErrorDocument doc = getErrorDocument();
+      // TODO: convert this GUI operatoin to a Runnable and use invokeLater
       try {
         int len = doc.getLength();
         // Insert the classname if it has changed
@@ -276,18 +285,19 @@ public class JUnitPanel extends ErrorPanel {
       }
     }
     
-    /** Displays the results of a test that has finished. 
+    /** Displays the results of a test that has finished in the JUnitPanel.
       * @param name the name of the test
       * @param wasSuccessful whether the test was successful
       * @param causedError whether the test caused an error
       */
     public void testEnded(String name, boolean wasSuccessful, boolean causedError) {
+      assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();
       if (name.indexOf('(')<0) return;
 
       String testName = _getTestFromName(name);
       String fullName = _getClassFromName(name) + "." + testName;
       if (fullName.equals(JUNIT_WARNING)) return;
-      
+      // TODO: convert this GUI operation to a Runnable and use invokeLater
       ErrorDocument doc = getErrorDocument();
       Position namePos = _runningTestNamePositions.get(fullName);
       AttributeSet set;
@@ -319,6 +329,7 @@ public class JUnitPanel extends ErrorPanel {
     
     /** Used to show that testing was unsuccessful. */
     protected void _updateWithErrors() throws BadLocationException {
+      assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();
       //DefaultStyledDocument doc = new DefaultStyledDocument();
       ErrorDocument doc = getErrorDocument();
 //      _checkSync(doc);
@@ -415,6 +426,7 @@ public class JUnitPanel extends ErrorPanel {
     
     private void _setupStackTraceFrame() {
       //DrJava.consoleOut().println("Stack Trace for Error: \n" +  e.stackTrace());
+      assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();
       JDialog _dialog = new JDialog(_frame,"JUnit Error Stack Trace",false);
       _stackFrame = _dialog;
       _stackTextArea = new JTextArea();
@@ -453,6 +465,7 @@ public class JUnitPanel extends ErrorPanel {
       * and enabling the _showStackTraceButton.
       */
     public void selectItem(DJError error) {
+      assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();
       super.selectItem(error);
       _error = (JUnitError) error;
       _showStackTraceButton.setEnabled(true);
@@ -461,6 +474,7 @@ public class JUnitPanel extends ErrorPanel {
     
     /** Overrides _removeListHighlight in ErrorListPane to disable the _showStackTraceButton. */
     protected void _removeListHighlight() {
+      assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();
       super._removeListHighlight();
       _showStackTraceButton.setEnabled(false);
     }
@@ -497,6 +511,7 @@ public class JUnitPanel extends ErrorPanel {
         * @return true iff the mouse click is over an error
         */
       private boolean _selectError(MouseEvent e) {
+        assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();
         //TODO: get rid of cast in the next line, if possible
         _error = (JUnitError)_errorAtPoint(e.getPoint());
         
@@ -513,7 +528,10 @@ public class JUnitPanel extends ErrorPanel {
       /** Shows the popup menu for this mouse adapter.
         * @param e the MouseEvent correponding to this click
         */
-      protected void _popupAction(MouseEvent e) { _popMenu.show(e.getComponent(), e.getX(), e.getY()); }
+      protected void _popupAction(MouseEvent e) { 
+        assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();
+        _popMenu.show(e.getComponent(), e.getX(), e.getY()); 
+      }
     }
     public String getErrorDocumentTitle() { return "Javadoc Errors"; }
   }
@@ -532,6 +550,7 @@ public class JUnitPanel extends ErrorPanel {
     }
     
     private Color getStatusColor() {
+      assert EventQueue.isDispatchThread();
       if (_hasError) {
         return Color.red;
       }
@@ -541,17 +560,20 @@ public class JUnitPanel extends ErrorPanel {
     }
     
     public void reset() {
+      assert EventQueue.isDispatchThread();
       _hasError = false;
       setForeground(getStatusColor());
       setValue(0);
     }
     
     public void start(int total) {
+      assert EventQueue.isDispatchThread();
       setMaximum(total);
       reset();
     }
     
     public void step(int value, boolean successful) {
+      assert EventQueue.isDispatchThread();
       setValue(value);
       if (!_hasError && !successful) {
         _hasError= true;

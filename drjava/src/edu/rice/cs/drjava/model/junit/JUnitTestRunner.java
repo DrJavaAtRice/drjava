@@ -35,7 +35,8 @@ import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 
 /** DrJava's own testrunner. It updates the document in the JUnit pane as error and failure events are fired.  
-  * These methods run inan auxiliary thread.
+  * These methods run inan auxiliary thread.  Many methods are synchronized for atomicity to maintain the 
+  * consistency of local state.
   *  @version $Id$
   */
 public class JUnitTestRunner extends BaseTestRunner {
@@ -56,8 +57,6 @@ public class JUnitTestRunner extends BaseTestRunner {
 
   /** The current number of failures in the result. */
   private int _failureCount;
-  
-  
 
   /** Standard constructor. 
    * @param jmc a JUnitModelCallback
