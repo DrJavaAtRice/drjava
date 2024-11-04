@@ -67,7 +67,7 @@ public class NewJavaClassDialog extends SwingFrame {
 
   private final JButton _okButton;
   private final JButton _cancelButton;
-  private JPanel _mainPanel;
+  private final JPanel _mainPanel;
   private final JTextField _className = new JTextField();
   private final JTextField _interfaces = new JTextField();
   private final JTextField _superClass = new JTextField();

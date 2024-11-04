@@ -35,6 +35,7 @@ import edu.rice.cs.drjava.model.junit.JUnitErrorModel;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.BorderlessScrollPane;
 import edu.rice.cs.util.swing.RightClickMouseAdapter;
+import edu.rice.cs.util.swing.Utilities;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -101,7 +102,7 @@ public class JUnitPanel extends ErrorPanel {
   /** The currently selected error. */
   private volatile JUnitError _error = null;
   private volatile Window _stackFrame = null;
-  private volatile JTextArea _stackTextArea;
+  private volatile JTextArea _stackTextArea;              // not final because it is rebound in _setupStackTraceFrame()
   private final JLabel _errorLabel = new JLabel();
   private final JLabel _testLabel = new JLabel();
   private final JLabel _fileLabel = new JLabel();
@@ -261,28 +262,33 @@ public class JUnitPanel extends ErrorPanel {
       String fullName = className + "." + testName;
       if (fullName.equals(JUNIT_WARNING)) return;
       ErrorDocument doc = getErrorDocument();
-      // TODO: convert this GUI operatoin to a Runnable and use invokeLater
-      try {
-        int len = doc.getLength();
-        // Insert the classname if it has changed
-        if (! className.equals(_runningTestName)) {
-          _runningTestName = className;
-          doc.insertString(len, "  " + className + "\n", NORMAL_ATTRIBUTES);
-          len = doc.getLength();
+      
+      // Converted this GUI operation to a Runnable and use invokeLater
+      Utilities.invokeLater(new Runnable() {
+        public void run() {
+          try {
+            int len = doc.getLength();
+            // Insert the classname if it has changed
+            if (! className.equals(_runningTestName)) {
+              _runningTestName = className;
+              doc.insertString(len, "  " + className + "\n", NORMAL_ATTRIBUTES);
+              len = doc.getLength();
+            }
+            
+            // Insert the test name, remembering its position
+            doc.insertString(len, "    ", NORMAL_ATTRIBUTES);
+            len = doc.getLength();
+            doc.insertString(len, testName + "\n", NORMAL_ATTRIBUTES);
+            Position pos = doc.createPosition(len);
+            _runningTestNamePositions.put(fullName, pos);
+            setCaretPosition(len);
+          }
+          catch (BadLocationException ble) {
+            // Inserting at end, shouldn't happen
+            throw new UnexpectedException(ble);
+          }
         }
-        
-        // Insert the test name, remembering its position
-        doc.insertString(len, "    ", NORMAL_ATTRIBUTES);
-        len = doc.getLength();
-        doc.insertString(len, testName + "\n", NORMAL_ATTRIBUTES);
-        Position pos = doc.createPosition(len);
-        _runningTestNamePositions.put(fullName, pos);
-        setCaretPosition(len);
-      }
-      catch (BadLocationException ble) {
-        // Inserting at end, shouldn't happen
-        throw new UnexpectedException(ble);
-      }
+      });
     }
     
     /** Displays the results of a test that has finished in the JUnitPanel.
@@ -299,15 +305,19 @@ public class JUnitPanel extends ErrorPanel {
       if (fullName.equals(JUNIT_WARNING)) return;
       // TODO: convert this GUI operation to a Runnable and use invokeLater
       ErrorDocument doc = getErrorDocument();
-      Position namePos = _runningTestNamePositions.get(fullName);
-      AttributeSet set;
-      if (! wasSuccessful || causedError) set = TEST_FAIL_ATTRIBUTES;
-      else set = TEST_PASS_ATTRIBUTES;
-      if (namePos != null) {
-        int index = namePos.getOffset();
-        int length = testName.length();
-        doc.setCharacterAttributes(index, length, set, false);
-      }
+      Utilities.invokeLater(new Runnable() {
+        public void run() {
+          Position namePos = _runningTestNamePositions.get(fullName);
+          AttributeSet set;
+          if (! wasSuccessful || causedError) set = TEST_FAIL_ATTRIBUTES;
+          else set = TEST_PASS_ATTRIBUTES;
+          if (namePos != null) {
+            int index = namePos.getOffset();
+            int length = testName.length();
+            doc.setCharacterAttributes(index, length, set, false);
+          }
+        }
+      });
     }
     
     /** Puts the error pane into "junit in progress" state.  Only runs in event thread. */
