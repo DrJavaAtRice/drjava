@@ -34,9 +34,9 @@ import junit.framework.*;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 
-/** DrJava's own testrunner. It updates the document in the JUnit pane as error and failure events are fired.  
-  * These methods run inan auxiliary thread.  Many methods are synchronized for atomicity to maintain the 
-  * consistency of local state.
+/** Runs in the InterpreterJVM. It uses RMI calls to update the the JUnitPanel as test results are reported.  Some methods are
+  * synchronized to maintain the consistency of local state.  These methods run in an auxiliary thread.
+  * GUI actions must be transferred to the event handling thread (DispatchThread).
   *  @version $Id$
   */
 public class JUnitTestRunner extends BaseTestRunner {

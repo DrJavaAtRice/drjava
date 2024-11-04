@@ -555,7 +555,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     catch (RemoteException re) { error.log(re); }
   }
   
-  /** Notifies that a suite of tests has started running.  Unsynchronized because it contains a remote call and does
+  /** Notifies the Main JVM that a suite of tests has started running.  Unsynchronized because it contains a remote call and does
     * not involve mutable local state.
     * @param numTests The number of tests in the suite to be run.
     */
@@ -564,7 +564,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     catch (RemoteException re) { error.log(re); }
   }
   
-  /** Notifies that a particular test has started.  Unsynchronized because it contains a remote call and does not
+  /** Notifies the Main JVM that a particular test has started.  Unsynchronized because it contains a remote call and does not
     * involve mutable local state.
     * @param testName The name of the test being started.
     */
