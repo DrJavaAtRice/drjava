@@ -36,8 +36,7 @@
   <property name="drjava.test.config" value="testFiles/drjava.basic.config" />
   
   <property environment="env" />
-  <property name="java8-home" value="${env.JAVA8_HOME}" />
-  <property name="launch4j-home" value="${env.LAUNCH4J_HOME}" />
+  <property name="java-home" value="${env.JAVA_HOME}" />
   <property name="findbugs-home" value="${env.FINDBUGS_HOME}" />
   
   <property name="is-development" value="yes" /> <!-- Development or stable release -->
@@ -57,22 +56,17 @@
   
   <!-- For code coverage report -->
   <taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml">
-      <classpath path="lib/jacocoant.jar"/>
+      <classpath path="lib/buildlib/jacocoant.jar"/>
   </taskdef>
   <property name="coverage-report-dir" value="coverage_report"/>
   <property name="coverage-exec" value="jacoco.exec"/>
-  <!--property name="TestParallel" value="${arg0}"/>
-  <property name="ThreadCount" value="${arg1}"/-->
-  <condition property="Thread" value="${ThreadCount}" else="4">
-    <isset property="ThreadCount"/>
-  </condition>
+
   <fileset id="libs" dir="lib" includes="*.jar" /> <!-- Only include jars that are at the top level (not in buildlib) -->
   <fileset id="jrelibs" dir="${java.home}/lib" includes="*.jar" /> 
-  <echo message="libs = ${toString:libs}" level="verbose" />
-  <echo message="jrelibs = ${toString:jrelibs}" level="verbose"/>
-  <fileset id="extlibs" dir="extlib" includes="*.jar" /> <!-- Copy of Java 8 ext/lib -->
-  <!--echo message="extlibs = ${toString:extlibs}" level="verbose"/-->
-
+  <echo message="libs = ${toString:libs}" />
+  <echo message="jrelibs = ${toString:jrelibs}" />
+  <fileset id="extlibs" dir="${java.home}/lib/ext" includes="*.jar" /> 
+  <echo message="extlibs = ${toString:extlibs}" />
   <!-- ************
        Help Targets
        ************ -->
@@ -88,10 +82,7 @@
     <echo message="variables may need to be defined (depending on the target invoked):" />
     <echo message="PATH: The 'javac' command is used for compilation;" />
     <echo message="      the 'java' command is used by default in testing/running; " />
-    <echo message="JAVA8_HOME: Home folder of the Java 8 JRE or JDK (required for" />
-    <echo message="            '-8' targets)" />
-    <echo message="LAUNCH4J_HOME: Location of the Launch4j installation (used to " />
-    <echo message="               release a Windows application)" />
+    <echo message="JAVA_HOME: Home folder of the Java JRE or JDK used for the build." />
     <echo message="FINDBUGS_HOME: Location of the FindBugs installation" />
     <echo message="" />
     <echo message="For control over the version of Java used to run Ant, set JAVA_HOME." />
@@ -188,13 +179,11 @@
        ******************* -->
        
   <!-- The following target assumes that javac resolves to a Java 8 compiler -->
-  <target name="compile" depends="generate-source, do-compile-7-to-10, copy-resources, unjar-libs"
+  <target name="compile" depends="generate-source, do-compile, copy-resources, unjar-libs"
           description="Compile all source files (after generating the source)">
   </target>
   
-
- <!--target name="do-compile-7-to-10" depends="resolve-java8-runtime, resolve-java8-tools"-->
- <target name="do-compile-7-to-10">
+  <target name="do-compile" depends="resolve-java-runtime, resolve-java-tools">
   
     <echo message="Compiling src directory to classes/base and classes/test with command 'javac'" />
     
@@ -206,123 +195,20 @@
       <fileset dir="classes/test" includes="**/*" />
     </move>
     <echo message="jrelibs=${toString:jrelibs}" />    
-    <echo message="libs=${toString:libs}" />    
-    <javac srcdir="src" destdir="classes/base" release="10"
-            sourcepath="" includeAntRuntime="no"
-            fork="yes" memoryMaximumSize="1024M"
-           debug="on" optimize="off" deprecation="on" >
-       <classpath>
-        <!-- TODO: Remove this dependency on tools.jar by refactoring and moving all the dependent
-             debugger code into the "platform" module -->
-        <pathelement location="lib/buildlib/junit.jar" />
-        <fileset refid="libs" />
-	<fileset refid="jrelibs" />
-        <pathelement location="lib/buildlib/netbeans-memory-leak-utils.jar" />
-<!--    <pathelement location="classes/base" />  THIS directory is typically empty at the start of this step -->
-      </classpath>
-      <compilerarg value="-Xlint" />
-      <!-- Ignore serial warnings, because they occur for every Throwable definition (among others) -->
-      <compilerarg value="-Xlint:-serial" /> 
-      <!-- Use the next line to compile against other sources, ignoring any unneeded classes.
-           This can be useful in creating a pruned version of a jar file for the lib directory.
-           (You must also clear the sourcepath="" option.)
-      <include name="${src-working-dir}/**/*.java" /> -->
-    </javac>
-    
-    <mkdir dir="classes/test" /> <!-- May be deleted by the previous move -->
-    <move todir="classes/test">
-      <fileset dir="classes/base">
-        <include name="**/*Test.class" />
-        <include name="**/*Test$*.class" />
-        <include name="**/*TestCase.class" />
-        <include name="**/*TestCase$*.class" />
-        <!-- Additional test classes should be listed here -->
-      </fileset>
-    </move>
-    
-  </target>
-
-
-
-
-
-  <target name="do-compile" depends="resolve-java8-runtime, resolve-java8-tools">
-  
-    <echo message="Compiling src directory to classes/base and classes/test with command 'javac'" />
-    
-    <mkdir dir="classes/base" />
-    <mkdir dir="classes/test" />
-    
-    <!-- Move any test classes back to base to prevent recompilation -->
-    <move todir="classes/base">
-      <fileset dir="classes/test" includes="**/*" />
-    </move>
-    <echo message="jrelibs=${toString:jrelibs}" />    
-    <javac srcdir="src" destdir="classes/base" source="1.8" target="1.8"
+    <javac srcdir="src" destdir="classes/base" source="1.7" target="1.7"
            bootclasspath="${java-runtime}" sourcepath="" includeAntRuntime="no"
            executable="${java-home}/bin/javac" fork="yes" memoryMaximumSize="1024M"
            debug="on" optimize="off" deprecation="on" >
       <classpath>
         <!-- TODO: Remove this dependency on tools.jar by refactoring and moving all the dependent
              debugger code into the "platform" module -->
-        <pathelement location="${java8-tools}" />
+        <pathelement location="${java-tools}" />
         <fileset refid="libs" />
 	<fileset refid="jrelibs" />
         <fileset refid="extlibs" />
         <pathelement location="lib/buildlib/junit.jar" />
         <pathelement location="lib/buildlib/netbeans-memory-leak-utils.jar" />
-<!--    <pathelement location="classes/base" />  THIS directory is typically empty at the start of this step -->
-      </classpath>
-      <compilerarg value="-Xlint" />
-      <!-- Ignore serial warnings, because they occur for every Throwable definition (among others) -->
-      <compilerarg value="-Xlint:-serial" /> 
-      <!-- Use the next line to compile against other sources, ignoring any unneeded classes.
-           This can be useful in creating a pruned version of a jar file for the lib directory.
-           (You must also clear the sourcepath="" option.)
-      <include name="${src-working-dir}/**/*.java" /> -->
-    </javac>
-    
-    <mkdir dir="classes/test" /> <!-- May be deleted by the previous move -->
-    <move todir="classes/test">
-      <fileset dir="classes/base">
-        <include name="**/*Test.class" />
-        <include name="**/*Test$*.class" />
-        <include name="**/*TestCase.class" />
-        <include name="**/*TestCase$*.class" />
-        <!-- Additional test classes should be listed here -->
-      </fileset>
-    </move>
-    
-  </target>
-
-  <target name="compile-8" depends="generate-source, do-compile-8, copy-resources, unjar-libs"
-          description="Compile all source files (after generating the source)">
-  </target>
-  
-  <target name="do-compile-8" depends="resolve-java8-runtime, resolve-java8-tools">
-  
-    <echo message="Compiling src directory to classes/base and classes/test with command 'javac'" />
-    
-    <mkdir dir="classes/base" />
-    <mkdir dir="classes/test" />
-    
-    <!-- Move any test classes back to base to prevent recompilation -->
-    <move todir="classes/base">
-      <fileset dir="classes/test" includes="**/*" />
-    </move>
-    
-    <javac srcdir="src" destdir="classes/base" source="1.6" target="1.6"
-           bootclasspath="${java8-runtime}" sourcepath="" includeAntRuntime="no"
-           executable="javac" fork="yes" memoryMaximumSize="1024M"
-           debug="on" optimize="off" deprecation="on"	>
-      <classpath>
-        <!-- TODO: Remove this dependency on tools.jar by refactoring and moving all the dependent
-             debugger code into the "platform" module -->
-        <pathelement location="${java8-tools}" />
-        <fileset refid="libs" />
-        <pathelement location="lib/buildlib/junit.jar" />
-        <pathelement location="lib/buildlib/netbeans-memory-leak-utils.jar" />
-        <pathelement location="classes/base" />
+      <!--    <pathelement location="classes/base" />  THIS directory is typically empty at the start of this step -->
       </classpath>
       <compilerarg value="-Xlint" />
       <!-- Ignore serial warnings, because they occur for every Throwable definition (among others) -->
@@ -374,6 +260,7 @@
     <!-- Delete "classes/lib" in case it exists (but is out of date) -->
     <delete dir="classes/lib" />
     <mkdir dir="classes/lib" />
+    <echo message="jar files are: ${toString:libs}" />
     <unjar dest="classes/lib">
       <fileset refid="libs" />
       <patternset excludes="META-INF/**" />
@@ -385,7 +272,7 @@
        Testing Targets
        *************** -->
   
-  <target name="test" depends="compile" unless="skip-test"
+  <target name="test" depends="compile, resolve-current-tools" unless="skip-test"
           description="Run all tests (after compiling); use -Dtest-spec=... to filter">
     <antcall target="iterate-tests">
       <param name="test-jvm" value="java" />
@@ -393,30 +280,10 @@
     </antcall>
   </target>
 
-  <target name="test-8" depends="compile, resolve-java8-exec, resolve-java8-tools" unless="skip-test"
-          description="Run all tests under Java 8 (after compiling); use -Dtest-spec=... to filter">
-    <antcall target="iterate-tests">
-      <param name="test-jvm" value="${java8-exec}" />
-      <param name="test-tools" value="${java8-tools}" />
-    </antcall>
-  </target>
-
   <target name="iterate-tests" depends="resolve-test-formatter-class">
     <!-- Calls do-test, unless that is overridden by the caller -->
     <echo message="Executing iterate-tests" />
-    <if>
-      <equals arg1="${TestParallel}" arg2="true" />
-      <then>
-        <echo message="Test in Parallel with ${Thread} threads" />
-        <property name="do-test-target" value="do-test-for" />
-      </then>
-      <else>
-        <echo message="Test in Sequential" />
-        <property name="do-test-target" value="do-test" />
-      </else>
-    </if>
-
-    
+    <property name="do-test-target" value="do-test" />
     <condition property="test-iteration-message">
       <not>
         <equals arg1="${test-repeat}" arg2="1" />
@@ -496,58 +363,16 @@
     </if>
     
   </target>
-
-
-
-
-  <target name="do-test-for" depends="resolve-jvm-args">
-    <echo message="Running all tests matching '${test-filter-string}' with command '${test-jvm}', using '${junit-jar}' and '${test-tools}'" />   
-    <for param="fileFullName"   parallel= "true"  threadCount="${Thread}">
-      <path>
-        <fileset dir="classes/test">
-          <!--include name="**/*${test-filter-string}*/**" /-->  
-          <include name="**/*Test.class" />
-    	</fileset>
-      </path>
-      <sequential>
-        <echo message="file= @{fileFullName}" level="verbose"/>  
-        <antcall target="execute-one-test" inheritRefs="true"  inheritall="true">
-          <param name="fileFullName" value="@{fileFullName}"/>
-        </antcall>
-      </sequential>
-    </for>
-    <antcall target="generate-cover" />
-  </target>
-
-  <target name="do-test-foreach" depends="resolve-jvm-args">
-    <echo message="Running all tests matching '${test-filter-string}' with command '${test-jvm}', using '${junit-jar}' and '${test-tools}'" />   
-    <foreach
-    target="execute-one-test"
-    maxthreads="16"
-    inheritall="true"
-    inheritrefs="true"
-    parallel="true"
-    param="fileFullName">
-      <path>
-	<fileset dir="classes/test">
-	  <!--include name="**/*${test-filter-string}*/**" /-->  
-          <include name="**/*Test.class" />
-    	</fileset>
-      </path>
-    </foreach>
-    <antcall target="generate-cover" />
- </target>
-
   
-
+  
   <target name="do-test" depends="resolve-jvm-args">
-    <echo message="Running all tests matching '${test-filter-string}' with command '${test-jvm}', using '${junit-jar}' and '${test-tools}'" />
+    <echo message="Running all tests matching '${test-filter-string}' with command '${test-jvm}', using '${junit-jar-to-include}' and '${test-tools}'" />
     <jacoco:coverage xmlns:jacoco="antlib:org.jacoco.ant">
     <junit haltonfailure="${test-halt}" failureproperty="test-failed"
            fork="yes" forkmode="perTest" maxmemory="2G" jvm="${test-jvm}" dir="${basedir}">
       <classpath>
         <pathelement location="${test-tools}" />
-        <pathelement location="${junit-jar}" />
+        <pathelement location="${junit-jar-to-include}" />
         <pathelement location="lib/buildlib/plt-ant.jar" /> <!-- required for custom formatter -->
         <pathelement location="lib/buildlib/netbeans-memory-leak-utils.jar" />
         <pathelement location="classes/test" />
@@ -567,51 +392,13 @@
       <batchtest fork="true">
         <fileset dir="classes/test">
           <filename name="**/*${test-filter-string}*/**" />  
-          <include name="**/*Test.class" />
+          <filename name="**/*Test.class" />
         </fileset>
       </batchtest>
     </junit>
     </jacoco:coverage>
     <fail if="test-failed" message="One or more unit tests failed."/>
     <antcall target="generate-cover" />
-  </target>
-
-  <target name="execute-one-test">
-    <sequential>
-    <basename property="filename" file="${fileFullName}"/>
-    <echo message="In execute-one-test, we are running '${fileFullName}' with testname ${filename}" level="verbose" />
-    <jacoco:coverage xmlns:jacoco="antlib:org.jacoco.ant">
-    <junit haltonfailure="${test-halt}" failureproperty="test-failed"
-           fork="yes" forkmode="perTest" maxmemory="2G" jvm="${test-jvm}" dir="${basedir}">
-      <classpath>
-        <pathelement location="${test-tools}" />
-        <pathelement location="${junit-jar}" />
-        <pathelement location="lib/buildlib/plt-ant.jar" /> <!-- required for custom formatter -->
-        <pathelement location="lib/buildlib/netbeans-memory-leak-utils.jar" />
-        <pathelement location="classes/test" />
-        <pathelement location="classes/base" />
-        <pathelement location="classes/lib" />
-      </classpath>
-      <assertions>
-        <enable />
-      </assertions>
-      <syspropertyset>
-        <propertyref prefix="plt." />
-        <propertyref prefix="drjava." />
-        <!-- Add any properties that should be passed on -->
-      </syspropertyset>
-      <jvmarg line="${jvm-args}" />
-      <formatter classname="${test-formatter-class}" usefile="${test-output-to-file}" />
-      <!--test name="${test.source.absolute}"/-->
-      <batchtest fork="true">
-        <fileset dir="classes/test">
-          <include name="**/${filename}*" />
-        </fileset>
-      </batchtest>
-    </junit>
-    </jacoco:coverage>
-    <fail if="test-failed" message="One unit test failed."/>
-    </sequential>
   </target>
 
   <target name = "generate-cover" xmlns:jacoco="antlib:org.jacoco.ant">
@@ -642,13 +429,6 @@
     </antcall>
   </target>
   
-  <target name="run-8" depends="compile, resolve-java8-exec"
-          description="Run the main class under Java 8 (after compiling)">
-    <antcall target="do-run">
-      <param name="run-jvm" value="${java8-exec}" />
-    </antcall>
-  </target>
-
   <target name="do-run" depends="resolve-jvm-args">
     <echo message="Running ${main-class} with command '${run-jvm}'" />
     <java classname="${main-class}" jvm="${run-jvm}" fork="yes" spawn="yes">
@@ -674,12 +454,6 @@
     </antcall>
   </target>
   
-  <target name="run-jar-8" depends="jar, resolve-java8-exec"
-          description="Run the jar file under Java 8 (after building it)">
-    <antcall target="do-run-jar">
-      <param name="run-jvm" value="${java8-exec}" />
-    </antcall>
-  </target>
 
   <target name="do-run-jar" depends="resolve-jvm-args">
     <echo message="Running ${ant.project.name}.jar with command '${run-jvm}'" />
@@ -743,7 +517,7 @@
        Documentation Targets
        ********************* -->
   
-  <target name="javadoc" depends="generate-source, resolve-java8-tools, resolve-version-tag"
+  <target name="javadoc" depends="generate-source, resolve-java-tools, resolve-version-tag"
           description="Generate javadocs from the source folder (after generating the source)"
           unless="skip-javadoc">
     <antcall target="do-javadoc">
@@ -759,7 +533,7 @@
     <javadoc sourcepath="src" packagenames="*" destdir="docs/javadoc" maxmemory="512M"
              access="private" Use="yes" Version="yes" Author="yes" Windowtitle="${readable-project-name} API (${version-tag})" linksource="${link-source}">
       <classpath>
-        <pathelement location="${java8-tools}" />
+        <pathelement location="${java-tools}" />
         <fileset refid="libs" />
         <pathelement location="lib/buildlib/junit.jar" />
         <pathelement location="lib/buildlib/netbeans-memory-leak-utils.jar" />
@@ -767,14 +541,14 @@
 
       <link href="http://docs.oracle.com/javase/8/docs/api/"/>
       <link href="http://junit.org/junit4/javadoc/4.12/index.html?org/junit/"/>
-      <link href="http://drjava.org/javadoc/plt/" />
-      <link href="http://drjava.org/javadoc/javalanglevels/" />
-      <link href="http://drjava.org/javadoc/dynamicjava/" />
+      <link href="http://www.cs.rice.edu/~javaplt/drjava/javadoc/plt/" />
+      <link href="http://www.cs.rice.edu/~javaplt/drjava/javadoc/javalanglevels/" />
+      <link href="http://www.cs.rice.edu/~javaplt/drjava/javadoc/dynamicjava/" />
       <!-- Additional external library APIs may be listed here -->
     </javadoc>
   </target>
   
-  <target name="findbugs" depends="assert-findbugs-exists, compile, resolve-java8-tools"
+  <target name="findbugs" depends="assert-findbugs-exists, compile, resolve-java-tools"
 	      description="Generate a findbugs report (after compiling)">
     <taskdef name="findbugs" classpath="lib/buildlib/findbugs-ant.jar"
              classname="edu.umd.cs.findbugs.anttask.FindBugsTask" />
@@ -795,7 +569,7 @@
       <class location="classes/base" />
       <class location="classes/test" />
       <auxclasspath>
-        <pathelement location="${java8-tools}" />
+        <pathelement location="${java-tools}" />
         <pathelement location="classes/lib" />
         <pathelement location="lib/buildlib/junit.jar" />
         <pathelement location="lib/buildlib/netbeans-memory-leak-utils.jar" />
@@ -905,7 +679,7 @@
   </target>
        
   <target name="release"
-          depends="build, jar-app, mac-app, windows-app, javadoc-zip" 
+          depends="build, jar-app, javadoc-zip" 
           description="Make a development release">
     <delete dir="${version-tag}" />
   </target>
@@ -915,58 +689,7 @@
     <copy file="${ant.project.name}.jar" tofile="${version-tag}.jar" />
   </target>
 
-  <target name="mac-app" depends="jar, assert-jar-exists, resolve-version-tag">
-    <echo message="Creating ${version-tag}-osx.zip" />
-    <taskdef name="bundleapp"
-             classname="com.oracle.appbundler.AppBundlerTask"   
-             classpath="lib/buildlib/appbundler-1.0.jar" />
-    <property name="mac-app-dir" value="${version-tag}/osx" />
-    <mkdir dir="${mac-app-dir}" />
-    <bundleapp outputdirectory="${mac-app-dir}"
-        name="DrJava"
-        displayname="DrJava"
-        icon="packaging/mac/DrJava.icns"
-        signature="DrJa"
-        shortversion="${version-tag}"
-        identifier="edu.rice.cs.drjava.DrJava"
-        mainclassname="edu.rice.cs.drjava.DrJava">
-      <classpath file="drjava.jar" />
-    </bundleapp>
-    <zip destfile="${version-tag}-osx.zip">
-      <zipfileset dir="${mac-app-dir}" 
-                  excludes="${readable-project-name}.app/Contents/MacOS/JavaAppLauncher" />
-      <zipfileset dir="${mac-app-dir}" filemode="755"
-                  includes="${readable-project-name}.app/Contents/MacOS/JavaAppLauncher" />
-    </zip>
-  </target>
-  
-  <target name="windows-app" depends="assert-launch4j-exists, jar, assert-jar-exists, resolve-version-tag">
-    <echo message="Creating ${version-tag}.exe" />
-    <taskdef name="launch4j" classname="net.sf.launch4j.ant.Launch4jTask">
-      <classpath>
-        <pathelement location="${launch4j-home}/launch4j.jar" />
-        <pathelement location="${launch4j-home}/lib/xstream.jar" />
-      </classpath>
-    </taskdef>
-    <property name="windows-app-dir" value="${version-tag}/windows" />
-    <mkdir dir="${windows-app-dir}" />
-    <copy todir="${windows-app-dir}" >
-      <fileset dir="packaging/windows" />
-    </copy>
-    <copy todir="${windows-app-dir}" overwrite="yes" >
-      <fileset dir="packaging/windows">
-        <include name="**/*.plist" />
-        <include name="**/*.xml" />
-      </fileset>
-      <filterset>
-        <filter token="VERSION" value="${version-tag}" />
-      </filterset>
-    </copy>
-    <copy file="${ant.project.name}.jar" todir="${windows-app-dir}" />
-    <launch4j configfile="${windows-app-dir}/launch4j-config.xml" />
-  </target>
-
-  <target name="javadoc-zip" depends="javadoc, resolve-version-tag" unless="skip-javadoc">
+<target name="javadoc-zip" depends="javadoc, resolve-version-tag" unless="skip-javadoc">
     <echo message="Creating ${version-tag}-javadoc.zip" />
     <zip destfile="${version-tag}-javadoc.zip">
       <zipfileset dir="docs/javadoc" prefix="${version-tag}/javadoc" />
@@ -1121,89 +844,70 @@
        Property-resolution Targets 
        *************************** -->
   
-  <target name="resolve-java8-runtime">
+  <target name="resolve-java-runtime">
     <!-- We rely on "location" to generate a platform-specific path; note that properties
-         are immutable and so java8-runtime will only be set the *first* time. -->
+         are immutable and so java-runtime will only be set the *first* time. -->
 
-    <property name="java-runtime-1" location="extlib/rt.jar" />
+    <property name="java-runtime-1" location="${java-home}/lib/rt.jar" />
     <available property="java-runtime" value="${java-runtime-1}" file="${java-runtime-1}" />
 
-    <property name="java8-runtime-2" location="${java8-home}/jre/lib/rt.jar" />
-    <available property="java8-runtime" value="${java8-runtime-2}" file="${java8-runtime-2}" />
+    <property name="java-runtime-2" location="${java-home}/jre/lib/rt.jar" />
+    <available property="java-runtime" value="${java-runtime-2}" file="${java-runtime-2}" />
 
-    <property name="java8-runtime-3" location="${java8-home}/../Classes/classes.jar" />
-    <available property="java8-runtime" value="${java8-runtime-3}" file="${java8-runtime-3}" />
-    <echo message="java8-runtime = ${java8-runtime}" />
+    <property name="java-runtime-3" location="${java-home}/../Classes/classes.jar" />
+    <available property="java-runtime" value="${java-runtime-3}" file="${java-runtime-3}" />
 
-    <fail message="Can't find rt.jar in the extlibs or java-home: ${java8-home}" unless="java8-runtime" />
+    <echo message="java-runtime = ${java-runtime}" />
+
+    <fail message="Can't find rt.jar in the Java 8 home: ${java-home}" unless="java-runtime" />
   </target>
 
-  <target name="resolve-java7-runtime">
-    <!-- We rely on "location" to generate a platform-specific path; note that properties
-         are immutable and so java7-runtime will only be set the *first* time. -->
-
-    <property name="java7-runtime-1" location="${java7-home}/lib/rt.jar" />
-    <available property="java7-runtime" value="${java7-runtime-1}" file="${java7-runtime-1}" />
-
-    <property name="java7-runtime-2" location="${java7-home}/jre/lib/rt.jar" />
-    <available property="java7-runtime" value="${java7-runtime-2}" file="${java7-runtime-2}" />
-
-    <property name="java7-runtime-3" location="${java7-home}/../Classes/classes.jar" />
-    <available property="java7-runtime" value="${java7-runtime-3}" file="${java7-runtime-3}" />
-
-    <echo message="java7-runtime = ${java7-runtime}" />
-
-    <fail message="Can't find rt.jar in the Java 7 home: ${java7-home}" unless="java7-runtime" />
-  </target>
-  
-  <target name="resolve-java8-exec">
+  <target name="resolve-java-exec">
     <!-- We rely on "location" to generate a platform-specific path -->
 
-    <property name="java8-exec-1" location="${java8-home}/bin/java.exe" />
-    <condition property="java8-exec" value="${java8-exec-1}">
+    <property name="java-exec-1" location="${java-home}/bin/java.exe" />
+    <condition property="java-exec" value="${java-exec-1}">
       <and>
-        <available file="${java8-exec-1}" />
+        <available file="${java-exec-1}" />
         <os family="windows" />
       </and>
     </condition>
     
-    <property name="java8-exec-2" location="${java8-home}/bin/java" />
-    <available property="java8-exec" value="${java8-exec-2}" file="${java8-exec-2}" />
+    <property name="java-exec-2" location="${java-home}/bin/java" />
+    <available property="java-exec" value="${java-exec-2}" file="${java-exec-2}" />
 
-    <fail message="Can't find the java executable in the Java 8 home: ${java8-home}" unless="java8-exec" />
+    <fail message="Can't find the java executable in the Java home: ${java-home}" unless="java-exec" />
   </target>
 
   <target name="resolve-java-tools">
-    <property name="java-tools-1" location="extlib/tools.jar" />
+    <property name="java-tools-1" location="${java-home}/lib/tools.jar" />
     <available property="java-tools" value="${java-tools-1}" file="${java-tools-1}" />
 
-    <property name="java-tools-2" location="${java-home}/lib/tools.jar" />
+    <property name="java-tools-2" location="${java-home}/../lib/tools.jar" />
     <available property="java-tools" value="${java-tools-2}" file="${java-tools-2}" />
-    
-    <property name="java8-tools-3" location="${java8-home}/../Classes/classes.jar" />
-    <available property="java8-tools" value="${java8-tools-3}" file="${java8-tools-3}" />
 
-    <fail message="Can't find tools.jar in extlib or the Java home: ${java-home}" unless="java-tools" />
+    <property name="java-tools-3" location="${java-home}/../Classes/classes.jar" />
+    <available property="java-tools" value="${java-tools-3}" file="${java-tools-3}" />
+
+    <fail message="Can't find tools.jar in the Java home: ${java-home}" unless="java-tools" />
   </target>
   
   <target name="resolve-current-tools">
-    <property name="current-tools-1" location="extlib/tools.jar" />
+    <property name="current-tools-1" location="${java.home}/lib/tools.jar" />
     <available property="current-tools" value="${current-tools-1}" file="${current-tools-1}" />
 
-    <property name="current-tools-2" location="${java.home}/lib/tools.jar" />
+    <property name="current-tools-2" location="${java.home}/../lib/tools.jar" />
     <available property="current-tools" value="${current-tools-2}" file="${current-tools-2}" />
 
-    <fail message="Can't find tools.jar in extib or the Java home: ${java.home}" unless="current-tools" />
+    <property name="current-tools-3" location="${java.home}/../Classes/classes.jar" />
+    <available property="current-tools" value="${current-tools-3}" file="${current-tools-3}" />
+
+    <fail message="Can't find tools.jar in the Java home: ${java.home}" unless="current-tools" />
   </target>
   
   <target name="assert-jar-exists">
     <available property="jar-exists" file="${ant.project.name}.jar" />
     <fail message="Can't find ${ant.project.name}.jar" unless="jar-exists" />
-  </target>
-  
-  <target name="assert-launch4j-exists">
-    <available property="launch4j-exists" file="${launch4j-home}/launch4j.jar" />
-    <fail message="${launch4j-home}/launch4j.jar does not exist" unless="launch4j-exists" />
   </target>
   
   <target name="assert-findbugs-exists">
