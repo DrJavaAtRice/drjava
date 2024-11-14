@@ -65,16 +65,16 @@ public class GenerateCustomDrJavaJarFrame extends SwingFrame {
   private final JButton _generateButton;
   private final JButton _checkButton;
   private final JButton _closeButton;
-  private JPanel _mainPanel;
+  private final JPanel  _mainPanel;
   
   /** The file with the current DrJava executable. */
   private final File _drjavaFile = FileOps.getDrJavaFile();
 
-  /** File selector for the jar output file. */
-  private FileSelectorComponent _jarFileSelector;
+  /** File selector for the jar output file. Not final because it is rebound in _makeJarFileSelector(). */
+  private volatile FileSelectorComponent _jarFileSelector;
   
   /** List with additional sources. */
-  private VectorFileOptionComponent _sourcesList;
+  private volatile VectorFileOptionComponent _sourcesList;
   
   /** Constructs a frame to generate a custom drjava.jar. 
    * @param mf reference to the main frame
@@ -83,7 +83,7 @@ public class GenerateCustomDrJavaJarFrame extends SwingFrame {
     super("Generate Custom drjava.jar File");
 
     _mainFrame = mf;
-    _mainPanel= new JPanel();
+    _mainPanel = new JPanel();
     
     Action generateAction = new AbstractAction("Generate") {
       public void actionPerformed(ActionEvent e) { generate(); } 

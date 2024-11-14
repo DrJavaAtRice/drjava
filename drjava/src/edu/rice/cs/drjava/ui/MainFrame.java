@@ -9548,7 +9548,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     public void junitTestStarted(final String name) {
       assert EventQueue.isDispatchThread();
-      _junitPanel.getErrorListPane().testStarted(name); /* this does nothing! */         
+      _junitPanel.getErrorListPane().testStarted(name); /* passes test name to errorListPane */         
     }
     
     public void junitTestEnded(final String name, final boolean succeeded, final boolean causedError) {

@@ -28,9 +28,10 @@
  * END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.repl.newjvm;
 
-import java.rmi.*;
+import java.awt.EventQueue;
 import java.io.*;
 import java.net.SocketException;
+import java.rmi.*;
 
 import java.util.List;
 import java.util.ArrayList;

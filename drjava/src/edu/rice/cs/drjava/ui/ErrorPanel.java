@@ -74,33 +74,33 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
   
   /** The total number of errors in the list */
   protected volatile int _numErrors;
-  protected volatile JCheckBox _showHighlightsCheckBox;
+  protected final JCheckBox _showHighlightsCheckBox;
   
-  protected volatile SingleDisplayModel _model;
+  protected final SingleDisplayModel _model;
   
-  private volatile JScrollPane _scroller;
+  private final JScrollPane _scroller;
   
   /** This contains the _scroller and the _errorNavPanel. */
-  private volatile JPanel _leftPanel;
+  private final JPanel _leftPanel;
   
   /** This contains the label, showHighlightsCheckBox, and the customPanel. */
-  private volatile JPanel _rightPanel;
+  private final JPanel _rightPanel;
   
-  private volatile JPanel _errorNavPanel;
+  private final JPanel _errorNavPanel;
   
-  private volatile JPanel _errorNavButtonsPanel;
+  private final JPanel _errorNavButtonsPanel;
   
   /** This JPanel contains each child panel's specific UI components. **/
-  protected volatile JPanel customPanel;
+  protected final JPanel customPanel;
   
-  private volatile JButton _nextErrorButton;
-  private volatile JButton _prevErrorButton;
+  private final JButton _nextErrorButton;
+  private final JButton _prevErrorButton;
   
   /** _popupMenu and _popupMenuListener are either both null or both non-null. */
   protected volatile JPopupMenu _popupMenu = null;
   protected volatile RightClickMouseAdapter _popupMenuListener = null;
   
-  /** Highlight painter for selected list items. */
+  /** Highlight painter for selected list items. Not final because it is rebound in CompilerErrorColorOptionListener */
   static volatile ReverseHighlighter.DrJavaHighlightPainter _listHighlightPainter =
     new ReverseHighlighter.DrJavaHighlightPainter(DrJava.getConfig().getSetting(COMPILER_ERROR_COLOR));
   
@@ -211,7 +211,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
   
   protected void setErrorListPane(final ErrorListPane elp) {
     if (_popupMenuListener!=null) {
-      if ((_scroller!=null) &&
+      if ((_scroller!=null) &&  // unnecessary?
           (_scroller.getViewport()!=null) &&
           (_scroller.getViewport().getView()!=null)) {
         _scroller.getViewport().getView().removeMouseListener(_popupMenuListener);
@@ -960,7 +960,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       }
     };
     addMouseListener(_popupMenuListener);
-    if (_scroller!=null) {
+    if (_scroller!=null) { // test unnecessary?
       _scroller.addMouseListener(_popupMenuListener);
       if (_scroller.getViewport().getView()!=null) {
         _scroller.getViewport().getView().addMouseListener(_popupMenuListener);

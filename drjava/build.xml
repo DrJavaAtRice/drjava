@@ -70,8 +70,9 @@
   <fileset id="jrelibs" dir="${java.home}/lib" includes="*.jar" /> 
   <echo message="libs = ${toString:libs}" level="verbose" />
   <echo message="jrelibs = ${toString:jrelibs}" level="verbose"/>
-  <fileset id="extlibs" dir="${java.home}/lib/ext" includes="*.jar" /> 
+  <fileset id="extlibs" dir="extlib" includes="*.jar" /> <!-- Copy of Java 8 ext/lib -->
   <!--echo message="extlibs = ${toString:extlibs}" level="verbose"/-->
+
   <!-- ************
        Help Targets
        ************ -->
@@ -257,9 +258,9 @@
       <fileset dir="classes/test" includes="**/*" />
     </move>
     <echo message="jrelibs=${toString:jrelibs}" />    
-    <javac srcdir="src" destdir="classes/base" source="1.7" target="1.7"
-           bootclasspath="${java8-runtime}" sourcepath="" includeAntRuntime="no"
-           executable="${java8-home}/bin/javac" fork="yes" memoryMaximumSize="1024M"
+    <javac srcdir="src" destdir="classes/base" source="1.8" target="1.8"
+           bootclasspath="${java-runtime}" sourcepath="" includeAntRuntime="no"
+           executable="${java-home}/bin/javac" fork="yes" memoryMaximumSize="1024M"
            debug="on" optimize="off" deprecation="on" >
       <classpath>
         <!-- TODO: Remove this dependency on tools.jar by refactoring and moving all the dependent
@@ -1124,18 +1125,17 @@
     <!-- We rely on "location" to generate a platform-specific path; note that properties
          are immutable and so java8-runtime will only be set the *first* time. -->
 
-    <property name="java8-runtime-1" location="${java8-home}/lib/rt.jar" />
-    <available property="java8-runtime" value="${java8-runtime-1}" file="${java8-runtime-1}" />
+    <property name="java-runtime-1" location="extlib/rt.jar" />
+    <available property="java-runtime" value="${java-runtime-1}" file="${java-runtime-1}" />
 
     <property name="java8-runtime-2" location="${java8-home}/jre/lib/rt.jar" />
     <available property="java8-runtime" value="${java8-runtime-2}" file="${java8-runtime-2}" />
 
     <property name="java8-runtime-3" location="${java8-home}/../Classes/classes.jar" />
     <available property="java8-runtime" value="${java8-runtime-3}" file="${java8-runtime-3}" />
-
     <echo message="java8-runtime = ${java8-runtime}" />
 
-    <fail message="Can't find rt.jar in the Java 8 home: ${java8-home}" unless="java8-runtime" />
+    <fail message="Can't find rt.jar in the extlibs or java-home: ${java8-home}" unless="java8-runtime" />
   </target>
 
   <target name="resolve-java7-runtime">
@@ -1173,30 +1173,27 @@
     <fail message="Can't find the java executable in the Java 8 home: ${java8-home}" unless="java8-exec" />
   </target>
 
-  <target name="resolve-java8-tools">
-    <property name="java8-tools-1" location="${java8-home}/lib/tools.jar" />
-    <available property="java8-tools" value="${java8-tools-1}" file="${java8-tools-1}" />
+  <target name="resolve-java-tools">
+    <property name="java-tools-1" location="extlib/tools.jar" />
+    <available property="java-tools" value="${java-tools-1}" file="${java-tools-1}" />
 
-    <property name="java8-tools-2" location="${java8-home}/../lib/tools.jar" />
-    <available property="java8-tools" value="${java8-tools-2}" file="${java8-tools-2}" />
-
+    <property name="java-tools-2" location="${java-home}/lib/tools.jar" />
+    <available property="java-tools" value="${java-tools-2}" file="${java-tools-2}" />
+    
     <property name="java8-tools-3" location="${java8-home}/../Classes/classes.jar" />
     <available property="java8-tools" value="${java8-tools-3}" file="${java8-tools-3}" />
 
-    <fail message="Can't find tools.jar in the Java 8 home: ${java8-home}" unless="java8-tools" />
+    <fail message="Can't find tools.jar in extlib or the Java home: ${java-home}" unless="java-tools" />
   </target>
   
   <target name="resolve-current-tools">
-    <property name="current-tools-1" location="${java.home}/lib/tools.jar" />
+    <property name="current-tools-1" location="extlib/tools.jar" />
     <available property="current-tools" value="${current-tools-1}" file="${current-tools-1}" />
 
-    <property name="current-tools-2" location="${java.home}/../lib/tools.jar" />
+    <property name="current-tools-2" location="${java.home}/lib/tools.jar" />
     <available property="current-tools" value="${current-tools-2}" file="${current-tools-2}" />
 
-    <property name="current-tools-3" location="${java.home}/../Classes/classes.jar" />
-    <available property="current-tools" value="${current-tools-3}" file="${current-tools-3}" />
-
-    <fail message="Can't find tools.jar in the Java home: ${java.home}" unless="current-tools" />
+    <fail message="Can't find tools.jar in extib or the Java home: ${java.home}" unless="current-tools" />
   </target>
   
   <target name="assert-jar-exists">

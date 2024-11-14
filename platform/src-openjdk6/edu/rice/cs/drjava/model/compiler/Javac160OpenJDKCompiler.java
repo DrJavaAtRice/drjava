@@ -57,12 +57,12 @@ import edu.rice.cs.plt.io.IOUtil;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 import static edu.rice.cs.plt.debug.DebugUtil.error;
 
-/**
- * An implementation of the CompilerInterface that supports compiling with
- * OpenJDK 6.0. It is a Java 6 compiler, but uses the Java 5 interface.
- *
- * @version $Id$
- */
+/* Question (Corky): Is this adapter obsolete? */
+/** An implementation of the CompilerInterface (in DrJava) that supports compiling with
+  * OpenJDK 6.0. It is a Java 6 compiler, but uses the Java 5 interface from DrJava.
+  *
+  * @version $Id$
+  */
 public class Javac160OpenJDKCompiler extends JavacCompiler {
   public static final String COMPILER_CLASS_NAME = "com.sun.tools.javac.main.JavaCompiler";
   
