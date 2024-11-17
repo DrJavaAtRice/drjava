@@ -37,6 +37,7 @@
   
   <property environment="env" />
   <property name="java8-home" value="${env.JAVA8_HOME}" />
+  <property name="java-home" value="${env.JAVA_HOME}" />
   <property name="launch4j-home" value="${env.LAUNCH4J_HOME}" />
   <property name="findbugs-home" value="${env.FINDBUGS_HOME}" />
   
@@ -57,7 +58,7 @@
   
   <!-- For code coverage report -->
   <taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml">
-      <classpath path="lib/jacocoant.jar"/>
+      <classpath path="lib/buildlib/jacocoant.jar"/>
   </taskdef>
   <property name="coverage-report-dir" value="coverage_report"/>
   <property name="coverage-exec" value="jacoco.exec"/>
@@ -196,7 +197,7 @@
  <!--target name="do-compile-7-to-10" depends="resolve-java8-runtime, resolve-java8-tools"-->
  <target name="do-compile-7-to-10">
   
-    <echo message="Compiling src directory to classes/base and classes/test with command 'javac'" />
+    <echo message="Compiling src directory to classes/base and classes/test with command ${java-home}/bin/javac" />
     
     <mkdir dir="classes/base" />
     <mkdir dir="classes/test" />
@@ -207,9 +208,10 @@
     </move>
     <echo message="jrelibs=${toString:jrelibs}" />    
     <echo message="libs=${toString:libs}" />    
+    <echo message="${java-home}/bin/javac is the java compiler" />
     <javac srcdir="src" destdir="classes/base" release="10"
-            sourcepath="" includeAntRuntime="no"
-            fork="yes" memoryMaximumSize="1024M"
+           sourcepath="" includeAntRuntime="no"
+           executable="${java-home}/bin/javac" fork="yes" memoryMaximumSize="1024M"
            debug="on" optimize="off" deprecation="on" >
        <classpath>
         <!-- TODO: Remove this dependency on tools.jar by refactoring and moving all the dependent
@@ -311,7 +313,7 @@
       <fileset dir="classes/test" includes="**/*" />
     </move>
     
-    <javac srcdir="src" destdir="classes/base" source="1.6" target="1.6"
+    <javac srcdir="src" destdir="classes/base" source="1.7" target="1.7"
            bootclasspath="${java8-runtime}" sourcepath="" includeAntRuntime="no"
            executable="javac" fork="yes" memoryMaximumSize="1024M"
            debug="on" optimize="off" deprecation="on"	>
@@ -1173,7 +1175,7 @@
     <fail message="Can't find the java executable in the Java 8 home: ${java8-home}" unless="java8-exec" />
   </target>
 
-  <target name="resolve-java-tools">
+  <target name="resolve-java8-tools">
     <property name="java-tools-1" location="extlib/tools.jar" />
     <available property="java-tools" value="${java-tools-1}" file="${java-tools-1}" />
 
