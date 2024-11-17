@@ -89,7 +89,7 @@ public class JUnitPanel extends ErrorPanel {
   
   private final JUnitProgressBar _progressBar;
   
-  private Action _showStackTraceAction = new AbstractAction("Show Stack Trace") {
+  private final Action _showStackTraceAction = new AbstractAction("Show Stack Trace") {
     public void actionPerformed(ActionEvent ae) {
       if (_error != null) {
         _displayStackTrace(_error);
@@ -214,9 +214,9 @@ public class JUnitPanel extends ErrorPanel {
   
   /** A pane to show JUnit errors. It acts like a listbox (clicking selects an item) but items can each wrap, etc. */
   public class JUnitErrorListPane extends ErrorPanel.ErrorListPane {
-    private JPopupMenu _popMenu;
-    private String _runningTestName;
-    private boolean _warnedOutOfSync;
+    private final JPopupMenu _popMenu;
+    private volatile String _runningTestName;
+    private volatile boolean _warnedOutOfSync;  // appears unncessary since only set to false
     private static final String JUNIT_WARNING = "junit.framework.TestSuite$1.warning";
     
     /** Maps any test names in the currently running suite to the position that they appear in the list pane. */
@@ -250,48 +250,43 @@ public class JUnitPanel extends ErrorPanel {
       else throw new IllegalArgumentException("Name does not contain any parens: " + name);
     }
     
-    /** Provides the the name of the test being run to the JUnitPanel.
+    /** Provides the the name of the test being run to the JUnitPanel.  Only runs in the dispatch thread.
      * @param name the name of the test being run
      */
     public void testStarted(String name) {
       assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();
       if (name.indexOf('(') < 0) return;
       
-      String testName = _getTestFromName(name);
-      String className = _getClassFromName(name);
-      String fullName = className + "." + testName;
+      final String testName = _getTestFromName(name);
+      final String className = _getClassFromName(name);
+      final String fullName = className + "." + testName;
       if (fullName.equals(JUNIT_WARNING)) return;
-      ErrorDocument doc = getErrorDocument();
-      
-      // Converted this GUI operation to a Runnable and use invokeLater
-      Utilities.invokeLater(new Runnable() {
-        public void run() {
-          try {
-            int len = doc.getLength();
-            // Insert the classname if it has changed
-            if (! className.equals(_runningTestName)) {
-              _runningTestName = className;
-              doc.insertString(len, "  " + className + "\n", NORMAL_ATTRIBUTES);
-              len = doc.getLength();
-            }
-            
-            // Insert the test name, remembering its position
-            doc.insertString(len, "    ", NORMAL_ATTRIBUTES);
-            len = doc.getLength();
-            doc.insertString(len, testName + "\n", NORMAL_ATTRIBUTES);
-            Position pos = doc.createPosition(len);
-            _runningTestNamePositions.put(fullName, pos);
-            setCaretPosition(len);
-          }
-          catch (BadLocationException ble) {
-            // Inserting at end, shouldn't happen
-            throw new UnexpectedException(ble);
-          }
+      final ErrorDocument doc = getErrorDocument();
+
+      try {
+        int len = doc.getLength();
+        // Insert the classname if it has changed
+        if (! className.equals(_runningTestName)) {
+          _runningTestName = className;
+          doc.insertString(len, "  " + className + "\n", NORMAL_ATTRIBUTES);
+          len = doc.getLength();
         }
-      });
+        
+        // Insert the test name, remembering its position
+        doc.insertString(len, "    ", NORMAL_ATTRIBUTES);
+        len = doc.getLength();
+        doc.insertString(len, testName + "\n", NORMAL_ATTRIBUTES);
+        Position pos = doc.createPosition(len);
+        _runningTestNamePositions.put(fullName, pos);
+        setCaretPosition(len);
+      }
+      catch (BadLocationException ble) {
+        // Inserting at end, shouldn't happen
+        throw new UnexpectedException(ble);
+      }
     }
     
-    /** Displays the results of a test that has finished in the JUnitPanel.
+    /** Displays the results of a test that has finished in the JUnitPanel.  Only runs in the dispatch thread.
       * @param name the name of the test
       * @param wasSuccessful whether the test was successful
       * @param causedError whether the test caused an error
@@ -303,21 +298,16 @@ public class JUnitPanel extends ErrorPanel {
       String testName = _getTestFromName(name);
       String fullName = _getClassFromName(name) + "." + testName;
       if (fullName.equals(JUNIT_WARNING)) return;
-      // TODO: convert this GUI operation to a Runnable and use invokeLater
       ErrorDocument doc = getErrorDocument();
-      Utilities.invokeLater(new Runnable() {
-        public void run() {
-          Position namePos = _runningTestNamePositions.get(fullName);
-          AttributeSet set;
-          if (! wasSuccessful || causedError) set = TEST_FAIL_ATTRIBUTES;
-          else set = TEST_PASS_ATTRIBUTES;
-          if (namePos != null) {
-            int index = namePos.getOffset();
-            int length = testName.length();
-            doc.setCharacterAttributes(index, length, set, false);
-          }
-        }
-      });
+      Position namePos = _runningTestNamePositions.get(fullName);
+      AttributeSet set;
+      if (! wasSuccessful || causedError) set = TEST_FAIL_ATTRIBUTES;
+      else set = TEST_PASS_ATTRIBUTES;
+      if (namePos != null) {
+        int index = namePos.getOffset();
+        int length = testName.length();
+        doc.setCharacterAttributes(index, length, set, false);
+      }
     }
     
     /** Puts the error pane into "junit in progress" state.  Only runs in event thread. */
@@ -552,7 +542,7 @@ public class JUnitPanel extends ErrorPanel {
    * Adapted from JUnit code.
    */
   static class JUnitProgressBar extends JProgressBar {
-    private boolean _hasError = false;
+    private volatile boolean _hasError = false;
     
     public JUnitProgressBar() {
       super();
@@ -560,7 +550,7 @@ public class JUnitPanel extends ErrorPanel {
     }
     
     private Color getStatusColor() {
-      assert EventQueue.isDispatchThread();
+      /* no dispatch thread check since it only reads shared data. */
       if (_hasError) {
         return Color.red;
       }
@@ -586,7 +576,7 @@ public class JUnitPanel extends ErrorPanel {
       assert EventQueue.isDispatchThread();
       setValue(value);
       if (!_hasError && !successful) {
-        _hasError= true;
+        _hasError = true;
         setForeground(getStatusColor());
       }
     }
