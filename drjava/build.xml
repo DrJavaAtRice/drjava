@@ -185,7 +185,7 @@
   
   <target name="do-compile" depends="resolve-java-runtime, resolve-java-tools">
   
-    <echo message="Compiling src directory to classes/base and classes/test with command 'javac'" />
+    <echo message="Compiling src directory to classes/base and classes/test with command ${java-home}/bin/javac" />
     
     <mkdir dir="classes/base" />
     <mkdir dir="classes/test" />
@@ -197,7 +197,7 @@
     <echo message="jrelibs=${toString:jrelibs}" />    
     <javac srcdir="src" destdir="classes/base" source="1.8" target="1.8"
            bootclasspath="${java-runtime}" sourcepath="" includeAntRuntime="no"
-           executable="${java-home}/bin/javac" fork="yes" memoryMaximumSize="1024M"
+	   fork="yes" memoryMaximumSize="1024M"
            debug="on" optimize="off" deprecation="on" >
       <classpath>
         <!-- TODO: Remove this dependency on tools.jar by refactoring and moving all the dependent
