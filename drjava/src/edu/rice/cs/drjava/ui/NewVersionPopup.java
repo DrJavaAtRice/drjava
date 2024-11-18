@@ -54,25 +54,25 @@ import edu.rice.cs.util.FileOps;
   */
 public class NewVersionPopup extends JDialog {
   /** whether to keep displaying this dialog, and for which releases */
-  private JComboBox<String> _modeBox;
+  private final JComboBox<String> _modeBox;
   /** the button that closes this window */
-  private JButton _closeButton;
+  private final JButton _closeButton;
   /** the button that updates to the new version */
-  private JButton _updateButton;
+  private final JButton _updateButton;
   /** the button that downloads the new version */
-  private JButton _downloadButton;
+  private final JButton _downloadButton;
   /** the parent frame */
-  private MainFrame _mainFrame;
+  private final MainFrame _mainFrame;
   /** the version information pane */
-  private JOptionPane _versionPanel;
+  private volatile JOptionPane _versionPanel;
   /** the panel with the buttons and combobox */
-  private JPanel _bottomPanel;
+  private final JPanel _bottomPanel;
   /** the build time of this version */
-  private static Date BUILD_TIME = Version.getBuildTime();
+  private static final Date BUILD_TIME = Version.getBuildTime();
   /** the message for the user */
-  private String[] _msg = null;
+  private volatile String[] _msg = null;
   /** the version string of the new version found, or "" */
-  private String _newestVersionString = "";
+  private volatile String _newestVersionString = "";
   /** indeterminate progress bar */
   
   /** Creates a window to display whether a new version of DrJava is available. 
@@ -110,13 +110,13 @@ public class NewVersionPopup extends JDialog {
     _downloadButton.setEnabled(false);
     
     _bottomPanel = new JPanel(new BorderLayout());
-    JPanel buttonPanel = new JPanel();
+    final JPanel buttonPanel = new JPanel();
     buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
     buttonPanel.add(_updateButton);
     buttonPanel.add(_downloadButton);
     buttonPanel.add(_closeButton);
     _bottomPanel.add(buttonPanel, BorderLayout.CENTER);
-    JPanel comboPanel = new JPanel();
+    final JPanel comboPanel = new JPanel();
     comboPanel.add(new JLabel("Check for: "));
     comboPanel.add(_modeBox);
     _bottomPanel.add(comboPanel, BorderLayout.WEST);
@@ -130,7 +130,7 @@ public class NewVersionPopup extends JDialog {
                                       JOptionPane.DEFAULT_OPTION,null,
                                       new Object[0]);   
       
-      JPanel cp = new JPanel(new BorderLayout(5,5));
+      final JPanel cp = new JPanel(new BorderLayout(5,5));
       cp.setBorder(new EmptyBorder(5,5,5,5));
       setContentPane(cp);
       cp.add(_versionPanel, BorderLayout.CENTER);
@@ -146,7 +146,7 @@ public class NewVersionPopup extends JDialog {
     _versionPanel = new JOptionPane(msg,JOptionPane.INFORMATION_MESSAGE,
                                     JOptionPane.DEFAULT_OPTION,null,
                                     new Object[0]);   
-    JPanel cp = new JPanel(new BorderLayout(5,5));
+    final JPanel cp = new JPanel(new BorderLayout(5,5));
     cp.setBorder(new EmptyBorder(5,5,5,5));
     setContentPane(cp);
     cp.add(_versionPanel, BorderLayout.CENTER);
@@ -235,13 +235,13 @@ public class NewVersionPopup extends JDialog {
   }
   
   protected void updateAction() {
-    JPanel cp = new JPanel(new BorderLayout(5,5));
+    final JPanel cp = new JPanel(new BorderLayout(5,5));
     cp.setBorder(new EmptyBorder(5,5,5,5));
     setContentPane(cp);
     cp.add(new JOptionPane("Waiting for www.sourceforge.net ...",JOptionPane.INFORMATION_MESSAGE,
                            JOptionPane.DEFAULT_OPTION,null,
                            new Object[0]), BorderLayout.CENTER);
-    JProgressBar pb = new JProgressBar(0,100);
+    final JProgressBar pb = new JProgressBar(0,100);
     pb.setIndeterminate(true);
     cp.add(pb, BorderLayout.SOUTH);
     validate();

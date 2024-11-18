@@ -54,7 +54,9 @@ import edu.rice.cs.util.swing.AsyncTask;
   * multiple notifications (reads) can occur simultaneously, but only one thread can be adding or removing listeners 
   * (writing) at a time, and no reads can occur during a write.
   * <p>
-  * <i>No</i> methods on this class should be synchronized using traditional Java synchronization!
+  * <i>No</i> methods on this class should be synchronized using traditional Java synchronization!  Methods in this
+  * class should be executed in the Dispatch thread, but no run-time checks are performed. Perhaps such checks should be 
+  * inserted in this code.
   * <p>
   * @version $Id$
   */
