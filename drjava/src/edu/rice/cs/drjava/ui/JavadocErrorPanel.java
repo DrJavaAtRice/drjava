@@ -31,6 +31,8 @@ package edu.rice.cs.drjava.ui;
 import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
 
+import edu.rice.cs.util.swing.Utilities;
+
 import javax.swing.text.*;
 
 /** * The panel which displays all the Javadoc parsing errors.
@@ -77,11 +79,14 @@ public class JavadocErrorPanel extends ErrorPanel {
 
   /** Reset the errors to the current error information. */
   public void reset() {
-    CompilerErrorModel model = getModel().getJavadocModel().getJavadocErrorModel();
-    if (model != null) _numErrors = model.getNumErrors();
-    else _numErrors = 0;
-
-    _errorListPane.updateListPane(true);
+    Utilities.invokeLater(new Runnable() {
+      public void run() {
+        CompilerErrorModel model = getModel().getJavadocModel().getJavadocErrorModel();
+        if (model != null) _numErrors = model.getNumErrors();
+        else _numErrors = 0;
+        _errorListPane.updateListPane(true);
+      }
+    });
   }
 
   /** A pane to show Javadoc errors. It acts a bit like a listbox (clicking
@@ -107,7 +112,8 @@ public class JavadocErrorPanel extends ErrorPanel {
     
     public void setJavadocEnded(boolean success) { _wasSuccessful = success; }
 
-    /** Used to show that the last javadoc command was unsuccessful. */
+    /** Used to show that the last javadoc command was unsuccessful. Only called from updateListPane, which runs in the 
+      * event thread. */
     protected void _updateWithErrors() throws BadLocationException {
       ErrorDocument doc = new ErrorDocument(getErrorDocumentTitle());
       String failureName = "error";
@@ -115,7 +121,7 @@ public class JavadocErrorPanel extends ErrorPanel {
       _updateWithErrors(failureName, "found", doc);
     }
 
-    /** Used to show that the last compile was successful. */
+    /** Used to show that the last compile was successful. Only called from updateListPane, which runs in event thread. */
     protected void _updateNoErrors(boolean done) throws BadLocationException {
       ErrorDocument doc = new ErrorDocument(getErrorDocumentTitle());
       String msg = "";

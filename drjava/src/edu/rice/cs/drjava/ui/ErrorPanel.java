@@ -44,6 +44,7 @@ import edu.rice.cs.util.text.SwingDocument;
 import edu.rice.cs.drjava.model.print.DrJavaBook;
   
 import edu.rice.cs.util.swing.RightClickMouseAdapter;
+import edu.rice.cs.util.swing.Utilities;
 
 import java.util.HashMap;
 import java.util.Vector;
@@ -276,7 +277,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
   /** @return the correct error model  */
   abstract protected CompilerErrorModel getErrorModel();
   
-  /** Pane to show compiler errors. Similar to a listbox (clicking selects an item) but items can each wrap, etc. */
+  /** Pane to show compiler (and junit?) errors. Similar to a listbox (clicking selects an item) but items can each wrap, etc. */
   public abstract class ErrorListPane extends JEditorPane implements ClipboardOwner {
     /** The custom keymap for the error list pane. */
     protected volatile Keymap _keymap;
@@ -497,31 +498,37 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     /** @return true if the text selection interval is empty. */
     protected boolean _isEmptySelection() { return getSelectionStart() == getSelectionEnd(); }
     
-    /** Update the pane which holds the list of errors for the viewer. 
-     * @param done boolean
-     */
+    /** Update the pane which holds the list of errors for the viewer.  
+      * @param done boolean
+      */
     protected void updateListPane(boolean done) {
-      try {
-        _errorListPositions = new Position[_numErrors];
-        _errorTable.clear();
-        
-        if (_numErrors == 0) _updateNoErrors(done);
-        else _updateWithErrors();
-      }
-      catch (BadLocationException e) { throw new UnexpectedException(e); }
-      
+      Utilities.invokeLater(new Runnable() {
+        public void run() {   
+          try {
+            _errorListPositions = new Position[_numErrors];
+            _errorTable.clear();
+            
+            if (_numErrors == 0) _updateNoErrors(done);
+            else _updateWithErrors();
+          }
+          catch (BadLocationException e) { throw new UnexpectedException(e); }
+        }
+      });
+          
       // Force UI to redraw
       repaint();
     }
-    
+     
+    /** Only called from updateListPane in event thread. */
     abstract protected void _updateNoErrors(boolean done) throws BadLocationException;
     
+    /** Only called from updateListPane in event thread. */
     abstract protected void _updateWithErrors() throws BadLocationException;
     
     /** @param failureName the name of the failure 
-     * @param failureMeaning the meaning of the failure
-     * @return the message indicating the number of errors and warnings.
-     */
+      * @param failureMeaning the meaning of the failure
+      * @return the message indicating the number of errors and warnings.
+      */
     protected String _getNumErrorsMessage(String failureName, String failureMeaning) {
       StringBuilder numErrMsg;
       
@@ -560,12 +567,13 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       return "";
     }
         
-    /** Used to show that the last compile was unsuccessful.
-     * @param failureName the name of the failure
-     * @param failureMeaning the meaning of the failure
-     * @param doc the error document
-     * @throws BadLocationException if attempts to reference an invalid location
-     */
+    /** Used to show that the last compile was unsuccessful.  Only called from UpdateWithErrors(), which runs in the
+      * event thread.
+      * @param failureName the name of the failure
+      * @param failureMeaning the meaning of the failure
+      * @param doc the error document
+      * @throws BadLocationException if attempts to reference an invalid location
+      */
     protected void _updateWithErrors(String failureName, String failureMeaning, ErrorDocument doc)
       throws BadLocationException {
       // Print how many errors

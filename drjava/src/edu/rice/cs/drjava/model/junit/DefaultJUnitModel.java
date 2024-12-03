@@ -71,6 +71,7 @@ import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.text.SwingDocument;
+import edu.rice.cs.util.swing.ScrollableDialog;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.Log;
 
@@ -306,17 +307,17 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     */
   private void _rawJUnitOpenDefDocs(List<OpenDefinitionsDocument> lod, final boolean allTests) {
 
-    File buildDir = _model.getBuildDirectory();
+    final File buildDir = _model.getBuildDirectory();
 
 //    Utilities.show("Running JUnit tests. Build directory is " + buildDir);
     
     /** Open java source files */
-    HashSet<String> openDocFiles = new HashSet<String>();
+    final HashSet<String> openDocFiles = new HashSet<String>();
     
     /** A map whose keys are directories containing class files corresponding to open java source files.
       * Their values are the corresponding source roots. 
       */
-    HashMap<File, File> classDirsAndRoots = new HashMap<File, File>();
+    final HashMap<File, File> classDirsAndRoots = new HashMap<File, File>();
     
     // Initialize openDocFiles and classDirsAndRoots
     // All packageNames should be valid because all source files are compiled
@@ -503,7 +504,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
           }
         }
         catch (RemoteException e) { // Unit testing aborted; cleanup; hourglassOff already called in junitStarted
-          _notifyJUnitEnded();  // balances junitStarted()
+          _notifyJUnitEnded();  // balances junitStarted() when an exception interrupts testing
           _testInProgress = false;
         }
       }
@@ -602,25 +603,30 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     */
   public void testSuiteEnded(final JUnitError[] errors) {
 //    new ScrollableDialog(null, "DefaultJUnitModel.testSuiteEnded(...) called", "", "").show();
-    List<File> files = new ArrayList<File>();
-    for(OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()) { files.add(odd.getRawFile()); }
+    
+    Utilities.invokeLater(new Runnable() {
+      public void run() {
+        List<File> files = new ArrayList<File>();
+        for(OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()) { files.add(odd.getRawFile()); }
 //    Utilities.show("errors.length = " + errors.length + " files = " + files);
-    for(JUnitError e: errors) {
-      try {
-        e.setStackTrace(_compilerModel.getLLSTM().replaceStackTrace(e.stackTrace(),files));
-      } catch(Exception ex) { DrJavaErrorHandler.record(ex); }
-      File f = e.file();
-      if ((f != null) && (DrJavaFileUtils.isLLFile(f))) {
-        String dn = DrJavaFileUtils.getJavaForLLFile(f.getName());
-        StackTraceElement ste = new StackTraceElement(e.className(), "", dn, e.lineNumber());
-        ste = _compilerModel.getLLSTM().replaceStackTraceElement(ste, f);
-        e.setLineNumber(ste.getLineNumber());
+        for(JUnitError e: errors) {
+          try {
+            e.setStackTrace(_compilerModel.getLLSTM().replaceStackTrace(e.stackTrace(),files));
+          } catch(Exception ex) { DrJavaErrorHandler.record(ex); }
+          File f = e.file();
+          if ((f != null) && (DrJavaFileUtils.isLLFile(f))) {
+            String dn = DrJavaFileUtils.getJavaForLLFile(f.getName());
+            StackTraceElement ste = new StackTraceElement(e.className(), "", dn, e.lineNumber());
+            ste = _compilerModel.getLLSTM().replaceStackTraceElement(ste, f);
+            e.setLineNumber(ste.getLineNumber());
+          }
+        }
+        _junitErrorModel = new JUnitErrorModel(errors, _model, true);
+        _notifyJUnitEnded();
+        _testInProgress = false;
+//        new ScrollableDialog(null, "DefaultJUnitModel.testSuiteEnded(...) finished", "", "").show();
       }
-    }
-    _junitErrorModel = new JUnitErrorModel(errors, _model, true);
-    _notifyJUnitEnded();
-    _testInProgress = false;
-//    new ScrollableDialog(null, "DefaultJUnitModel.testSuiteEnded(...) finished", "", "").show();
+    }); 
   }
 
   

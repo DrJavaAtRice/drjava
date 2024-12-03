@@ -37,6 +37,7 @@ import edu.rice.cs.drjava.model.compiler.CompilerModel;
 import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
 import edu.rice.cs.drjava.model.compiler.CompilerInterface;
 import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.plt.iter.IterUtil;
 
 import javax.swing.*;
@@ -142,9 +143,9 @@ public class CompilerErrorPanel extends ErrorPanel {
   }
   
   /** Reset the errors to the current error information immediately following 
-   * compilation. 
-   * @param excludedFiles files to set as excluded
-   */
+    * compilation. 
+    * @param excludedFiles files to set as excluded
+    */
   public void reset(File[] excludedFiles) {
     _excludedFiles = excludedFiles;
     reset();
@@ -155,15 +156,20 @@ public class CompilerErrorPanel extends ErrorPanel {
     // _nextErrorButton.setEnabled(false);
     // _prevErrorButton.setEnabled(false);
 //    Utilities.showDebug("Reset being called by CompilerErrorPanel");
-    _numErrors = getModel().getCompilerModel().getNumErrors();
-    
-    _errorListPane.updateListPane(true);
-    // _nextErrorButton.setEnabled(_errorListPane.hasNextError());
-    // _prevErrorButton.setEnabled(_errorListPane.hasPrevError());
+    Utilities.invokeLater(new Runnable() {
+      public void run() {
+        _numErrors = getModel().getCompilerModel().getNumErrors();
+        
+        _errorListPane.updateListPane(true);
+        // _nextErrorButton.setEnabled(_errorListPane.hasNextError());
+        // _prevErrorButton.setEnabled(_errorListPane.hasPrevError());
+      }
+    });
   }
   
   class CompilerErrorListPane extends ErrorPanel.ErrorListPane {
     
+    /** Only called from updateListPane, which runs in event thread. */
     protected void _updateWithErrors() throws BadLocationException {
       ErrorDocument doc = new ErrorDocument(getErrorDocumentTitle());
       if (_excludedFiles.length != 0) {
@@ -195,7 +201,7 @@ public class CompilerErrorPanel extends ErrorPanel {
       selectNothing();
     }
     
-    /** Used to show that the last compile was successful.
+    /** Used to show that the last compile was successful. Only called from updateListPane in event thread.
      *  @param done ignored: we assume that this is only called after compilation is completed
      */
     protected void _updateNoErrors(boolean done) throws BadLocationException {

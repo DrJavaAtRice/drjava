@@ -776,7 +776,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     * @param wd working directory for interpreter.
     */
   public void interpreterReady(final File wd) {
-    debug.logStart();
+//    debug.logStart();
 //    System.err.println("interpreterReady(" + wd + ") called in InteractionsModel");  // DEBUG
 //    System.out.println("_waitingForFirstInterpreter = " + _waitingForFirstInterpreter);  // DEBUG
     if (! _waitingForFirstInterpreter) {
@@ -793,7 +793,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
       });
     }
     _waitingForFirstInterpreter = false;
-    debug.logEnd();
+//    debug.logEnd();
   }
 
   /** Perform the default imports of the classes and packages listed in the INTERACTIONS_AUTO_IMPORT_CLASSES. */

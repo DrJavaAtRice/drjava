@@ -59,8 +59,7 @@ import java.util.List;
  * during a write.
  * <p>
  *
- * <i>No</i> methods on this class should be synchronized using traditional
- * Java synchronization!
+ * <i>No</i> methods on this class should be synchronized using traditionalJava synchronization!
  * <p>
  *
  * @version $Id$

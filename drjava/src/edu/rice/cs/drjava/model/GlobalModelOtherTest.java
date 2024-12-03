@@ -73,7 +73,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
   
   /** Tests that the undoableEditHappened event is fired if the undo manager is in use. */
   public void testUndoEventsOccur() /* throws BadLocationException */ {
-    debug.logStart();
+//    debug.logStart();
     
     final TestListener listener = new TestListener() { 
       public void undoableEditHappened() { 
@@ -107,7 +107,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     });
 //    Utilities.clearEventQueue();
     _log.log("testUndoEventsOccur() completed");
-    debug.logEnd();
+//    debug.logEnd();
   }
   
   
@@ -116,7 +116,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
    * @throws InterruptedException if execution is interrupted unexpectedly
    */
   public void testExitInteractions() throws EditDocumentException, InterruptedException {
-    debug.logStart();
+//    debug.logStart();
     final InteractionListener listener = new InteractionListener(); /*{
       
       public void consoleReset() { consoleResetCount++; }
@@ -139,7 +139,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     assertEquals("exit status", 23, listener.getLastExitStatus());
     
     _log.log("testExitInteractions() completed");
-    debug.logEnd();
+//    debug.logEnd();
   }
   
   /** Creates a new class, compiles it and then checks that the REPL can see it.  
@@ -152,7 +152,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
    */
   public void testInteractionsCanSeeCompiledClasses() throws BadLocationException, EditDocumentException,
     IOException, InterruptedException {
-    debug.logStart();
+//    debug.logStart();
     
     // Compile Foo
     OpenDefinitionsDocument doc1 = setupDocument(FOO_TEXT);
@@ -368,7 +368,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
   }
   
   public void testGetSourceRootPackageThreeDeepInvalid() throws BadLocationException, IOException {
-    debug.logStart();
+//    debug.logStart();
     
     // Create temp directory
     File baseTempDir = tempDirectory();
@@ -392,11 +392,11 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     assertEquals("number of source roots", 0, IterUtil.sizeOf(roots));
     
     _log.log("testGetSourceRootPackageThreeDeepInvalid() completed");
-    debug.logEnd();
+//    debug.logEnd();
   }
   
   public void testGetSourceRootPackageOneDeepValid() throws BadLocationException, IOException {
-    debug.logStart();
+//    debug.logStart();
     
     // Create temp directory
     File baseTempDir = tempDirectory();
@@ -419,7 +419,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     assertEquals("source root", baseTempDir.getCanonicalFile(), IterUtil.first(roots).getCanonicalFile());
     
     _log.log("testGetSourceRootPackageOneDeepValid() completed");
-    debug.logEnd();
+//    debug.logEnd();
   }
   
   

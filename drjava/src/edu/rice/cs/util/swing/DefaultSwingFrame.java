@@ -32,7 +32,8 @@ import java.awt.GraphicsConfiguration;
 
 import edu.rice.cs.util.swing.SwingFrame;
 
-/** A default implementation of SwingFrame (to use in place of default JFrame and Frame implementations).*/
+/** A default implementation of SwingFrame (to use in place of default JFrame and Frame implementations).
+  * Used in testing? */
 public class DefaultSwingFrame extends SwingFrame {
   
   /* Constructors analogous to JFrame. */

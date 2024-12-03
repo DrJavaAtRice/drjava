@@ -120,11 +120,15 @@ public class JUnitPanel extends ErrorPanel {
     _progressBar = new JUnitProgressBar();
     _progressBar.setUI(new javax.swing.plaf.basic.BasicProgressBarUI());
     _showStackTraceButton = new JButton(_showStackTraceAction);
-    customPanel.add(_progressBar, BorderLayout.NORTH);
-    customPanel.add(_showStackTraceButton, BorderLayout.SOUTH);
-    
-    _errorListPane = new JUnitErrorListPane();
-    setErrorListPane(_errorListPane);
+    Utilities.invokeLater(new Runnable() {
+      public void run() {
+        customPanel.add(_progressBar, BorderLayout.NORTH);
+        customPanel.add(_showStackTraceButton, BorderLayout.SOUTH);
+        
+        _errorListPane = new JUnitErrorListPane();
+        setErrorListPane(_errorListPane);
+      }
+    });
   }
   
   /** Returns the JUnitErrorListPane that this panel manages. */
@@ -161,15 +165,19 @@ public class JUnitPanel extends ErrorPanel {
   /** Reset the errors to the current error information. */
   public void reset() {
     assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();
-    JUnitErrorModel junitErrorModel = getModel().getJUnitModel().getJUnitErrorModel();
-    boolean testsHaveRun = false;
-    if (junitErrorModel != null) {
-      _numErrors = junitErrorModel.getNumErrors();
-      testsHaveRun = junitErrorModel.haveTestsRun();
-    } 
-    else _numErrors = 0;
-    _errorListPane.updateListPane(testsHaveRun); //changed!!
-    repaint();
+    Utilities.invokeLater(new Runnable() {
+      public void run() {
+        JUnitErrorModel junitErrorModel = getModel().getJUnitModel().getJUnitErrorModel();
+        boolean testsHaveRun = false;
+        if (junitErrorModel != null) {
+          _numErrors = junitErrorModel.getNumErrors();
+          testsHaveRun = junitErrorModel.haveTestsRun();
+        } 
+        else _numErrors = 0;
+        _errorListPane.updateListPane(testsHaveRun); //changed!!
+        repaint();
+      }
+    });
   }
   
   /** Resets the progress bar to start counting the given number of tests. 
@@ -186,11 +194,16 @@ public class JUnitPanel extends ErrorPanel {
   /** Steps the progress bar forward by one test.
     * @param successful Whether the last test was successful or not.
     */
-  public void progressStep(boolean successful) {
+  public void progressStep(boolean successful) {  
     assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();
-    _testCount++;
-    _testsSuccessful &= successful;
-    _progressBar.step(_testCount, _testsSuccessful);
+    /* Testing may not be sufficient. */
+    Utilities.invokeLater(new Runnable() {
+      public void run() { 
+        _testCount++;
+        _testsSuccessful &= successful;
+        _progressBar.step(_testCount, _testsSuccessful);
+      }
+    });
   }
   
   public void testStarted(String className, String testName) { }
@@ -251,8 +264,8 @@ public class JUnitPanel extends ErrorPanel {
     }
     
     /** Provides the the name of the test being run to the JUnitPanel.  Only runs in the dispatch thread.
-     * @param name the name of the test being run
-     */
+      * @param name the name of the test being run
+      */
     public void testStarted(String name) {
       assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();
       if (name.indexOf('(') < 0) return;
@@ -261,75 +274,95 @@ public class JUnitPanel extends ErrorPanel {
       final String className = _getClassFromName(name);
       final String fullName = className + "." + testName;
       if (fullName.equals(JUNIT_WARNING)) return;
-      final ErrorDocument doc = getErrorDocument();
-
-      try {
-        int len = doc.getLength();
-        // Insert the classname if it has changed
-        if (! className.equals(_runningTestName)) {
-          _runningTestName = className;
-          doc.insertString(len, "  " + className + "\n", NORMAL_ATTRIBUTES);
-          len = doc.getLength();
+      /* Testing may not be sufficient to guarantee proper synchronization. */
+      Utilities.invokeLater(new Runnable() {
+        public void run() {
+          final ErrorDocument doc = getErrorDocument();
+      
+          try {
+            int len = doc.getLength();
+            // Insert the classname if it has changed
+            if (! className.equals(_runningTestName)) {
+              _runningTestName = className;
+              doc.insertString(len, "  " + className + "\n", NORMAL_ATTRIBUTES);
+              len = doc.getLength();
+            }
+            
+            // Insert the test name, remembering its position
+            doc.insertString(len, "    ", NORMAL_ATTRIBUTES);
+            len = doc.getLength();
+            doc.insertString(len, testName + "\n", NORMAL_ATTRIBUTES);
+            Position pos = doc.createPosition(len);
+            _runningTestNamePositions.put(fullName, pos);
+            len = doc.getLength();
+            setCaretPosition(len);  // Why does caret position matter here? 
+            repaint();
+          }
+          catch (BadLocationException ble) {
+            // Inserting at end, shouldn't happen
+            throw new UnexpectedException(ble);
+          }
         }
-        
-        // Insert the test name, remembering its position
-        doc.insertString(len, "    ", NORMAL_ATTRIBUTES);
-        len = doc.getLength();
-        doc.insertString(len, testName + "\n", NORMAL_ATTRIBUTES);
-        Position pos = doc.createPosition(len);
-        _runningTestNamePositions.put(fullName, pos);
-        setCaretPosition(len);
-      }
-      catch (BadLocationException ble) {
-        // Inserting at end, shouldn't happen
-        throw new UnexpectedException(ble);
-      }
+      });
     }
     
-    /** Displays the results of a test that has finished in the JUnitPanel.  Only runs in the dispatch thread.
+    /** Colors (using attributes) the displayed name of a test that has finished in the JUnitPanel.  Only runs in the dispatch thread.
       * @param name the name of the test
       * @param wasSuccessful whether the test was successful
       * @param causedError whether the test caused an error
       */
     public void testEnded(String name, boolean wasSuccessful, boolean causedError) {
-      assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();
-      if (name.indexOf('(')<0) return;
-
-      String testName = _getTestFromName(name);
-      String fullName = _getClassFromName(name) + "." + testName;
-      if (fullName.equals(JUNIT_WARNING)) return;
-      ErrorDocument doc = getErrorDocument();
-      Position namePos = _runningTestNamePositions.get(fullName);
-      AttributeSet set;
-      if (! wasSuccessful || causedError) set = TEST_FAIL_ATTRIBUTES;
-      else set = TEST_PASS_ATTRIBUTES;
-      if (namePos != null) {
-        int index = namePos.getOffset();
-        int length = testName.length();
-        doc.setCharacterAttributes(index, length, set, false);
-      }
+      /* The following assertion only runs in tests not in deployed code; testing may not be sufficient. */
+//      assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();
+      if (name.indexOf('(') < 0) return;
+      
+      Utilities.invokeLater(new Runnable() {
+        public void run() {
+          
+          String testName = _getTestFromName(name);
+          String fullName = _getClassFromName(name) + "." + testName;
+          if (fullName.equals(JUNIT_WARNING)) return;
+          ErrorDocument doc = getErrorDocument();
+          Position namePos = _runningTestNamePositions.get(fullName);
+          AttributeSet set;
+          if (! wasSuccessful || causedError) set = TEST_FAIL_ATTRIBUTES;
+          else set = TEST_PASS_ATTRIBUTES;
+          if (namePos != null) {
+            int index = namePos.getOffset();
+            int length = testName.length();
+            doc.setCharacterAttributes(index, length, set, false);
+          }
+          repaint();
+        }
+      });
     }
     
     /** Puts the error pane into "junit in progress" state.  Only runs in event thread. */
     public void setJUnitInProgress() {
-      assert EventQueue.isDispatchThread();
-      _errorListPositions = new Position[0];
-      progressReset(0);
-      _runningTestNamePositions.clear();
-      _runningTestName = null;
-      _warnedOutOfSync = false;
-      
-      ErrorDocument doc = new ErrorDocument(getErrorDocumentTitle());
+      /* The following assertion only runs in tests not in deployed code; testing may not be sufficient. */
+//      assert EventQueue.isDispatchThread();
+      Utilities.invokeLater(new Runnable() {
+        public void run() {
+          _errorListPositions = new Position[0];
+          progressReset(0);
+          _runningTestNamePositions.clear();
+          _runningTestName = null;
+          _warnedOutOfSync = false;
+          
+          ErrorDocument doc = new ErrorDocument(getErrorDocumentTitle());
 //      _checkSync(doc);
-      
-      doc.append(START_JUNIT_MSG, BOLD_ATTRIBUTES);
-      setDocument(doc);
-      selectNothing();
+          
+          doc.append(START_JUNIT_MSG, BOLD_ATTRIBUTES);
+          setDocument(doc);
+          selectNothing();
+          repaint();
+        }
+      });
     }
     
-    /** Used to show that testing was unsuccessful. */
+    /** Used to show that testing was unsuccessful. Only called from updateListPane, which runs in the event thread. */
     protected void _updateWithErrors() throws BadLocationException {
-      assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();
+      assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();  // Always succeeds if comment above is correct
       //DefaultStyledDocument doc = new DefaultStyledDocument();
       ErrorDocument doc = getErrorDocument();
 //      _checkSync(doc);
@@ -359,9 +392,11 @@ public class JUnitPanel extends ErrorPanel {
       
       return numErrMsg.toString();
     }
-    
+    /* Only called from UpdateWithErrors(), which runs in event thread. */
     protected void _updateWithErrors(String failureName, String failureMeaning, ErrorDocument doc)
       throws BadLocationException {
+      assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();
+      
       // Print how many errors
       _replaceInProgressText(_getNumErrorsMessage(failureName, failureMeaning));
       
@@ -372,9 +407,9 @@ public class JUnitPanel extends ErrorPanel {
     }
     
     /** Replaces the "Testing in progress..." text with the given message.  Only runs in event thread.
-     * @param msg the text to insert
-     * @throws BadLocationException if attempts to reference an invalid location
-     */
+      * @param msg the text to insert
+      * @throws BadLocationException if attempts to reference an invalid location
+      */
     public void _replaceInProgressText(String msg) throws BadLocationException {
       assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();
       int start = 0;
@@ -387,15 +422,15 @@ public class JUnitPanel extends ErrorPanel {
       }
     }
     
-    /** Returns the string to identify a warning. In JUnit, warnings (the odd case) indicate errors/exceptions.
-      */
+    /** Returns the string to identify a warning. In JUnit, warnings (the odd case) indicate errors/exceptions. */
     protected String _getWarningText() {  return "Error: "; }
     
     /** Returns the string to identify an error.  In JUnit, errors (the normal case) indicate TestFailures. */
     protected String _getErrorText() { return "Failure: "; }
     
-    /** Updates the list pane with no errors. */
+    /** Updates the list pane with no errors.  Only runs in the event thread. */
     protected void _updateNoErrors(boolean haveTestsRun) throws BadLocationException {
+      assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();
       //DefaultStyledDocument doc = new DefaultStyledDocument();
 //      _checkSync(getDocument());
       _replaceInProgressText(haveTestsRun ? JUNIT_FINISHED_MSG : NO_TESTS_MSG);
@@ -511,10 +546,9 @@ public class JUnitPanel extends ErrorPanel {
         * @return true iff the mouse click is over an error
         */
       private boolean _selectError(MouseEvent e) {
-        assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();
+        assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();   
         //TODO: get rid of cast in the next line, if possible
-        _error = (JUnitError)_errorAtPoint(e.getPoint());
-        
+        _error = (JUnitError)_errorAtPoint(e.getPoint()); 
         if (_isEmptySelection() && _error != null) {
           _errorListPane.switchToError(_error);
           return true;
@@ -530,17 +564,21 @@ public class JUnitPanel extends ErrorPanel {
         */
       protected void _popupAction(MouseEvent e) { 
         assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();
-        _popMenu.show(e.getComponent(), e.getX(), e.getY()); 
+        /* Former only executed in tests. */
+        Utilities.invokeLater(new Runnable() {
+          public void run() {                 
+            _popMenu.show(e.getComponent(), e.getX(), e.getY());
+          }
+        });    
       }
     }
     public String getErrorDocumentTitle() { return "Javadoc Errors"; }
   }
   
-  
   /** A progress bar showing the status of JUnit tests.
-   * Green until a test fails, then red.
-   * Adapted from JUnit code.
-   */
+    * Green until a test fails, then red.
+    * Adapted from JUnit code.
+    */
   static class JUnitProgressBar extends JProgressBar {
     private volatile boolean _hasError = false;
     
@@ -550,35 +588,43 @@ public class JUnitPanel extends ErrorPanel {
     }
     
     private Color getStatusColor() {
-      /* no dispatch thread check since it only reads shared data. */
-      if (_hasError) {
-        return Color.red;
-      }
-      else {
-        return Color.green;
-      }
+      /* no event thread check since it only reads shared data. */
+      if (_hasError) return Color.red;
+      else return Color.green;
     }
     
     public void reset() {
       assert EventQueue.isDispatchThread();
-      _hasError = false;
-      setForeground(getStatusColor());
-      setValue(0);
+      Utilities.invokeLater(new Runnable() {
+        public void run() { 
+          _hasError = false;
+          setForeground(getStatusColor());
+          setValue(0);
+        }
+      });
     }
     
     public void start(int total) {
       assert EventQueue.isDispatchThread();
-      setMaximum(total);
-      reset();
+      Utilities.invokeLater(new Runnable() {
+        public void run() { 
+          setMaximum(total);
+          reset();
+        }
+      });
     }
     
     public void step(int value, boolean successful) {
       assert EventQueue.isDispatchThread();
-      setValue(value);
-      if (!_hasError && !successful) {
-        _hasError = true;
-        setForeground(getStatusColor());
-      }
+      Utilities.invokeLater(new Runnable() {
+        public void run() { 
+          setValue(value);
+          if (!_hasError && !successful) {
+            _hasError = true;
+            setForeground(getStatusColor());
+          }
+        }
+      });
     }
   }
 }

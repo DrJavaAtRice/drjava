@@ -64,9 +64,9 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
     * @param toEval command to be evaluated
     */
   protected void _interpret(String toEval) {
-    debug.logStart("Interpret " + toEval);
+//    debug.logStart("Interpret " + toEval);
     _jvm.interpret(toEval);
-    debug.logEnd();
+//    debug.logEnd();
   }
   
   /** Gets the string representation of the value of a variable in the current interpreter.
@@ -130,7 +130,7 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
     */
   public void setActiveInterpreter(String name, String prompt) {
     Option<Pair<Boolean, Boolean>> result = _jvm.setActiveInterpreter(name);
-    debug.logValue("result", result);
+//    debug.logValue("result", result);
     if (result.isSome() && result.unwrap().first()) { // interpreter changed
       boolean inProgress = result.unwrap().second();
       _updateDocument(prompt, inProgress);

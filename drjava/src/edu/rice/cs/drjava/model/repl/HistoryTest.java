@@ -331,14 +331,14 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
       his.movePrevious("3");
       fail("Should not have moved previous, empty history");
     }
-    catch(ArrayIndexOutOfBoundsException e) { 
+    catch(IndexOutOfBoundsException e) { 
     }
     
     try { 
       his.moveNext("3");
       fail("Should not have moved next, empty history");
     }
-    catch(ArrayIndexOutOfBoundsException e){
+    catch(IndexOutOfBoundsException e){
     }
   }
 }

@@ -113,7 +113,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
    * @throws InterruptedException if execution is interrupted unexpectedly
    */
   public void testCompileAllFailsDifferentSourceRoots() throws BadLocationException, IOException, InterruptedException {
-    debug.logStart();
+//    debug.logStart();
     
     File aDir = new File(_tempDir, "a");
     File bDir = new File(_tempDir, "b");
@@ -148,7 +148,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     assertEquals(_name() + "Class file exists after failing compile (2)", false, compiled2.exists());
     _model.removeListener(listener);
     
-    debug.logEnd();
+//    debug.logEnd();
   }
   
   /** Creates a source file with "package" as a field name and ensures that 
@@ -158,7 +158,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
    * @throws InterruptedException if execution is interrupted unexpectedly
    */
   public void testCompilePackageAsField() throws BadLocationException, IOException, InterruptedException {
-    debug.logStart();
+//    debug.logStart();
     
     OpenDefinitionsDocument doc = setupDocument(FOO_PACKAGE_AS_FIELD);
     final File file = tempFile();
@@ -179,7 +179,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     assertEquals(_name() + "Class file exists after failing compile", false, compiled.exists());
     _model.removeListener(listener);
     
-    debug.logEnd();
+//    debug.logEnd();
   }
   
   /** Creates a source file with "package" as a field name and ensures that compile starts but fails due to the
@@ -189,7 +189,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
    * @throws InterruptedException if execution is interrupted unexpectedly
    */
   public void testCompilePackageAsField2() throws BadLocationException, IOException, InterruptedException {
-    debug.logStart();
+//    debug.logStart();
     
     final OpenDefinitionsDocument doc = setupDocument(FOO_PACKAGE_AS_FIELD_2);
     final File file = tempFile();
@@ -210,7 +210,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     assertEquals(_name() + "Class file exists after failing compile", false, compiled.exists());
     _model.removeListener(listener);
     
-    debug.logEnd();
+//    debug.logEnd();
   }
   
   /** Tests compiling an invalid file and checks to make sure the class file was not created. 
@@ -219,7 +219,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
    * @throws InterruptedException if execution is interrupted unexpectedly
    */
   public void testCompileMissingCloseCurly() throws BadLocationException, IOException, InterruptedException {
-    debug.logStart();
+//    debug.logStart();
     
     final OpenDefinitionsDocument doc = setupDocument(FOO_MISSING_CLOSE_TEXT);
     final File file = tempFile();
@@ -238,7 +238,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     assertTrue(_name() + "Class file exists after compile?!", !compiled.exists());
     _model.removeListener(listener);
     
-    debug.logEnd();
+//    debug.logEnd();
   }
   
   /** Puts an otherwise valid package statement inside a class declaration. This better not work! 
@@ -248,7 +248,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
    */
   public void testCompileWithPackageStatementInsideClass() throws BadLocationException, IOException, 
     InterruptedException {
-    debug.logStart();
+//    debug.logStart();
     
     // Create temp file
     File baseTempDir = tempDirectory();
@@ -280,7 +280,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     assertEquals("CompilerErrorModel has errors after reset", 0, cem.getNumErrors());
     _model.removeListener(listener);
     
-    debug.logEnd();
+//    debug.logEnd();
   }
   
   
@@ -292,7 +292,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
    * @throws InterruptedException if execution is interrupted unexpectedly
    */
   public void testCompileFailsCorrectLineNumbers() throws BadLocationException, IOException, InterruptedException {
-    debug.logStart();
+//    debug.logStart();
     
     File aDir = new File(_tempDir, "a");
     File bDir = new File(_tempDir, "b");
@@ -311,9 +311,9 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     
     CompilerModel cm = _model.getCompilerModel();
     cm.compileAll();
-    debug.log("Before wait");
+//    debug.log("Before wait");
     listener.waitCompileDone();
-    debug.log("After wait");
+//    debug.log("After wait");
     
     assertCompileErrorsPresent(_name(), true);
     assertEquals("Should have 2 compiler errors", 2, _model.getCompilerModel().getNumErrors());
@@ -334,7 +334,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
                p1.getOffset() >= 20 && p1.getOffset() <= 29);
     assertTrue("location of error should be after 34 (line 3 or 4)", p2.getOffset() >= 34);
     
-    debug.logEnd();
+//    debug.logEnd();
   }
   
   /** Tests compiling an invalid file and checks to make sure the class file was not created.  
@@ -343,7 +343,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
    * @throws InterruptedException if execution is interrupted unexpectedly
    */
   public void testCompileEndWhileParsing() throws BadLocationException, IOException, InterruptedException {
-    debug.logStart();
+//    debug.logStart();
     
     final OpenDefinitionsDocument doc = setupDocument(COMPILER_ERRORS_2872797_TEXT);
     final File dir = tempDirectory();
@@ -364,6 +364,6 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     _model.removeListener(listener);
 
     file.delete();
-    debug.logEnd();
+//    debug.logEnd();
   }
 }

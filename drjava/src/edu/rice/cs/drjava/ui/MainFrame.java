@@ -9543,49 +9543,74 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     public void junitSuiteStarted(final int numTests) {
       assert EventQueue.isDispatchThread();
-      _junitPanel.progressReset(numTests);
+      /* Testing may not be sufficient to ensure proper synchronization. */
+      Utilities.invokeLater(new Runnable() {
+        public void run() {
+          _junitPanel.progressReset(numTests);
+        }
+      });
     }
     
     public void junitTestStarted(final String name) {
       assert EventQueue.isDispatchThread();
-      _junitPanel.getErrorListPane().testStarted(name); /* passes test name to errorListPane */         
+      /* Testing may not be sufficient to ensure proper synchronization. */
+      Utilities.invokeLater(new Runnable() {
+        public void run() {
+          _junitPanel.getErrorListPane().testStarted(name); /* passes test name to errorListPane */
+        }
+      });
     }
     
     public void junitTestEnded(final String name, final boolean succeeded, final boolean causedError) {
       assert EventQueue.isDispatchThread();
 //      new ScrollableDialog(null, "junitTestEnded(" + name + ", " + succeeded + ", " + causedError + ")", "", "").
 //        show();
-      _junitPanel.getErrorListPane().testEnded(name, succeeded, causedError);  // What does this do?
-      _junitPanel.progressStep(succeeded);
-      _model.refreshActiveDocument();
+      /* Testing may not be sufficient to ensure proper synchronization. */
+      Utilities.invokeLater(new Runnable() {
+        public void run() {
+          _junitPanel.getErrorListPane().testEnded(name, succeeded, causedError);  // Propagate testEnded()  notification
+          _junitPanel.progressStep(succeeded);
+          _model.refreshActiveDocument();
+        }
+      });
     }
-    
+
     public void junitEnded() {
-      assert EventQueue.isDispatchThread();
+      assert EventQueue.isDispatchThread();  
+      /* Testing may not be sufficient to ensure proper synchronization. */
+      Utilities.invokeLater(new Runnable() {
+        public void run() {
 //      new ScrollableDialog(null, "MainFrame.junitEnded() called", "", "").show();
-      _guiAvailabilityNotifier.junitFinished(); // JUNIT and COMPILER
-      // Use EventQueue invokeLater to ensure that JUnit panel is "reset" after it is updated with test results
-      EventQueue.invokeLater(new Runnable() { 
-        public void run() { 
+          _guiAvailabilityNotifier.junitFinished(); // JUNIT and COMPILER
+        }
+      });
+      
+      EventQueue.invokeLater(new Runnable() {
+        public void run() {
           _junitPanel.reset();
           if (_model.getJUnitModel().getCoverage()) {
             _coverageFrame.displayReport(_model.getJUnitModel().getFinalResult());
-          }
+          };
+          _model.refreshActiveDocument();
         }
       });
-      _model.refreshActiveDocument();
     }
-    
+
+                 
     /** Fire just before javadoc asynchronous thread is started. Only runs in the event thread. */
     public void javadocStarted() {
       
       assert EventQueue.isDispatchThread();
       
-      hourglassOn();
-      _guiAvailabilityNotifier.javadocStarted(); // JAVADOC and COMPILER
-
-      showTab(_javadocErrorPanel, true);
-      _javadocErrorPanel.setJavadocInProgress();
+      /* Testing may not be sufficient to ensure proper synchronization. */
+      Utilities.invokeLater(new Runnable() {
+        public void run() {
+          hourglassOn();
+          _guiAvailabilityNotifier.javadocStarted(); // JAVADOC and COMPILER
+          showTab(_javadocErrorPanel, true);
+          _javadocErrorPanel.setJavadocInProgress();
+        }
+      });
     }
     
     public void javadocEnded(final boolean success, final File destDir, final boolean allDocs) {
