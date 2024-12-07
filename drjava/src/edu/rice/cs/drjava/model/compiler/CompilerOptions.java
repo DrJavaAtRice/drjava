@@ -74,6 +74,7 @@ public class CompilerOptions implements OptionConstants {
   
   public static HashMap<String,String> getOptions(boolean warningsEnabled) {    
     HashMap<String,String> options = new HashMap<String,String>();
+    
     if (warningsEnabled) {
       if (SHOW_UNCHECKED) {
         options.put("-Xlint:unchecked","");
@@ -97,7 +98,7 @@ public class CompilerOptions implements OptionConstants {
       
       if (SHOW_FALLTHROUGH) {
         options.put("-Xlint:fallthrough","");
-        options.put("-Xlint:switchcheck",""); //Some compilers appear to use this option instead. Anyone know anything about this?
+//        options.put("-Xlint:switchcheck",""); //Some compilers appear to use this option instead. Anyone know anything about this?
       }
     }
     

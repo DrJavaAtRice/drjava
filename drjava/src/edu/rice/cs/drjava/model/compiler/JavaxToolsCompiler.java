@@ -68,6 +68,7 @@ public class JavaxToolsCompiler implements CompilerInterface {
         // Prepare the compilation options
         /* Question (by Corky): is the "-source" option necessary?  The JavaxTools compiler is part of the executing JVM. */
         List<String> optionList = new ArrayList<>();
+        optionList.add("-Xlint");
         if (sourceVersion != null) {
             optionList.add("-source");
             optionList.add(sourceVersion);
