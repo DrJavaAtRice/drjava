@@ -182,9 +182,10 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     Iterable<? extends JDKToolsLibrary> tools = findLibraries();  // findLibraries should be called findTools
     List<CompilerInterface> compilers = new LinkedList<CompilerInterface>();
 
-    // TODO: should this be done a different way?
-    JavaxToolsCompiler javaxCompiler = new JavaxToolsCompiler();
-    compilers.add(javaxCompiler);
+    /* Removed in Java 8 version of DrJava */
+//    // TODO: should this be done a different way?
+//    JavaxToolsCompiler javaxCompiler = new JavaxToolsCompiler();
+//    compilers.add(javaxCompiler);
 
     /* Note: the only debugger used in DrJava is JPDADebugger in the DrJava code base which relies
      * on machinery provided by the tools.jar library included in every Java JDK (up through JDK 8).  A copy of the
@@ -357,15 +358,14 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       else { JDKToolsLibrary.msg("\tduplicate"); }
     }
     
-    /* Removed when OPEN JDK 8 tools.jar (unjarred) was added to drjava.jar */
-//    // Only create a default JDKToolslibrary for the embedded tools.jar file if the list of results is otherwise empty.  
-//    
-//    if (results.isEmpty()) {
-//      JDKToolsLibrary defaultLibrary = 
-//        JarJDKToolsLibrary.makeFromFile(FileOps.getDrJavaFile(), this, JDKDescriptor.JDK_DEFAULT);
-//      JDKToolsLibrary.msg("Returning default library: " + defaultLibrary);
-//      return IterUtil.singleton(defaultLibrary);
-//    }
+//    /* Removed when OPEN JDK 8 tools.jar (unjarred) was added to drjava.jar */
+    // Only create a default JDKToolslibrary for the embedded tools.jar file if the list of results is otherwise empty.     
+    if (results.isEmpty()) {
+      JDKToolsLibrary defaultLibrary = 
+        JarJDKToolsLibrary.makeFromFile(FileOps.getDrJavaFile(), this, JDKDescriptor.JDK_DEFAULT);
+      JDKToolsLibrary.msg("Returning default library: " + defaultLibrary);
+      return IterUtil.singleton(defaultLibrary);
+    }
     
     // Add embedded tools.jar (unjarred) to libraries 
     JDKToolsLibrary defaultLibrary = JarJDKToolsLibrary.makeFromFile(FileOps.getDrJavaFile(), this, JDKDescriptor.JDK_DEFAULT);

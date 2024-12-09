@@ -103,6 +103,9 @@ public class CompilerOptions implements OptionConstants {
     }
     
     //Add any other options we want to add to the compiler in the future
+    options.put("-source", "8");
+    options.put("-target", "8");
+    
     return options;
   }
 }
