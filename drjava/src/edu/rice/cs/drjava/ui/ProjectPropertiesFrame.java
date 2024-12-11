@@ -193,11 +193,34 @@ public class ProjectPropertiesFrame extends SwingFrame {
 
   private void reset(File projRoot) {
 //  Utilities.show("reset(" + projRoot + ")");
-    _projRootSelector.setFileField(projRoot);
+    File pr = projRoot;
+    File srcF = new File(pr.getParentFile(), "src");
+    if (srcF.exists()){
+      _projRootSelector.setFileField(srcF);
+    } else {
+      _projRootSelector.setFileField(projRoot);
+    }
+
+    final JTextField rootTextField = _projRootSelector.getFileField();
+    String rootsrc = projRoot.getAbsolutePath() + "/src";
+    File rootsrcFile = new File(rootsrc);
+    if (rootsrcFile.isDirectory()){
+      rootTextField.setText(rootsrc);
+    }
+    // _projRootSelector.setFileField(projRoot);
 
     final File bd = _model.getBuildDirectory();
     final JTextField bdTextField = _buildDirSelector.getFileField();
-    if (bd == FileOps.NULL_FILE) bdTextField.setText("");
+
+    // if (bd == FileOps.NULL_FILE) bdTextField.setText("");
+    if (bd == FileOps.NULL_FILE) {
+      bdTextField.setText("");
+      String rootclasses = projRoot.getAbsolutePath() + "/classes";
+      File rootclassesFile = new File(rootclasses);
+      if (rootclassesFile.isDirectory()){
+        bdTextField.setText(rootclasses);
+      }
+    }
     else _buildDirSelector.setFileField(bd);
 
     final File wd = _model.getWorkingDirectory();

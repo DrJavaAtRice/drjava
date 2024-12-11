@@ -5389,6 +5389,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         if (projectFile == null ||
             projectFile.getParentFile() == null ||
             (projectFile.getCanonicalFile().exists() && ! MainFrameStatics.verifyOverwrite(MainFrame.this, projectFile))) { return; }        
+        
+        // still need to add checking if an src folder already exists to avoid overwriting
+        File srcFolder = new File(projectFile.getParentFile(), "src");
+        srcFolder.mkdir();
+
+        
         _model.createNewProject(projectFile); // sets model to a new FileGroupingState for project file pf
 //      ProjectPropertiesFrame ppf = new ProjectPropertiesFrame(MainFrame.this, file);
 //      ppf.saveSettings();  // Saves new project profile in global model
