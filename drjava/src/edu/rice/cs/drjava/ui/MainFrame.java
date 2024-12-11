@@ -5392,7 +5392,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         
         // still need to add checking if an src folder already exists to avoid overwriting
         File srcFolder = new File(projectFile.getParentFile(), "src");
-        srcFolder.mkdir();
+        if (!srcFolder.exists() || !srcFolder.isDirectory()){
+          srcFolder.mkdir();
+        }
+        // at this point, there should be a src folder no matter what. 
+        
 
         
         _model.createNewProject(projectFile); // sets model to a new FileGroupingState for project file pf
