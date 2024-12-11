@@ -5390,19 +5390,25 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
             projectFile.getParentFile() == null ||
             (projectFile.getCanonicalFile().exists() && ! MainFrameStatics.verifyOverwrite(MainFrame.this, projectFile))) { return; }        
         
-        // still need to add checking if an src folder already exists to avoid overwriting
         File srcFolder = new File(projectFile.getParentFile(), "src");
-        if (!srcFolder.exists() || !srcFolder.isDirectory()){
+        if (!srcFolder.exists() || !srcFolder.isDirectory()){ // ensure that srcFolder does not already exist so we don't overwrite any existing src folder. 
           srcFolder.mkdir();
         }
         // at this point, there should be a src folder no matter what. 
-        
-
         
         _model.createNewProject(projectFile); // sets model to a new FileGroupingState for project file pf
 //      ProjectPropertiesFrame ppf = new ProjectPropertiesFrame(MainFrame.this, file);
 //      ppf.saveSettings();  // Saves new project profile in global model
         _model.configNewProject(); // configures the new project in the model
+
+        // *********************************
+        _model.setProjectRoot(srcFolder); // actually set the project root as the src in the model. 
+        File buildDirectory = new File(projectFile.getParentFile(), "classes"); // suggested directory for the classes
+        if (buildDirectory.exists() && buildDirectory.isDirectory()) { // if classes folder for building already exists
+          _model.setBuildDirectory(buildDirectory);
+        } // otherwise, do whatever is the default
+        // *********************************
+
         _editProject();  // edits the properties of the new FileGroupingState
         _setUpProjectButtons(projectFile);
         _currentProjFile = projectFile;

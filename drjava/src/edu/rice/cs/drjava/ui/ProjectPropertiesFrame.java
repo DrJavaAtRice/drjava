@@ -191,37 +191,27 @@ public class ProjectPropertiesFrame extends SwingFrame {
 
   public void reset() { reset(_model.getProjectRoot()); }
 
-  private void reset(File projRoot) {
+  private void reset(File projRoot) { 
+    // NOTE THAT projRoot IS THE LOCATION OF THE .drjava PROJECT FILE!!!
 //  Utilities.show("reset(" + projRoot + ")");
-    File pr = projRoot;
-    File srcF = new File(pr.getParentFile(), "src");
-    if (srcF.exists()){
-      _projRootSelector.setFileField(srcF);
-    } else {
-      _projRootSelector.setFileField(projRoot);
-    }
+    _projRootSelector.setFileField(projRoot);
 
     final JTextField rootTextField = _projRootSelector.getFileField();
-    String rootsrc = projRoot.getAbsolutePath() + "/src";
-    File rootsrcFile = new File(rootsrc);
-    if (rootsrcFile.isDirectory()){
-      rootTextField.setText(rootsrc);
+    if (projRoot.isDirectory()){ 
+      rootTextField.setText(projRoot.getAbsolutePath());
+    } else {
+      rootTextField.setText("");
     }
-    // _projRootSelector.setFileField(projRoot);
 
     final File bd = _model.getBuildDirectory();
     final JTextField bdTextField = _buildDirSelector.getFileField();
-
-    // if (bd == FileOps.NULL_FILE) bdTextField.setText("");
     if (bd == FileOps.NULL_FILE) {
       bdTextField.setText("");
-      String rootclasses = projRoot.getAbsolutePath() + "/classes";
-      File rootclassesFile = new File(rootclasses);
-      if (rootclassesFile.isDirectory()){
-        bdTextField.setText(rootclasses);
-      }
     }
-    else _buildDirSelector.setFileField(bd);
+    else {
+      _buildDirSelector.setFileField(bd);
+      bdTextField.setText(bd.getAbsolutePath());
+    } 
 
     final File wd = _model.getWorkingDirectory();
     final JTextField wdTextField = _workDirSelector.getFileField();
