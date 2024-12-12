@@ -5404,9 +5404,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         // *********************************
         _model.setProjectRoot(srcFolder); // actually set the project root as the src in the model. 
         File buildDirectory = new File(projectFile.getParentFile(), "classes"); // suggested directory for the classes
-        if (buildDirectory.exists() && buildDirectory.isDirectory()) { // if classes folder for building already exists
-          _model.setBuildDirectory(buildDirectory);
-        } // otherwise, do whatever is the default
+        int i = 0;
+        while (buildDirectory.isDirectory()) {
+          i++;
+          buildDirectory = new File(projectFile.getParentFile(), "classes" + i);
+        }
+        buildDirectory.mkdir(); // make the new non existing build directory as a sibling of the src file. 
+        _model.setBuildDirectory(buildDirectory);
         // *********************************
 
         _editProject();  // edits the properties of the new FileGroupingState
