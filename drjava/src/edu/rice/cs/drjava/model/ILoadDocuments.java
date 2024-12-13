@@ -28,6 +28,8 @@
  * END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model;
 
+import java.io.File;
+
 import java.io.IOException;
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.OperationCanceledException;
@@ -66,4 +68,6 @@ public interface ILoadDocuments {
    */
   public OpenDefinitionsDocument[] openFiles(FileOpenSelector com) throws IOException, OperationCanceledException, 
     AlreadyOpenException;
+
+  public OpenDefinitionsDocument[] openFilesFromFileList(File[] files) throws IOException, OperationCanceledException, AlreadyOpenException;
 }

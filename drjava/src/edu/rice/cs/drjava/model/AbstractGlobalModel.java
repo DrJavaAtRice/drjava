@@ -1431,6 +1431,21 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   
   //----------------------- End ILoadDocuments Methods -----------------------//
+
+  // this doesn't really need to return anything
+  public OpenDefinitionsDocument[] openFilesFromFileList(File[] files) throws IOException, OperationCanceledException, AlreadyOpenException {
+    // Close an untitled, unchanged document if it is the only one open
+    boolean closeUntitled = _hasOneEmptyDocument();
+    if (! closeUntitled) addToBrowserHistory();
+    OpenDefinitionsDocument oldDoc = _activeDocument;
+    
+    OpenDefinitionsDocument[] openedDocs = _openFiles(files);
+    if (openedDocs.length > 0) {
+      if (closeUntitled) closeFileHelper(oldDoc);
+      setActiveDocument(openedDocs[0]);
+    }
+    return openedDocs;
+  }
   
   /** Opens all files in the specified folder dir and places them in the appropriate places in the document navigator.
     * If "open folders recursively" is checked, this operation opens all files in the subtree rooted at dir.

@@ -192,8 +192,7 @@ public class ProjectPropertiesFrame extends SwingFrame {
   public void reset() { reset(_model.getProjectRoot()); }
 
   private void reset(File projRoot) { 
-    // NOTE THAT projRoot IS THE LOCATION OF THE .drjava PROJECT FILE!!!
-//  Utilities.show("reset(" + projRoot + ")");
+    //  Utilities.show("reset(" + projRoot + ")");
     _projRootSelector.setFileField(projRoot);
 
     final JTextField rootTextField = _projRootSelector.getFileField();
@@ -202,7 +201,7 @@ public class ProjectPropertiesFrame extends SwingFrame {
     } else {
       rootTextField.setText("");
     }
-
+    
     final File bd = _model.getBuildDirectory();
     final JTextField bdTextField = _buildDirSelector.getFileField();
     if (bd == FileOps.NULL_FILE) {

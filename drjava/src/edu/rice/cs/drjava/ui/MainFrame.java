@@ -5362,7 +5362,26 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     ppf.reset();
     ppf.toFront();  // ppf actions save state of ppf in global model
   }
-  
+
+  // this is a list of all java files in the src, no matter how deep
+  public ArrayList<File> getAllJavaFiles(File dir){
+    ArrayList<File> javaFiles = new ArrayList<File>();
+    File[] files = dir.listFiles();
+
+    if (files != null) {
+      for (File file : files){
+        if (file.isDirectory()){
+          // if the file is in a directory, recursively search it
+          javaFiles.addAll(getAllJavaFiles(file));
+        } else if (file.isFile() && file.getName().endsWith(".java")) {
+          javaFiles.add(file);
+        }
+      }
+    }
+
+    return javaFiles;
+  }
+
   /** Closes all files and makes a new project. */
   private void _newProject() {
     
@@ -5416,6 +5435,16 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         _editProject();  // edits the properties of the new FileGroupingState
         _setUpProjectButtons(projectFile);
         _currentProjFile = projectFile;
+        
+        // *********************************
+        // recursive addition of all .java files in srcFolder
+        final File[] javaFiles = getAllJavaFiles(srcFolder).toArray(new File[0]);
+        try {
+          _model.openFilesFromFileList(javaFiles);
+        } catch (Exception e) {}
+        _model.saveProject(projectFile, gatherProjectDocInfo());
+        _model.setProjectChanged(false); // since we just saved the project
+        // *********************************
       }
       catch(IOException e) {
         MainFrameStatics.showIOError(MainFrame.this, e);
