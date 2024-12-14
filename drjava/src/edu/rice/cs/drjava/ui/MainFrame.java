@@ -5426,7 +5426,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         int i = 0;
         while (buildDirectory.isDirectory()) {
           i++;
-          buildDirectory = new File(projectFile.getParentFile(), "classes" + i);
+          buildDirectory = new File(projectFile.getParentFile(), "classes(" + i + ")");
         }
         buildDirectory.mkdir(); // make the new non existing build directory as a sibling of the src file. 
         _model.setBuildDirectory(buildDirectory);
@@ -5435,16 +5435,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         _editProject();  // edits the properties of the new FileGroupingState
         _setUpProjectButtons(projectFile);
         _currentProjFile = projectFile;
-        
-        // *********************************
-        // recursive addition of all .java files in srcFolder
-        final File[] javaFiles = getAllJavaFiles(srcFolder).toArray(new File[0]);
-        try {
-          _model.openFilesFromFileList(javaFiles);
-        } catch (Exception e) {}
-        _model.saveProject(projectFile, gatherProjectDocInfo());
-        _model.setProjectChanged(false); // since we just saved the project
-        // *********************************
       }
       catch(IOException e) {
         MainFrameStatics.showIOError(MainFrame.this, e);

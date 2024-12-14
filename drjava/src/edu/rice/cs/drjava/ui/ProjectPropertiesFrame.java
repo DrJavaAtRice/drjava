@@ -70,7 +70,6 @@ public class ProjectPropertiesFrame extends SwingFrame {
   private final JButton _applyButton;
   private final JButton _cancelButton;
   private final JButton _advancedButton;
-  //  private JButton _saveSettingsButton;
   private final JPanel _mainPanel;
 
   private volatile DirectorySelectorComponent _projRootSelector;
@@ -78,6 +77,9 @@ public class ProjectPropertiesFrame extends SwingFrame {
   private volatile DirectorySelectorComponent _workDirSelector;
   private volatile JTextField                 _mainDocumentSelector;
   
+  private volatile JCheckBox _injectSrcFile;
+  private volatile Boolean _injectState;
+
   private volatile JCheckBox _autoRefreshComponent;
 
   private volatile VectorAbsRelFileOptionComponent _extraClassPathList;
@@ -103,6 +105,17 @@ public class ProjectPropertiesFrame extends SwingFrame {
         boolean successful = true;
         successful = saveSettings();
         if (successful) ProjectPropertiesFrame.this.setVisible(false);
+
+        if (_injectState) {
+          File srcFolder = _getProjRoot();
+          File[] javaFiles = getAllJavaFiles(srcFolder).toArray(new File[0]);
+          try{
+            _model.openFilesFromFileList(javaFiles);
+            _model.saveProject(_model.getProjectFile(), mf.gatherProjectDocInfo());
+            _model.setProjectChanged(false);
+          } catch (Exception err) {}
+        }
+
         reset();
       }
     };
@@ -119,10 +132,21 @@ public class ProjectPropertiesFrame extends SwingFrame {
       public void actionPerformed(ActionEvent e) {
         // Always save settings
         saveSettings();
+        if (_injectState) {
+          File srcFolder = _getProjRoot();
+          File[] javaFiles = getAllJavaFiles(srcFolder).toArray(new File[0]);
+          try{
+            _model.openFilesFromFileList(javaFiles);
+            _model.saveProject(_model.getProjectFile(), mf.gatherProjectDocInfo());
+            _model.setProjectChanged(false);
+          } catch (Exception err) {}
+        }
         reset();
       }
     };
     _applyButton = new JButton(applyAction);
+
+    _injectState = false;
 
     Action cancelAction = new AbstractAction("Cancel") {
       public void actionPerformed(ActionEvent e) { cancel(); }
@@ -349,6 +373,34 @@ public class ProjectPropertiesFrame extends SwingFrame {
     JPanel prPanel = _projRootPanel();
     gridbag.setConstraints(prPanel, c);
     panel.add(prPanel);
+
+    // inject checkbox
+    c.weightx = 0.0;
+    c.gridwidth = 1;
+    c.insets = labelInsets;
+
+    JLabel emptyInjectLabel = new JLabel("");
+    gridbag.setConstraints(emptyInjectLabel, c);
+    panel.add(emptyInjectLabel);
+
+    c.weightx = 1.0;
+    c.gridwidth = GridBagConstraints.REMAINDER;
+    c.insets = compInsets;
+    JPanel injectPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    _injectSrcFile = new JCheckBox("Inject all existing java files in src folder into DrJava file explorer");
+    _injectSrcFile.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        _injectState = _injectSrcFile.isSelected();
+        if (_injectState) {
+          _applyButton.setEnabled(true); 
+        }
+      }
+    });
+    gridbag.setConstraints(_injectSrcFile, c);
+    injectPanel.add(_injectSrcFile);
+    gridbag.setConstraints(injectPanel, c);
+    panel.add(injectPanel);
 
     // Build Directory
 
@@ -738,5 +790,23 @@ public class ProjectPropertiesFrame extends SwingFrame {
     ppf.reset(_storedPreferences);
     ppf.setVisible(true);
     ppf.toFront();  // ppf actions save state of ppf in global model
+  }
+
+  private ArrayList<File> getAllJavaFiles(File dir){
+    ArrayList<File> javaFiles = new ArrayList<File>();
+    File[] files = dir.listFiles();
+
+    if (files != null) {
+      for (File file : files){
+        if (file.isDirectory()){
+          // if the file is in a directory, recursively search it
+          javaFiles.addAll(getAllJavaFiles(file));
+        } else if (file.isFile() && file.getName().endsWith(".java")) {
+          javaFiles.add(file);
+        }
+      }
+    }
+
+    return javaFiles;
   }
 }
