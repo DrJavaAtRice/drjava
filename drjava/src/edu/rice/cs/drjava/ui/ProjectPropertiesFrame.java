@@ -101,6 +101,24 @@ public class ProjectPropertiesFrame extends SwingFrame {
     
     Action okAction = new AbstractAction("OK") {
       public void actionPerformed(ActionEvent e) {
+        if (_buildDirSelector.getFileFromField().equals(FileOps.NULL_FILE)) {
+          JOptionPane.showMessageDialog(
+            ProjectPropertiesFrame.this,
+            "Build directory cannot be empty.",
+            "Error",
+            JOptionPane.ERROR_MESSAGE
+          );
+          return;
+        }
+        if (_projRootSelector.getFileFromField().equals(FileOps.NULL_FILE)) {
+          JOptionPane.showMessageDialog(
+            ProjectPropertiesFrame.this,
+            "Project root cannot be empty.",
+            "Error",
+            JOptionPane.ERROR_MESSAGE
+          );
+          return;
+        }
         // Always apply and save settings
         boolean successful = true;
         successful = saveSettings();
@@ -130,6 +148,24 @@ public class ProjectPropertiesFrame extends SwingFrame {
 
     Action applyAction = new AbstractAction("Apply") {
       public void actionPerformed(ActionEvent e) {
+        if (_buildDirSelector.getFileFromField().equals(FileOps.NULL_FILE)) {
+          JOptionPane.showMessageDialog(
+            ProjectPropertiesFrame.this,
+            "Build directory cannot be empty.",
+            "Error",
+            JOptionPane.ERROR_MESSAGE
+          );
+          return;
+        }
+        if (_projRootSelector.getFileFromField().equals(FileOps.NULL_FILE)) {
+          JOptionPane.showMessageDialog(
+            ProjectPropertiesFrame.this,
+            "Project root cannot be empty.",
+            "Error",
+            JOptionPane.ERROR_MESSAGE
+          );
+          return;
+        }
         // Always save settings
         saveSettings();
         if (_injectState) {
