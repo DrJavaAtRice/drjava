@@ -1446,6 +1446,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         fl.finalized(fe);
       }
     }
+    super.finalize();
   }
   
   public String toString() { return "ddoc for " + _odd; }
