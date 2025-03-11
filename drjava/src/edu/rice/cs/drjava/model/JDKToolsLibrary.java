@@ -66,7 +66,7 @@ public class JDKToolsLibrary {
   private final JavadocModel _javadoc;
   private final JDKDescriptor _jdkDescriptor; // JDKDescriptor.NONE if none
   
-  /* package private */ static Log _log = new Log("JDKToolsLibrary.txt", false);
+  /* package private */ static Log _log = new Log("JDKToolsLibrary.txt", true);
   
   protected JDKToolsLibrary(FullVersion version, JDKDescriptor jdkDescriptor, CompilerInterface compiler, 
                             Debugger debugger, JavadocModel javadoc) {

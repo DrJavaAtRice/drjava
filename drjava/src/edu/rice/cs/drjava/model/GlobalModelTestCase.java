@@ -74,15 +74,16 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   protected volatile File _tempDir;
   protected volatile OpenDefinitionsDocument _doc;  // the working document in some shared set up routines
 
-  protected static final String FOO_TEXT = "class DrJavaTestFoo {}";
-  protected static final String BAR_TEXT = "class DrJavaTestBar {}";
-  protected static final String BAZ_TEXT = "class DrJavaTestBaz extends DrJavaTestFoo { public static int x = 3; }";
-  protected static final String FOO_MISSING_CLOSE_TEXT = "class DrJavaTestFoo {";
+  /* @SuppressWarnings(\"serial\") inserted to work around backward compatibility bug regarding "serialVersionUID" introduced in evolution of Java 8.*/
+  protected static final String FOO_TEXT = "@SuppressWarnings(\"serial\") class DrJavaTestFoo {}";
+  protected static final String BAR_TEXT = "@SuppressWarnings(\"serial\") class DrJavaTestBar {}";
+  protected static final String BAZ_TEXT = "@SuppressWarnings(\"serial\") class DrJavaTestBaz extends DrJavaTestFoo { public static int x = 3; }";
+  protected static final String FOO_MISSING_CLOSE_TEXT = "@SuppressWarnings(\"serial\") class DrJavaTestFoo {";
   protected static final String FOO_PACKAGE_AFTER_IMPORT = "import java.util.*;\npackage a;\n" + FOO_TEXT;
-  protected static final String FOO_PACKAGE_INSIDE_CLASS = "class DrJavaTestFoo { package a; }";
-  protected static final String FOO_PACKAGE_AS_FIELD = "class DrJavaTestFoo { int package; }";
-  protected static final String FOO_PACKAGE_AS_FIELD_2 = "class DrJavaTestFoo { int package = 5; }";
-  protected static final String FOO_PACKAGE_AS_PART_OF_FIELD = "class DrJavaTestFoo { int cur_package = 5; }";
+  protected static final String FOO_PACKAGE_INSIDE_CLASS = "@SuppressWarnings(\"serial\") class DrJavaTestFoo { package a; }";
+  protected static final String FOO_PACKAGE_AS_FIELD = "@SuppressWarnings(\"serial\") class DrJavaTestFoo { int package; }";
+  protected static final String FOO_PACKAGE_AS_FIELD_2 = "@SuppressWarnings(\"serial\") class DrJavaTestFoo { int package = 5; }";
+  protected static final String FOO_PACKAGE_AS_PART_OF_FIELD = "@SuppressWarnings(\"serial\") class DrJavaTestFoo { int cur_package = 5; }";
   
   public GlobalModelTestCase() { _log.log("Constructing a " + this); }
 

@@ -116,11 +116,13 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
 //    "  } " +
 //    "}";
   
+  /* @SuppressWarnings("serial") inserted because of insane backward incompatible change in evolution of Java 8. 
+   * "<Integer>" added to Vector and ArrayList because raw types are banned in Java 8_422. */
   private static final String ABC_CLASS_ONE =
-    "class ABC extends java.util.Vector {}\n";
+    "@SuppressWarnings(\"serial\") class ABC extends java.util.Vector<Integer> {}\n";
   
   private static final String ABC_CLASS_TWO =
-    "class ABC extends java.util.ArrayList {}\n";
+    "@SuppressWarnings(\"serial\") class ABC extends java.util.ArrayList<Integer> {}\n";
   
   private static final String ABC_TEST =
     "public class ABCTest extends junit.framework.TestCase {\n" +
@@ -268,6 +270,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     
     _log.log("Second compile complete");
     if (_model.getCompilerModel().getNumErrors() > 0) {
+      System.err.println("Compiler generated " + _model.getCompilerModel().getNumErrors() + " errors");
       fail("compile failed: " + getCompilerErrorString());
     }
     listener.resetCounts();

@@ -83,9 +83,16 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
     assertLength(0, doc);
     assertModified(false, doc);
 
-    changeDocumentText(text, doc);  // not atomic but no other thread is trying to modify doc
-    getSDModel().removeListener(listener);
-    
+    /* Converted to atomic action for Java 8_422.  invokeAndWait is DANGEROUS because it can easily cause deadlock.
+     * Here it is only done in a test when presumably nothing else involving DrJava documents is going on and no other 
+     * thread should be depending on further action by this thread. */
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() { 
+        changeDocumentText(text, doc);  // [Former Comment:] not atomic but no other thread is trying to modify doc
+        getSDModel().removeListener(listener);
+      }
+    });
+   
     _log.log("New File " + doc + " created");
 
     return doc;

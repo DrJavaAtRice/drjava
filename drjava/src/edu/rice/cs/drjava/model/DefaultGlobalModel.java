@@ -180,12 +180,11 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   /** Constructs a new GlobalModel. Creates a new MainJVM and starts its Interpreter JVM. */
   public DefaultGlobalModel() {
     Iterable<? extends JDKToolsLibrary> tools = findLibraries();  // findLibraries should be called findTools
-    List<CompilerInterface> compilers = new LinkedList<CompilerInterface>();
+    LinkedList<CompilerInterface> compilers = new LinkedList<CompilerInterface>();
 
-    /* Removed in Java 8 version of DrJava */
-//    // TODO: should this be done a different way?
-//    JavaxToolsCompiler javaxCompiler = new JavaxToolsCompiler();
-//    compilers.add(javaxCompiler);
+    // TODO: should this be done a different way?
+    JavaxToolsCompiler javaxCompiler = new JavaxToolsCompiler();
+    compilers.add(javaxCompiler);
 
     /* Note: the only debugger used in DrJava is JPDADebugger in the DrJava code base which relies
      * on machinery provided by the tools.jar library included in every Java JDK (up through JDK 8).  A copy of the
@@ -349,8 +348,8 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       JDKToolsLibrary.msg("\tCoarsened Version: " + coarsenedVersion + " " + coarsenedVersion.vendor());
 
       // give a lower priority to built-in compilers
-      int priority = (edu.rice.cs.util.FileOps.getDrJavaFile().equals(tVersion.location())) ?
-        LibraryKey.PRIORITY_BUILTIN : LibraryKey.PRIORITY_SEARCH;
+      int priority = /* (edu.rice.cs.util.FileOps.getDrJavaFile().equals(tVersion.location())) ?
+        LibraryKey.PRIORITY_BUILTIN :*/ LibraryKey.PRIORITY_SEARCH;
       if (! results.containsKey(getLibraryKey(priority, t))) {
         JDKToolsLibrary.msg("\tadded ");
         results.put(getLibraryKey(priority, t), t);
