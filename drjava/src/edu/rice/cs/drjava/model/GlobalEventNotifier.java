@@ -477,14 +477,14 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     finally { _lock.endRead(); }
   }
   
-  /** Called after JUnit is started by the GlobalModel. */
+  /** Called after JUnit is started by the GlobalModel. Propogates the call to all GlobalModelListeners. */
   public void junitStarted() {
     _lock.startRead();
     try { for (GlobalModelListener l : _listeners) { l.junitStarted(); } }
     finally { _lock.endRead(); }
   }
   
-  /** Called when testing specific list of classes. */
+  /** Called when testing specific list of classes. Propogates the call to all GlobalModelListeners. */
   public void junitClassesStarted() {
     _lock.startRead();
     try { for (GlobalModelListener l : _listeners) { l.junitClassesStarted(); } }

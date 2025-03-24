@@ -52,7 +52,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 public final class GlobalModelOtherTest extends GlobalModelTestCase implements OptionConstants {
   
   //  _log can be inherited from GlobalModelTestCase
-  Log _log = new Log("GlobalModelOtherTest.txt", false);
+  Log _log = new Log("GlobalModelOtherTest.txt", true);
   
   private static final String FOO_CLASS =
     "package bar;\n" +

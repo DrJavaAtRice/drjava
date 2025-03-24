@@ -179,12 +179,8 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   /* CONSTRUCTORS */
   /** Constructs a new GlobalModel. Creates a new MainJVM and starts its Interpreter JVM. */
   public DefaultGlobalModel() {
-    Iterable<? extends JDKToolsLibrary> tools = findLibraries();  // findLibraries should be called findTools
+    Iterable<? extends JDKToolsLibrary> tools = findTools();  // findTools should be called findTools
     LinkedList<CompilerInterface> compilers = new LinkedList<CompilerInterface>();
-
-    // TODO: should this be done a different way?
-    JavaxToolsCompiler javaxCompiler = new JavaxToolsCompiler();
-    compilers.add(javaxCompiler);
 
     /* Note: the only debugger used in DrJava is JPDADebugger in the DrJava code base which relies
      * on machinery provided by the tools.jar library included in every Java JDK (up through JDK 8).  A copy of the
@@ -322,7 +318,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   }
   
   /** Fills the results Map with available tools.jar files located within found JDK distributions. */
-  private Iterable<JDKToolsLibrary> findLibraries() {
+  private Iterable<JDKToolsLibrary> findTools() {
     // Order to return: config setting, runtime (if different version), from search (if different versions)
     
     // map is sorted by version, lowest-to-highest
@@ -372,7 +368,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     JDKToolsLibrary.msg("Adding default library: " + defaultLibrary);
     
     Iterable<JDKToolsLibrary> libraries = IterUtil.reverse(results.values());
-    JDKToolsLibrary.msg("findLibraries() returning libraries: " + libraries);
+    JDKToolsLibrary.msg("findTools() returning libraries: " + libraries);
     return libraries;
   }
   

@@ -496,9 +496,9 @@ public class JPDADebugger implements Debugger {
   }
   
   /** Adds a watch on the given field or variable.
-   * @param field the name of the field we will watch
-   * @throws DebugException if something goes wrong
-   */
+    * @param field the name of the field we will watch
+    * @throws DebugException if something goes wrong
+    */
   public /* synchronized */ void addWatch(String field) throws DebugException {
     // _ensureReady();
     assert EventQueue.isDispatchThread();

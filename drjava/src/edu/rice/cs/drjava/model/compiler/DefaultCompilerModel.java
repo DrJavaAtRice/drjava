@@ -67,7 +67,7 @@ import edu.rice.cs.plt.collect.CollectUtil;
 public class DefaultCompilerModel implements CompilerModel {
   
   /** for logging debug info */
-  private static final Log _log = new edu.rice.cs.util.Log("DefaultCompilerModel.txt", false);
+  private static final Log _log = new edu.rice.cs.util.Log("DefaultCompilerModel.txt", true);
   
   /** The available compilers */
   private final List<CompilerInterface> _compilers;
@@ -103,9 +103,15 @@ public class DefaultCompilerModel implements CompilerModel {
     
     for (CompilerInterface i : compilers) { _compilers.add(i); compilerNames.add(i.getName());}
     
+    // TODO: should this be done a different way?
+    JavaxToolsCompiler javaxCompiler = new JavaxToolsCompiler();
+    _compilers.add(javaxCompiler);
+    
     OptionConstants.COMPILER_PREFERENCE_CONTROL.setList(compilerNames); // populates the compiler list for preference panel
     
     String dCompName = DrJava.getConfig().getSetting(OptionConstants.DEFAULT_COMPILER_PREFERENCE);
+    
+//    Utilities.show("dCompName = " + dCompName);
     
     if (_compilers.size() > 0) {
       if (! dCompName.equals(OptionConstants.COMPILER_PREFERENCE_CONTROL.NO_PREFERENCE) &&

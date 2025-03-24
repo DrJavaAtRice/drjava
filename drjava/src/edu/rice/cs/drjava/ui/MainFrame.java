@@ -1874,7 +1874,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private void generateJavaAPISet() {
     // should NOT be called in the event thread
     // otherwise the processing frame will not work correctly and the event thread will block
-    // assert (!EventQueue.isDispatchThread());  // Why is this commented out???
+    assert (!EventQueue.isDispatchThread()); 
     if (_javaAPISet.size() == 0) {
       final ProcessingDialog pd =
         new ProcessingDialog(this, "Java API Classes", "Loading, please wait.", false);
