@@ -69,17 +69,12 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
   
   private volatile String _projFileText = null;
   
-  /** Invokes setUp() in DrJavaTestCase.  This superclass is accessible from anonymous inner classes. 
-    * @throws Exception if something goes wrong
-    */
-  private void superSetUp() throws Exception { super.setUp(); }
-  
   /** Setup method for each JUnit test case in this Test class.
     * @throws Exception  This convention is mandated by the JUnit TestClass which is an ancestor of this class. 
     */
   public void setUp() throws Exception {
     // Perform Swing setup in event thread because the event thread is ALREADY running
-    superSetUp(); // super.setUp() should be called first; contains an embedded invokeAndWait
+    super.setUp();  // contains an embedded invokeAndWait in DrJavaTestCase
     
     Utilities.invokeAndWait(new Runnable() {
       public void run() {
@@ -113,7 +108,6 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
           _frame.pack();
           _model = _frame.getModel();
           _model.ensureJVMStarterFinished();
-//          superSetUp();
         }
         // Exception e is either an IOException from a file operation or an Exception thrown by superSetUp(). 
         catch(Exception e) { throw new UnexpectedException(e); }

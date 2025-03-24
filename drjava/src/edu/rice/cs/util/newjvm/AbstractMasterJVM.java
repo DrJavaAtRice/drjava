@@ -50,17 +50,17 @@ import edu.rice.cs.plt.reflect.ReflectUtil;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 import static edu.rice.cs.plt.debug.DebugUtil.error;
 
-/** * An abstract class implementing the logic to invoke and control, via RMI, a second Java virtual 
- * machine. This class is used by subclassing it. (See package documentation for more details.)
- * The state-changing methods of this class consistently block until a precondition for the state
- * change is satisfied &mdash; for example, {@link #quitSlave} cannot complete until a slave is
- * running.  Only one thread may change the state at a time.  Thus, clients should be careful
- * to only invoke state-changing methods when they are guaranteed to succeed (only invoking
- * {@code quitSlave()}, for example, when it is known to have been matched by a successful
- * {@code invokeSlave} invocation).
- *  
- * @version $Id$
- */
+/** An abstract class implementing the logic to invoke and control, via RMI, a second Java virtual 
+  * machine. This class is used by subclassing it. (See package documentation for more details.)
+  * The state-changing methods of this class consistently block until a precondition for the state
+  * change is satisfied &mdash; for example, {@link #quitSlave} cannot complete until a slave is
+  * running.  Only one thread may change the state at a time.  Thus, clients should be careful
+  * to only invoke state-changing methods when they are guaranteed to succeed (only invoking
+  * {@code quitSlave()}, for example, when it is known to have been matched by a successful
+  * {@code invokeSlave} invocation).
+  *  
+  * @version $Id$
+  */
 public abstract class AbstractMasterJVM implements MasterRemote {
   
   /** Debugging log. */
@@ -194,7 +194,7 @@ public abstract class AbstractMasterJVM implements MasterRemote {
     * @throws IllegalStateException  If this object has been disposed.
     */
   protected final void quitSlave() {
-    transition(State.RUNNING, State.QUITTING);
+    transition(State.RUNNING, State.QUITTING);  // may throw IllegalStateException
     attemptQuit(_slave);
     _slave = null;
     _monitor.set(State.FRESH);
@@ -202,17 +202,17 @@ public abstract class AbstractMasterJVM implements MasterRemote {
   }
     
   /** Make a best attempt to invoke {@code slave.quit()}.  Log an error if it fails.
-   * @param slave link to the slave JVM
-   */
+    * @param slave link to the slave JVM
+    */
   private static void attemptQuit(SlaveRemote slave) {
     try { slave.quit(); }
     catch (RemoteException e) { error.log("Unable to complete slave.quit()", e); }
   }
   
   /** Free the resources required for this object to respond to RMI invocations (useful for applications -- such as
-   * testing -- that produce a large number of MasterJVMs as a program runs).  Requires the slave to have
-   * quit; blocks until that occurs.  After an object has been disposed, it is no longer useful.
-   */
+    * testing -- that produce a large number of MasterJVMs as a program runs).  Requires the slave to have
+    * quit; blocks until that occurs.  After an object has been disposed, it is no longer useful.
+    */
   protected void dispose() {
     transition(State.FRESH, State.DISPOSED);
     if (_masterStub.isResolved()) { 

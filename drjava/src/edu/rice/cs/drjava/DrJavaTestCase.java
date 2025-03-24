@@ -61,20 +61,20 @@ public class DrJavaTestCase extends TestCase {
   protected void setUp() throws Exception {
     super.setUp();  // declared to throw Exception, forcing throws clause on preceding line
     Utilities.TEST_MODE = true;
-    final String newName = System.getProperty("drjava.test.config");
-    assert newName != null;
-    
+//    final String newName = System.getProperty("drjava.test.config");
+//    assert newName != null;  // The preceding property is never set in main drjava code base, so this assert will fail
+   
 //    Utilities.show("newName = '" + newName + "'");
 
-    if (newName != null) {  // in deployed code, assertion checking may be turned off
-      Utilities.invokeAndWait(new Runnable() {
-        public void run() {
-          DrJava.setPropertiesFile(newName);  // spawns change updates which should run in event thread
-//          Utilities.clearEventQueue();
-          DrJava._initConfig();               // spawns change updates which should run in event thread
-        }
-      });
-    }
+//    if (newName != null) {  // in deployed code, assertion checking may be turned off
+//      Utilities.invokeAndWait(new Runnable() {
+//        public void run() {
+//          DrJava.setPropertiesFile(newName);  // spawns change updates which should run in event thread
+////          Utilities.clearEventQueue();
+//          DrJava._initConfig();               // spawns change updates which should run in event thread
+//        }
+//      });
+//    }
   }
   
   /** Clean up for every test case.  Only used in unit tests.  Added because Windows would intermittently throw
