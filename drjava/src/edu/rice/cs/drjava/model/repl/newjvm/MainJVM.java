@@ -193,11 +193,11 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     debug.log("Slave won't start", e);
     _state.value().startFailed(e);
   }
-    
-  
 
   /*
    * === MainJVMRemoteI methods ===
+   * [Corky March 2025] Should the notifications passed to the InteractionsModel and JUnitModel be delegated to the
+   * dispatch thread?
    */
   
   // TODO: export other objects, such as the interactionsModel, thus avoiding the need to delegate here?

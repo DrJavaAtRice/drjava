@@ -58,7 +58,13 @@ import java.util.List;
  * or removing listeners (writing) at a time, and no reads can occur
  * during a write.
  * <p>
- *
+ * Addendum [Corky March, 2025] In hindsight, the event notification framework is unnecessarily complex and buggy.  Essentially
+ * all event notification code runs in the "dispatch (event-handling) thread".  The design should have forced ALL event
+ * notication code to run in the dispatch thread.  Then the read-write locking protocol would be unnecessary.  I suspect
+ * that "adminstrative methods" like addListener and removeListener are accessed from outside of the dispatch thread.  In addition,
+ * some events are signalled by RMI calls from JUnitTestRunner (and elsewhere?) in the slave JVM.  The RMI "proxy" thead in 
+ * the main JVM apparently does not route event notifications through the dispatch thread. Ugh.
+ * <p>
  * <i>No</i> methods on this class should be synchronized using traditionalJava synchronization!
  * <p>
  *
