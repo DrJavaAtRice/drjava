@@ -67,9 +67,7 @@ class JavadocEventNotifier extends EventNotifier<JavadocListener> implements Jav
   
   /** Called after Javadoc is started by the GlobalModel. */
   public void javadocStarted() {
-    _lock.startRead();
-    try { for (JavadocListener jl: _listeners) { jl.javadocStarted(); } }
-    finally { _lock.endRead(); }
+    for (JavadocListener jl: _listeners) { jl.javadocStarted(); } 
   }
   
   /** Called after Javadoc is finished.
@@ -78,27 +76,21 @@ class JavadocEventNotifier extends EventNotifier<JavadocListener> implements Jav
     * @param allDocs Whether Javadoc was run for all open documents
     */
   public void javadocEnded(boolean success, File destDir, boolean allDocs) {
-    _lock.startRead();
-    try { for (JavadocListener jl: _listeners) { jl.javadocEnded(success, destDir, allDocs); } }
-    finally { _lock.endRead();}
+    for (JavadocListener jl: _listeners) { jl.javadocEnded(success, destDir, allDocs); }
   }
   
   /** Asks the user if all files should be saved before running javadoc (assuming the proper listener has been 
     * installed). Does not continue with javadoc if the user fails to save!
     */
   public void saveBeforeJavadoc() {
-    _lock.startRead();
-    try { for (JavadocListener jl: _listeners) { jl.saveBeforeJavadoc(); } }
-    finally { _lock.endRead(); }
+    for (JavadocListener jl: _listeners) { jl.saveBeforeJavadoc(); }
   }
   
   /** Asks the user if all files should be compiled before running javadoc (assuming the proper listener has been 
     * installed). Does not continue with javadoc if the user fails to save!
     */
   public void compileBeforeJavadoc(final CompilerListener afterCompile) {
-    _lock.startRead();
-    try { for (JavadocListener jl: _listeners) { jl.compileBeforeJavadoc(afterCompile); } }
-    finally { _lock.endRead(); }
+    for (JavadocListener jl: _listeners) { jl.compileBeforeJavadoc(afterCompile); }
   }
 }
 

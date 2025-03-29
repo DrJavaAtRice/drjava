@@ -69,50 +69,38 @@ class CompilerEventNotifier extends EventNotifier<CompilerListener> implements C
   /** Called after a compile is started by the GlobalModel. */
   public void compileStarted() {
 //    new ScrollableDialog(null, "CompilerEventNotifier.compileStarted() called for listeners " + _listeners, "", "").show();
-    _lock.startRead();
-    try { for (CompilerListener cl : _listeners) { cl.compileStarted(); } }
-    finally { _lock.endRead(); }
+    for (CompilerListener cl : _listeners) { cl.compileStarted(); }
   }
   
   /** Called when a compile has finished running. */
   public void compileEnded(File workDir, List<? extends File> excludedFiles) {
-    _lock.startRead();
-    try { for (CompilerListener cl : _listeners) { cl.compileEnded(workDir, excludedFiles); } }
-    finally { _lock.endRead(); }
+    for (CompilerListener cl : _listeners) { cl.compileEnded(workDir, excludedFiles); } 
   }
 
   /** Called if the compile cannot be performed. By default, the Exception is an UnexpectedException containing an
     * explanatory message.
     */
   public void compileAborted(Exception e) {
-    _lock.startRead();
-    try { for (CompilerListener cl : _listeners) { cl.compileAborted(e); } }
-    finally { _lock.endRead(); }
+    for (CompilerListener cl : _listeners) { cl.compileAborted(e); } 
   }
   
   /** Called when files are saved before compiling. It is up to the caller of this method to check if the 
     * documents have been saved, using IGetDocuments.hasModifiedDocuments().
     */
   public void saveBeforeCompile() {
-    _lock.startRead();
-    try { for (CompilerListener cl : _listeners) { cl.saveBeforeCompile(); } }
-    finally { _lock.endRead(); }
+    for (CompilerListener cl : _listeners) { cl.saveBeforeCompile(); } 
   }
   
   /** Called when files are saved before compiling. It is up to the caller of this method to check if the 
     * documents have been saved, using IGetDocuments.hasModifiedDocuments().
     */
   public void saveUntitled() {
-    _lock.startRead();
-    try { for (CompilerListener cl : _listeners) { cl.saveUntitled(); } }
-    finally { _lock.endRead(); }
+    for (CompilerListener cl : _listeners) { cl.saveUntitled(); } 
   }
   
   /** Called after the active compiler has been changed. */
   public void activeCompilerChanged() {
 //    new ScrollableDialog(null, "CompilerEventNotifier.compileStarted() called for listeners " + _listeners, "", "").show();
-    _lock.startRead();
-    try { for (CompilerListener cl : _listeners) { cl.activeCompilerChanged(); } }
-    finally { _lock.endRead(); }
+    for (CompilerListener cl : _listeners) { cl.activeCompilerChanged(); } 
   }
 }

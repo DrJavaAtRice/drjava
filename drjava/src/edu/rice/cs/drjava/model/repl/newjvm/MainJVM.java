@@ -170,7 +170,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
 
   /* === AbstractMasterJVM methods === */
 
-  /** Callback for when the slave JVM has connected, and the bidirectional communications link has been 
+  /** Processes the notification that the slave JVM has connected, and the bidirectional communications link has been 
     * established.  Provides access to the newly-created slave JVM.
     */
   protected void handleSlaveConnected(SlaveRemote newSlave) {
@@ -178,17 +178,17 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     _state.value().started(slaveCast);
   }
   
-  /** Callback for when the slave JVM has quit.
+  /** Processes the notification that the slave JVM has quit.
     * @param status The exit code returned by the slave JVM.
     */
-  protected void handleSlaveQuit(int status) {
+  protected void handleSlaveQuit(int status) {     
     debug.logValue("Slave quit", "status", status);
     _state.value().stopped(status);
   }
-    
-  /** Callback for when the slave JVM fails to either run or respond to {@link SlaveRemote#start}.
-   * @param e  Exception that occurred during startup.
-   */
+  
+  /** Processes the notication that the slave JVM has failed to either run or reply to {@link SlaveRemote#start}.
+    * @param e  Exception that occurred during startup.
+    */
   protected void handleSlaveWontStart(Exception e) {
     debug.log("Slave won't start", e);
     _state.value().startFailed(e);
@@ -196,55 +196,69 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
 
   /*
    * === MainJVMRemoteI methods ===
-   * [Corky March 2025] Should the notifications passed to the InteractionsModel and JUnitModel be delegated to the
-   * dispatch thread?
+   * [Corky March 2025] Ignoring getConsoleInput() which is a request rather than a notification (but uses the 
+   * nofification interface), notifications passed to the InteractionsModel and JUnitModel are forwarded to the
+   * dispatch thread since the actions are short and affect the GUI.
    */
   
   // TODO: export other objects, such as the interactionsModel, thus avoiding the need to delegate here?
   
-  /** Forwards a call to System.err from InterpreterJVM to the local InteractionsModel.
+  /** Callback that forwards a call to System.err from InterpreterJVM to the local InteractionsModel.
     * @param s String that was printed in the other JVM
     */
   public void systemErrPrint(String s) {
-    debug.logStart();
-    _interactionsModel.replSystemErrPrint(s);
-//    Utilities.clearEventQueue();               // wait for event queue task to complete
-    debug.logEnd();
+    Utilities.invokeLater(new Runnable() {
+      public void run() { 
+        debug.logStart();
+        _interactionsModel.replSystemErrPrint(s);
+        debug.logEnd();
+      }});
   }
   
   /** Forwards a call to System.out from InterpreterJVM to the local InteractionsModel.
     * @param s String that was printed in the other JVM
     */
   public void systemOutPrint(String s) {
-    debug.logStart();
-    _interactionsModel.replSystemOutPrint(s); 
-//    Utilities.clearEventQueue();                // wait for event queue task to complete
-    debug.logEnd();
+    Utilities.invokeLater(new Runnable() {
+      public void run() { 
+        debug.logStart();
+        _interactionsModel.replSystemOutPrint(s); 
+        debug.logEnd();
+      }});
   }
   
-  /** Asks the main jvm for input from the console.
-   * @return the console input
-   */
-  public String getConsoleInput() { 
+  /** Process a request for console input from slave JVM.
+    * @return the console input
+    */
+  public String getConsoleInput() {
+    /** The method may hang indefinitely.  Hence it cannot be run in the dispatch thread. */
+    Utilities.clearEventQueue(); // Minimize potential races with other threads.
     String s = _interactionsModel.getConsoleInput(); 
     // System.err.println("MainJVM.getConsoleInput() returns '" + s + "'");
     return s; 
   }
  
-  /** Called if JUnit is invoked on a non TestCase class.  Forwards from the other JVM to the local JUnit model.
-   * @param isTestAll whether or not it was a use of the test all button
+  /** Process the notification that non TestCase class was encountered by the JUnit on slave JVM.  Forwards from
+    * the slave JVM to the local JUnit model.
+    * @param isTestAll whether or not it was a use of the test all button
     * @param didCompileFail whether or not a compile before this JUnit attempt failed
-   */
+    */
   public void nonTestCase(boolean isTestAll, boolean didCompileFail) {
-    _junitModel.nonTestCase(isTestAll, didCompileFail);
+    Utilities.invokeLater(new Runnable() {
+      public void run() { 
+        _junitModel.nonTestCase(isTestAll, didCompileFail);
+      }});
   }
- 
-  /** Called if the slave JVM encounters an illegal class file in testing.  Forwards from
-   * the other JVM to the local JUnit model.
-   * @param e the ClassFileError describing the error when loading the class file
-   */
+  
+  /** Process a repor that the slave JVM has encountered an illegal class file in testing.  Forwards from
+    * the other JVM to the local JUnit model.
+    * @param e the ClassFileError describing the error when loading the class file
+    */
   public void classFileError(ClassFileError e) {
-    _junitModel.classFileError(e);
+    Utilities.invokeLater(new Runnable() {
+      public void run() { 
+        _junitModel.classFileError(e);
+      }});  
   }
   
   /** Called to indicate that a suite of tests has started running.

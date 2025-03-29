@@ -78,9 +78,7 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
       // Notify listeners of this event
       Utilities.invokeLater(new Runnable() { 
         public void run() {
-          _lock.startRead();
-          try { for (RegionManagerListener<BrowserDocumentRegion> l: _listeners) { l.regionAdded(r); } } 
-          finally { _lock.endRead(); }
+          for (RegionManagerListener<BrowserDocumentRegion> l: _listeners) { l.regionAdded(r); }  
         } 
       });
       
@@ -113,9 +111,7 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
       // Notify listeners of this event
       Utilities.invokeLater(new Runnable() { 
         public void run() {
-          _lock.startRead();
-          try { for (RegionManagerListener<BrowserDocumentRegion> l: _listeners) { l.regionAdded(r); } } 
-          finally { _lock.endRead(); }
+          for (RegionManagerListener<BrowserDocumentRegion> l: _listeners) { l.regionAdded(r); } 
         } 
       });
       
@@ -153,9 +149,7 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
     // Notify listeners of this event
     Utilities.invokeLater(new Runnable() { 
       public void run() {
-        _lock.startRead();
-        try { for (RegionManagerListener<BrowserDocumentRegion> l: _listeners) { l.regionRemoved(r); } } 
-        finally { _lock.endRead(); }
+        for (RegionManagerListener<BrowserDocumentRegion> l: _listeners) { l.regionRemoved(r); }
       } 
     });
   }
@@ -172,9 +166,7 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
     // Notify listeners of this event
     Utilities.invokeLater(new Runnable() { 
       public void run() {
-        _lock.startRead();
-        try { for (RegionManagerListener<BrowserDocumentRegion> l: _listeners) { l.regionRemoved(r); } } 
-        finally { _lock.endRead(); }
+        for (RegionManagerListener<BrowserDocumentRegion> l: _listeners) { l.regionRemoved(r); } 
       } 
     });
   }
@@ -244,11 +236,8 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
     cmd.value(region);
     Utilities.invokeLater(new Runnable() { public void run() {
       // notify
-      _lock.startRead();
-      try {
         for (RegionManagerListener<BrowserDocumentRegion> l: _listeners) { l.regionChanged(region); }
-      } finally { _lock.endRead(); }            
-    } });
+      }});
   }
   
   /** @param r1 the first region to compare

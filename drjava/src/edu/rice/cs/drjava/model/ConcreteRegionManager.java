@@ -332,10 +332,7 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends
     
     // only notify if the region was actually added
     if (! alreadyPresent) {
-      // notify.  invokeLater unnecessary if it only runs in the event thread
-      _lock.startRead();
-      try { for (RegionManagerListener<R> l: _listeners) { l.regionAdded(region); } } 
-      finally { _lock.endRead(); }
+      for (RegionManagerListener<R> l: _listeners) { l.regionAdded(region); } 
     }
   }
   
@@ -366,9 +363,7 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends
   }
   
   private void _notifyRegionRemoved(final R region) {
-    _lock.startRead();
-    try { for (RegionManagerListener<R> l: _listeners) { l.regionRemoved(region); } } 
-    finally { _lock.endRead(); }
+    for (RegionManagerListener<R> l: _listeners) { l.regionRemoved(region); } 
   }
   
   /** Remove the specified document from _documents and _regions (removing all 
@@ -466,9 +461,7 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends
     * @param region the region that changed
     */
   public void notifyChangedRegion(final R region) {
-    _lock.startRead();
-    try { for (RegionManagerListener<R> l: _listeners) { l.regionChanged(region); } } 
-    finally { _lock.endRead(); }
+    for (RegionManagerListener<R> l: _listeners) { l.regionChanged(region); }
   }
   
   /** Updates _lineStartPos, _lineEndPos of regions in the interval 

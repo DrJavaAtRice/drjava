@@ -82,54 +82,40 @@ class JUnitEventNotifier extends EventNotifier<JUnitListener> implements JUnitLi
     * @param didCompileFail whether or not a compile before this JUnit attempt failed
     */
   public void nonTestCase(boolean isTestAll, boolean didCompileFail) {
-    _lock.startRead();
-    try { for (JUnitListener jul : _listeners) { jul.nonTestCase(isTestAll, didCompileFail); } }
-    finally { _lock.endRead(); }
+    for (JUnitListener jul : _listeners) { jul.nonTestCase(isTestAll, didCompileFail); }
   }
   
   public void classFileError(ClassFileError e) {
-    _lock.startRead();
-    try { for (JUnitListener jul : _listeners) { jul.classFileError(e); } }
-    finally { _lock.endRead(); }
+    for (JUnitListener jul : _listeners) { jul.classFileError(e); } 
   }
   
   /** Called before JUnit is started by the DefaultJUnitModel. */
   public void compileBeforeJUnit(final CompilerListener cl, List<OpenDefinitionsDocument> outOfSync) {
-    _lock.startRead();
-    try { for (JUnitListener jul : _listeners) { jul.compileBeforeJUnit(cl, outOfSync); } }
-    finally { _lock.endRead(); }
+    for (JUnitListener jul : _listeners) { jul.compileBeforeJUnit(cl, outOfSync); }
   }
   
   /** Called after junit/junitAll is started by the GlobalModel. */
   public void junitStarted() {
-    _lock.startRead();
-    try { for (JUnitListener jul : _listeners) { jul.junitStarted(); } }
-    finally { _lock.endRead(); }
+    for (JUnitListener jul : _listeners) { jul.junitStarted(); }
   }
   
   /** Called after junitClasses is started by the GlobalModel. */
   public void junitClassesStarted() {
-    _lock.startRead();
-    try { for (JUnitListener jul : _listeners) { jul.junitClassesStarted(); } }
-    finally { _lock.endRead(); }
+    for (JUnitListener jul : _listeners) { jul.junitClassesStarted(); }
   }
   
   /** Called to indicate that a suite of tests has started running.
     * @param numTests The number of tests in the suite to be run.
     */
   public void junitSuiteStarted(int numTests) {
-    _lock.startRead();
-    try { for (JUnitListener jul : _listeners) { jul.junitSuiteStarted(numTests); } }
-    finally { _lock.endRead(); }
+    for (JUnitListener jul : _listeners) { jul.junitSuiteStarted(numTests); }
   }
   
   /** Called when a particular test is started.
     * @param name The name of the test being started.
     */
   public void junitTestStarted(String name) {
-    _lock.startRead();
-    try { for (JUnitListener jul : _listeners) { jul.junitTestStarted(name); } }
-    finally { _lock.endRead(); }
+    for (JUnitListener jul : _listeners) { jul.junitTestStarted(name); }
   }
   
   /** Called when a particular test has ended.
@@ -138,16 +124,12 @@ class JUnitEventNotifier extends EventNotifier<JUnitListener> implements JUnitLi
     * @param causedError If not successful, whether the test caused an error or simply failed.
     */
   public void junitTestEnded(String name, boolean wasSuccessful, boolean causedError) {
-    _lock.startRead();
-    try { for (JUnitListener jul : _listeners) { jul.junitTestEnded(name, wasSuccessful, causedError); } }
-    finally { _lock.endRead(); }
+    for (JUnitListener jul : _listeners) { jul.junitTestEnded(name, wasSuccessful, causedError); } 
   }
   
   /** Called after JUnit is finished running tests. */
   public void junitEnded() {
-    _lock.startRead();
-    try { for(JUnitListener jul : _listeners) { jul.junitEnded(); } }
-    finally { _lock.endRead(); }
+    for(JUnitListener jul : _listeners) { jul.junitEnded(); } 
   }
 }
 

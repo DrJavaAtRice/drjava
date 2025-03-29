@@ -1686,10 +1686,8 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
    * @throws BadLocationException if attempts to reference an invalid location
    */
   private int _getWhiteSpacePrefix() throws BadLocationException {
-    
-//    System.err.println("lockState = " + _lockState);
-    
-    /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
     int lineStart = _getLineStartPos(_currentLocation);
     if (lineStart < 0) lineStart = 0;    // _currentLocation on first line

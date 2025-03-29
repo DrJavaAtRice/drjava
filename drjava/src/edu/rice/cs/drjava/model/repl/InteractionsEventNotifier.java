@@ -51,22 +51,14 @@ public class InteractionsEventNotifier extends EventNotifier<InteractionsListene
   
   /** Called after an interaction is started by the GlobalModel. */
   public void interactionStarted() {
-    _lock.startRead();
-    try {
       int size = _listeners.size();
       for (int i = 0; i < size; i++)  _listeners.get(i).interactionStarted();
-    }
-    finally { _lock.endRead(); }
   }
   
   /** Called when an interaction has finished running. */
   public void interactionEnded() {
-    _lock.startRead();
-    try {
       int size = _listeners.size();
       for (int i = 0; i < size; i++) _listeners.get(i).interactionEnded();
-    }
-    finally { _lock.endRead(); }
   }
   
   /** Called when the interactions window generates a syntax error.
@@ -74,45 +66,29 @@ public class InteractionsEventNotifier extends EventNotifier<InteractionsListene
     * @param length the length of the error
     */
   public void interactionErrorOccurred(int offset, int length) {
-    _lock.startRead();
-    try {
       int size = _listeners.size();
       for (int i = 0; i < size; i++) _listeners.get(i).interactionErrorOccurred(offset, length);
-    }
-    finally { _lock.endRead(); }
   }
   
   /** Called when the interactionsJVM has begun resetting. */
   public void interpreterResetting() {
-    _lock.startRead();
-    try {
       int size = _listeners.size();
 //      Utilities.showDebug("InteractionsEventNotifier: interpreterResetting called on " + size + " listeners");
       for (int i = 0; i < size; i++) _listeners.get(i).interpreterResetting();
-    }
-    finally { _lock.endRead(); }
   }
   
   /** Called when the interactions window is reset. */
   public void interpreterReady(File wd) {
-    _lock.startRead();
-    try {
       int size = _listeners.size();
       for (int i = 0; i < size; i++) _listeners.get(i).interpreterReady(wd);
-    }
-    finally { _lock.endRead(); }
   }
   
   /** Called if the interpreter reset failed.
     * @param t Throwable explaining why the reset failed. (Subclasses must maintain listeners.)
     */
   public void interpreterResetFailed(final Throwable t) {
-    _lock.startRead();
-    try {
       int size = _listeners.size();
       for (int i = 0; i < size; i++)  _listeners.get(i).interpreterResetFailed(t);
-    }
-    finally { _lock.endRead(); }
   }
   
   /** Called when the interactions JVM was closed by System.exit or by being aborted. Immediately after this the 
@@ -120,12 +96,8 @@ public class InteractionsEventNotifier extends EventNotifier<InteractionsListene
     * @param status the exit code
     */
   public void interpreterExited(int status) {
-    _lock.startRead();
-    try {
       int size = _listeners.size();
       for (int i = 0; i < size; i++) { _listeners.get(i).interpreterExited(status); }
-    }
-    finally { _lock.endRead(); }
   }
   
   /** Called when the active interpreter is changed.
@@ -133,22 +105,13 @@ public class InteractionsEventNotifier extends EventNotifier<InteractionsListene
     * interactionEnded event will be fired)
     */
   public void interpreterChanged(boolean inProgress) {
-    _lock.startRead();
-    try {
       int size = _listeners.size();
       for (int i = 0; i < size; i++)  _listeners.get(i).interpreterChanged(inProgress);
-    }
-    finally { _lock.endRead(); }
   }
   
   /** Notifies the view that the current interaction is incomplete. */
   public void interactionIncomplete() {
-    _lock.startRead();
-    try {
       int size = _listeners.size();
       for (int i = 0; i < size; i++)  _listeners.get(i).interactionIncomplete();
-    }
-    finally { _lock.endRead(); }
   }
-  
 }

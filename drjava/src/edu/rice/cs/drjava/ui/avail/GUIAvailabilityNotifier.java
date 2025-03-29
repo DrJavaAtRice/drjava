@@ -141,10 +141,6 @@ public class GUIAvailabilityNotifier extends EventNotifier<GUIAvailabilityListen
   /** Notify the listeners for the specified component.
     * @param component the component whose listeners should be notified */
   protected void notifyListeners(ComponentType component) {
-    _lock.startRead();
-    try { for (GUIAvailabilityListener cl : _listeners) {
-      cl.availabilityChanged(component, isAvailable(component));
-    } }
-    finally { _lock.endRead(); }
+    for (GUIAvailabilityListener cl : _listeners) { cl.availabilityChanged(component, isAvailable(component)); }
   }
 }

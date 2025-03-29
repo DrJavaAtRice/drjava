@@ -28,7 +28,8 @@
  * END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model;
 
-import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import edu.rice.cs.util.ReaderWriterLock;
 
 /** Base class for all component-specific EventNotifiers.  This class provides common methods to 
@@ -39,69 +40,24 @@ public abstract class EventNotifier<T> {
   /** All T Listeners that are listening to the model.  Accesses to this collection are protected by the 
     * ReaderWriterLock. The collection must be synchronized, since multiple readers could access it at once.
     */
-  protected final LinkedList<T> _listeners = new LinkedList<T>();
+  protected final List<T> _listeners = new CopyOnWriteArrayList<T>();
   
-  /** Provides synchronization primitives for solving the readers/writers problem.  In EventNotifier, adding and 
-    * removing listeners are considered write operations, and all notifications are considered read operations. Multiple 
-    * reads can occur simultaneously, but only one write can occur at a time, and no reads can occur during a write.
-    */
-  protected final ReaderWriterLock _lock = new ReaderWriterLock();
+  /* The listener framework is now implemented using CopyOnWriteArrayList, eliminating the readers/writers issue. */
   
   /** Adds a listener to the notifier.
     * @param listener a listener that reacts on events
     */
-  public void addListener(T listener) {
-    _lock.startWrite();
-    try { _listeners.add(listener); }
-    finally { _lock.endWrite(); }
-  }
+  public void addListener(T listener) { _listeners.add(listener); }
   
   /** Removes a listener from the notifier. If the thread already holds the lock,
     * then the listener is removed later, but as soon as possible.
     * Note: It is NOT guaranteed that the listener will not be executed again.
     * @param listener a listener that reacts on events
     */
-  public void removeListener(final T listener) {
-    try {
-      _lock.startWrite();
-      try { _listeners.remove(listener); }
-      finally { _lock.endWrite(); }
-    }
-    catch(ReaderWriterLock.DeadlockException e) {
-      // couldn't remove right now because this thread already owns a lock
-      // remember to remove it later
-      new Thread(new Runnable() {
-        public void run() {
-          _lock.startWrite();
-          try { _listeners.remove(listener); }
-          finally { _lock.endWrite(); }
-        }
-      }, "Pending Listener Removal").start();
-//      synchronized(_listenersToRemove) {
-//        _listenersToRemove.add(listener);
-//      }
-    }
-  }
+  public void removeListener(final T listener) { _listeners.remove(listener); }
   
   /** Removes all listeners from this notifier.  If the thread already holds the lock,
     * then the listener is removed later, but as soon as possible.
     * Note: It is NOT guaranteed that the listener will not be executed again. */
-  public void removeAllListeners() {
-    try { 
-      _lock.startWrite();
-      try { _listeners.clear(); }
-      finally { _lock.endWrite(); }
-    }
-    catch(ReaderWriterLock.DeadlockException e) {
-      // couldn't remove right now because this thread already owns a lock
-      // remember to remove it later
-      new Thread(new Runnable() {
-        public void run() {
-          _lock.startWrite();
-          try { _listeners.clear(); }
-          finally { _lock.endWrite(); }
-        }
-      }, "Pending Listener Removal").start();
-    }
-  }
+  public void removeAllListeners() { _listeners.clear(); }
 }
