@@ -50,15 +50,9 @@ import edu.rice.cs.drjava.model.compiler.CompilerListener;
  * components, and should not be used directly outside of the "host" component.
  * <p>
  *
- * All methods in this class must use the synchronization methods
- * provided by ReaderWriterLock.  This ensures that multiple notifications
- * (reads) can occur simultaneously, but only one thread can be adding
- * or removing listeners (writing) at a time, and no reads can occur
- * during a write.
- * <p>
- *
- * <i>No</i> methods on this class should be synchronized using traditional
- * Java synchronization!
+ * All methods in this class should use the "copy-on-write" semantics of the _listeners colletion. This protocol
+ * ensures that multiple notifications can occur simultaneously while other threads "atomically" modify the _listeners 
+ * collection (each using a single method of the CopyOnWriteArrayList class.
  * <p>
  *
  * @version $Id$
