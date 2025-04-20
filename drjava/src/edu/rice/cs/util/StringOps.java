@@ -48,7 +48,7 @@ import javax.swing.text.html.parser.*;
  * to provide convenient namespace importation of its methods.
  * @version $Id$
  */
-
+@SuppressWarnings("deprecation") 
 public abstract class StringOps {
   
   public static final String EOL = System.getProperty("line.separator");
@@ -720,16 +720,16 @@ public abstract class StringOps {
     tok.addKeyword(ProcessChain.PIPE_SEPARATOR);
     // add whitespace characters as keyword, as per Character.isWhitespace
     tok.addKeyword(" ");
-    tok.addKeyword(new Character((char)0x09).toString()); // horizontal tab
-    tok.addKeyword(new Character((char)0x0A).toString()); // line feed
-    tok.addKeyword(new Character((char)0x0B).toString()); // vertical tab
-    tok.addKeyword(new Character((char)0x0C).toString()); // form feed / Character.SPACE_SEPARATOR
-    tok.addKeyword(new Character((char)0x0D).toString()); // carriage return / Character.LINE_SEPARATOR
-    tok.addKeyword(new Character((char)0x0E).toString()); // carriage return / Character.PARAGRAPH_SEPARATOR
-    tok.addKeyword(new Character((char)0x1C).toString()); // file separator
-    tok.addKeyword(new Character((char)0x1D).toString()); // group separator
-    tok.addKeyword(new Character((char)0x1E).toString()); // record separator
-    tok.addKeyword(new Character((char)0x1F).toString()); // unit separator
+    tok.addKeyword(Character.valueOf((char)0x09).toString()); // horizontal tab
+    tok.addKeyword(Character.valueOf((char)0x0A).toString()); // line feed
+    tok.addKeyword(Character.valueOf((char)0x0B).toString()); // vertical tab
+    tok.addKeyword(Character.valueOf((char)0x0C).toString()); // form feed / Character.SPACE_SEPARATOR
+    tok.addKeyword(Character.valueOf((char)0x0D).toString()); // carriage return / Character.LINE_SEPARATOR
+    tok.addKeyword(Character.valueOf((char)0x0E).toString()); // carriage return / Character.PARAGRAPH_SEPARATOR
+    tok.addKeyword(Character.valueOf((char)0x1C).toString()); // file separator
+    tok.addKeyword(Character.valueOf((char)0x1D).toString()); // group separator
+    tok.addKeyword(Character.valueOf((char)0x1E).toString()); // record separator
+    tok.addKeyword(Character.valueOf((char)0x1F).toString()); // unit separator
     // also add escaped space as keyword, but treat it differently
     final String ESCAPE = String.valueOf((char)0x1B);
     final String ESCAPED_SPACE = ESCAPE + " ";

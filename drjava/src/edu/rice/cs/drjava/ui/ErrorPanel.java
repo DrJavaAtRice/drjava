@@ -67,6 +67,7 @@ import java.io.IOException;
  *  TODO: parameterize the types of CompilerErrors (which should be called DJErrors) used here
  *  @version $Id$
  */
+@SuppressWarnings("deprecation") 
 public abstract class ErrorPanel extends TabbedPanel implements OptionConstants {
   
   protected static final SimpleAttributeSet NORMAL_ATTRIBUTES = _getNormalAttributes();

@@ -61,7 +61,7 @@ public abstract class InputStreamRedirector extends InputStream {
     String input = _getInput();
 
     for(int i = 0; i < input.length(); i++) {
-      _buffer.add(new Character(input.charAt(i)));
+      _buffer.add(Character.valueOf(input.charAt(i)));
     }
   }
 

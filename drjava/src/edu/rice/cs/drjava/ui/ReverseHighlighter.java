@@ -35,12 +35,12 @@ import javax.swing.plaf.*;
 
 /** Implements the Highlighter interfaces.  Implements a simple highlight painter, but stores
   * the highlights in reverse order. That means that the selection (for copying) is always
-  * the foremost hightlight, and after that, the highlights are drawn from most recent
-  * to oldest.
+  * the foremost highlight, and after that, the highlights are drawn from most recent to oldest.
   * Based on DefaultHighlighter by Timothy Prinzing, version 1.39 12/19/03
-  * Unfortunately, as the vector of highlights in DefaultHighlighter was private, there was
+  * Unfortunately, since the vector of highlights in DefaultHighlighter was private, there was
   * no efficient way to make use of inheritance.
   */
+@SuppressWarnings("deprecation") 
 public class ReverseHighlighter extends DefaultHighlighter {
   
   /** Creates a new ReverseHighlighter object. */

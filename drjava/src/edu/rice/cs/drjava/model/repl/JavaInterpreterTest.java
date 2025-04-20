@@ -40,6 +40,7 @@ import edu.rice.cs.dynamicjava.interpreter.*;
 /** Tests the functionality of the repl interpreter.
   * @version $Id$
   */
+@SuppressWarnings("deprecation") 
 public class JavaInterpreterTest extends DrJavaTestCase {
   
   // ***************************
@@ -96,15 +97,15 @@ public class JavaInterpreterTest extends DrJavaTestCase {
   @SuppressWarnings({"unchecked","rawtypes"})
   public void testConstants() throws InterpreterException {
     Pair<String,Object>[] cases = new Pair[] {
-      Pair.make("5", (Object) new Integer(5)),
-        Pair.make("1356", (Object) new Integer(1356)),
+      Pair.make("5", (Object) Integer.valueOf(5)),
+        Pair.make("1356", (Object) Integer.valueOf(1356)),
         Pair.make("true", (Object) Boolean.TRUE),
         Pair.make("false", (Object) Boolean.FALSE),
-        Pair.make("\'c\'", (Object) new Character('c')),
-        Pair.make("1.345", (Object) new Double(1.345)),
+        Pair.make("\'c\'", (Object) Character.valueOf('c')),
+        Pair.make("1.345", (Object) Double.valueOf(1.345)),
         Pair.make("\"buwahahahaha!\"", (Object) "buwahahahaha!"),
         Pair.make("\"yah\\\"eh\\\"\"", (Object) "yah\"eh\""),
-        Pair.make("'\\''", (Object) new Character('\''))
+        Pair.make("'\\''", (Object) Character.valueOf('\''))
     };
     tester(cases);
   }
@@ -152,33 +153,33 @@ public class JavaInterpreterTest extends DrJavaTestCase {
   public void testIntegerOps() throws InterpreterException {
     Pair<String,Object>[] cases = new Pair[] {
       // plus
-      Pair.make("5+6", (Object) new Integer(5 + 6)),
+      Pair.make("5+6", (Object) Integer.valueOf(5 + 6)),
         // minus
-        Pair.make("6-5", (Object) new Integer(6 - 5)),
+        Pair.make("6-5", (Object) Integer.valueOf(6 - 5)),
         // times
-        Pair.make("6*5", (Object) new Integer(6*5)),
+        Pair.make("6*5", (Object) Integer.valueOf(6*5)),
         // divide
-        Pair.make("6/5", (Object) new Integer(6/5)),
+        Pair.make("6/5", (Object) Integer.valueOf(6/5)),
         // modulo
-        Pair.make("6%5", (Object) new Integer(6%5)),
+        Pair.make("6%5", (Object) Integer.valueOf(6%5)),
         // bit and
-        Pair.make("6&5", (Object) new Integer(6 & 5)),
+        Pair.make("6&5", (Object) Integer.valueOf(6 & 5)),
         // bit or
-        Pair.make("6 | 5", (Object) new Integer(6 | 5)),
+        Pair.make("6 | 5", (Object) Integer.valueOf(6 | 5)),
         // bit xor
-        Pair.make("6^5", (Object) new Integer(6 ^ 5)),
+        Pair.make("6^5", (Object) Integer.valueOf(6 ^ 5)),
         // bit complement
-        Pair.make("~6", (Object) new Integer(~6)),
+        Pair.make("~6", (Object) Integer.valueOf(~6)),
         // unary plus
-        Pair.make(" + 5", (Object) new Integer(+5)),
+        Pair.make(" + 5", (Object) Integer.valueOf(+5)),
         // unary minus
-        Pair.make("-5", (Object) new Integer(-5)),
+        Pair.make("-5", (Object) Integer.valueOf(-5)),
         // left shift
-        Pair.make("400 << 5", (Object) new Integer(400 << 5)),
+        Pair.make("400 << 5", (Object) Integer.valueOf(400 << 5)),
         // right shift
-        Pair.make("400 >> 5", (Object) new Integer(400 >> 5)),
+        Pair.make("400 >> 5", (Object) Integer.valueOf(400 >> 5)),
         // unsigned right shift
-        Pair.make("400 >>> 5", (Object) new Integer(400 >>> 5)),
+        Pair.make("400 >>> 5", (Object) Integer.valueOf(400 >>> 5)),
         // less than
         Pair.make("5 < 4", (Object) Boolean.valueOf(5 < 4)),
         // less than or equal to
@@ -214,19 +215,19 @@ public class JavaInterpreterTest extends DrJavaTestCase {
         // not equal to
         Pair.make("5.5 != 5.5", (Object) Boolean.valueOf(5 != 5)),
         // unary plus
-        Pair.make(" + 5.6", (Object) new Double(+5.6)),
+        Pair.make(" + 5.6", (Object) Double.valueOf(+5.6)),
         // unary minus
-        Pair.make("-5.6", (Object) new Double(-5.6)),
+        Pair.make("-5.6", (Object) Double.valueOf(-5.6)),
         // times
-        Pair.make("5.6 * 4.5", (Object) new Double(5.6*4.5)),
+        Pair.make("5.6 * 4.5", (Object) Double.valueOf(5.6*4.5)),
         // divide
-        Pair.make("5.6 / 3.4", (Object) new Double(5.6/3.4)),
+        Pair.make("5.6 / 3.4", (Object) Double.valueOf(5.6/3.4)),
         // modulo
-        Pair.make("5.6 % 3.4", (Object) new Double(5.6%3.4)),
+        Pair.make("5.6 % 3.4", (Object) Double.valueOf(5.6%3.4)),
         // plus
-        Pair.make("5.6 + 6.7", (Object) new Double(5.6 + 6.7)),
+        Pair.make("5.6 + 6.7", (Object) Double.valueOf(5.6 + 6.7)),
         // minus
-        Pair.make("4.5 - 3.4", (Object) new Double(4.5 - 3.4)),
+        Pair.make("4.5 - 3.4", (Object) Double.valueOf(4.5 - 3.4)),
     };
     tester(cases);
   }
@@ -270,7 +271,7 @@ public class JavaInterpreterTest extends DrJavaTestCase {
         Pair.make("String s = \"hello\"", (Object) null),
         Pair.make("String x = \"hello\";", (Object) null),
         Pair.make("char c = 'c'", (Object) null),
-        Pair.make("Character d = new Character('d')", (Object) null),
+        Pair.make("Character d = Character.valueOf('d')", (Object) null),
         Pair.make("s", "hello"), Pair.make("s;", (Object) null),
         Pair.make("x", "hello"), Pair.make("x;", (Object) null),
         Pair.make("c", (Object) 'c'), Pair.make("d", (Object) 'd')
@@ -318,11 +319,11 @@ public class JavaInterpreterTest extends DrJavaTestCase {
     Pair<String,Object>[] cases = new Pair[] {
       Pair.make("b", (Object) new Byte((byte)0)),
         Pair.make("s", (Object) new Short((short)0)),
-        Pair.make("i", (Object) new Integer(0)),
-        Pair.make("l", (Object) new Long(0L)),
-        Pair.make("f", (Object) new Float(0.0f)),
-        Pair.make("d", (Object) new Double(0.0d)),
-        Pair.make("c", (Object) new Character('\u0000')),
+        Pair.make("i", (Object) Integer.valueOf(0)),
+        Pair.make("l", (Object) Long.valueOf(0L)),
+        Pair.make("f", (Object) Float.valueOf(0.0f)),
+        Pair.make("d", (Object) Double.valueOf(0.0d)),
+        Pair.make("c", (Object) Character.valueOf('\u0000')),
         Pair.make("bool", (Object) Boolean.valueOf(false)),
         Pair.make("str", (Object) null)
     };
@@ -412,7 +413,7 @@ public class JavaInterpreterTest extends DrJavaTestCase {
     }
     
     // Check that a correct assignment doesn't fail
-    _interpreter.interpret("Object o = new Integer(3)");
+    _interpreter.interpret("Object o = Integer.valueOf(3)");
   }
   
   /** Test the operation of the TypeCheckerExtension by performing the operations ((false) ? 2/0 : 1) and 
@@ -454,9 +455,9 @@ public class JavaInterpreterTest extends DrJavaTestCase {
 //                 "\"ello\"", _interpreter.interpret("foo.substring(1,5)"));
 //    _interpreter.defineVariable("x", 3);
 //    assertEquals("externally defined variable x",
-//                 new Integer(3), _interpreter.interpret("x"));
+//                 Integer.valueOf(3), _interpreter.interpret("x"));
 //    assertEquals("incremented externally defined variable x",
-//                 new Integer(4), _interpreter.interpret(" + +x"));
+//                 Integer.valueOf(4), _interpreter.interpret(" + +x"));
 //  }
   
 //  /** Test that the value of a variable can be queried externally. */
@@ -464,7 +465,7 @@ public class JavaInterpreterTest extends DrJavaTestCase {
 //    _interpreter.defineVariable("x", 7);
 //// Get value of variable externally
 //    assertEquals("external query for x",
-//                 new Integer(7), _interpreter.getVariable("x"));
+//                 Integer.valueOf(7), _interpreter.getVariable("x"));
 //
 //// Undefined variable
 //    try {
@@ -535,7 +536,7 @@ public class JavaInterpreterTest extends DrJavaTestCase {
 //    DrJava.getConfig().setSetting(OptionConstants.ALLOW_PRIVATE_ACCESS, Boolean.valueOf(true));
 //    Utilities.clearEventQueue();
 //    assertEquals("Should be able to access private field i whose value should be 0",
-//                 new Integer(0),
+//                 Integer.valueOf(0),
 //                 _interpreter.interpret("new A().i"));
 //  }
   

@@ -12,8 +12,7 @@ import java.lang.reflect.Constructor;
 import java.util.*;
 import javax.tools.*;
 
-
-
+@SuppressWarnings("deprecation") 
 public class JavaxToolsCompiler implements CompilerInterface {
     /** The set of class names that are run as ACM Java Task Force library programs. */
     protected static final Set<String> ACM_PROGRAM_CLASSES = new HashSet<String>();

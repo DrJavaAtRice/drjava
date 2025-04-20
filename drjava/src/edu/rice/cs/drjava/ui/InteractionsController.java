@@ -92,6 +92,7 @@ import edu.rice.cs.util.UnexpectedException;
   *
   * @version $Id$
   */
+@SuppressWarnings("deprecation")
 public class InteractionsController extends AbstractConsoleController {
   
   /* InteractionsDocument _adapter is inherited from AbstractConsoleController. */

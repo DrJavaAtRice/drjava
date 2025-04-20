@@ -298,7 +298,7 @@ public void testDocumentPaneMemoryLeak() throws InterruptedException, IOExceptio
       LOG.log(line);
       // find the PID of JUnitTestRunner, i.e. the PID of the current process
       if (line.indexOf("JUnitTestRunner")>=0) {
-        pid = new Integer(line.substring(0,line.indexOf(' ')));
+        pid = Integer.valueOf(line.substring(0,line.indexOf(' ')));
       }
     }
     if (pid == null) throw new FileNotFoundException("Could not detect PID");

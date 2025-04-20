@@ -754,13 +754,13 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
 //      equals(OptionConstants.ConcJUnitCheckChoices.NONE);
 //    // "threads" is enabled as long as the setting isn't NONE
 //    props.put("edu.rice.cs.cunit.concJUnit.check.threads.enabled",
-//              new Boolean(!none).toString());
+//              Boolean.valueOf(!none).toString());
 //    // "join" is enabled for ALL and NO_LUCKY
 //    props.put("edu.rice.cs.cunit.concJUnit.check.join.enabled",
-//              new Boolean(all || noLucky).toString());
+//              Boolean.valueOf(all || noLucky).toString());
 //    // "lucky" is enabled only for ALL
 //    props.put("edu.rice.cs.cunit.concJUnit.check.lucky.enabled",
-//              new Boolean(all).toString());
+//              Boolean.valueOf(all).toString());
     
 //    jvmb = jvmb.properties(props);
     

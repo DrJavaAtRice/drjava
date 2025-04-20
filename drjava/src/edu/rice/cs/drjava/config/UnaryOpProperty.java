@@ -115,13 +115,13 @@ public class UnaryOpProperty<P,R> extends EagerProperty {
   /** Lambda to parse a String into a Double. */
   public static final Lambda<String,Double> PARSE_DOUBLE =
     new Lambda<String,Double>() {
-    public Double value(String s) { return new Double(s); }
+    public Double value(String s) { return Double.valueOf(s); }
   };
   
   /** Lambda to parse a String into a Boolean. */
   public static final Lambda<String,Boolean> PARSE_BOOL =
     new Lambda<String,Boolean>() {
-    public Boolean value(String s) { return new Boolean(s); }
+    public Boolean value(String s) { return Boolean.valueOf(s); }
   };
 
   /** Lambda to parse a String into a String. */

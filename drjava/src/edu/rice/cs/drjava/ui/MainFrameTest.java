@@ -56,6 +56,7 @@ import edu.rice.cs.util.swing.Utilities;
 /** Test functions of MainFrame.
   * @version $Id$
   */
+@SuppressWarnings("deprecation") 
 public final class MainFrameTest extends MultiThreadedTestCase {
   
   private volatile MainFrame _frame;

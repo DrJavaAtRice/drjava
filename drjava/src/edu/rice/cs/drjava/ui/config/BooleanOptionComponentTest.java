@@ -53,7 +53,7 @@ public final class BooleanOptionComponentTest extends DrJavaTestCase {
 
   public void testCancelDoesNotChangeConfig() {
 
-    Boolean testBoolean = new Boolean (!DrJava.getConfig().getSetting(OptionConstants.LINEENUM_ENABLED).booleanValue());
+    Boolean testBoolean = Boolean.valueOf(!DrJava.getConfig().getSetting(OptionConstants.LINEENUM_ENABLED).booleanValue());
 
     _option.setValue(testBoolean);
     Utilities.clearEventQueue();
@@ -68,7 +68,7 @@ public final class BooleanOptionComponentTest extends DrJavaTestCase {
   }
 
   public void testApplyDoesChangeConfig() {
-    Boolean testBoolean = new Boolean (!DrJava.getConfig().getSetting(OptionConstants.LINEENUM_ENABLED).booleanValue());
+    Boolean testBoolean = Boolean.valueOf(!DrJava.getConfig().getSetting(OptionConstants.LINEENUM_ENABLED).booleanValue());
 
     _option.setValue(testBoolean);
     Utilities.clearEventQueue();
@@ -80,7 +80,7 @@ public final class BooleanOptionComponentTest extends DrJavaTestCase {
   }
 
   public void testApplyThenResetDefault() {
-    Boolean testBoolean = new Boolean (!DrJava.getConfig().getSetting(OptionConstants.LINEENUM_ENABLED).booleanValue());
+    Boolean testBoolean = Boolean.valueOf(!DrJava.getConfig().getSetting(OptionConstants.LINEENUM_ENABLED).booleanValue());
 
     _option.setValue(testBoolean);
     Utilities.clearEventQueue();

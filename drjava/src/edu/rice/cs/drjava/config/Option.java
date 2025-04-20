@@ -42,7 +42,7 @@ import java.util.Vector;
   * <pre>
   * Option&lt;Integer&gt; INDENT_INC = new Option&lt;Integer&gt;("indent.level") {
   *         public Integer parse(String s) {
-  *             return new Integer(s);
+  *             return Integer.valueOf(s);
   *         }
   *     };
   * </pre>

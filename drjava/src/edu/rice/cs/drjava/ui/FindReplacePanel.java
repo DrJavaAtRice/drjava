@@ -56,6 +56,7 @@ import edu.rice.cs.util.text.SwingDocument;
 /** The tabbed panel that handles requests for finding and replacing text.
   * @version $Id$
   */
+@SuppressWarnings("deprecation") 
 class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
 
   /* Other bracketing options:

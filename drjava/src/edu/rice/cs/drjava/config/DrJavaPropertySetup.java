@@ -509,7 +509,7 @@ public class DrJavaPropertySetup implements OptionConstants {
     PropertyMaps.TEMPLATE.setProperty("File", new DrJavaProperty("file.rm", msg12) {
       public void update(PropertyMaps pm) {
         String s = _attributes.get("rec");
-        boolean rec = new Boolean(s).booleanValue();
+        boolean rec = Boolean.valueOf(s).booleanValue();
         s = _attributes.get("file");
         if (s == null) {
           _value = "(file.rm Error...)";
@@ -1309,7 +1309,7 @@ public class DrJavaPropertySetup implements OptionConstants {
         String outSep = _attributes.get("outsep");
         int each = 1;
         try {
-          each = new Integer(_attributes.get("each"));
+          each = Integer.valueOf(_attributes.get("each"));
           if (each<1) { throw new NumberFormatException(); }
         }
         catch(NumberFormatException e) {

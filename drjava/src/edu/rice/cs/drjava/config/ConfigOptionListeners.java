@@ -103,8 +103,8 @@ public class ConfigOptionListeners implements OptionConstants {
         }
       }
       try {
-        if (factor == 1)  heapSize = new Long(size);
-        else if (factor > 1) heapSize = new Long(size.substring(0,size.length()-1)) * factor;
+        if (factor == 1)  heapSize = Long.valueOf(size);
+        else if (factor > 1) heapSize = Long.valueOf(size.substring(0,size.length()-1)) * factor;
         else heapSize = -1;
       }
       catch(NumberFormatException nfe) { heapSize = -1; /* invalid */ }
@@ -194,7 +194,7 @@ public class ConfigOptionListeners implements OptionConstants {
       long heapSize;
       String size = value.trim();
       try {
-        heapSize = new Long(size);
+        heapSize = Long.valueOf(size);
       }
       catch(NumberFormatException nfe) {
         heapSize = -1; // invalid
@@ -240,7 +240,7 @@ public class ConfigOptionListeners implements OptionConstants {
     for(int i=1; i < OptionConstants.heapSizeChoices.size(); ++i) {
       try {
         newSetting = OptionConstants.heapSizeChoices.get(i);
-        float choice = new Float(newSetting);
+        float choice = Float.valueOf(newSetting);
         if (choice>=heapSizeMB) {
           return newSetting;
         }
@@ -301,8 +301,8 @@ public class ConfigOptionListeners implements OptionConstants {
         default: { if (!Character.isDigit(size.toLowerCase().charAt(size.length()-1)))  factor = 0; }
       }
       try {
-        if (factor==1)  heapSize = new Long(size);
-        else if (factor>1)  heapSize = new Long(size.substring(0,size.length()-1)) * factor;
+        if (factor==1)  heapSize = Long.valueOf(size);
+        else if (factor>1)  heapSize = Long.valueOf(size.substring(0,size.length()-1)) * factor;
         else  heapSize = -1;
       }
       catch(NumberFormatException nfe) { heapSize = -1; /* invalid */ }
@@ -383,7 +383,7 @@ public class ConfigOptionListeners implements OptionConstants {
       String size = value.trim();
       long heapSize;
       try {
-        heapSize = new Long(size);
+        heapSize = Long.valueOf(size);
       }
       catch(NumberFormatException nfe) {
         heapSize = -1; // invalid

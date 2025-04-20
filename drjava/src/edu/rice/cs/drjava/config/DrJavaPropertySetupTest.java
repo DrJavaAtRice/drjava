@@ -166,7 +166,7 @@ public class DrJavaPropertySetupTest extends DrJavaTestCase {
     assertEquals("false",p.getCurrent(pm));
     p.setAttribute("op","false");
     assertEquals("true",p.getCurrent(pm));
-    p.setAttribute("op","x"); // anything but "true" counts as false as per new Boolean("x")
+    p.setAttribute("op","x"); // anything but "true" counts as false as per Boolean.valueOf("x")
     assertEquals("true",p.getCurrent(pm));
     p.setAttribute("op","2");
     assertEquals("true",p.getCurrent(pm));
@@ -335,7 +335,7 @@ public class DrJavaPropertySetupTest extends DrJavaTestCase {
     p.setAttribute("op1","false");
     p.setAttribute("op2","false");
     assertEquals("false",p.getCurrent(pm));
-    p.setAttribute("op1","x"); // anything but "true" counts as false as per new Boolean("x")
+    p.setAttribute("op1","x"); // anything but "true" counts as false as per Boolean.valueOf("x")
     p.setAttribute("op2","2");
     assertEquals("false",p.getCurrent(pm));
     p.setAttribute("op1","2");
@@ -368,7 +368,7 @@ public class DrJavaPropertySetupTest extends DrJavaTestCase {
     p.setAttribute("op1","false");
     p.setAttribute("op2","false");
     assertEquals("false",p.getCurrent(pm));
-    p.setAttribute("op1","x"); // anything but "true" counts as false as per new Boolean("x")
+    p.setAttribute("op1","x"); // anything but "true" counts as false as per Boolean.valueOf("x")
     p.setAttribute("op2","2");
     assertEquals("false",p.getCurrent(pm));
     p.setAttribute("op1","2");

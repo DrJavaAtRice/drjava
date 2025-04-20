@@ -209,7 +209,7 @@ public class LanguageLevelStackTraceMapper {
     // Process header line of block
     LOG.log("rdLine = '" + rdLine + "'");
     LOG.log("\tlastIndex = " + rdLine.lastIndexOf(" "));
-    Integer mapSize = new Integer (rdLine.substring(rdLine.lastIndexOf(" ") + 1));
+    Integer mapSize = Integer.valueOf(rdLine.substring(rdLine.lastIndexOf(" ") + 1));
     
     try { rdLine = bufReader.readLine();  }  catch(java.io.IOException e){ }
     
@@ -234,8 +234,8 @@ public class LanguageLevelStackTraceMapper {
       String numRnum = text.substring(0, firstBlankPos);
       text = text.substring(firstBlankPos).trim() + " ";  // Only need to trim leading blanks here; String API is clumsy
       
-      djNum = new Integer(numRnum.substring(0, numRnum.indexOf("->")));
-      javaNum = new Integer(numRnum.substring(numRnum.indexOf("->") + 2));
+      djNum = Integer.valueOf(numRnum.substring(0, numRnum.indexOf("->")));
+      javaNum = Integer.valueOf(numRnum.substring(numRnum.indexOf("->") + 2));
       
       javaDJMap.put(javaNum,djNum);
     }
@@ -264,7 +264,7 @@ public class LanguageLevelStackTraceMapper {
     
     LOG.log("rdLine = '" + rdLine + "'");
     LOG.log("\tlastIndex = " + rdLine.lastIndexOf(" "));
-    Integer mapSize = new Integer (rdLine.substring(rdLine.lastIndexOf(" ") + 1));
+    Integer mapSize = Integer.valueOf(rdLine.substring(rdLine.lastIndexOf(" ") + 1));
     
     try { rdLine = bufReader.readLine(); } catch(java.io.IOException e){ }
     

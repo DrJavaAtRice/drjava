@@ -50,6 +50,7 @@ import org.junit.Assert;
 /** Tests the Definitions Pane
   * @version $Id$
   */
+@SuppressWarnings("deprecation") 
 public final class DefinitionsPaneTest extends MultiThreadedTestCase {
 
   private volatile MainFrame _frame;

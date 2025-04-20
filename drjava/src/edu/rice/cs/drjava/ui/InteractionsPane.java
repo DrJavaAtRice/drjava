@@ -55,6 +55,7 @@ import edu.rice.cs.drjava.model.repl.*;
 /** The view component for repl interaction.
   * @version $Id$
   */
+@SuppressWarnings("deprecation") 
 public abstract class InteractionsPane extends AbstractDJPane implements OptionConstants, ClipboardOwner {
   
   public static Log LOG = new Log("InteractionsPane.txt", false);

@@ -59,6 +59,7 @@ import static edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelStat
  *  which cannot be changed.
  *  @version $Id$
  */
+@SuppressWarnings("deprecation") 
 public class DefinitionsPane extends AbstractDJPane implements Finalizable<DefinitionsPane> {
 
   /** This field NEEDS to be set by setEditorKit() BEFORE any DefinitonsPanes are created. */

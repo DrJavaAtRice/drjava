@@ -57,6 +57,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
   * The methods in this class generally can be executed only in the event thread once the model has been constructed.
   * @version $Id$
   */
+@SuppressWarnings("deprecation") 
 public abstract class InteractionsModel implements InteractionsModelCallback {
   
   /** Banner prefix. */

@@ -50,6 +50,7 @@ import java.net.*;
   * 
   * This class is declared final because it cannot be robustly subclassed because the constructor starts a thread.
   */
+@SuppressWarnings("deprecation") 
 public final class RemoteControlServer {
   /** Prefix of a legitimate query by a client. */
   public static final String QUERY_PREFIX = "DrJava Remote Control?";

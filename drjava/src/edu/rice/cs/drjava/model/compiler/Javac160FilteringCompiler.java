@@ -96,7 +96,7 @@ public abstract class Javac160FilteringCompiler extends JavacCompiler {
                 if ((!name.startsWith(PREFIX)) || (!name.endsWith(SUFFIX))) return false;
                 String rest = name.substring(PREFIX.length(), name.length()-SUFFIX.length());
                 try {
-                  new Integer(rest);
+                  Integer.valueOf(rest);
                   // we could create an integer from the rest, this is one of our temporary files
                   return true;
                 }

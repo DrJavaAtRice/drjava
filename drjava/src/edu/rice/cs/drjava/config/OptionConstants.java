@@ -36,6 +36,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Frame;
 import java.awt.Toolkit;
+import java.awt.Event;
 import java.awt.event.KeyEvent;
 import javax.swing.KeyStroke;
 import javax.swing.LookAndFeel;
@@ -45,12 +46,13 @@ import javax.swing.UIManager.LookAndFeelInfo;
 import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.util.FileOps;
 
-import static java.awt.Event.*;
+//import static java.awt.Event.*;
 
 
 /** Defines the commonly used Option constants in DrJava config and project profiles.
   * @version $Id$
   */
+@SuppressWarnings("deprecation")
 public interface OptionConstants {
   
   // STATIC VARIABLES
@@ -382,6 +384,9 @@ public interface OptionConstants {
   
   /* ---------- Key Binding Options ----------- */
   public static int MASK = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+  public static int SHIFT_MASK = Event.SHIFT_MASK;
+  public static int CTRL_MASK = Event.CTRL_MASK;
+  public static int ALT_MASK = Event.ALT_MASK;
   
   static class to {
     public static Vector<KeyStroke> vector(KeyStroke... ks) {
@@ -619,7 +624,7 @@ public interface OptionConstants {
   public static final VectorOption<KeyStroke> KEY_GOTO_FILE =
     new VectorOption<KeyStroke>("key.goto.file", 
                                 new KeyStrokeOption("",null), 
-                                to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_G, MASK|KeyEvent.SHIFT_MASK)));
+                                to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_G, MASK|SHIFT_MASK)));
   
   /** The key binding for goto this file. */
   public static final VectorOption<KeyStroke> KEY_GOTO_FILE_UNDER_CURSOR =
@@ -631,7 +636,7 @@ public interface OptionConstants {
   public static final VectorOption<KeyStroke> KEY_OPEN_JAVADOC =
     new VectorOption<KeyStroke>("key.open.javadoc", 
                                 new KeyStrokeOption("",null), 
-                                to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_F6, KeyEvent.SHIFT_MASK)));
+                                to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_F6, SHIFT_MASK)));
   
   /** The key binding for open Javadoc under cursor. */
   public static final VectorOption<KeyStroke> KEY_OPEN_JAVADOC_UNDER_CURSOR =
@@ -643,7 +648,7 @@ public interface OptionConstants {
   public static final VectorOption<KeyStroke> KEY_COMPLETE_FILE =
     new VectorOption<KeyStroke>("key.complete.file", 
                                 new KeyStrokeOption("",null), 
-                                to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, MASK|KeyEvent.SHIFT_MASK)));
+                                to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, MASK|SHIFT_MASK)));
   
 //  /** The key binding for indenting */
 //  public static final VectorOption<KeyStroke> KEY_INDENT =

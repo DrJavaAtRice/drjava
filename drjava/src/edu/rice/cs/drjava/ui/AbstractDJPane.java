@@ -47,6 +47,7 @@ import java.awt.dnd.*;
 import edu.rice.cs.drjava.DrJavaRoot;
 
 /** This pane class for a SwingDocument. */
+@SuppressWarnings("deprecation") 
 public abstract class AbstractDJPane extends JTextPane implements OptionConstants, DropTargetListener {
   
   // ------------ FIELDS -----------

@@ -47,6 +47,7 @@ import edu.rice.cs.util.swing.SwingFrame;
 /** DrJava's print preview window
   * @version $Id$
   */
+@SuppressWarnings("deprecation") 
 public abstract class PreviewFrame extends SwingFrame {
   
   protected final SingleDisplayModel _model;

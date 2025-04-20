@@ -50,6 +50,7 @@ import java.lang.reflect.Constructor;
   * a matching signature.
   *  @version $Id$
   */
+@SuppressWarnings("deprecation") 
 public abstract class JavacCompiler implements CompilerInterface {
   
   protected final JavaVersion.FullVersion _version;

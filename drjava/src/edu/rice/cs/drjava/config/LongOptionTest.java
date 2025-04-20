@@ -33,6 +33,7 @@ import edu.rice.cs.drjava.DrJavaTestCase;
 /** Class according to the JUnit protocol. Tests the proper functionality of the class LongOption.
  *  @version $Id$
  */
+@SuppressWarnings("deprecation") 
 public final class LongOptionTest extends DrJavaTestCase {
   
   /** @param name The name of this test case. */
@@ -49,8 +50,8 @@ public final class LongOptionTest extends DrJavaTestCase {
   public void testParse() {
     LongOption io = new LongOption("max_files",null);
     
-    assertEquals(new Long(Integer.MAX_VALUE+1), io.parse(new Long(Integer.MAX_VALUE+1).toString()));
-    assertEquals(new Long(Integer.MIN_VALUE-1), io.parse(new Long(Integer.MIN_VALUE-1).toString()));
+    assertEquals(Long.valueOf(Integer.MAX_VALUE+1), io.parse(Long.valueOf(Integer.MAX_VALUE+1).toString()));
+    assertEquals(Long.valueOf(Integer.MIN_VALUE-1), io.parse(Long.valueOf(Integer.MIN_VALUE-1).toString()));
     
     try { io.parse("true"); fail(); }
     catch (OptionParseException e) { }
@@ -63,9 +64,9 @@ public final class LongOptionTest extends DrJavaTestCase {
     LongOption io1 = new LongOption("max_files",null);
     LongOption io2 = new LongOption("indent_size",null);
     
-    assertEquals(new Long(Integer.MAX_VALUE+1).toString(), io1.format(new Long(Integer.MAX_VALUE+1)));
-    assertEquals(new Long(Integer.MAX_VALUE+1).toString(), io2.format(new Long(Integer.MAX_VALUE+1)));
-    assertEquals(new Long(Integer.MIN_VALUE-1).toString(), io1.format(new Long(Integer.MIN_VALUE-1)));
-    assertEquals(new Long(Integer.MIN_VALUE-1).toString(), io2.format(new Long(Integer.MIN_VALUE-1)));
+    assertEquals(Long.valueOf(Integer.MAX_VALUE+1).toString(), io1.format(Long.valueOf(Integer.MAX_VALUE+1)));
+    assertEquals(Long.valueOf(Integer.MAX_VALUE+1).toString(), io2.format(Long.valueOf(Integer.MAX_VALUE+1)));
+    assertEquals(Long.valueOf(Integer.MIN_VALUE-1).toString(), io1.format(Long.valueOf(Integer.MIN_VALUE-1)));
+    assertEquals(Long.valueOf(Integer.MIN_VALUE-1).toString(), io2.format(Long.valueOf(Integer.MIN_VALUE-1)));
   }
 }

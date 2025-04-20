@@ -41,6 +41,7 @@ import java.util.Locale;
 /** Class according to the JUnit protocol. Tests the proper functionality of the class KeyStrokeOption.
   * @version $Id$
   */
+@SuppressWarnings("deprecation") 
 public final class KeyStrokeOptionTest extends DrJavaTestCase {
   /** @param name The name of this test case. */
   public KeyStrokeOptionTest(String name) { super(name); }

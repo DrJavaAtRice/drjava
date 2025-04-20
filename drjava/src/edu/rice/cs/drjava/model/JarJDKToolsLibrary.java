@@ -77,6 +77,7 @@ import edu.rice.cs.drjava.model.javadoc.NoJavadocAvailable;
 import edu.rice.cs.drjava.model.JDKDescriptor;
 
 /** A JDKToolsLibrary that was loaded from a specific jar file. */
+@SuppressWarnings("deprecation") 
 public class JarJDKToolsLibrary extends JDKToolsLibrary {
   
   /** Packages to shadow when loading a new tools.jar.  If we don't shadow these classes, we won't

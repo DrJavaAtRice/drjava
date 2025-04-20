@@ -43,7 +43,7 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
 // import edu.rice.cs.util.swing.Utilities;  // conflicts with javax.swing.text.Utilities
 
-
+@SuppressWarnings("deprecation") 
 public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements OptionConstants {
   
   public static Color COMMENTED_COLOR = DrJava.getConfig().getSetting(DEFINITIONS_COMMENT_COLOR);

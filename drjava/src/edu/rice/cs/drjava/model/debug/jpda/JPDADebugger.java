@@ -465,7 +465,7 @@ public class JPDADebugger implements Debugger {
           indexStr = indexStr.trim();   
           // System.out.println("\t\tindexStr: "+indexStr);   
           try {   
-            new Integer(indexStr);   
+            Integer.valueOf(indexStr);   
             // System.out.println("\t\tindex: "+index);   
           }   
           catch(NumberFormatException nfe) { return false; }   

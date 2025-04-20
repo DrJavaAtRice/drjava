@@ -49,6 +49,7 @@ import java.util.Date;
 /** Test functions of InteractionsPane.
   * @version $Id$
   */
+@SuppressWarnings("deprecation") 
 public final class InteractionsPaneTest extends DrJavaTestCase {
   
   private static final char UNDEFINED = KeyEvent.CHAR_UNDEFINED;

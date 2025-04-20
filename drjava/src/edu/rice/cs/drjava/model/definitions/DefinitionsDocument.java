@@ -60,6 +60,7 @@ import static edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelStat
 /** The document model for the definitions pane; it contains a reduced model since it extends AbstractDJDocument. 
   * @see AbstractDJDocument
   */
+@SuppressWarnings("deprecation") 
 public class DefinitionsDocument extends AbstractDJDocument implements Finalizable<DefinitionsDocument> {
   
   public static final Log _log = new Log("GlobalModel.txt", false);

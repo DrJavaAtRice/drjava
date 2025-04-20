@@ -50,6 +50,7 @@ import edu.rice.cs.util.text.EditDocumentInterface;
   *
   * @version $Id$
   */
+@SuppressWarnings("deprecation") 
 public class ColoringView extends PlainView implements OptionConstants {
   
   public static Color COMMENTED_COLOR = DrJava.getConfig().getSetting(DEFINITIONS_COMMENT_COLOR);

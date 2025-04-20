@@ -76,7 +76,7 @@ public abstract class Version {
   }
 
   public static long getRevisionNumber() {
-    return new Long(REVISION_STRING);
+    return Long.valueOf(REVISION_STRING);
   }
 
   public static String getBuildTimeString() {

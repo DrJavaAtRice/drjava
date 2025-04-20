@@ -38,6 +38,7 @@ import java.util.HashMap;
 
 /** Class representing all configuration options with values of type KeyStroke.  Only runs in the event thread, so no
   * synchronization is necessary (or advisable).*/
+@SuppressWarnings("deprecation") 
 public class KeyStrokeOption extends Option<KeyStroke> {
   
   /** Storage for keystrokes.*/
