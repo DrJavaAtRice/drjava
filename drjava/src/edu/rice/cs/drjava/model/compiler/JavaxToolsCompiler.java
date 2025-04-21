@@ -118,7 +118,9 @@ public class JavaxToolsCompiler implements CompilerInterface {
  
 
     public String getName() { return "javax.tools"; }
-
+    
+    public JavaVersion version() { return JavaVersion.CURRENT; }
+    
     public String getDescription() { return "Standard compiler in javax.tools"; }
 
     public String toString() { return getName(); }
