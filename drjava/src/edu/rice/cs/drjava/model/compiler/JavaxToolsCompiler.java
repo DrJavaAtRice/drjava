@@ -1,6 +1,9 @@
 package edu.rice.cs.drjava.model.compiler;
 
+import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.DJError;
+import edu.rice.cs.drjava.model.DrJavaFileUtils;
 import edu.rice.cs.drjava.ui.SmartSourceFilter;
 import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.util.ArgumentTokenizer;
@@ -35,7 +38,6 @@ public class JavaxToolsCompiler implements CompilerInterface {
     public List<? extends DJError> compile(List<? extends File> files, List<? extends File> classPath,
                                            List<? extends File> sourcePath, File destination,
                                            List<? extends File> bootClassPath, String sourceVersion, boolean showWarnings) {
-        // TODO: enforce using java8
         // Check if compiler is available
         if (compiler == null) {
             List<DJError> errors = new ArrayList<>();
@@ -67,6 +69,7 @@ public class JavaxToolsCompiler implements CompilerInterface {
         Iterable<? extends JavaFileObject> compilationUnits = fileManager.getJavaFileObjectsFromFiles(files);
 
         // Prepare the compilation options
+      
         List<String> optionList = new ArrayList<>();
         if (sourceVersion != null) {
             optionList.add("-source");
@@ -112,33 +115,22 @@ public class JavaxToolsCompiler implements CompilerInterface {
 
         return errors;
     }
+ 
 
-    public JavaVersion version() {
-        return JavaVersion.JAVA_8;
-    }
+    public String getName() { return "javax.tools"; }
 
-    public String getName() {
-        return "javax.tools";
-    }
+    public String getDescription() { return "Standard compiler in javax.tools"; }
 
-    public String getDescription() {
-        return "Custom compiler implementation using javax.tools";
-    }
+    public String toString() { return getName(); }
 
-    public String toString() {
-        return getName();
-    }
-
-    public List<File> additionalBootClassPathForInteractions() {
-        return Collections.emptyList();
-    }
+    public List<File> additionalBootClassPathForInteractions() { return Collections.emptyList(); }
 
     /** Transform the command line to be interpreted into something the Interactions JVM can use.
-     * This replaces "java MyClass a b c" with Java code to call MyClass.main(new String[]{"a","b","c"}).
-     * "import MyClass" is not handled here.
-     * transformCommands should support at least "run", "java" and "applet".
-     * @param interactionsString unprocessed command line
-     * @return command line with commands transformed */
+      * This replaces "java MyClass a b c" with Java code to call MyClass.main(new String[]{"a","b","c"}).
+      * "import MyClass" is not handled here.
+      * transformCommands should support at least "run", "java" and "applet".
+      * @param interactionsString unprocessed command line
+      * @return command line with commands transformed */
     public String transformCommands(String interactionsString) {
         if (interactionsString.startsWith("java ")) {
             interactionsString = transformJavaCommand(interactionsString);
@@ -341,30 +333,30 @@ public class JavaxToolsCompiler implements CompilerInterface {
     }
 
     /** Assumes a trimmed String. Returns a string of the call that the interpreter can use.
-     * The arguments get formatted as comma-separated list of strings enclosed in quotes.
-     * Example: _transformCommand("java MyClass arg1 arg2 arg3", "{0}.main(new String[]'{'{1}'}');")
-     * returns "MyClass.main(new String[]{\"arg1\",\"arg2\",\"arg3\"});"
-     * NOTE: the command to run is constructed using {@link java.text.MessageFormat}. That means that certain characters,
-     * single quotes and curly braces, for example, are special. To write single quotes, you need to double them.
-     * To write curly braces, you need to enclose them in single quotes. Example:
-     * MessageFormat.format("Abc {0} ''foo'' '{'something'}'", "def") returns "Abc def 'foo' {something}".
-     * @param s the command line, either "java MyApp arg1 arg2 arg3" or "applet MyApplet arg1 arg2 arg3"
-     * @param command the command to execute, with {0} marking the place for the class name and {1} the place for the arguments
-     * @return the transformed command
-     */
+      * The arguments get formatted as comma-separated list of strings enclosed in quotes.
+      * Example: _transformCommand("java MyClass arg1 arg2 arg3", "{0}.main(new String[]'{'{1}'}');")
+      * returns "MyClass.main(new String[]{\"arg1\",\"arg2\",\"arg3\"});"
+      * NOTE: the command to run is constructed using {@link java.text.MessageFormat}. That means that certain characters,
+      * single quotes and curly braces, for example, are special. To write single quotes, you need to double them.
+      * To write curly braces, you need to enclose them in single quotes. Example:
+      * MessageFormat.format("Abc {0} ''foo'' '{'something'}'", "def") returns "Abc def 'foo' {something}".
+      * @param s the command line, either "java MyApp arg1 arg2 arg3" or "applet MyApplet arg1 arg2 arg3"
+      * @param command the command to execute, with {0} marking the place for the class name and {1} the place for the arguments
+      * @return the transformed command
+      */
     protected static String _transformCommand(String s, String command) {
-        if (s.endsWith(";"))  s = _deleteSemiColon(s);
-        List<String> args = ArgumentTokenizer.tokenize(s, true);
-        final String classNameWithQuotes = args.get(1); // this is "MyClass"
-        final String className = classNameWithQuotes.substring(1, classNameWithQuotes.length() - 1); // removes quotes, becomes MyClass
-        final StringBuilder argsString = new StringBuilder();
-        boolean seenArg = false;
-        for (int i = 2; i < args.size(); i++) {
-            if (seenArg) argsString.append(",");
-            else seenArg = true;
-            argsString.append(args.get(i));
-        }
-        return java.text.MessageFormat.format(command, className, argsString.toString());
+      if (s.endsWith(";"))  s = _deleteSemiColon(s);
+      List<String> args = ArgumentTokenizer.tokenize(s, true);
+      final String classNameWithQuotes = args.get(1); // this is "MyClass"
+      final String className = classNameWithQuotes.substring(1, classNameWithQuotes.length() - 1); // removes quotes, becomes MyClass
+      final StringBuilder argsString = new StringBuilder();
+      boolean seenArg = false;
+      for (int i = 2; i < args.size(); i++) {
+        if (seenArg) argsString.append(",");
+        else seenArg = true;
+        argsString.append(args.get(i));
+      }
+      return java.text.MessageFormat.format(command, className, argsString.toString());
     }
 
     /** Deletes the last character of a string.  Assumes semicolon at the end, but does not check.  Helper
@@ -419,8 +411,6 @@ public class JavaxToolsCompiler implements CompilerInterface {
         Collections.addAll(JAVA_KEYWORDS, words);
     }
 
-    public boolean supportsLanguageLevels() {
-        // TODO: should we support LanguageLevels?
-        return false;
-    }
+    /** @return true since this compiler can be used in conjunction with the language level facility. */
+    public boolean supportsLanguageLevels() { return true; }
 }

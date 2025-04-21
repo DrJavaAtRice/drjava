@@ -36,6 +36,7 @@
   <property name="drjava.test.config" value="testFiles/drjava.basic.config" />
   
   <property environment="env" />
+
   <property name="java-home" value="${env.JAVA_HOME}" />
   <property name="findbugs-home" value="${env.FINDBUGS_HOME}" />
   
@@ -69,6 +70,7 @@
   <fileset id="jrelibs" dir="${java.home}/lib" includes="*.jar" /> 
   <fileset id="extlibs" dir="extlib" includes="*.jar" />
   <echo message="extlibs = ${toString:extlibs}" level="verbose"/>
+
   <!-- ************
        Help Targets
        ************ -->
