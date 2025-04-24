@@ -1095,10 +1095,10 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
   }
   
   /** Interprets some statements, saves the history, clears the history, then loads the history. 
-   * @throws EditDocumentException if an error occurs while editing
-   * @throws IOException if an IO operation fails
-   * @throws InterruptedException if execution is interrupted unexpectedly
-   */
+    * @throws EditDocumentException if an error occurs while editing
+    * @throws IOException if an IO operation fails
+    * @throws InterruptedException if execution is interrupted unexpectedly
+    */
   public void testSaveClearAndLoadHistory() throws EditDocumentException, IOException, InterruptedException {
     String newLine = StringOps.EOL;
     final InteractionListener listener = new InteractionListener();
@@ -1126,6 +1126,10 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     interpretIgnoreResult(s3);
     listener.waitInteractionDone();
     
+    ConsoleDocument con0 = _model.getConsoleDocument();
+//    Utilities.show("Length of console document = " + con0.getLength());
+//    Utilities.show("History as string = " + _model.getHistoryAsString());
+    
 //    System.err.println("history is '" + _model.getHistoryAsString() + "'");
     // check that the history contains the correct value
     assertEquals("History and getHistoryAsString should be the same.",
@@ -1142,10 +1146,13 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     // check that the file contains the correct value
     assertEquals("contents of saved file", History.HISTORY_FORMAT_VERSION_2 + s1 + delim + s2 + delim + s3 + delim,
                  IOUtil.toString(f));
-    
+    ConsoleDocument con1 = _model.getConsoleDocument();
+//    Utilities.show("Length of loaded history [?] = " + con1.getLength());
+//    Utilities.show("Length of history string [?] = " + _model.getHistoryAsString().length());
     _model.clearHistory();
     // confirm that the history is clear
     assertEquals("History is not clear", "", _model.getHistoryAsString());
+//    Utilities.show("Length of loaded history [0] = " + con1.getLength());
     
     Utilities.invokeLater(new Runnable() { 
       public void run() { 
@@ -1160,9 +1167,11 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     listener.waitInteractionDone();
         
     // check that output of loaded history is correct
-    ConsoleDocument con = _model.getConsoleDocument();
-    debug.log(con.getDocText(0, con.getLength()).trim());
-    assertEquals("Output of loaded history is not correct", "x = 5", con.getDocText(0, con.getLength()).trim());
+    ConsoleDocument con2 = _model.getConsoleDocument();
+    Utilities.clearEventQueue();
+//    Utilities.show("Length of loaded history = " + con2.getLength());
+    debug.log(con2.getDocText(0, con2.getLength()).trim());
+    assertEquals("Output of loaded history is not correct", "x = 5", con2.getDocText(0, con2.getLength()).trim());
     listener.assertInteractionStartCount(4);
     listener.assertInteractionEndCount(4);
     _model.removeListener(listener);

@@ -189,6 +189,7 @@ public class GenerateCustomDrJavaJarFrame extends SwingFrame {
 
   /** Resets the frame and hides it. */
   public void close() {
+    assert EventQueue.isDispatchThread();
     setVisible(false);
     reset();
   }

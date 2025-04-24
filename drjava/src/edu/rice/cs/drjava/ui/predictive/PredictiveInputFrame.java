@@ -695,7 +695,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
   
   /** Toggle visibility of this frame. Warning, it behaves like a modal dialog. */
   public void setVisible(boolean vis) {
-    assert EventQueue.isDispatchThread();
+    assert ! EventQueue.isDispatchThread();
     validate();
     if (vis) {
       DrJavaRoot.installModalWindowAdapter(this, LambdaUtil.NO_OP, CANCEL);

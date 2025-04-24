@@ -572,7 +572,7 @@ public class JarOptionsDialog extends SwingFrame {
       private void setEnabled() { 
 //        Utilities.invokeLater(new Runnable() { 
 //          public void run() { 
-            assert EventQueue.isDispatchThread();
+            assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();
             _okButton.setEnabled(true); 
 //          } 
 //        }); 
@@ -1044,7 +1044,7 @@ public class JarOptionsDialog extends SwingFrame {
   
   /** Toggle visibility of this frame. Warning, it behaves like a modal dialog. */
   public void setVisible(boolean vis) {
-    assert EventQueue.isDispatchThread();
+    assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();
     validate();
     if (vis) {
       _mainFrame.hourglassOn();

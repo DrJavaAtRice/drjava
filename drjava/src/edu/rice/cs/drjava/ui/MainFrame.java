@@ -142,13 +142,15 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   // ------ Field Declarations -------
   
-  /** The model which controls all logic in DrJava. */
+  /** The model which controls all logic in DrJava. Cannot be final because it is initialized in dispatch thread. */
   private volatile AbstractGlobalModel _model;
   
-  /** The main model listener attached by the main frame to the global model */
+  /** The main model listener attached by the main frame to the global model.
+    * Cannot be final because it is initialized in dispatch thread. */
   private volatile ModelListener _mainListener; 
   
-  /** Maps an OpenDefDoc to its JScrollPane.  Why doesn't OpenDefDoc contain a defScrollPane field? */
+  /** Maps an OpenDefDoc to its JScrollPane.  Cannot be final because it is initialized in dispatch thread.
+    * Why doesn't OpenDefDoc contain a defScrollPane field? */
   private volatile HashMap<OpenDefinitionsDocument, JScrollPane> _defScrollPanes;
   
   /** The currently displayed DefinitionsPane. */
@@ -1324,30 +1326,35 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     };*/
    
   /** Undoes the last change to the active definitions document. */
-  private final DelegatingAction _undoAction = new DelegatingAction() {
+  private final DelegatingAction _undoAction = new DelegatingAction() {    
+    /* Executes in dispatch thread */
     public void actionPerformed(ActionEvent e) {
+      assert EventQueue.isDispatchThread();
       // use whether the delegatee is the Interactions Pane's action instead of whether
       // _interactionsPane.hasFocus(), because the focus will be lost when the user clicks
       // on the menu bar.
       final boolean intPaneFocused = (getDelegatee()==_interactionsController.getUndoAction());
       if (intPaneFocused) _interactionsPane.endCompoundEdit();
       else _currentDefPane.endCompoundEdit();  
-           
-      super.actionPerformed(e);
       
+      super.actionPerformed(e);
+          
       if (intPaneFocused) _interactionsPane.requestFocusInWindow();
       else {
         _currentDefPane.requestFocusInWindow();
         OpenDefinitionsDocument doc = _model.getActiveDocument();
         _saveAction.setEnabled(doc.isModifiedSinceSave() || doc.isUntitled());
       }
-    }
+    };
   };
   
   /** Redoes the last undo to the active definitions document. */
   private final DelegatingAction _redoAction = new DelegatingAction() {
+    /* Execute in dispatch thread */
     public void actionPerformed(ActionEvent e) {
-      // use whether the delegatee is the Interactions Pane's action instead of whether
+      assert EventQueue.isDispatchThread();
+                               
+          // use whether the delegatee is the Interactions Pane's action instead of whether
       // _interactionsPane.hasFocus(), because the focus will be lost when the user clicks
       // on the menu bar.
       final boolean intPaneFocused = (getDelegatee()==_interactionsController.getRedoAction());
@@ -1359,7 +1366,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         OpenDefinitionsDocument doc = _model.getActiveDocument();
         _saveAction.setEnabled(doc.isModifiedSinceSave() || doc.isUntitled());
       }
-    }
+    };
   };
   
   /** Quits DrJava.  Optionally displays a prompt before quitting. */
@@ -1429,7 +1436,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
   };
   
-  /** Asks the user for a line number and goes there. */
+  /** Asks the user for a line number and goes there. */ /* UNSAFE? */
   private final Action _gotoLineAction = new AbstractAction("Go to Line...") {
     public void actionPerformed(ActionEvent ae) {
       int pos = _gotoLine();
@@ -2759,7 +2766,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Toggle a bookmark. */
   public void toggleBookmark() {
 //    _log.log("MainFrame.toggleBookmark called");
-    assert EventQueue.isDispatchThread();
+    assert ! MainFrame.this.isVisible() || EventQueue.isDispatchThread();
     addToBrowserHistory();
     _model._toggleBookmark(_currentDefPane.getSelectionStart(), _currentDefPane.getSelectionEnd()); 
     showTab(_bookmarksPanel, true);
@@ -4589,6 +4596,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Updates the status field with the current status of the Definitions Pane. */
   public void updateStatusField() {
+    assert EventQueue.isDispatchThread();
     OpenDefinitionsDocument doc = _model.getActiveDocument();
     String fileName = doc.getCompletePath();
     if (! fileName.equals(_fileTitle)) {
@@ -4774,6 +4782,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
    * by ProjectMenuTest.testSaveProject. 
    */
   void _moveToAuxiliary() {
+    assert EventQueue.isDispatchThread();
     Runnable1<OpenDefinitionsDocument> op =  new Runnable1<OpenDefinitionsDocument>() { 
       public void run(OpenDefinitionsDocument d) { _model.addAuxiliaryFile(d); }
     };
@@ -4782,6 +4791,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Removes selected auxiliary files. */       
   private void _removeAuxiliary() {
+    assert EventQueue.isDispatchThread();
     Runnable1<OpenDefinitionsDocument> op =  new Runnable1<OpenDefinitionsDocument>() { 
       public void run(OpenDefinitionsDocument d) { _model.removeAuxiliaryFile(d); }
     };
@@ -5572,11 +5582,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         }
       }
     }
+   
     _executeExternalDialog.setVisible(false);
     // tried passing false here. seemed to help with bug
     // [ 1478796 ] DrJava Does Not Shut Down With Project Open
     // on HP tc1100 and Toshiba Portege tablet PCs, but did not help in all cases
-
+    
     if (! _closeProject(true)) { return; /* if user pressed cancel, do not quit */ }
     
     if (!_updateSavedConfiguration()) { return; /* if user pressed cancel, do not quit */ }
@@ -5585,7 +5596,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     dispose();    // Free GUI elements of this frame
     _model.quit();
   }
-  
+ 
   boolean _updateSavedConfiguration() {
     _recentFileManager.saveRecentFiles();
     _recentProjectManager.saveRecentFiles();
@@ -8782,7 +8793,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Comment current selection using wing commenting.  public for testing purposes only. Runs in event thread. */
   public void commentLines() {
-    assert EventQueue.isDispatchThread();
+    assert ! MainFrame.this.isVisible() || EventQueue.isDispatchThread();
     
     // Delegate everything to the DefinitionsDocument.
     OpenDefinitionsDocument openDoc = _model.getActiveDocument();

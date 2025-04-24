@@ -416,6 +416,8 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   
   /** Prepares this model to be thrown away.  Never called in practice outside of quit(), except in tests. */
   public void dispose() {
+    /* Disposing this model is performed in test code that does not run in the dispatch thread. */
+//    assert EventQueue.isDispatchThread();
     ensureJVMStarterFinished();
     _jvm.dispose();
     _notifier.removeAllListeners();  // removes the global model listeners!

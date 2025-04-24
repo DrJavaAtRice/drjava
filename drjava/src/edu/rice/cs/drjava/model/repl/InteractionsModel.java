@@ -304,15 +304,12 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     */
   protected abstract void _notifySyntaxErrorOccurred(int offset, int length);
   
- 
-  /** Interprets the files selected in the FileOpenSelector. Assumes all 
-   * strings have no trailing whitespace.
-   * Interprets the array all at once so if there are any errors, none of the 
-   * statements after the first erroneous one are processed.  Only runs in 
-   * the event thread.
-   * @param selector a FileOpenSelector
-   * @throws IOException if an IO operation fails
-   */
+  /** Interprets the files selected in the FileOpenSelector. Assumes all strings have no trailing whitespace. Interprets
+    * the array all at once so if there are any errors, none of the statements after the first erroneous one are processed.  
+    * Only runs in the event thread.
+    * @param selector a FileOpenSelector
+    * @throws IOException if an IO operation fails
+    */
   public void loadHistory(final FileOpenSelector selector) throws IOException {
     ArrayList<String> histories;
     try { histories = _getHistoryText(selector); }
@@ -333,11 +330,10 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
       }
     }
     String text = buf.toString().trim();
-//          System.err.println("Histtory is: '" + text + "'");
+//    Utilities.show("History is: '" + text + "'");
     append(text, ConsoleDocument.DEFAULT_STYLE);
     interpretCurrentInteraction();  
 //    System.err.println("Interpreting loaded history");
-    
   }
   
    /** Opens the files chosen in the given file selector, and returns an 

@@ -180,7 +180,7 @@ public abstract class AbstractConsoleController /* implements Serializable */ {
   /** Default cut action. */
   Action cutAction = new DefaultEditorKit.CutAction() {
     public void actionPerformed(ActionEvent e) {
-      
+      assert EventQueue.isDispatchThread();     
       if (_pane.getSelectedText() != null) {
         super.actionPerformed(e);
         String s = edu.rice.cs.util.swing.Utilities.getClipboardSelection(_pane);
@@ -192,6 +192,7 @@ public abstract class AbstractConsoleController /* implements Serializable */ {
   /** Default copy action. */
   Action copyAction = new DefaultEditorKit.CopyAction() {
     public void actionPerformed(ActionEvent e) {
+      assert EventQueue.isDispatchThread();
       if (_pane.getSelectedText() != null) {
         super.actionPerformed(e);
         String s = edu.rice.cs.util.swing.Utilities.getClipboardSelection(_pane);

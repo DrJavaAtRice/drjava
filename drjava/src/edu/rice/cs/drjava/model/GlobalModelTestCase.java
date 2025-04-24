@@ -264,6 +264,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     Utilities.invokeAndWait(new Runnable() { public void run() { _model.loadHistory(fs); } });
   }
   
+  /* Only called from GlobalModelIOTest. */
   protected void safeSaveHistory(final FileSelector fs) {
     Utilities.invokeAndWait(new Runnable() { 
       public void run() { 

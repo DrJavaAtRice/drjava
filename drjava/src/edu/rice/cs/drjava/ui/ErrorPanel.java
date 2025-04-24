@@ -37,11 +37,13 @@ import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.model.DJError;
 import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
 import edu.rice.cs.drjava.model.ClipboardHistoryModel;
+import edu.rice.cs.drjava.model.print.DrJavaBook;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.HighlightManager;
 import edu.rice.cs.util.swing.BorderlessScrollPane;
+import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.SwingDocument;
-import edu.rice.cs.drjava.model.print.DrJavaBook;
+
   
 import edu.rice.cs.util.swing.RightClickMouseAdapter;
 
@@ -116,6 +118,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     return s;
   }
   
+  /* Primary constructor for ErrorPanel class */
   public ErrorPanel(SingleDisplayModel model, MainFrame frame, String tabString, String labelString) {
     super(frame, tabString);
     _model = model;
@@ -156,11 +159,10 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     
     //    _mainPanel.setMinimumSize(new Dimension(225,60));
     // We make the vertical scrollbar always there.
-    // If we don't, when it pops up it cuts away the right edge of the
-    // text. Very bad.
+    // If we don't, when it pops up it cuts away the right edge of thetext. Very bad.
     _scroller = new BorderlessScrollPane(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
                                          ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-    
+       
     _leftPanel.add(_scroller, BorderLayout.CENTER);
     _leftPanel.add(_errorNavPanel, BorderLayout.EAST);
     
@@ -175,9 +177,10 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     _mainPanel.add(_leftPanel, BorderLayout.CENTER);
     _mainPanel.add(_rightPanel, BorderLayout.EAST);
     
-    /** Default copy action.  Returns focus to the correct pane. */
+    /** Default copy action.  Returns focus to the correct pane. Executes in dispatch thread. */
     final Action copyAction = new AbstractAction("Copy Contents to Clipboard", MainFrame.getIcon("Copy16.gif")) {
       public void actionPerformed(ActionEvent e) {
+        assert EventQueue.isDispatchThread();
         getErrorListPane().selectAll();
         String t = getErrorListPane().getSelectedText();
         if (t != null) {
@@ -188,54 +191,68 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
             ClipboardHistoryModel.singleton().put(t);
           }
         }
-      }
+      };
     };
+
     addPopupMenu(copyAction);
+    
     getPopupMenu().add(new AbstractAction("Save Copy of Contents...", MainFrame.getIcon("Save16.gif")) {
+      /* Executes in dispatch thread. */
       public void actionPerformed(ActionEvent e) {
+        assert EventQueue.isDispatchThread();
         _frame._saveDocumentCopy(getErrorListPane().getErrorDocument());
       }
     });
+                       
     getPopupMenu().addSeparator();
+                       
     getPopupMenu().add(new AbstractAction("Print...", MainFrame.getIcon("Print16.gif")) {
+      /* Executes in dispatch thread. */
       public void actionPerformed(ActionEvent e) {
+        assert EventQueue.isDispatchThread();
         getErrorListPane().getErrorDocument().print();
       }
     });
+                       
     getPopupMenu().add(new AbstractAction("Print Preview...", MainFrame.getIcon("PrintPreview16.gif")) {
+      /* Executes in dispatch thread. */
       public void actionPerformed(ActionEvent e) {
+        assert EventQueue.isDispatchThread();
         getErrorListPane().getErrorDocument().preparePrintJob();
         new PreviewErrorFrame();
       }
     });
   }
-  
+                    
   protected void setErrorListPane(final ErrorListPane elp) {
-    if (_popupMenuListener!=null) {
-      if ((_scroller!=null) &&  // unnecessary?
-          (_scroller.getViewport()!=null) &&
-          (_scroller.getViewport().getView()!=null)) {
+    /* Should this action be performed in the dispatch thread? */
+    if (_popupMenuListener != null) {
+      if ((_scroller.getViewport() != null) && (_scroller.getViewport().getView() != null)) {
         _scroller.getViewport().getView().removeMouseListener(_popupMenuListener);
       }
     }
     
     _scroller.setViewportView(elp);
     
-    if (_popupMenuListener!=null) {
-      _scroller.getViewport().getView().addMouseListener(_popupMenuListener);
-    }
+    if (_popupMenuListener!=null) { _scroller.getViewport().getView().addMouseListener(_popupMenuListener); }
     
     _nextErrorButton.setEnabled(false);
+    
     _nextErrorButton.addActionListener(new ActionListener() {
+      /* Executes in dispatch thread. */
       public void actionPerformed(ActionEvent e) {
+        assert EventQueue.isDispatchThread();
         elp.nextError();
         //      _prevErrorButton.setEnabled(_errorListPane.hasPrevError());
         //      _nextErrorButton.setEnabled(_errorListPane.hasNextError());
       }
     });
+    
     _prevErrorButton.setEnabled(false);
     _prevErrorButton.addActionListener(new ActionListener() {
+      /* Executes in dispatch thread. */
       public void actionPerformed(ActionEvent e) {
+        assert EventQueue.isDispatchThread();
         elp.prevError();
         //      _prevErrorButton.setEnabled(_errorListPane.hasPrevError());
         //      _nextErrorButton.setEnabled(_errorListPane.hasNextError());
@@ -301,21 +318,26 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     
     /** Default cut action. */
     volatile Action cutAction = new DefaultEditorKit.CutAction() {
+
+      /* Executes in dispatch thread. */
       public void actionPerformed(ActionEvent e) {
+        assert EventQueue.isDispatchThread();
         if (getSelectedText() != null) {
           super.actionPerformed(e);
-          String s = edu.rice.cs.util.swing.Utilities.getClipboardSelection(ErrorListPane.this);
+          String s = Utilities.getClipboardSelection(ErrorListPane.this);
           if ((s != null) && (s.length() != 0)) { ClipboardHistoryModel.singleton().put(s); }
         }
       }
     };
-    
+   
     /** Default copy action. */
     volatile Action copyAction = new DefaultEditorKit.CopyAction() {
+      /* Executes in dispatch thread. */
       public void actionPerformed(ActionEvent e) {
+        assert EventQueue.isDispatchThread();
         if (getSelectedText() != null) {
           super.actionPerformed(e);
-          String s = edu.rice.cs.util.swing.Utilities.getClipboardSelection(ErrorListPane.this);
+          String s = Utilities.getClipboardSelection(ErrorListPane.this);
           if (s != null && s.length() != 0) { ClipboardHistoryModel.singleton().put(s); }
         }
       }
@@ -323,6 +345,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     
     /** No-op paste action. */
     volatile Action pasteAction = new DefaultEditorKit.PasteAction() {
+      /* Executes in any thread. */
       public void actionPerformed(ActionEvent e) { }
     };
      
@@ -498,14 +521,13 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     /** @return true if the text selection interval is empty. */
     protected boolean _isEmptySelection() { return getSelectionStart() == getSelectionEnd(); }
     
-    /** Update the pane which holds the list of errors for the viewer. 
-     * @param done boolean
-     */
+    /** Update the pane which holds the list of errors for the viewer.  Only executes in the dispatch thread.
+      * @param done boolean
+      */
     protected void updateListPane(boolean done) {
       try {
         _errorListPositions = new Position[_numErrors];
         _errorTable.clear();
-        
         if (_numErrors == 0) _updateNoErrors(done);
         else _updateWithErrors();
       }
@@ -818,9 +840,8 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
             if (! prevDoc.equals(doc)) {
               model.setActiveDocument(doc);
               EventQueue.invokeLater(new Runnable() { 
-                public void run() { 
-                  model.addToBrowserHistory(); 
-                } });
+                public void run() { model.addToBrowserHistory(); } 
+              });
             }
             else model.refreshActiveDocument();
             
@@ -837,8 +858,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
                  * is unhighlighted and the new error is not highlighted because the CaretListener does not act because there
                  * is no change in caret position. (This is the only place where updateHighlight was called from before) */
                 defPane.getErrorCaretListener().updateHighlight(errPos);
-              }
-              
+              } 
             }
             // The following line is a brute force hack that fixed a bug plaguing the DefinitionsPane immediately after a compilation
             // with errors.  In some cases (which were consistently reproducible), the DefinitionsPane editing functions would break
@@ -961,11 +981,10 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       }
     };
     addMouseListener(_popupMenuListener);
-    if (_scroller!=null) { // test unnecessary?
-      _scroller.addMouseListener(_popupMenuListener);
-      if (_scroller.getViewport().getView()!=null) {
-        _scroller.getViewport().getView().addMouseListener(_popupMenuListener);
-      }
+   
+    _scroller.addMouseListener(_popupMenuListener);
+    if (_scroller.getViewport().getView() != null) {
+      _scroller.getViewport().getView().addMouseListener(_popupMenuListener);
     }
   }
 }

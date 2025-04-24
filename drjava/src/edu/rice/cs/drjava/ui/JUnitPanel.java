@@ -153,6 +153,7 @@ public class JUnitPanel extends ErrorPanel {
   /** Closes this panel and resets the corresponding model. */
   @Override
   protected void _close() {
+    assert EventQueue.isDispatchThread();
     super._close();
     getModel().getJUnitModel().resetJUnitErrors();
     reset();
@@ -160,7 +161,7 @@ public class JUnitPanel extends ErrorPanel {
   
   /** Reset the errors to the current error information. */
   public void reset() {
-    assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();
+    assert EventQueue.isDispatchThread();
     JUnitErrorModel junitErrorModel = getModel().getJUnitModel().getJUnitErrorModel();
     boolean testsHaveRun = false;
     if (junitErrorModel != null) {
@@ -176,7 +177,7 @@ public class JUnitPanel extends ErrorPanel {
     * @param numTests number of tests to be counted
     */
   public void progressReset(int numTests) {
-    assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();
+    assert EventQueue.isDispatchThread();
     _progressBar.reset();
     _progressBar.start(numTests);
     _testsSuccessful = true;
@@ -187,7 +188,7 @@ public class JUnitPanel extends ErrorPanel {
     * @param successful Whether the last test was successful or not.
     */
   public void progressStep(boolean successful) {
-    assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();
+    assert EventQueue.isDispatchThread();
     _testCount++;
     _testsSuccessful &= successful;
     _progressBar.step(_testCount, _testsSuccessful);
@@ -196,7 +197,7 @@ public class JUnitPanel extends ErrorPanel {
   public void testStarted(String className, String testName) { }
   
   private void _displayStackTrace (JUnitError e) {
-    assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();
+    assert EventQueue.isDispatchThread();
     _errorLabel.setText((e.isWarning() ? "Error: " : "Failure: ") +
                         e.message());
     _fileLabel.setText("File: " + (new File(e.fileName())).getName());
@@ -254,7 +255,7 @@ public class JUnitPanel extends ErrorPanel {
      * @param name the name of the test being run
      */
     public void testStarted(String name) {
-      assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();
+      assert EventQueue.isDispatchThread();
       if (name.indexOf('(') < 0) return;
       
       String testName = _getTestFromName(name);
@@ -263,7 +264,7 @@ public class JUnitPanel extends ErrorPanel {
       if (fullName.equals(JUNIT_WARNING)) return;
       ErrorDocument doc = getErrorDocument();
       
-      // Converted this GUI operation to a Runnable and use invokeLater
+      // Converted this GUI operation to a Runnable and used invokeLater
       Utilities.invokeLater(new Runnable() {
         public void run() {
           try {
@@ -297,14 +298,14 @@ public class JUnitPanel extends ErrorPanel {
       * @param causedError whether the test caused an error
       */
     public void testEnded(String name, boolean wasSuccessful, boolean causedError) {
-      assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();
+      assert EventQueue.isDispatchThread();
       if (name.indexOf('(')<0) return;
 
-      String testName = _getTestFromName(name);
-      String fullName = _getClassFromName(name) + "." + testName;
+      final String testName = _getTestFromName(name);
+      final String fullName = _getClassFromName(name) + "." + testName;
       if (fullName.equals(JUNIT_WARNING)) return;
       // TODO: convert this GUI operation to a Runnable and use invokeLater
-      ErrorDocument doc = getErrorDocument();
+      final ErrorDocument doc = getErrorDocument();
       Utilities.invokeLater(new Runnable() {
         public void run() {
           Position namePos = _runningTestNamePositions.get(fullName);
@@ -339,7 +340,7 @@ public class JUnitPanel extends ErrorPanel {
     
     /** Used to show that testing was unsuccessful. */
     protected void _updateWithErrors() throws BadLocationException {
-      assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();
+      assert EventQueue.isDispatchThread();
       //DefaultStyledDocument doc = new DefaultStyledDocument();
       ErrorDocument doc = getErrorDocument();
 //      _checkSync(doc);
@@ -370,8 +371,8 @@ public class JUnitPanel extends ErrorPanel {
       return numErrMsg.toString();
     }
     
-    protected void _updateWithErrors(String failureName, String failureMeaning, ErrorDocument doc)
-      throws BadLocationException {
+    protected void _updateWithErrors(String failureName, String failureMeaning, ErrorDocument doc) throws BadLocationException {
+      assert EventQueue.isDispatchThread();
       // Print how many errors
       _replaceInProgressText(_getNumErrorsMessage(failureName, failureMeaning));
       
@@ -386,7 +387,7 @@ public class JUnitPanel extends ErrorPanel {
      * @throws BadLocationException if attempts to reference an invalid location
      */
     public void _replaceInProgressText(String msg) throws BadLocationException {
-      assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();
+      assert EventQueue.isDispatchThread();
       int start = 0;
       if (_warnedOutOfSync) { start = TEST_OUT_OF_SYNC.length(); }
       int len = START_JUNIT_MSG.length();
@@ -406,6 +407,7 @@ public class JUnitPanel extends ErrorPanel {
     
     /** Updates the list pane with no errors. */
     protected void _updateNoErrors(boolean haveTestsRun) throws BadLocationException {
+      assert EventQueue.isDispatchThread();
       //DefaultStyledDocument doc = new DefaultStyledDocument();
 //      _checkSync(getDocument());
       _replaceInProgressText(haveTestsRun ? JUNIT_FINISHED_MSG : NO_TESTS_MSG);
@@ -436,7 +438,7 @@ public class JUnitPanel extends ErrorPanel {
     
     private void _setupStackTraceFrame() {
       //DrJava.consoleOut().println("Stack Trace for Error: \n" +  e.stackTrace());
-      assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();
+      assert EventQueue.isDispatchThread();
       JDialog _dialog = new JDialog(_frame,"JUnit Error Stack Trace",false);
       _stackFrame = _dialog;
       _stackTextArea = new JTextArea();
@@ -475,7 +477,7 @@ public class JUnitPanel extends ErrorPanel {
       * and enabling the _showStackTraceButton.
       */
     public void selectItem(DJError error) {
-      assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();
+      assert EventQueue.isDispatchThread();
       super.selectItem(error);
       _error = (JUnitError) error;
       _showStackTraceButton.setEnabled(true);
@@ -484,7 +486,7 @@ public class JUnitPanel extends ErrorPanel {
     
     /** Overrides _removeListHighlight in ErrorListPane to disable the _showStackTraceButton. */
     protected void _removeListHighlight() {
-      assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();
+      assert EventQueue.isDispatchThread();
       super._removeListHighlight();
       _showStackTraceButton.setEnabled(false);
     }
@@ -521,7 +523,7 @@ public class JUnitPanel extends ErrorPanel {
         * @return true iff the mouse click is over an error
         */
       private boolean _selectError(MouseEvent e) {
-        assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();
+        assert EventQueue.isDispatchThread();
         //TODO: get rid of cast in the next line, if possible
         _error = (JUnitError)_errorAtPoint(e.getPoint());
         
@@ -539,7 +541,7 @@ public class JUnitPanel extends ErrorPanel {
         * @param e the MouseEvent correponding to this click
         */
       protected void _popupAction(MouseEvent e) { 
-        assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();
+        assert EventQueue.isDispatchThread();
         _popMenu.show(e.getComponent(), e.getX(), e.getY()); 
       }
     }

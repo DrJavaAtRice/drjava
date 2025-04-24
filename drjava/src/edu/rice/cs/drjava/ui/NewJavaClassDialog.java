@@ -414,7 +414,7 @@ public class NewJavaClassDialog extends SwingFrame {
     * @param vis true if frame should be shown, false if it should be hidden.
     */
   public void setVisible(boolean vis) {
-    assert EventQueue.isDispatchThread();
+    assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();
     validate();
     if (vis) {
       _mainFrame.hourglassOn();

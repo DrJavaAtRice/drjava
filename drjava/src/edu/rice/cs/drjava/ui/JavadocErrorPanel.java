@@ -31,6 +31,7 @@ package edu.rice.cs.drjava.ui;
 import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
 
+import java.awt.EventQueue;
 import javax.swing.text.*;
 
 /** * The panel which displays all the Javadoc parsing errors.
@@ -59,6 +60,7 @@ public class JavadocErrorPanel extends ErrorPanel {
   }
 
   protected CompilerErrorModel getErrorModel() {
+    assert EventQueue.isDispatchThread();
     return getModel().getJavadocModel().getJavadocErrorModel();
   }
 
@@ -70,6 +72,7 @@ public class JavadocErrorPanel extends ErrorPanel {
   /** Closes this panel and resets the corresponding model. */
   @Override
   protected void _close() {
+    assert EventQueue.isDispatchThread();
     super._close();
     getModel().getJavadocModel().resetJavadocErrors();
     reset();
@@ -77,6 +80,7 @@ public class JavadocErrorPanel extends ErrorPanel {
 
   /** Reset the errors to the current error information. */
   public void reset() {
+    assert EventQueue.isDispatchThread();
     CompilerErrorModel model = getModel().getJavadocModel().getJavadocErrorModel();
     if (model != null) _numErrors = model.getNumErrors();
     else _numErrors = 0;

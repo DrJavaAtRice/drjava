@@ -311,6 +311,7 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
 
   /** Method that handles the OK button */
   private void _ok() {
+    assert EventQueue.isDispatchThread();
     _lastState = new FrameState(this);
     DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_COUNT,
                                   DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT));
@@ -319,6 +320,7 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
   
   /** Edit a command. */
   private void _edit() {
+    assert EventQueue.isDispatchThread();
     final int selectedIndex = _list.getSelectedIndex();
     if ((selectedIndex < 0) || (selectedIndex>=DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT))) {
       return;
@@ -550,7 +552,7 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
   
   /** Toggle visibility of this frame. Warning, it behaves like a modal dialog. */
   public void setVisible(boolean vis) {
-    assert EventQueue.isDispatchThread();
+    assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();
     validate();
     if (vis) {
       updateList(0);

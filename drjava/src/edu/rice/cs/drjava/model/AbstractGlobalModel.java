@@ -2518,16 +2518,21 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     * @param style the style to print with
     */
   protected void _docAppend(final ConsoleDocument doc, final String s, final String style) {
-    Utilities.invokeLater(new Runnable() {
-      public void run() { doc.insertBeforeLastPrompt(s, style); }
-    });
+    assert EventQueue.isDispatchThread();
+    doc.insertBeforeLastPrompt(s, style);
   }
   
   /** Prints System.out to the DrJava console.  This method can safely be run outside the event thread. */
-  public void systemOutPrint(final String s) { _docAppend(_consoleDoc, s, EditDocumentInterface.SYSTEM_OUT_STYLE); }
+  public void systemOutPrint(final String s) {
+//    Utilities.show("AbstractGlobalModel.systemOutPrint(" + s + ") called");
+    _docAppend(_consoleDoc, s, EditDocumentInterface.SYSTEM_OUT_STYLE); 
+  }
   
   /** Prints System.err to the DrJava console.  This method can safely be run outside the event thread. */
-  public void systemErrPrint(final String s) { _docAppend(_consoleDoc, s, EditDocumentInterface.SYSTEM_ERR_STYLE); }
+  public void systemErrPrint(final String s) {
+//    Utilities.show("AbstractGlobalModel.systemErrPrint(" + s + ") called");
+    _docAppend(_consoleDoc, s, EditDocumentInterface.SYSTEM_ERR_STYLE); 
+  }
   
   /** Prints to the DrJava console as an echo of System.in.  This method can safely be run outside the event thread. */
   public void systemInEcho(final String s) { _docAppend(_consoleDoc, s, EditDocumentInterface.SYSTEM_IN_STYLE); }
