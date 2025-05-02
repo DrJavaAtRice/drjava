@@ -445,6 +445,8 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
               if (openDocFiles.contains(javaSourceFileName)) sourceFileName = javaSourceFileName;
               else if (openDocFiles.contains(strippedName + OptionConstants.DJ_FILE_EXTENSION))
                 sourceFileName = strippedName + OptionConstants.DJ_FILE_EXTENSION;
+              else if (openDocFiles.contains(strippedName + OptionConstants.FJAVA_FILE_EXTENSION))
+                sourceFileName = strippedName + OptionConstants.FJAVA_FILE_EXTENSION;
               else if (openDocFiles.contains(strippedName + OptionConstants.OLD_DJ0_FILE_EXTENSION))
                 sourceFileName = strippedName + OptionConstants.OLD_DJ0_FILE_EXTENSION;
               else if (openDocFiles.contains(strippedName + OptionConstants.OLD_DJ1_FILE_EXTENSION))

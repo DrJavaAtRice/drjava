@@ -96,6 +96,9 @@ public interface OptionConstants {
 
   /** The old extension for an advanced language level source file */
   public static final String OLD_DJ2_FILE_EXTENSION = ".dj2";
+
+  /** The extension for a functional java source file */
+  public static final String FJAVA_FILE_EXTENSION = ".fjava";
     
   /* Constants for language levels */
   public static final int FULL_JAVA = 0;
@@ -110,7 +113,8 @@ public interface OptionConstants {
       OLD_DJ0_FILE_EXTENSION, // = .dj0
       OLD_DJ1_FILE_EXTENSION, // = .dj1
       OLD_DJ2_FILE_EXTENSION, // = .dj2
-      DJ_FILE_EXTENSION }; // = .dj
+      DJ_FILE_EXTENSION,      // = .dj
+      FJAVA_FILE_EXTENSION }; // = .fjava
   
 //  /** The configuration XML file that DrJava looks for inside a .djapp file */
 //  public static final String EXTPROCESS_FILE_NAME_INSIDE_JAR = "process" + EXTPROCESS_FILE_EXTENSION;

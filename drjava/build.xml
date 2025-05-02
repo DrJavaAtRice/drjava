@@ -151,6 +151,28 @@
   <property name="version-source" value="${src-working-dir}/Version.orig" />
   <property name="version-target" value="${src-working-dir}/Version.java" />
 
+  <property name="lib" location="lib"/>
+ 
+
+  <path id="classpath">
+    <fileset dir="${lib}">
+      <include name="*.jar"/>
+    </fileset>
+  </path>
+
+    <!-- === Generate Lexer/Parser === -->
+    <target name="generate-lexer" description="Generate ANTLR lexer and parser">
+      <java classname="org.antlr.v4.Tool" fork="true" classpathref="classpath">
+        <arg value="-package" />
+        <arg value="edu.rice.cs.drjava.model.compiler.fjpreprocessor.grammar" />
+        <arg line="-no-listener -no-visitor"/>
+        <arg value="${src-working-dir}/model/compiler/fjpreprocessor/grammar/JavaLexer.g4"/>
+        <!-- Optional: JavaParser.g4 -->
+        <!-- <arg value="${src}/grammar/JavaParser.g4"/> -->
+      </java>
+    </target>
+  
+
   <target name="generate-source" depends="resolve-development-value, resolve-version-tag" 
           description="Generate the CodeStatus and Version source files">
     <filter token="DEVELOPMENT" value="${development-value}" />
@@ -179,7 +201,7 @@
        ******************* -->
        
   <!-- The following target assumes that javac resolves to a Java 8 compiler -->
-  <target name="compile" depends="generate-source, do-compile, copy-resources, unjar-libs"
+  <target name="compile" depends="generate-lexer, generate-source, do-compile, copy-resources, unjar-libs"
           description="Compile all source files (after generating the source)">
   </target>
   
@@ -1002,4 +1024,3 @@
     <available file="${generate-dir}" property="already-generated" />
   </target>
 </project>
-

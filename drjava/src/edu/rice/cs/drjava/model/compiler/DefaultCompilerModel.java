@@ -44,6 +44,7 @@ import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.DrJavaFileUtils;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
+import edu.rice.cs.drjava.model.compiler.fjpreprocessor.Preprocessor;
 
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.Log;
@@ -57,6 +58,8 @@ import edu.rice.cs.javalanglevels.tree.*;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.collect.CollectUtil;
+
+
 // import edu.rice.cs.plt.tuple.Pair;  
 // TODO: use the preceding pair class instead of javalanglevels.Pair; must change javalanglevels code as well 
 
@@ -549,29 +552,18 @@ public class DefaultCompilerModel implements CompilerModel {
         }
       }
       
+      
+      
       /* Perform language levels conversion, creating corresponding .java files. */
-      LanguageLevelConverter llc = new LanguageLevelConverter();
-      Options llOpts;  /* Options passed as arguments to LLConverter */
-      if (bootClassPath == null) { llOpts = new Options(getActiveCompiler().version(), classPath); }
-      else { llOpts = new Options(getActiveCompiler().version(), classPath, bootClassPath); }
+      try {
+      Preprocessor.preprocessList(files);
+      }
+      catch (Throwable t) {
+        errors.add(new DJError("Language Level Preprocessor failed: " + t.getMessage(), false));
+      }
       
-      // NOTE: the workaround "_testFileSort(files)" instead of simply "files") may no longer be necessary.
-      
-      /* Perform the LL conversion incorporating the following workaround:  Forward references can generate spurious 
-       * conversion errors in some cases.  This problem can be mitigated by compiling JUnit test files (with names
-       * containing the substring "Test") last.  
-       */
-      Map<File,Set<String>> sourceToTopLevelClassMap = new HashMap<File,Set<String>>();
-      Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> llErrors = 
-        llc.convert(_testFileSort(files).toArray(new File[0]), llOpts, sourceToTopLevelClassMap);
-      
-      /* Add any errors encountered in conversion to the compilation error log. */
-      errors.addAll(_parseExceptions2CompilerErrors(llErrors.getFirst()));
-      errors.addAll(_visitorErrors2CompilerErrors(llErrors.getSecond()));
-      
-      // Since we (optionally) delete all class files in LL directories, we don't need the code
-      // to smart-delete class files anymore.
-      // smartDeleteClassFiles(sourceToTopLevelClassMap);
+
+
     }
     
     if (containsLanguageLevels) { return new LinkedList<File>(javaFileSet); }

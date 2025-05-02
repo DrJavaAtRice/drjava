@@ -48,6 +48,7 @@ public class DrJavaFileUtils  {
     extensions.add(OptionConstants.OLD_DJ0_FILE_EXTENSION);
     extensions.add(OptionConstants.OLD_DJ1_FILE_EXTENSION);
     extensions.add(OptionConstants.OLD_DJ2_FILE_EXTENSION);
+    extensions.add(OptionConstants.FJAVA_FILE_EXTENSION);
     return extensions;
   }
   
@@ -70,6 +71,7 @@ public class DrJavaFileUtils  {
   public static boolean isSourceFile(String fileName) {
     return fileName != null && 
       (  fileName.endsWith(OptionConstants.JAVA_FILE_EXTENSION)
+          || fileName.endsWith(OptionConstants.FJAVA_FILE_EXTENSION)
          || fileName.endsWith(OptionConstants.DJ_FILE_EXTENSION)
          || fileName.endsWith(OptionConstants.OLD_DJ0_FILE_EXTENSION)
          || fileName.endsWith(OptionConstants.OLD_DJ1_FILE_EXTENSION)
@@ -95,6 +97,7 @@ public class DrJavaFileUtils  {
     */
   public static boolean isLLFile(String fileName) {
     return fileName.endsWith(OptionConstants.DJ_FILE_EXTENSION)
+      || fileName.endsWith(OptionConstants.FJAVA_FILE_EXTENSION)
       || fileName.endsWith(OptionConstants.OLD_DJ0_FILE_EXTENSION)
       || fileName.endsWith(OptionConstants.OLD_DJ1_FILE_EXTENSION)
       || fileName.endsWith(OptionConstants.OLD_DJ2_FILE_EXTENSION);
@@ -183,6 +186,10 @@ public class DrJavaFileUtils  {
       return fileName.substring(0, fileName.lastIndexOf(OptionConstants.DJ_FILE_EXTENSION))
         + OptionConstants.JAVA_FILE_EXTENSION;
     }
+    else if (fileName.endsWith(OptionConstants.FJAVA_FILE_EXTENSION)) {
+      return fileName.substring(0, fileName.lastIndexOf(OptionConstants.FJAVA_FILE_EXTENSION))
+        + OptionConstants.JAVA_FILE_EXTENSION;
+    }
     else if (fileName.endsWith(OptionConstants.OLD_DJ0_FILE_EXTENSION)) {
       return fileName.substring(0, fileName.lastIndexOf(OptionConstants.OLD_DJ0_FILE_EXTENSION))
         + OptionConstants.JAVA_FILE_EXTENSION;
@@ -195,6 +202,7 @@ public class DrJavaFileUtils  {
       return fileName.substring(0, fileName.lastIndexOf(OptionConstants.OLD_DJ2_FILE_EXTENSION))
         + OptionConstants.JAVA_FILE_EXTENSION;
     }
+
     else return fileName;
   }
   

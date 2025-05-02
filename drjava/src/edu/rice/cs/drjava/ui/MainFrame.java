@@ -3152,6 +3152,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     private final Icon _dj2;
     private final Icon _dj;
     private final Icon _other;
+    private final Icon _fjava;
     
     public DJFileDisplayManager(Icon java, Icon dj0, Icon dj1, Icon dj2, Icon dj, Icon other) {
       _java = java;
@@ -3160,6 +3161,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _dj2 = dj2;
       _dj = dj;
       _other = other;
+      _fjava = dj;
     }
     /** This method chooses the custom icon only for the known filetypes. If these filetypes are not receiving 
       * the correct icons, make sure the filenames are correct and that the icons are present in the ui/icons 
@@ -3172,6 +3174,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         String name = f.getName().toLowerCase();
         if (name.endsWith(OptionConstants.JAVA_FILE_EXTENSION)) ret = _java;
         else if (name.endsWith(OptionConstants.DJ_FILE_EXTENSION)) ret = _dj;
+        else if (name.endsWith(OptionConstants.FJAVA_FILE_EXTENSION)) ret = _fjava;
         else if (name.endsWith(OptionConstants.OLD_DJ0_FILE_EXTENSION)) ret = _dj0;
         else if (name.endsWith(OptionConstants.OLD_DJ1_FILE_EXTENSION)) ret = _dj1;
         else if (name.endsWith(OptionConstants.OLD_DJ2_FILE_EXTENSION)) ret = _dj2;
