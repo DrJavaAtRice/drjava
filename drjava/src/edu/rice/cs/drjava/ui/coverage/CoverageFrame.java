@@ -377,16 +377,10 @@ public class CoverageFrame extends SwingFrame {
 
                             try {
 
-                                if (_model.hasOutOfSyncDocuments() || _model.
-                                    getNumCompilerErrors() > 0) {
-                                    return;
-                                }
+                                if (_model.hasOutOfSyncDocuments() || _model.getNumCompilerErrors() > 0)  return;
 
                                 EventQueue.invokeLater(new Runnable() {  
-                                    /**
-                                     * Defer running this code; would prefer
-                                     * to waitForInterpreter.
-                                     */
+                                    /** Defer running this code; would prefer to waitForInterpreter. */
                                     public void run() {
                                         pane.getHighlightManager().
                                         removeHighlight(info);

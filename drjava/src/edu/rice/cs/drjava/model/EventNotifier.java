@@ -30,7 +30,6 @@ package edu.rice.cs.drjava.model;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import edu.rice.cs.util.ReaderWriterLock;
 
 /** Base class for all component-specific EventNotifiers.  This class provides common methods to 
   * manage listeners of a specific type.  T the type of the listener class to be managed.
@@ -38,18 +37,18 @@ import edu.rice.cs.util.ReaderWriterLock;
   */
 public abstract class EventNotifier<T> {
   /** All T Listeners that are listening to the model.  Accesses to this collection are protected by the 
-    * ReaderWriterLock. The collection must be synchronized, since multiple readers could access it at once.
+    * ReaderWriterLock. The collection relies on "copy-on-write" semantics for _listeners.
     */
   protected final List<T> _listeners = new CopyOnWriteArrayList<T>();
   
-  /* The listener framework is now implemented using CopyOnWriteArrayList, eliminating the readers/writers issue. */
+  /* Since the listener framework is now implemented using CopyOnWriteArrayList, no readers/writers locking is necessary. */
   
-  /** Adds a listener to the notifier.
+  /** Adds a listener to this notifier.
     * @param listener a listener that reacts on events
     */
   public void addListener(T listener) { _listeners.add(listener); }
   
-  /** Removes a listener from the notifier. If the thread already holds the lock,
+  /** Removes a listener from this notifier. If the thread already holds the lock,
     * then the listener is removed later, but as soon as possible.
     * Note: It is NOT guaranteed that the listener will not be executed again.
     * @param listener a listener that reacts on events

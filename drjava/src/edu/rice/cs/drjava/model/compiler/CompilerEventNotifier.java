@@ -51,17 +51,6 @@ import edu.rice.cs.drjava.model.EventNotifier;
  * components, and should not be used directly outside of the "host" component.
  * <p>
  *
- * All methods in this class must use the synchronization methods
- * provided by ReaderWriterLock.  This ensures that multiple notifications
- * (reads) can occur simultaneously, but only one thread can be adding
- * or removing listeners (writing) at a time, and no reads can occur
- * during a write.
- * <p>
- *
- * <i>No</i> methods on this class should be synchronized using traditional
- * Java synchronization!
- * <p>
- *
  * @version $Id$
  */
 class CompilerEventNotifier extends EventNotifier<CompilerListener> implements CompilerListener {

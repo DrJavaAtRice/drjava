@@ -50,7 +50,7 @@ public class GUIAvailabilityNotifier extends EventNotifier<GUIAvailabilityListen
  
   // public static final edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("avail.txt",true);
   
-  /** Create a new notifier with all components available. */
+  /** Standard constructor.  Creates a new notifier with all components available. */
   public GUIAvailabilityNotifier() {
     for(ComponentType component: ComponentType.values()) {
       _values.put(component, 0);

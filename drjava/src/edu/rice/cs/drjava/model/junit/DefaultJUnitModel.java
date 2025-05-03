@@ -529,10 +529,10 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   }
   
   /** Helper method to notify JUnitModel listeners that all open files must be 
-   * compiled before JUnit is run. 
-   * @param testAfterCompile a CompilerListener
-   * @param outOfSync list of out-of-sync documents
-   */
+    * compiled before JUnit is run. 
+    * @param testAfterCompile a CompilerListener
+    * @param outOfSync list of out-of-sync documents
+    */
   private void _notifyCompileBeforeJUnit(final CompilerListener testAfterCompile, 
                                          final List<OpenDefinitionsDocument> outOfSync) { 
     Utilities.invokeLater(new Runnable() { 
@@ -541,10 +541,10 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   }
   
   /** Helper method to notify JUnitModel listeners that JUnit aborted before 
-   * any tests could be run.
-   * @param testAll true if all tests are to be run
-   * @param didCompileFail true if compilation failed
-   */
+    * any tests could be run.
+    * @param testAll true if all tests are to be run
+    * @param didCompileFail true if compilation failed
+    */
   private void _notifyNonTestCase(final boolean testAll, final boolean didCompileFail) { 
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.nonTestCase(testAll, didCompileFail); } });
   }
@@ -606,29 +606,25 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   public void testSuiteEnded(final JUnitError[] errors) {
 //    new ScrollableDialog(null, "DefaultJUnitModel.testSuiteEnded(...) called", "", "").show();
     
-    Utilities.invokeLater(new Runnable() {
-      public void run() {
-        List<File> files = new ArrayList<File>();
-        for(OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()) { files.add(odd.getRawFile()); }
-//    Utilities.show("errors.length = " + errors.length + " files = " + files);
-        for(JUnitError e: errors) {
-          try {
-            e.setStackTrace(_compilerModel.getLLSTM().replaceStackTrace(e.stackTrace(),files));
-          } catch(Exception ex) { DrJavaErrorHandler.record(ex); }
-          File f = e.file();
-          if ((f != null) && (DrJavaFileUtils.isLLFile(f))) {
-            String dn = DrJavaFileUtils.getJavaForLLFile(f.getName());
-            StackTraceElement ste = new StackTraceElement(e.className(), "", dn, e.lineNumber());
-            ste = _compilerModel.getLLSTM().replaceStackTraceElement(ste, f);
-            e.setLineNumber(ste.getLineNumber());
-          }
-        }
-        _junitErrorModel = new JUnitErrorModel(errors, _model, true);
-        _notifyJUnitEnded();
-        _testInProgress = false;
-//        new ScrollableDialog(null, "DefaultJUnitModel.testSuiteEnded(...) finished", "", "").show();
+    final List<File> files = new ArrayList<File>();
+    for(OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()) { files.add(odd.getRawFile()); }
+    for(JUnitError e: errors) {
+      try {
+        e.setStackTrace(_compilerModel.getLLSTM().replaceStackTrace(e.stackTrace(),files));
+      } catch(Exception ex) { DrJavaErrorHandler.record(ex); }
+      File f = e.file();
+      if ((f != null) && (DrJavaFileUtils.isLLFile(f))) {
+        String dn = DrJavaFileUtils.getJavaForLLFile(f.getName());
+        StackTraceElement ste = new StackTraceElement(e.className(), "", dn, e.lineNumber());
+        ste = _compilerModel.getLLSTM().replaceStackTraceElement(ste, f);
+        e.setLineNumber(ste.getLineNumber());
       }
-    }); 
+    }
+    _junitErrorModel = new JUnitErrorModel(errors, _model, true);
+    _notifyJUnitEnded();
+    _testInProgress = false;
+    
+//     new ScrollableDialog(null, "DefaultJUnitModel.testSuiteEnded(...) finished", "", "").show();
   }
 
   

@@ -28,10 +28,9 @@
  * END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.definitions;
 
-/** * Exception indicating that a class name could not be found in
- * the DefinitionsDocument from which it was thrown.
- * @version $Id$
- */
+/** Exception indicating that a class name could not be found in the DefinitionsDocument from which it was thrown.
+  * @version $Id$
+  */
 public class ClassNameNotFoundException extends Exception {
   
   /** Creats a new ClassNameNotFoundException with the given label. */

@@ -46,28 +46,15 @@ import java.util.List;
  * interface.
  * <p>
  *
- * Components which might otherwise manage their own list of listeners use
+ * Components which might otherwise manage their own list of listeners extend
  * EventNotifiers instead to simplify their internal implementation.  Notifiers
  * should therefore be considered a private implementation detail of the
  * components, and should not be used directly outside of the "host" component.
  * <p>
  *
- * All methods in this class must use the synchronization methods
- * provided by ReaderWriterLock.  This ensures that multiple notifications
- * (reads) can occur simultaneously, but only one thread can be adding
- * or removing listeners (writing) at a time, and no reads can occur
- * during a write.
- * <p>
- * Addendum [Corky March, 2025] In hindsight, the event notification framework is unnecessarily complex and buggy.  Essentially
- * all event notification code runs in the "dispatch (event-handling) thread".  The design should have forced ALL event
- * notication code to run in the dispatch thread.  Then the read-write locking protocol would be unnecessary.  I suspect
- * that "adminstrative methods" like addListener and removeListener are accessed from outside of the dispatch thread.  In addition,
- * some events are signalled by RMI calls from JUnitTestRunner (and elsewhere?) in the slave JVM.  The RMI "proxy" thead in 
- * the main JVM apparently does not route event notifications through the dispatch thread. Ugh.
- * <p>
- * <i>No</i> methods on this class should be synchronized using traditionalJava synchronization!
- * <p>
- *
+ * All methods in this class that manipulate the _listeners collection should rely on the "copy-on-write"
+ * semantics for operations that mutate the collection. This protocol ensures that multiple notifications
+ * (reads) can occur simultaneously while other threads are modifying the _listeners collection.
  * @version $Id$
  */
 class JUnitEventNotifier extends EventNotifier<JUnitListener> implements JUnitListener {

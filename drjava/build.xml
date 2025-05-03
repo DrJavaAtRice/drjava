@@ -37,6 +37,7 @@
   
   <property environment="env" />
   <property name="java-home" value="${env.JAVA_HOME}" />
+  <property name="java8-home" value="${env.JAVA8_HOME}" />  
   <property name="findbugs-home" value="${env.FINDBUGS_HOME}" />
   
   <property name="is-development" value="yes" /> <!-- Development or stable release -->
@@ -200,8 +201,9 @@
        Compilation Targets
        ******************* -->
        
+
   <!-- The following target assumes that javac resolves to a Java 8 compiler -->
-  <target name="compile" depends="generate-lexer, generate-source, do-compile, copy-resources, unjar-libs"
+  <target name="compile" depends="generate-lexer, generate-source, do-compile, copy-resources, unjar-libs
           description="Compile all source files (after generating the source)">
   </target>
   
@@ -211,7 +213,7 @@
     
     <mkdir dir="classes/base" />
     <mkdir dir="classes/test" />
-    
+ 
     <!-- Move any test classes back to base to prevent recompilation -->
     <move todir="classes/base">
       <fileset dir="classes/test" includes="**/*" />
@@ -251,7 +253,6 @@
         <!-- Additional test classes should be listed here -->
       </fileset>
     </move>
-    
   </target>
 
   <target name="copy-resources">
@@ -386,7 +387,6 @@
     
   </target>
   
-  
   <target name="do-test" depends="resolve-jvm-args">
     <echo message="Running all tests matching '${test-filter-string}' with command '${test-jvm}', using '${junit-jar-to-include}' and '${test-tools}'" />
     <jacoco:coverage xmlns:jacoco="antlib:org.jacoco.ant">
@@ -443,7 +443,6 @@
                         
   </jacoco:report>
   </target>
-
 
   <target name="run" depends="compile" description="Run the main class (after compiling)">
     <antcall target="do-run">
@@ -915,7 +914,7 @@
     <property name="current-tools-2" location="${java.home}/lib/tools.jar" />
     <available property="current-tools" value="${current-tools-2}" file="${current-tools-2}" />
 
-    <fail message="Can't find tools.jar in extib or the Java home: ${java.home}" unless="current-tools" />
+    <fail message="Can't find tools.jar in extlib or the Java home: ${java.home}" unless="current-tools" />
   </target>
   
   <target name="assert-jar-exists">
