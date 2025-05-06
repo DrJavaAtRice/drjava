@@ -14,7 +14,7 @@ public class RawJavaNode implements ASTNode {
     public String toString() {
         return text;
     }
-    public <T> void accept(ASTVisitor<T> visitor) {
-        visitor.visit(this);
+    public <T> T accept(ASTVisitor<T> visitor) {
+        return visitor.visit(this);
     }
 }

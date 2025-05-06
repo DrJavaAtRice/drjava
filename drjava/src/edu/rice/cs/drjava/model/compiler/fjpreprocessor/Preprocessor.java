@@ -5,6 +5,7 @@ import java.io.FileWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.LinkedList;
 
 import org.antlr.v4.runtime.*;
 
@@ -16,6 +17,8 @@ import edu.rice.cs.drjava.model.compiler.fjpreprocessor.node.RootNode;
 import edu.rice.cs.drjava.model.compiler.fjpreprocessor.node.visitor.CodeGenVisitor;
 
 import edu.rice.cs.drjava.model.compiler.fjpreprocessor.grammar.JavaLexer;
+
+import edu.rice.cs.drjava.model.DJError;
 
 public class Preprocessor {
 
@@ -29,24 +32,44 @@ public class Preprocessor {
      * @param files
      * @throws Exception
      */
-    public static void preprocessList(List<File> files) throws Exception {
+    public static LinkedList<DJError> preprocessList(List<File> files) {
+        LinkedList<DJError> errors = new LinkedList<DJError>();
         for (File file : files) {
             if (file.getName().endsWith(".fjava")) {
                 File outputFile = new File(file.getAbsolutePath().replace(".fjava", ".java"));
-                doPreprocess(file, outputFile);
+                DJError e = doPreprocess(file, outputFile);
+                if (e != null) {
+                    errors.add(e);
+                }
             }
+            if (file.getName().endsWith(".java")) {
+                // Check if the file is a .java file and not a .fjava file
+                // If it is a .java file, we can ignore it
+                continue;
+            }
+
+            errors.add(new DJError(
+                    "File " + file.getAbsolutePath() + " is a languagle level file which is no longer supported.",
+                    false));
         }
+        return errors;
     }
 
-    static void doPreprocess(File inputFile, File outputFile) throws Exception {
-        CharStream input = CharStreams.fromPath(inputFile.toPath());
+    static DJError doPreprocess(File inputFile, File outputFile) {
+        CharStream input;
+        try {
+            input = CharStreams.fromPath(inputFile.toPath());
+        } catch (Exception e) {
+            return new DJError("Error reading file: " + inputFile.getAbsolutePath(), false);
+        }
         ASTNode ast = FJPreprocessor.process(input);
-        String output = new CodeGenVisitor().generate(ast);
+        String output = CodeGenVisitor.generate(ast);
         try (Writer writer = new FileWriter(outputFile)) {
             writer.write(output.toString());
         } catch (Exception e) {
-            throw new RuntimeException("Error writing to file: " + outputFile.getAbsolutePath(), e);
+            return new DJError("Error writing to file: " + outputFile.getAbsolutePath(), false);
         }
+        return null; // No errors
     }
 
 }

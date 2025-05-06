@@ -46,7 +46,7 @@ public class DCNode implements ASTNode {
     public String toString() {
         return "data-class " + name + " " + vars.toString();
     }
-    public <T> void accept(ASTVisitor<T> visitor) {
-        visitor.visit(this);
+    public <T> T accept(ASTVisitor<T> visitor) {
+        return visitor.visit(this);
     }
 }

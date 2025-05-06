@@ -555,12 +555,9 @@ public class DefaultCompilerModel implements CompilerModel {
       
       
       /* Perform language levels conversion, creating corresponding .java files. */
-      try {
-      Preprocessor.preprocessList(files);
-      }
-      catch (Throwable t) {
-        errors.add(new DJError("Language Level Preprocessor failed: " + t.getMessage(), false));
-      }
+      
+      LinkedList<DJError> e = Preprocessor.preprocessList(files);
+      errors.addAll(e);
       
 
 

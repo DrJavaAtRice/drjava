@@ -8,21 +8,27 @@ import edu.rice.cs.drjava.model.compiler.fjpreprocessor.node.RootNode;
 
 public class CodeGenVisitor implements ASTVisitor<StringBuilder> {
 
-    private final StringBuilder output = new StringBuilder();
 
-    public String generate(ASTNode node) {
-        node.accept(this);
-        return output.toString();
+    private static final CodeGenVisitor INSTANCE = new CodeGenVisitor();
+    private CodeGenVisitor() {
+        // Private constructor to prevent instantiation
+    }
+
+    public static String generate(ASTNode node) {
+        StringBuilder output = node.accept(INSTANCE);
+        return output.toString();      
     }
 
     @Override
     public StringBuilder visit(RawJavaNode node) {
+        StringBuilder output = new StringBuilder();
         output.append(node.text());
         return output;
     }
 
     @Override
     public StringBuilder visit(DCNode node) {
+        StringBuilder output = new StringBuilder();
         output.append("class ").append(node.name());
 
         if (!node.typeVars().isEmpty()) {
@@ -76,7 +82,7 @@ public class CodeGenVisitor implements ASTVisitor<StringBuilder> {
             output.append("    // PREPROCESSOR NOTE: toString method already defined\n\n");
         } else {
             output.append("    // PREPROCESSOR NOTE: toString method generated\n");
-            generateToStringMethod(node);
+            output.append(generateToStringMethod(node));
         }
 
         // HashCode method
@@ -85,7 +91,7 @@ public class CodeGenVisitor implements ASTVisitor<StringBuilder> {
             output.append("    // PREPROCESSOR NOTE: hashCode method already defined\n\n");
         } else {
             output.append("    // PREPROCESSOR NOTE: hashCode method generated\n");
-            generateHashCodeMethod(node);
+            output.append(generateHashCodeMethod(node));
         }
 
         // Equals method
@@ -94,7 +100,7 @@ public class CodeGenVisitor implements ASTVisitor<StringBuilder> {
             output.append("    // PREPROCESSOR NOTE: equals method already defined\n\n");
         } else {
             output.append("    // PREPROCESSOR NOTE: equals method generated\n");
-            generateEqualsMethod(node);
+            output.append(generateEqualsMethod(node));
         }
 
         output.append("/****************************************\\\n");
@@ -109,7 +115,8 @@ public class CodeGenVisitor implements ASTVisitor<StringBuilder> {
         return output;
     }
 
-    private void generateHashCodeMethod(DCNode node) {
+    private StringBuilder generateHashCodeMethod(DCNode node) {
+        StringBuilder output = new StringBuilder();
         output.append("    @Override\n")
                 .append("    public int hashCode() {\n")
                 .append("        return java.util.Objects.hash(");
@@ -121,9 +128,11 @@ public class CodeGenVisitor implements ASTVisitor<StringBuilder> {
         }
         output.append(");\n")
                 .append("    }\n\n");
+        return output;
     }
 
-    private void generateEqualsMethod(DCNode node) {
+    private StringBuilder generateEqualsMethod(DCNode node) {
+        StringBuilder output = new StringBuilder();
         output.append("    @Override\n")
                 .append("    public boolean equals(Object obj) {\n")
                 .append("        if (this == obj) return true;\n")
@@ -139,9 +148,11 @@ public class CodeGenVisitor implements ASTVisitor<StringBuilder> {
         }
 
         output.append(";\n    }\n\n");
+        return output;
     }
 
-    private void generateToStringMethod(DCNode node) {
+    private StringBuilder generateToStringMethod(DCNode node) {
+        StringBuilder output = new StringBuilder();
         output.append("    @Override\n")
                 .append("    public String toString() {\n")
                 .append("        return \"").append(node.name()).append("(\" + ");
@@ -153,12 +164,14 @@ public class CodeGenVisitor implements ASTVisitor<StringBuilder> {
         }
         output.append(" + \")\";\n")
                 .append("    }\n\n");
+        return output;
     }
 
     @Override
     public StringBuilder visit(RootNode node) {
+        StringBuilder output = new StringBuilder();
         for (ASTNode child : node.children()) {
-            child.accept(this);
+            output.append(child.accept(this));
         }
         return output;
     }
