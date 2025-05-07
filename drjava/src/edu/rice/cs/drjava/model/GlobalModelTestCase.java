@@ -194,6 +194,17 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     return File.createTempFile("DrJava-test" + i, ".java", _tempDir).getCanonicalFile();
   }
 
+  /** Create a new temporary fjava file in _tempDir.  Calls with the same int will 
+   * return the same filename, while calls with different ints will return 
+   * different filenames.
+   * @param i index to be appended to the filename
+   * @return new temporary file in _tempDir. 
+   * @throws IOException if an IO operation fails
+   */
+  protected File tempFjavaFile(int i) throws IOException {
+    return File.createTempFile("DrJava-test" + i, ".fjava", _tempDir).getCanonicalFile();
+  }
+
   /** Create a new temporary directory in _tempDir. 
    * @return new temporary file in _tempDir. 
    * @throws IOException if an IO operation fails

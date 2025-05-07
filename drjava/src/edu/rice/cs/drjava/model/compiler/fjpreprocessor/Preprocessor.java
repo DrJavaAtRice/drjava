@@ -41,6 +41,7 @@ public class Preprocessor {
                 if (e != null) {
                     errors.add(e);
                 }
+                continue;
             }
             if (file.getName().endsWith(".java")) {
                 // Check if the file is a .java file and not a .fjava file
@@ -60,7 +61,7 @@ public class Preprocessor {
         try {
             input = CharStreams.fromPath(inputFile.toPath());
         } catch (Exception e) {
-            return new DJError("Error reading file: " + inputFile.getAbsolutePath(), false);
+            return new DJError("Error reading file: " + inputFile.getAbsolutePath() + "e: " + e, false);
         }
         ASTNode ast = FJPreprocessor.process(input);
         String output = CodeGenVisitor.generate(ast);
